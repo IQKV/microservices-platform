@@ -1,0 +1,719 @@
+# Implementation Plan
+
+- [ ] 1. Set up multi-module Maven project structure with three-tier architecture, environment configuration, and Java 21 features
+  - Create parent POM with groupId org.gripday and Java 21 configuration for dependency management only
+  - Configure Spring Boot 3.5.6 and Spring Cloud 2025.0.0 dependencies
+  - Enable Java 21 language features and set compiler options for modern syntax
+  - Create isolated module structure for gripday-gateway-service and gripday-auth-service
+  - Implement three-tier package structure (presentation, domain, infrastructure) for each service
+  - Add ArchUnit and Spring Modulith dependencies for architectural testing
+  - Add SpringDoc OpenAPI dependencies for comprehensive API documentation
+  - Implement minimal Maven profile usage with no environment-specific profiles
+  - Set up Spring profiles-based configuration (local, staging, production)
+  - Create environment-specific application-{profile}.yml files for each service
+  - Configure externalized configuration using environment variables
+  - Ensure each microservice has independent dependencies without shared code
+  - Set up version management without shared libraries
+  - Configure Maven compiler plugin for Java 21 features (var, pattern matching, records, sealed classes)
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 14.1, 14.2, 16.1, 16.2, 16.3, 16.4, 17.1, 17.2, 17.8_
+
+- [ ] 2. Implement gripday-auth-service core structure
+  - [ ] 2.1 Create Spring Boot application with three-tier architecture, database configuration, and environment profiles using YAML-only format with gripday prefix
+    - Set up main application class with Spring Boot annotations
+    - Create three-tier package structure (presentation, domain, infrastructure)
+    - Configure PostgreSQL connection properties and JPA settings with Spring profiles using YAML format exclusively
+    - Create application-local.yml, application-staging.yml, and application-production.yml with gripday. prefix for all custom properties
+    - Set up Flyway XML migration configuration using flyway-core and flyway-database-postgresql with environment-specific settings
+    - Implement GripdayProperties configuration class with validation using @ConfigurationProperties(prefix = "gripday")
+    - Configure externalized configuration using @ConfigurationProperties with gripday namespace structure
+    - Implement architectural testing configuration with ArchUnit and Spring Modulith
+    - Add environment variable configuration for database connections per profile using gripday.database prefix
+    - Ensure no .properties files are used and all custom configuration follows gripday. prefix convention
+    - Create configuration validation to enforce YAML format and gripday prefix standards
+    - _Requirements: 3.1, 3.2, 3.3, 1.7, 1.8, 1.9, 16.1, 16.4, 16.5, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+
+  - [ ] 2.2 Implement database schema with Flyway XML migrations using flyway-core and flyway-database-postgresql
+    - Create V1__Create_users_table.xml migration with all required fields
+    - Create V2__Create_authorities_table.xml migration for roles and permissions
+    - Create V3__Create_user_authorities_table.xml migration for user-role relationships
+    - Create V4__Create_user_audit_log_table.xml migration for simple audit trail
+    - Create V5__Add_indexes.xml migration for performance optimization on all tables
+    - _Requirements: 3.3, 5.4, 9.5, 9.6_
+
+  - [ ] 2.3 Create JPA entities and repositories following three-tier architecture with Java 21 features
+    - Implement User entity in infrastructure.entity package with JPA annotations and relationships using var for local variables
+    - Implement Authority entity in infrastructure.entity package with proper mappings
+    - Create UserAuditLog entity in infrastructure.entity package for simple audit trail functionality
+    - Create UserRepository, AuthorityRepository, and UserAuditLogRepository interfaces in infrastructure.repository package
+    - Add custom query methods for role-based filtering and search using text blocks for complex SQL queries
+    - Use simple records for query result DTOs
+    - Implement repository methods with var for improved readability
+    - _Requirements: 5.4, 5.5, 9.1, 9.4, 9.5, 1.7, 17.1, 17.3, 17.5, 17.8_
+
+  - [ ] 2.4 Implement architectural testing with ArchUnit and Spring Modulith
+    - Create ArchUnit tests for three-tier architecture layer separation
+    - Implement dependency direction validation tests
+    - Add package naming convention tests including REST controller Resource suffix validation
+    - Add tests to validate @RestController classes are in presentation.web package
+    - Implement tests to enforce Resource naming convention for all REST controllers
+    - Create Spring Modulith tests for module boundary validation
+    - Add tests to prevent REST controllers from directly accessing repositories
+    - Validate that REST controllers follow presentation.web package structure
+    - Implement circular dependency detection tests
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 23.1, 23.2, 23.3, 23.4, 23.7_
+
+  - [ ] 2.5 Write simple happy path unit tests for entities and repositories
+    - Create straightforward unit tests for User and Authority entity validation focusing on successful scenarios
+    - Write basic unit tests for UserAuditLog entity creation and retrieval
+    - Write repository tests with @DataJpaTest focusing on successful CRUD operations
+    - Test custom query methods for role-based filtering with valid data scenarios
+    - Use simple test data setup with minimal complexity
+    - Focus on testing core functionality without extensive edge cases
+    - _Requirements: 3.3, 5.4, 9.1, 9.5, 21.1, 21.2, 21.3, 21.5_
+
+- [ ] 3. Implement centralized authentication and JWT functionality
+  - [ ] 3.1 Configure Spring Security with OAuth2
+    - Set up SecurityConfig with OAuth2 authorization server
+    - Configure JWT token generation and validation
+    - Implement password encoding with BCrypt
+    - _Requirements: 5.1, 5.2, 5.4_
+
+  - [ ] 3.2 Create authentication controllers and services following three-tier architecture with API versioning, HTTP standards, OpenAPI documentation, and Java 21 features
+    - Implement AuthenticationResource in presentation.web package with versioned endpoints (/api/v1/, /api/v2/) using var for local variables
+    - Create UserService in domain.service package for authentication and user management operations with modern Java syntax
+    - Implement JWT token generation and validation logic in domain layer using pattern matching and switch expressions
+    - Create version-specific DTOs using records for immutable data transfer objects
+    - Implement simple authentication result classes (AuthenticationSuccess, AuthenticationFailure)
+    - Implement API version detection and routing logic using pattern matching
+    - Add deprecation headers and migration guidance for older versions
+    - Implement standard HTTP methods (GET, POST, PUT, PATCH, DELETE) with proper status codes
+    - Create consistent error response format using records for error DTOs with correlation IDs and error codes
+    - Add global exception handler for centralized error handling using switch expressions and pattern matching
+    - Implement proper Content-Type and Accept header handling
+    - Add comprehensive OpenAPI annotations (@Operation, @ApiResponse, @Schema, @Parameter)
+    - Configure SpringDoc OpenAPI with security schemes and server information using text blocks for examples
+    - Create interactive Swagger UI with examples and comprehensive documentation
+    - Use var extensively for improved code readability while maintaining type safety
+    - _Requirements: 5.1, 5.2, 5.3, 1.7, 12.1, 12.2, 12.3, 12.6, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 14.1, 14.2, 14.3, 14.5, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.8_
+
+  - [ ] 3.3 Implement OAuth2 flow and token management
+    - Configure OAuth2 authorization code flow with PKCE
+    - Implement token refresh mechanism
+    - Create token validation endpoints for other services
+    - _Requirements: 5.1, 5.4_
+
+  - [ ] 3.4 Implement user context propagation via JWT claims in auth service using Java 21 features
+    - Create UserContext record for immutable user data transfer with validation in compact constructor
+    - Implement JWT token enrichment with user context claims using var and modern syntax
+    - Create AuthUserContextExtractor utility within auth service using pattern matching for type-safe claim extraction
+    - Add user context validation and refresh capabilities using switch expressions
+    - Implement custom claims support for service-specific metadata using records and sealed interfaces
+    - Use enhanced instanceof with pattern variables for safe type checking and casting
+    - Implement virtual threads for async user context processing where beneficial
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.7, 17.1, 17.2, 17.3, 17.6, 17.7, 17.8_
+
+  - [ ] 3.5 Implement HTTP standards and consistent error handling with Java 21 features
+    - Create ErrorCode enum with categorized error codes (AUTH_*, VALIDATION_*, RESOURCE_*, DOMAIN_*, SYSTEM_*, RATE_*)
+    - Implement ErrorResponse and ErrorDetail records for immutable error DTOs with consistent structure including correlation IDs and field errors
+    - Create GlobalExceptionHandler with comprehensive exception mapping using switch expressions and pattern matching
+    - Implement standard HTTP method usage patterns across all controllers using var for local variables
+    - Add proper HTTP status code compliance (2xx, 4xx, 5xx) for all operations using switch expressions
+    - Create correlation ID generation and propagation mechanism
+    - Implement request/response header standards (Content-Type, Accept, Authorization)
+    - Add rate limiting error responses with retry information using records
+    - Create circuit breaker error responses with service status using sealed classes for different response types
+    - Implement comprehensive error documentation with examples using text blocks for JSON templates
+    - Use pattern matching for instanceof checks in exception handling
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.8_
+
+  - [ ] 3.6 Implement comprehensive OpenAPI documentation infrastructure
+    - Configure SpringDoc OpenAPI with global settings, security schemes, and server information
+    - Create OpenApiConfig with grouped APIs for different service modules
+    - Implement comprehensive DTO schema documentation with @Schema annotations
+    - Add detailed operation documentation with examples and error responses
+    - Create version-specific OpenAPI documentation groups (v1, v2)
+    - Implement interactive Swagger UI customization with branding and examples
+    - Add OpenAPI contract testing to validate specification accuracy
+    - Create centralized API documentation portal with container orchestration
+    - Implement downloadable OpenAPI specifications in JSON and YAML formats
+    - Add comprehensive parameter documentation with validation constraints
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8_
+
+  - [ ] 3.7 Implement Postman collection generation and API testing automation with Java 21 features
+    - Create PostmanCollectionGenerator component for automated collection generation from OpenAPI specs using var and modern syntax
+    - Implement service-based collection organization (auth-service, gateway-service, platform) using records for configuration
+    - Generate comprehensive Postman collections with authentication flows and JWT token management
+    - Create pre-configured environments for local development, staging, and production using records for environment data
+    - Implement collection variables and global variables for dynamic configuration
+    - Add automated test scripts for request validation and response verification using text blocks for JavaScript templates
+    - Create authentication flow collections with automatic token extraction and refresh
+    - Implement error handling and validation scripts for all API responses
+    - Add Maven plugin configuration for automated collection generation in build pipeline
+    - Create PostmanCollectionResource in presentation.web package for downloadable collection and environment files using var for improved readability
+    - Implement collection enhancement with custom test scripts and documentation using text blocks for script templates
+    - Add CI/CD integration for automated Postman collection testing with Newman
+    - Use switch expressions for collection type handling and generation logic
+    - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 17.1, 17.5, 17.6, 17.8_
+
+  - [ ] 3.8 Implement comprehensive API versioning infrastructure
+    - Create ApiVersionRoutingFilter for gateway-level version handling
+    - Implement version detection from URL path, headers, and content negotiation
+    - Create ApiVersionMappingService for DTO transformations between versions
+    - Implement version-specific OpenAPI documentation generation
+    - Add deprecation warning system with sunset dates
+    - Create version compatibility matrix and migration documentation
+    - Implement semantic versioning strategy (major.minor.patch)
+    - Add support for at least 2 previous major versions
+    - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
+
+  - [ ] 3.9 Implement simple Java 21 features across authentication service
+    - Use var for local variable type inference where appropriate
+    - Convert DTOs to simple records for immutable data structures (LoginRequest, TokenResponse, UserDto)
+    - Implement simple authentication result classes without complex hierarchies
+    - Use basic pattern matching for simple type checking
+    - Implement text blocks for SQL queries and JSON templates
+    - Apply modern Java syntax consistently but simply across all authentication-related code
+    - Create simple utility classes using static methods
+    - Use straightforward control flow in authentication logic
+    - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.8_
+
+  - [ ] 3.11 Write simple happy path unit tests for authentication services using Java 21 features
+    - Create straightforward tests for UserService authentication methods focusing on successful login scenarios using var and modern syntax
+    - Write basic tests for JWT token generation and validation using records for simple test data
+    - Test successful OAuth2 flow components using pattern matching for result verification
+    - Test successful user context propagation and JWT claims enrichment using records
+    - Test AuthUserContextExtractor utility methods with valid JWT tokens using enhanced instanceof patterns
+    - Use text blocks for simple test JSON data and expected successful responses
+    - Implement basic test utilities using modern Java constructs without complex scenarios
+    - Focus on testing primary business logic without complex mocking or setup
+    - Use straightforward assertions and minimal test data setup
+    - _Requirements: 5.1, 5.2, 5.3, 10.1, 10.2, 10.3, 17.1, 17.2, 17.3, 17.5, 17.6, 17.8, 21.1, 21.2, 21.3, 21.5, 21.7_
+
+- [ ] 4. Implement centralized authorization and RBAC system
+  - [ ] 4.1 Create authorization service and controllers
+    - Implement AuthorizationResource in presentation.web package for permission checking
+    - Create RoleService for role and permission management
+    - Implement cross-service permission validation
+    - _Requirements: 5.6, 8.3_
+
+  - [ ] 4.2 Implement user lifecycle management
+    - Create UserLifecycleService for account management
+    - Implement user activation, suspension, and deletion
+    - Add user activity tracking and audit logging
+    - _Requirements: 5.4_
+
+  - [ ] 4.3 Implement admin-only user management CRUD operations with role-based filtering, API versioning, HTTP standards, and OpenAPI documentation
+    - Create UserManagementResource in presentation.web package with versioned CRUD endpoints (/api/v1/, /api/v2/) restricted to ADMIN and SUPER_ADMIN roles
+    - Implement @PreAuthorize annotations to enforce admin-only access on all user management endpoints
+    - Add HTTP 403 Forbidden responses for non-administrative users attempting access
+    - Implement UserManagementService with hierarchical access control for administrators
+    - Add role-based filtering where ADMIN can manage subordinates, SUPER_ADMIN can manage all users
+    - Implement bulk user operations with proper authorization (v2 only, ADMIN+ required)
+    - Create user search and advanced filtering capabilities (v2 enhanced, ADMIN+ required)
+    - Add role assignment and removal operations (v2 only, SUPER_ADMIN required)
+    - Create version-specific DTOs and mapping services
+    - Implement backward compatibility for v1 endpoints
+    - Implement standard HTTP methods with appropriate status codes (200, 201, 204, 400, 401, 403, 404, 409, 422)
+    - Add comprehensive error handling with consistent error response format including admin access violations
+    - Implement field-level validation errors with detailed error codes
+    - Add proper Content-Type handling and request/response headers
+    - Add comprehensive OpenAPI documentation with admin-only security requirements and access restrictions
+    - Document all query parameters, request/response schemas, and error responses including 403 Forbidden
+    - Create interactive examples for all CRUD operations and search functionality with admin role requirements
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 12.1, 12.2, 12.4, 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.3, 14.5_
+
+  - [ ] 4.4 Implement audit logging and user hierarchy management
+    - Create UserAuditLog entity and repository
+    - Implement UserHierarchy entity for organizational structure
+    - Add audit logging for all user management operations
+    - Create audit log retrieval with role-based filtering
+    - _Requirements: 9.6, 9.5_
+
+  - [ ] 4.10 Write simple happy path unit tests for admin-only authorization and user management services
+    - Test successful admin-only access control with @PreAuthorize annotations for valid admin users
+    - Write basic tests for successful user lifecycle operations with proper administrative privileges
+    - Test successful permission checking logic for ADMIN vs SUPER_ADMIN roles with valid scenarios
+    - Test successful user CRUD operations with appropriate administrative role scenarios
+    - Test successful role assignment operations for SUPER_ADMIN users
+    - Focus on testing successful administrative operations without complex failure scenarios
+    - Use straightforward test data setup with valid admin users and permissions
+    - Test basic hierarchical access control with simple organizational structures
+    - _Requirements: 5.6, 8.3, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.9, 9.10, 21.1, 21.2, 21.3, 21.5, 21.7_
+
+- [ ] 5. Set up Redis integration for caching and sessions
+  - [ ] 5.1 Configure Redis connection and caching with environment profiles using YAML format and gripday prefix
+    - Add Redis configuration properties for each Spring profile (local, staging, production) using YAML format exclusively
+    - Set up RedisTemplate and connection factory with environment-specific settings using gripday.cache.redis prefix
+    - Configure caching annotations and cache managers with gripday namespace structure
+    - Implement Redis connection pooling configuration per environment using gripday.cache.redis configuration properties
+    - Add environment variable configuration for Redis connections with gripday. prefix convention
+    - Create RedisConfigurationProperties with @ConfigurationProperties(prefix = "gripday.cache.redis")
+    - Ensure no .properties files are used for Redis configuration
+    - _Requirements: 4.1, 4.2, 4.4, 16.6, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+
+  - [ ] 5.2 Implement session management with Redis
+    - Create session storage mechanism using Redis
+    - Implement session validation and cleanup
+    - Configure session timeout and renewal
+    - _Requirements: 4.1, 4.5_
+
+  - [ ] 5.3 Write simple integration tests for Redis functionality
+    - Test successful Redis connection and basic caching operations
+    - Write basic tests for successful session creation and retrieval
+    - Focus on testing core Redis functionality without complex edge cases
+    - Use simple test data and straightforward assertions
+    - _Requirements: 4.1, 4.2, 21.1, 21.6, 21.7_
+
+- [ ] 6. Implement gripday-gateway-service with reactive architecture
+  - [ ] 6.1 Create Spring Cloud Gateway application with three-tier architecture, OpenAPI documentation, and environment profiles using YAML-only format with gripday prefix
+    - Set up main application class with Gateway annotations
+    - Create three-tier package structure (presentation, domain, infrastructure)
+    - Configure reactive web stack dependencies
+    - Set up basic routing configuration with environment-specific settings using YAML format exclusively
+    - Create application-local.yml, application-staging.yml, and application-production.yml for gateway service with gripday. prefix for all custom properties
+    - Implement GatewayProperties configuration class with environment-specific routing using @ConfigurationProperties(prefix = "gripday.gateway")
+    - Configure externalized configuration for gateway routing and security using gripday namespace structure
+    - Implement architectural testing configuration with ArchUnit and Spring Modulith
+    - Configure SpringDoc OpenAPI for gateway service documentation
+    - Create centralized API documentation portal aggregating all service docs
+    - Ensure no .properties files are used and all custom configuration follows gripday. prefix convention
+    - Create configuration validation to enforce YAML format and gripday prefix standards for gateway service
+    - _Requirements: 6.1, 6.2, 1.7, 1.8, 1.9, 14.1, 14.8, 16.1, 16.2, 16.3, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+
+  - [ ] 6.2 Implement JWT authentication filter with user context enrichment, API versioning, and HTTP standards
+    - Create reactive JWT authentication filter with version detection
+    - Integrate with auth service for token validation
+    - Implement JWT token enrichment with complete user context
+    - Create GatewayUserContextExtractor utility within gateway service
+    - Add user context propagation to downstream services
+    - Implement API version routing and transformation in gateway
+    - Add deprecation headers and version-specific error handling
+    - Implement standard HTTP status codes for authentication errors (401, 403)
+    - Create consistent error response format for gateway errors
+    - Add correlation ID propagation through gateway filters
+    - Implement proper request/response header handling
+    - _Requirements: 6.2, 5.8, 10.5, 10.6, 12.5, 12.8, 13.1, 13.2, 13.3, 13.6_
+
+  - [ ] 6.3 Implement Redis-backed rate limiting with HTTP standards
+    - Create reactive rate limiting filter using Redis
+    - Configure rate limiting policies per endpoint
+    - Implement distributed rate limiting logic
+    - Add HTTP 429 Too Many Requests status code for rate limit exceeded
+    - Implement rate limiting error response with retry information
+    - Add rate limiting headers (X-Rate-Limit-Remaining, X-Rate-Limit-Reset)
+    - Create consistent error format for rate limiting violations
+    - _Requirements: 6.3, 4.3, 13.2, 13.3, 13.4_
+
+  - [ ] 6.4 Implement circuit breaker with Resilience4j and HTTP standards
+    - Configure Resilience4j circuit breaker patterns
+    - Create fallback mechanisms for service failures
+    - Implement circuit breaker monitoring
+    - Add HTTP 503 Service Unavailable status code for circuit breaker open state
+    - Create circuit breaker error responses with service status information
+    - Implement proper error handling for upstream service timeouts (504 Gateway Timeout)
+    - Add retry-after headers for circuit breaker responses
+    - _Requirements: 6.4, 13.2, 13.3, 13.4_
+
+  - [ ] 6.5 Implement request/response transformation and CORS
+    - Create request and response transformation filters
+    - Configure CORS policies for cross-origin requests
+    - Implement request routing and load balancing
+    - _Requirements: 6.5, 6.6, 6.7_
+
+  - [ ] 6.6 Implement architectural testing for gateway service
+    - Create ArchUnit tests for three-tier architecture in gateway service
+    - Implement Spring Modulith tests for gateway module boundaries
+    - Add architectural validation tests for reactive components
+    - Test package structure and naming conventions including REST controller Resource suffix
+    - Validate @RestController classes are properly placed in presentation.web package
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 23.1, 23.2, 23.3, 23.4, 23.7_
+
+  - [ ] 6.7 Write simple unit tests for API versioning and gateway functionality
+    - Test successful API version detection from URL paths with valid version formats
+    - Write basic tests for successful version routing with supported versions
+    - Test successful backward compatibility scenarios for supported versions
+    - Focus on testing common user workflows and API usage patterns
+    - Use straightforward test scenarios without complex version migration edge cases
+    - _Requirements: 12.1, 12.2, 12.4, 12.6, 12.8, 21.1, 21.2, 21.7_
+
+  - [ ] 6.8 Write simple unit tests for gateway filters and routing
+    - Test successful JWT authentication filter logic with valid tokens
+    - Write basic tests for successful rate limiting functionality within limits
+    - Test successful circuit breaker behavior in closed state
+    - Focus on testing successful execution scenarios for core gateway functionality
+    - Use minimal test setup and straightforward assertions
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 21.1, 21.2, 21.3, 21.7_
+
+- [ ] 7. Implement container orchestration and extensibility
+  - [ ] 7.1 Configure container-based service networking
+    - Set up Docker Compose networking for local development
+    - Configure service-to-service communication using container DNS
+    - Implement static route configuration for known services
+    - _Requirements: 8.1, 8.2_
+
+  - [ ] 7.2 Implement extensible routing for new microservices
+    - Create static route configuration for microservices
+    - Implement service-specific security policies
+    - Add support for custom authentication rules per service
+    - Configure container networking and DNS resolution
+    - _Requirements: 8.3, 8.4, 8.5_
+
+  - [ ] 7.3 Write simple integration tests for container networking
+    - Test successful container-to-container communication scenarios
+    - Write basic tests for successful routing to containerized services
+    - Focus on testing basic service interactions and data flow
+    - Use simple test scenarios without complex service failure cases
+    - _Requirements: 8.1, 8.2, 21.1, 21.6, 21.7_
+
+- [ ] 8. Implement comprehensive environment configuration management
+  - [ ] 8.1 Create environment-specific Spring profile configurations with YAML-only format and gripday prefix convention
+    - Create application-local.yml with development-friendly settings and debug logging using YAML format exclusively
+    - Create application-staging.yml with staging environment configuration and moderate logging using YAML format exclusively
+    - Create application-production.yml with production-optimized settings and minimal logging using YAML format exclusively
+    - Ensure all custom configuration properties use gripday. prefix for clear namespace separation
+    - Implement GripdayProperties configuration class with validation annotations using @ConfigurationProperties(prefix = "gripday")
+    - Configure database connection settings per environment using environment variables with gripday.database prefix
+    - Set up Redis connection configuration per environment with connection pooling using gripday.cache.redis prefix
+    - Configure JWT and security settings per environment with externalized secrets using gripday.auth prefix
+    - Add rate limiting configuration per environment with different thresholds using gripday.gateway.rate-limiting prefix
+    - Configure observability settings per environment (tracing sample rates, logging levels) using gripday.observability prefix
+    - Validate that no .properties files are used anywhere in the configuration
+    - Create configuration validation to ensure all custom properties follow gripday. prefix convention
+    - _Requirements: 16.1, 16.4, 16.5, 16.6, 16.7, 16.8, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+
+  - [ ] 8.2 Implement configuration validation and management with YAML standards and gripday prefix enforcement
+    - Add @ConfigurationProperties validation with @Validated annotations using gripday. prefix for all custom properties
+    - Create configuration property classes for each major component (JWT, Redis, Database) with gripday namespace structure
+    - Implement AuthConfigurationProperties with @ConfigurationProperties(prefix = "gripday.auth")
+    - Create GatewayConfigurationProperties with @ConfigurationProperties(prefix = "gripday.gateway")
+    - Add DatabaseConfigurationProperties with @ConfigurationProperties(prefix = "gripday.database")
+    - Implement configuration health checks and validation on startup to ensure YAML format compliance
+    - Add configuration documentation and examples for each environment using YAML format exclusively
+    - Create environment variable templates and documentation with gripday. prefix examples
+    - Implement configuration testing for each Spring profile to validate YAML structure and gripday prefix usage
+    - Add validation rules to prevent .properties file usage and enforce gripday. prefix convention
+    - Create configuration migration utilities to convert any existing .properties to YAML format
+    - _Requirements: 16.2, 16.3, 16.4, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+
+  - [ ] 8.3 Create individual Docker Compose environment configuration with POSIX deployment scripts
+    - Create service-specific environment-specific Docker Compose files for each microservice (docker-compose.yml, docker-compose.staging.yml, docker-compose.production.yml)
+    - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
+    - Implement Docker Compose override files for different deployment scenarios per service
+    - Add environment variable injection and validation for individual containerized deployments
+    - Create POSIX shell scripts for individual service environment setup (setup-auth-local.sh, setup-gateway-local.sh)
+    - Implement service-specific health check scripts (wait-for-auth-service.sh, wait-for-gateway-service.sh) for POSIX systems
+    - Create environment variable loading and validation scripts per service (load-auth-env.sh, load-gateway-env.sh)
+    - Implement Maven build scripts (build-auth.sh, build-gateway.sh) with service-specific configurations
+    - Add deployment automation scripts for individual services in Unix/Mac environments
+    - Create database setup and migration scripts specific to auth service for POSIX systems
+    - _Requirements: 16.1, 16.2, 16.3, 2.6_
+
+- [ ] 9. Set up observability with OpenTelemetry
+  - [ ] 9.1 Configure OpenTelemetry instrumentation with environment profiles
+    - Add OpenTelemetry dependencies to both services
+    - Configure automatic instrumentation for Spring Boot with environment-specific settings
+    - Set up trace correlation and context propagation
+    - Configure observability settings per environment (sample rates, tracing enabled/disabled)
+    - Add environment variable configuration for observability stack
+    - _Requirements: 7.1, 7.5, 16.7_
+
+  - [ ] 9.2 Implement metrics collection and health checks
+    - Configure Prometheus metrics endpoints
+    - Implement custom domain metrics
+    - Add health check endpoints for monitoring
+    - _Requirements: 7.2, 7.5_
+
+  - [ ] 9.3 Configure structured logging
+    - Set up JSON structured logging format
+    - Configure log correlation with trace IDs
+    - Implement centralized logging configuration
+    - _Requirements: 7.4_
+
+  - [ ] 9.4 Write simple tests for observability components
+    - Test successful metrics collection and health check responses
+    - Verify basic trace correlation functionality with valid requests
+    - Focus on testing core observability functionality without complex scenarios
+    - Use straightforward test data and minimal setup
+    - _Requirements: 7.1, 7.2, 21.1, 21.2, 21.7_
+
+- [ ] 10. Create individual Docker containerization and deployment for each microservice
+  - [ ] 10.1 Create individual Dockerfiles for each microservice
+    - Write optimized Dockerfile for auth service with multi-stage builds in gripday-auth-service directory
+    - Create Dockerfile for gateway service with reactive optimizations in gripday-gateway-service directory
+    - Configure production-ready Docker images with security best practices for each service
+    - Implement service-specific build optimizations and dependency management
+    - _Requirements: 2.1, 2.2_
+
+  - [ ] 10.2 Set up individual Docker Compose configurations for auth service
+    - Create gripday-auth-service/docker-compose.yml for local development with PostgreSQL and Redis
+    - Create gripday-auth-service/docker-compose.staging.yml for staging environment deployment
+    - Create gripday-auth-service/docker-compose.production.yml for production environment deployment
+    - Configure service-specific PostgreSQL and Redis containers with proper data persistence
+    - Set up auth service networking, dependencies, and health checks
+    - Configure environment-specific resource limits and scaling options for auth service
+    - Add service-specific environment variable management and configuration
+    - _Requirements: 2.2, 2.3, 2.4, 2.5, 2.6, 19.1, 19.2_
+
+  - [ ] 10.3 Set up individual Docker Compose configurations for gateway service
+    - Create gripday-gateway-service/docker-compose.yml for local development with Redis
+    - Create gripday-gateway-service/docker-compose.staging.yml for staging environment deployment
+    - Create gripday-gateway-service/docker-compose.production.yml for production environment deployment
+    - Configure service-specific Redis container and external service connections
+    - Set up gateway service networking, dependencies, and health checks
+    - Configure environment-specific resource limits and scaling options for gateway service
+    - Add service-specific environment variable management and configuration
+    - _Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_
+
+  - [ ] 10.4 Create platform-level observability Docker Compose stack
+    - Create platform-observability/docker-compose.yml with Prometheus, Grafana, and Loki
+    - Configure observability stack to monitor all microservices
+    - Set up container networking and monitoring configuration for individual services
+    - Add centralized logging and metrics collection from all microservices
+    - _Requirements: 2.5, 7.1, 7.2, 7.4_
+
+  - [ ] 10.5 Create POSIX automation scripts for individual service deployment
+    - Create scripts/start-auth-service.sh and scripts/stop-auth-service.sh for auth service management
+    - Create scripts/start-gateway-service.sh and scripts/stop-gateway-service.sh for gateway service management
+    - Implement scripts/deploy-auth-staging.sh and scripts/deploy-auth-production.sh for auth service deployment
+    - Implement scripts/deploy-gateway-staging.sh and scripts/deploy-gateway-production.sh for gateway service deployment
+    - Create scripts/start-platform.sh for orchestrating all services startup
+    - Implement container health monitoring and service readiness scripts for individual services
+    - Add database initialization and migration scripts for auth service
+    - _Requirements: 19.3, 19.4, 19.5_
+
+  - [ ] 10.6 Write simple Docker integration tests and deployment validation for individual services
+    - Test successful container startup and health checks for each service
+    - Verify basic service communication between auth and gateway services
+    - Test successful Docker Compose configurations for local environment
+    - Validate basic service deployment scripts with successful scenarios
+    - Focus on testing core deployment functionality without complex failure scenarios
+    - Use straightforward validation checks and minimal test complexity
+    - _Requirements: 2.1, 2.2, 19.1, 19.2, 21.1, 21.6, 21.7_
+
+- [ ] 11. Create advanced individual Docker Compose deployment features
+  - [ ] 11.1 Implement individual Docker Compose service scaling and load balancing
+    - Configure Docker Compose scaling for individual auth and gateway services
+    - Set up nginx load balancer container for production deployments per service
+    - Implement container networking within individual Docker Compose networks
+    - Configure health checks and rolling updates for individual services
+    - Create service-specific scaling strategies and resource management
+    - _Requirements: 19.3, 19.4, 19.5_
+
+  - [ ] 11.2 Create individual service monitoring and logging integration
+    - Configure individual service integration with platform observability stack
+    - Set up service-specific Prometheus metrics endpoints and collection
+    - Implement individual service logging with Loki and Promtail integration
+    - Add service-specific Grafana dashboards for individual Docker Compose deployments
+    - Create service-specific alerting and notification setup for production monitoring
+    - _Requirements: 7.1, 7.2, 7.4, 7.5_
+
+  - [ ] 11.3 Implement individual Docker Compose security and networking
+    - Configure individual Docker network isolation and security policies per service
+    - Set up service-specific TLS termination and certificate management
+    - Implement individual secrets management for Docker Compose deployments per service
+    - Configure service-specific firewall rules and network access controls
+    - Create inter-service communication security and authentication
+    - _Requirements: 19.1, 19.2_
+
+  - [ ] 11.4 Write simple Docker Compose deployment validation tests
+    - Test successful Docker Compose deployment for local environment per service
+    - Verify basic service scaling functionality with simple scenarios
+    - Test successful inter-service communication with valid requests
+    - Validate basic monitoring and logging integration with successful data flow
+    - Focus on testing core deployment functionality without complex edge cases
+    - Use straightforward validation checks and minimal test setup
+    - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 21.1, 21.6, 21.7_
+
+- [ ] 12. Create Kubernetes deployment configurations
+  - [ ] 12.1 Create Kubernetes manifests for auth service
+    - Create auth-service-deployment.yaml with container specifications and environment variables
+    - Create auth-service-service.yaml for internal service discovery
+    - Create auth-postgres-deployment.yaml and auth-postgres-service.yaml for database
+    - Create auth-redis-deployment.yaml and auth-redis-service.yaml for caching
+    - Configure Kubernetes ConfigMaps for environment-specific configuration
+    - Add Kubernetes Secrets for sensitive data (database passwords, JWT secrets)
+    - Create auth-service-ingress.yaml for external access if needed
+    - _Requirements: 2.1, 2.2, 8.1, 8.2, 24.1, 24.2_
+
+  - [ ] 12.2 Create Kubernetes manifests for gateway service
+    - Create gateway-service-deployment.yaml with reactive configuration
+    - Create gateway-service-service.yaml for load balancing
+    - Create gateway-redis-deployment.yaml and gateway-redis-service.yaml
+    - Configure gateway-service-ingress.yaml for external traffic routing
+    - Set up Kubernetes HorizontalPodAutoscaler for gateway scaling
+    - Create NetworkPolicy for service-to-service communication security
+    - Configure Kubernetes health checks and readiness probes
+    - _Requirements: 2.1, 2.2, 6.1, 8.1, 8.2, 24.1, 24.2_
+
+  - [ ] 12.3 Create Kubernetes deployment automation scripts
+    - Create k8s/deploy-local.sh for minikube deployment
+    - Create k8s/deploy-staging.sh for staging Kubernetes cluster
+    - Create k8s/deploy-production.sh for production Kubernetes cluster
+    - Implement k8s/setup-namespace.sh for environment isolation
+    - Create k8s/apply-configs.sh for ConfigMap and Secret management
+    - Add k8s/scale-services.sh for horizontal scaling operations
+    - Implement k8s/rollback.sh for deployment rollback procedures
+    - Create k8s/health-check.sh for cluster health validation
+    - _Requirements: 8.1, 8.2, 19.1, 19.2_
+
+- [ ] 13. Create POSIX automation and tooling
+  - [ ] 13.1 Implement comprehensive POSIX shell scripts for development workflow
+    - Create setup-local.sh script for local development environment initialization
+    - Implement build.sh script with environment-specific Maven configurations
+    - Create test.sh script for running different test suites (unit, integration, e2e)
+    - Implement clean.sh script for cleaning build artifacts and Docker resources
+    - Create database management scripts (create-db.sh, migrate-db.sh, seed-db.sh)
+    - Add service management scripts (start-services.sh, stop-services.sh, restart-services.sh)
+    - Implement log aggregation and monitoring scripts for POSIX systems
+    - _Requirements: 16.1, 16.2, 16.3_
+
+  - [ ] 13.2 Create deployment and CI/CD automation scripts
+    - Implement deploy-staging.sh with comprehensive Docker Compose staging deployment automation
+    - Create deploy-production.sh with production Docker Compose deployment safety checks and validations
+    - Add rollback.sh script for automated Docker Compose rollback procedures
+    - Implement health-check.sh for comprehensive service health monitoring across Docker containers
+    - Create backup.sh and restore.sh scripts for database and configuration backup in containerized environments
+    - Add monitoring and alerting setup scripts for POSIX environments with Docker Compose
+    - Implement security scanning and vulnerability assessment scripts for Docker images
+    - _Requirements: 16.1, 16.2, 16.3, 19.1, 19.2_
+
+  - [ ] 13.3 Implement development productivity tools for POSIX systems
+    - Create dev-tools.sh script for installing and configuring development dependencies
+    - Implement code-quality.sh for running static analysis, linting, and formatting
+    - Add performance-test.sh for load testing and performance benchmarking
+    - Create api-test.sh for automated API testing with Postman collections and Newman
+    - Implement security-test.sh for security scanning and penetration testing
+    - Add documentation generation scripts (generate-docs.sh) for API and system documentation
+    - Create troubleshooting and debugging helper scripts for POSIX environments
+    - _Requirements: 15.6, 16.1, 16.2_
+
+- [ ] 14. Create comprehensive documentation structure for all microservices
+  - [ ] 14.1 Create concise documentation structure for auth service
+    - Create README.md with essential service overview and quick start guide using bullet points and brief descriptions
+    - Set up docs folder with api, architecture, and deployment subfolders
+    - Create docs/api/authentication.md with essential API endpoints and examples focusing on actionable information
+    - Add docs/api/errors.md with error codes and responses using concise format
+    - Create docs/architecture/overview.md with high-level architecture and key design patterns
+    - Add docs/architecture/security.md with JWT authentication flow and essential security information
+    - Create docs/deployment/local.md with local development setup using quick reference format
+    - Add docs/deployment/configuration.md with essential environment variables and configuration examples
+    - Focus on essential information in minimal, focused content without verbose explanations
+    - Use bullet points, code examples, and brief descriptions over lengthy prose
+    - Provide quick reference guides and practical usage examples
+    - Avoid redundant explanations and focus on unique, essential information per section
+    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 22.1, 22.2, 22.3, 22.4, 22.5, 22.7_
+
+  - [ ] 14.2 Create concise documentation structure for gateway service
+    - Create README.md with essential gateway service overview and quick start using minimal, focused content
+    - Set up docs folder with api, architecture, and deployment subfolders
+    - Create docs/api/routing.md with essential routing rules and configuration examples
+    - Add docs/api/rate-limiting.md with rate limiting policies using quick reference format
+    - Create docs/architecture/overview.md with reactive architecture essentials and key components
+    - Add docs/architecture/security.md with JWT authentication flow and essential security information
+    - Create docs/deployment/local.md with gateway deployment setup using actionable information
+    - Add docs/deployment/configuration.md with essential configuration examples and environment variables
+    - Focus on actionable information and practical usage examples
+    - Use bullet points, code examples, and brief descriptions over lengthy prose
+    - Provide quick reference guides that can be quickly read and understood
+    - Avoid verbose explanations and focus on unique, essential information per section
+    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7_
+
+  - [ ] 14.3 Create POSIX automation scripts and operational documentation
+    - Create scripts/setup-local.sh for local Docker Compose development environment setup
+    - Implement scripts/deploy-staging.sh for Docker Compose staging deployment automation
+    - Add scripts/deploy-production.sh for Docker Compose production deployment with safety checks
+    - Create scripts/wait-for-services.sh for Docker container service readiness checking
+    - Implement scripts/health-check.sh for comprehensive Docker service health monitoring
+    - Add scripts/backup.sh and scripts/restore.sh for containerized data backup and recovery
+    - Create scripts/troubleshoot.sh for automated Docker troubleshooting and diagnostics
+    - Implement all scripts with POSIX compatibility (bash, proper error handling, descriptive comments)
+    - Add executable permissions and proper shebang headers to all scripts
+    - Create script documentation with usage examples and parameter descriptions for Docker Compose workflows
+    - _Requirements: 18.7, 18.8_
+
+  - [ ] 14.4 Implement concise documentation automation and maintenance
+    - Create simple documentation templates for consistent structure across services using minimal format
+    - Implement automated documentation generation from OpenAPI specifications focusing on essential information
+    - Add basic documentation validation in CI/CD pipeline
+    - Create simple documentation update workflows for keeping content synchronized with code
+    - Implement automated generation of essential API examples and endpoint documentation
+    - Focus on essential information without excessive detail or verbose explanations
+    - Create streamlined documentation review processes
+    - _Requirements: 18.6, 18.8, 22.1, 22.2, 22.6_
+
+- [ ] 15. Implement happy path testing guidelines and concise documentation standards
+  - [ ] 15.1 Create happy path testing framework and guidelines
+    - Implement TestDataBuilder component for creating simple, valid test data objects
+    - Create testing utilities that focus on successful execution scenarios
+    - Implement simple test base classes with minimal setup and straightforward assertions
+    - Create testing guidelines documentation with examples of happy path testing patterns
+    - Implement test configuration that prioritizes clear, readable test implementations
+    - Add testing utilities for creating valid JWT tokens, user contexts, and request objects
+    - Create simple integration test base classes using Testcontainers with minimal complexity
+    - Focus testing framework on core functionality without extensive edge case coverage
+    - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7_
+
+  - [ ] 15.2 Implement concise documentation standards and templates
+    - Create documentation templates that provide essential information in minimal, focused content
+    - Implement README.md templates with quick start guides and essential configuration examples
+    - Create API documentation templates using bullet points, code examples, and brief descriptions
+    - Implement architecture documentation templates focusing on actionable information
+    - Create deployment documentation templates with practical usage examples
+    - Add documentation guidelines that avoid redundant explanations and verbose content
+    - Implement documentation structure that can be quickly read and understood
+    - Create documentation validation tools that ensure concise, focused content
+    - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7_
+
+  - [ ] 15.3 Implement REST controller naming and package conventions
+    - Ensure all @RestController classes are placed in presentation.web package structure
+    - Implement Resource suffix naming convention for all REST controllers (AuthenticationResource, UserManagementResource, etc.)
+    - Update existing controller classes to follow new naming conventions if needed
+    - Create ArchUnit validation rules to enforce REST controller package placement and naming
+    - Implement Spring Modulith tests to validate controller module boundaries
+    - Add architectural tests to prevent @RestController classes from being placed outside presentation.web
+    - Update documentation and examples to reflect new REST controller conventions
+    - Ensure consistent application of conventions across all microservices in the platform
+    - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7_
+
+- [ ] 16. Integration and end-to-end testing
+  - [ ] 16.1 Create simple integration test suite
+    - Write basic integration tests for successful auth service database operations
+    - Create tests for successful gateway-auth service communication
+    - Test successful authentication and authorization flows with valid credentials
+    - Write integration tests for successful user management CRUD operations
+    - Test successful admin access control with proper administrative privileges
+    - Test successful user context propagation through JWT claims in each service
+    - Test successful API versioning scenarios with supported versions
+    - Validate successful architectural compliance in integration tests
+    - Test successful HTTP status code responses for valid requests
+    - Validate successful error response format for common scenarios
+    - Test successful correlation ID propagation through service calls
+    - Verify successful Content-Type and header handling
+    - Test successful OpenAPI specification generation and accuracy
+    - Test successful Postman collection generation and download functionality
+    - Focus on testing basic service interactions and data flow
+    - Use straightforward test scenarios without complex failure cases
+    - _Requirements: 5.1, 5.2, 6.2, 8.3, 9.1, 9.2, 9.5, 10.1, 10.2, 11.6, 12.4, 12.8, 13.1, 13.2, 13.3, 13.6, 13.7, 14.6, 14.7, 15.1, 15.2, 15.6, 21.1, 21.6, 21.7_
+
+  - [ ] 16.2 Implement simple end-to-end testing scenarios
+    - Test successful user registration and login flow with valid credentials
+    - Verify successful rate limiting functionality within normal usage limits
+    - Test successful container networking and routing for containerized services
+    - Test successful end-to-end user management workflows with proper administrative roles
+    - Test successful user context propagation across multiple microservices
+    - Verify successful JWT claims enrichment and extraction functionality in both services
+    - Test successful API version usage with supported versions
+    - Verify successful backward compatibility for supported API versions
+    - Test successful end-to-end Postman collection workflows with valid data
+    - Focus on testing the most common user workflows and API usage patterns
+    - Use straightforward test scenarios without complex edge cases
+    - _Requirements: 6.1, 6.3, 6.4, 8.1, 9.1, 9.6, 10.3, 10.4, 10.5, 12.4, 12.6, 12.8, 15.3, 15.4, 15.6, 21.1, 21.6, 21.7_
+
+  - [ ] 16.3 Create simple performance and load testing
+    - Set up basic load testing for gateway throughput with normal usage scenarios
+    - Test database performance with typical load patterns
+    - Verify Redis performance for successful caching and rate limiting operations
+    - Test JWT token enrichment performance with standard token sizes
+    - Focus on testing core functionality under normal load conditions
+    - Use straightforward performance metrics and minimal test complexity
+    - _Requirements: 4.3, 6.3, 10.5, 21.1, 21.7_
