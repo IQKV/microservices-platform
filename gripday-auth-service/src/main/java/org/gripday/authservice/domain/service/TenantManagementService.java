@@ -6,6 +6,9 @@ import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.infrastructure.repository.dto.TenantDto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +35,14 @@ public class TenantManagementService {
 
     /**
      * Create a new tenant with validation and schema provisioning.
+     * Evicts tenant caches to ensure fresh data.
      * 
      * @param request the tenant creation request
      * @param createdBy the user creating the tenant
      * @return the created tenant response
      * @throws IllegalArgumentException if tenant already exists or validation fails
      */
+    @CacheEvict(value = "tenants", allEntries = true)
     public TenantResponse createTenant(CreateTenantRequest request, String createdBy) {
         logger.info("Creating new tenant: {}", request.tenantId());
         
@@ -81,12 +86,18 @@ public class TenantManagementService {
 
     /**
      * Update an existing tenant.
+     * Evicts specific tenant cache entries.
      * 
      * @param tenantId the tenant ID to update
      * @param request the update request
      * @return the updated tenant response
      * @throws IllegalArgumentException if tenant not found or validation fails
      */
+    @Caching(evict = {
+        @CacheEvict(value = "tenants", key = "#tenantId"),
+        @CacheEvict(value = "tenants", key = "'all_tenants'"),
+        @CacheEvict(value = "tenants", key = "'enabled_tenants'")
+    })
     public TenantResponse updateTenant(String tenantId, UpdateTenantRequest request) {
         logger.info("Updating tenant: {}", tenantId);
         
@@ -143,12 +154,14 @@ public class TenantManagementService {
 
     /**
      * Get tenant by tenant ID.
+     * Cached with tenant ID as key.
      * 
      * @param tenantId the tenant ID
      * @return the tenant response
      * @throws IllegalArgumentException if tenant not found
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "tenants", key = "#tenantId")
     public TenantResponse getTenant(String tenantId) {
         var tenant = tenantRepository.findByTenantId(tenantId)
             .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
@@ -158,11 +171,13 @@ public class TenantManagementService {
 
     /**
      * Get all tenants with optional filtering.
+     * Cached based on enabled filter.
      * 
      * @param enabledOnly if true, return only enabled tenants
      * @return list of tenant summaries
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "tenants", key = "#enabledOnly ? 'enabled_tenants' : 'all_tenants'")
     public List<TenantSummary> getAllTenants(boolean enabledOnly) {
         var tenants = enabledOnly ? tenantRepository.findByEnabledTrue() : tenantRepository.findAll();
         
@@ -173,10 +188,12 @@ public class TenantManagementService {
 
     /**
      * Delete a tenant and all associated data.
+     * Evicts all tenant-related cache entries.
      * 
      * @param tenantId the tenant ID to delete
      * @throws IllegalArgumentException if tenant not found
      */
+    @CacheEvict(value = "tenants", allEntries = true)
     public void deleteTenant(String tenantId) {
         logger.warn("Deleting tenant: {}", tenantId);
         
@@ -266,11 +283,13 @@ public class TenantManagementService {
 
     /**
      * Validate tenant exists and is enabled.
+     * Cached for frequent tenant validation checks.
      * 
      * @param tenantId the tenant ID to validate
      * @return true if tenant exists and is enabled
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "tenants", key = "'valid_' + #tenantId")
     public boolean isValidTenant(String tenantId) {
         return tenantRepository.findByTenantId(tenantId)
             .map(Tenant::isActive)

@@ -44,10 +44,21 @@ public record TokenResponse(
         description = "Authenticated user information and context",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
-    UserContext user
+    UserContext user,
+    
+    @Schema(
+        description = "Session identifier for session management",
+        example = "550e8400-e29b-41d4-a716-446655440000"
+    )
+    String sessionId
 ) {
     // Compact constructor with default token type
     public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user) {
-        this(accessToken, refreshToken, "Bearer", expiresIn, user);
+        this(accessToken, refreshToken, "Bearer", expiresIn, user, null);
+    }
+    
+    // Constructor with session ID
+    public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user, String sessionId) {
+        this(accessToken, refreshToken, "Bearer", expiresIn, user, sessionId);
     }
 }

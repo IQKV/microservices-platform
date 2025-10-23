@@ -298,7 +298,9 @@ public class AuthenticationResource {
         var authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             var token = authHeader.substring(7);
-            authenticationService.logoutUser(token);
+            // Extract session ID from request header (optional)
+            var sessionId = request.getHeader("X-Session-ID");
+            authenticationService.logoutUser(token, sessionId);
         }
         
         return ResponseEntity.ok().build();

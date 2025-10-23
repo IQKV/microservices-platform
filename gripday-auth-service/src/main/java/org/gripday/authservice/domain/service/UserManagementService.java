@@ -10,6 +10,9 @@ import org.gripday.authservice.presentation.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -79,8 +82,11 @@ public class UserManagementService {
 
     /**
      * Get user by ID with tenant isolation.
+     * Cached with tenant-aware key generation.
      */
     @Transactional(readOnly = true)
+    @Cacheable(value = "users", key = "#userId + '_' + #currentUser.tenantId()", 
+               condition = "#currentUser != null && #currentUser.tenantId() != null")
     public UserDto getUserById(Long userId, UserContext currentUser) {
         validateAdminAccess(currentUser, "GET_USER");
         
@@ -94,7 +100,9 @@ public class UserManagementService {
 
     /**
      * Create new user with admin privileges and tenant isolation.
+     * Evicts tenant-specific user cache entries.
      */
+    @CacheEvict(value = "users", allEntries = true, condition = "#currentUser != null && #currentUser.tenantId() != null")
     public UserDto createUser(CreateUserRequest request, UserContext currentUser) {
         validateAdminAccess(currentUser, "CREATE_USER");
         
@@ -137,7 +145,12 @@ public class UserManagementService {
 
     /**
      * Update existing user with admin privileges and tenant isolation.
+     * Evicts specific user cache entry and related caches.
      */
+    @Caching(evict = {
+        @CacheEvict(value = "users", key = "#userId + '_' + #currentUser.tenantId()"),
+        @CacheEvict(value = "users", allEntries = true, condition = "#request.roles() != null")
+    })
     public UserDto updateUser(Long userId, UpdateUserRequest request, UserContext currentUser) {
         validateAdminAccess(currentUser, "UPDATE_USER");
         
@@ -196,7 +209,12 @@ public class UserManagementService {
 
     /**
      * Delete user with admin privileges and tenant isolation.
+     * Evicts specific user cache entry and clears related caches.
      */
+    @Caching(evict = {
+        @CacheEvict(value = "users", key = "#userId + '_' + #currentUser.tenantId()"),
+        @CacheEvict(value = "users", allEntries = true)
+    })
     public void deleteUser(Long userId, UserContext currentUser) {
         validateAdminAccess(currentUser, "DELETE_USER");
         

@@ -12,7 +12,7 @@
   - Create Maven wrapper (mvnw) for consistent build environment
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 25.1, 25.2, 25.3, 25.4, 25.5_
 
-- [-] 2. Implement gripday-auth-service core functionality
+- [x] 2. Implement gripday-auth-service core functionality
   - [x] 2.1 Create Spring Boot application with three-tier architecture and YAML configuration
     - Set up main application class with Spring Boot annotations
     - Create three-tier package structure (presentation.web, domain.service, infrastructure.repository)
@@ -155,7 +155,7 @@
     - Add security documentation for JWT authentication flow
     - _Requirements: 13.4, 13.5, 13.6, 14.1, 14.2, 14.3, 14.5_
 
-- [ ] 3. Set up Redis integration for caching and sessions with multi-tenant support
+- [x] 3. Set up Redis integration for caching and sessions with multi-tenant support
   - Configure Redis connection with environment-specific settings using gripday.cache.redis prefix
   - Set up RedisTemplate and connection factory with YAML configuration
   - Implement session management with Redis storage and tenant namespace isolation

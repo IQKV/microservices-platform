@@ -1,10 +1,13 @@
 package org.gripday.authservice.domain.service;
 
+import org.gripday.authservice.config.RedisConfiguration.TenantAwareSessionService;
 import org.gripday.authservice.infrastructure.entity.User;
 import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.presentation.dto.*;
 import org.gripday.authservice.presentation.validation.InputSanitizer;
 import org.slf4j.MDC;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -28,19 +31,22 @@ public class AuthenticationService {
     private final AccountLockoutService accountLockoutService;
     private final SecurityAuditService securityAuditService;
     private final InputSanitizer inputSanitizer;
+    private final TenantAwareSessionService sessionService;
     
     public AuthenticationService(UserRepository userRepository, 
                                PasswordEncoder passwordEncoder,
                                JwtService jwtService,
                                AccountLockoutService accountLockoutService,
                                SecurityAuditService securityAuditService,
-                               InputSanitizer inputSanitizer) {
+                               InputSanitizer inputSanitizer,
+                               TenantAwareSessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.accountLockoutService = accountLockoutService;
         this.securityAuditService = securityAuditService;
         this.inputSanitizer = inputSanitizer;
+        this.sessionService = sessionService;
     }
     
     /**
@@ -119,6 +125,15 @@ public class AuthenticationService {
             var accessToken = jwtService.generateAccessToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
             
+            // Create session with tenant isolation
+            var sessionId = UUID.randomUUID().toString();
+            var sessionData = createSessionData(user, ipAddress, userAgent);
+            var sessionTimeout = request.rememberMe() ? 
+                java.time.Duration.ofDays(7) : java.time.Duration.ofMinutes(30);
+            
+            sessionService.storeSession(sessionId, sessionData, sessionTimeout);
+            sessionService.addUserSession(user.getId().toString(), sessionId);
+            
             // Log successful authentication
             securityAuditService.logSuccessfulAuthentication(user.getUsername(), ipAddress, userAgent);
             securityAuditService.logTokenEvent(user.getUsername(), "generated", ipAddress, userAgent);
@@ -129,7 +144,7 @@ public class AuthenticationService {
             // Determine token expiry based on rememberMe flag
             var expiresIn = request.rememberMe() ? 604800L : 900L; // 7 days or 15 minutes
             
-            return new TokenResponse(accessToken, refreshToken, expiresIn, userContext);
+            return new TokenResponse(accessToken, refreshToken, expiresIn, userContext, sessionId);
             
         } catch (AuthenticationException | AccountLockedException e) {
             throw e;
@@ -195,9 +210,10 @@ public class AuthenticationService {
     }
     
     /**
-     * Logout user and invalidate tokens.
+     * Logout user and invalidate tokens and session.
      */
-    public void logoutUser(String accessToken) {
+    @CacheEvict(value = "jwt-blacklist", key = "#accessToken")
+    public void logoutUser(String accessToken, String sessionId) {
         var correlationId = generateCorrelationId();
         MDC.put("correlationId", correlationId);
         
@@ -205,11 +221,91 @@ public class AuthenticationService {
             // Invalidate the access token
             jwtService.invalidateToken(accessToken);
             
+            // Invalidate session if provided
+            if (sessionId != null && !sessionId.trim().isEmpty()) {
+                sessionService.deleteSession(sessionId);
+                
+                // Extract user ID from token to remove user session mapping
+                try {
+                    var jwt = jwtService.validateToken(accessToken);
+                    var userId = jwt.getSubject();
+                    sessionService.removeUserSession(userId, sessionId);
+                } catch (Exception e) {
+                    // Log but don't fail logout if we can't extract user ID
+                    System.err.println("Could not extract user ID for session cleanup: " + e.getMessage());
+                }
+            }
+            
         } catch (Exception e) {
             // Log error but don't throw exception for logout
             System.err.println("Error during logout: " + e.getMessage());
         } finally {
             MDC.remove("correlationId");
+        }
+    }
+
+    /**
+     * Logout all sessions for a user (admin function or security measure).
+     */
+    @CacheEvict(value = {"jwt-blacklist", "users"}, allEntries = true)
+    public void logoutAllUserSessions(Long userId) {
+        var correlationId = generateCorrelationId();
+        MDC.put("correlationId", correlationId);
+        
+        try {
+            // Invalidate all sessions for the user
+            sessionService.invalidateAllUserSessions(userId.toString());
+            
+            // Log security event
+            var user = userRepository.findById(userId);
+            if (user.isPresent()) {
+                securityAuditService.logTokenEvent(
+                    user.get().getUsername(), 
+                    "all_sessions_invalidated", 
+                    "system", 
+                    "system"
+                );
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error during logout all sessions: " + e.getMessage());
+        } finally {
+            MDC.remove("correlationId");
+        }
+    }
+
+    /**
+     * Validate session and extend if needed.
+     */
+    @Cacheable(value = "sessions", key = "#sessionId")
+    public boolean validateAndExtendSession(String sessionId) {
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            return false;
+        }
+        
+        try {
+            if (sessionService.sessionExists(sessionId)) {
+                // Extend session by 30 minutes
+                sessionService.extendSession(sessionId, java.time.Duration.ofMinutes(30));
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error validating session: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get active sessions for a user.
+     */
+    @Cacheable(value = "sessions", key = "'user_sessions_' + #userId")
+    public java.util.Set<Object> getUserActiveSessions(Long userId) {
+        try {
+            return sessionService.getUserSessions(userId.toString());
+        } catch (Exception e) {
+            System.err.println("Error getting user sessions: " + e.getMessage());
+            return java.util.Set.of();
         }
     }
     
@@ -265,11 +361,39 @@ public class AuthenticationService {
     }
     
     /**
+     * Create session data for Redis storage with tenant isolation.
+     */
+    private SessionData createSessionData(User user, String ipAddress, String userAgent) {
+        return new SessionData(
+            user.getId(),
+            user.getUsername(),
+            user.getTenantId(),
+            ipAddress,
+            userAgent,
+            Instant.now(),
+            Instant.now()
+        );
+    }
+
+    /**
      * Generate correlation ID for request tracking.
      */
     private String generateCorrelationId() {
         return UUID.randomUUID().toString();
     }
+
+    /**
+     * Session data record for Redis storage.
+     */
+    public record SessionData(
+        Long userId,
+        String username,
+        String tenantId,
+        String ipAddress,
+        String userAgent,
+        Instant createdAt,
+        Instant lastAccessedAt
+    ) {}
     
     /**
      * Custom exception for authentication errors.

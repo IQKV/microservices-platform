@@ -1,6 +1,7 @@
 package org.gripday.authservice.infrastructure.repository;
 
 import org.gripday.authservice.infrastructure.entity.Authority;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,10 +20,12 @@ public interface AuthorityRepository extends JpaRepository<Authority, Long> {
 
     /**
      * Find authority by name.
+     * Cached since authorities rarely change.
      * 
      * @param name the authority name to search for
      * @return Optional containing the authority if found
      */
+    @Cacheable(value = "authorities", key = "#name")
     Optional<Authority> findByName(String name);
 
     /**
@@ -41,10 +44,12 @@ public interface AuthorityRepository extends JpaRepository<Authority, Long> {
 
     /**
      * Find authorities by names.
+     * Cached with composite key based on authority names.
      * 
      * @param names the set of authority names to search for
      * @return List of authorities matching the names
      */
+    @Cacheable(value = "authorities", key = "#names.toString()")
     @Query("""
         SELECT a FROM Authority a 
         WHERE a.name IN :names
@@ -62,9 +67,11 @@ public interface AuthorityRepository extends JpaRepository<Authority, Long> {
 
     /**
      * Find all authorities ordered by name.
+     * Cached since authorities are relatively static.
      * 
      * @return List of all authorities sorted by name
      */
+    @Cacheable(value = "authorities", key = "'all_authorities'")
     @Query("""
         SELECT a FROM Authority a 
         ORDER BY a.name ASC
