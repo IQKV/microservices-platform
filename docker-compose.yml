@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Auth Service
+  postgres-auth:
+    image: postgres:15-alpine
+    container_name: gripday-postgres-auth
+    environment:
+      POSTGRES_DB: gripday_auth
+      POSTGRES_USER: gripday_user
+      POSTGRES_PASSWORD: gripday_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis for Caching and Sessions
+  redis:
+    image: redis:7-alpine
+    container_name: gripday-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: redis-server --appendonly yes
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: gripday-auth-service/Dockerfile
+    container_name: gripday-auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
+      SPRING_DATASOURCE_USERNAME: gripday_user
+      SPRING_DATASOURCE_PASSWORD: gripday_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      GRIPDAY_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      GRIPDAY_AUTH_JWT_EXPIRATION: 900
+      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Gateway Service
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gripday-gateway-service/Dockerfile
+    container_name: gripday-gateway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8081
+      GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
+      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+    ports:
+      - "8080:8080"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Observability Stack - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gripday-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - gripday-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Observability Stack - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gripday-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - gripday-network
+    depends_on:
+      - prometheus
+
+  # Observability Stack - Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: gripday-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - gripday-network
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Observability Stack - Promtail
+  promtail:
+    image: grafana/promtail:latest
+    container_name: gripday-promtail
+    volumes:
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - gripday-network
+    depends_on:
+      - loki
+    command: -config.file=/etc/promtail/config.yml
+
+networks:
+  gripday-network:
+    driver: bridge
+    name: gripday-network
+
+volumes:
+  postgres_auth_data:
+    name: gripday_postgres_auth_data
+  redis_data:
+    name: gripday_redis_data
+  prometheus_data:
+    name: gripday_prometheus_data
+  grafana_data:
+    name: gripday_grafana_data
+  loki_data:
+    name: gripday_loki_data

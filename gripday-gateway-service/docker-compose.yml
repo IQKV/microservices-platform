@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Redis for Gateway Service
+  redis-gateway:
+    image: redis:7-alpine
+    container_name: gripday-gateway-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_gateway_data:/data
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: redis-server --appendonly yes
+
+  # Mock Auth Service for Gateway testing
+  mock-auth-service:
+    image: wiremock/wiremock:latest
+    container_name: gripday-mock-auth-service
+    ports:
+      - "8082:8080"
+    volumes:
+      - ../docker/wiremock/auth-service:/home/wiremock
+    networks:
+      - gateway-network
+    command: --global-response-templating --verbose
+
+  # Gateway Service
+  gateway-service:
+    build:
+      context: ..
+      dockerfile: gripday-gateway-service/Dockerfile
+    container_name: gripday-gateway-service-standalone
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATA_REDIS_HOST: redis-gateway
+      SPRING_DATA_REDIS_PORT: 6379
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://mock-auth-service:8080
+      GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
+      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis-gateway:
+        condition: service_healthy
+      mock-auth-service:
+        condition: service_started
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+networks:
+  gateway-network:
+    driver: bridge
+    name: gripday-gateway-network
+
+volumes:
+  redis_gateway_data:
+    name: gripday_gateway_redis_data

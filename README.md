@@ -17,37 +17,57 @@ The platform consists of two core services:
 
 ## Quick Start
 
-### Build the Platform
+### Using Docker (Recommended)
 
 ```bash
-# Using Maven wrapper (recommended)
+# 1. Copy environment file
+cp .env.example .env
+
+# 2. Update .env with your configuration
+
+# 3. Start the entire platform
+docker-compose up -d --build
+
+# 4. Check service health
+docker-compose ps
+
+# 5. View logs
+docker-compose logs -f
+
+# 6. Stop services
+docker-compose down
+```
+
+**Service URLs:**
+- Gateway Service: http://localhost:8080
+- Auth Service: http://localhost:8081
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (admin/admin)
+
+### Using Maven (Development)
+
+```bash
+# Build the platform
 ./mvnw clean compile
 
-# Or using system Maven
-mvn clean compile
-```
-
-### Run Tests
-
-```bash
-# Unit tests
+# Run tests
 ./mvnw test
 
-# Integration tests
-./mvnw verify
-
-# Code quality checks
-./mvnw clean compile -Pcode-quality
-```
-
-### Package Services
-
-```bash
-# Package all services
+# Package services
 ./mvnw package
 
 # Package specific service
 ./mvnw package -pl gripday-auth-service
+```
+
+### Environment-Specific Deployments
+
+```bash
+# Staging
+docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+
+# Production
+docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
 ## Project Structure
@@ -128,14 +148,28 @@ API gateway with intelligent routing:
 - Rate limiting and circuit breaker
 - CORS handling
 
+## Docker Configuration
+
+The platform includes comprehensive Docker support:
+
+- **Multi-stage Dockerfiles** for optimized container images
+- **Docker Compose** configurations for different environments
+- **Health checks** for all services
+- **Observability stack** (Prometheus, Grafana, Loki)
+- **Service-specific** Docker Compose files for individual development
+
+See [docker/README.md](docker/README.md) for detailed Docker usage instructions.
+
 ## Next Steps
 
-1. Implement auth service core functionality
-2. Set up database schema and JPA entities
-3. Configure Redis integration
-4. Implement gateway routing and security
-5. Add observability and monitoring
-6. Create Docker containerization
+1. ✅ Set up Maven multi-module project structure
+2. ✅ Implement auth service core functionality  
+3. ✅ Set up database schema and JPA entities
+4. ✅ Configure Redis integration
+5. ✅ Implement gateway routing and security
+6. ✅ Create Docker containerization
+7. 🔄 Add observability and monitoring
+8. 🔄 Implement architectural testing
 
 ## License
 

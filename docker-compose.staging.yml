@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Auth Service - Staging
+  postgres-auth:
+    environment:
+      POSTGRES_DB: gripday_auth_staging
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_auth_staging_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Redis - Staging Configuration
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Auth Service - Staging
+  auth-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth_staging
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      GRIPDAY_AUTH_JWT_SECRET: ${JWT_SECRET}
+      GRIPDAY_AUTH_JWT_EXPIRATION: 900
+      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Gateway Service - Staging
+  gateway-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8081
+      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
+      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # Observability - Staging optimized
+  prometheus:
+    volumes:
+      - ./docker/prometheus/prometheus-staging.yml:/etc/prometheus/prometheus.yml
+      - prometheus_staging_data:/prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_staging_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+volumes:
+  postgres_auth_staging_data:
+    name: gripday_postgres_auth_staging_data
+  prometheus_staging_data:
+    name: gripday_prometheus_staging_data
+  grafana_staging_data:
+    name: gripday_grafana_staging_data
