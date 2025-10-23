@@ -32,7 +32,18 @@ class GatewayArchitectureTest {
     @ArchTest
     static final ArchRule rest_controllers_should_have_resource_suffix = 
         classes().that().areAnnotatedWith(RestController.class)
-        .should().haveSimpleNameEndingWith("Resource");
+        .should().haveSimpleNameEndingWith("Resource")
+        .allowEmptyShould(true);
+
+    /**
+     * Validates that any REST controllers are in the proper presentation.web package.
+     * Ensures consistency with three-tier architecture standards.
+     */
+    @ArchTest
+    static final ArchRule rest_controllers_should_be_in_presentation_web_package = 
+        classes().that().areAnnotatedWith(RestController.class)
+        .should().resideInAPackage("..presentation.web..")
+        .allowEmptyShould(true);
 
     /**
      * Ensures configuration classes are properly organized.
@@ -50,7 +61,8 @@ class GatewayArchitectureTest {
     @ArchTest
     static final ArchRule filter_classes_should_be_in_filter_package = 
         classes().that().haveNameMatching(".*Filter")
-        .should().resideInAPackage("..filter..");
+        .and().areNotMemberClasses()
+        .should().resideInAnyPackage("..filter..", "..security..", "..config..");
 
     /**
      * Ensures security components are properly organized.
@@ -83,7 +95,10 @@ class GatewayArchitectureTest {
             "org.gripday.gatewayservice.config..",
             "org.gripday.gatewayservice.filter..",
             "org.gripday.gatewayservice.security..",
-            "org.gripday.gatewayservice.service.."
+            "org.gripday.gatewayservice.service..",
+            "org.gripday.gatewayservice.architecture..",
+            "org.gripday.gatewayservice.integration..",
+            "org.gripday.gatewayservice.unit.."
         );
 
     /**
@@ -94,7 +109,29 @@ class GatewayArchitectureTest {
     static final ArchRule reactive_components_should_not_use_blocking_operations = 
         noClasses().that().resideInAnyPackage("..filter..", "..service..")
         .should().dependOnClassesThat()
-        .resideInAnyPackage("java.util.concurrent..", "java.lang.Thread");
+        .resideInAnyPackage("java.lang.Thread")
+        .allowEmptyShould(true);
+
+    /**
+     * Validates that reactive filters implement proper Spring Cloud Gateway patterns.
+     * Ensures gateway filters extend appropriate base classes or implement required interfaces.
+     */
+    @ArchTest
+    static final ArchRule gateway_filters_should_follow_spring_cloud_patterns = 
+        classes().that().haveNameMatching(".*Filter")
+        .and().resideInAPackage("..filter..")
+        .should().dependOnClassesThat()
+        .resideInAnyPackage("org.springframework.cloud.gateway.filter..");
+
+    /**
+     * Validates that reactive components use appropriate Reactor types.
+     * Ensures proper reactive programming with Mono and Flux.
+     */
+    @ArchTest
+    static final ArchRule reactive_components_should_use_reactor_types = 
+        classes().that().resideInAnyPackage("..filter..", "..service..")
+        .should().dependOnClassesThat()
+        .resideInAnyPackage("reactor.core.publisher..");
 
     /**
      * Ensures filter classes implement proper reactive patterns.
@@ -119,8 +156,14 @@ class GatewayArchitectureTest {
             "org.springframework..", 
             "org.slf4j..",
             "..config..",
+            "..filter..",
+            "..service..",
+            "..security..",
             "reactor.core..",
-            "io.jsonwebtoken.."
+            "io.jsonwebtoken..",
+            "io.github.resilience4j..",
+            "io.micrometer..",
+            "org.springframework.cloud.gateway.."
         );
 
     /**

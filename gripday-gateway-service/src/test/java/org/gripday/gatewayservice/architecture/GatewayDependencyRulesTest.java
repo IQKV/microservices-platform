@@ -124,7 +124,34 @@ class GatewayDependencyRulesTest {
     static final ArchRule rest_controllers_should_follow_conventions = 
         classes().that().areAnnotatedWith(RestController.class)
         .should().haveSimpleNameEndingWith("Resource")
-        .andShould().resideInAPackage("..web..");
+        .andShould().resideInAPackage("..presentation.web..");
+
+    /**
+     * Validates three-tier architecture layer separation in gateway service.
+     * Ensures proper dependency direction between architectural layers.
+     */
+    @ArchTest
+    static final ArchRule three_tier_architecture_should_be_respected = 
+        noClasses().that().resideInAPackage("..presentation..")
+        .should().dependOnClassesThat().resideInAPackage("..infrastructure..");
+
+    /**
+     * Validates that presentation layer only depends on domain services.
+     * Ensures proper three-tier architecture dependency rules.
+     */
+    @ArchTest
+    static final ArchRule presentation_should_only_depend_on_domain = 
+        classes().that().resideInAPackage("..presentation..")
+        .should().onlyDependOnClassesThat()
+        .resideInAnyPackage(
+            "java..", 
+            "org.springframework..", 
+            "org.slf4j..",
+            "reactor.core..",
+            "..domain..",
+            "..presentation..",
+            "io.jsonwebtoken.."
+        );
 
     /**
      * Validates that components don't create inappropriate cross-cutting dependencies.

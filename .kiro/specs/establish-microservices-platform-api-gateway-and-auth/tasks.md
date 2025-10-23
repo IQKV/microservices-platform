@@ -295,7 +295,7 @@ The following features can be implemented after the core MVP is complete:
     - Implement request routing and load balancing
     - _Requirements: 6.5, 6.6, 6.7_
 
-  - [ ] 6.6 Implement architectural testing for gateway service
+  - [x] 6.6 Implement architectural testing for gateway service
     - Create ArchUnit tests for three-tier architecture in gateway service
     - Implement Spring Modulith tests for gateway module boundaries
     - Add architectural validation tests for reactive components
