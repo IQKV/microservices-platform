@@ -22,7 +22,7 @@
     - Set up Liquibase migration configuration using liquibase-core
     - _Requirements: 1.7, 1.8, 1.9, 3.1, 3.2, 24.1, 24.2, 24.3, 24.4, 24.5_
 
-  - [ ] 2.2 Create database schema and JPA entities with Java 21 features
+  - [x] 2.2 Create database schema and JPA entities with Java 21 features
     - Create Liquibase XML migrations in src/main/resources/db/changelog/:
       - V1__Create_users_table.xml: id, username, email, password_hash, first_name, last_name, enabled, email_verified, created_at, updated_at, tenant_id
       - V2__Create_authorities_table.xml: id, name, description, created_at

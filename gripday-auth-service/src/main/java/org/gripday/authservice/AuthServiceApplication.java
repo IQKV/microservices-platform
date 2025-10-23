@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * for the Gripday microservices platform using JWT tokens and Spring Security.
  */
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "org.gripday.authservice.infrastructure.repository")
 @EnableJpaAuditing
 @EnableTransactionManagement
 @ConfigurationPropertiesScan(basePackages = "org.gripday.authservice.config")

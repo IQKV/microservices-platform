@@ -6,13 +6,12 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <!-- Master changelog file for Gripday Auth Service database migrations -->
-    <!-- Individual migration files will be included here in subsequent tasks -->
     
-    <!-- Placeholder for future migrations - will be added in task 2.2 -->
-    <!-- <include file="db/changelog/V1__Create_users_table.xml"/> -->
-    <!-- <include file="db/changelog/V2__Create_authorities_table.xml"/> -->
-    <!-- <include file="db/changelog/V3__Create_user_authorities_table.xml"/> -->
-    <!-- <include file="db/changelog/V4__Create_user_audit_log_table.xml"/> -->
-    <!-- <include file="db/changelog/V5__Add_indexes.xml"/> -->
+    <!-- Database schema migrations -->
+    <include file="db/changelog/V1__Create_users_table.xml"/>
+    <include file="db/changelog/V2__Create_authorities_table.xml"/>
+    <include file="db/changelog/V3__Create_user_authorities_table.xml"/>
+    <include file="db/changelog/V4__Create_user_audit_log_table.xml"/>
+    <include file="db/changelog/V5__Add_indexes.xml"/>
 
 </databaseChangeLog>
