@@ -40,11 +40,18 @@ public class AuthenticationResource {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "User registered successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid input data"),
-        @ApiResponse(responseCode = "409", description = "Username or email already exists")
+        @ApiResponse(responseCode = "409", description = "Username or email already exists"),
+        @ApiResponse(responseCode = "429", description = "Too many requests")
     })
     @PostMapping("/signup")
-    public ResponseEntity<UserRegistrationResponse> signup(@Valid @RequestBody SignupRequest request) {
-        var result = userRegistrationService.registerUser(request);
+    public ResponseEntity<UserRegistrationResponse> signup(
+            @Valid @RequestBody SignupRequest request,
+            HttpServletRequest httpRequest) {
+        
+        var ipAddress = getClientIpAddress(httpRequest);
+        var userAgent = httpRequest.getHeader("User-Agent");
+        
+        var result = userRegistrationService.registerUser(request, ipAddress, userAgent);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     
@@ -55,11 +62,18 @@ public class AuthenticationResource {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Authentication successful"),
         @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-        @ApiResponse(responseCode = "423", description = "Account locked")
+        @ApiResponse(responseCode = "423", description = "Account locked"),
+        @ApiResponse(responseCode = "429", description = "Too many requests")
     })
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
-        var result = authenticationService.authenticateUser(request);
+    public ResponseEntity<TokenResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
+        
+        var ipAddress = getClientIpAddress(httpRequest);
+        var userAgent = httpRequest.getHeader("User-Agent");
+        
+        var result = authenticationService.authenticateUser(request, ipAddress, userAgent);
         return ResponseEntity.ok(result);
     }
     
@@ -107,6 +121,27 @@ public class AuthenticationResource {
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> health() {
         return ResponseEntity.ok(new HealthResponse("UP", "Authentication service is running"));
+    }
+    
+    /**
+     * Get client IP address, considering proxy headers.
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        // Check for X-Forwarded-For header (common in load balancers)
+        var xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // Take the first IP in the chain
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        // Check for X-Real-IP header (nginx)
+        var xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        
+        // Fall back to remote address
+        return request.getRemoteAddr();
     }
     
     /**

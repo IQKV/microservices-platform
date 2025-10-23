@@ -3,40 +3,52 @@ package org.gripday.authservice.presentation.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.gripday.authservice.presentation.validation.ValidPassword;
+import org.gripday.authservice.presentation.validation.ValidUsername;
 
 /**
  * Request DTO for user registration using Java 21 record.
- * Contains validation annotations for input validation.
+ * Contains comprehensive validation annotations for input validation and security.
  */
 public record SignupRequest(
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @ValidUsername
     String username,
     
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
     String email,
     
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+    @ValidPassword
     String password,
     
     @NotBlank(message = "First name is required")
-    @Size(max = 100, message = "First name must not exceed 100 characters")
+    @Size(min = 1, max = 100, message = "First name must be between 1 and 100 characters")
     String firstName,
     
     @NotBlank(message = "Last name is required")
-    @Size(max = 100, message = "Last name must not exceed 100 characters")
+    @Size(min = 1, max = 100, message = "Last name must be between 1 and 100 characters")
     String lastName,
     
     @Size(max = 100, message = "Tenant ID must not exceed 100 characters")
     String tenantId
 ) {
-    // Compact constructor for additional validation
+    // Compact constructor for additional validation and sanitization
     public SignupRequest {
         // Normalize tenant ID - use default if null or empty
         if (tenantId == null || tenantId.trim().isEmpty()) {
             tenantId = "default";
         }
+        
+        // Trim all string inputs to prevent whitespace issues
+        username = username != null ? username.trim() : null;
+        email = email != null ? email.trim().toLowerCase() : null;
+        firstName = firstName != null ? firstName.trim() : null;
+        lastName = lastName != null ? lastName.trim() : null;
+        tenantId = tenantId.trim();
     }
 }

@@ -3,6 +3,7 @@ package org.gripday.authservice.domain.service;
 import org.gripday.authservice.infrastructure.entity.User;
 import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.presentation.dto.*;
+import org.gripday.authservice.presentation.validation.InputSanitizer;
 import org.slf4j.MDC;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -14,8 +15,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Service for user authentication, token management, and logout operations.
- * Uses modern Java syntax and handles JWT token lifecycle.
+ * Enhanced service for user authentication with security measures.
+ * Includes account lockout, audit logging, and input sanitization.
  */
 @Service
 @Transactional
@@ -24,30 +25,64 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AccountLockoutService accountLockoutService;
+    private final SecurityAuditService securityAuditService;
+    private final InputSanitizer inputSanitizer;
     
     public AuthenticationService(UserRepository userRepository, 
                                PasswordEncoder passwordEncoder,
-                               JwtService jwtService) {
+                               JwtService jwtService,
+                               AccountLockoutService accountLockoutService,
+                               SecurityAuditService securityAuditService,
+                               InputSanitizer inputSanitizer) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.accountLockoutService = accountLockoutService;
+        this.securityAuditService = securityAuditService;
+        this.inputSanitizer = inputSanitizer;
     }
     
     /**
-     * Authenticate user with username/email and password.
+     * Authenticate user with enhanced security measures.
+     * Includes account lockout, audit logging, and input sanitization.
      */
-    public TokenResponse authenticateUser(LoginRequest request) {
+    public TokenResponse authenticateUser(LoginRequest request, String ipAddress, String userAgent) {
         var correlationId = generateCorrelationId();
         MDC.put("correlationId", correlationId);
         
         try {
+            // Sanitize input to prevent injection attacks
+            var sanitizedUsername = inputSanitizer.sanitizeInput(request.username());
+            
+            // Check for suspicious input patterns
+            if (!inputSanitizer.isInputSafe(request.username()) || 
+                inputSanitizer.containsSqlInjection(request.username())) {
+                securityAuditService.logSuspiciousActivity(
+                    sanitizedUsername, "Potential injection attempt in username", ipAddress, userAgent);
+                throw new AuthenticationException("Invalid input detected");
+            }
+            
+            // Check if account is locked
+            if (accountLockoutService.isAccountLocked(sanitizedUsername)) {
+                var timeUntilUnlock = accountLockoutService.getTimeUntilUnlock(sanitizedUsername);
+                securityAuditService.logFailedAuthentication(
+                    sanitizedUsername, "Account locked", ipAddress, userAgent);
+                throw new AccountLockedException("Account is locked. Try again in " + 
+                    timeUntilUnlock.toMinutes() + " minutes");
+            }
+            
             // Find user by username or email using var
             var userOptional = userRepository.findByUsernameOrEmail(
-                request.username(), 
-                request.username()
+                sanitizedUsername, 
+                sanitizedUsername
             );
             
             if (userOptional.isEmpty()) {
+                // Record failed attempt even for non-existent users to prevent enumeration
+                accountLockoutService.recordFailedAttempt(sanitizedUsername);
+                securityAuditService.logFailedAuthentication(
+                    sanitizedUsername, "User not found", ipAddress, userAgent);
                 throw new AuthenticationException("Invalid username or password");
             }
             
@@ -55,17 +90,38 @@ public class AuthenticationService {
             
             // Verify password
             if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+                // Record failed attempt
+                var shouldLock = accountLockoutService.recordFailedAttempt(user.getUsername());
+                
+                if (shouldLock) {
+                    var failedAttempts = accountLockoutService.getFailedAttempts(user.getUsername());
+                    securityAuditService.logAccountLockout(
+                        user.getUsername(), failedAttempts, ipAddress, userAgent);
+                } else {
+                    securityAuditService.logFailedAuthentication(
+                        user.getUsername(), "Invalid password", ipAddress, userAgent);
+                }
+                
                 throw new AuthenticationException("Invalid username or password");
             }
             
             // Check if user is enabled
             if (!user.getEnabled()) {
+                securityAuditService.logFailedAuthentication(
+                    user.getUsername(), "Account disabled", ipAddress, userAgent);
                 throw new AuthenticationException("Account is disabled");
             }
+            
+            // Clear failed attempts on successful authentication
+            accountLockoutService.clearFailedAttempts(user.getUsername());
             
             // Generate tokens
             var accessToken = jwtService.generateAccessToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
+            
+            // Log successful authentication
+            securityAuditService.logSuccessfulAuthentication(user.getUsername(), ipAddress, userAgent);
+            securityAuditService.logTokenEvent(user.getUsername(), "generated", ipAddress, userAgent);
             
             // Create user context
             var userContext = createUserContext(user);
@@ -75,9 +131,11 @@ public class AuthenticationService {
             
             return new TokenResponse(accessToken, refreshToken, expiresIn, userContext);
             
-        } catch (AuthenticationException e) {
+        } catch (AuthenticationException | AccountLockedException e) {
             throw e;
         } catch (Exception e) {
+            securityAuditService.logFailedAuthentication(
+                request.username(), "System error: " + e.getMessage(), ipAddress, userAgent);
             throw new AuthenticationException("Authentication failed", e);
         } finally {
             MDC.remove("correlationId");
@@ -223,6 +281,15 @@ public class AuthenticationService {
         
         public AuthenticationException(String message, Throwable cause) {
             super(message, cause);
+        }
+    }
+    
+    /**
+     * Custom exception for account lockout scenarios.
+     */
+    public static class AccountLockedException extends RuntimeException {
+        public AccountLockedException(String message) {
+            super(message);
         }
     }
 }

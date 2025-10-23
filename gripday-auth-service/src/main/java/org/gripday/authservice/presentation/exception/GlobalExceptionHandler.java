@@ -83,6 +83,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
     
+    @ExceptionHandler(AuthenticationService.AccountLockedException.class)
+    public ResponseEntity<ApiError> handleAccountLockedException(
+            AuthenticationService.AccountLockedException ex, HttpServletRequest request) {
+        
+        var errorResponse = createErrorResponse(
+            "AUTH_ACCOUNT_LOCKED",
+            "Account temporarily locked",
+            ex.getMessage(),
+            request,
+            List.of()
+        );
+        
+        return ResponseEntity.status(HttpStatus.LOCKED).body(errorResponse);
+    }
+    
     @ExceptionHandler(UserRegistrationService.UserRegistrationException.class)
     public ResponseEntity<ApiError> handleUserRegistrationException(
             UserRegistrationService.UserRegistrationException ex, HttpServletRequest request) {
@@ -163,6 +178,10 @@ public class GlobalExceptionHandler {
                 "AUTH_ACCOUNT_LOCKED";
             case String msg when msg.contains("invalid token") || msg.contains("expired token") -> 
                 "AUTH_INVALID_TOKEN";
+            case String msg when msg.contains("invalid input") -> 
+                "AUTH_INVALID_INPUT";
+            case String msg when msg.contains("suspicious") || msg.contains("injection") -> 
+                "AUTH_SUSPICIOUS_ACTIVITY";
             default -> "AUTH_AUTHENTICATION_FAILED";
         };
     }
@@ -178,6 +197,10 @@ public class GlobalExceptionHandler {
                 "VALIDATION_INVALID_EMAIL";
             case String msg when msg.contains("password") -> 
                 "VALIDATION_INVALID_PASSWORD";
+            case String msg when msg.contains("invalid input") -> 
+                "VALIDATION_INVALID_INPUT";
+            case String msg when msg.contains("suspicious") || msg.contains("injection") -> 
+                "VALIDATION_SUSPICIOUS_ACTIVITY";
             default -> "USER_REGISTRATION_FAILED";
         };
     }

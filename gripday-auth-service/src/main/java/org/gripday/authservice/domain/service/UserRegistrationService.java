@@ -6,13 +6,14 @@ import org.gripday.authservice.infrastructure.repository.AuthorityRepository;
 import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.presentation.dto.SignupRequest;
 import org.gripday.authservice.presentation.dto.UserRegistrationResponse;
+import org.gripday.authservice.presentation.validation.InputSanitizer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for user registration and account management.
- * Handles user creation with duplicate checking and tenant context.
+ * Enhanced service for user registration with security measures.
+ * Includes input sanitization, audit logging, and security validation.
  */
 @Service
 @Transactional
@@ -21,41 +22,80 @@ public class UserRegistrationService {
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityAuditService securityAuditService;
+    private final InputSanitizer inputSanitizer;
     
     public UserRegistrationService(UserRepository userRepository, 
                                  AuthorityRepository authorityRepository,
-                                 PasswordEncoder passwordEncoder) {
+                                 PasswordEncoder passwordEncoder,
+                                 SecurityAuditService securityAuditService,
+                                 InputSanitizer inputSanitizer) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;
+        this.securityAuditService = securityAuditService;
+        this.inputSanitizer = inputSanitizer;
     }
     
     /**
-     * Register a new user with duplicate checking and tenant context.
+     * Register a new user with enhanced security validation.
+     * Includes input sanitization, security checks, and audit logging.
      */
-    public UserRegistrationResponse registerUser(SignupRequest request) {
+    public UserRegistrationResponse registerUser(SignupRequest request, String ipAddress, String userAgent) {
+        // Sanitize all inputs to prevent XSS and injection attacks
+        var sanitizedUsername = inputSanitizer.sanitizeUsername(request.username());
+        var sanitizedEmail = inputSanitizer.sanitizeEmail(request.email());
+        var sanitizedFirstName = inputSanitizer.sanitizeName(request.firstName());
+        var sanitizedLastName = inputSanitizer.sanitizeName(request.lastName());
+        
+        // Validate input safety
+        if (!inputSanitizer.isInputSafe(request.username()) ||
+            !inputSanitizer.isInputSafe(request.email()) ||
+            !inputSanitizer.isInputSafe(request.firstName()) ||
+            !inputSanitizer.isInputSafe(request.lastName())) {
+            
+            securityAuditService.logSuspiciousActivity(
+                sanitizedUsername, "Potential XSS/injection attempt in registration", ipAddress, userAgent);
+            throw new UserRegistrationException("Invalid input detected");
+        }
+        
+        // Check for SQL injection attempts
+        if (inputSanitizer.containsSqlInjection(request.username()) ||
+            inputSanitizer.containsSqlInjection(request.email()) ||
+            inputSanitizer.containsSqlInjection(request.firstName()) ||
+            inputSanitizer.containsSqlInjection(request.lastName())) {
+            
+            securityAuditService.logSuspiciousActivity(
+                sanitizedUsername, "SQL injection attempt in registration", ipAddress, userAgent);
+            throw new UserRegistrationException("Invalid input detected");
+        }
+        
         // Check for duplicate username and email using var
-        var existingUsername = userRepository.existsByUsername(request.username());
-        var existingEmail = userRepository.existsByEmail(request.email());
+        var existingUsername = userRepository.existsByUsername(sanitizedUsername);
+        var existingEmail = userRepository.existsByEmail(sanitizedEmail);
         
         if (existingUsername) {
-            throw new UserRegistrationException("Username already exists: " + request.username());
+            securityAuditService.logFailedAuthentication(
+                sanitizedUsername, "Registration failed - username exists", ipAddress, userAgent);
+            throw new UserRegistrationException("Username already exists");
         }
         
         if (existingEmail) {
-            throw new UserRegistrationException("Email already exists: " + request.email());
+            securityAuditService.logFailedAuthentication(
+                sanitizedEmail, "Registration failed - email exists", ipAddress, userAgent);
+            throw new UserRegistrationException("Email already exists");
         }
         
-        // Hash password
+        // Hash password with enhanced security
         var hashedPassword = passwordEncoder.encode(request.password());
         
-        // Create new user entity
+        // Create new user entity with sanitized inputs
         var user = new User(
-            request.username(),
-            request.email(),
+            sanitizedUsername,
+            sanitizedEmail,
             hashedPassword,
-            request.firstName(),
-            request.lastName(),
+            sanitizedFirstName,
+            sanitizedLastName,
             request.tenantId()
         );
         
@@ -65,6 +105,10 @@ public class UserRegistrationService {
         
         // Save user
         var savedUser = userRepository.save(user);
+        
+        // Log successful registration
+        securityAuditService.logUserRegistration(
+            savedUser.getUsername(), savedUser.getEmail(), ipAddress, userAgent);
         
         // Send email verification (placeholder implementation)
         sendEmailVerification(savedUser);

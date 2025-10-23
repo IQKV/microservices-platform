@@ -121,7 +121,7 @@
     - Ensure all user operations are automatically filtered by tenant context
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 13.1, 13.2, 13.3, 26.3, 26.10_
 
-  - [ ] 2.6 Implement input validation and security measures
+  - [x] 2.6 Implement input validation and security measures
     - Add comprehensive input validation using Bean Validation (JSR-303):
       - SignupRequest: @NotBlank for required fields, @Email for email, @Size for password (min 8 chars)
       - LoginRequest: @NotBlank for username and password

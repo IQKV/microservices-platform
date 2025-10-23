@@ -3,7 +3,7 @@ package org.gripday.authservice.infrastructure.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -35,7 +35,7 @@ public class UserAuditLog extends TenantAwareEntity {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
 
 
@@ -115,8 +115,12 @@ public class UserAuditLog extends TenantAwareEntity {
         this.userAgent = userAgent;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
+    }
+    
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 
 
