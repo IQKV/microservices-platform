@@ -1,16 +1,86 @@
+# Test configuration for Auth Service
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: 
+    driver-class-name: org.h2.Driver
+  
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+  
   liquibase:
     enabled: false
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 15
+
+# Gripday test configuration
+gripday:
+  database:
+    host: localhost
+    port: 5432
+    name: testdb
+    username: sa
+    password: "test-password"
+    pool:
+      initial-size: 1
+      max-active: 5
+      max-idle: 3
+      min-idle: 1
+      max-wait: 30000
+
+  auth:
+    jwt:
+      secret: test-secret-key-for-testing-must-be-at-least-256-bits-long-to-work-properly
+      access-token-expiration-minutes: 15
+      refresh-token-expiration-days: 7
+      issuer: test-issuer
+      audience: test-audience
+    security:
+      password-encoder-strength: 4
+      max-login-attempts: 5
+      lockout-duration-minutes: 15
+      rate-limit:
+        requests-per-minute: 100
+        window-size-minutes: 1
+
+  cache:
+    redis:
+      host: localhost
+      port: 6379
+      password: "test-password"
+      database: 15
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 1
+        max-wait: 30000
+
+  observability:
+    tracing:
+      enabled: false
+      sample-rate: 0.0
+      service-name: test-auth-service
+    metrics:
+      enabled: false
+      path: /actuator/prometheus
+    logging:
+      level: DEBUG
+      format: human-readable
+      include-correlation-id: true
 
 logging:
   level:
-    org.gripday: DEBUG
+    org.gripday.authservice: DEBUG
+    org.springframework.security: WARN
+    org.hibernate.SQL: DEBUG
+    liquibase: WARN
+    root: WARN

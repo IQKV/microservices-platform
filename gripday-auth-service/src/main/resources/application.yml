@@ -6,12 +6,47 @@ spring:
     name: gripday-auth-service
   profiles:
     active: local
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # Liquibase Configuration
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,liquibase
   endpoint:
     health:
       show-details: when-authorized
+    liquibase:
+      enabled: true
+
+# Gripday-specific configuration properties
+gripday:
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+    logging:
+      include-correlation-id: true

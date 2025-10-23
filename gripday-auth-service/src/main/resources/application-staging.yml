@@ -1,0 +1,101 @@
+# Staging environment configuration
+spring:
+  datasource:
+    url: jdbc:postgresql://${GRIPDAY_DB_HOST}:${GRIPDAY_DB_PORT}/${GRIPDAY_DB_NAME}
+    username: ${GRIPDAY_DB_USERNAME}
+    password: ${GRIPDAY_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  # Redis Configuration for staging
+  data:
+    redis:
+      host: ${GRIPDAY_REDIS_HOST}
+      port: ${GRIPDAY_REDIS_PORT}
+      password: ${GRIPDAY_REDIS_PASSWORD}
+      database: 1
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# Gripday configuration for staging environment
+gripday:
+  database:
+    host: ${GRIPDAY_DB_HOST}
+    port: ${GRIPDAY_DB_PORT}
+    name: ${GRIPDAY_DB_NAME}
+    username: ${GRIPDAY_DB_USERNAME}
+    password: ${GRIPDAY_DB_PASSWORD}
+    pool:
+      initial-size: 5
+      max-active: 20
+      max-idle: 10
+      min-idle: 5
+      max-wait: 30000
+
+  auth:
+    jwt:
+      secret: ${GRIPDAY_JWT_SECRET}
+      access-token-expiration-minutes: 15
+      refresh-token-expiration-days: 7
+      issuer: ${GRIPDAY_JWT_ISSUER:gripday-auth-service}
+      audience: ${GRIPDAY_JWT_AUDIENCE:gripday-platform}
+    security:
+      password-encoder-strength: 12
+      max-login-attempts: 5
+      lockout-duration-minutes: 15
+      rate-limit:
+        requests-per-minute: 5
+        window-size-minutes: 1
+
+  cache:
+    redis:
+      host: ${GRIPDAY_REDIS_HOST}
+      port: ${GRIPDAY_REDIS_PORT}
+      password: ${GRIPDAY_REDIS_PASSWORD}
+      database: 1
+      pool:
+        max-active: 16
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1
+
+  observability:
+    tracing:
+      enabled: true
+      sample-rate: 0.1
+      service-name: ${spring.application.name}
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+    logging:
+      level: INFO
+      format: json
+      include-correlation-id: true
+
+# Logging configuration for staging
+logging:
+  level:
+    org.gripday.authservice: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    liquibase: INFO
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"

@@ -12,8 +12,8 @@
   - Create Maven wrapper (mvnw) for consistent build environment
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 25.1, 25.2, 25.3, 25.4, 25.5_
 
-- [ ] 2. Implement gripday-auth-service core functionality
-  - [ ] 2.1 Create Spring Boot application with three-tier architecture and YAML configuration
+- [-] 2. Implement gripday-auth-service core functionality
+  - [x] 2.1 Create Spring Boot application with three-tier architecture and YAML configuration
     - Set up main application class with Spring Boot annotations
     - Create three-tier package structure (presentation.web, domain.service, infrastructure.repository)
     - Configure PostgreSQL connection and JPA settings using YAML format with gripday. prefix

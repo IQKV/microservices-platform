@@ -43,8 +43,8 @@ ehthumbs.db
 Thumbs.db
 
 # Spring Boot
-application-local.yml
-application-dev.yml
+#application-local.yml
+#application-dev.yml
 !**/src/main/**/target/
 !**/src/test/**/target/
 
