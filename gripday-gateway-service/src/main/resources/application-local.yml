@@ -1,0 +1,133 @@
+# Local Development Configuration
+server:
+  port: 8080
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+# Gripday Gateway Local Configuration
+gripday:
+  gateway:
+    routing:
+      services:
+        auth-service:
+          uri: http://localhost:8081
+          path: /api/v1/auth/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: true
+        health-check-interval: PT30S
+    
+    security:
+      jwt:
+        secret-key: ${JWT_SECRET_KEY:local-development-secret-key-not-for-production}
+        access-token-expiry: PT15M
+        refresh-token-expiry: P7D
+        issuer: gripday-platform-local
+        audience: gripday-services-local
+      authentication:
+        enabled: true
+        auth-service-url: http://localhost:8081
+        token-validation-timeout: PT5S
+        enable-user-context-propagation: true
+      public-paths:
+        - /api/v1/auth/login
+        - /api/v1/auth/signup
+        - /api/v1/auth/refresh
+        - /actuator/health
+        - /actuator/info
+        - /swagger-ui/**
+        - /v3/api-docs/**
+    
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "gripday:gateway:local:rate-limit"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 120
+        default-burst-capacity: 200
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 20
+            burst-capacity: 40
+            enable-tenant-quotas: false
+          "/api/v1/auth/signup":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+      tenant-quotas:
+        enabled: false
+        default-tenant-requests-per-minute: 2000
+        tenant-specific-quotas: {}
+    
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 70
+      slow-call-rate-threshold: 70
+      slow-call-duration-threshold: PT5S
+      minimum-number-of-calls: 5
+      wait-duration-in-open-state: PT10S
+      sliding-window-size: 50
+      sliding-window-type: COUNT_BASED
+    
+    cors:
+      enabled: true
+      allowed-origins:
+        - http://localhost:3000
+        - http://localhost:5173
+        - http://localhost:8080
+        - http://localhost:8081
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - "*"
+      allow-credentials: true
+      max-age: 3600
+    
+    observability:
+      tracing:
+        enabled: true
+        sampling-rate: 1.0
+        service-name: gripday-gateway-service-local
+      metrics:
+        enabled: true
+        prefix: gripday_gateway_local
+        enabled-metrics:
+          - gateway.requests
+          - gateway.response.time
+          - gateway.circuit.breaker
+          - gateway.rate.limit
+      logging:
+        level: DEBUG
+        enable-request-logging: true
+        enable-response-logging: true
+        enable-correlation-id: true
+
+logging:
+  level:
+    org.gripday.gatewayservice: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    reactor.netty: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
