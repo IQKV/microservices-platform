@@ -21,7 +21,7 @@ org.gripday.{servicename}/
 ### Database Per Service Pattern
 - Each microservice owns its dedicated database instance
 - Services communicate via APIs only, never direct database access
-- Use PostgreSQL 15+ with Flyway migrations (XML format only)
+- Use PostgreSQL 15+ with Liquibase migrations (XML format only)
 - Independent scaling and technology choices per service
 
 ## Java 21 Modern Development
@@ -145,7 +145,7 @@ public record UserContext(
 - Spring Boot 3.5.6 for all microservices
 - Spring Cloud 2025.0.0 for distributed system capabilities
 - Java 21 as target runtime version
-- PostgreSQL 15+ with Flyway migrations
+- PostgreSQL 15+ with Liquibase migrations
 - Redis for caching and session management
 
 ## Observability and Monitoring

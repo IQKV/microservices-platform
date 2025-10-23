@@ -13,6 +13,824 @@ The microservices platform is designed as an extensible foundation that enables 
 
 The platform follows reactive programming principles, implements comprehensive security through JWT and OAuth2, and provides full observability through OpenTelemetry integration. Each microservice is organized using three-tier architecture with clear separation between presentation, domain, and data access layers, enforced through ArchUnit and Spring Modulith testing. The architecture supports development and deployment through Docker Compose with environment-specific configurations.
 
+## Maven Build System Architecture
+
+### Maven Enforcement Strategy
+
+**Design Rationale:** Apache Maven serves as the exclusive build automation and dependency management tool for the entire microservices platform. This enforces consistent build processes, standardized project structure, centralized dependency management, and seamless integration with containerization and CI/CD pipelines. The Maven-first approach ensures predictable builds, simplified onboarding, and maintainable project organization across all microservices.
+
+**Key Benefits:**
+- **Standardized Build Process**: Consistent compilation, testing, and packaging across all services
+- **Centralized Dependency Management**: Parent POM controls versions and prevents conflicts
+- **Project Structure Consistency**: Standard Maven directory layout enforced across services
+- **Plugin Standardization**: Consistent code quality, testing, and packaging plugins
+- **CI/CD Integration**: Seamless integration with Docker builds and deployment pipelines
+- **Developer Experience**: Familiar tooling and consistent commands across all services
+
+### Multi-Module Maven Project Structure
+
+**Parent POM Configuration (gripday-platform/pom.xml):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>org.gripday</groupId>
+    <artifactId>gripday-platform</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+    <name>Gripday Microservices Platform</name>
+    <description>Extensible microservices platform with centralized authentication and gateway</description>
+    
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
+        <!-- Spring Boot and Cloud versions -->
+        <spring-boot.version>3.5.6</spring-boot.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        
+        <!-- Database and persistence -->
+        <postgresql.version>42.7.3</postgresql.version>
+        <liquibase.version>4.29.2</liquibase.version>
+        <hibernate.version>6.6.1.Final</hibernate.version>
+        
+        <!-- Security and JWT -->
+        <spring-security.version>6.4.1</spring-security.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        
+        <!-- Observability -->
+        <micrometer.version>1.14.1</micrometer.version>
+        <opentelemetry.version>1.42.1</opentelemetry.version>
+        
+        <!-- Testing -->
+        <junit.version>5.11.3</junit.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
+        <archunit.version>1.3.0</archunit.version>
+        <spring-modulith.version>1.3.0</spring-modulith.version>
+        
+        <!-- Build plugins -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+        <spotbugs-maven-plugin.version>4.8.6.4</spotbugs-maven-plugin.version>
+        <checkstyle-maven-plugin.version>3.5.0</checkstyle-maven-plugin.version>
+    </properties>
+    
+    <modules>
+        <module>gripday-auth-service</module>
+        <module>gripday-gateway-service</module>
+    </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <!-- Database dependencies -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${liquibase.version}</version>
+            </dependency>
+            
+            <!-- JWT dependencies -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            
+            <!-- Testing dependencies -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.springframework.modulith</groupId>
+                <artifactId>spring-modulith-bom</artifactId>
+                <version>${spring-modulith.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Compiler plugin with Java 21 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>21</source>
+                        <target>21</target>
+                        <compilerArgs>
+                            <arg>--enable-preview</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                
+                <!-- Spring Boot Maven plugin -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- Surefire for unit tests -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*IntegrationTest.java</exclude>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                
+                <!-- Failsafe for integration tests -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*IntegrationTest.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- JaCoCo for code coverage -->
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- SpotBugs for static analysis -->
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${spotbugs-maven-plugin.version}</version>
+                    <configuration>
+                        <effort>Max</effort>
+                        <threshold>Low</threshold>
+                        <xmlOutput>true</xmlOutput>
+                    </configuration>
+                </plugin>
+                
+                <!-- Checkstyle for code style -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${checkstyle-maven-plugin.version}</version>
+                    <configuration>
+                        <configLocation>checkstyle.xml</configLocation>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <violationSeverity>warning</violationSeverity>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
+        <plugins>
+            <!-- Apply common plugins to all modules -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
+    <profiles>
+        <!-- Minimal Maven profiles - rely primarily on Spring profiles -->
+        <profile>
+            <id>code-quality</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
+```
+
+### Service-Specific Maven Configuration
+
+**Auth Service POM (gripday-auth-service/pom.xml):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.gripday</groupId>
+        <artifactId>gripday-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>gripday-auth-service</artifactId>
+    <packaging>jar</packaging>
+    
+    <name>Gripday Auth Service</name>
+    <description>Centralized authentication and user management service</description>
+    
+    <dependencies>
+        <!-- Spring Boot starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        
+        <!-- Database -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+        </dependency>
+        
+        <!-- OpenAPI documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        
+        <!-- Observability -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+**Gateway Service POM (gripday-gateway-service/pom.xml):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.gripday</groupId>
+        <artifactId>gripday-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>gripday-gateway-service</artifactId>
+    <packaging>jar</packaging>
+    
+    <name>Gripday Gateway Service</name>
+    <description>API Gateway with routing, authentication, and rate limiting</description>
+    
+    <dependencies>
+        <!-- Spring Cloud Gateway -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        
+        <!-- Circuit breaker -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        </dependency>
+        
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+        </dependency>
+        
+        <!-- OpenAPI documentation -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+        </dependency>
+        
+        <!-- Observability -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+        
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>redis</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+### Maven Directory Structure Enforcement
+
+**Standard Maven Directory Layout:**
+```
+gripday-platform/                    # Parent project root
+├── pom.xml                         # Parent POM
+├── README.md                       # Platform documentation
+├── docker-compose.yml             # Platform-wide services
+├── .gitignore                      # Git ignore rules
+├── checkstyle.xml                  # Code style configuration
+│
+├── gripday-auth-service/           # Auth service module
+│   ├── pom.xml                     # Service-specific POM
+│   ├── Dockerfile                  # Container configuration
+│   ├── docker-compose.yml         # Service-specific compose
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── org/gripday/authservice/
+│   │   │   │       ├── presentation/
+│   │   │   │       ├── domain/
+│   │   │   │       ├── infrastructure/
+│   │   │   │       └── AuthServiceApplication.java
+│   │   │   └── resources/
+│   │   │       ├── application.yml
+│   │   │       ├── application-local.yml
+│   │   │       ├── application-staging.yml
+│   │   │       ├── application-production.yml
+│   │   │       └── db/changelog/
+│   │   │           └── db.changelog-master.xml
+│   │   └── test/
+│   │       ├── java/
+│   │       │   └── org/gripday/authservice/
+│   │       │       ├── architecture/
+│   │       │       ├── integration/
+│   │       │       └── unit/
+│   │       └── resources/
+│   │           └── application-test.yml
+│   └── docs/                       # Service documentation
+│       ├── api/
+│       ├── architecture/
+│       └── deployment/
+│
+└── gripday-gateway-service/        # Gateway service module
+    ├── pom.xml                     # Service-specific POM
+    ├── Dockerfile                  # Container configuration
+    ├── docker-compose.yml         # Service-specific compose
+    ├── src/
+    │   ├── main/
+    │   │   ├── java/
+    │   │   │   └── org/gripday/gatewayservice/
+    │   │   │       ├── config/
+    │   │   │       ├── filter/
+    │   │   │       ├── security/
+    │   │   │       ├── service/
+    │   │   │       └── GatewayServiceApplication.java
+    │   │   └── resources/
+    │   │       ├── application.yml
+    │   │       ├── application-local.yml
+    │   │       ├── application-staging.yml
+    │   │       └── application-production.yml
+    │   └── test/
+    │       ├── java/
+    │       │   └── org/gripday/gatewayservice/
+    │       │       ├── architecture/
+    │       │       ├── integration/
+    │       │       └── unit/
+    │       └── resources/
+    │           └── application-test.yml
+    └── docs/                       # Service documentation
+        ├── api/
+        ├── architecture/
+        └── deployment/
+```
+
+### Maven Integration with Docker and CI/CD
+
+**Dockerfile Integration with Maven:**
+```dockerfile
+# Auth Service Dockerfile
+FROM eclipse-temurin:21-jre-alpine
+
+# Create application user
+RUN addgroup -g 1001 -S appuser && \
+    adduser -u 1001 -S appuser -G appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy Maven-built JAR
+COPY target/gripday-auth-service-*.jar app.jar
+
+# Change ownership
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 8081
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8081/actuator/health || exit 1
+
+# Run application
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+**Maven Build Commands:**
+```bash
+# Build entire platform
+mvn clean compile
+
+# Run tests for all modules
+mvn test
+
+# Run integration tests
+mvn verify
+
+# Package all services
+mvn package
+
+# Build Docker images (requires Docker)
+mvn package && docker-compose build
+
+# Run code quality checks
+mvn clean compile -Pcode-quality
+
+# Generate test coverage reports
+mvn clean test jacoco:report
+
+# Build specific service
+mvn clean package -pl gripday-auth-service
+
+# Skip tests for faster builds (development only)
+mvn package -DskipTests
+```
+
+### Maven Enforcement Rules
+
+**Enforcer Plugin Configuration (added to parent POM):**
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-enforcer-plugin</artifactId>
+    <version>3.5.0</version>
+    <executions>
+        <execution>
+            <id>enforce-maven</id>
+            <goals>
+                <goal>enforce</goal>
+            </goals>
+            <configuration>
+                <rules>
+                    <!-- Require Maven 3.9.0+ -->
+                    <requireMavenVersion>
+                        <version>[3.9.0,)</version>
+                    </requireMavenVersion>
+                    
+                    <!-- Require Java 21 -->
+                    <requireJavaVersion>
+                        <version>[21,)</version>
+                    </requireJavaVersion>
+                    
+                    <!-- No duplicate dependencies -->
+                    <banDuplicatePomDependencyVersions/>
+                    
+                    <!-- Require dependency convergence -->
+                    <dependencyConvergence/>
+                    
+                    <!-- Ban problematic dependencies -->
+                    <bannedDependencies>
+                        <excludes>
+                            <!-- Ban Gradle -->
+                            <exclude>org.gradle:*</exclude>
+                            <!-- Ban SBT -->
+                            <exclude>org.scala-sbt:*</exclude>
+                            <!-- Ban Ant -->
+                            <exclude>org.apache.ant:*</exclude>
+                            <!-- Ban old logging frameworks -->
+                            <exclude>commons-logging:commons-logging</exclude>
+                            <exclude>log4j:log4j</exclude>
+                        </excludes>
+                    </bannedDependencies>
+                    
+                    <!-- Require specific file presence -->
+                    <requireFilesExist>
+                        <files>
+                            <file>${project.basedir}/src/main/java</file>
+                            <file>${project.basedir}/src/test/java</file>
+                            <file>${project.basedir}/src/main/resources</file>
+                        </files>
+                    </requireFilesExist>
+                </rules>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+
+**Alternative Build Tool Prevention:**
+- Enforcer plugin explicitly bans Gradle, SBT, and Ant dependencies
+- CI/CD pipelines validate presence of `pom.xml` files
+- Docker builds rely exclusively on Maven-generated JAR files
+- Documentation and examples use only Maven commands
+- Development setup scripts assume Maven installation
+
 ## Architecture
 
 ### High-Level Architecture
@@ -5978,6 +6796,718 @@ volumes:
 - Structured logging with JSON format
 - Centralized log collection with Promtail
 - Log correlation with trace IDs
+
+## Multi-Tenant Architecture Design
+
+### Comprehensive Multi-Tenancy Implementation
+
+**Design Rationale:** Multi-tenant architecture enables the platform to serve multiple organizations securely with complete data isolation, tenant-specific configurations, and scalable resource management. This design supports SaaS deployment models while maintaining security, performance, and operational efficiency.
+
+The platform implements a comprehensive multi-tenant architecture that provides complete isolation between tenants while maintaining operational efficiency and security. Each tenant represents an organization with its own data, configurations, and user base.
+
+### Tenant Isolation Strategy
+
+**Database-Level Isolation:**
+```java
+// Tenant-aware data source configuration
+@Configuration
+public class MultiTenantDataSourceConfiguration {
+    
+    @Bean
+    @Primary
+    public DataSource dataSource() {
+        return new TenantRoutingDataSource();
+    }
+    
+    @Bean
+    public MultiTenantConnectionProvider multiTenantConnectionProvider() {
+        return new SchemaBasedMultiTenantConnectionProvider();
+    }
+    
+    @Bean
+    public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
+        return new RequestBasedTenantIdentifierResolver();
+    }
+}
+
+// Schema-based tenant isolation
+public class SchemaBasedMultiTenantConnectionProvider implements MultiTenantConnectionProvider {
+    
+    @Override
+    public Connection getConnection(String tenantIdentifier) throws SQLException {
+        var connection = dataSource.getConnection();
+        connection.createStatement().execute("SET search_path TO " + tenantIdentifier);
+        return connection;
+    }
+}
+
+// Request-based tenant resolution
+@Component
+public class RequestBasedTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
+    
+    @Override
+    public String resolveCurrentTenantIdentifier() {
+        var tenantId = TenantContext.getCurrentTenantId();
+        return tenantId != null ? tenantId : "public";
+    }
+}
+```
+
+**Tenant Context Management:**
+```java
+// Thread-local tenant context
+public class TenantContext {
+    private static final ThreadLocal<String> TENANT_ID = new ThreadLocal<>();
+    private static final ThreadLocal<TenantMetadata> TENANT_METADATA = new ThreadLocal<>();
+    
+    public static void setTenantId(String tenantId) {
+        TENANT_ID.set(tenantId);
+    }
+    
+    public static String getCurrentTenantId() {
+        return TENANT_ID.get();
+    }
+    
+    public static void setTenantMetadata(TenantMetadata metadata) {
+        TENANT_METADATA.set(metadata);
+    }
+    
+    public static TenantMetadata getCurrentTenantMetadata() {
+        return TENANT_METADATA.get();
+    }
+    
+    public static void clear() {
+        TENANT_ID.remove();
+        TENANT_METADATA.remove();
+    }
+}
+
+// Tenant metadata record
+public record TenantMetadata(
+    String tenantId,
+    String organizationName,
+    String subscriptionTier,
+    Map<String, Object> configuration,
+    Set<String> enabledFeatures,
+    ResourceQuotas quotas,
+    Instant createdAt,
+    Instant lastActiveAt
+) {}
+
+// Resource quotas record
+public record ResourceQuotas(
+    int maxUsers,
+    int maxApiCallsPerMinute,
+    long maxStorageBytes,
+    int maxConcurrentSessions,
+    Map<String, Integer> customLimits
+) {}
+```
+
+### JWT-Based Tenant Propagation
+
+**Enhanced JWT Claims with Tenant Information:**
+```java
+// Tenant-aware JWT claims
+public record TenantAwareUserContext(
+    Long userId,
+    String username,
+    String email,
+    Set<String> roles,
+    Set<String> permissions,
+    String department,
+    String tenantId,                    // Tenant identifier
+    String organizationName,            // Organization display name
+    String subscriptionTier,            // Subscription level
+    Set<String> enabledFeatures,        // Tenant-specific features
+    Map<String, Object> tenantConfig,   // Tenant configuration
+    Map<String, Object> customClaims
+) {
+    public boolean hasFeature(String feature) {
+        return enabledFeatures.contains(feature);
+    }
+    
+    public boolean isFeatureEnabled(String feature) {
+        return enabledFeatures.contains(feature);
+    }
+    
+    public <T> T getTenantConfig(String key, Class<T> type) {
+        return type.cast(tenantConfig.get(key));
+    }
+}
+
+// JWT token service with tenant support
+@Service
+public class TenantAwareJwtService {
+    
+    public String generateToken(TenantAwareUserContext userContext) {
+        var claims = Jwts.claims().setSubject(userContext.userId().toString());
+        claims.put("username", userContext.username());
+        claims.put("email", userContext.email());
+        claims.put("roles", userContext.roles());
+        claims.put("permissions", userContext.permissions());
+        claims.put("tenant_id", userContext.tenantId());
+        claims.put("organization_name", userContext.organizationName());
+        claims.put("subscription_tier", userContext.subscriptionTier());
+        claims.put("enabled_features", userContext.enabledFeatures());
+        claims.put("tenant_config", userContext.tenantConfig());
+        claims.put("custom_claims", userContext.customClaims());
+        
+        return Jwts.builder()
+            .setClaims(claims)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .compact();
+    }
+    
+    public TenantAwareUserContext extractUserContext(String token) {
+        var claims = Jwts.parser()
+            .setSigningKey(jwtSecret)
+            .parseClaimsJws(token)
+            .getBody();
+            
+        return new TenantAwareUserContext(
+            Long.parseLong(claims.getSubject()),
+            claims.get("username", String.class),
+            claims.get("email", String.class),
+            extractStringSet(claims.get("roles")),
+            extractStringSet(claims.get("permissions")),
+            claims.get("department", String.class),
+            claims.get("tenant_id", String.class),
+            claims.get("organization_name", String.class),
+            claims.get("subscription_tier", String.class),
+            extractStringSet(claims.get("enabled_features")),
+            extractMap(claims.get("tenant_config")),
+            extractMap(claims.get("custom_claims"))
+        );
+    }
+}
+```
+
+### Tenant-Aware Request Processing
+
+**Gateway Service Tenant Filtering:**
+```java
+// Tenant extraction filter
+@Component
+public class TenantExtractionFilter implements GlobalFilter, Ordered {
+    
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        return extractTenantFromRequest(exchange)
+            .flatMap(tenantId -> {
+                TenantContext.setTenantId(tenantId);
+                return loadTenantMetadata(tenantId);
+            })
+            .flatMap(metadata -> {
+                TenantContext.setTenantMetadata(metadata);
+                return chain.filter(exchange);
+            })
+            .doFinally(signalType -> TenantContext.clear());
+    }
+    
+    private Mono<String> extractTenantFromRequest(ServerWebExchange exchange) {
+        // Extract from JWT token
+        var authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            var token = authHeader.substring(7);
+            var userContext = jwtService.extractUserContext(token);
+            return Mono.just(userContext.tenantId());
+        }
+        
+        // Extract from custom header
+        var tenantHeader = exchange.getRequest().getHeaders().getFirst("X-Tenant-ID");
+        if (tenantHeader != null) {
+            return Mono.just(tenantHeader);
+        }
+        
+        // Extract from subdomain
+        var host = exchange.getRequest().getHeaders().getFirst("Host");
+        if (host != null && host.contains(".")) {
+            var subdomain = host.split("\\.")[0];
+            return tenantService.getTenantBySubdomain(subdomain)
+                .map(TenantMetadata::tenantId);
+        }
+        
+        return Mono.error(new TenantNotFoundException("No tenant identifier found"));
+    }
+    
+    @Override
+    public int getOrder() {
+        return -100; // Execute early in filter chain
+    }
+}
+
+// Tenant-aware rate limiting
+@Component
+public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
+    
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        var tenantId = TenantContext.getCurrentTenantId();
+        var metadata = TenantContext.getCurrentTenantMetadata();
+        
+        return checkRateLimit(tenantId, metadata.quotas())
+            .flatMap(allowed -> {
+                if (allowed) {
+                    return chain.filter(exchange);
+                } else {
+                    return handleRateLimitExceeded(exchange);
+                }
+            });
+    }
+    
+    private Mono<Boolean> checkRateLimit(String tenantId, ResourceQuotas quotas) {
+        var key = "rate_limit:" + tenantId;
+        var limit = quotas.maxApiCallsPerMinute();
+        
+        return redisTemplate.opsForValue()
+            .increment(key)
+            .flatMap(count -> {
+                if (count == 1) {
+                    return redisTemplate.expire(key, Duration.ofMinutes(1))
+                        .thenReturn(true);
+                }
+                return Mono.just(count <= limit);
+            });
+    }
+}
+```
+
+### Tenant-Aware Data Access
+
+**Repository Layer with Tenant Filtering:**
+```java
+// Base tenant-aware repository
+@NoRepositoryBean
+public interface TenantAwareRepository<T, ID> extends JpaRepository<T, ID> {
+    
+    @Query("SELECT e FROM #{#entityName} e WHERE e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
+    List<T> findAllForCurrentTenant();
+    
+    @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
+    Optional<T> findByIdForCurrentTenant(@Param("id") ID id);
+    
+    @Modifying
+    @Query("DELETE FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
+    void deleteByIdForCurrentTenant(@Param("id") ID id);
+}
+
+// Tenant-aware entity base class
+@MappedSuperclass
+public abstract class TenantAwareEntity {
+    
+    @Column(name = "tenant_id", nullable = false, updatable = false)
+    private String tenantId;
+    
+    @PrePersist
+    public void prePersist() {
+        if (tenantId == null) {
+            tenantId = TenantContext.getCurrentTenantId();
+        }
+    }
+    
+    // Getters and setters
+    public String getTenantId() { return tenantId; }
+    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+}
+
+// User entity with tenant support
+@Entity
+@Table(name = "users")
+public class User extends TenantAwareEntity {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(unique = true, nullable = false)
+    private String username;
+    
+    @Column(unique = true, nullable = false)
+    private String email;
+    
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+    
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+    
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_authorities",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "authority_id")
+    )
+    private Set<Authority> authorities = new HashSet<>();
+    
+    // Constructors, getters, setters
+}
+
+// User repository with tenant awareness
+public interface UserRepository extends TenantAwareRepository<User, Long> {
+    
+    @Query("SELECT u FROM User u WHERE (u.username = :identifier OR u.email = :identifier) AND u.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
+    Optional<User> findByUsernameOrEmailForCurrentTenant(@Param("identifier") String identifier);
+    
+    @Query("SELECT u FROM User u WHERE u.status = :status AND u.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
+    List<User> findByStatusForCurrentTenant(@Param("status") UserStatus status);
+}
+```
+
+### Tenant-Aware Caching
+
+**Redis Namespace Isolation:**
+```java
+// Tenant-aware cache configuration
+@Configuration
+@EnableCaching
+public class TenantAwareCacheConfiguration {
+    
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        var configuration = RedisCacheConfiguration.defaultCacheConfig()
+            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+            .computePrefixWith(cacheName -> TenantContext.getCurrentTenantId() + ":" + cacheName + ":");
+            
+        return RedisCacheManager.builder(connectionFactory)
+            .cacheDefaults(configuration)
+            .build();
+    }
+    
+    @Bean
+    public RedisTemplate<String, Object> tenantAwareRedisTemplate(RedisConnectionFactory connectionFactory) {
+        var template = new RedisTemplate<String, Object>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new TenantAwareKeySerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+}
+
+// Tenant-aware key serializer
+public class TenantAwareKeySerializer implements RedisSerializer<String> {
+    
+    private final StringRedisSerializer stringSerializer = new StringRedisSerializer();
+    
+    @Override
+    public byte[] serialize(String key) throws SerializationException {
+        var tenantId = TenantContext.getCurrentTenantId();
+        var tenantAwareKey = tenantId != null ? tenantId + ":" + key : key;
+        return stringSerializer.serialize(tenantAwareKey);
+    }
+    
+    @Override
+    public String deserialize(byte[] bytes) throws SerializationException {
+        var key = stringSerializer.deserialize(bytes);
+        if (key != null && key.contains(":")) {
+            return key.substring(key.indexOf(":") + 1);
+        }
+        return key;
+    }
+}
+
+// Tenant-aware service with caching
+@Service
+public class TenantAwareUserService {
+    
+    @Cacheable(value = "users", key = "#id")
+    public UserDto getUserById(Long id) {
+        var user = userRepository.findByIdForCurrentTenant(id)
+            .orElseThrow(() -> new UserNotFoundException("User not found: " + id));
+        return userMapper.toDto(user);
+    }
+    
+    @CacheEvict(value = "users", key = "#id")
+    public void evictUserCache(Long id) {
+        // Cache eviction handled by annotation
+    }
+    
+    @Cacheable(value = "tenant_config", key = "'config'")
+    public TenantConfiguration getTenantConfiguration() {
+        var tenantId = TenantContext.getCurrentTenantId();
+        return tenantConfigurationRepository.findByTenantId(tenantId)
+            .orElse(TenantConfiguration.getDefault());
+    }
+}
+```
+
+### Tenant Management APIs
+
+**Tenant Administration Service:**
+```java
+// Tenant management service
+@Service
+@Transactional
+public class TenantManagementService {
+    
+    public TenantDto createTenant(CreateTenantRequest request) {
+        // Create tenant schema
+        createTenantSchema(request.getTenantId());
+        
+        // Create tenant metadata
+        var tenant = new Tenant();
+        tenant.setTenantId(request.getTenantId());
+        tenant.setOrganizationName(request.getOrganizationName());
+        tenant.setSubscriptionTier(request.getSubscriptionTier());
+        tenant.setConfiguration(request.getConfiguration());
+        tenant.setEnabledFeatures(request.getEnabledFeatures());
+        tenant.setQuotas(request.getQuotas());
+        tenant.setStatus(TenantStatus.ACTIVE);
+        
+        var savedTenant = tenantRepository.save(tenant);
+        
+        // Create default admin user
+        createDefaultAdminUser(savedTenant);
+        
+        // Initialize tenant-specific data
+        initializeTenantData(savedTenant);
+        
+        return tenantMapper.toDto(savedTenant);
+    }
+    
+    public TenantDto updateTenant(String tenantId, UpdateTenantRequest request) {
+        var tenant = tenantRepository.findByTenantId(tenantId)
+            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+            
+        tenant.setOrganizationName(request.getOrganizationName());
+        tenant.setSubscriptionTier(request.getSubscriptionTier());
+        tenant.setConfiguration(request.getConfiguration());
+        tenant.setEnabledFeatures(request.getEnabledFeatures());
+        tenant.setQuotas(request.getQuotas());
+        
+        var savedTenant = tenantRepository.save(tenant);
+        
+        // Invalidate tenant cache
+        evictTenantCache(tenantId);
+        
+        return tenantMapper.toDto(savedTenant);
+    }
+    
+    public void deleteTenant(String tenantId) {
+        var tenant = tenantRepository.findByTenantId(tenantId)
+            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+            
+        // Soft delete tenant
+        tenant.setStatus(TenantStatus.DELETED);
+        tenant.setDeletedAt(Instant.now());
+        tenantRepository.save(tenant);
+        
+        // Schedule data cleanup
+        scheduleDataCleanup(tenantId);
+        
+        // Invalidate all tenant caches
+        evictAllTenantCaches(tenantId);
+    }
+    
+    private void createTenantSchema(String tenantId) {
+        var sql = "CREATE SCHEMA IF NOT EXISTS " + tenantId;
+        jdbcTemplate.execute(sql);
+        
+        // Run migrations for new schema
+        var flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .schemas(tenantId)
+            .load();
+        flyway.migrate();
+    }
+}
+
+// Tenant management REST controller
+@RestController
+@RequestMapping("/api/v1/admin/tenants")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+@Tag(name = "Tenant Management", description = "Tenant administration operations")
+public class TenantManagementResource {
+    
+    private final TenantManagementService tenantManagementService;
+    
+    @Operation(summary = "Create tenant", description = "Create new tenant organization")
+    @PostMapping
+    public ResponseEntity<TenantDto> createTenant(@Valid @RequestBody CreateTenantRequest request) {
+        var tenant = tenantManagementService.createTenant(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tenant);
+    }
+    
+    @Operation(summary = "List tenants", description = "Get paginated list of tenants")
+    @GetMapping
+    public ResponseEntity<Page<TenantDto>> getTenants(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) String search
+    ) {
+        var tenants = tenantManagementService.getTenants(page, size, search);
+        return ResponseEntity.ok(tenants);
+    }
+    
+    @Operation(summary = "Get tenant", description = "Get tenant by ID")
+    @GetMapping("/{tenantId}")
+    public ResponseEntity<TenantDto> getTenant(@PathVariable String tenantId) {
+        var tenant = tenantManagementService.getTenant(tenantId);
+        return ResponseEntity.ok(tenant);
+    }
+    
+    @Operation(summary = "Update tenant", description = "Update tenant configuration")
+    @PutMapping("/{tenantId}")
+    public ResponseEntity<TenantDto> updateTenant(
+        @PathVariable String tenantId,
+        @Valid @RequestBody UpdateTenantRequest request
+    ) {
+        var tenant = tenantManagementService.updateTenant(tenantId, request);
+        return ResponseEntity.ok(tenant);
+    }
+    
+    @Operation(summary = "Delete tenant", description = "Soft delete tenant")
+    @DeleteMapping("/{tenantId}")
+    public ResponseEntity<Void> deleteTenant(@PathVariable String tenantId) {
+        tenantManagementService.deleteTenant(tenantId);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+### Tenant-Aware Logging and Monitoring
+
+**Structured Logging with Tenant Context:**
+```java
+// Tenant-aware logging configuration
+@Configuration
+public class TenantLoggingConfiguration {
+    
+    @Bean
+    public Logger tenantAwareLogger() {
+        var loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        var logger = loggerContext.getLogger("TENANT_AWARE");
+        
+        // Add tenant context to MDC
+        logger.addAppender(new TenantContextAppender());
+        
+        return logger;
+    }
+}
+
+// Custom appender for tenant context
+public class TenantContextAppender extends AppenderBase<ILoggingEvent> {
+    
+    @Override
+    protected void append(ILoggingEvent event) {
+        var tenantId = TenantContext.getCurrentTenantId();
+        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+        
+        if (tenantId != null) {
+            MDC.put("tenant_id", tenantId);
+        }
+        
+        if (tenantMetadata != null) {
+            MDC.put("organization_name", tenantMetadata.organizationName());
+            MDC.put("subscription_tier", tenantMetadata.subscriptionTier());
+        }
+    }
+}
+
+// Tenant-aware audit logging
+@Service
+public class TenantAuditService {
+    
+    private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
+    
+    public void logUserAction(String action, String resource, Object details) {
+        var tenantId = TenantContext.getCurrentTenantId();
+        var userContext = SecurityContextHolder.getContext().getAuthentication();
+        
+        var auditEvent = AuditEvent.builder()
+            .tenantId(tenantId)
+            .userId(userContext.getName())
+            .action(action)
+            .resource(resource)
+            .details(details)
+            .timestamp(Instant.now())
+            .correlationId(MDC.get("correlationId"))
+            .build();
+            
+        auditLogger.info("Audit event: {}", auditEvent);
+    }
+}
+```
+
+### Feature Flag Management
+
+**Tenant-Specific Feature Flags:**
+```java
+// Feature flag service
+@Service
+public class TenantFeatureFlagService {
+    
+    public boolean isFeatureEnabled(String feature) {
+        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+        if (tenantMetadata == null) {
+            return false;
+        }
+        
+        return tenantMetadata.enabledFeatures().contains(feature);
+    }
+    
+    public <T> T getFeatureConfig(String feature, Class<T> type) {
+        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+        if (tenantMetadata == null) {
+            return null;
+        }
+        
+        var config = tenantMetadata.configuration().get(feature);
+        return type.cast(config);
+    }
+    
+    public void enableFeature(String tenantId, String feature) {
+        var tenant = tenantRepository.findByTenantId(tenantId)
+            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+            
+        var features = new HashSet<>(tenant.getEnabledFeatures());
+        features.add(feature);
+        tenant.setEnabledFeatures(features);
+        
+        tenantRepository.save(tenant);
+        evictTenantCache(tenantId);
+    }
+}
+
+// Feature flag annotation
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequireFeature {
+    String value();
+    String message() default "Feature not enabled for tenant";
+}
+
+// Feature flag aspect
+@Aspect
+@Component
+public class FeatureFlagAspect {
+    
+    @Around("@annotation(requireFeature)")
+    public Object checkFeatureFlag(ProceedingJoinPoint joinPoint, RequireFeature requireFeature) throws Throwable {
+        var feature = requireFeature.value();
+        
+        if (!featureFlagService.isFeatureEnabled(feature)) {
+            throw new FeatureNotEnabledException(requireFeature.message());
+        }
+        
+        return joinPoint.proceed();
+    }
+}
+```
+
+This multi-tenant architecture provides:
+
+1. **Complete Data Isolation**: Schema-based database isolation per tenant
+2. **Tenant Context Propagation**: JWT-based tenant information across all services
+3. **Resource Management**: Tenant-specific quotas and rate limiting
+4. **Feature Management**: Tenant-specific feature flags and configurations
+5. **Operational Visibility**: Tenant-aware logging, monitoring, and auditing
+6. **Administrative Control**: Comprehensive tenant management APIs
+7. **Caching Isolation**: Redis namespace separation per tenant
+8. **Security**: Automatic tenant-based data filtering and access control
 
 ## Security Considerations
 
