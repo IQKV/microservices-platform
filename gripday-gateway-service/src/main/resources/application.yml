@@ -110,24 +110,36 @@ gripday:
       allow-credentials: true
       max-age: 3600
     
-    observability:
-      tracing:
-        enabled: true
-        sampling-rate: 1.0
-        service-name: gripday-gateway-service
-      metrics:
-        enabled: true
-        prefix: gripday_gateway
-        enabled-metrics:
-          - gateway.requests
-          - gateway.response.time
-          - gateway.circuit.breaker
-          - gateway.rate.limit
-      logging:
-        level: INFO
-        enable-request-logging: true
-        enable-response-logging: false
-        enable-correlation-id: true
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: gripday_gateway
+      include-host-tag: true
+      include-application-tag: true
+      enabled-metrics:
+        - gateway.requests
+        - gateway.response.time
+        - gateway.circuit.breaker
+        - gateway.rate.limit
+    logging:
+      level: INFO
+      enable-request-logging: true
+      enable-response-logging: false
+      enable-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
 
 management:
   endpoints:
@@ -141,3 +153,11 @@ management:
     export:
       prometheus:
         enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0

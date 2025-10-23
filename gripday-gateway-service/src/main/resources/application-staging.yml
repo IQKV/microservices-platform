@@ -1,130 +1,17 @@
-# Staging Environment Configuration
-server:
-  port: 8080
-
+# Staging environment configuration
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:redis-staging}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
-      database: ${REDIS_DATABASE:1}
-      password: ${REDIS_PASSWORD:}
-      timeout: 3000ms
+      password: ${REDIS_PASSWORD}
+      database: 1
+      timeout: 2000ms
       lettuce:
         pool:
-          max-active: 16
-          max-idle: 8
+          max-active: 20
+          max-idle: 10
           min-idle: 2
-
-# Gripday Gateway Staging Configuration
-gripday:
-  gateway:
-    routing:
-      services:
-        auth-service:
-          uri: ${AUTH_SERVICE_URL:http://gripday-auth-service:8081}
-          path: /api/v1/auth/**
-          enabled: true
-          connect-timeout: 3000
-          response-timeout: 15000
-      enable-service-discovery: true
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: true
-        health-check-interval: PT15S
-    
-    security:
-      jwt:
-        secret-key: ${JWT_SECRET_KEY}
-        access-token-expiry: PT15M
-        refresh-token-expiry: P7D
-        issuer: gripday-platform-staging
-        audience: gripday-services-staging
-      authentication:
-        enabled: true
-        auth-service-url: ${AUTH_SERVICE_URL:http://gripday-auth-service:8081}
-        token-validation-timeout: PT3S
-        enable-user-context-propagation: true
-      public-paths:
-        - /api/v1/auth/login
-        - /api/v1/auth/signup
-        - /api/v1/auth/refresh
-        - /actuator/health
-        - /actuator/info
-    
-    rate-limiting:
-      enabled: true
-      redis:
-        key-prefix: "gripday:gateway:staging:rate-limit"
-        key-expiry: PT1M
-      policies:
-        default-requests-per-minute: 100
-        default-burst-capacity: 150
-        endpoints:
-          "/api/v1/auth/login":
-            requests-per-minute: 15
-            burst-capacity: 30
-            enable-tenant-quotas: true
-          "/api/v1/auth/signup":
-            requests-per-minute: 8
-            burst-capacity: 15
-            enable-tenant-quotas: true
-      tenant-quotas:
-        enabled: true
-        default-tenant-requests-per-minute: 1500
-        tenant-specific-quotas: {}
-    
-    circuit-breaker:
-      enabled: true
-      failure-rate-threshold: 50
-      slow-call-rate-threshold: 50
-      slow-call-duration-threshold: PT2S
-      minimum-number-of-calls: 10
-      wait-duration-in-open-state: PT30S
-      sliding-window-size: 100
-      sliding-window-type: COUNT_BASED
-    
-    cors:
-      enabled: true
-      allowed-origins:
-        - ${FRONTEND_URL:https://staging.gripday.com}
-        - ${ADMIN_FRONTEND_URL:https://admin-staging.gripday.com}
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - PATCH
-        - DELETE
-        - OPTIONS
-      allowed-headers:
-        - Authorization
-        - Content-Type
-        - X-Tenant-ID
-        - X-Correlation-ID
-        - Accept
-        - Origin
-      allow-credentials: true
-      max-age: 3600
-    
-    observability:
-      tracing:
-        enabled: true
-        sampling-rate: 0.5
-        service-name: gripday-gateway-service-staging
-      metrics:
-        enabled: true
-        prefix: gripday_gateway_staging
-        enabled-metrics:
-          - gateway.requests
-          - gateway.response.time
-          - gateway.circuit.breaker
-          - gateway.rate.limit
-          - gateway.tenant.usage
-      logging:
-        level: INFO
-        enable-request-logging: true
-        enable-response-logging: false
-        enable-correlation-id: true
 
 logging:
   level:
@@ -132,6 +19,33 @@ logging:
     org.springframework.cloud.gateway: INFO
     org.springframework.security: INFO
     reactor.netty: WARN
-    root: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId:-}] [%X{tenantId:-}] %logger{36} - %msg%n"
+    io.github.resilience4j: INFO
+
+management:
+  tracing:
+    sampling:
+      probability: 0.1
+
+gripday:
+  gateway:
+    routing:
+      services:
+        auth-service:
+          uri: http://auth-service:8081
+    security:
+      jwt:
+        secret-key: ${JWT_SECRET_KEY}
+      authentication:
+        auth-service-url: http://auth-service:8081
+    observability:
+      tracing:
+        enabled: true
+        sampling-rate: 0.1
+        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4317}
+      metrics:
+        enabled: true
+      logging:
+        level: INFO
+        enable-request-logging: true
+        enable-response-logging: false
+        enable-correlation-id: true

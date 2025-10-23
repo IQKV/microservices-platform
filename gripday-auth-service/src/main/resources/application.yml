@@ -28,17 +28,6 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,liquibase,openapi
-  endpoint:
-    health:
-      show-details: when-authorized
-    liquibase:
-      enabled: true
-
 # SpringDoc OpenAPI Configuration
 springdoc:
   api-docs:
@@ -71,6 +60,32 @@ springdoc:
   show-actuator: true
   use-management-port: false
 
+# OpenTelemetry Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase,openapi
+  endpoint:
+    health:
+      show-details: when-authorized
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0
+
 # Gripday-specific configuration properties
 gripday:
   auth:
@@ -82,8 +97,21 @@ gripday:
     tracing:
       enabled: true
       service-name: ${spring.application.name}
+      sampling-rate: 1.0
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
     metrics:
       enabled: true
       path: /actuator/prometheus
+      prefix: gripday_auth
+      include-host-tag: true
+      include-application-tag: true
     logging:
       include-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID

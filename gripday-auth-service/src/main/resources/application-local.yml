@@ -1,23 +1,16 @@
-# Local development environment configuration
+# Local development configuration
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/gripday_auth_local
-    username: ${GRIPDAY_DB_USERNAME:gripday_user}
-    password: ${GRIPDAY_DB_PASSWORD:gripday_password}
+    username: ${DB_USERNAME:gripday_user}
+    password: ${DB_PASSWORD:gripday_pass}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-
-  # Redis Configuration for local development
+  
   data:
     redis:
-      host: ${GRIPDAY_REDIS_HOST:localhost}
-      port: ${GRIPDAY_REDIS_PORT:6379}
-      password: ${GRIPDAY_REDIS_PASSWORD:}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       database: 0
       timeout: 2000ms
       lettuce:
@@ -25,7 +18,6 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
-          max-wait: -1ms
 
   jpa:
     show-sql: true
@@ -33,68 +25,31 @@ spring:
       hibernate:
         format_sql: true
 
-# Gripday configuration for local environment
-gripday:
-  database:
-    host: ${GRIPDAY_DB_HOST:localhost}
-    port: ${GRIPDAY_DB_PORT:5432}
-    name: ${GRIPDAY_DB_NAME:gripday_auth_local}
-    username: ${GRIPDAY_DB_USERNAME:gripday_user}
-    password: ${GRIPDAY_DB_PASSWORD:gripday_password}
-    pool:
-      initial-size: 2
-      max-active: 10
-      max-idle: 8
-      min-idle: 2
-      max-wait: 30000
-
-  auth:
-    jwt:
-      secret: ${GRIPDAY_JWT_SECRET:dev-secret-key-change-in-production-must-be-at-least-256-bits-long}
-      access-token-expiration-minutes: 15
-      refresh-token-expiration-days: 7
-      issuer: ${GRIPDAY_JWT_ISSUER:gripday-auth-service}
-      audience: ${GRIPDAY_JWT_AUDIENCE:gripday-platform}
-    security:
-      password-encoder-strength: 10
-      max-login-attempts: 5
-      lockout-duration-minutes: 15
-      rate-limit:
-        requests-per-minute: 10
-        window-size-minutes: 1
-
-  cache:
-    redis:
-      host: ${GRIPDAY_REDIS_HOST:localhost}
-      port: ${GRIPDAY_REDIS_PORT:6379}
-      password: ${GRIPDAY_REDIS_PASSWORD:}
-      database: 0
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1
-
-  observability:
-    tracing:
-      enabled: true
-      sample-rate: 1.0
-      service-name: ${spring.application.name}
-    metrics:
-      enabled: true
-      path: /actuator/prometheus
-    logging:
-      level: DEBUG
-      format: human-readable
-      include-correlation-id: true
-
-# Logging configuration for development
 logging:
   level:
     org.gripday.authservice: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    liquibase: INFO
-  pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+gripday:
+  auth:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY:local-development-secret-key-change-in-production}
+  observability:
+    tracing:
+      enabled: true
+      sampling-rate: 1.0
+      endpoint: http://localhost:4317
+    metrics:
+      enabled: true
+    logging:
+      include-correlation-id: true
+      include-trace-id: true
+      include-span-id: true

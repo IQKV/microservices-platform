@@ -1,144 +1,51 @@
-# Production Environment Configuration
-server:
-  port: 8080
-
+# Production environment configuration
 spring:
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
-      database: ${REDIS_DATABASE:0}
       password: ${REDIS_PASSWORD}
-      timeout: 5000ms
-      ssl:
-        enabled: ${REDIS_SSL_ENABLED:false}
+      database: 1
+      timeout: 2000ms
       lettuce:
         pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
-        cluster:
-          refresh:
-            adaptive: true
-            period: PT30S
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
 
-# Gripday Gateway Production Configuration
+logging:
+  level:
+    org.gripday.gatewayservice: WARN
+    org.springframework.cloud.gateway: WARN
+    org.springframework.security: WARN
+    reactor.netty: WARN
+    io.github.resilience4j: WARN
+
+management:
+  tracing:
+    sampling:
+      probability: 0.01
+
 gripday:
   gateway:
     routing:
       services:
         auth-service:
           uri: ${AUTH_SERVICE_URL}
-          path: /api/v1/auth/**
-          enabled: true
-          connect-timeout: 2000
-          response-timeout: 10000
-      enable-service-discovery: true
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: true
-        health-check-interval: PT10S
-    
     security:
       jwt:
         secret-key: ${JWT_SECRET_KEY}
-        access-token-expiry: PT15M
-        refresh-token-expiry: P7D
-        issuer: gripday-platform
-        audience: gripday-services
       authentication:
-        enabled: true
         auth-service-url: ${AUTH_SERVICE_URL}
-        token-validation-timeout: PT2S
-        enable-user-context-propagation: true
-      public-paths:
-        - /api/v1/auth/login
-        - /api/v1/auth/signup
-        - /api/v1/auth/refresh
-        - /actuator/health
-        - /actuator/info
-    
-    rate-limiting:
-      enabled: true
-      redis:
-        key-prefix: "gripday:gateway:prod:rate-limit"
-        key-expiry: PT1M
-      policies:
-        default-requests-per-minute: 60
-        default-burst-capacity: 100
-        endpoints:
-          "/api/v1/auth/login":
-            requests-per-minute: 10
-            burst-capacity: 20
-            enable-tenant-quotas: true
-          "/api/v1/auth/signup":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-      tenant-quotas:
-        enabled: true
-        default-tenant-requests-per-minute: 1000
-        tenant-specific-quotas: {}
-    
-    circuit-breaker:
-      enabled: true
-      failure-rate-threshold: 50
-      slow-call-rate-threshold: 50
-      slow-call-duration-threshold: PT2S
-      minimum-number-of-calls: 10
-      wait-duration-in-open-state: PT30S
-      sliding-window-size: 100
-      sliding-window-type: COUNT_BASED
-    
-    cors:
-      enabled: true
-      allowed-origins:
-        - ${FRONTEND_URL}
-        - ${ADMIN_FRONTEND_URL}
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - PATCH
-        - DELETE
-        - OPTIONS
-      allowed-headers:
-        - Authorization
-        - Content-Type
-        - X-Tenant-ID
-        - X-Correlation-ID
-        - Accept
-        - Origin
-      allow-credentials: true
-      max-age: 3600
-    
     observability:
       tracing:
         enabled: true
-        sampling-rate: ${TRACING_SAMPLING_RATE:0.1}
-        service-name: gripday-gateway-service
+        sampling-rate: 0.01
+        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
       metrics:
         enabled: true
-        prefix: gripday_gateway
-        enabled-metrics:
-          - gateway.requests
-          - gateway.response.time
-          - gateway.circuit.breaker
-          - gateway.rate.limit
-          - gateway.tenant.usage
-          - gateway.security.events
       logging:
         level: WARN
         enable-request-logging: false
         enable-response-logging: false
         enable-correlation-id: true
-
-logging:
-  level:
-    org.gripday.gatewayservice: INFO
-    org.springframework.cloud.gateway: WARN
-    org.springframework.security: WARN
-    reactor.netty: ERROR
-    root: WARN
-  pattern:
-    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","correlationId":"%X{correlationId:-}","tenantId":"%X{tenantId:-}","logger":"%logger{36}","message":"%msg"}%n'

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProfile name="local">
+        <!-- Console appender for local development -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        
+        <!-- Enable debug logging for gateway service components -->
+        <logger name="org.gripday.gatewayservice" level="DEBUG"/>
+        <logger name="org.springframework.cloud.gateway" level="DEBUG"/>
+        <logger name="org.springframework.security" level="DEBUG"/>
+        <logger name="reactor.netty" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="staging,production">
+        <!-- JSON appender for staging and production -->
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+                    <version/>
+                    <logLevel/>
+                    <message/>
+                    <mdc/>
+                    <arguments/>
+                    <stackTrace/>
+                    <pattern>
+                        <pattern>
+                            {
+                                "service": "gripday-gateway-service",
+                                "environment": "${SPRING_PROFILES_ACTIVE:-unknown}",
+                                "correlationId": "%X{correlationId:-}",
+                                "traceId": "%X{traceId:-}",
+                                "spanId": "%X{spanId:-}",
+                                "userId": "%X{userId:-}",
+                                "tenantId": "%X{tenantId:-}",
+                                "requestId": "%X{requestId:-}",
+                                "logger": "%logger"
+                            }
+                        </pattern>
+                    </pattern>
+                </providers>
+            </encoder>
+        </appender>
+        
+        <root level="WARN">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+        
+        <!-- Service-specific logging levels -->
+        <logger name="org.gripday.gatewayservice" level="INFO"/>
+        <logger name="org.springframework.cloud.gateway" level="INFO"/>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="reactor.netty" level="WARN"/>
+        <logger name="io.github.resilience4j" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="staging">
+        <!-- Additional logging for staging environment -->
+        <logger name="org.gripday.gatewayservice" level="INFO"/>
+        <logger name="org.springframework.cloud.gateway" level="INFO"/>
+        <root level="INFO"/>
+    </springProfile>
+
+    <!-- Security audit logging -->
+    <logger name="SECURITY_AUDIT" level="INFO" additivity="false">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </logger>
+    
+    <!-- Performance logging -->
+    <logger name="PERFORMANCE" level="INFO" additivity="false">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </logger>
+    
+    <!-- Gateway events logging -->
+    <logger name="GATEWAY_EVENTS" level="INFO" additivity="false">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </logger>
+</configuration>

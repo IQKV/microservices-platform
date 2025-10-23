@@ -35,6 +35,7 @@
         <!-- Observability -->
         <micrometer.version>1.14.1</micrometer.version>
         <opentelemetry.version>1.42.1</opentelemetry.version>
+        <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
         
         <!-- Documentation -->
         <springdoc.version>2.6.0</springdoc.version>
@@ -149,6 +150,13 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
                 <version>${springdoc.version}</version>
+            </dependency>
+            
+            <!-- Observability dependencies -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>   

@@ -1,102 +1,65 @@
 # Production environment configuration
 spring:
   datasource:
-    url: jdbc:postgresql://${GRIPDAY_DB_HOST}:${GRIPDAY_DB_PORT}/${GRIPDAY_DB_NAME}
-    username: ${GRIPDAY_DB_USERNAME}
-    password: ${GRIPDAY_DB_PASSWORD}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 30
+      maximum-pool-size: 50
       minimum-idle: 10
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
       leak-detection-threshold: 60000
-
-  # Redis Configuration for production
+  
   data:
     redis:
-      host: ${GRIPDAY_REDIS_HOST}
-      port: ${GRIPDAY_REDIS_PORT}
-      password: ${GRIPDAY_REDIS_PASSWORD}
-      database: 2
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      database: 0
       timeout: 2000ms
       lettuce:
         pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
-          max-wait: -1ms
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
 
   jpa:
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-        use_sql_comments: false
+        generate_statistics: false
 
-# Gripday configuration for production environment
-gripday:
-  database:
-    host: ${GRIPDAY_DB_HOST}
-    port: ${GRIPDAY_DB_PORT}
-    name: ${GRIPDAY_DB_NAME}
-    username: ${GRIPDAY_DB_USERNAME}
-    password: ${GRIPDAY_DB_PASSWORD}
-    pool:
-      initial-size: 10
-      max-active: 30
-      max-idle: 20
-      min-idle: 10
-      max-wait: 30000
-
-  auth:
-    jwt:
-      secret: ${GRIPDAY_JWT_SECRET}
-      access-token-expiration-minutes: 15
-      refresh-token-expiration-days: 7
-      issuer: ${GRIPDAY_JWT_ISSUER:gripday-auth-service}
-      audience: ${GRIPDAY_JWT_AUDIENCE:gripday-platform}
-    security:
-      password-encoder-strength: 12
-      max-login-attempts: 3
-      lockout-duration-minutes: 30
-      rate-limit:
-        requests-per-minute: 3
-        window-size-minutes: 1
-
-  cache:
-    redis:
-      host: ${GRIPDAY_REDIS_HOST}
-      port: ${GRIPDAY_REDIS_PORT}
-      password: ${GRIPDAY_REDIS_PASSWORD}
-      database: 2
-      pool:
-        max-active: 32
-        max-idle: 16
-        min-idle: 4
-        max-wait: -1
-
-  observability:
-    tracing:
-      enabled: true
-      sample-rate: 0.01
-      service-name: ${spring.application.name}
-    metrics:
-      enabled: true
-      path: /actuator/prometheus
-    logging:
-      level: WARN
-      format: json
-      include-correlation-id: true
-
-# Logging configuration for production
 logging:
   level:
     org.gripday.authservice: WARN
-    org.springframework.security: ERROR
-    org.hibernate.SQL: ERROR
-    liquibase: WARN
-    root: WARN
-  pattern:
-    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","correlationId":"%X{correlationId:-}","logger":"%logger{36}","message":"%msg"}%n'
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.liquibase: WARN
+    org.springframework.web: WARN
+
+management:
+  tracing:
+    sampling:
+      probability: 0.01
+
+gripday:
+  auth:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+  observability:
+    tracing:
+      enabled: true
+      sampling-rate: 0.01
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+    metrics:
+      enabled: true
+    logging:
+      include-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
