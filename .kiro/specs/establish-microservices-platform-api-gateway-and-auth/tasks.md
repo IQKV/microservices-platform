@@ -408,8 +408,8 @@ The following features can be implemented after the core MVP is complete:
     - Create database setup and migration scripts specific to auth service for POSIX systems
     - _Requirements: 16.1, 16.2, 16.3, 2.6_
 
-- [ ] 9. Set up observability with OpenTelemetry
-  - [ ] 9.1 Configure OpenTelemetry instrumentation with environment profiles
+- [x] 9. Set up observability with OpenTelemetry
+  - [x] 9.1 Configure OpenTelemetry instrumentation with environment profiles
     - Add OpenTelemetry dependencies to both services
     - Configure automatic instrumentation for Spring Boot with environment-specific settings
     - Set up trace correlation and context propagation
@@ -417,19 +417,19 @@ The following features can be implemented after the core MVP is complete:
     - Add environment variable configuration for observability stack
     - _Requirements: 7.1, 7.5, 16.7_
 
-  - [ ] 9.2 Implement metrics collection and health checks
+  - [x] 9.2 Implement metrics collection and health checks
     - Configure Prometheus metrics endpoints
     - Implement custom domain metrics
     - Add health check endpoints for monitoring
     - _Requirements: 7.2, 7.5_
 
-  - [ ] 9.3 Configure structured logging
+  - [x] 9.3 Configure structured logging
     - Set up JSON structured logging format
     - Configure log correlation with trace IDs
     - Implement centralized logging configuration
     - _Requirements: 7.4_
 
-  - [ ] 9.4 Write simple tests for observability components
+  - [x] 9.4 Write simple tests for observability components
     - Test successful metrics collection and health check responses
     - Verify basic trace correlation functionality with valid requests
     - Focus on testing core observability functionality without complex scenarios

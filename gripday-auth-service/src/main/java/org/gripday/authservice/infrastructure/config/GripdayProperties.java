@@ -1,6 +1,8 @@
 package org.gripday.authservice.infrastructure.config;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -146,7 +148,7 @@ public record GripdayProperties(
         public record TracingProperties(
             boolean enabled,
             @NotBlank String serviceName,
-            @Min(0.0) @Max(1.0) double samplingRate,
+            @DecimalMin("0.0") @DecimalMax("1.0") double samplingRate,
             @NotBlank String endpoint,
             @NotNull Duration timeout,
             @NotNull Duration exportTimeout,

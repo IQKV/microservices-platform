@@ -7,16 +7,16 @@ server:
 spring:
   # Database Configuration - Staging PostgreSQL
   datasource:
-    url: ${GRIPDAY_DATABASE_URL}
-    username: ${GRIPDAY_DATABASE_USERNAME}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://postgres-staging:5432/gripday_auth_staging}
+    username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
     password: ${GRIPDAY_DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
       leak-detection-threshold: 60000
 
   # JPA Configuration - Staging Settings
@@ -38,17 +38,17 @@ spring:
   # Redis Configuration - Staging Redis
   data:
     redis:
-      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      host: ${GRIPDAY_CACHE_REDIS_HOST:redis-staging}
       port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
       password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
-      timeout: 3000ms
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: 2000ms
       lettuce:
         pool:
           max-active: 16
           max-idle: 8
           min-idle: 2
-          max-wait: 5000ms
+          max-wait: -1ms
 
   # Liquibase Configuration
   liquibase:
@@ -60,15 +60,15 @@ spring:
 gripday:
   # Database Configuration
   database:
-    url: ${GRIPDAY_DATABASE_URL}
-    username: ${GRIPDAY_DATABASE_USERNAME}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://postgres-staging:5432/gripday_auth_staging}
+    username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
     password: ${GRIPDAY_DATABASE_PASSWORD}
     pool:
       maximum-size: 20
       minimum-idle: 5
-      connection-timeout: PT30S
-      idle-timeout: PT10M
-      max-lifetime: PT30M
+      connection-timeout: PT20S
+      idle-timeout: PT5M
+      max-lifetime: PT20M
     migration:
       enabled: true
       contexts: staging
@@ -77,19 +77,19 @@ gripday:
   # Cache Configuration - Redis
   cache:
     redis:
-      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      host: ${GRIPDAY_CACHE_REDIS_HOST:redis-staging}
       port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
       password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
-      timeout: PT3S
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
       pool:
         max-active: 16
         max-idle: 8
         min-idle: 2
-        max-wait: PT5S
+        max-wait: PT-1S
       key-prefix: "gripday:auth:staging"
       default-ttl: PT30M
-      enable-statistics: true
+      enable-statistics: false
 
   # Authentication Configuration
   auth:
@@ -99,7 +99,7 @@ gripday:
       refresh-token-expiry: P7D
       issuer: gripday-auth-service-staging
       audience: gripday-services-staging
-      algorithm: RS256
+      algorithm: HS256
     security:
       password:
         encoder-strength: 12
@@ -112,20 +112,16 @@ gripday:
         timeout: PT4H
         concurrent-sessions: 3
     oauth2:
-      enabled: true
-      providers:
-        google:
-          client-id: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID:}
-          client-secret: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET:}
-          enabled: false
+      enabled: false
+      providers: {}
 
   # Observability Configuration - Staging
   observability:
     tracing:
       enabled: true
       service-name: ${spring.application.name}
-      sampling-rate: 0.1  # 10% sampling for staging
-      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
+      sampling-rate: 0.1  # Reduced sampling for staging
+      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT:http://otel-collector:4317}
       timeout: PT10S
       export-timeout: PT30S
       batch-size: 512
@@ -141,7 +137,7 @@ gripday:
         service: auth-service
     logging:
       level: INFO
-      format: json  # Structured logging for staging
+      format: json  # JSON format for staging
       include-correlation-id: true
       include-trace-id: true
       include-span-id: true
@@ -152,31 +148,29 @@ gripday:
       tenant-id-header: X-Tenant-ID
       enable-sql-logging: false
       enable-security-events: true
-      enable-performance-logging: true
+      enable-performance-logging: false
 
 # Logging Configuration - Staging
 logging:
   level:
     org.gripday: INFO
-    org.springframework.security: INFO
-    org.springframework.web: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
     org.hibernate.SQL: WARN
     liquibase: INFO
-    com.zaxxer.hikari: INFO
+    com.zaxxer.hikari: WARN
   pattern:
-    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId:-}","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","message":"%msg"}%n'
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
 # Management Configuration - Staging
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,liquibase
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
-    liquibase:
-      enabled: true
     prometheus:
       enabled: true
   metrics:
@@ -190,7 +184,7 @@ management:
         http.server.requests: 0.5,0.95,0.99
   tracing:
     sampling:
-      probability: 0.1
+      probability: 0.1  # Reduced sampling for staging
 
 # SpringDoc Configuration - Staging
 springdoc:
@@ -198,4 +192,4 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
-    try-it-out-enabled: false  # Disabled for staging security
+    try-it-out-enabled: false

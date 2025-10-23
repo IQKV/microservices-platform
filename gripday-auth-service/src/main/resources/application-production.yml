@@ -14,10 +14,10 @@ spring:
     hikari:
       maximum-pool-size: 50
       minimum-idle: 10
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      leak-detection-threshold: 0  # Disabled in production
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
 
   # JPA Configuration - Production Settings
   jpa:
@@ -41,14 +41,14 @@ spring:
       host: ${GRIPDAY_CACHE_REDIS_HOST}
       port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
       password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:2}
-      timeout: 5000ms
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: 2000ms
       lettuce:
         pool:
           max-active: 32
           max-idle: 16
           min-idle: 4
-          max-wait: 10000ms
+          max-wait: -1ms
 
   # Liquibase Configuration
   liquibase:
@@ -66,9 +66,9 @@ gripday:
     pool:
       maximum-size: 50
       minimum-idle: 10
-      connection-timeout: PT30S
-      idle-timeout: PT10M
-      max-lifetime: PT30M
+      connection-timeout: PT20S
+      idle-timeout: PT5M
+      max-lifetime: PT20M
     migration:
       enabled: true
       contexts: production
@@ -80,16 +80,16 @@ gripday:
       host: ${GRIPDAY_CACHE_REDIS_HOST}
       port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
       password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:2}
-      timeout: PT5S
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
       pool:
         max-active: 32
         max-idle: 16
         min-idle: 4
-        max-wait: PT10S
+        max-wait: PT-1S
       key-prefix: "gripday:auth:production"
       default-ttl: PT15M
-      enable-statistics: false  # Disabled for performance
+      enable-statistics: false
 
   # Authentication Configuration
   auth:
@@ -99,53 +99,49 @@ gripday:
       refresh-token-expiry: P7D
       issuer: gripday-auth-service
       audience: gripday-services
-      algorithm: RS256
+      algorithm: HS256
     security:
       password:
-        encoder-strength: 14  # Maximum security
+        encoder-strength: 14
         require-special-chars: true
         min-length: 12
       rate-limiting:
-        login-attempts: 3  # Strict rate limiting
+        login-attempts: 3
         lockout-duration: PT30M
       session:
-        timeout: PT2H  # Shorter sessions for security
+        timeout: PT2H
         concurrent-sessions: 2
     oauth2:
-      enabled: true
-      providers:
-        google:
-          client-id: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID}
-          client-secret: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET}
-          enabled: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED:false}
+      enabled: false
+      providers: {}
 
   # Observability Configuration - Production
   observability:
     tracing:
       enabled: true
       service-name: ${spring.application.name}
-      sampling-rate: 0.01  # 1% sampling for production
+      sampling-rate: 0.01  # Minimal sampling for production
       endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
-      timeout: PT5S
-      export-timeout: PT15S
-      batch-size: 2048
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 1024
     metrics:
       enabled: true
       path: /actuator/prometheus
       prefix: gripday_auth
-      include-host-tag: false  # Reduced for security
+      include-host-tag: true
       include-application-tag: true
       include-environment-tag: true
       custom-tags:
         environment: production
         service: auth-service
     logging:
-      level: WARN  # Minimal logging for production
-      format: json  # Structured logging for production
+      level: WARN
+      format: json  # JSON format for production
       include-correlation-id: true
       include-trace-id: true
       include-span-id: true
-      include-user-id: false  # Disabled for privacy
+      include-user-id: false  # Disabled for privacy in production
       include-tenant-id: true
       correlation-id-header: X-Correlation-ID
       request-id-header: X-Request-ID
@@ -158,24 +154,23 @@ gripday:
 logging:
   level:
     org.gripday: WARN
-    org.springframework.security: WARN
-    org.springframework.web: WARN
+    org.springframework.security: ERROR
+    org.springframework.web: ERROR
     org.hibernate.SQL: ERROR
     liquibase: WARN
-    com.zaxxer.hikari: WARN
-    root: WARN
+    com.zaxxer.hikari: ERROR
   pattern:
-    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId:-}","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","message":"%msg"}%n'
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
 # Management Configuration - Production
 management:
   endpoints:
     web:
       exposure:
-        include: health,metrics,prometheus  # Minimal exposure for security
+        include: health,metrics,prometheus
   endpoint:
     health:
-      show-details: never  # Security: never show details
+      show-details: never
     prometheus:
       enabled: true
   metrics:
@@ -189,11 +184,11 @@ management:
         http.server.requests: 0.5,0.95,0.99
   tracing:
     sampling:
-      probability: 0.01
+      probability: 0.01  # Minimal sampling for production
 
 # SpringDoc Configuration - Production
 springdoc:
   api-docs:
-    enabled: false  # Disabled for production security
+    enabled: false  # Disabled in production
   swagger-ui:
-    enabled: false  # Disabled for production security
+    enabled: false  # Disabled in production

@@ -4,25 +4,37 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.aop.ObservedAspect;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.UUID;
 
 /**
  * Configuration for observability features in the gateway service.
- * Provides correlation ID generation, MDC management, and custom metrics for reactive applications.
+ * Provides correlation ID generation, MDC management, and custom metrics for reactive applications with environment-specific settings.
  */
 @Configuration
 @EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
@@ -30,6 +42,57 @@ import java.util.UUID;
 public class ObservabilityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(ObservabilityConfig.class);
+
+    private final GripdayGatewayObservabilityProperties observabilityProperties;
+    private final Environment environment;
+
+    public ObservabilityConfig(GripdayGatewayObservabilityProperties observabilityProperties, Environment environment) {
+        this.observabilityProperties = observabilityProperties;
+        this.environment = environment;
+    }
+
+    /**
+     * Configures OpenTelemetry SDK with environment-specific settings for reactive applications.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "gripday.observability.tracing.enabled", havingValue = "true", matchIfMissing = true)
+    public OpenTelemetry openTelemetry() {
+        var tracingProps = observabilityProperties.tracing();
+        
+        // Create resource with service information
+        var resource = Resource.getDefault()
+            .merge(Resource.create(Attributes.builder()
+                .put("service.name", tracingProps.serviceName())
+                .put("service.version", "1.0.0")
+                .put("deployment.environment", getActiveProfile())
+                .build()));
+
+        // Configure OTLP exporter with environment-specific settings
+        var spanExporter = OtlpGrpcSpanExporter.builder()
+            .setEndpoint(tracingProps.endpoint())
+            .setTimeout(tracingProps.timeout())
+            .build();
+
+        // Configure tracer provider with sampling
+        var tracerProvider = SdkTracerProvider.builder()
+            .addSpanProcessor(BatchSpanProcessor.builder(spanExporter)
+                .setMaxExportBatchSize(512)
+                .setScheduleDelay(Duration.ofSeconds(5))
+                .build())
+            .setResource(resource)
+            .setSampler(Sampler.traceIdRatioBased(tracingProps.samplingRate()))
+            .build();
+
+        // Build OpenTelemetry SDK
+        var openTelemetry = OpenTelemetrySdk.builder()
+            .setTracerProvider(tracerProvider)
+            .buildAndRegisterGlobal();
+
+        logger.info("OpenTelemetry configured for service: {} with endpoint: {} and sampling rate: {}", 
+            tracingProps.serviceName(), tracingProps.endpoint(), tracingProps.samplingRate());
+
+        return openTelemetry;
+    }
 
     /**
      * Enables @Observed annotation support for automatic observation of methods.
@@ -53,6 +116,14 @@ public class ObservabilityConfig {
     @Bean
     public GatewayServiceMetrics gatewayServiceMetrics(MeterRegistry meterRegistry) {
         return new GatewayServiceMetrics(meterRegistry);
+    }
+
+    /**
+     * Gets the active Spring profile for environment identification.
+     */
+    private String getActiveProfile() {
+        var activeProfiles = environment.getActiveProfiles();
+        return activeProfiles.length > 0 ? activeProfiles[0] : "default";
     }
 
     /**
@@ -185,6 +256,64 @@ public class ObservabilityConfig {
         
         public void recordCircuitBreakerClosed(String service) {
             meterRegistry.counter("gripday.gateway.circuitbreaker.closed", "service", service).increment();
+        }
+        
+        public void recordRouteLatency(String route, long latencyMs) {
+            meterRegistry.timer("gripday.gateway.route.latency", "route", route)
+                .record(Duration.ofMillis(latencyMs));
+        }
+        
+        public void recordActiveConnections(int count) {
+            meterRegistry.gauge("gripday.gateway.connections.active", count);
+        }
+        
+        public void recordTotalRequests(String method, String route) {
+            meterRegistry.counter("gripday.gateway.requests.total", "method", method, "route", route).increment();
+        }
+        
+        public void recordResponseStatus(int statusCode, String route) {
+            var statusClass = getStatusClass(statusCode);
+            meterRegistry.counter("gripday.gateway.responses.total", 
+                "status_code", String.valueOf(statusCode),
+                "status_class", statusClass,
+                "route", route).increment();
+        }
+        
+        public void recordTenantRequests(String tenantId, String endpoint) {
+            meterRegistry.counter("gripday.gateway.tenant.requests", 
+                "tenant", tenantId != null ? tenantId : "unknown",
+                "endpoint", endpoint).increment();
+        }
+        
+        public void recordCorsRequests(String origin, String method) {
+            meterRegistry.counter("gripday.gateway.cors.requests", 
+                "origin", origin != null ? origin : "unknown",
+                "method", method).increment();
+        }
+        
+        public void recordTransformationTime(String type, long durationMs) {
+            meterRegistry.timer("gripday.gateway.transformation.duration", "type", type)
+                .record(Duration.ofMillis(durationMs));
+        }
+        
+        public void recordLoadBalancingDecision(String service, String instance) {
+            meterRegistry.counter("gripday.gateway.loadbalancing.decisions", 
+                "service", service,
+                "instance", instance).increment();
+        }
+        
+        public void recordHealthCheckResult(String service, boolean healthy) {
+            meterRegistry.counter("gripday.gateway.healthcheck.results", 
+                "service", service,
+                "result", healthy ? "healthy" : "unhealthy").increment();
+        }
+        
+        private String getStatusClass(int statusCode) {
+            if (statusCode >= 200 && statusCode < 300) return "2xx";
+            if (statusCode >= 300 && statusCode < 400) return "3xx";
+            if (statusCode >= 400 && statusCode < 500) return "4xx";
+            if (statusCode >= 500) return "5xx";
+            return "1xx";
         }
     }
 }

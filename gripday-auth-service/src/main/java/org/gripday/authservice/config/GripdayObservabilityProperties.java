@@ -29,10 +29,13 @@ public record GripdayObservabilityProperties(
         double samplingRate,
         String endpoint,
         Duration timeout,
+        Duration exportTimeout,
+        int batchSize,
         Map<String, String> headers
     ) {
         public TracingProperties() {
-            this(true, "gripday-auth-service", 1.0, "http://localhost:4317", Duration.ofSeconds(10), Map.of());
+            this(true, "gripday-auth-service", 1.0, "http://localhost:4317", 
+                Duration.ofSeconds(10), Duration.ofSeconds(30), 512, Map.of());
         }
     }
     
@@ -44,10 +47,12 @@ public record GripdayObservabilityProperties(
         String path,
         String prefix,
         boolean includeHostTag,
-        boolean includeApplicationTag
+        boolean includeApplicationTag,
+        boolean includeEnvironmentTag,
+        Map<String, String> customTags
     ) {
         public MetricsProperties() {
-            this(true, "/actuator/prometheus", "gripday_auth", true, true);
+            this(true, "/actuator/prometheus", "gripday_auth", true, true, true, Map.of());
         }
     }
     

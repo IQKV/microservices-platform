@@ -30,12 +30,14 @@ public record GripdayGatewayObservabilityProperties(
         double samplingRate,
         String endpoint,
         Duration timeout,
+        Duration exportTimeout,
+        int batchSize,
         Map<String, String> headers,
         List<String> excludedPaths
     ) {
         public TracingProperties() {
             this(true, "gripday-gateway-service", 1.0, "http://localhost:4317", Duration.ofSeconds(10), 
-                Map.of(), List.of("/actuator/**", "/health"));
+                Duration.ofSeconds(30), 512, Map.of(), List.of("/actuator/**", "/health"));
         }
     }
     
@@ -48,10 +50,12 @@ public record GripdayGatewayObservabilityProperties(
         String prefix,
         boolean includeHostTag,
         boolean includeApplicationTag,
+        boolean includeEnvironmentTag,
+        Map<String, String> customTags,
         List<String> enabledMetrics
     ) {
         public MetricsProperties() {
-            this(true, "/actuator/prometheus", "gripday_gateway", true, true, 
+            this(true, "/actuator/prometheus", "gripday_gateway", true, true, true, Map.of(),
                 List.of("gateway.requests", "gateway.response.time", "gateway.circuit.breaker", "gateway.rate.limit"));
         }
     }
