@@ -15,7 +15,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends TenantAwareEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,8 +50,7 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "tenant_id", nullable = false, length = 100)
-    private String tenantId;
+
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -67,12 +66,12 @@ public class User {
     // Constructor with required fields using Java 21 features
     public User(String username, String email, String passwordHash, 
                 String firstName, String lastName, String tenantId) {
+        super(tenantId);
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.tenantId = tenantId;
     }
 
     // Getters and setters using modern Java syntax
@@ -144,13 +143,7 @@ public class User {
         return updatedAt;
     }
 
-    public String getTenantId() {
-        return tenantId;
-    }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public Set<Authority> getAuthorities() {
         return authorities;
@@ -219,7 +212,7 @@ public class User {
           .append(", lastName='").append(lastName).append('\'')
           .append(", enabled=").append(enabled)
           .append(", emailVerified=").append(emailVerified)
-          .append(", tenantId='").append(tenantId).append('\'')
+          .append(", tenantId='").append(getTenantId()).append('\'')
           .append(", createdAt=").append(createdAt)
           .append('}');
         return sb.toString();

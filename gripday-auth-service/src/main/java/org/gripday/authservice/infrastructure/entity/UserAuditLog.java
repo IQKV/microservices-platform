@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "user_audit_log")
-public class UserAuditLog {
+public class UserAuditLog extends TenantAwareEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,8 +37,7 @@ public class UserAuditLog {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "tenant_id", nullable = false, length = 100)
-    private String tenantId;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -49,26 +48,26 @@ public class UserAuditLog {
 
     // Constructor with required fields
     public UserAuditLog(String action, String tenantId) {
+        super(tenantId);
         this.action = action;
-        this.tenantId = tenantId;
     }
 
     // Constructor with user context
     public UserAuditLog(Long userId, String action, String tenantId) {
+        super(tenantId);
         this.userId = userId;
         this.action = action;
-        this.tenantId = tenantId;
     }
 
     // Full constructor
     public UserAuditLog(Long userId, String action, String details, 
                        String ipAddress, String userAgent, String tenantId) {
+        super(tenantId);
         this.userId = userId;
         this.action = action;
         this.details = details;
         this.ipAddress = ipAddress;
         this.userAgent = userAgent;
-        this.tenantId = tenantId;
     }
 
     // Getters and setters
@@ -120,13 +119,7 @@ public class UserAuditLog {
         return createdAt;
     }
 
-    public String getTenantId() {
-        return tenantId;
-    }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
 
     public User getUser() {
         return user;
@@ -189,7 +182,7 @@ public class UserAuditLog {
           .append(", userId=").append(userId)
           .append(", action='").append(action).append('\'')
           .append(", ipAddress='").append(ipAddress).append('\'')
-          .append(", tenantId='").append(tenantId).append('\'')
+          .append(", tenantId='").append(getTenantId()).append('\'')
           .append(", createdAt=").append(createdAt)
           .append('}');
         return sb.toString();

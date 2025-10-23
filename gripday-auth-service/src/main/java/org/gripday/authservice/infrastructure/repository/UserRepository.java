@@ -125,6 +125,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countEnabledUsersByTenantId(@Param("tenantId") String tenantId);
 
     /**
+     * Count enabled users in a specific tenant (alternative method name).
+     * 
+     * @param tenantId the tenant identifier
+     * @return number of enabled users in the tenant
+     */
+    long countByTenantIdAndEnabledTrue(String tenantId);
+
+    /**
      * Find users with unverified emails in a tenant.
      * 
      * @param tenantId the tenant identifier

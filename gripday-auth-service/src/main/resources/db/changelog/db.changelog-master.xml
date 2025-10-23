@@ -13,5 +13,6 @@
     <include file="db/changelog/V3__Create_user_authorities_table.xml"/>
     <include file="db/changelog/V4__Create_user_audit_log_table.xml"/>
     <include file="db/changelog/V5__Add_indexes.xml"/>
+    <include file="db/changelog/V6__Create_tenants_table.xml"/>
 
 </databaseChangeLog>
