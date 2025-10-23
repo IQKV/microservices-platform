@@ -1,5 +1,6 @@
 package org.gripday.authservice.presentation.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -8,15 +9,68 @@ import java.util.Set;
  * Immutable user context record for JWT claims and user data transfer.
  * Contains comprehensive user information for multi-tenant support.
  */
+@Schema(
+    name = "UserContext",
+    description = "Comprehensive user information and context for authenticated users"
+)
 public record UserContext(
+    @Schema(
+        description = "Unique user identifier",
+        example = "1",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     Long userId,
+    
+    @Schema(
+        description = "Unique username",
+        example = "john.doe",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     String username,
+    
+    @Schema(
+        description = "User's email address",
+        example = "john.doe@example.com",
+        format = "email",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     String email,
+    
+    @Schema(
+        description = "Set of user roles for authorization",
+        example = "[\"USER\", \"ADMIN\"]"
+    )
     Set<String> roles,
+    
+    @Schema(
+        description = "Set of specific permissions granted to the user",
+        example = "[\"READ_PROFILE\", \"WRITE_PROFILE\"]"
+    )
     Set<String> permissions,
+    
+    @Schema(
+        description = "User's first name",
+        example = "John"
+    )
     String firstName,
+    
+    @Schema(
+        description = "User's last name",
+        example = "Doe"
+    )
     String lastName,
+    
+    @Schema(
+        description = "Tenant identifier for multi-tenant isolation",
+        example = "tenant-123",
+        requiredMode = Schema.RequiredMode.REQUIRED
+    )
     String tenantId,
+    
+    @Schema(
+        description = "Additional custom claims and metadata",
+        example = "{\"department\": \"Engineering\", \"location\": \"US\"}"
+    )
     Map<String, Object> customClaims
 ) {
     // Compact constructor for validation and immutability

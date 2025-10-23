@@ -144,7 +144,7 @@
       - Include IP address, user agent, and timestamp in audit logs
     - _Requirements: 5.1, 5.2, 13.1, 13.2, 13.3_
 
-  - [ ] 2.7 Add OpenAPI documentation and HTTP standards
+  - [x] 2.7 Add OpenAPI documentation and HTTP standards
     - Configure SpringDoc OpenAPI with security schemes and interactive Swagger UI
     - Add comprehensive @Operation, @ApiResponse, @Schema annotations for all authentication endpoints
     - Document all request/response DTOs with examples and validation constraints

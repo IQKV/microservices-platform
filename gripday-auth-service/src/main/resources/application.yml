@@ -32,12 +32,44 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,liquibase
+        include: health,info,metrics,liquibase,openapi
   endpoint:
     health:
       show-details: when-authorized
     liquibase:
       enabled: true
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    groups-order: ASC
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+    display-operation-id: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: authentication
+      display-name: Authentication APIs
+      paths-to-match: /api/*/auth/**
+    - group: user-management
+      display-name: User Management APIs
+      paths-to-match: /api/*/users/**
+    - group: tenant-management
+      display-name: Tenant Management APIs
+      paths-to-match: /api/*/tenants/**
+  show-actuator: true
+  use-management-port: false
 
 # Gripday-specific configuration properties
 gripday:
