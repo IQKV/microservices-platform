@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan
+@ConfigurationPropertiesScan(basePackages = "org.gripday.gatewayservice.config")
 public class GatewayServiceApplication {
 
     public static void main(String[] args) {

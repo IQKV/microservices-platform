@@ -1,45 +1,259 @@
-# Local development configuration
+# Local Development Environment Configuration
+# This configuration is optimized for development with debug logging and relaxed security
+
+server:
+  port: 8080
+
 spring:
+  # Redis Configuration - Local Redis
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      database: 1
+      host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 0
+          max-wait: -1ms
 
-logging:
-  level:
-    org.gripday.gatewayservice: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    reactor.netty: INFO
-    io.github.resilience4j: DEBUG
+  # Cloud Gateway Configuration - Development
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${gripday.gateway.routing.services.auth-service.uri}
+          predicates:
+            - Path=${gripday.gateway.routing.services.auth-service.path}
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${gripday.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: health-check
+          uri: ${gripday.gateway.routing.services.auth-service.uri}
+          predicates:
+            - Path=/actuator/health
+          filters:
+            - StripPrefix=0
+      discovery:
+        locator:
+          enabled: false  # Disabled for local development
 
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-
+# Gripday Gateway Configuration - Local Environment
 gripday:
+  # Cache Configuration - Redis
+  cache:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "gripday:gateway:local"
+      default-ttl: PT1H
+      enable-statistics: true
+
+  # Gateway Configuration
   gateway:
+    routing:
+      services:
+        auth-service:
+          uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI:http://localhost:8081}
+          path: /api/v1/auth/**
+          enabled: true
+          connect-timeout: 10000  # Extended for development
+          response-timeout: 60000  # Extended for development
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: true
+        health-check-interval: PT30S
+    
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY:local-development-secret-key-change-in-production}
-    observability:
-      tracing:
+        secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET:local-development-secret-key-not-for-production-use}
+        access-token-expiry: PT30M  # Extended for development
+        refresh-token-expiry: P30D  # Extended for development
+        issuer: gripday-platform-local
+        audience: gripday-services-local
+        algorithm: HS256
+      authentication:
         enabled: true
-        sampling-rate: 1.0
-        endpoint: http://localhost:4317
-      metrics:
+        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL:http://localhost:8081}
+        token-validation-timeout: PT10S  # Extended for development
+        enable-user-context-propagation: true
+      public-paths:
+        - /api/v1/auth/login
+        - /api/v1/auth/signup
+        - /api/v1/auth/refresh
+        - /actuator/health
+        - /actuator/info
+        - /swagger-ui/**
+        - /api-docs/**
+    
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "gripday:gateway:rate-limit:local"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 120  # More lenient for development
+        default-burst-capacity: 200
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 20  # More lenient for development
+            burst-capacity: 40
+            enable-tenant-quotas: false  # Disabled for development
+          "/api/v1/auth/signup":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+      tenant-quotas:
+        enabled: false  # Disabled for development
+        default-tenant-requests-per-minute: 5000
+        tenant-specific-quotas: {}
+    
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 70  # More lenient for development
+      slow-call-rate-threshold: 70
+      slow-call-duration-threshold: PT5S  # More lenient for development
+      minimum-number-of-calls: 5  # Lower threshold for development
+      wait-duration-in-open-state: PT10S  # Shorter for development
+      sliding-window-size: 50
+      sliding-window-type: COUNT_BASED
+    
+    cors:
+      enabled: true
+      allowed-origins:
+        - http://localhost:3000
+        - http://localhost:5173
+        - http://localhost:8080
+        - http://localhost:8081
+        - http://127.0.0.1:3000
+        - http://127.0.0.1:5173
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+        - HEAD
+      allowed-headers:
+        - "*"
+      allow-credentials: true
+      max-age: 3600
+    
+    transformation:
+      request:
         enabled: true
-      logging:
-        level: DEBUG
-        enable-request-logging: true
-        enable-response-logging: true
-        enable-correlation-id: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
+          - Authorization-Internal
+          - X-Internal-Token
+        additional-headers:
+          X-Gateway-Version: "1.0.0-local"
+          X-Environment: "local"
+      response:
+        enabled: true
+        enable-security-headers: false  # Relaxed for development
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
+          - X-Internal-Service
+          - X-Database-Query-Time
+    
+  # Observability Configuration - Development
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0  # Full sampling for development
+      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: gripday_gateway_local
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags:
+        environment: local
+        service: gateway-service
+      enabled-metrics:
+        - gateway.requests
+        - gateway.response.time
+        - gateway.circuit.breaker
+        - gateway.rate.limit
+    logging:
+      level: DEBUG  # Verbose logging for development
+      format: console  # Human-readable format
+      enable-request-logging: true
+      enable-response-logging: true  # Enabled for development debugging
+      enable-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+
+# Logging Configuration - Development
+logging:
+  level:
+    org.gripday: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: DEBUG
+    io.lettuce: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
+
+# Management Configuration - Development
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all endpoints for development
+  endpoint:
+    health:
+      show-details: always  # Always show health details in development
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0  # Full tracing in development
+
+# SpringDoc Configuration - Development
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    try-it-out-enabled: true

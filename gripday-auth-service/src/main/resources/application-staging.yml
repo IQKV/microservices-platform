@@ -1,9 +1,15 @@
-# Staging environment configuration
+# Staging Environment Configuration
+# This configuration is optimized for staging with moderate logging and security
+
+server:
+  port: 8081
+
 spring:
+  # Database Configuration - Staging PostgreSQL
   datasource:
-    url: ${DB_URL:jdbc:postgresql://postgres:5432/gripday_auth_staging}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${GRIPDAY_DATABASE_URL}
+    username: ${GRIPDAY_DATABASE_USERNAME}
+    password: ${GRIPDAY_DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -11,52 +17,185 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD}
-      database: 0
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 20
-          max-idle: 10
-          min-idle: 2
+      leak-detection-threshold: 60000
 
+  # JPA Configuration - Staging Settings
   jpa:
+    hibernate:
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
+        use_sql_comments: false
+        generate_statistics: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
 
-logging:
-  level:
-    org.gripday.authservice: INFO
-    org.springframework.security: INFO
-    org.hibernate: WARN
-    org.liquibase: INFO
+  # Redis Configuration - Staging Redis
+  data:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5000ms
 
-management:
-  tracing:
-    sampling:
-      probability: 0.1
+  # Liquibase Configuration
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    contexts: staging
 
+# Gripday Configuration - Staging Environment
 gripday:
+  # Database Configuration
+  database:
+    url: ${GRIPDAY_DATABASE_URL}
+    username: ${GRIPDAY_DATABASE_USERNAME}
+    password: ${GRIPDAY_DATABASE_PASSWORD}
+    pool:
+      maximum-size: 20
+      minimum-idle: 5
+      connection-timeout: PT30S
+      idle-timeout: PT10M
+      max-lifetime: PT30M
+    migration:
+      enabled: true
+      contexts: staging
+      validate-on-migrate: true
+
+  # Cache Configuration - Redis
+  cache:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
+      timeout: PT3S
+      pool:
+        max-active: 16
+        max-idle: 8
+        min-idle: 2
+        max-wait: PT5S
+      key-prefix: "gripday:auth:staging"
+      default-ttl: PT30M
+      enable-statistics: true
+
+  # Authentication Configuration
   auth:
     jwt:
-      secret-key: ${JWT_SECRET_KEY}
+      secret-key: ${GRIPDAY_AUTH_JWT_SECRET}
+      access-token-expiry: PT15M
+      refresh-token-expiry: P7D
+      issuer: gripday-auth-service-staging
+      audience: gripday-services-staging
+      algorithm: RS256
+    security:
+      password:
+        encoder-strength: 12
+        require-special-chars: true
+        min-length: 8
+      rate-limiting:
+        login-attempts: 5
+        lockout-duration: PT15M
+      session:
+        timeout: PT4H
+        concurrent-sessions: 3
+    oauth2:
+      enabled: true
+      providers:
+        google:
+          client-id: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID:}
+          client-secret: ${GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET:}
+          enabled: false
+
+  # Observability Configuration - Staging
   observability:
     tracing:
       enabled: true
-      sampling-rate: 0.1
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://jaeger:4317}
+      service-name: ${spring.application.name}
+      sampling-rate: 0.1  # 10% sampling for staging
+      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
     metrics:
       enabled: true
+      path: /actuator/prometheus
+      prefix: gripday_auth_staging
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags:
+        environment: staging
+        service: auth-service
     logging:
+      level: INFO
+      format: json  # Structured logging for staging
       include-correlation-id: true
       include-trace-id: true
       include-span-id: true
       include-user-id: true
       include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+      enable-sql-logging: false
+      enable-security-events: true
+      enable-performance-logging: true
+
+# Logging Configuration - Staging
+logging:
+  level:
+    org.gripday: INFO
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+    liquibase: INFO
+    com.zaxxer.hikari: INFO
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId:-}","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","message":"%msg"}%n'
+
+# Management Configuration - Staging
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase
+  endpoint:
+    health:
+      show-details: when-authorized
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 0.1
+
+# SpringDoc Configuration - Staging
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    try-it-out-enabled: false  # Disabled for staging security

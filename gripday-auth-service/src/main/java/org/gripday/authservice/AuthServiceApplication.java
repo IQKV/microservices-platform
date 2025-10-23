@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableTransactionManagement
-@ConfigurationPropertiesScan(basePackages = "org.gripday.authservice.config")
+@ConfigurationPropertiesScan(basePackages = "org.gripday.authservice.infrastructure.config")
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

@@ -1,55 +1,204 @@
-# Local development configuration
+# Local Development Environment Configuration
+# This configuration is optimized for development with debug logging and relaxed security
+
+server:
+  port: 8081
+
 spring:
+  # Database Configuration - Local PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/gripday_auth_local
-    username: ${DB_USERNAME:gripday_user}
-    password: ${DB_PASSWORD:gripday_pass}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_auth_local}
+    username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
+    password: ${GRIPDAY_DATABASE_PASSWORD:gripday_password}
     driver-class-name: org.postgresql.Driver
-  
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
+  # JPA Configuration - Development Settings
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Redis Configuration - Local Redis
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      database: 0
+      host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 0
+          max-wait: -1ms
 
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  # Liquibase Configuration
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    contexts: local,development
 
+# Gripday Configuration - Local Environment
+gripday:
+  # Database Configuration
+  database:
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_auth_local}
+    username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
+    password: ${GRIPDAY_DATABASE_PASSWORD:gripday_password}
+    pool:
+      maximum-size: 10
+      minimum-idle: 2
+      connection-timeout: PT20S
+      idle-timeout: PT5M
+      max-lifetime: PT20M
+    migration:
+      enabled: true
+      contexts: local,development
+      validate-on-migrate: true
+
+  # Cache Configuration - Redis
+  cache:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "gripday:auth:local"
+      default-ttl: PT1H
+      enable-statistics: true
+
+  # Authentication Configuration
+  auth:
+    jwt:
+      secret-key: ${GRIPDAY_AUTH_JWT_SECRET:local-development-secret-key-not-for-production-use}
+      access-token-expiry: PT30M  # Extended for development
+      refresh-token-expiry: P30D  # Extended for development
+      issuer: gripday-auth-service-local
+      audience: gripday-services-local
+      algorithm: HS256
+    security:
+      password:
+        encoder-strength: 10  # Lower for faster development
+        require-special-chars: false  # Relaxed for development
+        min-length: 6  # Relaxed for development
+      rate-limiting:
+        login-attempts: 10  # More lenient for development
+        lockout-duration: PT5M  # Shorter lockout for development
+      session:
+        timeout: PT8H  # Extended for development
+        concurrent-sessions: 5
+    oauth2:
+      enabled: false  # Disabled for local development
+      providers: {}
+
+  # Observability Configuration - Development
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0  # Full sampling for development
+      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: gripday_auth_local
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags:
+        environment: local
+        service: auth-service
+    logging:
+      level: DEBUG  # Verbose logging for development
+      format: console  # Human-readable format
+      include-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+      enable-sql-logging: true
+      enable-security-events: true
+      enable-performance-logging: true
+
+# Logging Configuration - Development
 logging:
   level:
-    org.gripday.authservice: DEBUG
+    org.gripday: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    liquibase: INFO
+    com.zaxxer.hikari: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
+# Management Configuration - Development
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all endpoints for development
+  endpoint:
+    health:
+      show-details: always  # Always show health details in development
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
   tracing:
     sampling:
-      probability: 1.0
+      probability: 1.0  # Full tracing in development
 
-gripday:
-  auth:
-    jwt:
-      secret-key: ${JWT_SECRET_KEY:local-development-secret-key-change-in-production}
-  observability:
-    tracing:
-      enabled: true
-      sampling-rate: 1.0
-      endpoint: http://localhost:4317
-    metrics:
-      enabled: true
-    logging:
-      include-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
+# SpringDoc Configuration - Development
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    try-it-out-enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    filter: true
+    display-request-duration: true
+    display-operation-id: true

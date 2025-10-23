@@ -1,51 +1,258 @@
-# Production environment configuration
+# Production Environment Configuration
+# This configuration is optimized for production with minimal logging and maximum security
+
+server:
+  port: 8080
+
 spring:
+  # Redis Configuration - Production Redis
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD}
-      database: 1
-      timeout: 2000ms
+      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:2}
+      timeout: 5000ms
       lettuce:
         pool:
-          max-active: 50
-          max-idle: 20
-          min-idle: 5
+          max-active: 32
+          max-idle: 16
+          min-idle: 4
+          max-wait: 10000ms
 
-logging:
-  level:
-    org.gripday.gatewayservice: WARN
-    org.springframework.cloud.gateway: WARN
-    org.springframework.security: WARN
-    reactor.netty: WARN
-    io.github.resilience4j: WARN
+  # Cloud Gateway Configuration - Production
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${gripday.gateway.routing.services.auth-service.uri}
+          predicates:
+            - Path=${gripday.gateway.routing.services.auth-service.path}
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${gripday.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: health-check
+          uri: ${gripday.gateway.routing.services.auth-service.uri}
+          predicates:
+            - Path=/actuator/health
+          filters:
+            - StripPrefix=0
+      discovery:
+        locator:
+          enabled: false
 
-management:
-  tracing:
-    sampling:
-      probability: 0.01
-
+# Gripday Gateway Configuration - Production Environment
 gripday:
+  # Cache Configuration - Redis
+  cache:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:2}
+      timeout: PT5S
+      pool:
+        max-active: 32
+        max-idle: 16
+        min-idle: 4
+        max-wait: PT10S
+      key-prefix: "gripday:gateway:production"
+      default-ttl: PT15M
+      enable-statistics: false  # Disabled for performance
+
+  # Gateway Configuration
   gateway:
     routing:
       services:
         auth-service:
-          uri: ${AUTH_SERVICE_URL}
+          uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI}
+          path: /api/v1/auth/**
+          enabled: true
+          connect-timeout: 3000  # Strict timeouts for production
+          response-timeout: 15000
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: true
+        health-check-interval: PT30S
+    
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY}
+        secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
+        access-token-expiry: PT15M
+        refresh-token-expiry: P7D
+        issuer: gripday-platform
+        audience: gripday-services
+        algorithm: RS256
       authentication:
-        auth-service-url: ${AUTH_SERVICE_URL}
-    observability:
-      tracing:
         enabled: true
-        sampling-rate: 0.01
-        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
-      metrics:
+        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL}
+        token-validation-timeout: PT3S  # Strict timeout for production
+        enable-user-context-propagation: true
+      public-paths:
+        - /api/v1/auth/login
+        - /api/v1/auth/signup
+        - /api/v1/auth/refresh
+        - /actuator/health
+    
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "gripday:gateway:rate-limit:production"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 30  # Strict rate limiting for production
+        default-burst-capacity: 50
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 5  # Very strict for login
+            burst-capacity: 10
+            enable-tenant-quotas: true
+          "/api/v1/auth/signup":
+            requests-per-minute: 2  # Very strict for signup
+            burst-capacity: 5
+            enable-tenant-quotas: true
+      tenant-quotas:
         enabled: true
-      logging:
-        level: WARN
-        enable-request-logging: false
-        enable-response-logging: false
-        enable-correlation-id: true
+        default-tenant-requests-per-minute: 500  # Conservative default
+        tenant-specific-quotas: {}
+    
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 30  # Strict threshold for production
+      slow-call-rate-threshold: 30
+      slow-call-duration-threshold: PT1S  # Strict duration threshold
+      minimum-number-of-calls: 20
+      wait-duration-in-open-state: PT60S  # Longer wait in production
+      sliding-window-size: 200
+      sliding-window-type: COUNT_BASED
+    
+    cors:
+      enabled: true
+      allowed-origins:
+        - ${GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS}
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - Authorization
+        - Content-Type
+        - X-Requested-With
+        - X-Correlation-ID
+        - X-Request-ID
+        - X-Tenant-ID
+      allow-credentials: true
+      max-age: 3600
+    
+    transformation:
+      request:
+        enabled: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
+          - Authorization-Internal
+          - X-Internal-Token
+          - X-Debug-Info
+        additional-headers:
+          X-Gateway-Version: "1.0.0"
+          X-Environment: "production"
+      response:
+        enabled: true
+        enable-security-headers: true
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
+          - X-Internal-Service
+          - X-Database-Query-Time
+          - X-Debug-Info
+          - Server
+    
+  # Observability Configuration - Production
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 0.01  # 1% sampling for production
+      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
+      timeout: PT5S
+      export-timeout: PT15S
+      batch-size: 2048
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: gripday_gateway
+      include-host-tag: false  # Reduced for security
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags:
+        environment: production
+        service: gateway-service
+      enabled-metrics:
+        - gateway.requests
+        - gateway.response.time
+        - gateway.circuit.breaker
+        - gateway.rate.limit
+    logging:
+      level: WARN  # Minimal logging for production
+      format: json  # Structured logging for production
+      enable-request-logging: false  # Disabled for performance and privacy
+      enable-response-logging: false
+      enable-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: false  # Disabled for privacy
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+
+# Logging Configuration - Production
+logging:
+  level:
+    org.gripday: WARN
+    org.springframework.cloud.gateway: WARN
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    reactor.netty: WARN
+    io.lettuce: ERROR
+    root: WARN
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%-5level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId:-}","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}","message":"%msg"}%n'
+
+# Management Configuration - Production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus  # Minimal exposure for security
+  endpoint:
+    health:
+      show-details: never  # Security: never show details
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 0.01
+
+# SpringDoc Configuration - Production
+springdoc:
+  api-docs:
+    enabled: false  # Disabled for production security
+  swagger-ui:
+    enabled: false  # Disabled for production security
