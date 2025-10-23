@@ -111,7 +111,7 @@
     - Add tenant context to MDC for structured logging
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.8_
 
-  - [ ] 2.5 Implement user management with admin-only access and tenant isolation
+  - [x] 2.5 Implement user management with admin-only access and tenant isolation
     - Create UserManagementResource in presentation.web package with @PreAuthorize annotations
     - Implement UserManagementService with role-based access control and tenant filtering
     - Add CRUD operations restricted to ADMIN and SUPER_ADMIN roles within tenant boundaries

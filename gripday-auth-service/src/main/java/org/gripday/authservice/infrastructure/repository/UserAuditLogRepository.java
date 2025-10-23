@@ -153,6 +153,20 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
                                           @Param("limit") int limit);
 
     /**
+     * Find latest audit log for a user.
+     * 
+     * @param userId the user ID
+     * @return Optional containing the latest audit log if found
+     */
+    @Query("""
+        SELECT al FROM UserAuditLog al 
+        WHERE al.userId = :userId
+        ORDER BY al.createdAt DESC
+        LIMIT 1
+        """)
+    java.util.Optional<UserAuditLog> findLatestByUserId(@Param("userId") Long userId);
+
+    /**
      * Delete old audit logs before a specific date for a tenant.
      * 
      * @param tenantId the tenant identifier

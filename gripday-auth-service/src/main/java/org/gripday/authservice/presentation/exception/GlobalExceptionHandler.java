@@ -116,6 +116,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
     
+    @ExceptionHandler(org.gripday.authservice.domain.service.UserManagementService.UserManagementException.class)
+    public ResponseEntity<ApiError> handleUserManagementException(
+            org.gripday.authservice.domain.service.UserManagementService.UserManagementException ex, 
+            HttpServletRequest request) {
+        
+        var errorCode = determineUserManagementErrorCode(ex.getMessage());
+        var status = errorCode.equals("USER_ALREADY_EXISTS") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
+        
+        var errorResponse = createErrorResponse(
+            errorCode,
+            "User management operation failed",
+            ex.getMessage(),
+            request,
+            List.of()
+        );
+        
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(
             Exception ex, HttpServletRequest request) {
@@ -160,6 +179,23 @@ public class GlobalExceptionHandler {
             case String msg when msg.contains("password") -> 
                 "VALIDATION_INVALID_PASSWORD";
             default -> "USER_REGISTRATION_FAILED";
+        };
+    }
+    
+    /**
+     * Determine user management error code using switch expression.
+     */
+    private String determineUserManagementErrorCode(String message) {
+        return switch (message.toLowerCase()) {
+            case String msg when msg.contains("username already exists") || msg.contains("email already exists") -> 
+                "USER_ALREADY_EXISTS";
+            case String msg when msg.contains("user not found") -> 
+                "USER_NOT_FOUND";
+            case String msg when msg.contains("cannot delete your own account") -> 
+                "USER_SELF_DELETE_FORBIDDEN";
+            case String msg when msg.contains("unknown roles") -> 
+                "USER_INVALID_ROLES";
+            default -> "USER_MANAGEMENT_FAILED";
         };
     }
     
