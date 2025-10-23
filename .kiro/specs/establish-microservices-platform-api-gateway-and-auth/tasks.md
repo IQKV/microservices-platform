@@ -23,7 +23,7 @@
     - Create three-tier package structure (presentation, domain, infrastructure)
     - Configure PostgreSQL connection properties and JPA settings with Spring profiles using YAML format exclusively
     - Create application-local.yml, application-staging.yml, and application-production.yml with gripday. prefix for all custom properties
-    - Set up Flyway XML migration configuration using flyway-core and flyway-database-postgresql with environment-specific settings
+    - Set up Liquibase migration configuration using liquibase-core and xml changesets
     - Implement GripdayProperties configuration class with validation using @ConfigurationProperties(prefix = "gripday")
     - Configure externalized configuration using @ConfigurationProperties with gripday namespace structure
     - Implement architectural testing configuration with ArchUnit and Spring Modulith
@@ -32,7 +32,7 @@
     - Create configuration validation to enforce YAML format and gripday prefix standards
     - _Requirements: 3.1, 3.2, 3.3, 1.7, 1.8, 1.9, 16.1, 16.4, 16.5, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
 
-  - [ ] 2.2 Implement database schema with Flyway XML migrations using flyway-core and flyway-database-postgresql
+  - [ ] 2.2 Implement database schema with Liquibase XML migrations using liquibase-core and postgresql driver
     - Create V1__Create_users_table.xml migration with all required fields
     - Create V2__Create_authorities_table.xml migration for roles and permissions
     - Create V3__Create_user_authorities_table.xml migration for user-role relationships

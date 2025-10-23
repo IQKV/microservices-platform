@@ -26,7 +26,7 @@ This document outlines the requirements for a multi-module Maven project impleme
 - **Rate_Limiter**: Component that controls the frequency of requests to prevent abuse
 - **Session_Store**: Redis-based storage for managing user sessions
 - **Cache_Layer**: Redis-based caching mechanism for improved performance
-- **Migration_System**: Flyway-based database schema versioning and migration tool using flyway-core and flyway-database-postgresql dependencies with XML format only
+- **Migration_System**: Liquibase-based database schema versioning and migration tool using liquibase-core with XML format only
 - **Observability_Stack**: Combined monitoring solution using OpenTelemetry, Prometheus, Grafana, Loki, and Promtail
 - **Container_Platform**: Docker and Docker Compose setup for development and deployment environments
 - **Three_Tier_Architecture**: Layered architecture pattern with presentation, business, and data access layers
@@ -104,7 +104,7 @@ This document outlines the requirements for a multi-module Maven project impleme
 
 1. THE Platform SHALL use PostgreSQL as the primary database
 2. THE Platform SHALL integrate JPA/Hibernate for object-relational mapping
-3. THE Migration_System SHALL manage database schema versions using Flyway with flyway-core and flyway-database-postgresql dependencies in XML format
+3. THE Migration_System SHALL manage database schema versions using Liquibase with liquibase-core and postgresql dependencies (in XML changeset format)
 4. THE Auth_Service SHALL store User_Entity and Authority_Entity data in PostgreSQL tables
 5. THE Platform SHALL provide database connection pooling and configuration management
 

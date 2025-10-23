@@ -2314,7 +2314,7 @@ org.gripday.authservice/
 - Spring Data JPA with Hibernate 6.x
 - Jakarta Persistence API (JPA 3.1+)
 - PostgreSQL database
-- Flyway migrations with flyway-core and flyway-database-postgresql
+- Liquibase migrations with liquibase-core (xml changesets)
 
 **Core Components:**
 
@@ -2627,13 +2627,13 @@ public class AuthValidationController {
 
 ### Auth Service Database Schema
 
-**Flyway XML Migration Configuration:**
+**Liquibase XML Migration Configuration:**
 
-**Design Rationale:** XML-based Flyway migrations provide structured, version-controlled database schema management with clear separation from application code. Using flyway-core and flyway-database-postgresql dependencies ensures PostgreSQL-specific optimizations while maintaining Spring Boot integration for automatic execution on startup.
+**Design Rationale:** XML-based Liquibase migrations provide structured, version-controlled database schema management with clear separation from application code. Using liquibase-core and postgresql dependencies ensures PostgreSQL-specific optimizations while maintaining Spring Boot integration for automatic execution on startup.
 
-All database schema changes will be managed through Flyway XML migrations using flyway-core and flyway-database-postgresql dependencies. Migrations will be executed automatically by Spring Boot on application startup, not through Maven plugin.
+All database schema changes will be managed through Liquibase XML migrations using liquibase-core and postgresql dependencies. Migrations will be executed automatically by Spring Boot on application startup, not through Maven plugin.
 
-**Spring Boot JPA and Flyway Configuration:**
+**Spring Boot JPA and Liquibase Configuration:**
 ```yaml
 # application.yml
 spring:
@@ -2669,14 +2669,16 @@ spring:
     show-sql: false
     open-in-view: false
     
-  flyway:
+  liquibase:
     enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    validate-on-migrate: true
-    clean-disabled: true
-    sql-migration-suffixes: .xml
-    encoding: UTF-8
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: default
+    default-schema: public
+    liquibase-schema: public
+    rollback-file: classpath:db/changelog/rollback.sql
+    parameters:
+      lockTimeout: 300s
+    
 ```
 
 **Maven Dependencies (pom.xml):**
@@ -2713,14 +2715,10 @@ spring:
         <scope>runtime</scope>
     </dependency>
     
-    <!-- Flyway dependencies -->
+    <!-- Liquibase -->
     <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-database-postgresql</artifactId>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
     </dependency>
     
     <!-- Hibernate Second Level Cache (Optional) -->
@@ -2735,59 +2733,84 @@ spring:
 </dependencies>
 ```
 
-**Example Migration (V1__Create_users_table.xml):**
+**Liquibase Master Changelog (`db/changelog/db.changelog-master.xml`):**
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<sql>
-    <![CDATA[
-        CREATE TABLE users (
-            id BIGSERIAL PRIMARY KEY,
-            username VARCHAR(50) NOT NULL UNIQUE,
-            email VARCHAR(100) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            first_name VARCHAR(50),
-            last_name VARCHAR(50),
-            enabled BOOLEAN NOT NULL DEFAULT true,
-            account_non_expired BOOLEAN NOT NULL DEFAULT true,
-            account_non_locked BOOLEAN NOT NULL DEFAULT true,
-            credentials_non_expired BOOLEAN NOT NULL DEFAULT true,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        );
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
-        -- Create indexes for performance
-        CREATE INDEX idx_users_username ON users(username);
-        CREATE INDEX idx_users_email ON users(email);
-        CREATE INDEX idx_users_enabled ON users(enabled);
-    ]]>
-</sql>
+    <include file="db/changelog/changes/001-create-users-table.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/002-create-authorities-table.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/003-create-user-authorities-table.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/004-create-user-audit-log-table.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/005-add-indexes.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog>
 ```
 
-**Auth Service Migration File Structure:**
-```
-gripday-auth-service/src/main/resources/db/migration/
-├── V1__Create_users_table.xml
-├── V2__Create_authorities_table.xml
-├── V3__Create_user_authorities_table.xml
-├── V4__Create_user_audit_log_table.xml
-└── V5__Add_indexes.xml
-```
+**Example Changeset (`db/changelog/changes/001-create-users-table.xml`):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
 
-**Gateway Service Migration File Structure:**
-```
-gripday-gateway-service/src/main/resources/db/migration/
-├── V1__Create_routes_table.xml
-├── V2__Create_rate_limits_table.xml
-├── V3__Create_circuit_breaker_state_table.xml
-├── V4__Create_request_logs_table.xml
-└── V5__Add_performance_indexes.xml
+    <changeSet id="001-create-users-table" author="platform">
+        <createTable tableName="users">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)"/>
+            <column name="last_name" type="VARCHAR(50)"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_non_expired" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_non_locked" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credentials_non_expired" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_users_username" tableName="users">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_users_enabled" tableName="users">
+            <column name="enabled"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
 ```
 
 ### Database Per Service Migration Strategy
 
 **Independent Migration Lifecycle:**
 - Each service manages its own database schema evolution
-- Migrations run automatically on service startup via Spring Boot Flyway integration
+- Migrations run automatically on service startup via Spring Boot Liquibase integration
 - No coordination required between services for schema changes
 - Service teams have full autonomy over their data model
 
@@ -2805,7 +2828,7 @@ gripday-gateway-service/src/main/resources/db/migration/
 
 ### Gateway Service Database Schema
 
-**Flyway XML Migration Configuration:**
+**Liquibase XML Migration Configuration:**
 
 **Design Rationale:** Gateway service maintains its own database for route configurations, rate limiting rules, and operational state. This ensures the gateway can operate independently and scale its data storage according to routing and traffic management needs.
 
@@ -3442,7 +3465,7 @@ TTL: Session timeout duration
 - **Dependency Rules Tests**: Prevent architectural violations and circular dependencies
 
 ### Integration Testing
-- **Service-Specific Database Integration**: Test each service's Spring Data JPA repositories with Hibernate 6.x and Flyway migrations independently
+- **Service-Specific Database Integration**: Test each service's Spring Data JPA repositories with Hibernate 6.x and Liquibase migrations independently
 - **Auth Service Database**: Test user management, authentication, and authorization data operations
 - **Gateway Service Database**: Test route configuration, rate limiting, and circuit breaker state management
 - **Redis Integration**: Test service-specific caching and session management
@@ -3700,9 +3723,9 @@ gripday:
       maximum-pool-size: 20
       minimum-idle: 5
       connection-timeout: 30000
-    flyway:
-      validate-on-migrate: true
-      clean-disabled: true
+    liquibase:
+      enabled: true
+      change-log: classpath:db/changelog/db.changelog-master.xml
       
   # Redis configuration
   cache:
@@ -6639,7 +6662,7 @@ The Auth Service implements a three-tier architecture with clear separation of c
 - JPA entities and repositories
 - External service integrations
 - Caching with Redis
-- Database migrations with Flyway using flyway-core and flyway-database-postgresql
+- Database migrations with Liquibase using liquibase-core and postgresql driver
 
 ## Simple Design Patterns
 - **Repository Pattern**: Simple data access
@@ -6732,7 +6755,7 @@ echo "Waiting for services to be ready..."
 export SPRING_PROFILES_ACTIVE=local
 export DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_local
 
-# Database migrations will be handled automatically by Spring Boot with flyway-core
+# Database migrations will be handled automatically by Spring Boot with liquibase-core
 echo "Database migrations will run automatically on application startup..."
 
 # Start application
