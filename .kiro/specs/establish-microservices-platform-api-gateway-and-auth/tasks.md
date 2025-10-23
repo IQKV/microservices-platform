@@ -57,7 +57,7 @@
     - Use records for query result DTOs (UserProjection, UserSummaryDto) with modern syntax
     - _Requirements: 3.3, 5.8, 5.9, 17.1, 17.3, 17.5, 17.8_
 
-  - [ ] 2.3 Implement authentication and user registration with JWT functionality using Java 21 features
+  - [x] 2.3 Implement authentication and user registration with JWT functionality using Java 21 features
     - Configure Spring Security with JWT token generation and validation using JwtEncoder and JwtDecoder
     - Create AuthenticationResource in presentation.web package with Resource suffix
     - Implement POST /api/v1/auth/signup endpoint:

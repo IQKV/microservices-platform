@@ -41,6 +41,11 @@ management:
 
 # Gripday-specific configuration properties
 gripday:
+  auth:
+    jwt:
+      access-token-expiry: PT15M  # 15 minutes
+      refresh-token-expiry: P7D   # 7 days
+      issuer: gripday-auth-service
   observability:
     tracing:
       enabled: true
