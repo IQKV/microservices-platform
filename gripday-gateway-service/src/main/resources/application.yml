@@ -98,6 +98,7 @@ gripday:
       allowed-origins:
         - http://localhost:3000
         - http://localhost:5173
+        - http://localhost:8080
       allowed-methods:
         - GET
         - POST
@@ -109,6 +110,26 @@ gripday:
         - "*"
       allow-credentials: true
       max-age: 3600
+    
+    transformation:
+      request:
+        enabled: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
+          - Authorization-Internal
+          - X-Internal-Token
+        additional-headers:
+          X-Gateway-Version: "1.0.0"
+      response:
+        enabled: true
+        enable-security-headers: true
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
+          - X-Internal-Service
+          - X-Database-Query-Time
     
   observability:
     tracing:
