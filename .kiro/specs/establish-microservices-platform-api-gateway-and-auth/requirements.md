@@ -132,14 +132,17 @@ This document outlines the requirements for a multi-module Maven project impleme
 
 1. THE Auth_Service SHALL implement JWT_Token generation and validation
 2. THE Auth_Service SHALL integrate Spring Security for authentication flows
-3. THE Auth_Service SHALL provide user registration and login endpoints
-4. THE Auth_Service SHALL implement OAuth2_Flow for secure authentication
-5. THE Auth_Service SHALL manage User_Entity and Authority_Entity data structures
-6. THE RBAC_System SHALL enforce role-based access control across services
-7. THE Auth_Service SHALL provide JWT_Token validation endpoints for cross-service verification
-8. THE Gateway_Service SHALL validate JWT_Token for all protected incoming requests
-9. THE JWT_Token SHALL include User_Context claims for seamless user information propagation
-10. THE Claims_Propagation SHALL ensure user context flows through all connected microservices
+3. THE Auth_Service SHALL provide POST /api/v1/auth/signup endpoint for user registration with username, email, and password
+4. THE Auth_Service SHALL provide POST /api/v1/auth/login endpoint for user authentication with username/email and password
+5. THE Auth_Service SHALL provide POST /api/v1/auth/refresh endpoint for JWT token refresh
+6. THE Auth_Service SHALL provide POST /api/v1/auth/logout endpoint for user logout and token invalidation
+7. THE Auth_Service SHALL implement OAuth2_Flow for secure authentication
+8. THE Auth_Service SHALL manage User_Entity and Authority_Entity data structures
+9. THE RBAC_System SHALL enforce role-based access control across services
+10. THE Auth_Service SHALL provide JWT_Token validation endpoints for cross-service verification
+11. THE Gateway_Service SHALL validate JWT_Token for all protected incoming requests
+12. THE JWT_Token SHALL include User_Context claims for seamless user information propagation
+13. THE Claims_Propagation SHALL ensure user context flows through all connected microservices
 
 ### Requirement 6
 
@@ -390,7 +393,7 @@ This document outlines the requirements for a multi-module Maven project impleme
 
 #### Acceptance Criteria
 
-1. THE Platform SHALL place all @RestController classes in the presentation.web package structure
+1. THE Platform SHALL place all @RestController classes in the presentation.web package exclusivelyn the presentation.web package structure
 2. THE REST_Controller_Conventions SHALL require all @RestController classes to have a "Resource" suffix in their class names
 3. THE Platform SHALL enforce consistent package naming with presentation.web pattern for REST controllers
 4. THE Architecture_Testing SHALL validate that all @RestController classes follow the Resource naming convention

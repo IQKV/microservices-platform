@@ -1,377 +1,293 @@
-# Implementation Plan
+# Implementation Plan - MVP Focus
 
-- [ ] 1. Establish Maven as the exclusive build system with enforcer rules and project structure validation
-  - Create parent POM (gripday-platform/pom.xml) with Maven enforcer plugin to ban alternative build tools (Gradle, SBT, Ant)
-  - Configure Maven enforcer rules to require Maven 3.9.0+ and Java 21
-  - Set up dependency convergence validation and ban problematic dependencies
-  - Implement Maven directory structure validation with required file presence checks
-  - Configure Maven compiler plugin with Java 21 features and preview flags
-  - Set up Maven Surefire and Failsafe plugins for unit and integration testing
-  - Add JaCoCo Maven plugin for code coverage reporting
-  - Configure SpotBugs and Checkstyle Maven plugins for code quality
-  - Create Maven profiles for code quality checks while minimizing profile usage
-  - Set up Spring Boot Maven plugin for executable JAR packaging
-  - Configure Maven build commands and validate Docker integration with Maven-built JARs
-  - Create Maven wrapper (mvnw) for consistent build environment
-  - Add Maven build validation in CI/CD pipelines
-  - Document Maven-only development workflow and prevent alternative build tool usage
-  - _Requirements: 25.1, 25.2, 25.3, 25.4, 25.5, 25.6, 25.7, 25.8_
+## Phase 1: Core Platform Foundation
 
-- [ ] 2. Set up multi-module Maven project structure with three-tier architecture, environment configuration, and Java 21 features
-  - Create parent POM with groupId org.gripday and Java 21 configuration for dependency management only
+- [ ] 1. Set up Maven multi-module project structure
+  - Create parent POM (gripday-platform/pom.xml) with Maven enforcer plugin and Java 21 configuration
   - Configure Spring Boot 3.5.6 and Spring Cloud 2025.0.0 dependencies
-  - Enable Java 21 language features and set compiler options for modern syntax
-  - Create isolated module structure for gripday-gateway-service and gripday-auth-service
-  - Implement three-tier package structure (presentation, domain, infrastructure) for each service
+  - Create isolated module structure for gripday-auth-service and gripday-gateway-service
+  - Set up Maven compiler plugin with Java 21 features (var, records, pattern matching, text blocks)
+  - Configure Maven Surefire and Failsafe plugins for testing
   - Add ArchUnit and Spring Modulith dependencies for architectural testing
-  - Add SpringDoc OpenAPI dependencies for comprehensive API documentation
-  - Implement minimal Maven profile usage with no environment-specific profiles
-  - Set up Spring profiles-based configuration (local, staging, production)
-  - Create environment-specific application-{profile}.yml files for each service
-  - Configure externalized configuration using environment variables
-  - Ensure each microservice has independent dependencies without shared code
-  - Set up version management without shared libraries
-  - Configure Maven compiler plugin for Java 21 features (var, pattern matching, records, sealed classes)
-  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 14.1, 14.2, 16.1, 16.2, 16.3, 16.4, 17.1, 17.2, 17.8_
+  - Create Maven wrapper (mvnw) for consistent build environment
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 25.1, 25.2, 25.3, 25.4, 25.5_
 
-- [ ] 3. Implement gripday-auth-service core structure
-  - [ ] 3.1 Create Spring Boot application with three-tier architecture, database configuration, environment profiles, and multi-tenant foundation using YAML-only format with gripday prefix
+- [ ] 2. Implement gripday-auth-service core functionality
+  - [ ] 2.1 Create Spring Boot application with three-tier architecture and YAML configuration
     - Set up main application class with Spring Boot annotations
-    - Create three-tier package structure (presentation, domain, infrastructure)
-    - Configure PostgreSQL connection properties and JPA settings with Spring profiles using YAML format exclusively
-    - Create application-local.yml, application-staging.yml, and application-production.yml with gripday. prefix for all custom properties
-    - Set up Liquibase migration configuration using liquibase-core and xml changesets with tenant schema support
-    - Implement GripdayProperties configuration class with validation using @ConfigurationProperties(prefix = "gripday")
-    - Configure externalized configuration using @ConfigurationProperties with gripday namespace structure
-    - Implement architectural testing configuration with ArchUnit and Spring Modulith
-    - Add environment variable configuration for database connections per profile using gripday.database prefix
-    - Ensure no .properties files are used and all custom configuration follows gripday. prefix convention
-    - Create configuration validation to enforce YAML format and gripday prefix standards
-    - Implement multi-tenant data source configuration with schema-based isolation
+    - Create three-tier package structure (presentation.web, domain.service, infrastructure.repository)
+    - Configure PostgreSQL connection and JPA settings using YAML format with gripday. prefix
+    - Create application-local.yml, application-staging.yml, application-production.yml
+    - Implement GripdayProperties configuration class with @ConfigurationProperties(prefix = "gripday")
+    - Set up Liquibase migration configuration using liquibase-core
+    - _Requirements: 1.7, 1.8, 1.9, 3.1, 3.2, 24.1, 24.2, 24.3, 24.4, 24.5_
+
+  - [ ] 2.2 Create database schema and JPA entities with Java 21 features
+    - Create Liquibase XML migrations in src/main/resources/db/changelog/:
+      - V1__Create_users_table.xml: id, username, email, password_hash, first_name, last_name, enabled, email_verified, created_at, updated_at, tenant_id
+      - V2__Create_authorities_table.xml: id, name, description, created_at
+      - V3__Create_user_authorities_table.xml: user_id, authority_id (many-to-many relationship)
+      - V4__Create_user_audit_log_table.xml: id, user_id, action, details, ip_address, user_agent, created_at, tenant_id
+      - V5__Add_indexes.xml: indexes on username, email, tenant_id, created_at for performance
+    - Implement User entity in infrastructure.entity package:
+      - Use @Entity, @Table, @Id, @GeneratedValue annotations
+      - Include fields for authentication (username, email, passwordHash)
+      - Include profile fields (firstName, lastName, emailVerified, enabled)
+      - Include audit fields (createdAt, updatedAt) with @CreationTimestamp and @UpdateTimestamp
+      - Include tenant field (tenantId) for multi-tenant support
+      - Use @ManyToMany relationship with Authority entity
+      - Use var for local variables in methods
+    - Implement Authority entity with proper JPA mappings:
+      - Use @Entity annotation with id, name, description fields
+      - Include @ManyToMany back-reference to User entity
+      - Add standard audit fields (createdAt)
+    - Create UserRepository interface in infrastructure.repository package:
+      - Extend JpaRepository<User, Long>
+      - Add findByUsername(String username) method
+      - Add findByEmail(String email) method
+      - Add findByUsernameOrEmail(String username, String email) method
+      - Add existsByUsername(String username) and existsByEmail(String email) methods
+      - Add findByTenantId(String tenantId) for multi-tenant queries
+      - Use text blocks for complex custom queries with @Query annotation
+    - Create AuthorityRepository interface in infrastructure.repository package:
+      - Extend JpaRepository<Authority, Long>
+      - Add findByName(String name) method
+      - Add findByUserId(Long userId) custom query method
+    - Create UserAuditLogRepository for audit trail functionality
+    - Use records for query result DTOs (UserProjection, UserSummaryDto) with modern syntax
+    - _Requirements: 3.3, 5.8, 5.9, 17.1, 17.3, 17.5, 17.8_
+
+  - [ ] 2.3 Implement authentication and user registration with JWT functionality using Java 21 features
+    - Configure Spring Security with JWT token generation and validation using JwtEncoder and JwtDecoder
+    - Create AuthenticationResource in presentation.web package with Resource suffix
+    - Implement POST /api/v1/auth/signup endpoint:
+      - Accept SignupRequest with username, email, password, firstName, lastName, tenantId
+      - Validate unique username and email constraints
+      - Hash password using BCryptPasswordEncoder
+      - Return 201 Created with UserRegistrationResponse or 409 Conflict for duplicates
+    - Implement POST /api/v1/auth/login endpoint:
+      - Accept LoginRequest with username/email, password, rememberMe flag
+      - Support authentication with either username or email
+      - Generate JWT access token (15 min) and refresh token (7 days)
+      - Return 200 OK with TokenResponse or 401 Unauthorized for invalid credentials
+    - Implement POST /api/v1/auth/refresh endpoint:
+      - Accept RefreshTokenRequest with refresh token
+      - Validate refresh token and generate new access token
+      - Return 200 OK with new TokenResponse or 401 Unauthorized for invalid token
+    - Implement POST /api/v1/auth/logout endpoint:
+      - Invalidate current JWT tokens (add to blacklist in Redis)
+      - Return 200 OK or 401 Unauthorized for invalid token
+    - Create UserRegistrationService in domain.service package:
+      - Handle user registration logic with duplicate checking
+      - Integrate with tenant context for multi-tenant user creation
+      - Send email verification (placeholder implementation)
+    - Implement AuthenticationService in domain.service package using var and modern syntax:
+      - Handle login authentication with username/email lookup
+      - Generate JWT tokens with user context claims
+      - Implement token refresh and logout logic
+    - Create DTO records using Java 21 features:
+      - SignupRequest with validation annotations (@NotBlank, @Email, @Size)
+      - LoginRequest with username/password fields
+      - RefreshTokenRequest with refresh token field
+      - TokenResponse with access token, refresh token, expiry, and user context
+      - UserRegistrationResponse with user details and registration status
+    - Create UserContext record for immutable user data transfer with tenant information
+    - Implement JWT token enrichment with user context claims using pattern matching
+    - Create simple authentication result classes (AuthenticationSuccess, AuthenticationFailure) using records
+    - Add comprehensive error handling using switch expressions and records
+    - Add proper HTTP status codes and OpenAPI documentation with @Operation and @ApiResponse annotations
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 10.1, 10.2, 10.3, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6_
+
+  - [ ] 2.4 Implement multi-tenant architecture support
+    - Create Tenant entity with tenant metadata and configuration using records
+    - Implement TenantRepository with tenant management operations
+    - Create TenantManagementService with tenant CRUD operations and schema provisioning
+    - Implement TenantManagementResource with admin-only tenant management APIs
+    - Create TenantAwareEntity base class with automatic tenant ID injection
+    - Implement tenant extraction from JWT tokens and custom headers (X-Tenant-ID)
     - Create TenantContext class for ThreadLocal tenant management
     - Set up tenant-aware JPA configuration with CurrentTenantIdentifierResolver
     - Configure tenant-aware Redis caching with namespace isolation
-    - _Requirements: 3.1, 3.2, 3.3, 1.7, 1.8, 1.9, 16.1, 16.4, 16.5, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7, 26.1, 26.2, 26.5, 26.8_
+    - Add tenant context to MDC for structured logging
+    - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.8_
 
-  - [ ] 3.2 Implement database schema with Liquibase XML migrations using liquibase-core and postgresql driver
-    - Create V1__Create_users_table.xml migration with all required fields
-    - Create V2__Create_authorities_table.xml migration for roles and permissions
-    - Create V3__Create_user_authorities_table.xml migration for user-role relationships
-    - Create V4__Create_user_audit_log_table.xml migration for simple audit trail
-    - Create V5__Add_indexes.xml migration for performance optimization on all tables
-    - _Requirements: 3.3, 5.4, 9.5, 9.6_
+  - [ ] 2.5 Implement user management with admin-only access and tenant isolation
+    - Create UserManagementResource in presentation.web package with @PreAuthorize annotations
+    - Implement UserManagementService with role-based access control and tenant filtering
+    - Add CRUD operations restricted to ADMIN and SUPER_ADMIN roles within tenant boundaries
+    - Implement role-based filtering for hierarchical access control with tenant isolation
+    - Add audit logging for all user management operations with tenant context
+    - Create consistent error responses for authorization failures (HTTP 403) and tenant violations
+    - Ensure all user operations are automatically filtered by tenant context
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 13.1, 13.2, 13.3, 26.3, 26.10_
 
-  - [ ] 3.3 Create JPA entities and repositories following three-tier architecture with Java 21 features
-    - Implement User entity in infrastructure.entity package with JPA annotations and relationships using var for local variables
-    - Implement Authority entity in infrastructure.entity package with proper mappings
-    - Create UserAuditLog entity in infrastructure.entity package for simple audit trail functionality
-    - Create UserRepository, AuthorityRepository, and UserAuditLogRepository interfaces in infrastructure.repository package
-    - Add custom query methods for role-based filtering and search using text blocks for complex SQL queries
-    - Use simple records for query result DTOs
-    - Implement repository methods with var for improved readability
-    - _Requirements: 5.4, 5.5, 9.1, 9.4, 9.5, 1.7, 17.1, 17.3, 17.5, 17.8_
+  - [ ] 2.6 Implement input validation and security measures
+    - Add comprehensive input validation using Bean Validation (JSR-303):
+      - SignupRequest: @NotBlank for required fields, @Email for email, @Size for password (min 8 chars)
+      - LoginRequest: @NotBlank for username and password
+      - Validate password complexity (uppercase, lowercase, number, special character)
+    - Implement security measures:
+      - Rate limiting for authentication endpoints (5 attempts per minute per IP)
+      - Account lockout after 5 failed login attempts (15-minute lockout)
+      - Password hashing using BCryptPasswordEncoder with strength 12
+      - Secure JWT token generation with RS256 algorithm
+      - CSRF protection for state-changing operations
+    - Add request sanitization and XSS prevention:
+      - Sanitize user input in username, email, firstName, lastName fields
+      - Implement proper encoding for output to prevent XSS attacks
+    - Create custom validation annotations:
+      - @ValidPassword for password complexity validation
+      - @ValidUsername for username format validation
+    - Implement audit logging for security events:
+      - Log successful and failed authentication attempts
+      - Log account lockouts and password changes
+      - Include IP address, user agent, and timestamp in audit logs
+    - _Requirements: 5.1, 5.2, 13.1, 13.2, 13.3_
 
-  - [ ] 3.4 Implement architectural testing with ArchUnit and Spring Modulith
-    - Create ArchUnit tests for three-tier architecture layer separation
-    - Implement dependency direction validation tests
-    - Add package naming convention tests including REST controller Resource suffix validation
-    - Add tests to validate @RestController classes are in presentation.web package
-    - Implement tests to enforce Resource naming convention for all REST controllers
-    - Create Spring Modulith tests for module boundary validation
-    - Add tests to prevent REST controllers from directly accessing repositories
-    - Validate that REST controllers follow presentation.web package structure
-    - Implement circular dependency detection tests
-    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 23.1, 23.2, 23.3, 23.4, 23.7_
-
-  - [ ] 3.5 Write simple happy path unit tests for entities and repositories
-    - Create straightforward unit tests for User and Authority entity validation focusing on successful scenarios
-    - Write basic unit tests for UserAuditLog entity creation and retrieval
-    - Write repository tests with @DataJpaTest focusing on successful CRUD operations
-    - Test custom query methods for role-based filtering with valid data scenarios
-    - Use simple test data setup with minimal complexity
-    - Focus on testing core functionality without extensive edge cases
-    - _Requirements: 3.3, 5.4, 9.1, 9.5, 21.1, 21.2, 21.3, 21.5_
-
-  - [ ] 3.6 Implement comprehensive multi-tenant architecture support
-    - Create Tenant entity with tenant metadata, configuration, and resource quotas using records for immutable data
-    - Implement TenantRepository with tenant management operations and schema-aware queries
-    - Create TenantManagementService with tenant CRUD operations, schema provisioning, and feature flag management
-    - Implement TenantManagementResource with admin-only tenant management APIs using Resource suffix convention
-    - Create TenantAwareEntity base class with automatic tenant ID injection using @PrePersist
-    - Implement TenantAwareRepository interfaces with automatic tenant filtering using SpEL expressions
-    - Create tenant extraction filters for JWT-based tenant context propagation using var and pattern matching
-    - Implement tenant-specific feature flag service with configuration management using records
-    - Create tenant-aware audit logging with tenant context in structured logs using MDC
-    - Set up tenant-specific rate limiting with Redis-based quota enforcement using tenant namespaces
-    - Implement tenant onboarding workflow with schema creation, default data, and admin user setup
-    - Create tenant-aware caching strategies with Redis namespace isolation using custom key serializers
-    - Add tenant-aware database migrations with Liquibase schema support
-    - Implement tenant context propagation through JWT claims with enhanced user context records
-    - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.6, 26.7, 26.8, 26.9, 26.10_
-
-  - [ ] 3.7 Write simple tests for auth service core functionality including multi-tenant support
-    - Test successful user authentication with valid credentials within tenant context
-    - Test successful JWT token generation and validation with tenant claims
-    - Test successful user management CRUD operations with proper authorization and tenant isolation
-    - Test successful admin access control with administrative privileges and tenant boundaries
-    - Test successful user context propagation through JWT claims with tenant information
-    - Test successful tenant isolation in data access and caching operations
-    - Test successful tenant management operations for admin users
-    - Test successful architectural compliance with ArchUnit rules including tenant-aware components
-    - Focus on testing core authentication, authorization, and multi-tenant functionality
-    - Use straightforward test scenarios without complex edge cases
-    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 21.1, 21.2, 21.7, 26.1, 26.2, 26.3, 26.10_
-
-- [ ] 4. Implement centralized authentication and JWT functionality
-  - [ ] 4.1 Configure Spring Security with OAuth2
-    - Set up SecurityConfig with OAuth2 authorization server
-    - Configure JWT token generation and validation
-    - Implement password encoding with BCrypt
-    - _Requirements: 5.1, 5.2, 5.4_
-
-  - [ ] 4.2 Create authentication controllers and services following three-tier architecture with API versioning, HTTP standards, OpenAPI documentation, and Java 21 features
-    - Implement AuthenticationResource in presentation.web package with versioned endpoints (/api/v1/, /api/v2/) using var for local variables
-    - Create UserService in domain.service package for authentication and user management operations with modern Java syntax
-    - Implement JWT token generation and validation logic in domain layer using pattern matching and switch expressions
-    - Create version-specific DTOs using records for immutable data transfer objects
-    - Implement simple authentication result classes (AuthenticationSuccess, AuthenticationFailure)
-    - Implement API version detection and routing logic using pattern matching
-    - Add deprecation headers and migration guidance for older versions
-    - Implement standard HTTP methods (GET, POST, PUT, PATCH, DELETE) with proper status codes
-    - Create consistent error response format using records for error DTOs with correlation IDs and error codes
-    - Add global exception handler for centralized error handling using switch expressions and pattern matching
+  - [ ] 2.7 Add OpenAPI documentation and HTTP standards
+    - Configure SpringDoc OpenAPI with security schemes and interactive Swagger UI
+    - Add comprehensive @Operation, @ApiResponse, @Schema annotations for all authentication endpoints
+    - Document all request/response DTOs with examples and validation constraints
+    - Implement standard HTTP methods with proper status codes (2xx, 4xx, 5xx)
+    - Create consistent error response format with correlation IDs and field-level errors
+    - Add global exception handler with comprehensive error mapping using switch expressions
     - Implement proper Content-Type and Accept header handling
-    - Add comprehensive OpenAPI annotations (@Operation, @ApiResponse, @Schema, @Parameter)
-    - Configure SpringDoc OpenAPI with security schemes and server information using text blocks for examples
-    - Create interactive Swagger UI with examples and comprehensive documentation
-    - Use var extensively for improved code readability while maintaining type safety
-    - _Requirements: 5.1, 5.2, 5.3, 1.7, 12.1, 12.2, 12.3, 12.6, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 14.1, 14.2, 14.3, 14.5, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.8_
+    - Add security documentation for JWT authentication flow
+    - _Requirements: 13.4, 13.5, 13.6, 14.1, 14.2, 14.3, 14.5_
 
-  - [ ] 4.3 Implement OAuth2 flow and token management
-    - Configure OAuth2 authorization code flow with PKCE
-    - Implement token refresh mechanism
-    - Create token validation endpoints for other services
-    - _Requirements: 5.1, 5.4_
+- [ ] 3. Set up Redis integration for caching and sessions with multi-tenant support
+  - Configure Redis connection with environment-specific settings using gripday.cache.redis prefix
+  - Set up RedisTemplate and connection factory with YAML configuration
+  - Implement session management with Redis storage and tenant namespace isolation
+  - Configure caching annotations and cache managers with tenant-aware key generation
+  - Add Redis configuration properties with @ConfigurationProperties
+  - Implement tenant-aware caching strategies with Redis namespace isolation
+  - Create custom key serializers for tenant-specific cache keys
+  - _Requirements: 4.1, 4.2, 4.4, 4.5, 24.6, 24.7, 26.5, 26.8_
 
-  - [ ] 4.4 Implement user context propagation via JWT claims in auth service using Java 21 features
-    - Create UserContext record for immutable user data transfer with validation in compact constructor
-    - Implement JWT token enrichment with user context claims using var and modern syntax
-    - Create AuthUserContextExtractor utility within auth service using pattern matching for type-safe claim extraction
-    - Add user context validation and refresh capabilities using switch expressions
-    - Implement custom claims support for service-specific metadata using records and sealed interfaces
-    - Use enhanced instanceof with pattern variables for safe type checking and casting
-    - Implement virtual threads for async user context processing where beneficial
-    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.7, 17.1, 17.2, 17.3, 17.6, 17.7, 17.8_
-
-  - [ ] 4.5 Implement HTTP standards and consistent error handling with Java 21 features
-    - Create ErrorCode enum with categorized error codes (AUTH_*, VALIDATION_*, RESOURCE_*, DOMAIN_*, SYSTEM_*, RATE_*)
-    - Implement ErrorResponse and ErrorDetail records for immutable error DTOs with consistent structure including correlation IDs and field errors
-    - Create GlobalExceptionHandler with comprehensive exception mapping using switch expressions and pattern matching
-    - Implement standard HTTP method usage patterns across all controllers using var for local variables
-    - Add proper HTTP status code compliance (2xx, 4xx, 5xx) for all operations using switch expressions
-    - Create correlation ID generation and propagation mechanism
-    - Implement request/response header standards (Content-Type, Accept, Authorization)
-    - Add rate limiting error responses with retry information using records
-    - Create circuit breaker error responses with service status using sealed classes for different response types
-    - Implement comprehensive error documentation with examples using text blocks for JSON templates
-    - Use pattern matching for instanceof checks in exception handling
-    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.8_
-
-  - [ ] 4.6 Implement comprehensive OpenAPI documentation infrastructure
-    - Configure SpringDoc OpenAPI with global settings, security schemes, and server information
-    - Create OpenApiConfig with grouped APIs for different service modules
-    - Implement comprehensive DTO schema documentation with @Schema annotations
-    - Add detailed operation documentation with examples and error responses
-    - Create version-specific OpenAPI documentation groups (v1, v2)
-    - Implement interactive Swagger UI customization with branding and examples
-    - Add OpenAPI contract testing to validate specification accuracy
-    - Create centralized API documentation portal with container orchestration
-    - Implement downloadable OpenAPI specifications in JSON and YAML formats
-    - Add comprehensive parameter documentation with validation constraints
-    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8_
-
-  - [ ] 4.7 Implement Postman collection generation and API testing automation with Java 21 features
-    - Create PostmanCollectionGenerator component for automated collection generation from OpenAPI specs using var and modern syntax
-    - Implement service-based collection organization (auth-service, gateway-service, platform) using records for configuration
-    - Generate comprehensive Postman collections with authentication flows and JWT token management
-    - Create pre-configured environments for local development, staging, and production using records for environment data
-    - Implement collection variables and global variables for dynamic configuration
-    - Add automated test scripts for request validation and response verification using text blocks for JavaScript templates
-    - Create authentication flow collections with automatic token extraction and refresh
-    - Implement error handling and validation scripts for all API responses
-    - Add Maven plugin configuration for automated collection generation in build pipeline
-    - Create PostmanCollectionResource in presentation.web package for downloadable collection and environment files using var for improved readability
-    - Implement collection enhancement with custom test scripts and documentation using text blocks for script templates
-    - Add CI/CD integration for automated Postman collection testing with Newman
-    - Use switch expressions for collection type handling and generation logic
-    - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 17.1, 17.5, 17.6, 17.8_
-
-  - [ ] 3.8 Implement comprehensive API versioning infrastructure
-    - Create ApiVersionRoutingFilter for gateway-level version handling
-    - Implement version detection from URL path, headers, and content negotiation
-    - Create ApiVersionMappingService for DTO transformations between versions
-    - Implement version-specific OpenAPI documentation generation
-    - Add deprecation warning system with sunset dates
-    - Create version compatibility matrix and migration documentation
-    - Implement semantic versioning strategy (major.minor.patch)
-    - Add support for at least 2 previous major versions
-    - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
-
-  - [ ] 3.9 Implement simple Java 21 features across authentication service
-    - Use var for local variable type inference where appropriate
-    - Convert DTOs to simple records for immutable data structures (LoginRequest, TokenResponse, UserDto)
-    - Implement simple authentication result classes without complex hierarchies
-    - Use basic pattern matching for simple type checking
-    - Implement text blocks for SQL queries and JSON templates
-    - Apply modern Java syntax consistently but simply across all authentication-related code
-    - Create simple utility classes using static methods
-    - Use straightforward control flow in authentication logic
-    - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.8_
-
-  - [ ] 3.11 Write simple happy path unit tests for authentication services using Java 21 features
-    - Create straightforward tests for UserService authentication methods focusing on successful login scenarios using var and modern syntax
-    - Write basic tests for JWT token generation and validation using records for simple test data
-    - Test successful OAuth2 flow components using pattern matching for result verification
-    - Test successful user context propagation and JWT claims enrichment using records
-    - Test AuthUserContextExtractor utility methods with valid JWT tokens using enhanced instanceof patterns
-    - Use text blocks for simple test JSON data and expected successful responses
-    - Implement basic test utilities using modern Java constructs without complex scenarios
-    - Focus on testing primary business logic without complex mocking or setup
-    - Use straightforward assertions and minimal test data setup
-    - _Requirements: 5.1, 5.2, 5.3, 10.1, 10.2, 10.3, 17.1, 17.2, 17.3, 17.5, 17.6, 17.8, 21.1, 21.2, 21.3, 21.5, 21.7_
-
-- [ ] 4. Implement centralized authorization and RBAC system
-  - [ ] 4.1 Create authorization service and controllers
-    - Implement AuthorizationResource in presentation.web package for permission checking
-    - Create RoleService for role and permission management
-    - Implement cross-service permission validation
-    - _Requirements: 5.6, 8.3_
-
-  - [ ] 4.2 Implement user lifecycle management
-    - Create UserLifecycleService for account management
-    - Implement user activation, suspension, and deletion
-    - Add user activity tracking and audit logging
-    - _Requirements: 5.4_
-
-  - [ ] 4.3 Implement admin-only user management CRUD operations with role-based filtering, API versioning, HTTP standards, and OpenAPI documentation
-    - Create UserManagementResource in presentation.web package with versioned CRUD endpoints (/api/v1/, /api/v2/) restricted to ADMIN and SUPER_ADMIN roles
-    - Implement @PreAuthorize annotations to enforce admin-only access on all user management endpoints
-    - Add HTTP 403 Forbidden responses for non-administrative users attempting access
-    - Implement UserManagementService with hierarchical access control for administrators
-    - Add role-based filtering where ADMIN can manage subordinates, SUPER_ADMIN can manage all users
-    - Implement bulk user operations with proper authorization (v2 only, ADMIN+ required)
-    - Create user search and advanced filtering capabilities (v2 enhanced, ADMIN+ required)
-    - Add role assignment and removal operations (v2 only, SUPER_ADMIN required)
-    - Create version-specific DTOs and mapping services
-    - Implement backward compatibility for v1 endpoints
-    - Implement standard HTTP methods with appropriate status codes (200, 201, 204, 400, 401, 403, 404, 409, 422)
-    - Add comprehensive error handling with consistent error response format including admin access violations
-    - Implement field-level validation errors with detailed error codes
-    - Add proper Content-Type handling and request/response headers
-    - Add comprehensive OpenAPI documentation with admin-only security requirements and access restrictions
-    - Document all query parameters, request/response schemas, and error responses including 403 Forbidden
-    - Create interactive examples for all CRUD operations and search functionality with admin role requirements
-    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 12.1, 12.2, 12.4, 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.3, 14.5_
-
-  - [ ] 4.4 Implement audit logging and user hierarchy management
-    - Create UserAuditLog entity and repository
-    - Implement UserHierarchy entity for organizational structure
-    - Add audit logging for all user management operations
-    - Create audit log retrieval with role-based filtering
-    - _Requirements: 9.6, 9.5_
-
-  - [ ] 4.10 Write simple happy path unit tests for admin-only authorization and user management services
-    - Test successful admin-only access control with @PreAuthorize annotations for valid admin users
-    - Write basic tests for successful user lifecycle operations with proper administrative privileges
-    - Test successful permission checking logic for ADMIN vs SUPER_ADMIN roles with valid scenarios
-    - Test successful user CRUD operations with appropriate administrative role scenarios
-    - Test successful role assignment operations for SUPER_ADMIN users
-    - Focus on testing successful administrative operations without complex failure scenarios
-    - Use straightforward test data setup with valid admin users and permissions
-    - Test basic hierarchical access control with simple organizational structures
-    - _Requirements: 5.6, 8.3, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.9, 9.10, 21.1, 21.2, 21.3, 21.5, 21.7_
-
-- [ ] 5. Set up Redis integration for caching and sessions
-  - [ ] 5.1 Configure Redis connection and caching with environment profiles using YAML format and gripday prefix
-    - Add Redis configuration properties for each Spring profile (local, staging, production) using YAML format exclusively
-    - Set up RedisTemplate and connection factory with environment-specific settings using gripday.cache.redis prefix
-    - Configure caching annotations and cache managers with gripday namespace structure
-    - Implement Redis connection pooling configuration per environment using gripday.cache.redis configuration properties
-    - Add environment variable configuration for Redis connections with gripday. prefix convention
-    - Create RedisConfigurationProperties with @ConfigurationProperties(prefix = "gripday.cache.redis")
-    - Ensure no .properties files are used for Redis configuration
-    - _Requirements: 4.1, 4.2, 4.4, 16.6, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
-
-  - [ ] 5.2 Implement session management with Redis
-    - Create session storage mechanism using Redis
-    - Implement session validation and cleanup
-    - Configure session timeout and renewal
-    - _Requirements: 4.1, 4.5_
-
-  - [ ] 5.3 Write simple integration tests for Redis functionality
-    - Test successful Redis connection and basic caching operations
-    - Write basic tests for successful session creation and retrieval
-    - Focus on testing core Redis functionality without complex edge cases
-    - Use simple test data and straightforward assertions
-    - _Requirements: 4.1, 4.2, 21.1, 21.6, 21.7_
-
-- [ ] 6. Implement gripday-gateway-service with reactive architecture
-  - [ ] 6.1 Create Spring Cloud Gateway application with three-tier architecture, OpenAPI documentation, and environment profiles using YAML-only format with gripday prefix
+- [ ] 4. Implement gripday-gateway-service with reactive architecture
+  - [ ] 4.1 Create Spring Cloud Gateway application with YAML configuration
     - Set up main application class with Gateway annotations
-    - Create three-tier package structure (presentation, domain, infrastructure)
-    - Configure reactive web stack dependencies
-    - Set up basic routing configuration with environment-specific settings using YAML format exclusively
-    - Create application-local.yml, application-staging.yml, and application-production.yml for gateway service with gripday. prefix for all custom properties
-    - Implement GatewayProperties configuration class with environment-specific routing using @ConfigurationProperties(prefix = "gripday.gateway")
-    - Configure externalized configuration for gateway routing and security using gripday namespace structure
-    - Implement architectural testing configuration with ArchUnit and Spring Modulith
-    - Configure SpringDoc OpenAPI for gateway service documentation
-    - Create centralized API documentation portal aggregating all service docs
-    - Ensure no .properties files are used and all custom configuration follows gripday. prefix convention
-    - Create configuration validation to enforce YAML format and gripday prefix standards for gateway service
-    - _Requirements: 6.1, 6.2, 1.7, 1.8, 1.9, 14.1, 14.8, 16.1, 16.2, 16.3, 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
+    - Configure reactive web stack dependencies and basic routing
+    - Create application-local.yml, application-staging.yml, application-production.yml with gripday. prefix
+    - Implement GatewayProperties configuration class with @ConfigurationProperties(prefix = "gripday.gateway")
+    - Set up basic service routing to auth service
+    - _Requirements: 6.1, 6.2, 24.1, 24.2, 24.3, 24.4, 24.5_
 
-  - [ ] 6.2 Implement JWT authentication filter with user context enrichment, multi-tenant support, API versioning, and HTTP standards
-    - Create reactive JWT authentication filter with version detection and tenant extraction
+  - [ ] 4.2 Implement JWT authentication filter with multi-tenant support and user context propagation
+    - Create reactive JWT authentication filter for token validation with tenant extraction
     - Integrate with auth service for token validation and tenant context resolution
-    - Implement JWT token enrichment with complete user context and tenant information
-    - Create GatewayUserContextExtractor utility within gateway service with tenant-aware context extraction
-    - Add user context and tenant context propagation to downstream services via headers and JWT claims
     - Implement tenant extraction from JWT tokens, custom headers (X-Tenant-ID), and subdomain routing
     - Create TenantExtractionFilter for early tenant context establishment in filter chain
-    - Implement tenant-aware request routing and service discovery
+    - Implement user context and tenant context propagation to downstream services via headers
     - Add tenant context to MDC for structured logging with tenant information
-    - Implement API version routing and transformation in gateway with tenant-specific configurations
-    - Add deprecation headers and version-specific error handling
-    - Implement standard HTTP status codes for authentication errors (401, 403) and tenant access violations
-    - Create consistent error response format for gateway errors with tenant context
-    - Add correlation ID propagation through gateway filters with tenant information
-    - Implement proper request/response header handling including tenant propagation headers
-    - _Requirements: 6.2, 5.8, 10.5, 10.6, 12.5, 12.8, 13.1, 13.2, 13.3, 13.6, 26.2, 26.3, 26.8_
+    - Add correlation ID generation and propagation with tenant information
+    - Create consistent error responses for authentication failures (401, 403) and tenant access violations
+    - _Requirements: 6.2, 10.5, 10.6, 13.1, 13.2, 13.3, 26.2, 26.3, 26.8_
 
-  - [ ] 6.3 Implement Redis-backed rate limiting with multi-tenant support and HTTP standards
-    - Create reactive rate limiting filter using Redis with tenant-aware key namespacing
+  - [ ] 4.3 Add rate limiting and circuit breaker functionality with multi-tenant support
+    - Implement Redis-backed rate limiting filter with tenant-aware key namespacing
     - Configure tenant-specific rate limiting policies and resource quotas per endpoint
-    - Implement distributed rate limiting logic with tenant isolation using Redis namespaces
     - Create TenantRateLimitingFilter for tenant-aware quota enforcement
-    - Implement tenant-specific rate limiting configurations based on subscription tiers
-    - Add support for tenant-specific API call limits and burst allowances
-    - Add HTTP 429 Too Many Requests status code for rate limit exceeded with tenant context
-    - Implement rate limiting error response with retry information and tenant quota details
-    - Add rate limiting headers (X-Rate-Limit-Remaining, X-Rate-Limit-Reset, X-Tenant-Quota)
-    - Create consistent error format for rate limiting violations with tenant information
-    - Implement tenant quota monitoring and alerting for usage tracking
-    - _Requirements: 6.3, 4.3, 13.2, 13.3, 13.4, 26.5, 26.7, 26.8_
-
-  - [ ] 6.4 Implement circuit breaker with Resilience4j and HTTP standards
     - Configure Resilience4j circuit breaker patterns
+    - Add HTTP 429 Too Many Requests for rate limiting with tenant quota details
+    - Add HTTP 503 Service Unavailable for circuit breaker open state
     - Create fallback mechanisms for service failures
-    - Implement circuit breaker monitoring
-    - Add HTTP 503 Service Unavailable status code for circuit breaker open state
-    - Create circuit breaker error responses with service status information
-    - Implement proper error handling for upstream service timeouts (504 Gateway Timeout)
-    - Add retry-after headers for circuit breaker responses
-    - _Requirements: 6.4, 13.2, 13.3, 13.4_
+    - Implement tenant quota monitoring and alerting for usage tracking
+    - _Requirements: 6.3, 6.4, 13.2, 13.3, 13.4, 26.5, 26.7, 26.8_
+
+## Phase 2: Testing and Architectural Validation
+
+- [ ] 5. Implement architectural testing and validation
+  - Create ArchUnit tests for three-tier architecture layer separation
+  - Add tests to validate @RestController classes are in presentation.web package with Resource suffix
+  - Implement Spring Modulith tests for module boundary validation
+  - Add tests to prevent REST controllers from directly accessing repositories
+  - Validate dependency direction rules and prevent circular dependencies
+  - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 23.1, 23.2, 23.3, 23.4, 23.7_
+
+- [ ] 6. Write happy path unit and integration tests with multi-tenant scenarios
+  - Create simple unit tests for entities, repositories, and services focusing on successful scenarios:
+    - Test User and Authority entity validation and relationships
+    - Test UserRepository methods (findByUsername, findByEmail, findByUsernameOrEmail)
+    - Test AuthorityRepository methods with valid data
+    - Test UserRegistrationService.registerUser() with valid SignupRequest
+    - Test AuthenticationService.authenticateUser() with valid LoginRequest
+    - Test JWT token generation and validation with valid user context
+  - Write integration tests for authentication endpoints with valid credentials:
+    - Test POST /api/v1/auth/signup with valid SignupRequest returns 201 Created
+    - Test POST /api/v1/auth/login with valid LoginRequest returns 200 OK with TokenResponse
+    - Test POST /api/v1/auth/refresh with valid RefreshTokenRequest returns 200 OK
+    - Test POST /api/v1/auth/logout with valid JWT token returns 200 OK
+    - Test authentication flows within tenant context with tenant isolation
+  - Test JWT token generation and validation with valid tokens and tenant claims:
+    - Verify JWT contains correct user context (userId, username, email, roles, tenantId)
+    - Test token expiration and refresh functionality
+    - Test tenant context propagation through JWT claims
+  - Test user management CRUD operations with proper admin privileges and tenant isolation:
+    - Test admin-only endpoints return 403 for non-admin users
+    - Test successful CRUD operations for users with ADMIN/SUPER_ADMIN roles
+    - Test tenant isolation in user management operations
+  - Test tenant management operations for admin users with valid tenant configurations
+  - Test gateway routing and authentication with valid requests and tenant context propagation
+  - Test tenant isolation in data access and caching operations
+  - Use straightforward test data setup with TestDataBuilder pattern and minimal complexity
+  - Focus on successful execution scenarios without complex edge cases
+  - _Requirements: 21.1, 21.2, 21.3, 21.5, 21.6, 21.7, 26.1, 26.2, 26.3, 26.10_
+
+## Phase 3: Containerization and Deployment
+
+- [ ] 7. Create Docker containerization
+  - Write optimized Dockerfiles for auth service and gateway service
+  - Create Docker Compose configurations for local development
+  - Set up PostgreSQL and Redis containers with proper networking
+  - Configure environment-specific Docker Compose files
+  - Add health checks and service dependencies
+  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+- [ ] 8. Set up observability and monitoring
+  - Configure OpenTelemetry instrumentation for both services
+  - Set up structured logging with JSON format for production
+  - Add Prometheus metrics endpoints and health checks
+  - Configure log correlation with trace IDs
+  - Implement centralized logging configuration
+  - _Requirements: 7.1, 7.2, 7.4, 7.5_
+
+- [ ] 9. Create basic documentation
+  - Create README.md files for each service with quick start guides:
+    - Auth service README with authentication endpoint examples
+    - Gateway service README with routing and security information
+    - Include curl examples for signup, login, refresh, and logout endpoints
+  - Document API endpoints with essential information:
+    - Create docs/api/authentication.md with detailed endpoint documentation
+    - Include request/response examples for all authentication endpoints
+    - Document error responses and status codes (201, 200, 401, 409, 423)
+    - Add OpenAPI/Swagger UI access instructions
+  - Add deployment documentation for local development:
+    - Docker Compose setup instructions
+    - Environment variable configuration
+    - Database setup and migration instructions
+  - Create configuration examples and environment variable documentation:
+    - YAML configuration examples for each environment (local, staging, production)
+    - JWT configuration (secret, expiration times)
+    - Database and Redis connection settings
+    - Multi-tenant configuration examples
+  - Focus on essential information in minimal, focused content:
+    - Quick start guide for developers
+    - API usage examples with authentication flow
+    - Troubleshooting common issues
+  - _Requirements: 18.1, 18.2, 18.3, 18.4, 22.1, 22.2, 22.3, 22.4_
+
+## Future Enhancements (Post-MVP)
+
+The following features can be implemented after the core MVP is complete:
+- API versioning infrastructure
+- Postman collection generation
+- Kubernetes deployment configurations
+- Advanced monitoring and alerting
+- Performance testing and optimization
+- Comprehensive security scanning
+- Advanced documentation automation
 
   - [ ] 6.5 Implement request/response transformation and CORS
     - Create request and response transformation filters

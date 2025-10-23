@@ -970,12 +970,36 @@ public record LoginRequest(
     boolean rememberMe
 ) {}
 
+public record SignupRequest(
+    @NotBlank @Size(min = 3, max = 50) String username,
+    @NotBlank @Email String email,
+    @NotBlank @Size(min = 8, max = 100) String password,
+    @NotBlank String firstName,
+    @NotBlank String lastName,
+    String tenantId
+) {}
+
+public record RefreshTokenRequest(
+    @NotBlank String refreshToken
+) {}
+
 public record TokenResponse(
     String accessToken,
     String refreshToken,
     String tokenType,
     long expiresIn,
     UserContext user
+) {}
+
+public record UserRegistrationResponse(
+    Long userId,
+    String username,
+    String email,
+    String firstName,
+    String lastName,
+    boolean emailVerified,
+    Instant createdAt,
+    String message
 ) {}
 
 public record ErrorDetail(
@@ -1453,6 +1477,88 @@ class ModularityTests {
 }
 ```
 
+## API Endpoints Documentation
+
+### Authentication Endpoints
+
+The authentication service provides the following REST endpoints for user management and authentication:
+
+**Base URL:** `/api/v1/auth`
+
+| Method | Endpoint | Description | Request Body | Response | Status Codes |
+|--------|----------|-------------|--------------|----------|--------------|
+| POST | `/signup` | Register new user account | `SignupRequest` | `UserRegistrationResponse` | 201, 400, 409 |
+| POST | `/login` | Authenticate user with credentials | `LoginRequest` | `TokenResponse` | 200, 401, 423 |
+| POST | `/refresh` | Refresh JWT access token | `RefreshTokenRequest` | `TokenResponse` | 200, 401 |
+| POST | `/logout` | Logout user and invalidate tokens | None | None | 200, 401 |
+
+**Request/Response Examples:**
+
+**User Signup:**
+```json
+POST /api/v1/auth/signup
+{
+  "username": "johndoe",
+  "email": "john.doe@example.com",
+  "password": "SecurePassword123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "tenantId": "tenant-123"
+}
+
+Response (201 Created):
+{
+  "userId": 1,
+  "username": "johndoe",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "emailVerified": false,
+  "createdAt": "2024-01-15T10:30:00Z",
+  "message": "User registered successfully. Please verify your email."
+}
+```
+
+**User Login:**
+```json
+POST /api/v1/auth/login
+{
+  "username": "johndoe",
+  "password": "SecurePassword123!",
+  "rememberMe": true
+}
+
+Response (200 OK):
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 900,
+  "user": {
+    "userId": 1,
+    "username": "johndoe",
+    "email": "john.doe@example.com",
+    "roles": ["USER"],
+    "permissions": ["READ_PROFILE"],
+    "department": "Engineering",
+    "organizationId": "tenant-123",
+    "customClaims": {}
+  }
+}
+```
+
+### User Management Endpoints
+
+**Base URL:** `/api/v1/users` (Admin-only endpoints)
+
+| Method | Endpoint | Description | Request Body | Response | Status Codes |
+|--------|----------|-------------|--------------|----------|--------------|
+| GET | `/` | List users (paginated) | Query params | `Page<UserDto>` | 200, 403 |
+| POST | `/` | Create new user | `CreateUserRequest` | `UserDto` | 201, 400, 403, 409 |
+| GET | `/{id}` | Get user by ID | None | `UserDto` | 200, 403, 404 |
+| PUT | `/{id}` | Update user | `UpdateUserRequest` | `UserDto` | 200, 400, 403, 404 |
+| DELETE | `/{id}` | Delete user | None | None | 204, 403, 404 |
+
 ## REST Controller Design Patterns
 
 ### Naming and Package Conventions
@@ -1472,28 +1578,78 @@ package org.gripday.authservice.presentation.web;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Authentication", description = "User authentication and token management")
-@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Authentication", description = "User authentication, registration, and token management")
 public class AuthenticationResource {
     
     private final AuthenticationService authenticationService;
+    private final UserRegistrationService userRegistrationService;
     
-    public AuthenticationResource(AuthenticationService authenticationService) {
+    public AuthenticationResource(
+        AuthenticationService authenticationService,
+        UserRegistrationService userRegistrationService
+    ) {
         this.authenticationService = authenticationService;
+        this.userRegistrationService = userRegistrationService;
     }
     
-    @Operation(summary = "User login", description = "Authenticate user with credentials")
+    @Operation(
+        summary = "User signup", 
+        description = "Register a new user account with username, email, and password"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "User registered successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "409", description = "Username or email already exists")
+    })
+    @PostMapping("/signup")
+    public ResponseEntity<UserRegistrationResponse> signup(@Valid @RequestBody SignupRequest request) {
+        var result = userRegistrationService.registerUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+    
+    @Operation(
+        summary = "User login", 
+        description = "Authenticate user with username/email and password"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Authentication successful"),
+        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+        @ApiResponse(responseCode = "423", description = "Account locked")
+    })
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
         var result = authenticationService.authenticateUser(request);
         return ResponseEntity.ok(result);
     }
     
-    @Operation(summary = "Refresh token", description = "Refresh JWT access token")
+    @Operation(
+        summary = "Refresh token", 
+        description = "Refresh JWT access token using refresh token"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Token refreshed successfully"),
+        @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")
+    })
     @PostMapping("/refresh")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         var result = authenticationService.refreshToken(request);
         return ResponseEntity.ok(result);
+    }
+    
+    @Operation(
+        summary = "User logout", 
+        description = "Logout user and invalidate tokens"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Logout successful"),
+        @ApiResponse(responseCode = "401", description = "Invalid token")
+    })
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        authenticationService.logout(request);
+        return ResponseEntity.ok().build();
     }
 }
 
