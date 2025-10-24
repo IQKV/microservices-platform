@@ -9,6 +9,7 @@ import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.repository.BookRepository;
 import org.gripday.bookstore.infrastructure.repository.CategoryRepository;
 import org.gripday.bookstore.infrastructure.security.AuditLogger;
+import org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,12 +31,14 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
     private final AuditLogger auditLogger;
+    private final BookstoreMetrics bookstoreMetrics;
     
     public BookService(BookRepository bookRepository, CategoryRepository categoryRepository, 
-                      AuditLogger auditLogger) {
+                      AuditLogger auditLogger, BookstoreMetrics bookstoreMetrics) {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.auditLogger = auditLogger;
+        this.bookstoreMetrics = bookstoreMetrics;
     }
     
     @Transactional(readOnly = true)
@@ -44,17 +47,23 @@ public class BookService {
     public Page<BookDto> findBooks(BookSearchCriteria criteria, Pageable pageable) {
         logger.debug("Finding books with criteria: {}", criteria);
         
-        var books = bookRepository.findBooksWithInventoryFilter(
-            criteria.title(),
-            criteria.author(),
-            criteria.category(),
-            criteria.minPrice(),
-            criteria.maxPrice(),
-            criteria.availableOnly() != null ? criteria.availableOnly() : false,
-            pageable
-        );
-        
-        return books.map(this::convertToDto);
+        var timer = bookstoreMetrics.startBookSearchTimer();
+        try {
+            var books = bookRepository.findBooksWithInventoryFilter(
+                criteria.title(),
+                criteria.author(),
+                criteria.category(),
+                criteria.minPrice(),
+                criteria.maxPrice(),
+                criteria.availableOnly() != null ? criteria.availableOnly() : false,
+                pageable
+            );
+            
+            bookstoreMetrics.incrementBookSearch();
+            return books.map(this::convertToDto);
+        } finally {
+            bookstoreMetrics.recordBookSearchTime(timer);
+        }
     }
     
     @Transactional(readOnly = true)
@@ -74,9 +83,12 @@ public class BookService {
     public BookDto createBook(CreateBookRequest request, UserContext userContext) {
         logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
         
+        var timer = bookstoreMetrics.startBookCreationTimer();
+        
         // Authorization check
         if (!userContext.isAdmin()) {
             auditLogger.logUnauthorizedAccess("create book", "BOOK", userContext);
+            bookstoreMetrics.incrementUnauthorizedAccess();
             throw new UnauthorizedOperationException("create book", "ADMIN or SUPERADMIN");
         }
         
@@ -108,6 +120,10 @@ public class BookService {
         // Audit log the creation
         auditLogger.logBookCreation(savedBook.getId(), savedBook.getTitle(), userContext);
         
+        // Record metrics
+        bookstoreMetrics.incrementBookCreated();
+        bookstoreMetrics.recordBookCreationTime(timer);
+        
         logger.info("Successfully created book with ID: {} by user: {}", savedBook.getId(), userContext.username());
         
         return convertToDto(savedBook);
@@ -125,6 +141,7 @@ public class BookService {
         // Authorization check
         if (!userContext.isAdmin()) {
             auditLogger.logUnauthorizedAccess("update book", "BOOK", userContext);
+            bookstoreMetrics.incrementUnauthorizedAccess();
             throw new UnauthorizedOperationException("update book", "ADMIN or SUPERADMIN");
         }
         
@@ -147,6 +164,9 @@ public class BookService {
         // Audit log the update
         auditLogger.logBookUpdate(updatedBook.getId(), updatedBook.getTitle(), userContext);
         
+        // Record metrics
+        bookstoreMetrics.incrementBookUpdated();
+        
         logger.info("Successfully updated book ID: {} by user: {}", id, userContext.username());
         
         return convertToDto(updatedBook);
@@ -163,6 +183,7 @@ public class BookService {
         // Authorization check
         if (!userContext.isAdmin()) {
             auditLogger.logUnauthorizedAccess("delete book", "BOOK", userContext);
+            bookstoreMetrics.incrementUnauthorizedAccess();
             throw new UnauthorizedOperationException("delete book", "ADMIN or SUPERADMIN");
         }
         
@@ -175,6 +196,9 @@ public class BookService {
         
         // Audit log the deletion
         auditLogger.logBookDeletion(book.getId(), book.getTitle(), userContext);
+        
+        // Record metrics
+        bookstoreMetrics.incrementBookDeleted();
         
         logger.info("Successfully deleted (marked unavailable) book ID: {} by user: {}", id, userContext.username());
     }

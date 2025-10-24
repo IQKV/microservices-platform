@@ -24,3 +24,6 @@ logging:
   level:
     org.gripday.bookstore: INFO
     org.springframework.cache: INFO
+    AUDIT: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"

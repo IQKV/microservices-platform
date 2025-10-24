@@ -3,9 +3,10 @@ package org.gripday.bookstore.infrastructure.security;
 import org.gripday.bookstore.domain.dto.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 @Component
@@ -16,20 +17,34 @@ public class AuditLogger {
     public void logAdminOperation(String operation, String resourceType, String resourceId, 
                                 UserContext userContext, Map<String, Object> details) {
         
-        var auditEntry = Map.of(
-            "timestamp", LocalDateTime.now(),
-            "operation", operation,
-            "resourceType", resourceType,
-            "resourceId", resourceId,
-            "userId", userContext.userId(),
-            "username", userContext.username(),
-            "userRoles", userContext.roles(),
-            "department", userContext.department(),
-            "organizationId", userContext.organizationId(),
-            "details", details != null ? details : Map.of()
-        );
+        // Add audit-specific MDC entries
+        MDC.put("auditEvent", "ADMIN_OPERATION");
+        MDC.put("operation", operation);
+        MDC.put("resourceType", resourceType);
+        MDC.put("resourceId", resourceId);
         
-        auditLog.info("Admin operation performed: {}", auditEntry);
+        try {
+            var auditEntry = Map.<String, Object>of(
+                "timestamp", Instant.now().toString(),
+                "operation", operation,
+                "resourceType", resourceType,
+                "resourceId", resourceId,
+                "userId", userContext.userId(),
+                "username", userContext.username(),
+                "userRoles", userContext.roles(),
+                "department", userContext.department() != null ? userContext.department() : "N/A",
+                "organizationId", userContext.organizationId() != null ? userContext.organizationId() : "N/A",
+                "correlationId", MDC.get("correlationId")
+            );
+            
+            auditLog.info("Admin operation performed: {} Details: {}", auditEntry, details != null ? details : Map.of());
+        } finally {
+            // Clean up audit-specific MDC entries
+            MDC.remove("auditEvent");
+            MDC.remove("operation");
+            MDC.remove("resourceType");
+            MDC.remove("resourceId");
+        }
     }
     
     public void logBookCreation(Long bookId, String title, UserContext userContext) {
@@ -58,18 +73,31 @@ public class AuditLogger {
     }
     
     public void logUnauthorizedAccess(String operation, String resourceType, UserContext userContext) {
-        var auditEntry = Map.of(
-            "timestamp", LocalDateTime.now(),
-            "event", "UNAUTHORIZED_ACCESS_ATTEMPT",
-            "operation", operation,
-            "resourceType", resourceType,
-            "userId", userContext.userId(),
-            "username", userContext.username(),
-            "userRoles", userContext.roles(),
-            "department", userContext.department(),
-            "organizationId", userContext.organizationId()
-        );
+        // Add security audit MDC entries
+        MDC.put("auditEvent", "UNAUTHORIZED_ACCESS_ATTEMPT");
+        MDC.put("operation", operation);
+        MDC.put("resourceType", resourceType);
         
-        auditLog.warn("Unauthorized access attempt: {}", auditEntry);
+        try {
+            var auditEntry = Map.<String, Object>of(
+                "timestamp", Instant.now().toString(),
+                "event", "UNAUTHORIZED_ACCESS_ATTEMPT",
+                "operation", operation,
+                "resourceType", resourceType,
+                "userId", userContext.userId(),
+                "username", userContext.username(),
+                "userRoles", userContext.roles(),
+                "department", userContext.department() != null ? userContext.department() : "N/A",
+                "organizationId", userContext.organizationId() != null ? userContext.organizationId() : "N/A",
+                "correlationId", MDC.get("correlationId")
+            );
+            
+            auditLog.warn("Unauthorized access attempt: {}", auditEntry);
+        } finally {
+            // Clean up security audit MDC entries
+            MDC.remove("auditEvent");
+            MDC.remove("operation");
+            MDC.remove("resourceType");
+        }
     }
 }

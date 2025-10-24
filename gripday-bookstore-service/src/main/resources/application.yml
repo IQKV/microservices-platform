@@ -59,14 +59,42 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,env,configprops
+      base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
+      show-components: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    diskspace:
+      enabled: true
   metrics:
     export:
       prometheus:
         enabled: true
+        step: 60s
+        descriptions: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[bookstore.books.search.duration]": true
+        "[bookstore.books.creation.duration]": true
+        "[bookstore.inventory.update.duration]": true
+    tags:
+      application: bookstore-service
+      environment: ${spring.profiles.active:local}
 
 logging:
   level:

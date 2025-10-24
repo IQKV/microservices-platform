@@ -7,6 +7,7 @@ import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.repository.BookRepository;
 import org.gripday.bookstore.infrastructure.repository.InventoryRepository;
 import org.gripday.bookstore.infrastructure.security.AuditLogger;
+import org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -26,12 +27,14 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final BookRepository bookRepository;
     private final AuditLogger auditLogger;
+    private final BookstoreMetrics bookstoreMetrics;
     
     public InventoryService(InventoryRepository inventoryRepository, BookRepository bookRepository,
-                          AuditLogger auditLogger) {
+                          AuditLogger auditLogger, BookstoreMetrics bookstoreMetrics) {
         this.inventoryRepository = inventoryRepository;
         this.bookRepository = bookRepository;
         this.auditLogger = auditLogger;
+        this.bookstoreMetrics = bookstoreMetrics;
     }
     
     @Transactional(readOnly = true)
@@ -52,9 +55,12 @@ public class InventoryService {
     public InventoryDto updateInventory(Long bookId, UpdateInventoryRequest request, UserContext userContext) {
         logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
         
+        var timer = bookstoreMetrics.startInventoryUpdateTimer();
+        
         // Authorization check
         if (!userContext.isAdmin()) {
             auditLogger.logUnauthorizedAccess("update inventory", "INVENTORY", userContext);
+            bookstoreMetrics.incrementUnauthorizedAccess();
             throw new UnauthorizedOperationException("update inventory", "ADMIN or SUPERADMIN");
         }
         
@@ -86,6 +92,10 @@ public class InventoryService {
         // Audit log the inventory update
         auditLogger.logInventoryUpdate(bookId, oldQuantity, request.quantity(), userContext);
         
+        // Record metrics
+        bookstoreMetrics.incrementInventoryUpdated();
+        bookstoreMetrics.recordInventoryUpdateTime(timer);
+        
         logger.info("Successfully updated inventory for book ID: {} by user: {}", bookId, userContext.username());
         
         return convertToDto(updatedInventory);
@@ -102,6 +112,7 @@ public class InventoryService {
         // Authorization check
         if (!userContext.isAdmin()) {
             auditLogger.logUnauthorizedAccess("bulk update inventory", "INVENTORY", userContext);
+            bookstoreMetrics.incrementUnauthorizedAccess();
             throw new UnauthorizedOperationException("bulk update inventory", "ADMIN or SUPERADMIN");
         }
         

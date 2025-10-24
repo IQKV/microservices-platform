@@ -81,6 +81,20 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantity = 0 AND i.book.available = true")
     long countOutOfStockItems();
     
+    // Additional metrics methods
+    @Query("SELECT COALESCE(SUM(i.quantity), 0) FROM Inventory i")
+    Long sumTotalQuantity();
+    
+    @Query("""
+        SELECT COUNT(i) FROM Inventory i 
+        WHERE i.quantity <= i.lowStockThreshold 
+        AND i.book.available = true
+        """)
+    long countLowStockBooks();
+    
+    @Query("SELECT COUNT(i) FROM Inventory i WHERE i.quantity = 0 AND i.book.available = true")
+    long countOutOfStockBooks();
+    
     // Category-based inventory queries
     @Query("""
         SELECT i FROM Inventory i 

@@ -108,6 +108,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT COUNT(b) FROM Book b WHERE b.available = true")
     long countAvailableBooks();
     
+    long countByAvailableTrue();
+    
     @Query("SELECT COUNT(b) FROM Book b WHERE b.category.name = :categoryName AND b.available = true")
     long countBooksByCategory(@Param("categoryName") String categoryName);
     
