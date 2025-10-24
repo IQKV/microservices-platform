@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-gateway
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+    environment: local
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-gateway-staging
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-gateway-production
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production

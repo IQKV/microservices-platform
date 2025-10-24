@@ -1,55 +1,74 @@
-# Multi-stage build for Auth Service
+# Multi-stage build for Auth Service with optimized caching
 FROM eclipse-temurin:21-jdk-alpine AS builder
+
+# Install Maven for build optimization
+RUN apk add --no-cache maven
 
 # Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and pom files
-COPY mvnw .
-COPY .mvn .mvn
+# Copy Maven configuration files first for better layer caching
 COPY pom.xml .
 COPY gripday-auth-service/pom.xml gripday-auth-service/
 
-# Download dependencies (cached layer)
-RUN ./mvnw dependency:go-offline -pl gripday-auth-service
+# Download dependencies in separate layer for better caching
+RUN mvn dependency:go-offline -pl gripday-auth-service -B
 
 # Copy source code
 COPY gripday-auth-service/src gripday-auth-service/src
 
-# Build the application
-RUN ./mvnw clean package -pl gripday-auth-service -DskipTests
+# Build the application with optimizations
+RUN mvn clean package -pl gripday-auth-service -DskipTests -B && \
+    # Extract JAR layers for better Docker layer caching
+    mkdir -p target/dependency && \
+    cd gripday-auth-service/target && \
+    java -Djarmode=layertools -jar gripday-auth-service-*.jar extract --destination ../target/dependency
 
-# Runtime stage
+# Production runtime stage with security hardening
 FROM eclipse-temurin:21-jre-alpine
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Security: Install only essential packages and remove package manager
+RUN apk add --no-cache curl tzdata && \
+    rm -rf /var/cache/apk/* && \
+    # Create application user with restricted permissions
+    addgroup -g 1001 -S appuser && \
+    adduser -u 1001 -S appuser -G appuser -s /bin/false -h /app
 
-# Create application user for security
-RUN addgroup -g 1001 -S appuser && \
-    adduser -u 1001 -S appuser -G appuser
-
-# Set working directory
+# Set working directory and create necessary directories
 WORKDIR /app
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R appuser:appuser /app
 
-# Copy the built JAR from builder stage
-COPY --from=builder /app/gripday-auth-service/target/gripday-auth-service-*.jar app.jar
+# Copy application layers for optimal caching
+COPY --from=builder --chown=appuser:appuser /app/target/dependency/dependencies/ ./
+COPY --from=builder --chown=appuser:appuser /app/target/dependency/spring-boot-loader/ ./
+COPY --from=builder --chown=appuser:appuser /app/target/dependency/snapshot-dependencies/ ./
+COPY --from=builder --chown=appuser:appuser /app/target/dependency/application/ ./
 
-# Change ownership to non-root user
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
+# Switch to non-root user for security
 USER appuser
 
-# Expose port
+# Expose application port
 EXPOSE 8081
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8081/actuator/health || exit 1
+# Health check with improved configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:8081/actuator/health/readiness || exit 1
 
-# JVM optimization for containers
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseStringDeduplication"
+# JVM optimization for auth service workloads
+ENV JAVA_OPTS="-XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=75.0 \
+    -XX:+UseG1GC \
+    -XX:+UseStringDeduplication \
+    -XX:+OptimizeStringConcat \
+    -XX:+UseCompressedOops \
+    -XX:+UseCompressedClassPointers \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Dspring.backgroundpreinitializer.ignore=true \
+    -Dlogging.config=classpath:logback-spring.xml"
 
-# Run application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Security: Set temporary directory
+ENV JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/app/tmp"
+
+# Run application with Spring Boot's layered JAR approach
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS $JAVA_TOOL_OPTIONS org.springframework.boot.loader.launch.JarLauncher"]

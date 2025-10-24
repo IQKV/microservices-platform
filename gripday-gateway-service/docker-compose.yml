@@ -1,14 +1,15 @@
 version: '3.8'
 
 services:
-  # Redis for Gateway Service
+  # Redis for Gateway Service - Local Development
   redis-gateway:
     image: redis:7-alpine
-    container_name: gripday-gateway-redis
+    container_name: gripday-gateway-redis-local
     ports:
       - "6380:6379"
     volumes:
       - redis_gateway_data:/data
+      - ./scripts/redis-gateway.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - gateway-network
     healthcheck:
@@ -17,55 +18,142 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    command: redis-server --appendonly yes
+    restart: unless-stopped
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
 
-  # Mock Auth Service for Gateway testing
+  # Mock Auth Service for Gateway testing (local development)
   mock-auth-service:
-    image: wiremock/wiremock:latest
-    container_name: gripday-mock-auth-service
+    image: wiremock/wiremock:3-alpine
+    container_name: gripday-mock-auth-service-local
     ports:
       - "8082:8080"
     volumes:
-      - ../docker/wiremock/auth-service:/home/wiremock
+      - ./scripts/wiremock:/home/wiremock:ro
     networks:
       - gateway-network
-    command: --global-response-templating --verbose
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    command: --global-response-templating --verbose --port 8080
 
-  # Gateway Service
+  # Gateway Service - Local Development
   gateway-service:
     build:
       context: ..
       dockerfile: gripday-gateway-service/Dockerfile
-    container_name: gripday-gateway-service-standalone
+      target: builder
+    image: gripday/gateway-service:local
+    container_name: gripday-gateway-service-local
     environment:
+      # Spring Configuration
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATA_REDIS_HOST: redis-gateway
-      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_APPLICATION_NAME: gripday-gateway-service
+      
+      # Redis Configuration
+      GRIPDAY_CACHE_REDIS_HOST: redis-gateway
+      GRIPDAY_CACHE_REDIS_PORT: 6379
+      GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
+      GRIPDAY_CACHE_REDIS_DATABASE: 0
+      
+      # Gateway Configuration
       GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://mock-auth-service:8080
+      GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      GRIPDAY_GATEWAY_CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
+      GRIPDAY_GATEWAY_CORS_ALLOWED_HEADERS: "*"
+      GRIPDAY_GATEWAY_CORS_ALLOW_CREDENTIALS: true
+      
+      # Rate Limiting Configuration
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+      GRIPDAY_GATEWAY_RATE_LIMITING_BURST_CAPACITY: 200
+      GRIPDAY_GATEWAY_RATE_LIMITING_REPLENISH_RATE: 50
+      
+      # Circuit Breaker Configuration
+      GRIPDAY_GATEWAY_CIRCUIT_BREAKER_ENABLED: true
+      GRIPDAY_GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD: 50
+      GRIPDAY_GATEWAY_CIRCUIT_BREAKER_WAIT_DURATION_IN_OPEN_STATE: 30s
+      GRIPDAY_GATEWAY_CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE: 10
+      
+      # Observability Configuration
+      GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
+      GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
+      GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: DEBUG
+      
+      # Reactive Configuration
+      SPRING_WEBFLUX_MULTIPART_MAX_IN_MEMORY_SIZE: 1MB
+      SPRING_WEBFLUX_MULTIPART_MAX_DISK_USAGE_PER_PART: 10MB
+      SPRING_WEBFLUX_MULTIPART_MAX_PARTS: 128
+      
+      # JVM Configuration for reactive workloads
+      JAVA_OPTS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -XX:+UnlockExperimentalVMOptions
+        -Dreactor.netty.ioWorkerCount=4
+        -Dreactor.netty.pool.maxConnections=500
+        -Dspring.reactor.netty.shutdown-quiet-period=2s
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.profiles.active=local
+        -Dlogging.level.org.gripday=DEBUG
+        -Dlogging.level.reactor.netty=DEBUG
     ports:
       - "8080:8080"
+      - "8090:8090"  # Debug port
     depends_on:
       redis-gateway:
         condition: service_healthy
       mock-auth-service:
-        condition: service_started
+        condition: service_healthy
     networks:
       - gateway-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
     restart: unless-stopped
+    volumes:
+      - gateway_logs:/app/logs
+      - gateway_tmp:/app/tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
 networks:
   gateway-network:
     driver: bridge
-    name: gripday-gateway-network
+    name: gripday-gateway-network-local
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
 
 volumes:
   redis_gateway_data:
-    name: gripday_gateway_redis_data
+    name: gripday_gateway_redis_data_local
+    driver: local
+  gateway_logs:
+    name: gripday_gateway_logs_local
+    driver: local
+  gateway_tmp:
+    name: gripday_gateway_tmp_local
+    driver: local

@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-redis
+  namespace: gripday-auth
+  labels:
+    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-redis
+      app.kubernetes.io/component: cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-redis
+        app.kubernetes.io/component: cache
+        app.kubernetes.io/part-of: gripday-platform
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-service-secrets
+              key: GRIPDAY_CACHE_REDIS_PASSWORD
+              optional: true
+        command:
+        - redis-server
+        - --appendonly
+        - "yes"
+        - --maxmemory
+        - "256mb"
+        - --maxmemory-policy
+        - "allkeys-lru"
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        - name: redis-config
+          mountPath: /usr/local/etc/redis
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: auth-redis-pvc
+      - name: redis-config
+        configMap:
+          name: redis-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-redis-pvc
+  namespace: gripday-auth
+  labels:
+    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday-platform
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: gripday-auth
+  labels:
+    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday-platform
+data:
+  redis.conf: |
+    # Redis configuration for auth service
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+    appendonly yes
+    appendfsync everysec
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # Security settings
+    protected-mode yes
+    bind 0.0.0.0
+    port 6379
+    
+    # Logging
+    loglevel notice
+    logfile ""
+    
+    # Performance tuning
+    tcp-keepalive 300
+    timeout 0
+    tcp-backlog 511

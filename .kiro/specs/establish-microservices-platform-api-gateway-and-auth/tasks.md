@@ -437,14 +437,14 @@ The following features can be implemented after the core MVP is complete:
     - _Requirements: 7.1, 7.2, 21.1, 21.2, 21.7_
 
 - [ ] 10. Create individual Docker containerization and deployment for each microservice
-  - [ ] 10.1 Create individual Dockerfiles for each microservice
+  - [x] 10.1 Create individual Dockerfiles for each microservice
     - Write optimized Dockerfile for auth service with multi-stage builds in gripday-auth-service directory
     - Create Dockerfile for gateway service with reactive optimizations in gripday-gateway-service directory
     - Configure production-ready Docker images with security best practices for each service
     - Implement service-specific build optimizations and dependency management
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 10.2 Set up individual Docker Compose configurations for auth service
+  - [x] 10.2 Set up individual Docker Compose configurations for auth service
     - Create gripday-auth-service/docker-compose.yml for local development with PostgreSQL and Redis
     - Create gripday-auth-service/docker-compose.staging.yml for staging environment deployment
     - Create gripday-auth-service/docker-compose.production.yml for production environment deployment
@@ -454,7 +454,7 @@ The following features can be implemented after the core MVP is complete:
     - Add service-specific environment variable management and configuration
     - _Requirements: 2.2, 2.3, 2.4, 2.5, 2.6, 19.1, 19.2_
 
-  - [ ] 10.3 Set up individual Docker Compose configurations for gateway service
+  - [] 10.3 Set up individual Docker Compose configurations for gateway service
     - Create gripday-gateway-service/docker-compose.yml for local development with Redis
     - Create gripday-gateway-service/docker-compose.staging.yml for staging environment deployment
     - Create gripday-gateway-service/docker-compose.production.yml for production environment deployment
@@ -524,8 +524,8 @@ The following features can be implemented after the core MVP is complete:
     - Use straightforward validation checks and minimal test setup
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 21.1, 21.6, 21.7_
 
-- [ ] 12. Create Kubernetes deployment configurations
-  - [ ] 12.1 Create Kubernetes manifests for auth service
+- [-] 12. Create Kubernetes deployment configurations
+  - [x] 12.1 Create Kubernetes manifests for auth service
     - Create auth-service-deployment.yaml with container specifications and environment variables
     - Create auth-service-service.yaml for internal service discovery
     - Create auth-postgres-deployment.yaml and auth-postgres-service.yaml for database
@@ -535,7 +535,7 @@ The following features can be implemented after the core MVP is complete:
     - Create auth-service-ingress.yaml for external access if needed
     - _Requirements: 2.1, 2.2, 8.1, 8.2, 24.1, 24.2_
 
-  - [ ] 12.2 Create Kubernetes manifests for gateway service
+  - [x] 12.2 Create Kubernetes manifests for gateway service
     - Create gateway-service-deployment.yaml with reactive configuration
     - Create gateway-service-service.yaml for load balancing
     - Create gateway-redis-deployment.yaml and gateway-redis-service.yaml
@@ -545,7 +545,7 @@ The following features can be implemented after the core MVP is complete:
     - Configure Kubernetes health checks and readiness probes
     - _Requirements: 2.1, 2.2, 6.1, 8.1, 8.2, 24.1, 24.2_
 
-  - [ ] 12.3 Create Kubernetes deployment automation scripts
+  - [x] 12.3 Create Kubernetes deployment automation scripts
     - Create k8s/deploy-local.sh for minikube deployment
     - Create k8s/deploy-staging.sh for staging Kubernetes cluster
     - Create k8s/deploy-production.sh for production Kubernetes cluster

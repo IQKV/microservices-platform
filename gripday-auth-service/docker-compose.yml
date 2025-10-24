@@ -1,36 +1,57 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database for Auth Service only
+  # PostgreSQL Database for Auth Service - Local Development
   postgres-auth:
     image: postgres:15-alpine
-    container_name: gripday-auth-postgres
+    container_name: gripday-auth-postgres-local
     environment:
       POSTGRES_DB: gripday_auth
       POSTGRES_USER: gripday_user
       POSTGRES_PASSWORD: gripday_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
-      - ../docker/postgres/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
+      - ./scripts/init-auth-db.sql:/docker-entrypoint-initdb.d/01-init-auth-db.sql:ro
+      - ./scripts/init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
     networks:
       - auth-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth"]
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
 
-  # Redis for Auth Service
+  # Redis for Auth Service - Local Development
   redis-auth:
     image: redis:7-alpine
-    container_name: gripday-auth-redis
+    container_name: gripday-auth-redis-local
     ports:
       - "6379:6379"
     volumes:
       - redis_auth_data:/data
+      - ./scripts/redis-auth.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network
     healthcheck:
@@ -39,26 +60,75 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    command: redis-server --appendonly yes
+    restart: unless-stopped
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
 
-  # Auth Service
+  # Auth Service - Local Development
   auth-service:
     build:
       context: ..
       dockerfile: gripday-auth-service/Dockerfile
-    container_name: gripday-auth-service-standalone
+      target: builder
+    image: gripday/auth-service:local
+    container_name: gripday-auth-service-local
     environment:
+      # Spring Configuration
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
-      SPRING_DATASOURCE_USERNAME: gripday_user
-      SPRING_DATASOURCE_PASSWORD: gripday_password
-      SPRING_DATA_REDIS_HOST: redis-auth
-      SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      SPRING_APPLICATION_NAME: gripday-auth-service
+      
+      # Database Configuration
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
+      GRIPDAY_DATABASE_USERNAME: gripday_user
+      GRIPDAY_DATABASE_PASSWORD: gripday_password
+      GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
+      GRIPDAY_DATABASE_JPA_SHOW_SQL: true
+      
+      # Redis Configuration
+      GRIPDAY_CACHE_REDIS_HOST: redis-auth
+      GRIPDAY_CACHE_REDIS_PORT: 6379
+      GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
+      GRIPDAY_CACHE_REDIS_DATABASE: 0
+      
+      # JWT Configuration
+      GRIPDAY_AUTH_JWT_SECRET: dev-secret-key-change-in-production-256-bit-minimum
       GRIPDAY_AUTH_JWT_EXPIRATION: 900
       GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      GRIPDAY_AUTH_JWT_ISSUER: gripday-auth-service
+      
+      # Security Configuration
+      GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
+      GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: 60
+      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
+      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: 5
+      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: 900
+      
+      # Observability Configuration
+      GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
+      GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
+      GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: DEBUG
+      
+      # JVM Configuration
+      JAVA_OPTS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.profiles.active=local
+        -Dlogging.level.org.gripday=DEBUG
+        -Dlogging.level.org.springframework.security=DEBUG
     ports:
       - "8081:8081"
+      - "8091:8091"  # Debug port
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -67,20 +137,42 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
     restart: unless-stopped
+    volumes:
+      - auth_logs:/app/logs
+      - auth_tmp:/app/tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
 networks:
   auth-network:
     driver: bridge
-    name: gripday-auth-network
+    name: gripday-auth-network-local
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
   postgres_auth_data:
-    name: gripday_auth_postgres_data
+    name: gripday_auth_postgres_data_local
+    driver: local
   redis_auth_data:
-    name: gripday_auth_redis_data
+    name: gripday_auth_redis_data_local
+    driver: local
+  auth_logs:
+    name: gripday_auth_logs_local
+    driver: local
+  auth_tmp:
+    name: gripday_auth_tmp_local
+    driver: local

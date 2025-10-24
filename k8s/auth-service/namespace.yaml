@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-auth
+  labels:
+    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/component: authentication
+    app.kubernetes.io/part-of: gripday-platform
+    environment: local
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-auth-staging
+  labels:
+    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/component: authentication
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gripday-auth-production
+  labels:
+    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/component: authentication
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production

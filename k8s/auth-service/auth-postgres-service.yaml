@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-postgres
+  namespace: gripday-auth
+  labels:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: gripday-platform
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-postgres-staging
+  namespace: gripday-auth-staging
+  labels:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    environment: staging
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-postgres-production
+  namespace: gripday-auth-production
+  labels:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    environment: production

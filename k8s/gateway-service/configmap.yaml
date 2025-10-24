@@ -1,0 +1,213 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-service-config
+  namespace: gripday-gateway
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+data:
+  application.yml: |
+    server:
+      port: 8080
+    
+    spring:
+      application:
+        name: gripday-gateway-service
+      profiles:
+        active: local
+      
+      cloud:
+        gateway:
+          routes:
+          - id: auth-service
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            predicates:
+            - Path=/api/*/auth/**
+            filters:
+            - StripPrefix=0
+          
+          - id: auth-service-actuator
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            predicates:
+            - Path=/auth/actuator/**
+            filters:
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
+          
+          - id: auth-service-docs
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            predicates:
+            - Path=/auth/swagger-ui/**,/auth/api-docs/**
+            filters:
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
+          
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods:
+                - GET
+                - POST
+                - PUT
+                - PATCH
+                - DELETE
+                - OPTIONS
+                allowedHeaders:
+                - "*"
+                allowCredentials: true
+                maxAge: 3600
+          
+          default-filters:
+          - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+    
+    # OpenTelemetry Configuration
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health,info,metrics,prometheus,gateway
+      endpoint:
+        health:
+          show-details: when-authorized
+        prometheus:
+          enabled: true
+      metrics:
+        export:
+          prometheus:
+            enabled: true
+        distribution:
+          percentiles-histogram:
+            http.server.requests: true
+          percentiles:
+            http.server.requests: 0.5,0.95,0.99
+      tracing:
+        sampling:
+          probability: 1.0
+    
+    # Gripday-specific configuration properties
+    gripday:
+      gateway:
+        auth:
+          jwt:
+            secret: ${GRIPDAY_AUTH_JWT_SECRET}
+            issuer: gripday-auth-service
+        rate-limiting:
+          enabled: true
+          default-requests-per-minute: 60
+          burst-capacity: 10
+          replenish-rate: 1
+        circuit-breaker:
+          enabled: true
+          failure-rate-threshold: 50
+          wait-duration-in-open-state: 30s
+          sliding-window-size: 10
+          minimum-number-of-calls: 5
+      observability:
+        tracing:
+          enabled: true
+          service-name: ${spring.application.name}
+          sampling-rate: 1.0
+          endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+          timeout: PT10S
+        metrics:
+          enabled: true
+          path: /actuator/prometheus
+          prefix: gripday_gateway
+          include-host-tag: true
+          include-application-tag: true
+        logging:
+          include-correlation-id: true
+          include-trace-id: true
+          include-span-id: true
+          include-user-id: true
+          include-tenant-id: true
+          correlation-id-header: X-Correlation-ID
+          request-id-header: X-Request-ID
+          tenant-id-header: X-Tenant-ID
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-service-config-staging
+  namespace: gripday-gateway-staging
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+data:
+  application-staging.yml: |
+    server:
+      port: 8080
+    
+    spring:
+      profiles:
+        active: staging
+      
+      cloud:
+        gateway:
+          routes:
+          - id: auth-service
+            uri: http://auth-service-staging.gripday-auth-staging.svc.cluster.local:8081
+            predicates:
+            - Path=/api/*/auth/**
+    
+    management:
+      tracing:
+        sampling:
+          probability: 0.1
+    
+    gripday:
+      gateway:
+        rate-limiting:
+          default-requests-per-minute: 120
+          burst-capacity: 20
+      observability:
+        tracing:
+          sampling-rate: 0.1
+        logging:
+          level: INFO
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-service-config-production
+  namespace: gripday-gateway-production
+  labels:
+    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/component: gateway
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production
+data:
+  application-production.yml: |
+    server:
+      port: 8080
+    
+    spring:
+      profiles:
+        active: production
+      
+      cloud:
+        gateway:
+          routes:
+          - id: auth-service
+            uri: http://auth-service-production.gripday-auth-production.svc.cluster.local:8081
+            predicates:
+            - Path=/api/*/auth/**
+    
+    management:
+      tracing:
+        sampling:
+          probability: 0.01
+    
+    gripday:
+      gateway:
+        rate-limiting:
+          default-requests-per-minute: 1000
+          burst-capacity: 100
+      observability:
+        tracing:
+          sampling-rate: 0.01
+        logging:
+          level: WARN
