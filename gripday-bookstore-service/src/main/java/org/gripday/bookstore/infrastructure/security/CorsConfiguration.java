@@ -12,19 +12,19 @@ import java.util.List;
 @Configuration
 public class CorsConfiguration {
     
-    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+    @Value("${gripday.bookstore.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
     private String[] allowedOrigins;
     
-    @Value("${app.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}")
+    @Value("${gripday.bookstore.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}")
     private String[] allowedMethods;
     
-    @Value("${app.cors.allowed-headers:*}")
+    @Value("${gripday.bookstore.cors.allowed-headers:*}")
     private String[] allowedHeaders;
     
-    @Value("${app.cors.allow-credentials:true}")
+    @Value("${gripday.bookstore.cors.allow-credentials:true}")
     private boolean allowCredentials;
     
-    @Value("${app.cors.max-age:3600}")
+    @Value("${gripday.bookstore.cors.max-age:3600}")
     private long maxAge;
     
     @Bean
