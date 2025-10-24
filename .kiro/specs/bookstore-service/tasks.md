@@ -155,10 +155,11 @@
     - _Requirements: 4.2, 5.4_
   
   - [ ] 10.2 Verify platform integration
-    - Test integration with Gateway Service routing
-    - Verify JWT authentication flow with Auth Service
+    - Test integration with Gateway Service routing for both bookstore and auth endpoints
+    - Verify JWT authentication flow with Auth Service through Gateway Service BFF
+    - Confirm unified API access pattern for React 19 frontend integration
     - Confirm observability stack integration (Prometheus, Grafana)
-    - _Requirements: 4.1, 4.3, 4.4_
+    - _Requirements: 4.1, 4.3, 5.2, 5.3_
   
   - [ ]* 10.3 Create end-to-end integration tests
     - Write @SpringBootTest classes for full application testing

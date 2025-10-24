@@ -7,7 +7,7 @@ The Bookstore Service is a microservice that provides comprehensive book catalog
 ## Glossary
 
 - **Bookstore_Service**: The microservice responsible for managing book catalog, inventory, and related operations
-- **Gateway_Service**: The existing API gateway that serves as Backend for Frontend (BFF), handling routing, authentication, rate limiting, and unified API access for React 19 applications
+- **Gateway_Service**: The existing API gateway that serves as Backend for Frontend (BFF), handling routing, authentication, rate limiting, and unified API access for React 19 applications. All microservice endpoints including Auth_Service are accessed exclusively through Gateway_Service
 - **Auth_Service**: The existing authentication service that manages user authentication and authorization
 - **Book_Entity**: A data structure representing a book with metadata including title, author, ISBN, price, and inventory count
 - **Inventory_Management**: The process of tracking book quantities, availability, and stock operations
@@ -63,7 +63,7 @@ The Bookstore Service is a microservice that provides comprehensive book catalog
 
 1. THE Bookstore_Service SHALL implement the three-tier architecture pattern with presentation, domain, and infrastructure layers
 2. THE Bookstore_Service SHALL use PostgreSQL database with Liquibase migrations for data persistence
-3. THE Bookstore_Service SHALL integrate with Gateway_Service as Backend for Frontend and Auth_Service for authentication
+3. THE Bookstore_Service SHALL integrate with Gateway_Service as Backend for Frontend, with Auth_Service authentication endpoints also routed through Gateway_Service
 4. THE Bookstore_Service SHALL provide OpenAPI documentation and health check endpoints
 5. THE Bookstore_Service SHALL implement structured logging with correlation ID propagation and observability integration
 
@@ -74,10 +74,10 @@ The Bookstore Service is a microservice that provides comprehensive book catalog
 #### Acceptance Criteria
 
 1. THE Bookstore_Service SHALL expose all endpoints exclusively through Gateway_Service routing without direct external access
-2. THE Gateway_Service SHALL serve as the unified API umbrella for all bookstore operations accessed by React 19 frontend applications
-3. THE Gateway_Service SHALL handle authentication, authorization, and CORS policies for bookstore endpoints
+2. THE Gateway_Service SHALL serve as the unified API umbrella for all microservice operations (bookstore, authentication) accessed by React 19 frontend applications
+3. THE Gateway_Service SHALL route authentication endpoints from Auth_Service and handle CORS policies for all microservices
 4. THE Bookstore_Service SHALL provide API responses optimized for frontend consumption with proper data aggregation
-5. THE Gateway_Service SHALL implement rate limiting and circuit breaker patterns for bookstore service protection
+5. THE Gateway_Service SHALL implement rate limiting and circuit breaker patterns for all microservice protection including Auth_Service and Bookstore_Service
 
 ### Requirement 6
 

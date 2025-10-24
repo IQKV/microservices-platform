@@ -23,16 +23,25 @@ graph TB
     React[React 19 Frontend] --> Gateway[Gateway Service - BFF]
     Gateway --> Auth[Auth Service]
     Gateway --> Bookstore[Bookstore Service]
-    Auth --> JWT[JWT Validation]
-    Bookstore --> DB[(PostgreSQL Database)]
-    Bookstore --> Redis[(Redis Cache)]
+    Auth --> AuthDB[(Auth PostgreSQL)]
+    Bookstore --> BookDB[(Bookstore PostgreSQL)]
+    Gateway --> Redis[(Redis Cache)]
     
     subgraph "Gateway Service (BFF)"
         Router[API Router]
+        AuthRouter[Auth Router /api/v1/auth/*]
+        BookRouter[Book Router /api/v1/bookstore/*]
         Security[Security Layer]
         RateLimit[Rate Limiting]
         CircuitBreaker[Circuit Breaker]
         CORS[CORS Handler]
+    end
+    
+    subgraph "Auth Service"
+        AuthResource[Authentication Resource]
+        UserResource[User Management Resource]
+        AuthService[Auth Service]
+        UserService[User Service]
     end
     
     subgraph "Bookstore Service"
@@ -45,6 +54,7 @@ graph TB
     end
     
     Note1[No Direct External Access]
+    Auth -.-> Note1
     Bookstore -.-> Note1
 ```
 
@@ -54,11 +64,13 @@ graph TB
 
 The Gateway Service acts as the unified entry point for all React 19 frontend applications, providing:
 
-- **Unified API Surface**: Single endpoint for all bookstore operations (`/api/v1/bookstore/*`)
-- **Authentication Handling**: JWT token validation and user context propagation
+- **Unified API Surface**: Single endpoint for all microservice operations
+  - Authentication: `/api/v1/auth/*` → Auth Service
+  - Bookstore: `/api/v1/bookstore/*` → Bookstore Service
+- **Authentication Handling**: JWT token validation and user context propagation across all services
 - **CORS Management**: React 19 development server support (localhost:5173) and production policies
-- **Rate Limiting**: Per-user and per-endpoint rate limiting for bookstore operations
-- **Circuit Breaker**: Fault tolerance and graceful degradation for bookstore service failures
+- **Rate Limiting**: Per-user and per-endpoint rate limiting for all microservice operations
+- **Circuit Breaker**: Fault tolerance and graceful degradation for all microservice failures
 
 ### Frontend-Optimized Responses
 
@@ -507,11 +519,33 @@ spring:
 
 #### Gateway Service Configuration (BFF Pattern)
 ```yaml
-# Gateway Service handles all external access
+# Gateway Service handles all external access for all microservices
 spring:
   cloud:
     gateway:
       routes:
+        # Auth Service Routes
+        - id: auth-login
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/login
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+        
+        - id: auth-users
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-circuit-breaker
+                fallbackUri: forward:/fallback/auth
+        
+        # Bookstore Service Routes
         - id: bookstore-catalog
           uri: lb://bookstore-service
           predicates:
@@ -521,6 +555,16 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
+            - name: CircuitBreaker
+              args:
+                name: bookstore-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore
+        
+        - id: bookstore-inventory
+          uri: lb://bookstore-service
+          predicates:
+            - Path=/api/v1/bookstore/inventory/**
+          filters:
             - name: CircuitBreaker
               args:
                 name: bookstore-circuit-breaker
@@ -565,6 +609,46 @@ public record FilterMetadata(
     List<AuthorFilter> authors,
     AvailabilityFilter availability
 ) {}
+```
+
+#### React 19 Usage Examples
+```javascript
+// All API calls through Gateway Service BFF - unified access pattern
+// Authentication through Gateway
+const loginResponse = await fetch('/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username, password })
+}).then(res => res.json());
+
+const token = loginResponse.token;
+
+// Bookstore operations through Gateway
+const { data: books, pagination, filters } = await fetch('/api/v1/bookstore/books', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+}).then(res => res.json());
+
+// User management through Gateway (admin only)
+const users = await fetch('/api/v1/auth/users', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+}).then(res => res.json());
+
+// Unified React 19 state management structure
+const appState = {
+  auth: { user: {...}, token: '...', isAuthenticated: true },
+  bookstore: { 
+    books: [...], 
+    pagination: { currentPage: 1, totalPages: 10, hasNext: true },
+    filters: { categories: [...], priceRange: {...} }
+  },
+  admin: { users: [...] }  // admin role only
+};
 ```
 
 ### OpenAPI Documentation
