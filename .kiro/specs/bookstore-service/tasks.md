@@ -64,7 +64,13 @@
     - Add repository methods for bulk operations
     - _Requirements: 1.1, 3.1, 3.5_
   
-  - [ ]* 3.3 Write repository unit tests
+  - [x] 3.3 Write repository unit tests
+
+
+
+
+
+
     - Create @DataJpaTest classes for repository methods
     - Test custom queries and pagination functionality
     - Verify relationship mappings and cascade operations
