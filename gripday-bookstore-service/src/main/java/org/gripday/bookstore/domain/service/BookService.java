@@ -2,6 +2,7 @@ package org.gripday.bookstore.domain.service;
 
 import org.gripday.bookstore.domain.dto.*;
 import org.gripday.bookstore.domain.exception.*;
+import org.gripday.bookstore.infrastructure.config.CacheConfiguration;
 import org.gripday.bookstore.infrastructure.entity.Book;
 import org.gripday.bookstore.infrastructure.entity.Category;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
@@ -10,6 +11,9 @@ import org.gripday.bookstore.infrastructure.repository.CategoryRepository;
 import org.gripday.bookstore.infrastructure.security.AuditLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,6 +39,8 @@ public class BookService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfiguration.BOOK_SEARCH_CACHE, 
+               key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<BookDto> findBooks(BookSearchCriteria criteria, Pageable pageable) {
         logger.debug("Finding books with criteria: {}", criteria);
         
@@ -52,6 +58,7 @@ public class BookService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfiguration.BOOK_CACHE, key = "#id")
     public Optional<BookDto> findBookById(Long id) {
         logger.debug("Finding book by ID: {}", id);
         
@@ -59,6 +66,11 @@ public class BookService {
             .map(this::convertToDto);
     }
     
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.AUTHOR_CACHE, allEntries = true)
+    })
     public BookDto createBook(CreateBookRequest request, UserContext userContext) {
         logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
         
@@ -101,6 +113,12 @@ public class BookService {
         return convertToDto(savedBook);
     }
     
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.AUTHOR_CACHE, allEntries = true)
+    })
     public BookDto updateBook(Long id, UpdateBookRequest request, UserContext userContext) {
         logger.info("Updating book ID: {} by user: {}", id, userContext.username());
         
@@ -134,6 +152,11 @@ public class BookService {
         return convertToDto(updatedBook);
     }
     
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#id"),
+        @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+    })
     public void deleteBook(Long id, UserContext userContext) {
         logger.info("Deleting book ID: {} by user: {}", id, userContext.username());
         
@@ -157,6 +180,7 @@ public class BookService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfiguration.BOOK_CACHE, key = "'isbn_' + #isbn")
     public Optional<BookDto> findBookByIsbn(String isbn) {
         logger.debug("Finding book by ISBN: {}", isbn);
         
@@ -165,6 +189,8 @@ public class BookService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfiguration.POPULAR_BOOKS_CACHE, 
+               key = "'available_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<BookDto> findAvailableBooks(Pageable pageable) {
         logger.debug("Finding available books");
         
@@ -173,6 +199,8 @@ public class BookService {
     }
     
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfiguration.POPULAR_BOOKS_CACHE, 
+               key = "'in_stock_' + #pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<BookDto> findBooksInStock(Pageable pageable) {
         logger.debug("Finding books in stock");
         

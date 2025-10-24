@@ -31,15 +31,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b FROM Book b WHERE b.available = true AND b.inventory.quantity > 0")
     Page<Book> findBooksInStock(Pageable pageable);
     
-    // Combined search methods for multiple criteria
+    // Optimized combined search methods for multiple criteria
     @Query("""
         SELECT b FROM Book b 
-        WHERE (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
+        WHERE (:availableOnly = false OR b.available = true)
+        AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
         AND (:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%')))
         AND (:categoryName IS NULL OR b.category.name = :categoryName)
         AND (:minPrice IS NULL OR b.price >= :minPrice)
         AND (:maxPrice IS NULL OR b.price <= :maxPrice)
-        AND (:availableOnly = false OR b.available = true)
+        ORDER BY b.available DESC, b.createdAt DESC
         """)
     Page<Book> findBooksWithCriteria(
         @Param("title") String title,
@@ -51,16 +52,19 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         Pageable pageable
     );
     
-    // Advanced search with inventory considerations
+    // Optimized advanced search with inventory considerations
     @Query("""
         SELECT b FROM Book b 
-        LEFT JOIN b.inventory i
-        WHERE (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
+        LEFT JOIN FETCH b.inventory i
+        LEFT JOIN FETCH b.category c
+        WHERE (:availableOnly = false OR b.available = true)
+        AND (:availableOnly = false OR i.quantity > 0)
+        AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
         AND (:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%')))
-        AND (:categoryName IS NULL OR b.category.name = :categoryName)
+        AND (:categoryName IS NULL OR c.name = :categoryName)
         AND (:minPrice IS NULL OR b.price >= :minPrice)
         AND (:maxPrice IS NULL OR b.price <= :maxPrice)
-        AND (:availableOnly = false OR (b.available = true AND i.quantity > 0))
+        ORDER BY b.available DESC, i.quantity DESC, b.createdAt DESC
         """)
     Page<Book> findBooksWithInventoryFilter(
         @Param("title") String title,
@@ -107,10 +111,51 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT COUNT(b) FROM Book b WHERE b.category.name = :categoryName AND b.available = true")
     long countBooksByCategory(@Param("categoryName") String categoryName);
     
-    // Distinct authors and categories for filter options
+    // Optimized distinct authors and categories for filter options
     @Query("SELECT DISTINCT b.author FROM Book b WHERE b.available = true ORDER BY b.author")
     List<String> findDistinctAuthors();
     
     @Query("SELECT DISTINCT c.name FROM Book b JOIN b.category c WHERE b.available = true ORDER BY c.name")
     List<String> findDistinctCategoryNames();
+    
+    // Fast text search using PostgreSQL full-text search capabilities
+    @Query(value = """
+        SELECT * FROM books b 
+        WHERE b.available = true 
+        AND to_tsvector('english', b.title || ' ' || b.author) @@ plainto_tsquery('english', :searchTerm)
+        ORDER BY ts_rank(to_tsvector('english', b.title || ' ' || b.author), plainto_tsquery('english', :searchTerm)) DESC
+        """, nativeQuery = true)
+    Page<Book> findByFullTextSearch(@Param("searchTerm") String searchTerm, Pageable pageable);
+    
+    // Fuzzy search using trigram similarity
+    @Query(value = """
+        SELECT * FROM books b 
+        WHERE b.available = true 
+        AND (similarity(b.title, :searchTerm) > 0.3 OR similarity(b.author, :searchTerm) > 0.3)
+        ORDER BY GREATEST(similarity(b.title, :searchTerm), similarity(b.author, :searchTerm)) DESC
+        """, nativeQuery = true)
+    Page<Book> findByFuzzySearch(@Param("searchTerm") String searchTerm, Pageable pageable);
+    
+    // Optimized price range query with category filter
+    @Query("""
+        SELECT b FROM Book b 
+        WHERE b.available = true 
+        AND b.price BETWEEN :minPrice AND :maxPrice
+        AND (:categoryId IS NULL OR b.category.id = :categoryId)
+        ORDER BY b.price ASC
+        """)
+    Page<Book> findByPriceRangeAndCategory(
+        @Param("minPrice") BigDecimal minPrice, 
+        @Param("maxPrice") BigDecimal maxPrice,
+        @Param("categoryId") Long categoryId,
+        Pageable pageable
+    );
+    
+    // Fast availability check with inventory
+    @Query("""
+        SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END 
+        FROM Book b JOIN b.inventory i 
+        WHERE b.id = :bookId AND b.available = true AND i.quantity > :requestedQuantity
+        """)
+    boolean isBookAvailableWithQuantity(@Param("bookId") Long bookId, @Param("requestedQuantity") int requestedQuantity);
 }

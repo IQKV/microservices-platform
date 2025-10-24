@@ -9,27 +9,18 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
-      timeout: 2000ms
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
   
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI}
+  cache:
+    redis:
+      time-to-live: 600000  # 10 minutes for staging
 
 logging:
   level:
     org.gripday.bookstore: INFO
-    org.springframework.security: INFO
-    org.hibernate.SQL: WARN
-    AUDIT: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
-
-app:
-  cors:
-    allowed-origins: "${CORS_ALLOWED_ORIGINS:https://staging.bookstore.gripday.org}"
-    allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
-    allowed-headers: "*"
-    allow-credentials: true
-    max-age: 3600
+    org.springframework.cache: INFO

@@ -2,12 +2,15 @@ package org.gripday.bookstore.domain.service;
 
 import org.gripday.bookstore.domain.dto.*;
 import org.gripday.bookstore.domain.exception.*;
+import org.gripday.bookstore.infrastructure.config.CacheConfiguration;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.repository.BookRepository;
 import org.gripday.bookstore.infrastructure.repository.InventoryRepository;
 import org.gripday.bookstore.infrastructure.security.AuditLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,11 @@ public class InventoryService {
         return convertToDto(inventory);
     }
     
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#bookId"),
+        @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+    })
     public InventoryDto updateInventory(Long bookId, UpdateInventoryRequest request, UserContext userContext) {
         logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
         
@@ -83,6 +91,11 @@ public class InventoryService {
         return convertToDto(updatedInventory);
     }
     
+    @Caching(evict = {
+        @CacheEvict(value = CacheConfiguration.BOOK_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
+        @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+    })
     public List<InventoryDto> bulkUpdateInventory(List<BulkInventoryRequest> requests, UserContext userContext) {
         logger.info("Bulk updating inventory for {} books by user: {}", requests.size(), userContext.username());
         

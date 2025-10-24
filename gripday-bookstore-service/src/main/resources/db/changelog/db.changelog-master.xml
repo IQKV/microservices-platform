@@ -10,5 +10,8 @@
     
     <!-- Seed data -->
     <include file="db/changelog/changes/002-insert-seed-data.xml"/>
+    
+    <!-- Performance optimization indexes -->
+    <include file="db/changelog/changes/003-add-performance-indexes.xml"/>
 
 </databaseChangeLog>
