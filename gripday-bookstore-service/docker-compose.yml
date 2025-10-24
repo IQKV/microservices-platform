@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  bookstore-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookstore-service-local
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - DB_HOST=bookstore-db
+      - DB_PORT=5432
+      - DB_NAME=bookstore_db
+      - DB_USERNAME=bookstore_user
+      - DB_PASSWORD=bookstore_pass
+      - REDIS_HOST=bookstore-redis
+      - REDIS_PORT=6379
+    depends_on:
+      - bookstore-db
+      - bookstore-redis
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  bookstore-db:
+    image: postgres:15-alpine
+    container_name: bookstore-db-local
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=bookstore_db
+      - POSTGRES_USER=bookstore_user
+      - POSTGRES_PASSWORD=bookstore_pass
+    volumes:
+      - bookstore_db_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookstore_user -d bookstore_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  bookstore-redis:
+    image: redis:7-alpine
+    container_name: bookstore-redis-local
+    ports:
+      - "6379:6379"
+    volumes:
+      - bookstore_redis_data:/data
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  bookstore_db_data:
+  bookstore_redis_data:
+
+networks:
+  bookstore-network:
+    driver: bridge
