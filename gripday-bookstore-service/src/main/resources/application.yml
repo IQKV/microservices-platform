@@ -106,6 +106,41 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+    displayRequestDuration: true
+    displayOperationId: false
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    docExpansion: none
+  show-actuator: true
+  group-configs:
+    - group: 'bookstore-api-v1'
+      display-name: 'Bookstore API v1 (Current)'
+      paths-to-match: '/api/v1/bookstore/**'
+    - group: 'bookstore-api-all'
+      display-name: 'Bookstore API (All Versions)'
+      paths-to-match: '/api/**/bookstore/**'
+    - group: 'actuator'
+      display-name: 'Actuator Endpoints'
+      paths-to-match: '/actuator/**'
+  version-configs:
+    v1:
+      description: 'Current stable version of the Bookstore API'
+      deprecated: false
+    v2:
+      description: 'Future version (not yet implemented)'
+      deprecated: false
+
 app:
   cors:
     allowed-origins: "http://localhost:5173,http://localhost:3000,https://bookstore.gripday.org"

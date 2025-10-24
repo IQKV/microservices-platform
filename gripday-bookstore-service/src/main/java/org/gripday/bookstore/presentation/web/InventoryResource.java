@@ -1,5 +1,14 @@
 package org.gripday.bookstore.presentation.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.gripday.bookstore.domain.dto.*;
 import org.gripday.bookstore.domain.service.InventoryService;
@@ -12,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookstore/inventory")
+@Tag(name = "Inventory Management", description = "Book inventory operations including stock tracking, availability checks, and administrative inventory management")
 public class InventoryResource {
     
     private static final Logger logger = LoggerFactory.getLogger(InventoryResource.class);
@@ -22,8 +32,47 @@ public class InventoryResource {
         this.inventoryService = inventoryService;
     }
     
+    @Operation(
+        summary = "Get inventory information",
+        description = "Retrieve current inventory details for a specific book including stock levels and availability"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Inventory information retrieved successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = InventoryDto.class),
+                examples = @ExampleObject(
+                    name = "Inventory response",
+                    value = """
+                        {
+                          "bookId": 1,
+                          "bookTitle": "The Great Gatsby",
+                          "quantity": 25,
+                          "reservedQuantity": 3,
+                          "availableQuantity": 22,
+                          "lowStockThreshold": 5,
+                          "lowStock": false,
+                          "lastUpdated": "2024-01-15T10:30:00Z"
+                        }
+                        """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Book not found with the specified ID",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        )
+    })
     @GetMapping("/{bookId}")
-    public ResponseEntity<InventoryDto> getInventory(@PathVariable Long bookId) {
+    public ResponseEntity<InventoryDto> getInventory(
+            @Parameter(description = "Unique identifier of the book", required = true, example = "1")
+            @PathVariable Long bookId) {
         logger.debug("Getting inventory for book ID: {}", bookId);
         
         var inventory = inventoryService.getInventory(bookId);
@@ -41,10 +90,60 @@ public class InventoryResource {
         return ResponseEntity.ok(available);
     }
     
+    @Operation(
+        summary = "Update inventory quantity (Admin only)",
+        description = "Update the inventory quantity for a specific book. Requires ADMIN or SUPERADMIN role.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Inventory updated successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = InventoryDto.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid request data or validation errors",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Authentication required",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions - ADMIN role required",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Book not found with the specified ID",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        )
+    })
     @PutMapping("/{bookId}")
     public ResponseEntity<InventoryDto> updateInventory(
+            @Parameter(description = "Unique identifier of the book", required = true, example = "1")
             @PathVariable Long bookId,
+            @Parameter(description = "Inventory update request data", required = true)
             @Valid @RequestBody UpdateInventoryRequest request,
+            @Parameter(hidden = true)
             @RequestAttribute("userContext") UserContext userContext) {
         
         logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
