@@ -23,6 +23,28 @@ services:
       retries: 5
       start_period: 30s
 
+  # PostgreSQL Database for Bookstore Service
+  postgres-bookstore:
+    image: postgres:15-alpine
+    container_name: gripday-postgres-bookstore
+    environment:
+      POSTGRES_DB: gripday_bookstore
+      POSTGRES_USER: gripday_user
+      POSTGRES_PASSWORD: gripday_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_bookstore_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-bookstore.sql:/docker-entrypoint-initdb.d/init-bookstore.sql
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_bookstore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
@@ -74,6 +96,37 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+  # Bookstore Service
+  bookstore-service:
+    build:
+      context: .
+      dockerfile: gripday-bookstore-service/Dockerfile
+    container_name: gripday-bookstore-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-bookstore:5432/gripday_bookstore
+      SPRING_DATASOURCE_USERNAME: gripday_user
+      SPRING_DATASOURCE_PASSWORD: gripday_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_ISSUER_URI: http://gateway-service:8080/auth/realms/gripday
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-bookstore:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gripday-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
   # Gateway Service
   gateway-service:
     build:
@@ -85,12 +138,15 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8081
+      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8082
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:
       - "8080:8080"
     depends_on:
       auth-service:
+        condition: service_healthy
+      bookstore-service:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -174,6 +230,8 @@ networks:
 volumes:
   postgres_auth_data:
     name: gripday_postgres_auth_data
+  postgres_bookstore_data:
+    name: gripday_postgres_bookstore_data
   redis_data:
     name: gripday_redis_data
   prometheus_data:

@@ -28,6 +28,14 @@ scrape_configs:
     scrape_interval: 10s
     scrape_timeout: 5s
 
+  # Bookstore Service
+  - job_name: 'bookstore-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['bookstore-service:8082']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
   # PostgreSQL Exporter (if added later)
   - job_name: 'postgres'
     static_configs:

@@ -33,7 +33,7 @@ public class CacheConfiguration {
     public static final String POPULAR_BOOKS_CACHE = "popular-books";
     
     @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
+    public RedisCacheConfiguration redisCacheConfiguration() {
         var objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.activateDefaultTyping(
