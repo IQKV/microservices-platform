@@ -249,7 +249,12 @@
     - _Requirements: 5.2_
 
 - [ ] 10. Final integration and deployment preparation
-  - [ ] 10.1 Create Docker configuration and compose files
+  - [x] 10.1 Create Docker configuration and compose files
+
+
+
+
+
     - Write Dockerfile for the bookstore service
     - Create docker-compose files for different environments
     - Include PostgreSQL and Redis dependencies

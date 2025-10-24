@@ -17,18 +17,31 @@ services:
       - DB_PASSWORD=bookstore_pass
       - REDIS_HOST=bookstore-redis
       - REDIS_PORT=6379
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Xms256m -Xmx512m
     depends_on:
-      - bookstore-db
-      - bookstore-redis
+      bookstore-db:
+        condition: service_healthy
+      bookstore-redis:
+        condition: service_healthy
     networks:
       - bookstore-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
+    volumes:
+      - bookstore_logs:/app/logs
 
   bookstore-db:
     image: postgres:15-alpine
@@ -70,6 +83,7 @@ services:
 volumes:
   bookstore_db_data:
   bookstore_redis_data:
+  bookstore_logs:
 
 networks:
   bookstore-network:
