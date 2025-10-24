@@ -108,7 +108,9 @@ class ObservabilityConfigTest {
         metrics.recordActiveConnections(25);
         
         // Then
-        assertThat(meterRegistry.gauge("gripday.gateway.connections.active").value()).isEqualTo(25.0);
+        var gauge = meterRegistry.find("gripday.gateway.connections.active").gauge();
+        assertThat(gauge).isNotNull();
+        assertThat(gauge.value()).isEqualTo(25.0);
     }
 
     @Test
