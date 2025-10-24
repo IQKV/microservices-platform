@@ -76,20 +76,31 @@
     - Verify relationship mappings and cascade operations
     - _Requirements: 5.3_
 
-- [ ] 4. Implement domain services
-  - [ ] 4.1 Create BookService with core business logic
+- [x] 4. Implement domain services
+
+
+
+
+
+  - [x] 4.1 Create BookService with core business logic
+
+
     - Implement CRUD operations for book management
     - Add validation logic for book creation and updates
     - Include admin authorization checks and audit logging
     - _Requirements: 1.1, 1.2, 1.3, 1.5_
   
-  - [ ] 4.2 Create SearchService for book discovery
+  - [x] 4.2 Create SearchService for book discovery
+
+
     - Implement search functionality by title, author, and category
     - Add price range filtering and availability checks
     - Include pagination and result ranking logic
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
   
-  - [ ] 4.3 Create InventoryService for stock management
+  - [x] 4.3 Create InventoryService for stock management
+
+
     - Implement inventory update operations with validation
     - Add availability checking and threshold management
     - Include bulk update operations and audit trails

@@ -1,0 +1,152 @@
+package org.gripday.bookstore.domain.service;
+
+import org.gripday.bookstore.domain.dto.BookDto;
+import org.gripday.bookstore.domain.dto.BookSearchCriteria;
+import org.gripday.bookstore.infrastructure.entity.Book;
+import org.gripday.bookstore.infrastructure.repository.BookRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Service
+@Transactional(readOnly = true)
+public class SearchService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+    
+    private final BookRepository bookRepository;
+    
+    public SearchService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+    
+    public Page<BookDto> searchByTitle(String title, Pageable pageable) {
+        logger.debug("Searching books by title: {}", title);
+        
+        return bookRepository.findByTitleContainingIgnoreCase(title, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> searchByAuthor(String author, Pageable pageable) {
+        logger.debug("Searching books by author: {}", author);
+        
+        return bookRepository.findByAuthorContainingIgnoreCase(author, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> searchByCategory(String category, Pageable pageable) {
+        logger.debug("Searching books by category: {}", category);
+        
+        return bookRepository.findByCategoryName(category, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> searchByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        logger.debug("Searching books by price range: {} - {}", minPrice, maxPrice);
+        
+        return bookRepository.findByPriceBetween(minPrice, maxPrice, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> searchWithCriteria(BookSearchCriteria criteria, Pageable pageable) {
+        logger.debug("Searching books with criteria: {}", criteria);
+        
+        return bookRepository.findBooksWithCriteria(
+            criteria.title(),
+            criteria.author(),
+            criteria.category(),
+            criteria.minPrice(),
+            criteria.maxPrice(),
+            criteria.availableOnly() != null ? criteria.availableOnly() : false,
+            pageable
+        ).map(this::convertToDto);
+    }
+    
+    public Page<BookDto> searchAvailableBooksWithInventory(BookSearchCriteria criteria, Pageable pageable) {
+        logger.debug("Searching available books with inventory filter: {}", criteria);
+        
+        return bookRepository.findBooksWithInventoryFilter(
+            criteria.title(),
+            criteria.author(),
+            criteria.category(),
+            criteria.minPrice(),
+            criteria.maxPrice(),
+            criteria.availableOnly() != null ? criteria.availableOnly() : true,
+            pageable
+        ).map(this::convertToDto);
+    }
+    
+    public Page<BookDto> findAffordableBooks(BigDecimal maxPrice, Pageable pageable) {
+        logger.debug("Finding affordable books under: {}", maxPrice);
+        
+        return bookRepository.findAffordableBooks(maxPrice, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> findRecentBooks(Pageable pageable) {
+        logger.debug("Finding recent books");
+        
+        return bookRepository.findRecentBooks(pageable)
+            .map(this::convertToDto);
+    }
+    
+    public Page<BookDto> findAvailableBooksByCategory(Long categoryId, Pageable pageable) {
+        logger.debug("Finding available books by category ID: {}", categoryId);
+        
+        return bookRepository.findAvailableBooksByCategory(categoryId, pageable)
+            .map(this::convertToDto);
+    }
+    
+    public List<String> getDistinctAuthors() {
+        logger.debug("Getting distinct authors");
+        
+        return bookRepository.findDistinctAuthors();
+    }
+    
+    public List<String> getDistinctCategories() {
+        logger.debug("Getting distinct categories");
+        
+        return bookRepository.findDistinctCategoryNames();
+    }
+    
+    public long countAvailableBooks() {
+        logger.debug("Counting available books");
+        
+        return bookRepository.countAvailableBooks();
+    }
+    
+    public long countBooksByCategory(String categoryName) {
+        logger.debug("Counting books by category: {}", categoryName);
+        
+        return bookRepository.countBooksByCategory(categoryName);
+    }
+    
+    private BookDto convertToDto(Book book) {
+        var availableQuantity = 0;
+        if (book.getInventory() != null) {
+            availableQuantity = book.getInventory().getAvailableQuantity();
+        }
+        
+        var categoryName = book.getCategory() != null ? book.getCategory().getName() : null;
+        
+        return new BookDto(
+            book.getId(),
+            book.getTitle(),
+            book.getAuthor(),
+            book.getIsbn(),
+            book.getDescription(),
+            book.getPrice(),
+            categoryName,
+            book.isAvailable(),
+            availableQuantity,
+            book.getCreatedAt(),
+            book.getUpdatedAt()
+        );
+    }
+}

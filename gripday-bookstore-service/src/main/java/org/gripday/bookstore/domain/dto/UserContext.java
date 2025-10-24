@@ -12,4 +12,27 @@ public record UserContext(
     String department,
     String organizationId,
     Map<String, Object> customClaims
-) {}
+) {
+    
+    public boolean hasRole(String role) {
+        return roles != null && roles.contains(role);
+    }
+    
+    public boolean hasAnyRole(String... roles) {
+        if (this.roles == null) return false;
+        for (String role : roles) {
+            if (this.roles.contains(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isAdmin() {
+        return hasAnyRole("ADMIN", "SUPERADMIN");
+    }
+    
+    public boolean isSuperAdmin() {
+        return hasRole("SUPERADMIN");
+    }
+}

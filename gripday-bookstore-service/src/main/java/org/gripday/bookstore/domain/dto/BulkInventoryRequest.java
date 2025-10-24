@@ -1,18 +1,16 @@
 package org.gripday.bookstore.domain.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public record BulkInventoryRequest(
     @NotNull(message = "Book ID is required")
-    @Positive(message = "Book ID must be positive")
     Long bookId,
     
     @NotNull(message = "Quantity is required")
-    @Min(value = 0, message = "Quantity must not be negative")
-    @Max(value = 999999, message = "Quantity must not exceed 999999")
+    @Min(value = 0, message = "Quantity cannot be negative")
     Integer quantity,
     
-    @Min(value = 0, message = "Low stock threshold must not be negative")
-    @Max(value = 1000, message = "Low stock threshold must not exceed 1000")
+    @Min(value = 0, message = "Low stock threshold cannot be negative")
     Integer lowStockThreshold
 ) {}
