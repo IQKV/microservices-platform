@@ -20,12 +20,20 @@ org.gripday.bookstore/
 
 ```mermaid
 graph TB
-    Client[Client Applications] --> Gateway[Gateway Service]
+    React[React 19 Frontend] --> Gateway[Gateway Service - BFF]
     Gateway --> Auth[Auth Service]
     Gateway --> Bookstore[Bookstore Service]
     Auth --> JWT[JWT Validation]
     Bookstore --> DB[(PostgreSQL Database)]
     Bookstore --> Redis[(Redis Cache)]
+    
+    subgraph "Gateway Service (BFF)"
+        Router[API Router]
+        Security[Security Layer]
+        RateLimit[Rate Limiting]
+        CircuitBreaker[Circuit Breaker]
+        CORS[CORS Handler]
+    end
     
     subgraph "Bookstore Service"
         BookResource[Book Resource]
@@ -35,23 +43,97 @@ graph TB
         SearchService[Search Service]
         BookRepository[Book Repository]
     end
+    
+    Note1[No Direct External Access]
+    Bookstore -.-> Note1
+```
+
+## Backend for Frontend (BFF) Integration
+
+### Gateway Service as API Umbrella
+
+The Gateway Service acts as the unified entry point for all React 19 frontend applications, providing:
+
+- **Unified API Surface**: Single endpoint for all bookstore operations (`/api/v1/bookstore/*`)
+- **Authentication Handling**: JWT token validation and user context propagation
+- **CORS Management**: React 19 development server support (localhost:5173) and production policies
+- **Rate Limiting**: Per-user and per-endpoint rate limiting for bookstore operations
+- **Circuit Breaker**: Fault tolerance and graceful degradation for bookstore service failures
+
+### Frontend-Optimized Responses
+
+The bookstore service provides responses optimized for React 19 consumption:
+
+```java
+public record BookCatalogResponse(
+    List<BookDto> books,
+    PaginationInfo pagination,
+    FilterOptions availableFilters,
+    SearchSuggestions suggestions
+) {}
+
+public record PaginationInfo(
+    int currentPage,
+    int totalPages,
+    long totalElements,
+    int pageSize,
+    boolean hasNext,
+    boolean hasPrevious
+) {}
+
+public record FilterOptions(
+    List<String> categories,
+    PriceRange priceRange,
+    List<String> authors
+) {}
+```
+
+### Gateway Service Routing Configuration
+
+```yaml
+# Gateway Service Configuration
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bookstore-catalog
+          uri: lb://bookstore-service
+          predicates:
+            - Path=/api/v1/bookstore/books/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        
+        - id: bookstore-inventory
+          uri: lb://bookstore-service
+          predicates:
+            - Path=/api/v1/bookstore/inventory/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: bookstore-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore
 ```
 
 ## Components and Interfaces
 
 ### Presentation Layer (presentation.web)
 
-#### BookResource
-- `GET /api/v1/books` - Paginated book listing with search and filter capabilities
-- `GET /api/v1/books/{id}` - Individual book details
-- `POST /api/v1/books` - Create new book (admin only)
-- `PUT /api/v1/books/{id}` - Update book information (admin only)
-- `DELETE /api/v1/books/{id}` - Remove book from catalog (admin only)
+#### BookResource (accessed via Gateway Service BFF)
+- `GET /api/v1/bookstore/books` - Paginated book listing with search and filter capabilities
+- `GET /api/v1/bookstore/books/{id}` - Individual book details
+- `POST /api/v1/bookstore/books` - Create new book (admin only)
+- `PUT /api/v1/bookstore/books/{id}` - Update book information (admin only)
+- `DELETE /api/v1/bookstore/books/{id}` - Remove book from catalog (admin only)
 
-#### InventoryResource
-- `GET /api/v1/inventory/{bookId}` - Get current inventory levels
-- `PUT /api/v1/inventory/{bookId}` - Update inventory quantity (admin only)
-- `POST /api/v1/inventory/bulk-update` - Bulk inventory operations (admin only)
+#### InventoryResource (accessed via Gateway Service BFF)
+- `GET /api/v1/bookstore/inventory/{bookId}` - Get current inventory levels
+- `PUT /api/v1/bookstore/inventory/{bookId}` - Update inventory quantity (admin only)
+- `POST /api/v1/bookstore/inventory/bulk-update` - Bulk inventory operations (admin only)
+
+**Note**: All endpoints are accessed through the Gateway Service which routes to internal service endpoints. Direct external access to bookstore service is not permitted.
 
 ### Domain Layer (domain.service)
 
@@ -419,6 +501,70 @@ spring:
     type: redis
     redis:
       time-to-live: 600000  # 10 minutes
+```
+
+### React 19 Frontend Integration
+
+#### Gateway Service Configuration (BFF Pattern)
+```yaml
+# Gateway Service handles all external access
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bookstore-catalog
+          uri: lb://bookstore-service
+          predicates:
+            - Path=/api/v1/bookstore/books/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+            - name: CircuitBreaker
+              args:
+                name: bookstore-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore
+      
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: 
+              - "http://localhost:5173"  # Vite + React 19 dev server
+              - "https://bookstore.gripday.org"  # Production
+            allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+```
+
+#### Frontend-Optimized Response DTOs
+```java
+// Enhanced response for React 19 state management
+public record BookCatalogResponse(
+    List<BookDto> books,
+    PaginationMetadata pagination,
+    FilterMetadata filters,
+    SearchMetadata search
+) {}
+
+public record PaginationMetadata(
+    int currentPage,
+    int totalPages,
+    long totalElements,
+    int pageSize,
+    boolean hasNext,
+    boolean hasPrevious,
+    String nextPageUrl,
+    String previousPageUrl
+) {}
+
+public record FilterMetadata(
+    List<CategoryFilter> categories,
+    PriceRangeFilter priceRange,
+    List<AuthorFilter> authors,
+    AvailabilityFilter availability
+) {}
 ```
 
 ### OpenAPI Documentation
