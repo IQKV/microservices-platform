@@ -42,14 +42,23 @@
     - Add validation annotations for input validation
     - _Requirements: 1.1, 2.4, 3.1, 5.2_
 
-- [ ] 3. Implement repository layer
-  - [ ] 3.1 Create BookRepository with custom query methods
+- [x] 3. Implement repository layer
+
+
+
+
+
+  - [x] 3.1 Create BookRepository with custom query methods
+
+
     - Implement JpaRepository with search and filter methods
     - Add custom queries for title, author, category, and price range searches
     - Include availability filtering and pagination support
     - _Requirements: 2.1, 2.2, 2.3_
   
-  - [ ] 3.2 Create CategoryRepository and InventoryRepository
+  - [x] 3.2 Create CategoryRepository and InventoryRepository
+
+
     - Implement basic CRUD operations for categories
     - Create inventory-specific query methods for stock management
     - Add repository methods for bulk operations
