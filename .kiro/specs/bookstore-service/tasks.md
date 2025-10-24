@@ -12,20 +12,31 @@
   - Configure Liquibase for database migrations
   - _Requirements: 4.2, 4.4, 5.4_
 
-- [ ] 2. Implement data models and database schema
-  - [ ] 2.1 Create JPA entity classes (Book, Category, Inventory)
+- [x] 2. Implement data models and database schema
+
+
+
+
+
+  - [x] 2.1 Create JPA entity classes (Book, Category, Inventory)
+
+
     - Implement Book entity with proper annotations and relationships
     - Implement Category entity with bidirectional relationship to Book
     - Implement Inventory entity with one-to-one relationship to Book
     - _Requirements: 1.1, 3.1, 4.2_
   
-  - [ ] 2.2 Create Liquibase migration scripts
+  - [x] 2.2 Create Liquibase migration scripts
+
+
     - Write XML migration for books, categories, and inventory tables
     - Include proper indexes, constraints, and foreign key relationships
     - Add initial seed data for book categories
     - _Requirements: 4.2, 5.4_
   
-  - [ ] 2.3 Create DTOs and record classes
+  - [x] 2.3 Create DTOs and record classes
+
+
     - Implement BookDto, InventoryDto, and search criteria records
     - Create request/response records for API operations
     - Add validation annotations for input validation
