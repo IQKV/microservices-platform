@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstore-redis
+  namespace: gripday-bookstore
+  labels:
+    app.kubernetes.io/name: bookstore-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday-platform
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app.kubernetes.io/name: bookstore-redis
+    app.kubernetes.io/component: cache
+---
+# Headless service for potential Redis clustering in the future
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstore-redis-headless
+  namespace: gripday-bookstore
+  labels:
+    app.kubernetes.io/name: bookstore-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday-platform
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app.kubernetes.io/name: bookstore-redis
+    app.kubernetes.io/component: cache

@@ -143,6 +143,10 @@ check_prerequisites() {
         if ! docker image inspect gripday/gateway-service:latest &>/dev/null; then
             print_warning "Gateway service image not found, will build..."
         fi
+        
+        if ! docker image inspect gripday/bookstore-service:latest &>/dev/null; then
+            print_warning "Bookstore service image not found, will build..."
+        fi
     fi
     
     print_status "Prerequisites check completed"
@@ -180,6 +184,16 @@ build_images() {
         print_warning "[DRY-RUN] Would build gateway service image"
     fi
     
+    # Build bookstore service
+    print_status "Building bookstore service image..."
+    if [[ "$DRY_RUN" == "false" ]]; then
+        cd gripday-bookstore-service
+        docker build -t gripday/bookstore-service:latest .
+        cd ..
+    else
+        print_warning "[DRY-RUN] Would build bookstore service image"
+    fi
+    
     print_status "Docker images built successfully"
 }
 
@@ -194,6 +208,7 @@ setup_namespaces() {
     
     execute_kubectl "apply -f auth-service/namespace.yaml"
     execute_kubectl "apply -f gateway-service/namespace.yaml"
+    execute_kubectl "apply -f bookstore-service/namespace.yaml"
     
     print_status "Namespaces created successfully"
 }
@@ -259,6 +274,41 @@ deploy_gateway_service() {
     print_status "Gateway service deployed successfully"
 }
 
+# Function to deploy bookstore service
+deploy_bookstore_service() {
+    print_status "Deploying bookstore service..."
+    
+    # Apply configs and secrets
+    execute_kubectl "apply -f bookstore-service/configmap.yaml"
+    execute_kubectl "apply -f bookstore-service/secret.yaml"
+    
+    # Deploy PostgreSQL
+    execute_kubectl "apply -f bookstore-service/bookstore-postgres-deployment.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-postgres-service.yaml"
+    
+    # Deploy Redis
+    execute_kubectl "apply -f bookstore-service/bookstore-redis-deployment.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-redis-service.yaml"
+    
+    # Wait for databases to be ready
+    if [[ "$DRY_RUN" == "false" ]]; then
+        print_status "Waiting for Bookstore PostgreSQL to be ready..."
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=bookstore-postgres -n gripday-bookstore --timeout=300s
+        
+        print_status "Waiting for Bookstore Redis to be ready..."
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=bookstore-redis -n gripday-bookstore --timeout=300s
+    fi
+    
+    # Deploy bookstore service
+    execute_kubectl "apply -f bookstore-service/bookstore-service-deployment.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-service-service.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-service-hpa.yaml"
+    execute_kubectl "apply -f bookstore-service/network-policy.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-service-ingress.yaml"
+    
+    print_status "Bookstore service deployed successfully"
+}
+
 # Function to verify deployment
 verify_deployment() {
     if [[ "$DRY_RUN" == "true" ]]; then
@@ -276,6 +326,10 @@ verify_deployment() {
     print_status "Waiting for gateway service to be ready..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n gripday-gateway --timeout=300s
     
+    # Wait for bookstore service to be ready
+    print_status "Waiting for bookstore service to be ready..."
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-bookstore-service -n gripday-bookstore --timeout=300s
+    
     # Show service URLs
     print_status "Deployment verification completed!"
     print_status ""
@@ -286,7 +340,11 @@ verify_deployment() {
     print_status "Access services:"
     print_status "  Auth Service: http://auth.local.gripday.com"
     print_status "  Gateway Service: http://api.local.gripday.com"
-    print_status "  Auth Swagger UI: http://auth.local.gripday.com/swagger-ui.html"
+    print_status "  Bookstore Service: http://localhost/api/v1/bookstore"
+    print_status ""
+    print_status "Swagger UI:"
+    print_status "  Auth Service: http://auth.local.gripday.com/swagger-ui.html"
+    print_status "  Bookstore Service: http://localhost/bookstore/swagger-ui.html"
 }
 
 # Main execution
@@ -299,6 +357,7 @@ main() {
     setup_namespaces
     deploy_auth_service
     deploy_gateway_service
+    deploy_bookstore_service
     verify_deployment
     
     print_status "Local deployment completed successfully!"

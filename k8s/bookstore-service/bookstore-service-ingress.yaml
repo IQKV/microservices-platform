@@ -1,0 +1,211 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bookstore-service-ingress
+  namespace: gripday-bookstore
+  labels:
+    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/component: bookstore
+    app.kubernetes.io/part-of: gripday-platform
+  annotations:
+    # NGINX Ingress Controller annotations
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    
+    # CORS configuration for development
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:5173, http://localhost:3000"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID,X-Request-ID,X-Tenant-ID"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "86400"
+    
+    # Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit-connections: "10"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "60"
+    
+    # Request size limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    
+    # Health check
+    nginx.ingress.kubernetes.io/health-check-path: "/actuator/health"
+    nginx.ingress.kubernetes.io/health-check-interval: "30s"
+    
+    # Load balancing
+    nginx.ingress.kubernetes.io/load-balance: "round_robin"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options nosniff;
+      add_header X-Frame-Options DENY;
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Referrer-Policy "strict-origin-when-cross-origin";
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: localhost
+    http:
+      paths:
+      # Public API endpoints (no authentication required)
+      - path: /api/v1/bookstore/public(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+      
+      # Protected API endpoints (authentication required)
+      - path: /api/v1/bookstore(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+      
+      # Health and monitoring endpoints
+      - path: /bookstore/actuator(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+      
+      # API documentation
+      - path: /bookstore/swagger-ui(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+      
+      - path: /bookstore/api-docs(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+  
+  # TLS configuration (uncomment for HTTPS)
+  # tls:
+  # - hosts:
+  #   - bookstore.gripday.local
+  #   secretName: bookstore-service-tls
+---
+# Ingress for staging environment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bookstore-service-ingress-staging
+  namespace: gripday-bookstore-staging
+  labels:
+    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/component: bookstore
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Stricter CORS for staging
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.gripday.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID,X-Request-ID,X-Tenant-ID"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Enhanced rate limiting for staging
+    nginx.ingress.kubernetes.io/rate-limit-connections: "20"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "120"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options nosniff;
+      add_header X-Frame-Options DENY;
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Referrer-Policy "strict-origin-when-cross-origin";
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: staging-api.gripday.com
+    http:
+      paths:
+      - path: /api/v1/bookstore(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+  tls:
+  - hosts:
+    - staging-api.gripday.com
+    secretName: bookstore-service-tls-staging
+---
+# Ingress for production environment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bookstore-service-ingress-production
+  namespace: gripday-bookstore-production
+  labels:
+    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/component: bookstore
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # Strict CORS for production
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID,X-Request-ID,X-Tenant-ID"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Production rate limiting
+    nginx.ingress.kubernetes.io/rate-limit-connections: "50"
+    nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "300"
+    
+    # Enhanced security headers for production
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options nosniff;
+      add_header X-Frame-Options DENY;
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Referrer-Policy "strict-origin-when-cross-origin";
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none';" always;
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: api.gripday.com
+    http:
+      paths:
+      - path: /api/v1/bookstore(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: bookstore-service
+            port:
+              number: 8082
+  tls:
+  - hosts:
+    - api.gripday.com
+    secretName: bookstore-service-tls-production
