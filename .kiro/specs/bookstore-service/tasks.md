@@ -118,20 +118,31 @@
     - Verify InventoryService stock management operations
     - _Requirements: 5.3_
 
-- [ ] 5. Implement presentation layer
-  - [ ] 5.1 Create BookResource REST controller
+- [x] 5. Implement presentation layer
+
+
+
+
+
+  - [x] 5.1 Create BookResource REST controller
+
+
     - Implement GET endpoints for book listing and details
     - Add POST, PUT, DELETE endpoints for admin operations
     - Include proper HTTP status codes and error handling
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.4, 2.5, 5.2_
   
-  - [ ] 5.2 Create InventoryResource REST controller
+  - [x] 5.2 Create InventoryResource REST controller
+
+
     - Implement GET endpoint for inventory status
     - Add PUT endpoint for inventory updates (admin only)
     - Include bulk update endpoint for efficient operations
     - _Requirements: 3.1, 3.2, 3.5_
   
-  - [ ] 5.3 Implement global exception handler
+  - [x] 5.3 Implement global exception handler
+
+
     - Create @RestControllerAdvice for consistent error responses
     - Handle domain-specific exceptions (BookNotFound, InsufficientInventory)
     - Include validation error handling and correlation ID propagation
