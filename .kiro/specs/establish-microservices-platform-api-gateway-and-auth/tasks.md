@@ -278,12 +278,53 @@
     - Troubleshooting common issues
   - _Requirements: 18.1, 18.2, 18.3, 18.4, 22.1, 22.2, 22.3, 22.4_
 
+## Phase 4: Kubernetes Deployment and Final Integration
+
+- [ ] 11. Implement Kubernetes deployment automation
+  - [ ] 11.1 Create Kubernetes deployment automation scripts
+    - Implement k8s/deploy-local.sh for local Kubernetes deployment with validation
+    - Create k8s/deploy-staging.sh for staging environment deployment with health checks
+    - Implement k8s/deploy-production.sh for production deployment with safety validations
+    - Add k8s/rollback.sh for automated rollback functionality
+    - Create k8s/scale-services.sh for horizontal scaling automation
+    - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
+
+  - [ ] 11.2 Implement Kubernetes health monitoring and validation
+    - Create k8s/health-check.sh for comprehensive service health validation
+    - Implement automated readiness and liveness probe validation
+    - Add service mesh connectivity testing between auth and gateway services
+    - Create namespace isolation validation scripts
+    - _Requirements: 8.1, 8.2, 21.1, 21.6, 21.7_
+
+  - [ ] 11.3 Write integration tests for Kubernetes deployment
+    - Test successful Kubernetes deployment for both services
+    - Validate service-to-service communication in Kubernetes environment
+    - Test horizontal pod autoscaling functionality
+    - Verify ingress routing and load balancing
+    - Focus on successful deployment scenarios with basic validation
+    - _Requirements: 8.1, 8.2, 8.3, 21.1, 21.6, 21.7_
+
+- [ ] 12. Final platform integration and validation
+  - [ ] 12.1 Create end-to-end platform validation
+    - Implement comprehensive platform startup validation script
+    - Test complete user authentication flow through gateway to auth service
+    - Validate multi-tenant functionality across both services
+    - Test JWT token propagation and user context flow
+    - Verify observability stack integration and metrics collection
+    - _Requirements: 5.1, 5.2, 5.3, 6.1, 6.2, 7.1, 7.2, 26.1, 26.2, 26.3_
+
+  - [ ] 12.2 Implement platform documentation finalization
+    - Create comprehensive platform README.md with quick start guide
+    - Finalize API documentation with complete endpoint examples
+    - Add troubleshooting guide for common deployment issues
+    - Create developer onboarding documentation
+    - _Requirements: 18.1, 18.2, 18.3, 22.1, 22.2, 22.3_
+
 ## Future Enhancements (Post-MVP)
 
 The following features can be implemented after the core MVP is complete:
 - API versioning infrastructure
 - Postman collection generation
-- Kubernetes deployment configurations
 - Advanced monitoring and alerting
 - Performance testing and optimization
 - Comprehensive security scanning
@@ -311,7 +352,7 @@ The following features can be implemented after the core MVP is complete:
     - Use straightforward test scenarios without complex version migration edge cases
     - _Requirements: 12.1, 12.2, 12.4, 12.6, 12.8, 21.1, 21.2, 21.7_
 
-  - [ ] 6.8 Write simple unit tests for gateway filters and routing
+  - [x] 6.8 Write simple unit tests for gateway filters and routing
     - Test successful JWT authentication filter logic with valid tokens
     - Write basic tests for successful rate limiting functionality within limits
     - Test successful circuit breaker behavior in closed state
@@ -319,7 +360,7 @@ The following features can be implemented after the core MVP is complete:
     - Use minimal test setup and straightforward assertions
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 21.1, 21.2, 21.3, 21.7_
 
-  - [ ] 6.9 Implement comprehensive multi-tenant gateway support
+  - [x] 6.9 Implement comprehensive multi-tenant gateway support
     - Create tenant-aware routing configuration with dynamic service discovery per tenant
     - Implement tenant-specific gateway filters and request transformation
     - Create tenant-aware load balancing and service routing strategies
@@ -334,7 +375,7 @@ The following features can be implemented after the core MVP is complete:
     - Create tenant-specific logging and audit trails in gateway operations
     - _Requirements: 26.2, 26.3, 26.4, 26.5, 26.6, 26.7, 26.8, 26.9, 26.10_
 
-  - [ ] 6.10 Write simple tests for multi-tenant gateway functionality
+  - [x] 6.10 Write simple tests for multi-tenant gateway functionality
     - Test successful tenant extraction from JWT tokens, headers, and subdomains
     - Write basic tests for tenant-aware rate limiting with different quota scenarios
     - Test successful tenant context propagation to downstream services
@@ -344,21 +385,21 @@ The following features can be implemented after the core MVP is complete:
     - Use straightforward test scenarios with valid tenant configurations
     - _Requirements: 26.1, 26.2, 26.3, 26.5, 26.8, 26.10, 21.1, 21.2, 21.7_
 
-- [ ] 7. Implement container orchestration and extensibility
-  - [ ] 7.1 Configure container-based service networking
+- [x] 7. Implement container orchestration and extensibility
+  - [x] 7.1 Configure container-based service networking
     - Set up Docker Compose networking for local development
     - Configure service-to-service communication using container DNS
     - Implement static route configuration for known services
     - _Requirements: 8.1, 8.2_
 
-  - [ ] 7.2 Implement extensible routing for new microservices
+  - [x] 7.2 Implement extensible routing for new microservices
     - Create static route configuration for microservices
     - Implement service-specific security policies
     - Add support for custom authentication rules per service
     - Configure container networking and DNS resolution
     - _Requirements: 8.3, 8.4, 8.5_
 
-  - [ ] 7.3 Write simple integration tests for container networking
+  - [x] 7.3 Write simple integration tests for container networking
     - Test successful container-to-container communication scenarios
     - Write basic tests for successful routing to containerized services
     - Focus on testing basic service interactions and data flow
@@ -436,7 +477,7 @@ The following features can be implemented after the core MVP is complete:
     - Use straightforward test data and minimal setup
     - _Requirements: 7.1, 7.2, 21.1, 21.2, 21.7_
 
-- [ ] 10. Create individual Docker containerization and deployment for each microservice
+- [x] 10. Create individual Docker containerization and deployment for each microservice
   - [x] 10.1 Create individual Dockerfiles for each microservice
     - Write optimized Dockerfile for auth service with multi-stage builds in gripday-auth-service directory
     - Create Dockerfile for gateway service with reactive optimizations in gripday-gateway-service directory
@@ -447,7 +488,16 @@ The following features can be implemented after the core MVP is complete:
   - [x] 10.2 Set up individual Docker Compose configurations for auth service
     - Create gripday-auth-service/docker-compose.yml for local development with PostgreSQL and Redis
     - Create gripday-auth-service/docker-compose.staging.yml for staging environment deployment
-    - Create gripday-auth-service/docker-compose.production.yml for production environment deployment
+    - Create gripday-auth-service/docker-compose.production.yml for production deployment
+    - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
+    - _Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_
+
+  - [x] 10.3 Set up individual Docker Compose configurations for gateway service
+    - Create gripday-gateway-service/docker-compose.yml for local development with Redis
+    - Create gripday-gateway-service/docker-compose.staging.yml for staging environment deployment
+    - Create gripday-gateway-service/docker-compose.production.yml for production deployment
+    - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
+    - _Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_eate gripday-auth-service/docker-compose.production.yml for production environment deployment
     - Configure service-specific PostgreSQL and Redis containers with proper data persistence
     - Set up auth service networking, dependencies, and health checks
     - Configure environment-specific resource limits and scaling options for auth service
@@ -464,14 +514,14 @@ The following features can be implemented after the core MVP is complete:
     - Add service-specific environment variable management and configuration
     - _Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_
 
-  - [ ] 10.4 Create platform-level observability Docker Compose stack
+  - [x] 10.4 Create platform-level observability Docker Compose stack
     - Create platform-observability/docker-compose.yml with Prometheus, Grafana, and Loki
     - Configure observability stack to monitor all microservices
     - Set up container networking and monitoring configuration for individual services
     - Add centralized logging and metrics collection from all microservices
     - _Requirements: 2.5, 7.1, 7.2, 7.4_
 
-  - [ ] 10.5 Create POSIX automation scripts for individual service deployment
+  - [x] 10.5 Create POSIX automation scripts for individual service deployment
     - Create scripts/start-auth-service.sh and scripts/stop-auth-service.sh for auth service management
     - Create scripts/start-gateway-service.sh and scripts/stop-gateway-service.sh for gateway service management
     - Implement scripts/deploy-auth-staging.sh and scripts/deploy-auth-production.sh for auth service deployment
@@ -481,7 +531,7 @@ The following features can be implemented after the core MVP is complete:
     - Add database initialization and migration scripts for auth service
     - _Requirements: 19.3, 19.4, 19.5_
 
-  - [ ] 10.6 Write simple Docker integration tests and deployment validation for individual services
+  - [x] 10.6 Write simple Docker integration tests and deployment validation for individual services
     - Test successful container startup and health checks for each service
     - Verify basic service communication between auth and gateway services
     - Test successful Docker Compose configurations for local environment
@@ -556,164 +606,3 @@ The following features can be implemented after the core MVP is complete:
     - Create k8s/health-check.sh for cluster health validation
     - _Requirements: 8.1, 8.2, 19.1, 19.2_
 
-- [ ] 13. Create POSIX automation and tooling
-  - [ ] 13.1 Implement comprehensive POSIX shell scripts for development workflow
-    - Create setup-local.sh script for local development environment initialization
-    - Implement build.sh script with environment-specific Maven configurations
-    - Create test.sh script for running different test suites (unit, integration, e2e)
-    - Implement clean.sh script for cleaning build artifacts and Docker resources
-    - Create database management scripts (create-db.sh, migrate-db.sh, seed-db.sh)
-    - Add service management scripts (start-services.sh, stop-services.sh, restart-services.sh)
-    - Implement log aggregation and monitoring scripts for POSIX systems
-    - _Requirements: 16.1, 16.2, 16.3_
-
-  - [ ] 13.2 Create deployment and CI/CD automation scripts
-    - Implement deploy-staging.sh with comprehensive Docker Compose staging deployment automation
-    - Create deploy-production.sh with production Docker Compose deployment safety checks and validations
-    - Add rollback.sh script for automated Docker Compose rollback procedures
-    - Implement health-check.sh for comprehensive service health monitoring across Docker containers
-    - Create backup.sh and restore.sh scripts for database and configuration backup in containerized environments
-    - Add monitoring and alerting setup scripts for POSIX environments with Docker Compose
-    - Implement security scanning and vulnerability assessment scripts for Docker images
-    - _Requirements: 16.1, 16.2, 16.3, 19.1, 19.2_
-
-  - [ ] 13.3 Implement development productivity tools for POSIX systems
-    - Create dev-tools.sh script for installing and configuring development dependencies
-    - Implement code-quality.sh for running static analysis, linting, and formatting
-    - Add performance-test.sh for load testing and performance benchmarking
-    - Create api-test.sh for automated API testing with Postman collections and Newman
-    - Implement security-test.sh for security scanning and penetration testing
-    - Add documentation generation scripts (generate-docs.sh) for API and system documentation
-    - Create troubleshooting and debugging helper scripts for POSIX environments
-    - _Requirements: 15.6, 16.1, 16.2_
-
-- [ ] 14. Create comprehensive documentation structure for all microservices
-  - [ ] 14.1 Create concise documentation structure for auth service
-    - Create README.md with essential service overview and quick start guide using bullet points and brief descriptions
-    - Set up docs folder with api, architecture, and deployment subfolders
-    - Create docs/api/authentication.md with essential API endpoints and examples focusing on actionable information
-    - Add docs/api/errors.md with error codes and responses using concise format
-    - Create docs/architecture/overview.md with high-level architecture and key design patterns
-    - Add docs/architecture/security.md with JWT authentication flow and essential security information
-    - Create docs/deployment/local.md with local development setup using quick reference format
-    - Add docs/deployment/configuration.md with essential environment variables and configuration examples
-    - Focus on essential information in minimal, focused content without verbose explanations
-    - Use bullet points, code examples, and brief descriptions over lengthy prose
-    - Provide quick reference guides and practical usage examples
-    - Avoid redundant explanations and focus on unique, essential information per section
-    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 22.1, 22.2, 22.3, 22.4, 22.5, 22.7_
-
-  - [ ] 14.2 Create concise documentation structure for gateway service
-    - Create README.md with essential gateway service overview and quick start using minimal, focused content
-    - Set up docs folder with api, architecture, and deployment subfolders
-    - Create docs/api/routing.md with essential routing rules and configuration examples
-    - Add docs/api/rate-limiting.md with rate limiting policies using quick reference format
-    - Create docs/architecture/overview.md with reactive architecture essentials and key components
-    - Add docs/architecture/security.md with JWT authentication flow and essential security information
-    - Create docs/deployment/local.md with gateway deployment setup using actionable information
-    - Add docs/deployment/configuration.md with essential configuration examples and environment variables
-    - Focus on actionable information and practical usage examples
-    - Use bullet points, code examples, and brief descriptions over lengthy prose
-    - Provide quick reference guides that can be quickly read and understood
-    - Avoid verbose explanations and focus on unique, essential information per section
-    - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7_
-
-  - [ ] 14.3 Create POSIX automation scripts and operational documentation
-    - Create scripts/setup-local.sh for local Docker Compose development environment setup
-    - Implement scripts/deploy-staging.sh for Docker Compose staging deployment automation
-    - Add scripts/deploy-production.sh for Docker Compose production deployment with safety checks
-    - Create scripts/wait-for-services.sh for Docker container service readiness checking
-    - Implement scripts/health-check.sh for comprehensive Docker service health monitoring
-    - Add scripts/backup.sh and scripts/restore.sh for containerized data backup and recovery
-    - Create scripts/troubleshoot.sh for automated Docker troubleshooting and diagnostics
-    - Implement all scripts with POSIX compatibility (bash, proper error handling, descriptive comments)
-    - Add executable permissions and proper shebang headers to all scripts
-    - Create script documentation with usage examples and parameter descriptions for Docker Compose workflows
-    - _Requirements: 18.7, 18.8_
-
-  - [ ] 14.4 Implement concise documentation automation and maintenance
-    - Create simple documentation templates for consistent structure across services using minimal format
-    - Implement automated documentation generation from OpenAPI specifications focusing on essential information
-    - Add basic documentation validation in CI/CD pipeline
-    - Create simple documentation update workflows for keeping content synchronized with code
-    - Implement automated generation of essential API examples and endpoint documentation
-    - Focus on essential information without excessive detail or verbose explanations
-    - Create streamlined documentation review processes
-    - _Requirements: 18.6, 18.8, 22.1, 22.2, 22.6_
-
-- [ ] 15. Implement happy path testing guidelines and concise documentation standards
-  - [ ] 15.1 Create happy path testing framework and guidelines
-    - Implement TestDataBuilder component for creating simple, valid test data objects
-    - Create testing utilities that focus on successful execution scenarios
-    - Implement simple test base classes with minimal setup and straightforward assertions
-    - Create testing guidelines documentation with examples of happy path testing patterns
-    - Implement test configuration that prioritizes clear, readable test implementations
-    - Add testing utilities for creating valid JWT tokens, user contexts, and request objects
-    - Create simple integration test base classes using Testcontainers with minimal complexity
-    - Focus testing framework on core functionality without extensive edge case coverage
-    - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7_
-
-  - [ ] 15.2 Implement concise documentation standards and templates
-    - Create documentation templates that provide essential information in minimal, focused content
-    - Implement README.md templates with quick start guides and essential configuration examples
-    - Create API documentation templates using bullet points, code examples, and brief descriptions
-    - Implement architecture documentation templates focusing on actionable information
-    - Create deployment documentation templates with practical usage examples
-    - Add documentation guidelines that avoid redundant explanations and verbose content
-    - Implement documentation structure that can be quickly read and understood
-    - Create documentation validation tools that ensure concise, focused content
-    - _Requirements: 22.1, 22.2, 22.3, 22.4, 22.5, 22.6, 22.7_
-
-  - [ ] 15.3 Implement REST controller naming and package conventions
-    - Ensure all @RestController classes are placed in presentation.web package structure
-    - Implement Resource suffix naming convention for all REST controllers (AuthenticationResource, UserManagementResource, etc.)
-    - Update existing controller classes to follow new naming conventions if needed
-    - Create ArchUnit validation rules to enforce REST controller package placement and naming
-    - Implement Spring Modulith tests to validate controller module boundaries
-    - Add architectural tests to prevent @RestController classes from being placed outside presentation.web
-    - Update documentation and examples to reflect new REST controller conventions
-    - Ensure consistent application of conventions across all microservices in the platform
-    - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.6, 23.7_
-
-- [ ] 16. Integration and end-to-end testing
-  - [ ] 16.1 Create simple integration test suite
-    - Write basic integration tests for successful auth service database operations
-    - Create tests for successful gateway-auth service communication
-    - Test successful authentication and authorization flows with valid credentials
-    - Write integration tests for successful user management CRUD operations
-    - Test successful admin access control with proper administrative privileges
-    - Test successful user context propagation through JWT claims in each service
-    - Test successful API versioning scenarios with supported versions
-    - Validate successful architectural compliance in integration tests
-    - Test successful HTTP status code responses for valid requests
-    - Validate successful error response format for common scenarios
-    - Test successful correlation ID propagation through service calls
-    - Verify successful Content-Type and header handling
-    - Test successful OpenAPI specification generation and accuracy
-    - Test successful Postman collection generation and download functionality
-    - Focus on testing basic service interactions and data flow
-    - Use straightforward test scenarios without complex failure cases
-    - _Requirements: 5.1, 5.2, 6.2, 8.3, 9.1, 9.2, 9.5, 10.1, 10.2, 11.6, 12.4, 12.8, 13.1, 13.2, 13.3, 13.6, 13.7, 14.6, 14.7, 15.1, 15.2, 15.6, 21.1, 21.6, 21.7_
-
-  - [ ] 16.2 Implement simple end-to-end testing scenarios
-    - Test successful user registration and login flow with valid credentials
-    - Verify successful rate limiting functionality within normal usage limits
-    - Test successful container networking and routing for containerized services
-    - Test successful end-to-end user management workflows with proper administrative roles
-    - Test successful user context propagation across multiple microservices
-    - Verify successful JWT claims enrichment and extraction functionality in both services
-    - Test successful API version usage with supported versions
-    - Verify successful backward compatibility for supported API versions
-    - Test successful end-to-end Postman collection workflows with valid data
-    - Focus on testing the most common user workflows and API usage patterns
-    - Use straightforward test scenarios without complex edge cases
-    - _Requirements: 6.1, 6.3, 6.4, 8.1, 9.1, 9.6, 10.3, 10.4, 10.5, 12.4, 12.6, 12.8, 15.3, 15.4, 15.6, 21.1, 21.6, 21.7_
-
-  - [ ] 16.3 Create simple performance and load testing
-    - Set up basic load testing for gateway throughput with normal usage scenarios
-    - Test database performance with typical load patterns
-    - Verify Redis performance for successful caching and rate limiting operations
-    - Test JWT token enrichment performance with standard token sizes
-    - Focus on testing core functionality under normal load conditions
-    - Use straightforward performance metrics and minimal test complexity
-    - _Requirements: 4.3, 6.3, 10.5, 21.1, 21.7_
