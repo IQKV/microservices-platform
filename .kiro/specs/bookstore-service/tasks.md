@@ -248,13 +248,11 @@
     - Add deprecation notices for future API changes
     - _Requirements: 5.2_
 
-- [-] 10. Final integration and deployment preparation
+- [x] 10. Final integration and deployment preparation
+
 
 
   - [x] 10.1 Create Docker configuration and compose files
-
-
-
 
 
     - Write Dockerfile for the bookstore service
@@ -263,7 +261,6 @@
     - _Requirements: 4.2, 5.4_
   
   - [x] 10.2 Verify platform integration
-
 
 
     - Test integration with Gateway Service routing for both bookstore and auth endpoints
@@ -275,11 +272,19 @@
   - [x] 10.3 Create end-to-end integration tests
 
 
-
-
-
-
     - Write @SpringBootTest classes for full application testing
     - Test complete user workflows (browse, search, admin operations)
     - Verify security and error handling in realistic scenarios
     - _Requirements: 5.3_
+
+- [x] 11. Implement public access endpoints
+
+
+  - [x] 11.1 Configure public book browsing endpoints
+
+
+    - Implement public access to paginated book listings without authentication
+    - Configure security to allow unauthenticated access to basic catalog operations
+    - Add rate limiting for public endpoints to prevent abuse
+    - Ensure public endpoints return only basic book metadata (title, author, price, availability)
+    - _Requirements: 6.1, 6.2, 6.4, 6.5_
