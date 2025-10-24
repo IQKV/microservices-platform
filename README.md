@@ -332,15 +332,23 @@ spring:
 
 ## Documentation
 
-### Comprehensive Guides
-- [Local Development Setup](docs/deployment/local-development.md)
-- [Environment Configuration](docs/configuration/environment-variables.md)
-- [Authentication API](gripday-auth-service/docs/api/authentication.md)
-- [Troubleshooting Guide](docs/troubleshooting/common-issues.md)
+### Getting Started
+- [Developer Onboarding Guide](docs/developer-onboarding.md) - Complete setup and development guide
+- [Platform Validation Scripts](scripts/README.md) - End-to-end testing and validation
+
+### API Documentation
+- [Complete API Reference](docs/api/complete-api-reference.md) - Comprehensive endpoint documentation
+- [Authentication API](gripday-auth-service/docs/api/authentication.md) - Auth service specific endpoints
+- Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8081/swagger-ui.html)
+
+### Deployment and Operations
+- [Local Development Setup](docs/deployment/local-development.md) - Development environment setup
+- [Environment Configuration](docs/configuration/environment-variables.md) - Configuration management
+- [Troubleshooting Guide](docs/troubleshooting/common-issues.md) - Common issues and solutions
 
 ### Service Documentation
-- [Auth Service README](gripday-auth-service/README.md)
-- [Gateway Service README](gripday-gateway-service/README.md)
+- [Auth Service README](gripday-auth-service/README.md) - Authentication service details
+- [Gateway Service README](gripday-gateway-service/README.md) - API gateway service details
 
 ## Troubleshooting
 

@@ -1,372 +1,374 @@
-# Troubleshooting Common Issues
+# Troubleshooting Guide
 
-This guide provides solutions to common issues encountered when developing, deploying, and operating the Gripday microservices platform.
+This guide covers common issues and their solutions when working with the Gripday microservices platform.
 
-## Quick Diagnostics
+## Service Startup Issues
 
-### Health Check Commands
+### Auth Service Won't Start
+
+**Symptoms:**
+- Service fails to start with database connection errors
+- Application context fails to load
+- Port binding errors
+
+**Solutions:**
+
+1. **Database Connection Issues:**
 ```bash
-# Check all services
-curl http://localhost:8081/actuator/health  # Auth Service
-curl http://localhost:8080/actuator/health  # Gateway Service
+# Check PostgreSQL container status
+docker-compose ps postgres
 
-# Check infrastructure
-docker-compose ps                           # Container status
-docker-compose logs -f postgres            # Database logs
-docker-compose logs -f redis               # Redis logs
+# Verify database connectivity
+docker-compose exec postgres psql -U gripday -d gripday_auth -c "SELECT 1;"
+
+# Check database logs
+docker-compose logs postgres
+
+# Restart database if needed
+docker-compose restart postgres
 ```
 
-### Service Status Verification
+2. **Port Already in Use:**
 ```bash
-# Test authentication flow
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"test","password":"test"}'
+# Check what's using port 8081
+lsof -i :8081
+netstat -tulpn | grep 8081
 
-# Check gateway routing
-curl http://localhost:8080/actuator/gateway/routes
+# Kill process using the port
+kill -9 <PID>
 
-# Verify database connection
-psql -h localhost -U gripday -d gripday_auth -c "SELECT 1;"
+# Or change port in application.yml
+server:
+  port: 8082
+```
+
+3. **Liquibase Migration Failures:**
+```bash
+# Check migration status
+cd gripday-auth-service
+mvn liquibase:status -Dspring.profiles.active=local
+
+# Clear locks if stuck
+mvn liquibase:releaseLocks -Dspring.profiles.active=local
+
+# Rollback and retry
+mvn liquibase:rollback -Dliquibase.rollbackCount=1
+mvn liquibase:update
+```
+
+### Gateway Service Won't Start
+
+**Symptoms:**
+- Gateway service fails to connect to Auth Service
+- Redis connection errors
+- Route configuration issues
+
+**Solutions:**
+
+1. **Auth Service Connectivity:**
+```bash
+# Verify Auth Service is running
+curl http://localhost:8081/actuator/health
+
+# Check network connectivity
+docker-compose exec gateway-service ping auth-service
+
+# Verify service discovery
+docker-compose logs gateway-service | grep "auth-service"
+```
+
+2. **Redis Connection Issues:**
+```bash
+# Check Redis container
+docker-compose ps redis
+
+# Test Redis connectivity
+docker-compose exec redis redis-cli ping
+
+# Check Redis logs
+docker-compose logs redis
+
+# Restart Redis if needed
+docker-compose restart redis
 ```
 
 ## Authentication Issues
 
 ### JWT Token Problems
 
-**Issue: "Invalid or expired token" (401)**
-
 **Symptoms:**
-- API calls return 401 Unauthorized
-- Token validation fails
-- Authentication endpoints work but protected endpoints don't
+- 401 Unauthorized responses
+- Token validation failures
+- Invalid signature errors
 
 **Solutions:**
+
+1. **Token Format Issues:**
 ```bash
-# 1. Check token format
-echo "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." | cut -d' ' -f2 | base64 -d
+# Verify token format (should have 3 parts separated by dots)
+echo "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." | cut -d. -f1 | base64 -d
 
-# 2. Verify JWT secret configuration
-curl http://localhost:8081/actuator/env | grep jwt.secret
+# Check token expiration
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8081/api/v1/auth/validate
+```
 
-# 3. Check token expiration
-# Decode JWT payload (second part after first dot)
-TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.PAYLOAD.SIGNATURE"
-echo $TOKEN | cut -d'.' -f2 | base64 -d | jq .exp
+2. **JWT Secret Configuration:**
+```bash
+# Verify JWT secret is set
+docker-compose exec auth-service env | grep JWT_SECRET
 
-# 4. Test with fresh token
-curl -X POST http://localhost:8081/api/v1/auth/login \
+# Check if secrets match between services
+docker-compose exec gateway-service env | grep JWT_SECRET
+```
+
+3. **Token Refresh Issues:**
+```bash
+# Test token refresh endpoint
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"TestPass123!"}' | jq -r '.accessToken'
+  -d '{"refreshToken": "your-refresh-token"}'
 ```
 
-**Configuration Fix:**
-```yaml
-# Ensure consistent JWT secret across services
-gripday:
-  auth:
-    jwt:
-      secret: ${GRIPDAY_AUTH_JWT_SECRET:your_secret_key_minimum_256_bits}
-      access-token-expiry: PT15M
-      refresh-token-expiry: P7D
-```
-
-### Account Lockout Issues
-
-**Issue: "Account temporarily locked" (423)**
+### User Registration/Login Failures
 
 **Symptoms:**
-- Login attempts return 423 status
-- User cannot authenticate after multiple failed attempts
+- 409 Conflict on registration
+- 401 Unauthorized on login
+- Validation errors
 
 **Solutions:**
+
+1. **Duplicate User Registration:**
 ```bash
-# 1. Check lockout status in database
-psql -h localhost -U gripday -d gripday_auth -c "
-  SELECT username, failed_attempts, locked_until 
-  FROM users 
-  WHERE username = 'problematic_user';"
+# Check if user already exists
+curl -X GET "http://localhost:8081/api/v1/users/search?username=testuser" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
 
-# 2. Manually unlock account (development only)
-psql -h localhost -U gripday -d gripday_auth -c "
-  UPDATE users 
-  SET failed_attempts = 0, locked_until = NULL 
-  WHERE username = 'problematic_user';"
-
-# 3. Check lockout configuration
-curl http://localhost:8081/actuator/configprops | grep lockout
-```
-
-**Configuration Adjustment:**
-```yaml
-gripday:
-  auth:
-    account-lockout:
-      attempts: 5                    # Reduce for tighter security
-      duration: PT15M               # Increase for longer lockout
-```
-
-## Database Connection Issues
-
-### PostgreSQL Connection Failed
-
-**Issue: "Connection refused" or "Database connection failed"**
-
-**Symptoms:**
-- Service fails to start
-- Database health check fails
-- Liquibase migrations fail
-
-**Diagnostic Commands:**
-```bash
-# 1. Check PostgreSQL container status
-docker-compose ps postgres
-
-# 2. Test direct connection
-psql -h localhost -p 5432 -U gripday -d gripday_auth
-
-# 3. Check PostgreSQL logs
-docker-compose logs postgres | tail -50
-
-# 4. Verify network connectivity
-docker network ls
-docker network inspect gripday-platform_default
-```
-
-**Solutions:**
-```bash
-# 1. Restart PostgreSQL container
-docker-compose restart postgres
-
-# 2. Check port availability
-lsof -i :5432
-netstat -tulpn | grep 5432
-
-# 3. Verify environment variables
-echo $GRIPDAY_DATABASE_URL
-echo $GRIPDAY_DATABASE_USERNAME
-echo $GRIPDAY_DATABASE_PASSWORD
-
-# 4. Reset database (development only)
-docker-compose down -v
-docker-compose up -d postgres
-```
-
-### Liquibase Migration Issues
-
-**Issue: Migration fails or database schema out of sync**
-
-**Symptoms:**
-- Service startup fails with migration errors
-- Database tables missing or incorrect structure
-
-**Solutions:**
-```bash
-# 1. Check migration status
-cd gripday-auth-service
-mvn liquibase:status -Dspring.profiles.active=local
-
-# 2. View migration history
-psql -h localhost -U gripday -d gripday_auth -c "
-  SELECT * FROM databasechangelog ORDER BY dateexecuted DESC LIMIT 10;"
-
-# 3. Force migration (development only)
-mvn liquibase:update -Dspring.profiles.active=local
-
-# 4. Rollback last migration (if needed)
-mvn liquibase:rollback -Dliquibase.rollbackCount=1 -Dspring.profiles.active=local
-
-# 5. Clear migration history and restart (development only)
-psql -h localhost -U gripday -d gripday_auth -c "
-  DROP TABLE IF EXISTS databasechangelog;
-  DROP TABLE IF EXISTS databasechangeloglock;"
-mvn liquibase:update -Dspring.profiles.active=local
-```
-
-## Redis Connection Issues
-
-### Redis Connection Failed
-
-**Issue: "Unable to connect to Redis" or caching not working**
-
-**Symptoms:**
-- Rate limiting not working
-- Session management fails
-- Cache-related errors in logs
-
-**Diagnostic Commands:**
-```bash
-# 1. Check Redis container status
-docker-compose ps redis
-
-# 2. Test Redis connection
-redis-cli -h localhost -p 6379 ping
-
-# 3. Check Redis logs
-docker-compose logs redis | tail -20
-
-# 4. Monitor Redis operations
-redis-cli -h localhost -p 6379 monitor
-```
-
-**Solutions:**
-```bash
-# 1. Restart Redis container
-docker-compose restart redis
-
-# 2. Check Redis configuration
-redis-cli -h localhost -p 6379 config get "*"
-
-# 3. Clear Redis data (development only)
-redis-cli -h localhost -p 6379 flushall
-
-# 4. Verify Redis connectivity from application
-curl http://localhost:8081/actuator/health/redis
-```
-
-## Gateway Service Issues
-
-### Service Routing Problems
-
-**Issue: 404 Not Found or routing not working**
-
-**Symptoms:**
-- Requests to gateway return 404
-- Services not reachable through gateway
-- Route configuration not working
-
-**Diagnostic Commands:**
-```bash
-# 1. Check gateway routes
-curl http://localhost:8080/actuator/gateway/routes | jq .
-
-# 2. Check service discovery
-curl http://localhost:8080/actuator/gateway/globalfilters
-
-# 3. Test direct service access
-curl http://localhost:8081/api/v1/auth/health  # Direct auth service
-curl http://localhost:8080/api/v1/auth/health  # Through gateway
-
-# 4. Check gateway logs
-docker-compose logs gateway-service | grep -i error
-```
-
-**Solutions:**
-```bash
-# 1. Verify route configuration
-curl http://localhost:8080/actuator/env | grep -i route
-
-# 2. Check backend service health
-curl http://localhost:8081/actuator/health
-
-# 3. Restart gateway service
-docker-compose restart gateway-service
-
-# 4. Update route configuration
-# Edit application-local.yml and restart service
-```
-
-### Rate Limiting Issues
-
-**Issue: Rate limiting not working or too restrictive**
-
-**Symptoms:**
-- 429 Too Many Requests errors
-- Rate limiting headers missing
-- Rate limits not enforced
-
-**Solutions:**
-```bash
-# 1. Check rate limiting configuration
-curl http://localhost:8080/actuator/configprops | grep -i rate
-
-# 2. Monitor Redis rate limiting keys
-redis-cli -h localhost -p 6379 keys "*rate*"
-redis-cli -h localhost -p 6379 get "request_rate_limiter.{user_id}.tokens"
-
-# 3. Test rate limiting
-for i in {1..10}; do
-  curl -w "%{http_code}\n" -o /dev/null -s http://localhost:8080/api/v1/auth/health
-done
-
-# 4. Adjust rate limiting configuration
-# Update application-local.yml:
-gripday:
-  gateway:
-    rate-limiting:
-      default-requests-per-minute: 200  # Increase limit
-      burst-capacity: 50               # Increase burst
-```
-
-## Circuit Breaker Issues
-
-**Issue: Circuit breaker stuck open or not working**
-
-**Symptoms:**
-- 503 Service Unavailable errors
-- Circuit breaker always open
-- Fallback responses not working
-
-**Solutions:**
-```bash
-# 1. Check circuit breaker status
-curl http://localhost:8080/actuator/circuitbreakers
-
-# 2. Check circuit breaker metrics
-curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.calls
-
-# 3. Force circuit breaker state (development only)
-curl -X POST http://localhost:8080/actuator/circuitbreakers/auth-service/state \
+# Use different username or email
+curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{"state":"CLOSED"}'
+  -d '{
+    "username": "testuser2",
+    "email": "test2@example.com",
+    "password": "SecurePass123!"
+  }'
+```
 
-# 4. Adjust circuit breaker configuration
-# Update application-local.yml:
-resilience4j:
-  circuitbreaker:
-    instances:
-      auth-service:
-        failure-rate-threshold: 70      # Increase threshold
-        wait-duration-in-open-state: PT10S  # Reduce wait time
+2. **Password Validation Errors:**
+```bash
+# Ensure password meets requirements:
+# - At least 8 characters
+# - Contains uppercase letter
+# - Contains lowercase letter  
+# - Contains number
+# - Contains special character
+
+# Valid password example
+"password": "MySecure123!"
+```
+
+## Multi-Tenant Issues
+
+### Tenant Isolation Problems
+
+**Symptoms:**
+- Users can access other tenants' data
+- Tenant context not propagated
+- Cross-tenant authentication issues
+
+**Solutions:**
+
+1. **Verify Tenant Header:**
+```bash
+# Always include X-Tenant-ID header
+curl -H "X-Tenant-ID: tenant-123" \
+     -H "Authorization: Bearer $TOKEN" \
+     http://localhost:8080/api/v1/users/me
+```
+
+2. **Check JWT Tenant Claims:**
+```bash
+# Decode JWT to verify tenant claim
+echo "$TOKEN" | cut -d. -f2 | base64 -d | jq .tenantId
+```
+
+3. **Database Tenant Isolation:**
+```bash
+# Verify tenant_id column in database
+docker-compose exec postgres psql -U gripday -d gripday_auth \
+  -c "SELECT username, tenant_id FROM users LIMIT 10;"
 ```
 
 ## Performance Issues
 
-### High Memory Usage
-
-**Issue: Services consuming excessive memory**
+### Slow Response Times
 
 **Symptoms:**
-- OutOfMemoryError exceptions
-- Slow response times
-- Container restarts
-
-**Diagnostic Commands:**
-```bash
-# 1. Check JVM memory usage
-curl http://localhost:8081/actuator/metrics/jvm.memory.used
-curl http://localhost:8081/actuator/metrics/jvm.memory.max
-
-# 2. Generate heap dump (development only)
-jcmd <PID> GC.run_finalization
-jcmd <PID> VM.gc
-jmap -dump:format=b,file=heapdump.hprof <PID>
-
-# 3. Check container memory usage
-docker stats
-
-# 4. Monitor garbage collection
-curl http://localhost:8081/actuator/metrics/jvm.gc.pause
-```
+- High response latencies
+- Timeout errors
+- Circuit breaker activation
 
 **Solutions:**
-```bash
-# 1. Adjust JVM memory settings
-export JAVA_OPTS="-Xmx1g -Xms512m -XX:+UseG1GC"
-mvn spring-boot:run
 
-# 2. Update Docker memory limits
-# In docker-compose.yml:
+1. **Database Performance:**
+```bash
+# Check database connections
+docker-compose exec postgres psql -U gripday -d gripday_auth \
+  -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Monitor slow queries
+docker-compose exec postgres psql -U gripday -d gripday_auth \
+  -c "SELECT query, mean_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
+```
+
+2. **Redis Performance:**
+```bash
+# Check Redis memory usage
+docker-compose exec redis redis-cli info memory
+
+# Monitor Redis operations
+docker-compose exec redis redis-cli monitor
+```
+
+3. **JVM Performance:**
+```bash
+# Check JVM metrics
+curl http://localhost:8081/actuator/metrics/jvm.memory.used
+curl http://localhost:8081/actuator/metrics/jvm.gc.pause
+
+# Adjust JVM settings if needed
+JAVA_OPTS="-Xmx1g -Xms512m" docker-compose up auth-service
+```
+
+### Rate Limiting Issues
+
+**Symptoms:**
+- 429 Too Many Requests errors
+- Inconsistent rate limiting behavior
+- Rate limits not working
+
+**Solutions:**
+
+1. **Check Rate Limit Configuration:**
+```bash
+# Verify rate limiting settings
+curl http://localhost:8080/actuator/configprops | jq '.["gripday.gateway.rate-limiting"]'
+```
+
+2. **Redis Rate Limit Keys:**
+```bash
+# Check rate limit keys in Redis
+docker-compose exec redis redis-cli keys "rate_limit:*"
+
+# View rate limit data
+docker-compose exec redis redis-cli get "rate_limit:user:123"
+```
+
+3. **Adjust Rate Limits:**
+```yaml
+# In application.yml
+gripday:
+  gateway:
+    rate-limiting:
+      default-requests-per-minute: 200
+      burst-capacity: 50
+```
+
+## Observability Issues
+
+### Missing Metrics
+
+**Symptoms:**
+- Prometheus metrics not available
+- Grafana dashboards empty
+- Tracing data missing
+
+**Solutions:**
+
+1. **Verify Metrics Endpoints:**
+```bash
+# Check Prometheus endpoints
+curl http://localhost:8081/actuator/prometheus
+curl http://localhost:8080/actuator/prometheus
+
+# Verify Prometheus is scraping
+curl http://localhost:9090/api/v1/targets
+```
+
+2. **OpenTelemetry Configuration:**
+```bash
+# Check tracing configuration
+curl http://localhost:8081/actuator/configprops | jq '.["management.tracing"]'
+
+# Verify trace export
+docker-compose logs auth-service | grep -i "trace"
+```
+
+### Log Aggregation Issues
+
+**Symptoms:**
+- Logs not appearing in centralized system
+- Missing correlation IDs
+- Incorrect log format
+
+**Solutions:**
+
+1. **Check Log Configuration:**
+```bash
+# Verify logging configuration
+curl http://localhost:8081/actuator/loggers
+
+# Check log format
+docker-compose logs auth-service | head -5
+```
+
+2. **Correlation ID Propagation:**
+```bash
+# Verify correlation ID in logs
+docker-compose logs gateway-service | grep -o "correlationId=[^,]*"
+```
+
+## Docker and Container Issues
+
+### Container Startup Problems
+
+**Symptoms:**
+- Containers fail to start
+- Health checks failing
+- Network connectivity issues
+
+**Solutions:**
+
+1. **Check Container Status:**
+```bash
+# View container status
+docker-compose ps
+
+# Check container logs
+docker-compose logs auth-service
+docker-compose logs gateway-service
+
+# Inspect container details
+docker inspect gripday_auth-service_1
+```
+
+2. **Network Issues:**
+```bash
+# Check Docker networks
+docker network ls
+docker network inspect gripday_default
+
+# Test container connectivity
+docker-compose exec gateway-service ping auth-service
+docker-compose exec auth-service ping postgres
+```
+
+3. **Resource Constraints:**
+```bash
+# Check container resource usage
+docker stats
+
+# Increase memory limits if needed
 services:
   auth-service:
     deploy:
@@ -375,212 +377,190 @@ services:
           memory: 1G
         reservations:
           memory: 512M
-
-# 3. Optimize database connection pool
-# In application.yml:
-gripday:
-  database:
-    hikari:
-      maximum-pool-size: 10    # Reduce pool size
-      minimum-idle: 2          # Reduce idle connections
 ```
 
-### Slow Database Queries
-
-**Issue: Database queries taking too long**
+### Volume and Data Issues
 
 **Symptoms:**
-- Slow API response times
-- Database connection pool exhaustion
-- Timeout errors
-
-**Solutions:**
-```bash
-# 1. Enable query logging
-# Add to application-local.yml:
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
-# 2. Check slow queries in PostgreSQL
-psql -h localhost -U gripday -d gripday_auth -c "
-  SELECT query, mean_exec_time, calls 
-  FROM pg_stat_statements 
-  ORDER BY mean_exec_time DESC 
-  LIMIT 10;"
-
-# 3. Analyze query execution plans
-psql -h localhost -U gripday -d gripday_auth -c "
-  EXPLAIN ANALYZE SELECT * FROM users WHERE username = 'testuser';"
-
-# 4. Add missing indexes
-psql -h localhost -U gripday -d gripday_auth -c "
-  CREATE INDEX CONCURRENTLY idx_users_email ON users(email);
-  CREATE INDEX CONCURRENTLY idx_users_tenant_id ON users(tenant_id);"
-```
-
-## Development Environment Issues
-
-### Port Conflicts
-
-**Issue: "Port already in use" errors**
-
-**Solutions:**
-```bash
-# 1. Find process using port
-lsof -i :8080
-lsof -i :8081
-
-# 2. Kill process using port
-kill -9 <PID>
-
-# 3. Use different ports
-mvn spring-boot:run -Dserver.port=8082
-
-# 4. Check Docker port mappings
-docker-compose ps
-docker port <container_name>
-```
-
-### Maven Build Issues
-
-**Issue: Build failures or dependency conflicts**
-
-**Solutions:**
-```bash
-# 1. Clean and rebuild
-mvn clean install
-
-# 2. Update dependencies
-mvn dependency:resolve
-mvn versions:display-dependency-updates
-
-# 3. Check for conflicts
-mvn dependency:tree
-mvn dependency:analyze
-
-# 4. Clear Maven cache
-rm -rf ~/.m2/repository
-mvn clean install
-
-# 5. Skip tests for faster builds
-mvn clean package -DskipTests
-```
-
-### IDE Configuration Issues
-
-**Issue: IDE not recognizing Java 21 features or Spring Boot configuration**
+- Data not persisting
+- Permission errors
+- Volume mount failures
 
 **Solutions:**
 
-**IntelliJ IDEA:**
+1. **Check Volume Mounts:**
 ```bash
-# 1. Set Project SDK to Java 21
-File → Project Structure → Project → Project SDK
+# Verify volumes
+docker volume ls
+docker volume inspect gripday_postgres_data
 
-# 2. Enable annotation processing
-File → Settings → Build → Compiler → Annotation Processors → Enable
-
-# 3. Refresh Maven project
-Maven tool window → Reload All Maven Projects
-
-# 4. Invalidate caches
-File → Invalidate Caches and Restart
+# Check permissions
+docker-compose exec postgres ls -la /var/lib/postgresql/data
 ```
 
-**VS Code:**
+2. **Data Persistence:**
 ```bash
-# 1. Install required extensions
-code --install-extension vscjava.vscode-java-pack
-code --install-extension pivotal.vscode-spring-boot
+# Backup database
+docker-compose exec postgres pg_dump -U gripday gripday_auth > backup.sql
 
-# 2. Configure Java home
-# Add to settings.json:
-{
-  "java.home": "/path/to/java-21",
-  "java.configuration.runtimes": [
-    {
-      "name": "JavaSE-21",
-      "path": "/path/to/java-21"
-    }
-  ]
-}
+# Restore database
+docker-compose exec -T postgres psql -U gripday gripday_auth < backup.sql
 ```
 
-## Monitoring and Logging
+## Kubernetes Deployment Issues
 
-### Missing Logs or Metrics
+### Pod Startup Problems
 
-**Issue: Logs not appearing or metrics not collected**
+**Symptoms:**
+- Pods stuck in Pending state
+- CrashLoopBackOff errors
+- ImagePullBackOff issues
 
 **Solutions:**
+
+1. **Check Pod Status:**
 ```bash
-# 1. Check logging configuration
-curl http://localhost:8081/actuator/loggers
+# View pod details
+kubectl get pods -n gripday
+kubectl describe pod auth-service-xxx -n gripday
 
-# 2. Adjust log levels
-curl -X POST http://localhost:8081/actuator/loggers/org.gripday \
-  -H "Content-Type: application/json" \
-  -d '{"configuredLevel":"DEBUG"}'
-
-# 3. Check metrics endpoints
-curl http://localhost:8081/actuator/metrics
-curl http://localhost:8081/actuator/prometheus
-
-# 4. Verify observability configuration
-curl http://localhost:8081/actuator/env | grep -i otel
+# Check pod logs
+kubectl logs auth-service-xxx -n gripday
+kubectl logs gateway-service-xxx -n gripday
 ```
 
-## Getting Help
-
-### Diagnostic Information Collection
-
-When reporting issues, collect the following information:
-
+2. **Resource Issues:**
 ```bash
-# 1. Service versions and health
-curl http://localhost:8081/actuator/info
-curl http://localhost:8080/actuator/info
+# Check node resources
+kubectl top nodes
+kubectl describe nodes
+
+# Adjust resource requests/limits
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+```
+
+3. **Image Issues:**
+```bash
+# Verify image availability
+kubectl describe pod auth-service-xxx -n gripday | grep -A5 "Events:"
+
+# Check image pull secrets
+kubectl get secrets -n gripday
+```
+
+### Service Discovery Issues
+
+**Symptoms:**
+- Services can't communicate
+- DNS resolution failures
+- Load balancing not working
+
+**Solutions:**
+
+1. **Check Service Configuration:**
+```bash
+# Verify services
+kubectl get services -n gripday
+kubectl describe service auth-service -n gripday
+
+# Test service connectivity
+kubectl exec -it gateway-service-xxx -n gripday -- curl http://auth-service:8081/actuator/health
+```
+
+2. **DNS Resolution:**
+```bash
+# Test DNS from pod
+kubectl exec -it gateway-service-xxx -n gripday -- nslookup auth-service
+
+# Check CoreDNS
+kubectl get pods -n kube-system | grep coredns
+kubectl logs coredns-xxx -n kube-system
+```
+
+## Diagnostic Commands
+
+### Health Check Commands
+```bash
+# Service health
 curl http://localhost:8081/actuator/health
 curl http://localhost:8080/actuator/health
 
-# 2. Configuration
-curl http://localhost:8081/actuator/env > auth-service-env.json
-curl http://localhost:8080/actuator/env > gateway-service-env.json
+# Database connectivity
+curl http://localhost:8081/actuator/health/db
 
-# 3. Recent logs
-docker-compose logs --tail=100 auth-service > auth-service.log
-docker-compose logs --tail=100 gateway-service > gateway-service.log
+# Redis connectivity  
+curl http://localhost:8081/actuator/health/redis
 
-# 4. System information
-docker-compose ps > containers-status.txt
-docker system df > docker-usage.txt
+# Detailed health information
+curl http://localhost:8081/actuator/health?show-details=always
+```
+
+### Metrics and Monitoring
+```bash
+# Application metrics
+curl http://localhost:8081/actuator/metrics
+curl http://localhost:8080/actuator/metrics
+
+# JVM metrics
+curl http://localhost:8081/actuator/metrics/jvm.memory.used
+curl http://localhost:8081/actuator/metrics/jvm.threads.live
+
+# Custom metrics
+curl http://localhost:8081/actuator/metrics/auth.login.attempts
+curl http://localhost:8080/actuator/metrics/gateway.requests
+```
+
+### Configuration Verification
+```bash
+# View configuration properties
+curl http://localhost:8081/actuator/configprops
+curl http://localhost:8080/actuator/configprops
+
+# Environment variables
+curl http://localhost:8081/actuator/env
+curl http://localhost:8080/actuator/env
+
+# Active profiles
+curl http://localhost:8081/actuator/info
+```
+
+## Getting Additional Help
+
+### Log Collection
+```bash
+# Collect all service logs
+mkdir -p logs
+docker-compose logs auth-service > logs/auth-service.log
+docker-compose logs gateway-service > logs/gateway-service.log
+docker-compose logs postgres > logs/postgres.log
+docker-compose logs redis > logs/redis.log
+
+# Create diagnostic bundle
+tar -czf diagnostic-$(date +%Y%m%d-%H%M%S).tar.gz logs/
+```
+
+### System Information
+```bash
+# System information
+uname -a
+docker version
+docker-compose version
+java -version
+mvn -version
+
+# Container information
+docker-compose ps
+docker stats --no-stream
 ```
 
 ### Support Channels
-
+- **GitHub Issues**: Report bugs and request features
 - **Documentation**: Check service-specific README files
-- **API Documentation**: Swagger UI at `http://localhost:8081/swagger-ui.html`
-- **Logs**: Use `docker-compose logs -f <service-name>` for real-time logs
-- **Metrics**: Monitor via `/actuator/metrics` endpoints
-
-### Emergency Procedures
-
-**Complete Environment Reset (Development Only):**
-```bash
-# Stop all services
-docker-compose down -v
-
-# Clean Docker system
-docker system prune -f
-docker volume prune -f
-
-# Rebuild and restart
-mvn clean package
-docker-compose up -d --build
-
-# Verify services
-curl http://localhost:8081/actuator/health
-curl http://localhost:8080/actuator/health
-```
+- **Community**: GitHub Discussions for questions
+- **Validation Scripts**: Run `./scripts/validate-platform.sh` for comprehensive testing
