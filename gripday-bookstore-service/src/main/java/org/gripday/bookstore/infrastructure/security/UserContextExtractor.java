@@ -1,0 +1,175 @@
+package org.gripday.bookstore.infrastructure.security;
+
+import org.gripday.bookstore.domain.dto.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+@Component
+public class UserContextExtractor {
+    
+    private static final Logger logger = LoggerFactory.getLogger(UserContextExtractor.class);
+    
+    private final JwtDecoder jwtDecoder;
+    
+    public UserContextExtractor(JwtDecoder jwtDecoder) {
+        this.jwtDecoder = jwtDecoder;
+    }
+    
+    public UserContext extractFromJwt(String jwtToken) {
+        try {
+            var jwt = jwtDecoder.decode(jwtToken);
+            return extractFromJwt(jwt);
+        } catch (Exception e) {
+            logger.error("Failed to decode JWT token", e);
+            throw new IllegalArgumentException("Invalid JWT token", e);
+        }
+    }
+    
+    public UserContext extractFromJwt(Jwt jwt) {
+        var claims = jwt.getClaims();
+        
+        var userId = extractUserId(claims);
+        var username = extractUsername(claims);
+        var email = extractEmail(claims);
+        var roles = extractRoles(claims);
+        var permissions = extractPermissions(claims);
+        var department = extractDepartment(claims);
+        var organizationId = extractOrganizationId(claims);
+        var customClaims = extractCustomClaims(claims);
+        
+        logger.debug("Extracted user context for user: {} with roles: {}", username, roles);
+        
+        return new UserContext(
+            userId,
+            username,
+            email,
+            roles,
+            permissions,
+            department,
+            organizationId,
+            customClaims
+        );
+    }
+    
+    private Long extractUserId(Map<String, Object> claims) {
+        var userIdClaim = claims.get("userId");
+        if (userIdClaim == null) {
+            userIdClaim = claims.get("sub");
+        }
+        
+        if (userIdClaim instanceof Number number) {
+            return number.longValue();
+        } else if (userIdClaim instanceof String str) {
+            try {
+                return Long.parseLong(str);
+            } catch (NumberFormatException e) {
+                logger.warn("Could not parse userId from string: {}", str);
+                return null;
+            }
+        }
+        
+        return null;
+    }
+    
+    private String extractUsername(Map<String, Object> claims) {
+        var username = (String) claims.get("username");
+        if (username == null) {
+            username = (String) claims.get("preferred_username");
+        }
+        if (username == null) {
+            username = (String) claims.get("sub");
+        }
+        return username;
+    }
+    
+    private String extractEmail(Map<String, Object> claims) {
+        return (String) claims.get("email");
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Set<String> extractRoles(Map<String, Object> claims) {
+        // Try different claim names for roles
+        var rolesObj = claims.get("roles");
+        if (rolesObj == null) {
+            rolesObj = claims.get("authorities");
+        }
+        if (rolesObj == null) {
+            // Check realm_access for Keycloak
+            var realmAccess = (Map<String, Object>) claims.get("realm_access");
+            if (realmAccess != null) {
+                rolesObj = realmAccess.get("roles");
+            }
+        }
+        
+        try {
+            if (rolesObj instanceof Iterable<?> roles) {
+                return StreamSupport.stream(((Iterable<Object>) roles).spliterator(), false)
+                    .map(Object::toString)
+                    .collect(Collectors.toSet());
+            }
+        } catch (Exception e) {
+            logger.warn("Error extracting roles from claims", e);
+        }
+        
+        return Set.of();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Set<String> extractPermissions(Map<String, Object> claims) {
+        var permissionsObj = claims.get("permissions");
+        if (permissionsObj == null) {
+            permissionsObj = claims.get("scope");
+        }
+        
+        if (permissionsObj instanceof String scopeString) {
+            return Set.of(scopeString.split(" "));
+        }
+        
+        try {
+            if (permissionsObj instanceof Iterable<?> permissions) {
+                return StreamSupport.stream(((Iterable<Object>) permissions).spliterator(), false)
+                    .map(Object::toString)
+                    .collect(Collectors.toSet());
+            }
+        } catch (Exception e) {
+            logger.warn("Error extracting permissions from claims", e);
+        }
+        
+        return Set.of();
+    }
+    
+    private String extractDepartment(Map<String, Object> claims) {
+        return (String) claims.get("department");
+    }
+    
+    private String extractOrganizationId(Map<String, Object> claims) {
+        return (String) claims.get("organizationId");
+    }
+    
+    private Map<String, Object> extractCustomClaims(Map<String, Object> claims) {
+        var customClaims = new HashMap<String, Object>();
+        
+        // Standard JWT claims to exclude
+        var standardClaims = Set.of(
+            "iss", "sub", "aud", "exp", "nbf", "iat", "jti",
+            "userId", "username", "preferred_username", "email",
+            "roles", "authorities", "permissions", "scope",
+            "department", "organizationId", "realm_access"
+        );
+        
+        claims.entrySet().stream()
+            .filter(entry -> !standardClaims.contains(entry.getKey()))
+            .forEach(entry -> customClaims.put(entry.getKey(), entry.getValue()));
+        
+        return customClaims;
+    }
+}

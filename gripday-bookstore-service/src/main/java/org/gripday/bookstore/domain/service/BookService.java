@@ -7,6 +7,7 @@ import org.gripday.bookstore.infrastructure.entity.Category;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.repository.BookRepository;
 import org.gripday.bookstore.infrastructure.repository.CategoryRepository;
+import org.gripday.bookstore.infrastructure.security.AuditLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -24,10 +25,13 @@ public class BookService {
     
     private final BookRepository bookRepository;
     private final CategoryRepository categoryRepository;
+    private final AuditLogger auditLogger;
     
-    public BookService(BookRepository bookRepository, CategoryRepository categoryRepository) {
+    public BookService(BookRepository bookRepository, CategoryRepository categoryRepository, 
+                      AuditLogger auditLogger) {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
+        this.auditLogger = auditLogger;
     }
     
     @Transactional(readOnly = true)
@@ -60,6 +64,7 @@ public class BookService {
         
         // Authorization check
         if (!userContext.isAdmin()) {
+            auditLogger.logUnauthorizedAccess("create book", "BOOK", userContext);
             throw new UnauthorizedOperationException("create book", "ADMIN or SUPERADMIN");
         }
         
@@ -88,6 +93,9 @@ public class BookService {
         
         var savedBook = bookRepository.save(book);
         
+        // Audit log the creation
+        auditLogger.logBookCreation(savedBook.getId(), savedBook.getTitle(), userContext);
+        
         logger.info("Successfully created book with ID: {} by user: {}", savedBook.getId(), userContext.username());
         
         return convertToDto(savedBook);
@@ -98,6 +106,7 @@ public class BookService {
         
         // Authorization check
         if (!userContext.isAdmin()) {
+            auditLogger.logUnauthorizedAccess("update book", "BOOK", userContext);
             throw new UnauthorizedOperationException("update book", "ADMIN or SUPERADMIN");
         }
         
@@ -117,6 +126,9 @@ public class BookService {
         
         var updatedBook = bookRepository.save(book);
         
+        // Audit log the update
+        auditLogger.logBookUpdate(updatedBook.getId(), updatedBook.getTitle(), userContext);
+        
         logger.info("Successfully updated book ID: {} by user: {}", id, userContext.username());
         
         return convertToDto(updatedBook);
@@ -127,6 +139,7 @@ public class BookService {
         
         // Authorization check
         if (!userContext.isAdmin()) {
+            auditLogger.logUnauthorizedAccess("delete book", "BOOK", userContext);
             throw new UnauthorizedOperationException("delete book", "ADMIN or SUPERADMIN");
         }
         
@@ -136,6 +149,9 @@ public class BookService {
         // Soft delete by marking as unavailable
         book.setAvailable(false);
         bookRepository.save(book);
+        
+        // Audit log the deletion
+        auditLogger.logBookDeletion(book.getId(), book.getTitle(), userContext);
         
         logger.info("Successfully deleted (marked unavailable) book ID: {} by user: {}", id, userContext.username());
     }

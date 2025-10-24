@@ -1,50 +1,35 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:bookstore-db-prod}:${DB_PORT:5432}/${DB_NAME:bookstore_db}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    hikari:
-      maximum-pool-size: 30
-      minimum-idle: 15
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
   
   data:
     redis:
-      host: ${REDIS_HOST:bookstore-redis-prod}
+      host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
-      timeout: 3000ms
-      lettuce:
-        pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
+      timeout: 2000ms
   
-  jpa:
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-
-server:
-  port: ${SERVER_PORT:8082}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI}
 
 logging:
   level:
     org.gripday.bookstore: WARN
-    org.springframework.security: ERROR
-    org.hibernate.SQL: ERROR
-    org.hibernate.type.descriptor.sql.BasicBinder: ERROR
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    AUDIT: INFO
   pattern:
-    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId:-}","message":"%msg","exception":"%ex"}%n'
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss}","thread":"%thread","level":"%-5level","correlationId":"%X{correlationId}","userId":"%X{userId}","username":"%X{username}","logger":"%logger{36}","message":"%msg"}%n'
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: never
+app:
+  cors:
+    allowed-origins: "${CORS_ALLOWED_ORIGINS:https://bookstore.gripday.org}"
+    allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
