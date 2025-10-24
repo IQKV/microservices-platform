@@ -13,7 +13,7 @@ org.gripday.bookstore/
 ├── presentation/web/          # REST controllers (BookResource, InventoryResource)
 ├── domain/service/           # Business logic (BookService, InventoryService, SearchService)
 ├── infrastructure/repository/ # Data access (BookRepository, CategoryRepository)
-└── BookstoreApplication.java
+└── BookstoreServiceApplication.java
 ```
 
 ### Service Integration
