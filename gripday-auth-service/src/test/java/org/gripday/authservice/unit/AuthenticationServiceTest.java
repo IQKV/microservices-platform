@@ -78,6 +78,9 @@ class AuthenticationServiceTest {
         var request = new LoginRequest("testuser", "validPassword", false);
         var ipAddress = "192.168.1.1";
         var userAgent = "Mozilla/5.0";
+        
+        // Ensure user has verified email
+        testUser.setEmailVerified(true);
 
         // Mock input sanitization
         when(inputSanitizer.sanitizeInput("testuser")).thenReturn("testuser");
@@ -123,6 +126,82 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void authenticateUser_WithUnverifiedEmail_ShouldThrowEmailVerificationRequiredException() {
+        // Given
+        var request = new LoginRequest("testuser", "validPassword", false);
+        var ipAddress = "192.168.1.1";
+        var userAgent = "Mozilla/5.0";
+        
+        // Ensure user has unverified email
+        testUser.setEmailVerified(false);
+
+        // Mock input sanitization
+        when(inputSanitizer.sanitizeInput("testuser")).thenReturn("testuser");
+        when(inputSanitizer.isInputSafe("testuser")).thenReturn(true);
+        when(inputSanitizer.containsSqlInjection("testuser")).thenReturn(false);
+
+        // Mock account lockout check
+        when(accountLockoutService.isAccountLocked("testuser")).thenReturn(false);
+
+        // Mock user lookup
+        when(userRepository.findByUsernameOrEmail("testuser", "testuser"))
+            .thenReturn(Optional.of(testUser));
+
+        // Mock password verification
+        when(passwordEncoder.matches("validPassword", testUser.getPasswordHash())).thenReturn(true);
+
+        // When & Then
+        var exception = assertThrows(AuthenticationService.EmailVerificationRequiredException.class, () -> {
+            authenticationService.authenticateUser(request, ipAddress, userAgent);
+        });
+
+        assertEquals("Email verification required", exception.getMessage());
+
+        // Verify security audit was logged
+        verify(securityAuditService).logFailedAuthentication("testuser", "Email not verified", ipAddress, userAgent);
+        
+        // Verify no tokens were generated
+        verify(jwtService, never()).generateAccessToken(any());
+        verify(jwtService, never()).generateRefreshToken(any());
+    }
+
+    @Test
+    void authenticateUser_WithNullEmailVerified_ShouldThrowEmailVerificationRequiredException() {
+        // Given
+        var request = new LoginRequest("testuser", "validPassword", false);
+        var ipAddress = "192.168.1.1";
+        var userAgent = "Mozilla/5.0";
+        
+        // Ensure user has null emailVerified (unverified)
+        testUser.setEmailVerified(null);
+
+        // Mock input sanitization
+        when(inputSanitizer.sanitizeInput("testuser")).thenReturn("testuser");
+        when(inputSanitizer.isInputSafe("testuser")).thenReturn(true);
+        when(inputSanitizer.containsSqlInjection("testuser")).thenReturn(false);
+
+        // Mock account lockout check
+        when(accountLockoutService.isAccountLocked("testuser")).thenReturn(false);
+
+        // Mock user lookup
+        when(userRepository.findByUsernameOrEmail("testuser", "testuser"))
+            .thenReturn(Optional.of(testUser));
+
+        // Mock password verification
+        when(passwordEncoder.matches("validPassword", testUser.getPasswordHash())).thenReturn(true);
+
+        // When & Then
+        var exception = assertThrows(AuthenticationService.EmailVerificationRequiredException.class, () -> {
+            authenticationService.authenticateUser(request, ipAddress, userAgent);
+        });
+
+        assertEquals("Email verification required", exception.getMessage());
+
+        // Verify security audit was logged
+        verify(securityAuditService).logFailedAuthentication("testuser", "Email not verified", ipAddress, userAgent);
+    }
+
+    @Test
     void authenticateUser_WithRememberMe_ShouldReturnLongerExpiry() {
         // Given
         var request = new LoginRequest("testuser", "validPassword", true);
@@ -149,6 +228,9 @@ class AuthenticationServiceTest {
         var request = new LoginRequest("test@example.com", "validPassword", false);
         var ipAddress = "192.168.1.1";
         var userAgent = "Mozilla/5.0";
+        
+        // Ensure user has verified email
+        testUser.setEmailVerified(true);
 
         // Mock input sanitization
         when(inputSanitizer.sanitizeInput("test@example.com")).thenReturn("test@example.com");
@@ -335,6 +417,9 @@ class AuthenticationServiceTest {
     }
 
     private void setupSuccessfulAuthenticationMocks() {
+        // Ensure user has verified email
+        testUser.setEmailVerified(true);
+        
         // Mock input sanitization
         when(inputSanitizer.sanitizeInput("testuser")).thenReturn("testuser");
         when(inputSanitizer.isInputSafe("testuser")).thenReturn(true);

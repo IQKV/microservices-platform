@@ -118,6 +118,13 @@ public class AuthenticationService {
                 throw new AuthenticationException("Account is disabled");
             }
             
+            // Check if email is verified
+            if (user.getEmailVerified() == null || !user.getEmailVerified()) {
+                securityAuditService.logFailedAuthentication(
+                    user.getUsername(), "Email not verified", ipAddress, userAgent);
+                throw new EmailVerificationRequiredException("Email verification required");
+            }
+            
             // Clear failed attempts on successful authentication
             accountLockoutService.clearFailedAttempts(user.getUsername());
             
@@ -146,7 +153,7 @@ public class AuthenticationService {
             
             return new TokenResponse(accessToken, refreshToken, expiresIn, userContext, sessionId);
             
-        } catch (AuthenticationException | AccountLockedException e) {
+        } catch (AuthenticationException | AccountLockedException | EmailVerificationRequiredException e) {
             throw e;
         } catch (Exception e) {
             securityAuditService.logFailedAuthentication(
@@ -413,6 +420,15 @@ public class AuthenticationService {
      */
     public static class AccountLockedException extends RuntimeException {
         public AccountLockedException(String message) {
+            super(message);
+        }
+    }
+    
+    /**
+     * Custom exception for email verification required scenarios.
+     */
+    public static class EmailVerificationRequiredException extends RuntimeException {
+        public EmailVerificationRequiredException(String message) {
             super(message);
         }
     }

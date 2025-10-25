@@ -7,6 +7,8 @@ import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.presentation.dto.SignupRequest;
 import org.gripday.authservice.presentation.dto.UserRegistrationResponse;
 import org.gripday.authservice.presentation.validation.InputSanitizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,22 +21,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserRegistrationService {
     
+    private static final Logger logger = LoggerFactory.getLogger(UserRegistrationService.class);
+    
     private final UserRepository userRepository;
     private final AuthorityRepository authorityRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityAuditService securityAuditService;
     private final InputSanitizer inputSanitizer;
+    private final EmailVerificationService emailVerificationService;
     
     public UserRegistrationService(UserRepository userRepository, 
                                  AuthorityRepository authorityRepository,
                                  PasswordEncoder passwordEncoder,
                                  SecurityAuditService securityAuditService,
-                                 InputSanitizer inputSanitizer) {
+                                 InputSanitizer inputSanitizer,
+                                 EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;
         this.securityAuditService = securityAuditService;
         this.inputSanitizer = inputSanitizer;
+        this.emailVerificationService = emailVerificationService;
     }
     
     /**
@@ -99,6 +106,9 @@ public class UserRegistrationService {
             request.tenantId()
         );
         
+        // Ensure emailVerified is false for new users
+        user.setEmailVerified(false);
+        
         // Assign default USER role
         var userRole = findOrCreateUserRole();
         user.addAuthority(userRole);
@@ -110,8 +120,14 @@ public class UserRegistrationService {
         securityAuditService.logUserRegistration(
             savedUser.getUsername(), savedUser.getEmail(), ipAddress, userAgent);
         
-        // Send email verification (placeholder implementation)
-        sendEmailVerification(savedUser);
+        // Generate verification token and send verification email
+        try {
+            emailVerificationService.generateVerificationToken(savedUser);
+        } catch (Exception e) {
+            logger.warn("Failed to send verification email to user: {} ({})", 
+                       savedUser.getUsername(), savedUser.getEmail(), e);
+            // Don't fail registration if email sending fails
+        }
         
         // Return registration response
         return new UserRegistrationResponse(
@@ -141,35 +157,7 @@ public class UserRegistrationService {
         return authorityRepository.save(userRole);
     }
     
-    /**
-     * Send email verification (placeholder implementation).
-     * In a real implementation, this would integrate with an email service.
-     */
-    private void sendEmailVerification(User user) {
-        // Placeholder implementation
-        // TODO: Integrate with email service to send verification email
-        var verificationToken = generateVerificationToken(user);
-        var verificationUrl = generateVerificationUrl(verificationToken);
-        
-        // Log the verification URL for development
-        System.out.println("Email verification URL for " + user.getEmail() + ": " + verificationUrl);
-    }
-    
-    /**
-     * Generate email verification token.
-     */
-    private String generateVerificationToken(User user) {
-        // Simple token generation for placeholder
-        // In production, use a proper token generation mechanism
-        return java.util.UUID.randomUUID().toString();
-    }
-    
-    /**
-     * Generate email verification URL.
-     */
-    private String generateVerificationUrl(String token) {
-        return "http://localhost:8081/api/v1/auth/verify-email?token=" + token;
-    }
+
     
     /**
      * Custom exception for user registration errors.

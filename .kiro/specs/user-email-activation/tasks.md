@@ -65,19 +65,30 @@
     - Test token expiration and cleanup logic
     - _Requirements: 1.1, 1.5, 2.1, 2.2, 2.3, 3.1, 3.3, 3.4_
 
-- [ ] 4. Update authentication flow for email verification
-  - [ ] 4.1 Modify AuthenticationService
+- [x] 4. Update authentication flow for email verification
+
+
+
+
+
+  - [x] 4.1 Modify AuthenticationService
+
+
     - Update `authenticateUser()` method to check `emailVerified` status
     - Return specific error response for unverified accounts
     - _Requirements: 1.4, 5.1_
 
-  - [ ] 4.2 Update UserRegistrationService
+  - [x] 4.2 Update UserRegistrationService
+
+
     - Integrate email verification token generation after user registration
     - Trigger verification email sending after successful registration
     - Ensure `emailVerified` remains false for new users
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 4.3 Write unit tests for authentication changes
+  - [x] 4.3 Write unit tests for authentication changes
+
+
     - Test login rejection for unverified users
     - Test successful login after email verification
     - Test registration flow with email verification trigger

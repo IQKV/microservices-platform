@@ -43,12 +43,15 @@ class UserRegistrationServiceTest {
     @Mock
     private InputSanitizer inputSanitizer;
 
+    @Mock
+    private org.gripday.authservice.domain.service.EmailVerificationService emailVerificationService;
+
     private UserRegistrationService userRegistrationService;
 
     @BeforeEach
     void setUp() {
         userRegistrationService = new UserRegistrationService(
-            userRepository, authorityRepository, passwordEncoder, securityAuditService, inputSanitizer
+            userRepository, authorityRepository, passwordEncoder, securityAuditService, inputSanitizer, emailVerificationService
         );
     }
 
@@ -97,8 +100,9 @@ class UserRegistrationServiceTest {
         verify(userRepository).existsByUsername("newuser");
         verify(userRepository).existsByEmail("new@example.com");
         verify(passwordEncoder).encode("ValidPass123!");
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(argThat(user -> !user.getEmailVerified())); // Verify emailVerified is false
         verify(securityAuditService).logUserRegistration(eq("newuser"), eq("new@example.com"), eq(ipAddress), eq(userAgent));
+        verify(emailVerificationService).generateVerificationToken(any(User.class)); // Verify email verification is triggered
     }
 
     @Test
@@ -142,6 +146,7 @@ class UserRegistrationServiceTest {
         verify(inputSanitizer).sanitizeEmail("new@example.com");
         verify(inputSanitizer).sanitizeName("John");
         verify(inputSanitizer).sanitizeName("Doe");
+        verify(emailVerificationService).generateVerificationToken(any(User.class));
     }
 
     @Test
@@ -184,6 +189,7 @@ class UserRegistrationServiceTest {
         verify(authorityRepository).findByName("USER");
         verify(authorityRepository).save(any(Authority.class));
         verify(userRepository).save(any(User.class));
+        verify(emailVerificationService).generateVerificationToken(any(User.class));
     }
 
     @Test
@@ -224,6 +230,7 @@ class UserRegistrationServiceTest {
         // Then
         assertNotNull(result);
         verify(userRepository).save(argThat(user -> "custom-tenant".equals(user.getTenantId())));
+        verify(emailVerificationService).generateVerificationToken(any(User.class));
     }
 
     @Test
@@ -275,6 +282,99 @@ class UserRegistrationServiceTest {
 
         // Verify both users were saved (tenant isolation allows same username)
         verify(userRepository, times(2)).save(any(User.class));
+        verify(emailVerificationService, times(2)).generateVerificationToken(any(User.class));
+    }
+
+    @Test
+    void registerUser_ShouldTriggerEmailVerificationAfterRegistration() {
+        // Given
+        var request = new SignupRequest(
+            "newuser", "new@example.com", "ValidPass123!", 
+            "John", "Doe", "tenant-1"
+        );
+        var ipAddress = "192.168.1.1";
+        var userAgent = "Mozilla/5.0";
+
+        var userRole = new Authority("USER", "Standard user role");
+        var savedUser = createTestUser(1L, "newuser", "new@example.com");
+
+        // Mock input sanitization
+        when(inputSanitizer.sanitizeUsername("newuser")).thenReturn("newuser");
+        when(inputSanitizer.sanitizeEmail("new@example.com")).thenReturn("new@example.com");
+        when(inputSanitizer.sanitizeName("John")).thenReturn("John");
+        when(inputSanitizer.sanitizeName("Doe")).thenReturn("Doe");
+        when(inputSanitizer.isInputSafe(anyString())).thenReturn(true);
+        when(inputSanitizer.containsSqlInjection(anyString())).thenReturn(false);
+
+        // Mock repository calls
+        when(userRepository.existsByUsername("newuser")).thenReturn(false);
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("ValidPass123!")).thenReturn("hashedPassword");
+        when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+
+        // Mock email verification service
+        when(emailVerificationService.generateVerificationToken(any(User.class))).thenReturn("verification-token");
+
+        // When
+        var result = userRegistrationService.registerUser(request, ipAddress, userAgent);
+
+        // Then
+        assertNotNull(result);
+        assertFalse(result.emailVerified());
+
+        // Verify email verification was triggered
+        verify(emailVerificationService).generateVerificationToken(argThat(user -> 
+            "newuser".equals(user.getUsername()) && 
+            "new@example.com".equals(user.getEmail()) &&
+            !user.getEmailVerified()
+        ));
+    }
+
+    @Test
+    void registerUser_WhenEmailVerificationFails_ShouldStillCompleteRegistration() {
+        // Given
+        var request = new SignupRequest(
+            "newuser", "new@example.com", "ValidPass123!", 
+            "John", "Doe", "tenant-1"
+        );
+        var ipAddress = "192.168.1.1";
+        var userAgent = "Mozilla/5.0";
+
+        var userRole = new Authority("USER", "Standard user role");
+        var savedUser = createTestUser(1L, "newuser", "new@example.com");
+
+        // Mock input sanitization
+        when(inputSanitizer.sanitizeUsername("newuser")).thenReturn("newuser");
+        when(inputSanitizer.sanitizeEmail("new@example.com")).thenReturn("new@example.com");
+        when(inputSanitizer.sanitizeName("John")).thenReturn("John");
+        when(inputSanitizer.sanitizeName("Doe")).thenReturn("Doe");
+        when(inputSanitizer.isInputSafe(anyString())).thenReturn(true);
+        when(inputSanitizer.containsSqlInjection(anyString())).thenReturn(false);
+
+        // Mock repository calls
+        when(userRepository.existsByUsername("newuser")).thenReturn(false);
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("ValidPass123!")).thenReturn("hashedPassword");
+        when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+
+        // Mock email verification service to throw exception
+        when(emailVerificationService.generateVerificationToken(any(User.class)))
+            .thenThrow(new RuntimeException("Email service unavailable"));
+
+        // When
+        var result = userRegistrationService.registerUser(request, ipAddress, userAgent);
+
+        // Then - Registration should still succeed even if email verification fails
+        assertNotNull(result);
+        assertEquals("newuser", result.username());
+        assertEquals("new@example.com", result.email());
+        assertFalse(result.emailVerified());
+
+        // Verify user was still saved
+        verify(userRepository).save(any(User.class));
+        verify(emailVerificationService).generateVerificationToken(any(User.class));
     }
 
     private User createTestUser(Long id, String username, String email) {
