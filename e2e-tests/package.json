@@ -4,6 +4,8 @@
   "description": "End-to-end API testing suite for Gripday microservices platform",
   "type": "module",
   "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
     "test": "playwright test",
     "test:local": "playwright test --config=playwright.config.ts",
     "test:staging": "cross-env TEST_ENV=staging playwright test",
