@@ -13,6 +13,11 @@ export {
   schemas 
 } from './validation.js';
 
+// Authentication Testing exports
+export { AuthTestFramework } from './auth-test-framework.js';
+export { JwtTestUtils } from './jwt-test-utils.js';
+export { RbacTestHelpers } from './rbac-test-helpers.js';
+
 // Re-export types for convenience
 export type {
   PaginationParams,
@@ -21,6 +26,26 @@ export type {
 } from './typed-api-client.js';
 
 export type { ApiClientConfig } from './api-client.js';
+
+// Authentication testing types
+export type {
+  AuthTestUser,
+  TokenTestResult,
+  AuthFlowTestResult
+} from './auth-test-framework.js';
+
+export type {
+  JwtPayload,
+  TokenValidationResult,
+  TokenComparisonResult
+} from './jwt-test-utils.js';
+
+export type {
+  RoleDefinition,
+  EndpointAccessRule,
+  AccessTestResult,
+  RoleTestSuite
+} from './rbac-test-helpers.js';
 
 export type {
   ApiResponse,
