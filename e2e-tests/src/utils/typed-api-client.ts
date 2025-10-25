@@ -6,19 +6,29 @@
 import { ApiClient } from './api-client.js';
 import { ValidationUtils, schemas } from './validation.js';
 import {
-  ApiResponse,
   LoginCredentials,
   AuthResponse,
   UserRegistrationData,
   UserResponse,
   VerificationResponse,
-  BookData,
   BookResponse,
   TenantData,
   PaginatedResponse,
   HealthCheckResponse,
   TokenRefreshResponse,
-  LogoutResponse
+  LogoutResponse,
+  CreateBookRequest,
+  UpdateBookRequest,
+  CreateUserRequest,
+  UpdateUserRequest,
+  CreateTenantRequest,
+  UpdateTenantRequest,
+  EmailVerificationRequest,
+  ResendVerificationRequest,
+  VerificationStatusResponse,
+  UpdateInventoryRequest,
+  BulkInventoryRequest,
+  CategoryResponse
 } from '../types/api-responses.js';
 
 export interface PaginationParams {
@@ -50,7 +60,7 @@ export interface UserSearchParams extends PaginationParams {
  * Type-safe API client with validation and strongly typed methods
  */
 export class TypedApiClient {
-  constructor(private apiClient: ApiClient) {}
+  constructor(private readonly apiClient: ApiClient) {}
 
   // ============================================================================
   // Authentication Service Methods
@@ -89,14 +99,46 @@ export class TypedApiClient {
   /**
    * Verify user email with token
    */
-  async verifyEmail(token: string): Promise<VerificationResponse> {
+  async verifyEmail(request: EmailVerificationRequest): Promise<VerificationResponse> {
+    // Validate input
+    ValidationUtils.validate(request, schemas.emailVerification);
+    
     const response = await this.apiClient.request<VerificationResponse>({
       method: 'POST',
       url: '/api/v1/auth/verify-email',
-      data: { token }
+      data: request
     });
 
     return response.data;
+  }
+
+  /**
+   * Resend email verification
+   */
+  async resendEmailVerification(request: ResendVerificationRequest): Promise<VerificationStatusResponse> {
+    // Validate input
+    ValidationUtils.validate(request, schemas.resendVerification);
+    
+    const response = await this.apiClient.request<VerificationStatusResponse>({
+      method: 'POST',
+      url: '/api/v1/auth/resend-verification',
+      data: request
+    });
+
+    return ValidationUtils.validateVerificationStatusResponse(response.data);
+  }
+
+  /**
+   * Get email verification status
+   */
+  async getVerificationStatus(email: string): Promise<VerificationStatusResponse> {
+    const response = await this.apiClient.request<VerificationStatusResponse>({
+      method: 'GET',
+      url: '/api/v1/auth/verification-status',
+      params: { email }
+    });
+
+    return ValidationUtils.validateVerificationStatusResponse(response.data);
   }
 
   /**
@@ -149,7 +191,9 @@ export class TypedApiClient {
   /**
    * Update current user profile
    */
-  async updateCurrentUser(userData: Partial<UserRegistrationData>): Promise<UserResponse> {
+  async updateCurrentUser(userData: UpdateUserRequest): Promise<UserResponse> {
+    ValidationUtils.validate(userData, schemas.updateUser);
+    
     const response = await this.apiClient.request<UserResponse>({
       method: 'PUT',
       url: '/api/v1/auth/me',
@@ -191,8 +235,8 @@ export class TypedApiClient {
   /**
    * Create new user (admin only)
    */
-  async createUser(userData: UserRegistrationData): Promise<UserResponse> {
-    ValidationUtils.validate(userData, schemas.userRegistration);
+  async createUser(userData: CreateUserRequest): Promise<UserResponse> {
+    ValidationUtils.validate(userData, schemas.createUser);
     
     const response = await this.apiClient.request<UserResponse>({
       method: 'POST',
@@ -206,7 +250,9 @@ export class TypedApiClient {
   /**
    * Update user (admin only)
    */
-  async updateUser(userId: number, userData: Partial<UserRegistrationData>): Promise<UserResponse> {
+  async updateUser(userId: number, userData: UpdateUserRequest): Promise<UserResponse> {
+    ValidationUtils.validate(userData, schemas.updateUser);
+    
     const response = await this.apiClient.request<UserResponse>({
       method: 'PUT',
       url: `/api/v1/users/${userId}`,
@@ -271,10 +317,27 @@ export class TypedApiClient {
   /**
    * Create new tenant (admin only)
    */
-  async createTenant(tenantData: Omit<TenantData, 'id' | 'createdAt' | 'updatedAt'>): Promise<TenantData> {
+  async createTenant(tenantData: CreateTenantRequest): Promise<TenantData> {
+    ValidationUtils.validate(tenantData, schemas.createTenant);
+    
     const response = await this.apiClient.request<TenantData>({
       method: 'POST',
       url: '/api/v1/tenants',
+      data: tenantData
+    });
+
+    return ValidationUtils.validateTenantData(response.data);
+  }
+
+  /**
+   * Update tenant (admin only)
+   */
+  async updateTenant(tenantId: string, tenantData: UpdateTenantRequest): Promise<TenantData> {
+    ValidationUtils.validate(tenantData, schemas.updateTenant);
+    
+    const response = await this.apiClient.request<TenantData>({
+      method: 'PUT',
+      url: `/api/v1/tenants/${tenantId}`,
       data: tenantData
     });
 
@@ -313,7 +376,7 @@ export class TypedApiClient {
   /**
    * Create new book
    */
-  async createBook(bookData: Omit<BookData, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<BookResponse> {
+  async createBook(bookData: CreateBookRequest): Promise<BookResponse> {
     ValidationUtils.validate(bookData, schemas.createBook);
     
     const response = await this.apiClient.request<BookResponse>({
@@ -328,7 +391,9 @@ export class TypedApiClient {
   /**
    * Update book
    */
-  async updateBook(bookId: number, bookData: Partial<Omit<BookData, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>>): Promise<BookResponse> {
+  async updateBook(bookId: number, bookData: UpdateBookRequest): Promise<BookResponse> {
+    ValidationUtils.validate(bookData, schemas.updateBook);
+    
     const response = await this.apiClient.request<BookResponse>({
       method: 'PUT',
       url: `/api/v1/books/${bookId}`,
@@ -400,6 +465,61 @@ export class TypedApiClient {
     });
 
     return ValidationUtils.validatePaginatedResponse(response.data, schemas.bookData);
+  }
+
+  /**
+   * Update book inventory/stock
+   */
+  async updateBookInventory(bookId: number, inventoryData: UpdateInventoryRequest): Promise<BookResponse> {
+    ValidationUtils.validate(inventoryData, schemas.updateInventory);
+    
+    const response = await this.apiClient.request<BookResponse>({
+      method: 'PATCH',
+      url: `/api/v1/books/${bookId}/inventory`,
+      data: inventoryData
+    });
+
+    return ValidationUtils.validateBookData(response.data);
+  }
+
+  /**
+   * Bulk update book inventory
+   */
+  async bulkUpdateInventory(inventoryData: BulkInventoryRequest): Promise<BookResponse[]> {
+    ValidationUtils.validate(inventoryData, schemas.bulkInventory);
+    
+    const response = await this.apiClient.request<BookResponse[]>({
+      method: 'PATCH',
+      url: '/api/v1/books/inventory/bulk',
+      data: inventoryData
+    });
+
+    // Validate each book in the response
+    return response.data.map(book => ValidationUtils.validateBookData(book));
+  }
+
+  /**
+   * Get all categories
+   */
+  async getCategories(): Promise<CategoryResponse[]> {
+    const response = await this.apiClient.request<CategoryResponse[]>({
+      method: 'GET',
+      url: '/api/v1/books/categories'
+    });
+
+    return response.data.map(category => ValidationUtils.validateCategoryResponse(category));
+  }
+
+  /**
+   * Get category by ID
+   */
+  async getCategoryById(categoryId: number): Promise<CategoryResponse> {
+    const response = await this.apiClient.request<CategoryResponse>({
+      method: 'GET',
+      url: `/api/v1/books/categories/${categoryId}`
+    });
+
+    return ValidationUtils.validateCategoryResponse(response.data);
   }
 
   // ============================================================================

@@ -13,8 +13,7 @@ import {
     AuthTokens,
     LoginCredentials,
     AuthResponse,
-    TokenRefreshResponse,
-    ErrorResponse
+    TokenRefreshResponse
 } from '../types/api-responses.js';
 import { TestEnvironmentConfig } from '../types/environment.js';
 
@@ -519,7 +518,7 @@ export class ApiClient {
      * Generate a unique correlation ID
      */
     private generateCorrelationId(): string {
-        return `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        return `test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     }
 
     /**

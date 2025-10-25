@@ -7,13 +7,24 @@ import Joi from 'joi';
 import { 
   AuthResponse, 
   UserData, 
-  AuthTokens, 
   BookData, 
   TenantData, 
   ErrorResponse,
+  ServiceErrorResponse,
   PaginatedResponse,
   HealthCheckResponse,
-  ValidationError
+  ValidationError,
+  UserContext,
+  CreateUserRequest,
+  UpdateUserRequest,
+  BookSearchCriteria,
+  CreateTenantRequest,
+  UpdateTenantRequest,
+  VerificationStatusResponse,
+  CategoryResponse,
+  SearchMetadata,
+  FilterMetadata,
+  ApiVersionInfo
 } from '../types/api-responses.js';
 
 // Common validation patterns
@@ -28,7 +39,9 @@ const commonPatterns = {
   tenantId: Joi.string().min(1).max(100),
   correlationId: Joi.string().min(1).max(100),
   currency: Joi.string().length(3).uppercase(), // ISO 4217
-  isbn: Joi.string().pattern(/^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/)
+  isbn: Joi.string().pattern(
+    /^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/
+  )
 };
 
 // Authentication schemas
@@ -188,7 +201,7 @@ export class ValidationUtils {
   /**
    * Validate data against a Joi schema
    */
-  static validate<T>(data: any, schema: Joi.Schema<T>): T {
+  static validate<T>(data: unknown, schema: Joi.Schema<T>): T {
     const { error, value } = schema.validate(data, {
       abortEarly: false,
       stripUnknown: true,
@@ -212,56 +225,56 @@ export class ValidationUtils {
   /**
    * Validate authentication response
    */
-  static validateAuthResponse(data: any): AuthResponse {
+  static validateAuthResponse(data: unknown): AuthResponse {
     return this.validate(data, authResponseSchema);
   }
 
   /**
    * Validate user data
    */
-  static validateUserData(data: any): UserData {
+  static validateUserData(data: unknown): UserData {
     return this.validate(data, userDataSchema);
   }
 
   /**
    * Validate book data
    */
-  static validateBookData(data: any): BookData {
+  static validateBookData(data: unknown): BookData {
     return this.validate(data, bookDataSchema);
   }
 
   /**
    * Validate tenant data
    */
-  static validateTenantData(data: any): TenantData {
+  static validateTenantData(data: unknown): TenantData {
     return this.validate(data, tenantDataSchema);
   }
 
   /**
    * Validate error response
    */
-  static validateErrorResponse(data: any): ErrorResponse {
+  static validateErrorResponse(data: unknown): ErrorResponse {
     return this.validate(data, errorResponseSchema);
   }
 
   /**
    * Validate paginated response
    */
-  static validatePaginatedResponse<T>(data: any, itemSchema: Joi.Schema<T>): PaginatedResponse<T> {
+  static validatePaginatedResponse<T>(data: unknown, itemSchema: Joi.Schema<T>): PaginatedResponse<T> {
     return this.validate(data, paginatedResponseSchema(itemSchema));
   }
 
   /**
    * Validate health check response
    */
-  static validateHealthCheckResponse(data: any): HealthCheckResponse {
+  static validateHealthCheckResponse(data: unknown): HealthCheckResponse {
     return this.validate(data, healthCheckResponseSchema);
   }
 
   /**
    * Check if data matches schema without throwing
    */
-  static isValid<T>(data: any, schema: Joi.Schema<T>): boolean {
+  static isValid<T>(data: unknown, schema: Joi.Schema<T>): boolean {
     const { error } = schema.validate(data);
     return !error;
   }
@@ -269,7 +282,7 @@ export class ValidationUtils {
   /**
    * Get validation errors without throwing
    */
-  static getValidationErrors<T>(data: any, schema: Joi.Schema<T>): ValidationError[] {
+  static getValidationErrors<T>(data: unknown, schema: Joi.Schema<T>): ValidationError[] {
     const { error } = schema.validate(data, { abortEarly: false });
     
     if (!error) {
@@ -282,6 +295,90 @@ export class ValidationUtils {
       rejectedValue: detail.context?.value,
       code: detail.type
     }));
+  }
+
+  /**
+   * Validate user context
+   */
+  static validateUserContext(data: unknown): UserContext {
+    return this.validate(data, userContextSchema);
+  }
+
+  /**
+   * Validate service error response
+   */
+  static validateServiceErrorResponse(data: unknown): ServiceErrorResponse {
+    return this.validate(data, serviceErrorResponseSchema);
+  }
+
+  /**
+   * Validate book search criteria
+   */
+  static validateBookSearchCriteria(data: unknown): BookSearchCriteria {
+    return this.validate(data, bookSearchCriteriaSchema);
+  }
+
+  /**
+   * Validate create user request
+   */
+  static validateCreateUserRequest(data: unknown): CreateUserRequest {
+    return this.validate(data, createUserRequestSchema);
+  }
+
+  /**
+   * Validate update user request
+   */
+  static validateUpdateUserRequest(data: unknown): UpdateUserRequest {
+    return this.validate(data, updateUserRequestSchema);
+  }
+
+  /**
+   * Validate create tenant request
+   */
+  static validateCreateTenantRequest(data: unknown): CreateTenantRequest {
+    return this.validate(data, createTenantRequestSchema);
+  }
+
+  /**
+   * Validate update tenant request
+   */
+  static validateUpdateTenantRequest(data: unknown): UpdateTenantRequest {
+    return this.validate(data, updateTenantRequestSchema);
+  }
+
+  /**
+   * Validate verification status response
+   */
+  static validateVerificationStatusResponse(data: unknown): VerificationStatusResponse {
+    return this.validate(data, verificationStatusResponseSchema);
+  }
+
+  /**
+   * Validate category response
+   */
+  static validateCategoryResponse(data: unknown): CategoryResponse {
+    return this.validate(data, categoryResponseSchema);
+  }
+
+  /**
+   * Validate search metadata
+   */
+  static validateSearchMetadata(data: unknown): SearchMetadata {
+    return this.validate(data, searchMetadataSchema);
+  }
+
+  /**
+   * Validate filter metadata
+   */
+  static validateFilterMetadata(data: unknown): FilterMetadata {
+    return this.validate(data, filterMetadataSchema);
+  }
+
+  /**
+   * Validate API version info
+   */
+  static validateApiVersionInfo(data: unknown): ApiVersionInfo {
+    return this.validate(data, apiVersionInfoSchema);
   }
 }
 
@@ -296,6 +393,170 @@ export class ApiValidationError extends Error {
   }
 }
 
+// Additional validation schemas for new types
+
+// Service error response schema (alternative format)
+export const serviceErrorResponseSchema = Joi.object({
+  code: Joi.string().min(1).max(100).required(),
+  message: Joi.string().min(1).max(500).required(),
+  details: Joi.string().max(1000).required(),
+  timestamp: commonPatterns.timestamp.required(),
+  path: Joi.string().min(1).max(500).required(),
+  method: Joi.string().valid('GET', 'POST', 'PUT', 'PATCH', 'DELETE').required(),
+  correlationId: commonPatterns.correlationId.required(),
+  requestId: Joi.string().min(1).max(100).optional(),
+  fields: Joi.array().items(Joi.object({
+    field: Joi.string().min(1).max(100).required(),
+    rejectedValue: Joi.any().optional(),
+    message: Joi.string().min(1).max(200).required()
+  })).optional()
+});
+
+// User context schema for JWT tokens
+export const userContextSchema = Joi.object({
+  userId: commonPatterns.id.required(),
+  username: commonPatterns.username.required(),
+  email: commonPatterns.email.required(),
+  roles: Joi.array().items(Joi.string().min(1).max(50)).required(),
+  permissions: Joi.array().items(Joi.string().min(1).max(100)).required(),
+  firstName: Joi.string().min(1).max(100).optional(),
+  lastName: Joi.string().min(1).max(100).optional(),
+  tenantId: commonPatterns.tenantId.optional(),
+  department: Joi.string().min(1).max(100).optional(),
+  organizationId: Joi.string().min(1).max(100).optional(),
+  customClaims: Joi.object().unknown(true).optional()
+});
+
+// Create user request schema
+export const createUserRequestSchema = Joi.object({
+  username: commonPatterns.username.required(),
+  email: commonPatterns.email.required(),
+  password: commonPatterns.password.required(),
+  firstName: Joi.string().min(1).max(100).optional(),
+  lastName: Joi.string().min(1).max(100).optional(),
+  roles: Joi.array().items(Joi.string().min(1).max(50)).optional(),
+  enabled: Joi.boolean().optional().default(true),
+  tenantId: commonPatterns.tenantId.optional()
+});
+
+// Update user request schema
+export const updateUserRequestSchema = Joi.object({
+  firstName: Joi.string().min(1).max(100).optional(),
+  lastName: Joi.string().min(1).max(100).optional(),
+  email: commonPatterns.email.optional(),
+  roles: Joi.array().items(Joi.string().min(1).max(50)).optional(),
+  enabled: Joi.boolean().optional(),
+  department: Joi.string().min(1).max(100).optional()
+});
+
+// Book search criteria schema
+export const bookSearchCriteriaSchema = Joi.object({
+  title: Joi.string().min(1).max(500).optional(),
+  author: Joi.string().min(1).max(200).optional(),
+  category: Joi.string().min(1).max(100).optional(),
+  minPrice: Joi.number().positive().optional(),
+  maxPrice: Joi.number().positive().optional(),
+  availableOnly: Joi.boolean().optional(),
+  tags: Joi.array().items(Joi.string().min(1).max(50)).optional(),
+  inStock: Joi.boolean().optional()
+});
+
+// Update book request schema
+export const updateBookRequestSchema = Joi.object({
+  title: Joi.string().min(1).max(500).optional(),
+  author: Joi.string().min(1).max(200).optional(),
+  isbn: commonPatterns.isbn.optional(),
+  description: Joi.string().max(2000).optional(),
+  price: Joi.number().positive().precision(2).optional(),
+  currency: commonPatterns.currency.optional(),
+  stock: Joi.number().integer().min(0).optional(),
+  category: Joi.string().min(1).max(100).optional(),
+  tags: Joi.array().items(Joi.string().min(1).max(50)).optional()
+});
+
+// Create tenant request schema
+export const createTenantRequestSchema = Joi.object({
+  name: Joi.string().min(1).max(200).required(),
+  domain: Joi.string().domain().optional(),
+  subdomain: Joi.string().min(1).max(100).optional(),
+  enabled: Joi.boolean().optional().default(true),
+  settings: Joi.object().unknown(true).optional().default({})
+});
+
+// Update tenant request schema
+export const updateTenantRequestSchema = Joi.object({
+  name: Joi.string().min(1).max(200).optional(),
+  domain: Joi.string().domain().optional(),
+  subdomain: Joi.string().min(1).max(100).optional(),
+  enabled: Joi.boolean().optional(),
+  settings: Joi.object().unknown(true).optional()
+});
+
+// Email verification request schema
+export const emailVerificationRequestSchema = Joi.object({
+  token: Joi.string().min(1).max(500).required()
+});
+
+// Resend verification request schema
+export const resendVerificationRequestSchema = Joi.object({
+  email: commonPatterns.email.required()
+});
+
+// Verification status response schema
+export const verificationStatusResponseSchema = Joi.object({
+  verified: Joi.boolean().required(),
+  message: Joi.string().min(1).max(200).required(),
+  user: userDataSchema.optional()
+});
+
+// Update inventory request schema
+export const updateInventoryRequestSchema = Joi.object({
+  stock: Joi.number().integer().min(0).required()
+});
+
+// Bulk inventory request schema
+export const bulkInventoryRequestSchema = Joi.object({
+  updates: Joi.array().items(Joi.object({
+    bookId: commonPatterns.id.required(),
+    stock: Joi.number().integer().min(0).required()
+  })).min(1).required()
+});
+
+// Category response schema
+export const categoryResponseSchema = Joi.object({
+  id: commonPatterns.id.required(),
+  name: Joi.string().min(1).max(100).required(),
+  description: Joi.string().max(500).optional(),
+  bookCount: Joi.number().integer().min(0).optional()
+});
+
+// Search metadata schema
+export const searchMetadataSchema = Joi.object({
+  query: Joi.string().optional(),
+  totalResults: Joi.number().integer().min(0).required(),
+  searchTime: Joi.number().positive().required(),
+  filters: Joi.object().unknown(true).optional()
+});
+
+// Filter metadata schema
+export const filterMetadataSchema = Joi.object({
+  availableCategories: Joi.array().items(Joi.string()).required(),
+  priceRange: Joi.object({
+    min: Joi.number().min(0).required(),
+    max: Joi.number().positive().required()
+  }).required(),
+  availableAuthors: Joi.array().items(Joi.string()).required(),
+  totalBooks: Joi.number().integer().min(0).required()
+});
+
+// API version info schema
+export const apiVersionInfoSchema = Joi.object({
+  version: Joi.string().pattern(/^\d+\.\d+\.\d+$/).required(),
+  supportedVersions: Joi.array().items(Joi.string().pattern(/^\d+\.\d+\.\d+$/)).required(),
+  deprecatedVersions: Joi.array().items(Joi.string().pattern(/^\d+\.\d+\.\d+$/)).required(),
+  latestVersion: Joi.string().pattern(/^\d+\.\d+\.\d+$/).required()
+});
+
 // Export commonly used schemas
 export const schemas = {
   loginCredentials: loginCredentialsSchema,
@@ -303,10 +564,27 @@ export const schemas = {
   authResponse: authResponseSchema,
   authTokens: authTokensSchema,
   userData: userDataSchema,
+  userContext: userContextSchema,
+  createUser: createUserRequestSchema,
+  updateUser: updateUserRequestSchema,
   bookData: bookDataSchema,
   createBook: createBookSchema,
+  updateBook: updateBookRequestSchema,
+  bookSearchCriteria: bookSearchCriteriaSchema,
   tenantData: tenantDataSchema,
+  createTenant: createTenantRequestSchema,
+  updateTenant: updateTenantRequestSchema,
   errorResponse: errorResponseSchema,
+  serviceErrorResponse: serviceErrorResponseSchema,
   healthCheckResponse: healthCheckResponseSchema,
-  paginatedResponse: paginatedResponseSchema
+  paginatedResponse: paginatedResponseSchema,
+  emailVerification: emailVerificationRequestSchema,
+  resendVerification: resendVerificationRequestSchema,
+  verificationStatus: verificationStatusResponseSchema,
+  updateInventory: updateInventoryRequestSchema,
+  bulkInventory: bulkInventoryRequestSchema,
+  categoryResponse: categoryResponseSchema,
+  searchMetadata: searchMetadataSchema,
+  filterMetadata: filterMetadataSchema,
+  apiVersionInfo: apiVersionInfoSchema
 };

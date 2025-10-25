@@ -4,7 +4,7 @@
  */
 
 // Base API response structure
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: number;
   headers: Record<string, string>;
   data: T;
@@ -28,11 +28,31 @@ export interface ErrorResponse {
   };
 }
 
+// Alternative error response format (direct format from services)
+export interface ServiceErrorResponse {
+  code: string;
+  message: string;
+  details: string;
+  timestamp: string;
+  path: string;
+  method: string;
+  correlationId: string;
+  requestId?: string;
+  fields?: FieldError[];
+}
+
+// Field error for service responses
+export interface FieldError {
+  field: string;
+  rejectedValue?: unknown;
+  message: string;
+}
+
 // Validation error for field-specific errors
 export interface ValidationError {
   field: string;
   message: string;
-  rejectedValue?: any;
+  rejectedValue?: unknown;
   code?: string;
 }
 
@@ -110,7 +130,7 @@ export interface TenantData {
   domain?: string;
   subdomain?: string;
   enabled: boolean;
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -123,11 +143,14 @@ export interface BookData {
   isbn: string;
   description?: string;
   price: number;
-  currency: string;
-  stock: number;
-  category: string;
-  tags: string[];
-  tenantId: string;
+  currency?: string;
+  stock?: number;
+  category?: string;
+  categoryName?: string;
+  tags?: string[];
+  tenantId?: string;
+  available?: boolean;
+  availableQuantity?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -139,12 +162,53 @@ export interface BookResponse {
   isbn: string;
   description?: string;
   price: number;
-  currency: string;
-  stock: number;
-  category: string;
-  tags: string[];
+  currency?: string;
+  stock?: number;
+  category?: string;
+  categoryName?: string;
+  tags?: string[];
+  available?: boolean;
+  availableQuantity?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+// Book creation request
+export interface CreateBookRequest {
+  title: string;
+  author: string;
+  isbn: string;
+  description?: string;
+  price: number;
+  currency?: string;
+  stock?: number;
+  category?: string;
+  tags?: string[];
+}
+
+// Book update request
+export interface UpdateBookRequest {
+  title?: string;
+  author?: string;
+  isbn?: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  stock?: number;
+  category?: string;
+  tags?: string[];
+}
+
+// Book search criteria
+export interface BookSearchCriteria {
+  title?: string;
+  author?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availableOnly?: boolean;
+  tags?: string[];
+  inStock?: boolean;
 }
 
 // Paginated response structure
@@ -182,7 +246,7 @@ export interface RequestConfig {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   url: string;
   headers?: Record<string, string>;
-  data?: any;
+  data?: unknown;
   params?: Record<string, string | number | boolean>;
   timeout?: number;
   retries?: number;
@@ -193,7 +257,7 @@ export interface RequestConfig {
 export interface ResponseSchema {
   statusCode?: number | number[];
   headers?: Record<string, string | RegExp>;
-  body?: any; // Joi schema or validation function
+  body?: unknown; // Joi schema or validation function
 }
 
 // Error types for API client
@@ -219,7 +283,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     type: ApiErrorType,
-    status?: number,
+    responseStatus?: number,
     response?: ApiResponse,
     correlationId?: string,
     requestId?: string
@@ -227,7 +291,7 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
     this.type = type;
-    if (status !== undefined) this.status = status;
+    if (responseStatus !== undefined) this.status = responseStatus;
     if (response !== undefined) this.response = response;
     if (correlationId !== undefined) this.correlationId = correlationId;
     if (requestId !== undefined) this.requestId = requestId;
@@ -247,4 +311,161 @@ export interface TokenRefreshResponse {
 export interface LogoutResponse {
   success: boolean;
   message: string;
+}
+
+// Email verification request
+export interface EmailVerificationRequest {
+  token: string;
+}
+
+// Resend verification request
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+// Verification status response
+export interface VerificationStatusResponse {
+  verified: boolean;
+  message: string;
+  user?: UserResponse;
+}
+
+// User context for JWT tokens
+export interface UserContext {
+  userId: number;
+  username: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
+  firstName?: string;
+  lastName?: string;
+  tenantId?: string;
+  department?: string;
+  organizationId?: string;
+  customClaims?: Record<string, unknown>;
+}
+
+// Create user request (admin only)
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  roles?: string[];
+  enabled?: boolean;
+  tenantId?: string;
+}
+
+// Update user request
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  roles?: string[];
+  enabled?: boolean;
+  department?: string;
+}
+
+// Tenant creation request
+export interface CreateTenantRequest {
+  name: string;
+  domain?: string;
+  subdomain?: string;
+  enabled?: boolean;
+  settings?: Record<string, unknown>;
+}
+
+// Tenant update request
+export interface UpdateTenantRequest {
+  name?: string;
+  domain?: string;
+  subdomain?: string;
+  enabled?: boolean;
+  settings?: Record<string, unknown>;
+}
+
+// Inventory update request
+export interface UpdateInventoryRequest {
+  stock: number;
+}
+
+// Bulk inventory update request
+export interface BulkInventoryRequest {
+  updates: Array<{
+    bookId: number;
+    stock: number;
+  }>;
+}
+
+// Category response
+export interface CategoryResponse {
+  id: number;
+  name: string;
+  description?: string;
+  bookCount?: number;
+}
+
+// Search metadata
+export interface SearchMetadata {
+  query?: string;
+  totalResults: number;
+  searchTime: number;
+  filters?: Record<string, unknown>;
+}
+
+// Filter metadata
+export interface FilterMetadata {
+  availableCategories: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+  availableAuthors: string[];
+  totalBooks: number;
+}
+
+// API versioning support
+export interface ApiVersionInfo {
+  version: string;
+  supportedVersions: string[];
+  deprecatedVersions: string[];
+  latestVersion: string;
+}
+
+// Rate limiting response headers
+export interface RateLimitHeaders {
+  'X-RateLimit-Limit': string;
+  'X-RateLimit-Remaining': string;
+  'X-RateLimit-Reset': string;
+  'X-RateLimit-Retry-After'?: string;
+}
+
+// CORS headers
+export interface CorsHeaders {
+  'Access-Control-Allow-Origin': string;
+  'Access-Control-Allow-Methods': string;
+  'Access-Control-Allow-Headers': string;
+  'Access-Control-Allow-Credentials': string;
+  'Access-Control-Max-Age': string;
+}
+
+// Security headers
+export interface SecurityHeaders {
+  'X-Content-Type-Options': string;
+  'X-Frame-Options': string;
+  'X-XSS-Protection': string;
+  'Strict-Transport-Security': string;
+  'Content-Security-Policy'?: string;
+}
+
+// Common response headers
+export interface CommonResponseHeaders extends Partial<RateLimitHeaders>, Partial<SecurityHeaders> {
+  'Content-Type': string;
+  'X-Correlation-ID'?: string;
+  'X-Request-ID'?: string;
+  'X-Tenant-ID'?: string;
+  'Cache-Control'?: string;
+  'ETag'?: string;
+  'Last-Modified'?: string;
 }
