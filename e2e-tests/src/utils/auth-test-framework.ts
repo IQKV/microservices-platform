@@ -3,7 +3,7 @@
  * Provides utilities for testing JWT-based authentication flows
  */
 
-import { faker } from 'faker';
+import { faker } from '@faker-js/faker';
 import { TypedApiClient } from './typed-api-client.js';
 import { ApiClient } from './api-client.js';
 import { getEnvironmentConfig } from '../config/environments.js';

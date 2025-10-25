@@ -18,6 +18,32 @@ export { AuthTestFramework } from './auth-test-framework.js';
 export { JwtTestUtils } from './jwt-test-utils.js';
 export { RbacTestHelpers } from './rbac-test-helpers.js';
 
+// Test Data Management exports
+export { 
+  TestDataFactory, 
+  testDataFactory, 
+  createTenantAwareFactory, 
+  createSeededFactory 
+} from './test-data-factory.js';
+
+// Database Helper exports
+export { 
+  DatabaseHelper, 
+  DatabaseConnectionManager,
+  TestTransactionManager,
+  TestDataSeeder,
+  TestDataCleanup,
+  databaseHelper,
+  createDatabaseHelper
+} from './database-helper.js';
+
+// Test Data Manager exports
+export { 
+  TestDataManager,
+  createTestDataManager,
+  createTenantTestDataManager
+} from './test-data-manager.js';
+
 // Re-export types for convenience
 export type {
   PaginationParams,
@@ -46,6 +72,29 @@ export type {
   AccessTestResult,
   RoleTestSuite
 } from './rbac-test-helpers.js';
+
+// Test Data Factory types
+export type {
+  TestDataFactoryConfig,
+  CreateUserOptions,
+  CreateBookOptions,
+  CreateTenantOptions,
+  TestDataRelationships
+} from './test-data-factory.js';
+
+// Database Helper types
+export type {
+  DatabasePoolConfig,
+  TransactionConfig,
+  TestIsolationConfig
+} from '../config/database.js';
+
+// Test Data Manager types
+export type {
+  TestDataManagerConfig,
+  TestDataCreationResult,
+  BatchTestDataResult
+} from './test-data-manager.js';
 
 export type {
   ApiResponse,
