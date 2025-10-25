@@ -94,26 +94,40 @@
     - Test registration flow with email verification trigger
     - _Requirements: 1.3, 1.4, 5.1_
 
-- [ ] 5. Create email verification REST endpoints
-  - [ ] 5.1 Create EmailVerificationResource controller
+- [x] 5. Create email verification REST endpoints
+
+
+
+
+
+  - [x] 5.1 Create EmailVerificationResource controller
+
+
     - Implement `GET /api/v1/auth/email/verify` endpoint for email verification
     - Implement `POST /api/v1/auth/email/resend` endpoint for resending verification
     - Implement `GET /api/v1/auth/email/status` endpoint for verification status
     - Add proper OpenAPI documentation and examples
+    - Integrate endpoints with gateteway-service
     - _Requirements: 2.1, 2.2, 2.3, 3.1, 3.2, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 5.2 Create DTOs for email verification
+  - [x] 5.2 Create DTOs for email verification
+
+
     - Create `EmailVerificationResponse` record
     - Create `ResendVerificationRequest` record with validation
     - Create `VerificationStatusResponse` record
     - _Requirements: 2.2, 2.3, 3.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 5.3 Update AuthenticationResource error responses
+  - [x] 5.3 Update AuthenticationResource error responses
+
+
     - Enhance login error responses to include email verification status
     - Add actionable error messages with resend email links
     - _Requirements: 5.1, 5.2, 5.3_
 
-  - [ ] 5.4 Write integration tests for email verification endpoints
+  - [x] 5.4 Write integration tests for email verification endpoints
+
+
     - Test complete email verification flow end-to-end
     - Test error handling for invalid/expired tokens
     - Test rate limiting for resend functionality

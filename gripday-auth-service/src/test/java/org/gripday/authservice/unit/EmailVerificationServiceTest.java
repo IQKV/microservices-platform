@@ -168,8 +168,9 @@ class EmailVerificationServiceTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(testUser.getId(), result.getId());
-        assertTrue(result.getEmailVerified());
+        assertTrue(result.success());
+        assertEquals("Email verified successfully", result.message());
+        assertEquals("testuser", result.username());
         
         // Verify token was marked as used
         verify(tokenRepository).save(validToken);
@@ -266,11 +267,13 @@ class EmailVerificationServiceTest {
         doNothing().when(emailService).sendVerificationEmail(eq(testUser), anyString());
 
         // When
-        var result = emailVerificationService.resendVerificationEmail(email);
+        var result = emailVerificationService.resendVerificationEmail(email, "127.0.0.1");
 
         // Then
         assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertTrue(result.success());
+        assertEquals("Verification email sent successfully", result.message());
+        assertEquals("testuser", result.username());
         
         // Verify email was sent
         verify(emailService).sendVerificationEmail(eq(testUser), anyString());
@@ -285,7 +288,7 @@ class EmailVerificationServiceTest {
 
         // When & Then
         var exception = assertThrows(EmailVerificationService.EmailVerificationException.class,
-            () -> emailVerificationService.resendVerificationEmail(email));
+            () -> emailVerificationService.resendVerificationEmail(email, "127.0.0.1"));
         
         assertTrue(exception.getMessage().contains("User not found with email"));
         
@@ -303,7 +306,7 @@ class EmailVerificationServiceTest {
 
         // When & Then
         var exception = assertThrows(EmailVerificationService.EmailVerificationException.class,
-            () -> emailVerificationService.resendVerificationEmail(email));
+            () -> emailVerificationService.resendVerificationEmail(email, "127.0.0.1"));
         
         assertEquals("User email is already verified", exception.getMessage());
         
@@ -437,7 +440,7 @@ class EmailVerificationServiceTest {
     void resendVerificationEmail_WithNullEmail_ShouldThrowException() {
         // When & Then
         var exception = assertThrows(EmailVerificationService.EmailVerificationException.class,
-            () -> emailVerificationService.resendVerificationEmail(null));
+            () -> emailVerificationService.resendVerificationEmail(null, "127.0.0.1"));
         
         assertEquals("Email address cannot be null or empty", exception.getMessage());
     }
@@ -446,7 +449,7 @@ class EmailVerificationServiceTest {
     void resendVerificationEmail_WithEmptyEmail_ShouldThrowException() {
         // When & Then
         var exception = assertThrows(EmailVerificationService.EmailVerificationException.class,
-            () -> emailVerificationService.resendVerificationEmail(""));
+            () -> emailVerificationService.resendVerificationEmail("", "127.0.0.1"));
         
         assertEquals("Email address cannot be null or empty", exception.getMessage());
     }

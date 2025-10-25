@@ -4,6 +4,8 @@ import org.gripday.authservice.infrastructure.entity.EmailVerificationToken;
 import org.gripday.authservice.infrastructure.entity.User;
 import org.gripday.authservice.infrastructure.repository.EmailVerificationTokenRepository;
 import org.gripday.authservice.infrastructure.repository.UserRepository;
+import org.gripday.authservice.presentation.dto.EmailVerificationResponse;
+import org.gripday.authservice.presentation.dto.VerificationStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -98,11 +100,11 @@ public class EmailVerificationService {
      * Validates token and activates user account if valid.
      * 
      * @param token The verification token to validate
-     * @return The verified user
+     * @return EmailVerificationResponse with verification result
      * @throws EmailVerificationException if token is invalid, expired, or already used
      */
     @Transactional
-    public User verifyEmail(String token) {
+    public EmailVerificationResponse verifyEmail(String token) {
         if (token == null || token.trim().isEmpty()) {
             throw new EmailVerificationException("Verification token cannot be null or empty");
         }
@@ -145,7 +147,12 @@ public class EmailVerificationService {
         logger.info("Email verification successful for user: {} ({})", 
                    user.getUsername(), user.getEmail());
 
-        return verifiedUser;
+        return new EmailVerificationResponse(
+            true,
+            "Email verified successfully",
+            user.getUsername(),
+            LocalDateTime.now()
+        );
     }
 
     /**
@@ -153,10 +160,11 @@ public class EmailVerificationService {
      * Implements rate limiting and generates new token.
      * 
      * @param email The email address to resend verification to
-     * @return The new verification token
+     * @param ipAddress The IP address of the request for rate limiting
+     * @return EmailVerificationResponse with resend result
      * @throws EmailVerificationException if user not found, already verified, or rate limited
      */
-    public String resendVerificationEmail(String email) {
+    public EmailVerificationResponse resendVerificationEmail(String email, String ipAddress) {
         if (email == null || email.trim().isEmpty()) {
             throw new EmailVerificationException("Email address cannot be null or empty");
         }
@@ -177,7 +185,14 @@ public class EmailVerificationService {
         }
 
         // Generate new verification token (this includes rate limiting check)
-        return generateVerificationToken(user);
+        generateVerificationToken(user);
+        
+        return new EmailVerificationResponse(
+            true,
+            "Verification email sent successfully",
+            user.getUsername(),
+            null
+        );
     }
 
     /**
@@ -235,6 +250,41 @@ public class EmailVerificationService {
     public EmailVerificationToken getMostRecentUnusedToken(Long userId, String tenantId) {
         return tokenRepository.findMostRecentUnusedTokenByUserIdAndTenantId(userId, tenantId)
             .orElse(null);
+    }
+
+    /**
+     * Get email verification status for a user.
+     * 
+     * @param email The email address to check
+     * @return VerificationStatusResponse with status information
+     * @throws EmailVerificationException if user not found
+     */
+    public VerificationStatusResponse getVerificationStatus(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new EmailVerificationException("Email address cannot be null or empty");
+        }
+
+        // Find user by email
+        var user = userRepository.findByEmail(email.trim())
+            .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
+
+        // Check tenant context
+        var currentTenantId = TenantContext.getCurrentTenantId();
+        if (currentTenantId != null && !currentTenantId.equals(user.getTenantId())) {
+            throw new EmailVerificationException("User not found in current tenant");
+        }
+
+        var isVerified = user.getEmailVerified() != null && user.getEmailVerified();
+        var message = isVerified 
+            ? "Email address is verified and active."
+            : "Email verification pending. Please check your inbox.";
+
+        return new VerificationStatusResponse(
+            user.getEmail(),
+            isVerified,
+            user.getCreatedAt(),
+            message
+        );
     }
 
     /**
