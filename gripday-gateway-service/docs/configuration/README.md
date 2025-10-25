@@ -83,6 +83,9 @@ gripday:
         - /api/v1/auth/login
         - /api/v1/auth/signup
         - /api/v1/auth/refresh
+        - /api/v1/auth/email/verify
+        - /api/v1/auth/email/resend
+        - /api/v1/auth/email/status
         - /actuator/health
     
     rate-limiting:
