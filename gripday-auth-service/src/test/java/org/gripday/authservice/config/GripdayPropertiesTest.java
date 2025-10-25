@@ -31,10 +31,12 @@ class GripdayPropertiesTest {
         assertThat(email.smtp().port()).isEqualTo(587);
         assertThat(email.smtp().auth()).isTrue();
         assertThat(email.smtp().starttls()).isTrue();
+        assertThat(email.smtp().timeout()).isEqualTo(java.time.Duration.ofSeconds(30));
         
         assertThat(email.verification()).isNotNull();
         assertThat(email.verification().fromEmail()).isEqualTo("noreply@gripday.com");
         assertThat(email.verification().fromName()).isEqualTo("Gripday Platform");
+        assertThat(email.verification().tokenExpiry()).isEqualTo(java.time.Duration.ofHours(24));
         assertThat(email.verification().rateLimit()).isEqualTo(3);
         
         assertThat(email.templates()).isNotNull();

@@ -72,10 +72,12 @@ gripday:
       password: test-password
       auth: true
       starttls: true
+      timeout: PT30S
     verification:
       from-email: noreply@gripday.com
       from-name: Gripday Platform
       base-url: https://test.gripday.com
+      token-expiry: PT24H
       rate-limit: 3
     templates:
       verification-subject: "Verify your Gripday account"

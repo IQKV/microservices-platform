@@ -2,6 +2,7 @@ package org.gripday.authservice.unit;
 
 import org.gripday.authservice.config.GripdayProperties;
 import org.gripday.authservice.domain.service.EmailService;
+import org.gripday.authservice.domain.service.EmailVerificationMetricsService;
 import org.gripday.authservice.infrastructure.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +42,10 @@ class EmailServiceTest {
     void setUp() {
         // Create test configuration
         var smtpConfig = new GripdayProperties.Email.Smtp(
-            "localhost", 587, "test@example.com", "password", true, true
+            "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
         );
         var verificationConfig = new GripdayProperties.Email.Verification(
-            "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", 3
+            "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", java.time.Duration.ofHours(24), 3
         );
         var templatesConfig = new GripdayProperties.Email.Templates(
             "Verify your Gripday account", "email/verification.html"
@@ -58,7 +59,8 @@ class EmailServiceTest {
         var observability = mock(GripdayProperties.Observability.class);
         
         gripdayProperties = new GripdayProperties(database, auth, cache, emailConfig, observability);
-        emailService = new EmailService(mailSender, templateEngine, gripdayProperties);
+        var metricsService = mock(EmailVerificationMetricsService.class);
+        emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService);
     }
     
     @Test
@@ -77,10 +79,10 @@ class EmailServiceTest {
     void buildVerificationUrl_ShouldHandleBaseUrlWithTrailingSlash() {
         // Given
         var smtpConfig = new GripdayProperties.Email.Smtp(
-            "localhost", 587, "test@example.com", "password", true, true
+            "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
         );
         var verificationConfig = new GripdayProperties.Email.Verification(
-            "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", 3
+            "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", java.time.Duration.ofHours(24), 3
         );
         var templatesConfig = new GripdayProperties.Email.Templates(
             "Verify your Gripday account", "email/verification.html"
@@ -93,7 +95,8 @@ class EmailServiceTest {
         var observability = mock(GripdayProperties.Observability.class);
         
         var properties = new GripdayProperties(database, auth, cache, emailConfig, observability);
-        var service = new EmailService(mailSender, templateEngine, properties);
+        var metricsService = mock(EmailVerificationMetricsService.class);
+        var service = new EmailService(mailSender, templateEngine, properties, metricsService);
         
         var token = "test-token-123";
         

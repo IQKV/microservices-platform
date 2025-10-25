@@ -106,13 +106,15 @@ public record GripdayProperties(
             String username,
             String password,
             boolean auth,
-            boolean starttls
+            boolean starttls,
+            @NotNull java.time.Duration timeout
         ) {}
 
         public record Verification(
             @NotBlank String fromEmail,
             @NotBlank String fromName,
             @NotBlank String baseUrl,
+            @NotNull java.time.Duration tokenExpiry,
             @Positive int rateLimit
         ) {}
 

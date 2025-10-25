@@ -134,20 +134,31 @@
     - Test multi-tenant isolation for verification tokens
     - _Requirements: 2.1, 2.2, 2.3, 3.1, 3.2, 3.5_
 
-- [ ] 6. Add configuration and scheduled tasks
-  - [ ] 6.1 Update application configuration
+- [x] 6. Add configuration and scheduled tasks
+
+
+
+
+
+  - [x] 6.1 Update application configuration
+
+
     - Add email service configuration to `application.yml`
     - Add environment-specific SMTP settings
     - Configure email templates and verification URL settings
     - _Requirements: 1.2, 3.2, 4.4_
 
-  - [ ] 6.2 Implement scheduled token cleanup
+  - [x] 6.2 Implement scheduled token cleanup
+
+
     - Create scheduled task to clean up expired verification tokens
     - Configure cleanup to run daily and remove tokens older than 48 hours
     - Add logging and metrics for cleanup operations
     - _Requirements: 4.3_
 
-  - [ ] 6.3 Write tests for configuration and scheduled tasks
+  - [x] 6.3 Write tests for configuration and scheduled tasks
+
+
     - Test SMTP configuration loading
     - Test scheduled cleanup task execution
     - Test email template rendering

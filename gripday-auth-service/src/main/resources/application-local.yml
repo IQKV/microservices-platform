@@ -100,6 +100,26 @@ gripday:
       issuer: gripday-auth-service-local
       audience: gripday-services-local
       algorithm: HS256
+
+  # Email Configuration - Local Development
+  email:
+    smtp:
+      host: ${SMTP_HOST:localhost}
+      port: ${SMTP_PORT:1025}  # MailHog default port for local development
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      auth: false  # Disabled for local MailHog
+      starttls: false  # Disabled for local development
+      timeout: PT30S
+    verification:
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.local}
+      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform (Local)}
+      base-url: ${VERIFICATION_BASE_URL:http://localhost:3000}
+      token-expiry: PT24H
+      rate-limit: 10  # More lenient for development
+    templates:
+      verification-subject: "[LOCAL] Verify your Gripday account"
+      verification-template: "email/verification.html"
     security:
       password:
         encoder-strength: 10  # Lower for faster development

@@ -33,14 +33,17 @@ public class EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final EmailOperations emailService;
+    private final EmailVerificationMetricsService metricsService;
 
     public EmailVerificationService(
             EmailVerificationTokenRepository tokenRepository,
             UserRepository userRepository,
-            EmailOperations emailService) {
+            EmailOperations emailService,
+            EmailVerificationMetricsService metricsService) {
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -106,25 +109,34 @@ public class EmailVerificationService {
     @Transactional
     public EmailVerificationResponse verifyEmail(String token) {
         if (token == null || token.trim().isEmpty()) {
+            metricsService.recordVerificationFailed();
             throw new EmailVerificationException("Verification token cannot be null or empty");
         }
 
         // Find the verification token
         var verificationToken = tokenRepository.findByTokenAndUsedFalse(token)
-            .orElseThrow(() -> new EmailVerificationException("Invalid or already used verification token"));
+            .orElseThrow(() -> {
+                metricsService.recordVerificationFailed();
+                return new EmailVerificationException("Invalid or already used verification token");
+            });
 
         // Check if token is expired
         if (verificationToken.isExpired()) {
+            metricsService.recordVerificationFailed();
             throw new EmailVerificationException("Verification token has expired");
         }
 
         // Get the user
         var user = userRepository.findById(verificationToken.getUserId())
-            .orElseThrow(() -> new EmailVerificationException("User not found for verification token"));
+            .orElseThrow(() -> {
+                metricsService.recordVerificationFailed();
+                return new EmailVerificationException("User not found for verification token");
+            });
 
         // Verify tenant context matches
         var currentTenantId = TenantContext.getCurrentTenantId();
         if (currentTenantId != null && !currentTenantId.equals(user.getTenantId())) {
+            metricsService.recordVerificationFailed();
             throw new EmailVerificationException("Token not valid for current tenant");
         }
 
@@ -133,6 +145,7 @@ public class EmailVerificationService {
             // Mark token as used even if user is already verified
             verificationToken.markAsUsed();
             tokenRepository.save(verificationToken);
+            metricsService.recordVerificationFailed();
             throw new EmailVerificationException("User email is already verified");
         }
 
@@ -143,6 +156,9 @@ public class EmailVerificationService {
         // Activate user account
         user.setEmailVerified(true);
         var verifiedUser = userRepository.save(user);
+
+        // Record successful verification
+        metricsService.recordVerificationSuccess();
 
         logger.info("Email verification successful for user: {} ({})", 
                    user.getUsername(), user.getEmail());

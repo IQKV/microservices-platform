@@ -100,6 +100,26 @@ gripday:
       issuer: gripday-auth-service
       audience: gripday-services
       algorithm: HS256
+
+  # Email Configuration - Production Environment
+  email:
+    smtp:
+      host: ${SMTP_HOST}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+      auth: true
+      starttls: true
+      timeout: PT30S
+    verification:
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
+      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
+      token-expiry: PT24H
+      rate-limit: 3
+    templates:
+      verification-subject: "Verify your Gripday account"
+      verification-template: "email/verification.html"
     security:
       password:
         encoder-strength: 14

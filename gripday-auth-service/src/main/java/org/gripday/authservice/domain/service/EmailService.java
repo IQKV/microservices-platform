@@ -27,17 +27,22 @@ public class EmailService implements EmailOperations {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
     private final GripdayProperties gripdayProperties;
+    private final EmailVerificationMetricsService metricsService;
     
     public EmailService(JavaMailSender mailSender, 
                        TemplateEngine templateEngine,
-                       GripdayProperties gripdayProperties) {
+                       GripdayProperties gripdayProperties,
+                       EmailVerificationMetricsService metricsService) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
         this.gripdayProperties = gripdayProperties;
+        this.metricsService = metricsService;
     }
     
     @Override
     public void sendVerificationEmail(User user, String token) {
+        var timerSample = metricsService.startEmailSendTimer();
+        
         try {
             var mimeMessage = mailSender.createMimeMessage();
             var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -67,21 +72,29 @@ public class EmailService implements EmailOperations {
             // Send email
             mailSender.send(mimeMessage);
             
+            // Record successful send
+            metricsService.recordEmailSent();
+            
             logger.info("Verification email sent successfully to user: {} ({})", 
                        user.getUsername(), user.getEmail());
             
         } catch (MessagingException e) {
+            metricsService.recordEmailSendFailed();
             logger.error("Failed to create verification email for user: {} ({})", 
                         user.getUsername(), user.getEmail(), e);
             throw new EmailServiceException("Failed to create verification email", e);
         } catch (MailException e) {
+            metricsService.recordEmailSendFailed();
             logger.error("Failed to send verification email to user: {} ({})", 
                         user.getUsername(), user.getEmail(), e);
             throw new EmailServiceException("Failed to send verification email", e);
         } catch (Exception e) {
+            metricsService.recordEmailSendFailed();
             logger.error("Unexpected error sending verification email to user: {} ({})", 
                         user.getUsername(), user.getEmail(), e);
             throw new EmailServiceException("Unexpected error sending verification email", e);
+        } finally {
+            timerSample.stop(metricsService.getEmailSendTimer());
         }
     }
     

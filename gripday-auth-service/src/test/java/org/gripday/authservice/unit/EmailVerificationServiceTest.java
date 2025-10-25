@@ -2,6 +2,7 @@ package org.gripday.authservice.unit;
 
 import org.gripday.authservice.domain.service.EmailOperations;
 import org.gripday.authservice.domain.service.EmailVerificationService;
+import org.gripday.authservice.domain.service.EmailVerificationMetricsService;
 import org.gripday.authservice.domain.service.TenantContext;
 import org.gripday.authservice.infrastructure.entity.EmailVerificationToken;
 import org.gripday.authservice.infrastructure.entity.User;
@@ -42,8 +43,9 @@ class EmailVerificationServiceTest {
 
     @BeforeEach
     void setUp() {
+        var metricsService = mock(EmailVerificationMetricsService.class);
         emailVerificationService = new EmailVerificationService(
-            tokenRepository, userRepository, emailService
+            tokenRepository, userRepository, emailService, metricsService
         );
 
         testUser = createTestUser(1L, "testuser", "test@example.com", "tenant-1");

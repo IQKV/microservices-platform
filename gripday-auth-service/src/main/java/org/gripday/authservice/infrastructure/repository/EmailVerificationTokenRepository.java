@@ -176,4 +176,17 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
         """)
     boolean existsByTokenAndValidAt(@Param("token") String token, 
                                    @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Count all tokens that have expired before the specified date.
+     * Used for monitoring expired tokens before cleanup.
+     * 
+     * @param dateTime the cutoff date for counting
+     * @return number of expired tokens
+     */
+    @Query("""
+        SELECT COUNT(evt) FROM EmailVerificationToken evt 
+        WHERE evt.expiresAt < :dateTime
+        """)
+    long countByExpiresAtBefore(@Param("dateTime") LocalDateTime dateTime);
 }
