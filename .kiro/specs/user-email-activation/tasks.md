@@ -24,6 +24,11 @@
     - _Requirements: 1.2, 3.2, 3.5_
 
   - [ ] 2.2 Implement core email service
+
+
+
+
+
     - Create `EmailService` interface and implementation
     - Implement SMTP integration using Spring Boot Mail
     - Create HTML email template for verification emails
