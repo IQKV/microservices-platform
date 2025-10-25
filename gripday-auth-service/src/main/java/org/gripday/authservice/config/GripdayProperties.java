@@ -18,6 +18,7 @@ public record GripdayProperties(
     @Valid @NotNull Database database,
     @Valid @NotNull Auth auth,
     @Valid @NotNull Cache cache,
+    @Valid @NotNull Email email,
     @Valid @NotNull Observability observability
 ) {
 
@@ -89,6 +90,36 @@ public record GripdayProperties(
                 @Positive long maxWait
             ) {}
         }
+    }
+
+    /**
+     * Email configuration properties with gripday.email prefix.
+     */
+    public record Email(
+        @Valid @NotNull Smtp smtp,
+        @Valid @NotNull Verification verification,
+        @Valid @NotNull Templates templates
+    ) {
+        public record Smtp(
+            @NotBlank String host,
+            @Positive int port,
+            String username,
+            String password,
+            boolean auth,
+            boolean starttls
+        ) {}
+
+        public record Verification(
+            @NotBlank String fromEmail,
+            @NotBlank String fromName,
+            @NotBlank String baseUrl,
+            @Positive int rateLimit
+        ) {}
+
+        public record Templates(
+            @NotBlank String verificationSubject,
+            @NotBlank String verificationTemplate
+        ) {}
     }
 
     /**

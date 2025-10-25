@@ -93,6 +93,24 @@ gripday:
       access-token-expiry: PT15M  # 15 minutes
       refresh-token-expiry: P7D   # 7 days
       issuer: gripday-auth-service
+  email:
+    smtp:
+      host: ${SMTP_HOST:localhost}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      auth: true
+      starttls: true
+      timeout: PT30S
+    verification:
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
+      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
+      token-expiry: PT24H  # 24 hours
+      rate-limit: 3  # emails per hour per user
+    templates:
+      verification-subject: "Verify your Gripday account"
+      verification-template: "email/verification.html"
   observability:
     tracing:
       enabled: true

@@ -64,6 +64,23 @@ gripday:
         min-idle: 1
         max-wait: 30000
 
+  email:
+    smtp:
+      host: localhost
+      port: 587
+      username: test-user
+      password: test-password
+      auth: true
+      starttls: true
+    verification:
+      from-email: noreply@gripday.com
+      from-name: Gripday Platform
+      base-url: https://test.gripday.com
+      rate-limit: 3
+    templates:
+      verification-subject: "Verify your Gripday account"
+      verification-template: "email/verification.html"
+
   observability:
     tracing:
       enabled: false

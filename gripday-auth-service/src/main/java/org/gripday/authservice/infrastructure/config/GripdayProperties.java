@@ -25,6 +25,7 @@ public record GripdayProperties(
     @Valid @NotNull DatabaseProperties database,
     @Valid @NotNull CacheProperties cache,
     @Valid @NotNull AuthProperties auth,
+    @Valid @NotNull EmailProperties email,
     @Valid @NotNull ObservabilityProperties observability
 ) {
 
@@ -134,6 +135,39 @@ public record GripdayProperties(
                 boolean enabled
             ) {}
         }
+    }
+
+    /**
+     * Email configuration properties with gripday.email prefix.
+     */
+    public record EmailProperties(
+        @Valid @NotNull SmtpProperties smtp,
+        @Valid @NotNull VerificationProperties verification,
+        @Valid @NotNull TemplateProperties templates
+    ) {
+        
+        public record SmtpProperties(
+            @NotBlank String host,
+            @Min(1) @Max(65535) int port,
+            String username,
+            String password,
+            boolean auth,
+            boolean starttls,
+            @NotNull Duration timeout
+        ) {}
+        
+        public record VerificationProperties(
+            @NotBlank String fromEmail,
+            @NotBlank String fromName,
+            @NotBlank String baseUrl,
+            @NotNull Duration tokenExpiry,
+            @Min(1) @Max(10) int rateLimit
+        ) {}
+        
+        public record TemplateProperties(
+            @NotBlank String verificationSubject,
+            @NotBlank String verificationTemplate
+        ) {}
     }
 
     /**
