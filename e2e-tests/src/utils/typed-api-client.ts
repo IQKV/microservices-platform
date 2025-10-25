@@ -354,7 +354,7 @@ export class TypedApiClient {
   async getBooks(params?: BookSearchParams): Promise<PaginatedResponse<BookResponse>> {
     const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
       method: 'GET',
-      url: '/api/v1/books',
+      url: '/api/v1/bookstore/books',
       params: params as Record<string, string | number | boolean>
     });
 
@@ -367,7 +367,7 @@ export class TypedApiClient {
   async getBookById(bookId: number): Promise<BookResponse> {
     const response = await this.apiClient.request<BookResponse>({
       method: 'GET',
-      url: `/api/v1/books/${bookId}`
+      url: `/api/v1/bookstore/books/${bookId}`
     });
 
     return ValidationUtils.validateBookData(response.data);
@@ -381,7 +381,7 @@ export class TypedApiClient {
     
     const response = await this.apiClient.request<BookResponse>({
       method: 'POST',
-      url: '/api/v1/books',
+      url: '/api/v1/bookstore/books',
       data: bookData
     });
 
@@ -396,7 +396,7 @@ export class TypedApiClient {
     
     const response = await this.apiClient.request<BookResponse>({
       method: 'PUT',
-      url: `/api/v1/books/${bookId}`,
+      url: `/api/v1/bookstore/books/${bookId}`,
       data: bookData
     });
 
@@ -409,7 +409,7 @@ export class TypedApiClient {
   async deleteBook(bookId: number): Promise<void> {
     await this.apiClient.request({
       method: 'DELETE',
-      url: `/api/v1/books/${bookId}`
+      url: `/api/v1/bookstore/books/${bookId}`
     });
   }
 
@@ -434,7 +434,7 @@ export class TypedApiClient {
 
     const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
       method: 'GET',
-      url: '/api/v1/books/search',
+      url: '/api/v1/bookstore/books/search',
       params: searchParams
     });
 
@@ -446,8 +446,8 @@ export class TypedApiClient {
    */
   async updateBookStock(bookId: number, stock: number): Promise<BookResponse> {
     const response = await this.apiClient.request<BookResponse>({
-      method: 'PATCH',
-      url: `/api/v1/books/${bookId}/stock`,
+      method: 'PUT',
+      url: `/api/v1/bookstore/inventory/${bookId}`,
       data: { stock }
     });
 
@@ -460,8 +460,8 @@ export class TypedApiClient {
   async getBooksByCategory(category: string, params?: PaginationParams): Promise<PaginatedResponse<BookResponse>> {
     const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
       method: 'GET',
-      url: `/api/v1/books/category/${encodeURIComponent(category)}`,
-      params: params as Record<string, string | number | boolean>
+      url: `/api/v1/bookstore/books/search/category`,
+      params: { category, ...(params as Record<string, string | number | boolean>) } as Record<string, string | number | boolean>
     });
 
     return ValidationUtils.validatePaginatedResponse(response.data, schemas.bookData);
@@ -474,8 +474,8 @@ export class TypedApiClient {
     ValidationUtils.validate(inventoryData, schemas.updateInventory);
     
     const response = await this.apiClient.request<BookResponse>({
-      method: 'PATCH',
-      url: `/api/v1/books/${bookId}/inventory`,
+      method: 'PUT',
+      url: `/api/v1/bookstore/inventory/${bookId}`,
       data: inventoryData
     });
 
@@ -489,9 +489,9 @@ export class TypedApiClient {
     ValidationUtils.validate(inventoryData, schemas.bulkInventory);
     
     const response = await this.apiClient.request<BookResponse[]>({
-      method: 'PATCH',
-      url: '/api/v1/books/inventory/bulk',
-      data: inventoryData
+      method: 'POST',
+      url: '/api/v1/bookstore/inventory/bulk-update',
+      data: inventoryData.updates
     });
 
     // Validate each book in the response
