@@ -4,15 +4,16 @@ An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 
 
 ## Overview
 
-The Gripday platform consists of two core services that work together to create a robust foundation for any microservices ecosystem:
+The Gripday platform consists of three services that demonstrate a complete microservices ecosystem:
 
-- **Auth Service** - Centralized authentication, authorization, and user management with JWT tokens
-- **Gateway Service** - Intelligent API gateway with routing, rate limiting, and circuit breaker functionality
+- **Auth Service** (Port 8081) - Centralized authentication, authorization, and user management with JWT tokens
+- **Gateway Service** (Port 8080) - Intelligent API gateway with routing, rate limiting, and circuit breaker functionality
+- **Bookstore Service** (Port 8082) - Example business service for book catalog and inventory management
 
 ### Key Features
 
 - 🔐 **JWT-based Authentication** - Stateless authentication with user context propagation
-- 🌐 **API Gateway** - Intelligent routing, rate limiting, and circuit breaker patterns
+- 🌐 **API Gateway** - Intelligent routing, rate limiting, and circuit breaker patterns  
 - 🏢 **Multi-Tenant Architecture** - Complete tenant isolation and context management
 - 📊 **Observability** - OpenTelemetry, Prometheus metrics, and structured logging
 - 🐳 **Container-First** - Docker Compose for development, Kubernetes-ready
@@ -25,19 +26,17 @@ The Gripday platform consists of two core services that work together to create 
 - Java 21
 - Maven 3.9+
 - Docker and Docker Compose
-- PostgreSQL 15+ (via Docker)
-- Redis 7+ (via Docker)
 
 ### 1. Clone and Setup
 ```bash
-git clone https://github.com/gripday/gripday-platform.git
+git clone <repository-url>
 cd gripday-platform
 
 # Start infrastructure services
 docker-compose up -d postgres redis
 ```
 
-### 2. Build Services
+### 2. Build and Start Services
 ```bash
 # Build all services
 mvn clean package
@@ -46,24 +45,19 @@ mvn clean package
 cd gripday-auth-service
 mvn liquibase:update -Dspring.profiles.active=local
 cd ..
+
+# Start services (in separate terminals)
+cd gripday-auth-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
+cd gripday-gateway-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
+cd gripday-bookstore-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-### 3. Start Services
-```bash
-# Terminal 1 - Auth Service
-cd gripday-auth-service
-mvn spring-boot:run -Dspring-boot.run.profiles=local
-
-# Terminal 2 - Gateway Service  
-cd gripday-gateway-service
-mvn spring-boot:run -Dspring-boot.run.profiles=local
-```
-
-### 4. Verify Installation
+### 3. Verify Installation
 ```bash
 # Check service health
 curl http://localhost:8081/actuator/health  # Auth Service
 curl http://localhost:8080/actuator/health  # Gateway Service
+curl http://localhost:8082/actuator/health  # Bookstore Service
 
 # Test authentication flow
 curl -X POST http://localhost:8080/api/v1/auth/signup \
@@ -77,10 +71,26 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
   }'
 ```
 
+✅ **Success**: You should receive a 201 Created response with user details.
+
+### 4. Test Complete Flow
+```bash
+# Login to get token
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "TestPass123!"}' | \
+  jq -r '.accessToken')
+
+# Test bookstore service through gateway
+curl -H "Authorization: Bearer $TOKEN" \
+     -H "X-Tenant-ID: default" \
+     http://localhost:8080/api/v1/books
+```
+
 ## Services
 
 ### Auth Service (Port 8081)
-Centralized authentication and user management service.
+Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, and role-based access control.
 
 **Key Endpoints:**
 - `POST /api/v1/auth/signup` - User registration
@@ -90,14 +100,13 @@ Centralized authentication and user management service.
 
 **Documentation:**
 - [Auth Service README](gripday-auth-service/README.md)
-- [API Documentation](gripday-auth-service/docs/api/authentication.md)
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 
 ### Gateway Service (Port 8080)
-API Gateway with intelligent routing and security.
+API Gateway providing intelligent routing, security, and resilience patterns for all microservices.
 
 **Features:**
-- JWT authentication for all protected routes
+- JWT authentication for protected routes
 - Redis-backed rate limiting
 - Circuit breaker patterns with Resilience4j
 - Multi-tenant request routing
@@ -107,34 +116,70 @@ API Gateway with intelligent routing and security.
 - [Gateway Service README](gripday-gateway-service/README.md)
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
+### Bookstore Service (Port 8082)
+Example business microservice demonstrating book catalog and inventory management with full three-tier architecture implementation.
+
+**Features:**
+- Book catalog management (CRUD operations)
+- Inventory tracking and management
+- JWT authentication integration
+- Multi-tenant data isolation
+- PostgreSQL with Liquibase migrations
+
+**Documentation:**
+- [Bookstore Service README](gripday-bookstore-service/README.md)
+- Swagger UI: `http://localhost:8082/swagger-ui.html`
+
 ## Architecture
+
+### Service Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Gateway Service │    │   Auth Service  │    │ Bookstore Service│
+│   (Port 8080)   │◄──►│   (Port 8081)   │    │   (Port 8082)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│      Redis      │    │   PostgreSQL    │    │   PostgreSQL    │
+│   (Rate Limiting│    │ (Auth Database) │    │(Bookstore Database)│
+│   & Caching)    │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
 ### Three-Tier Architecture
 Each service follows a strict three-tier architecture pattern:
 
 ```
-presentation.web/     # REST controllers (Resource suffix)
-├── AuthenticationResource.java
-└── UserManagementResource.java
-
-domain.service/       # Business logic services  
-├── AuthenticationService.java
-└── UserRegistrationService.java
-
-infrastructure.repository/  # Data access repositories
-├── UserRepository.java
-└── AuthorityRepository.java
+org.gripday.{servicename}/
+├── presentation/web/          # REST controllers (Resource suffix)
+│   ├── AuthenticationResource.java
+│   └── UserManagementResource.java
+├── domain/service/           # Business logic services  
+│   ├── AuthenticationService.java
+│   └── UserRegistrationService.java
+└── infrastructure/repository/ # Data access repositories
+    ├── UserRepository.java
+    └── AuthorityRepository.java
 ```
+
+**Implemented Services:**
+- `org.gripday.authservice` - Authentication and user management
+- `org.gripday.gatewayservice` - API gateway and routing  
+- `org.gripday.bookstoreservice` - Book catalog and inventory management
 
 ### Multi-Tenant Support
 Complete tenant isolation with multiple identification methods:
 
 ```bash
 # Header-based tenant identification
-curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
+curl -H "X-Tenant-ID: tenant-123" \
+     -H "Authorization: Bearer <token>" \
+     http://localhost:8080/api/v1/books
 
 # Subdomain-based routing (when enabled)
-curl http://tenant-123.localhost:8080/api/v1/users
+curl -H "Authorization: Bearer <token>" \
+     http://tenant-123.localhost:8080/api/v1/books
 
 # JWT token embedded tenant context
 # Tenant information automatically extracted from JWT claims
@@ -143,10 +188,10 @@ curl http://tenant-123.localhost:8080/api/v1/users
 ### Technology Stack
 - **Runtime**: Java 21 with modern language features
 - **Framework**: Spring Boot 3.5.6, Spring Cloud 2025.0.0
-- **Database**: PostgreSQL 15+ with Liquibase migrations
+- **Database**: PostgreSQL 15+ with Liquibase migrations (XML format)
 - **Caching**: Redis 7+ for sessions and rate limiting
-- **Security**: Spring Security with JWT (RS256/HS256)
-- **Observability**: OpenTelemetry, Prometheus, Grafana
+- **Security**: Spring Security with JWT tokens
+- **Observability**: OpenTelemetry, Prometheus, Grafana, Loki
 - **Testing**: JUnit 5, Testcontainers, ArchUnit, Spring Modulith
 
 ## Configuration
@@ -175,7 +220,7 @@ gripday:
 # Gateway Service  
 gripday:
   gateway:
-    auth-service-url: ${AUTH_SERVICE_URL}
+    auth-service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
     rate-limiting:
       default-requests-per-minute: 100
     circuit-breaker:
@@ -194,6 +239,7 @@ docker-compose up -d
 # View logs
 docker-compose logs -f auth-service
 docker-compose logs -f gateway-service
+docker-compose logs -f bookstore-service
 
 # Stop services
 docker-compose down
@@ -204,7 +250,7 @@ docker-compose down
 # Run all tests
 mvn test
 
-# Integration tests
+# Integration tests with Testcontainers
 mvn verify
 
 # Architectural tests
@@ -260,9 +306,42 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 **Authenticated Request:**
 ```bash
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Get user profile
 curl -H "Authorization: Bearer $TOKEN" \
      -H "X-Tenant-ID: default" \
-     http://localhost:8080/api/v1/users/me
+     http://localhost:8080/api/v1/auth/profile
+
+# Access bookstore service
+curl -H "Authorization: Bearer $TOKEN" \
+     -H "X-Tenant-ID: default" \
+     http://localhost:8080/api/v1/books
+```
+
+**Bookstore Service Examples:**
+```bash
+# Create a book (requires authentication)
+curl -X POST http://localhost:8080/api/v1/books \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-ID: default" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Spring Boot Microservices",
+    "author": "John Doe",
+    "isbn": "978-1234567890",
+    "price": 29.99,
+    "quantity": 100
+  }'
+
+# Get all books
+curl -H "Authorization: Bearer $TOKEN" \
+     -H "X-Tenant-ID: default" \
+     http://localhost:8080/api/v1/books
+
+# Get book by ID
+curl -H "Authorization: Bearer $TOKEN" \
+     -H "X-Tenant-ID: default" \
+     http://localhost:8080/api/v1/books/1
 ```
 
 ## Monitoring and Observability
@@ -298,6 +377,8 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 
 ### Adding New Microservices
 
+The platform demonstrates extensibility with the included Bookstore Service. To add new services:
+
 1. **Create new Maven module:**
 ```xml
 <module>gripday-new-service</module>
@@ -310,7 +391,7 @@ spring:
     gateway:
       routes:
         - id: new-service
-          uri: http://localhost:8082
+          uri: http://localhost:8083
           predicates:
             - Path=/api/v1/newservice/**
           filters:
@@ -321,6 +402,7 @@ spring:
 - Three-tier architecture (presentation/domain/infrastructure)
 - JWT authentication integration
 - Multi-tenant support
+- Database per service pattern
 - Observability integration
 
 ### Service Integration Patterns
@@ -349,6 +431,7 @@ spring:
 ### Service Documentation
 - [Auth Service README](gripday-auth-service/README.md) - Authentication service details
 - [Gateway Service README](gripday-gateway-service/README.md) - API gateway service details
+- [Bookstore Service README](gripday-bookstore-service/README.md) - Example business service implementation
 
 ## Troubleshooting
 
@@ -363,9 +446,19 @@ See [Troubleshooting Guide](docs/troubleshooting/common-issues.md) for detailed 
 ### Getting Help
 ```bash
 # Collect diagnostic information
-curl http://localhost:8081/actuator/info
+curl http://localhost:8081/actuator/info  # Auth Service
+curl http://localhost:8080/actuator/info  # Gateway Service  
+curl http://localhost:8082/actuator/info  # Bookstore Service
+
+# Check service health
 curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
+curl http://localhost:8082/actuator/health
+
+# View service logs
 docker-compose logs --tail=50 auth-service
+docker-compose logs --tail=50 gateway-service
+docker-compose logs --tail=50 bookstore-service
 ```
 
 ## Contributing

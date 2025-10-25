@@ -24,11 +24,11 @@
 
   - [x] 2.2 Create database schema and JPA entities with Java 21 features
     - Create Liquibase XML migrations in src/main/resources/db/changelog/:
-      - V1__Create_users_table.xml: id, username, email, password_hash, first_name, last_name, enabled, email_verified, created_at, updated_at, tenant_id
-      - V2__Create_authorities_table.xml: id, name, description, created_at
-      - V3__Create_user_authorities_table.xml: user_id, authority_id (many-to-many relationship)
-      - V4__Create_user_audit_log_table.xml: id, user_id, action, details, ip_address, user_agent, created_at, tenant_id
-      - V5__Add_indexes.xml: indexes on username, email, tenant_id, created_at for performance
+      - 001-create-users-table.xml: id, username, email, password_hash, first_name, last_name, enabled, email_verified, created_at, updated_at, tenant_id
+      - 002-create-authorities-table.xml: id, name, description, created_at
+      - 003-create-user-authorities-table.xml: user_id, authority_id (many-to-many relationship)
+      - 004-create-user-audit-log-table.xml: id, user_id, action, details, ip_address, user_agent, created_at, tenant_id
+      - 005-add-indexes.xml: indexes on username, email, tenant_id, created_at for performance
     - Implement User entity in infrastructure.entity package:
       - Use @Entity, @Table, @Id, @GeneratedValue annotations
       - Include fields for authentication (username, email, passwordHash)

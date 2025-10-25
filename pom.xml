@@ -59,6 +59,7 @@
     <modules>
         <module>gripday-auth-service</module>
         <module>gripday-gateway-service</module>
+        <module>gripday-bookstore-service</module>
     </modules>    
 
     <dependencyManagement>
