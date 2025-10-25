@@ -103,8 +103,9 @@ chmod +x scripts/validate-kubernetes.sh
 ## Validation Test Coverage
 
 ### Authentication Flow Tests
-- User registration with tenant isolation
-- User authentication with username/email
+- User registration with tenant isolation and email verification
+- Email verification token validation and account activation
+- User authentication with username/email (requires verified email)
 - JWT token generation and validation
 - Token refresh functionality
 - User logout and token invalidation
@@ -204,6 +205,7 @@ sudo yum install curl jq
 - Verify JWT configuration and secrets
 - Check database connectivity and schema
 - Validate tenant configuration
+- Ensure email verification is completed for new users
 
 **Rate Limiting Issues:**
 - Adjust rate limiting configuration

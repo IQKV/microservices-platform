@@ -13,6 +13,7 @@ The Gripday platform consists of three services that demonstrate a complete micr
 ### Key Features
 
 - 🔐 **JWT-based Authentication** - Stateless authentication with user context propagation
+- 📧 **Email Verification** - Secure account activation with HTML email templates
 - 🌐 **API Gateway** - Intelligent routing, rate limiting, and circuit breaker patterns  
 - 🏢 **Multi-Tenant Architecture** - Complete tenant isolation and context management
 - 📊 **Observability** - OpenTelemetry, Prometheus metrics, and structured logging
@@ -71,7 +72,9 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
   }'
 ```
 
-✅ **Success**: You should receive a 201 Created response with user details.
+✅ **Success**: You should receive a 201 Created response with user details and a verification email sent.
+
+**Note**: New users must verify their email address before they can log in. Check the application logs for the verification link in development mode.
 
 ### 4. Test Complete Flow
 ```bash
@@ -90,13 +93,16 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Services
 
 ### Auth Service (Port 8081)
-Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, and role-based access control.
+Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account activation.
 
 **Key Endpoints:**
-- `POST /api/v1/auth/signup` - User registration
-- `POST /api/v1/auth/login` - User authentication  
+- `POST /api/v1/auth/signup` - User registration with email verification
+- `POST /api/v1/auth/login` - User authentication (requires verified email)
 - `POST /api/v1/auth/refresh` - Token refresh
 - `POST /api/v1/auth/logout` - User logout
+- `GET /api/v1/auth/email/verify` - Email address verification
+- `POST /api/v1/auth/email/resend` - Resend verification email
+- `GET /api/v1/auth/email/status` - Check email verification status
 
 **Documentation:**
 - [Auth Service README](gripday-auth-service/README.md)
@@ -189,8 +195,9 @@ curl -H "Authorization: Bearer <token>" \
 - **Runtime**: Java 21 with modern language features
 - **Framework**: Spring Boot 3.5.6, Spring Cloud 2025.0.0
 - **Database**: PostgreSQL 15+ with Liquibase migrations (XML format)
+- **Email**: SMTP integration with HTML templates
 - **Caching**: Redis 7+ for sessions and rate limiting
-- **Security**: Spring Security with JWT tokens
+- **Security**: Spring Security with JWT tokens and email verification
 - **Observability**: OpenTelemetry, Prometheus, Grafana, Loki
 - **Testing**: JUnit 5, Testcontainers, ArchUnit, Spring Modulith
 
@@ -211,6 +218,17 @@ gripday:
       secret: ${JWT_SECRET}
       access-token-expiry: PT15M
       refresh-token-expiry: P7D
+  email:
+    smtp:
+      host: ${SMTP_HOST:localhost}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+    verification:
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
+      token-expiry: PT24H
+      rate-limit: 3
   database:
     url: ${DATABASE_URL}
   cache:
@@ -225,6 +243,20 @@ gripday:
       default-requests-per-minute: 100
     circuit-breaker:
       failure-rate-threshold: 50
+```
+
+### Email Configuration
+```bash
+# SMTP Settings
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=noreply@gripday.com
+SMTP_PASSWORD=your-app-password
+
+# Email Verification
+VERIFICATION_FROM_EMAIL=noreply@gripday.com
+VERIFICATION_FROM_NAME=Gripday Platform
+VERIFICATION_BASE_URL=https://app.gripday.com
 ```
 
 See [Environment Variables Guide](docs/configuration/environment-variables.md) for complete configuration options.
@@ -293,6 +325,20 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
   }'
 ```
 
+**Email Verification:**
+```bash
+# Check verification status
+curl "http://localhost:8080/api/v1/auth/email/status?email=john@example.com"
+
+# Verify email (use token from verification email)
+curl "http://localhost:8080/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a716-446655440000"
+
+# Resend verification email
+curl -X POST http://localhost:8080/api/v1/auth/email/resend \
+  -H "Content-Type: application/json" \
+  -d '{"email": "john@example.com"}'
+```
+
 **User Login:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -302,6 +348,8 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
     "password": "SecurePass123!"
   }'
 ```
+
+**Note**: Users must verify their email address before they can successfully log in.
 
 **Authenticated Request:**
 ```bash
@@ -438,6 +486,8 @@ spring:
 ### Common Issues
 - **Database Connection**: Check PostgreSQL container and connection settings
 - **JWT Token Issues**: Verify token format and secret configuration
+- **Email Verification Required**: New users must verify email before login
+- **Email Sending Failed**: Check SMTP configuration and credentials
 - **Rate Limiting**: Check Redis connection and rate limit configuration
 - **Circuit Breaker**: Monitor circuit breaker status and thresholds
 
