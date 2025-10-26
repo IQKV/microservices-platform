@@ -15,10 +15,14 @@ import org.gripday.bookstore.domain.service.InventoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST API for managing book inventory.
+ */
 @RestController
 @RequestMapping("/api/v1/bookstore/inventory")
 @Tag(name = "Inventory Management", description = "Book inventory operations including stock tracking, availability checks, and administrative inventory management")
@@ -65,7 +69,7 @@ public class InventoryResource {
             description = "Book not found with the specified ID",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })
@@ -109,7 +113,7 @@ public class InventoryResource {
             description = "Invalid request data or validation errors",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -117,7 +121,7 @@ public class InventoryResource {
             description = "Authentication required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -125,7 +129,7 @@ public class InventoryResource {
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -133,7 +137,7 @@ public class InventoryResource {
             description = "Book not found with the specified ID",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })

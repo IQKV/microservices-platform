@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -95,7 +96,7 @@ public class BookResource {
             description = "Invalid request parameters",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })
@@ -142,7 +143,7 @@ public class BookResource {
             description = "Book not found with the specified ID",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })
@@ -201,7 +202,7 @@ public class BookResource {
             description = "Invalid request data or validation errors",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -209,7 +210,7 @@ public class BookResource {
             description = "Authentication required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -217,7 +218,7 @@ public class BookResource {
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -225,7 +226,7 @@ public class BookResource {
             description = "Book with ISBN already exists",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })
@@ -261,7 +262,7 @@ public class BookResource {
             description = "Invalid request data or validation errors",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -269,7 +270,7 @@ public class BookResource {
             description = "Authentication required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -277,7 +278,7 @@ public class BookResource {
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -285,7 +286,7 @@ public class BookResource {
             description = "Book not found with the specified ID",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })
@@ -319,7 +320,7 @@ public class BookResource {
             description = "Authentication required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -327,7 +328,7 @@ public class BookResource {
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
         @ApiResponse(
@@ -335,7 +336,7 @@ public class BookResource {
             description = "Book not found with the specified ID",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class)
+                schema = @Schema(implementation = ProblemDetail.class)
             )
         )
     })

@@ -54,7 +54,7 @@ class BookstoreExceptionHandlerTest {
     }
 
     @Test
-    void handleBookNotFoundException_ShouldReturn404WithErrorResponse() throws Exception {
+    void handleBookNotFoundException_ShouldReturn404WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new BookNotFoundException(999L));
 
@@ -74,18 +74,17 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.title").value("The requested book could not be found"))
+            .andExpect(jsonPath("$.detail").exists())
+            .andExpect(jsonPath("$.instance").value("/api/v1/bookstore/books"))
             .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
-            .andExpect(jsonPath("$.message").exists())
-            .andExpect(jsonPath("$.details").value("The requested book could not be found"))
-            .andExpect(jsonPath("$.timestamp").exists())
-            .andExpect(jsonPath("$.path").value("/api/v1/bookstore/books"))
             .andExpect(jsonPath("$.method").value("POST"))
             .andExpect(jsonPath("$.correlationId").exists())
             .andExpect(jsonPath("$.requestId").exists());
     }
 
     @Test
-    void handleCategoryNotFoundException_ShouldReturn404WithErrorResponse() throws Exception {
+    void handleCategoryNotFoundException_ShouldReturn404WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new CategoryNotFoundException(999L));
 
@@ -106,11 +105,11 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
-            .andExpect(jsonPath("$.details").value("The requested category could not be found"));
+            .andExpect(jsonPath("$.title").value("The requested category could not be found"));
     }
 
     @Test
-    void handleInsufficientInventoryException_ShouldReturn409WithErrorResponse() throws Exception {
+    void handleInsufficientInventoryException_ShouldReturn409WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new InsufficientInventoryException(1L, 100, 5));
 
@@ -131,11 +130,11 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("DOMAIN_INSUFFICIENT_INVENTORY"))
-            .andExpect(jsonPath("$.details").value("Not enough inventory available for the requested operation"));
+            .andExpect(jsonPath("$.title").value("Not enough inventory available for the requested operation"));
     }
 
     @Test
-    void handleDuplicateIsbnException_ShouldReturn409WithErrorResponse() throws Exception {
+    void handleDuplicateIsbnException_ShouldReturn409WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new DuplicateIsbnException("9780123456786"));
 
@@ -156,11 +155,11 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("DOMAIN_DUPLICATE_ISBN"))
-            .andExpect(jsonPath("$.details").value("A book with this ISBN already exists in the catalog"));
+            .andExpect(jsonPath("$.title").value("A book with this ISBN already exists in the catalog"));
     }
 
     @Test
-    void handleUnauthorizedOperationException_ShouldReturn403WithErrorResponse() throws Exception {
+    void handleUnauthorizedOperationException_ShouldReturn403WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new UnauthorizedOperationException("Insufficient privileges"));
 
@@ -181,11 +180,11 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.code").value("AUTH_INSUFFICIENT_PRIVILEGES"))
-            .andExpect(jsonPath("$.details").value("You do not have sufficient privileges to perform this operation"));
+            .andExpect(jsonPath("$.title").value("You do not have sufficient privileges to perform this operation"));
     }
 
     @Test
-    void handleValidationErrors_ShouldReturn400WithFieldErrors() throws Exception {
+    void handleValidationErrors_ShouldReturn400WithProblemDetailFields() throws Exception {
         var invalidRequest = new CreateBookRequest(
             "", // Invalid empty title
             "", // Invalid empty author
@@ -203,26 +202,26 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-            .andExpect(jsonPath("$.message").value("Request validation failed"))
-            .andExpect(jsonPath("$.details").value("One or more fields contain invalid values"))
+            .andExpect(jsonPath("$.title").value("Request validation failed"))
+            .andExpect(jsonPath("$.detail").value("One or more fields contain invalid values"))
             .andExpect(jsonPath("$.fields").isArray())
             .andExpect(jsonPath("$.fields").isNotEmpty());
     }
 
     @Test
-    void handleTypeMismatchException_ShouldReturn400WithErrorResponse() throws Exception {
+    void handleTypeMismatchException_ShouldReturn400WithProblemDetail() throws Exception {
         mockMvc.perform(get("/api/v1/bookstore/books/invalid-id")) // Non-numeric ID
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-            .andExpect(jsonPath("$.message").value("Invalid parameter type"))
-            .andExpect(jsonPath("$.details").value("The provided parameter value has an incorrect type"))
+            .andExpect(jsonPath("$.title").value("Invalid parameter type"))
+            .andExpect(jsonPath("$.detail").value("The provided parameter value has an incorrect type"))
             .andExpect(jsonPath("$.fields").isArray())
             .andExpect(jsonPath("$.fields[0].field").value("id"))
             .andExpect(jsonPath("$.fields[0].rejectedValue").value("invalid-id"));
     }
 
     @Test
-    void handleIllegalArgumentException_ShouldReturn400WithErrorResponse() throws Exception {
+    void handleIllegalArgumentException_ShouldReturn400WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new IllegalArgumentException("Invalid argument provided"));
 
@@ -243,12 +242,12 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-            .andExpect(jsonPath("$.message").value("Invalid argument provided"))
-            .andExpect(jsonPath("$.details").value("The provided argument is invalid"));
+            .andExpect(jsonPath("$.title").value("The provided argument is invalid"))
+            .andExpect(jsonPath("$.detail").value("Invalid argument provided"));
     }
 
     @Test
-    void handleGenericException_ShouldReturn500WithErrorResponse() throws Exception {
+    void handleGenericException_ShouldReturn500WithProblemDetail() throws Exception {
         when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
             .thenThrow(new RuntimeException("Unexpected system error"));
 
@@ -269,7 +268,7 @@ class BookstoreExceptionHandlerTest {
                 .requestAttr("userContext", userContext))
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.code").value("SYSTEM_INTERNAL_ERROR"))
-            .andExpect(jsonPath("$.message").value("An unexpected error occurred"))
-            .andExpect(jsonPath("$.details").value("Please try again later or contact support if the problem persists"));
+            .andExpect(jsonPath("$.title").value("An unexpected error occurred"))
+            .andExpect(jsonPath("$.detail").value("Please try again later or contact support if the problem persists"));
     }
 }
