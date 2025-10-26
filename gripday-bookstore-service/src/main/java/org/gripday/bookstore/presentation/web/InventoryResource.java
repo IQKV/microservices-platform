@@ -68,7 +68,7 @@ public class InventoryResource {
             responseCode = "404",
             description = "Book not found with the specified ID",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )
@@ -112,7 +112,7 @@ public class InventoryResource {
             responseCode = "400",
             description = "Invalid request data or validation errors",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -120,7 +120,7 @@ public class InventoryResource {
             responseCode = "401",
             description = "Authentication required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -128,7 +128,7 @@ public class InventoryResource {
             responseCode = "403",
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -136,7 +136,7 @@ public class InventoryResource {
             responseCode = "404",
             description = "Book not found with the specified ID",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )

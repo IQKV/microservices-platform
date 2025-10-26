@@ -95,7 +95,7 @@ public class BookResource {
             responseCode = "400",
             description = "Invalid request parameters",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )
@@ -142,7 +142,7 @@ public class BookResource {
             responseCode = "404",
             description = "Book not found with the specified ID",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )
@@ -201,7 +201,7 @@ public class BookResource {
             responseCode = "400",
             description = "Invalid request data or validation errors",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -209,7 +209,7 @@ public class BookResource {
             responseCode = "401",
             description = "Authentication required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -217,7 +217,7 @@ public class BookResource {
             responseCode = "403",
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -225,7 +225,7 @@ public class BookResource {
             responseCode = "409",
             description = "Book with ISBN already exists",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )
@@ -261,7 +261,7 @@ public class BookResource {
             responseCode = "400",
             description = "Invalid request data or validation errors",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -269,7 +269,7 @@ public class BookResource {
             responseCode = "401",
             description = "Authentication required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -277,7 +277,7 @@ public class BookResource {
             responseCode = "403",
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -285,7 +285,7 @@ public class BookResource {
             responseCode = "404",
             description = "Book not found with the specified ID",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )
@@ -319,7 +319,7 @@ public class BookResource {
             responseCode = "401",
             description = "Authentication required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -327,7 +327,7 @@ public class BookResource {
             responseCode = "403",
             description = "Insufficient permissions - ADMIN role required",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         ),
@@ -335,7 +335,7 @@ public class BookResource {
             responseCode = "404",
             description = "Book not found with the specified ID",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 schema = @Schema(implementation = ProblemDetail.class)
             )
         )

@@ -74,6 +74,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.title").value("The requested book could not be found"))
             .andExpect(jsonPath("$.detail").exists())
             .andExpect(jsonPath("$.instance").value("/api/v1/bookstore/books"))
@@ -104,6 +105,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
             .andExpect(jsonPath("$.title").value("The requested category could not be found"));
     }
@@ -129,6 +131,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isConflict())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("DOMAIN_INSUFFICIENT_INVENTORY"))
             .andExpect(jsonPath("$.title").value("Not enough inventory available for the requested operation"));
     }
@@ -154,6 +157,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isConflict())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("DOMAIN_DUPLICATE_ISBN"))
             .andExpect(jsonPath("$.title").value("A book with this ISBN already exists in the catalog"));
     }
@@ -179,6 +183,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isForbidden())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("AUTH_INSUFFICIENT_PRIVILEGES"))
             .andExpect(jsonPath("$.title").value("You do not have sufficient privileges to perform this operation"));
     }
@@ -201,6 +206,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(invalidRequest))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
             .andExpect(jsonPath("$.title").value("Request validation failed"))
             .andExpect(jsonPath("$.detail").value("One or more fields contain invalid values"))
@@ -212,6 +218,7 @@ class BookstoreExceptionHandlerTest {
     void handleTypeMismatchException_ShouldReturn400WithProblemDetail() throws Exception {
         mockMvc.perform(get("/api/v1/bookstore/books/invalid-id")) // Non-numeric ID
             .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
             .andExpect(jsonPath("$.title").value("Invalid parameter type"))
             .andExpect(jsonPath("$.detail").value("The provided parameter value has an incorrect type"))
@@ -241,6 +248,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isBadRequest())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
             .andExpect(jsonPath("$.title").value("The provided argument is invalid"))
             .andExpect(jsonPath("$.detail").value("Invalid argument provided"));
@@ -267,6 +275,7 @@ class BookstoreExceptionHandlerTest {
                 .content(objectMapper.writeValueAsString(request))
                 .requestAttr("userContext", userContext))
             .andExpect(status().isInternalServerError())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
             .andExpect(jsonPath("$.code").value("SYSTEM_INTERNAL_ERROR"))
             .andExpect(jsonPath("$.title").value("An unexpected error occurred"))
             .andExpect(jsonPath("$.detail").value("Please try again later or contact support if the problem persists"));
