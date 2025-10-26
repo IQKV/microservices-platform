@@ -1,8 +1,33 @@
 # Gripday Platform - Minikube Deployment
 
+Local Kubernetes deployment that mirrors production architecture while maintaining debugging flexibility.
+
 Easy-to-use Kubernetes manifests for deploying the Gripday microservices platform on minikube.
 
-## Quick Start
+## Overview
+
+This directory contains everything needed to deploy the Gripday microservices platform to minikube for local development and testing.
+
+### 🎯 Architecture
+
+Minikube deployment supports **3 access patterns**:
+
+1. **API Gateway Pattern** (Production-like)
+   - Traffic flows: Ingress → Gateway → Backend Services
+   - Domain-based routing: `api.gripday.dev`
+   - Mirrors staging/production architecture
+
+2. **Direct NodePort** (Quick Testing)
+   - Direct IP:Port access to any service
+   - No DNS setup required
+   - Great for rapid development
+
+3. **Direct Service Ingress** (Debugging Only)
+   - Domain-based direct access: `auth.gripday.dev`
+   - Bypasses gateway for debugging
+   - **Does NOT exist in production!**
+
+> **Note**: Production/staging only use method #1 (API Gateway). Methods #2 and #3 are minikube-only for development convenience.
 
 ### Prerequisites
 

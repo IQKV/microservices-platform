@@ -22,7 +22,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: auth.local.gripday.com
+  - host: auth.gripday.dev
     http:
       paths:
       - path: /

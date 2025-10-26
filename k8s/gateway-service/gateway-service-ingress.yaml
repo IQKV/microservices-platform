@@ -24,7 +24,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: api.local.gripday.com
+  - host: api.gripday.dev
     http:
       paths:
       - path: /

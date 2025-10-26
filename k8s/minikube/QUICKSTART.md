@@ -1,6 +1,15 @@
 # Gripday Platform - Minikube Quick Start
 
+This guide gets you up and running with the Gripday platform on minikube, with options for both production-like testing (API Gateway) and quick debugging (direct access).
+
 ⚡ Deploy the complete Gripday microservices platform to minikube in minutes.
+
+## What You'll Get
+
+- ✅ **API Gateway Pattern**: Test production-like routing
+- ✅ **Direct Access**: Debug services directly when needed
+- ✅ **Multiple Access Methods**: Ingress, NodePort, Port Forward
+- ✅ **Full Platform**: Gateway, Auth, Bookstore, Databases
 
 ## Prerequisites
 
@@ -32,41 +41,69 @@ cd k8s\minikube
 
 ### 3. Access Services
 
-Get the service URLs:
+You have **3 ways** to access services:
+
+#### Option A: NodePort (Easiest - No Setup)
 ```bash
-minikube service gateway-service -n gripday --url
+MINIKUBE_IP=$(minikube ip)
+echo "Gateway: http://$MINIKUBE_IP:30080"
+echo "Auth: http://$MINIKUBE_IP:30081"
+echo "Bookstore: http://$MINIKUBE_IP:30082"
 ```
 
-Or use direct URLs:
+#### Option B: Ingress (Production-like)
 ```bash
-# Replace <minikube-ip> with your minikube IP
-http://<minikube-ip>:30080  # Gateway Service
-http://<minikube-ip>:30081  # Auth Service
-http://<minikube-ip>:30082  # Bookstore Service
+# 1. Enable ingress addon
+minikube addons enable ingress
+
+# 2. Get minikube IP
+MINIKUBE_IP=$(minikube ip)
+
+# 3. Add to /etc/hosts (Linux/Mac):
+sudo echo "$MINIKUBE_IP api.gripday.dev auth.gripday.dev" >> /etc/hosts
+
+# Windows: Add to C:\Windows\System32\drivers\etc\hosts
+
+# 4. Access via domain names:
+echo "API Gateway: http://api.gripday.dev"
+echo "Auth (debug): http://auth.gripday.dev"
+```
+
+#### Option C: Port Forward (Debugging)
+```bash
+kubectl port-forward -n gripday svc/gateway-service 8080:8080
+# Access at http://localhost:8080
 ```
 
 ## 🧪 Test the API
 
-### Register a User
+### Via NodePort (Quick Testing)
 
 ```bash
-GATEWAY_URL=$(minikube service gateway-service -n gripday --url)
+MINIKUBE_IP=$(minikube ip)
 
-curl -X POST $GATEWAY_URL/api/v1/auth/signup \
+# Register a user
+curl -X POST http://$MINIKUBE_IP:30080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "TestPass123!",
-    "firstName": "Test",
-    "lastName": "User"
-  }'
+  -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
+
+# Check health
+curl http://$MINIKUBE_IP:30080/actuator/health
+
+# View gateway routes
+curl http://$MINIKUBE_IP:30080/actuator/gateway/routes | jq
 ```
 
-### Check Health
+### Via Ingress (Production-like)
 
 ```bash
-curl $GATEWAY_URL/actuator/health
+# Through API Gateway (production pattern)
+curl -X POST http://api.gripday.dev/api/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!"}'
+
+# Direct to auth service (debugging only - doesn't exist in production!)
+curl http://auth.gripday.dev/actuator/health
 ```
 
 ## 📊 Monitor Deployment

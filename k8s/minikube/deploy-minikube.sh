@@ -176,6 +176,22 @@ else
     exit 1
 fi
 
+# Check if ingress addon is enabled
+print_info "Checking ingress addon..."
+if minikube addons list | grep -q "ingress.*enabled"; then
+    print_status "Ingress addon is enabled"
+    print_info "Applying ingress configuration..."
+    if kubectl apply -f ingress.yaml; then
+        print_status "Ingress configuration applied"
+        print_info "Add to /etc/hosts: $(minikube ip) api.gripday.dev auth.gripday.dev bookstore.gripday.dev"
+    else
+        print_warning "Failed to apply ingress (not critical for minikube)"
+    fi
+else
+    print_warning "Ingress addon not enabled. Enable with: minikube addons enable ingress"
+    print_info "Services will be accessible via NodePort only"
+fi
+
 # Wait for pods to be ready
 if [ "$WAIT_FOR_READY" = true ]; then
     print_header "Waiting for Pods to be Ready"
@@ -210,10 +226,22 @@ AUTH_URL="http://${MINIKUBE_IP}:30081"
 BOOKSTORE_URL="http://${MINIKUBE_IP}:30082"
 
 echo ""
+echo -e "${CYAN}=== NodePort Access (Direct) ===${NC}"
 echo -e "${GREEN}Gateway Service:${NC}   $GATEWAY_URL"
 echo -e "${GREEN}Auth Service:${NC}      $AUTH_URL"
 echo -e "${GREEN}Bookstore Service:${NC} $BOOKSTORE_URL"
 echo ""
+
+if minikube addons list | grep -q "ingress.*enabled"; then
+    echo -e "${CYAN}=== Ingress Access (Production-like) ===${NC}"
+    echo -e "${GREEN}API Gateway:${NC}       http://api.gripday.dev"
+    echo -e "${GREEN}Auth Service:${NC}      http://auth.gripday.dev (debugging)"
+    echo -e "${GREEN}Bookstore Service:${NC} http://bookstore.gripday.dev (debugging)"
+    echo ""
+    echo -e "${YELLOW}Note:${NC} Add these to /etc/hosts:"
+    echo -e "      ${MINIKUBE_IP} api.gripday.dev auth.gripday.dev bookstore.gripday.dev"
+    echo ""
+fi
 
 # Test health endpoints
 print_header "Testing Health Endpoints"
@@ -241,35 +269,29 @@ test_health "Bookstore" "$BOOKSTORE_URL"
 print_header "Quick Start Commands"
 
 cat << EOF
-Test the API:
+${CYAN}=== API Testing ===${NC}
 
-1. Register a user:
+${GREEN}1. Via NodePort (Direct):${NC}
    curl -X POST $GATEWAY_URL/api/v1/auth/signup \\
      -H "Content-Type: application/json" \\
-     -d '{
-       "username": "testuser",
-       "email": "test@example.com",
-       "password": "TestPass123!",
-       "firstName": "Test",
-       "lastName": "User"
-     }'
+     -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
 
-2. Login (after email verification):
-   curl -X POST $GATEWAY_URL/api/v1/auth/login \\
+${GREEN}2. Via Ingress (Production-like):${NC}
+   curl -X POST http://api.gripday.dev/api/v1/auth/signup \\
      -H "Content-Type: application/json" \\
-     -d '{
-       "username": "testuser",
-       "password": "TestPass123!"
-     }'
+     -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
 
-3. View logs:
+${GREEN}3. Direct Service Access (Debugging):${NC}
+   curl http://auth.gripday.dev/actuator/health
+
+${GREEN}4. View Gateway Routes:${NC}
+   curl $GATEWAY_URL/actuator/gateway/routes | jq
+
+${GREEN}5. View logs:${NC}
    kubectl logs -f deployment/gateway-service -n gripday
 
-4. Access pods:
+${GREEN}6. Get all pods:${NC}
    kubectl get pods -n gripday
-
-5. Port forward (alternative to NodePort):
-   kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 EOF
 

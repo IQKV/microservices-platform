@@ -49,9 +49,9 @@ This document provides a clear mapping of all domains and their purposes across 
 | Domain | Purpose | Service | Port |
 |--------|---------|---------|------|
 | **localhost** | Main Application | React/Vue App | 3000/5173 |
-| **auth.local.gripday.com** | Auth Service (Direct) | Auth Service | 8081 |
-| **api.local.gripday.com** | API Gateway | Gateway Service | 8080 |
-| **bookstore.local.gripday.com** | Bookstore Service (Direct) | Bookstore Service | 8082 |
+| **auth.gripday.dev** | Auth Service (Direct) | Auth Service | 8081 |
+| **api.gripday.dev** | API Gateway | Gateway Service | 8080 |
+| **bookstore.gripday.dev** | Bookstore Service (Direct) | Bookstore Service | 8082 |
 
 > **Note**: In local development, backend services have direct ingress for debugging purposes only.
 
