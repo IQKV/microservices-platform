@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -104,17 +103,17 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      */
     private void sendRateLimitResponse(HttpServletResponse response, long retryAfterSeconds) throws IOException {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType("application/problem+json");
         response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
         
         var errorResponse = Map.of(
-            "error", Map.of(
-                "code", "RATE_LIMIT_EXCEEDED",
-                "message", "Too many requests. Please try again later.",
-                "details", "Rate limit of 5 requests per minute exceeded",
-                "timestamp", Instant.now().toString(),
-                "retryAfter", retryAfterSeconds + " seconds"
-            )
+            "type", "https://problems.gripday.com/rate-limit-exceeded",
+            "title", "Too Many Requests",
+            "status", HttpStatus.TOO_MANY_REQUESTS.value(),
+            "detail", "Too many requests. Please try again later.",
+            "instance", "/api/v1/auth",
+            "code", "RATE_LIMIT_EXCEEDED",
+            "retryAfter", retryAfterSeconds
         );
         
         var jsonResponse = objectMapper.writeValueAsString(errorResponse);

@@ -81,16 +81,18 @@ public class EmailVerificationResource {
             responseCode = "400", 
             description = "Invalid or expired verification token",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 examples = @ExampleObject(
                     name = "Invalid Token",
                     summary = "Token is invalid or expired",
                     value = """
                     {
+                      "type": "https://problems.gripday.com/email-verification",
+                      "title": "Email verification failed",
+                      "status": 400,
+                      "detail": "Verification token is invalid or has expired",
+                      "instance": "/api/v1/auth/email/verify",
                       "code": "EMAIL_VERIFICATION_TOKEN_INVALID",
-                      "message": "Email verification failed",
-                      "details": "Verification token is invalid or has expired",
-                      "timestamp": "2024-01-15T10:30:00Z",
                       "path": "/api/v1/auth/email/verify",
                       "method": "GET",
                       "correlationId": "abc123-def456-ghi789",
@@ -166,16 +168,18 @@ public class EmailVerificationResource {
             responseCode = "400", 
             description = "Invalid email or already verified",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 examples = @ExampleObject(
                     name = "Already Verified",
                     summary = "Email is already verified",
                     value = """
                     {
+                      "type": "https://problems.gripday.com/email-verification",
+                      "title": "Email verification not required",
+                      "status": 400,
+                      "detail": "Email address is already verified",
+                      "instance": "/api/v1/auth/email/resend",
                       "code": "EMAIL_ALREADY_VERIFIED",
-                      "message": "Email verification not required",
-                      "details": "Email address is already verified",
-                      "timestamp": "2024-01-15T10:30:00Z",
                       "path": "/api/v1/auth/email/resend",
                       "method": "POST",
                       "correlationId": "abc123-def456-ghi789",
@@ -190,16 +194,18 @@ public class EmailVerificationResource {
             responseCode = "429", 
             description = "Rate limit exceeded",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 examples = @ExampleObject(
                     name = "Rate Limited",
                     summary = "Too many resend requests",
                     value = """
                     {
+                      "type": "https://problems.gripday.com/email-verification",
+                      "title": "Rate limit exceeded",
+                      "status": 429,
+                      "detail": "Maximum 3 verification emails per hour. Please try again later.",
+                      "instance": "/api/v1/auth/email/resend",
                       "code": "EMAIL_RESEND_RATE_LIMITED",
-                      "message": "Rate limit exceeded",
-                      "details": "Maximum 3 verification emails per hour. Please try again later.",
-                      "timestamp": "2024-01-15T10:30:00Z",
                       "path": "/api/v1/auth/email/resend",
                       "method": "POST",
                       "correlationId": "abc123-def456-ghi789",
@@ -287,16 +293,18 @@ public class EmailVerificationResource {
             responseCode = "404", 
             description = "User not found",
             content = @Content(
-                mediaType = "application/json",
+                mediaType = "application/problem+json",
                 examples = @ExampleObject(
                     name = "User Not Found",
                     summary = "Email address not registered",
                     value = """
                     {
+                      "type": "https://problems.gripday.com/user-management",
+                      "title": "User not found",
+                      "status": 404,
+                      "detail": "No user found with the specified email address",
+                      "instance": "/api/v1/auth/email/status",
                       "code": "USER_NOT_FOUND",
-                      "message": "User not found",
-                      "details": "No user found with the specified email address",
-                      "timestamp": "2024-01-15T10:30:00Z",
                       "path": "/api/v1/auth/email/status",
                       "method": "GET",
                       "correlationId": "abc123-def456-ghi789",

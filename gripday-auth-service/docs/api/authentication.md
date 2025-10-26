@@ -17,7 +17,8 @@ Authorization: Bearer <jwt_token>
 ```
 
 ## Content Type
-All requests and responses use `application/json` content type.
+Successful responses use `application/json`.
+Errors use RFC7807 Problem Details with `application/problem+json`.
 
 ## Multi-Tenant Support
 Include tenant context via header:
@@ -78,46 +79,54 @@ Content-Type: application/json
 **409 Conflict - Username/Email Already Exists:**
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "User already exists",
-    "details": "Username or email is already registered",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/signup",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789",
-    "fields": [
-      {
-        "field": "username",
-        "message": "Username 'johndoe' is already taken"
-      }
-    ]
-  }
+  "type": "https://problems.gripday.com/user-registration",
+  "title": "User registration failed",
+  "status": 409,
+  "detail": "Username or email is already registered",
+  "instance": "/api/v1/auth/signup",
+  "code": "USER_ALREADY_EXISTS",
+  "path": "/api/v1/auth/signup",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024",
+  "fields": [
+    {
+      "field": "username",
+      "code": "Duplicate",
+      "message": "Username 'johndoe' is already taken",
+      "rejectedValue": "johndoe"
+    }
+  ]
 }
 ```
 
 **400 Bad Request - Validation Error:**
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Request validation failed",
-    "details": "One or more fields contain invalid values",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/signup",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789",
-    "fields": [
-      {
-        "field": "password",
-        "message": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-      },
-      {
-        "field": "email",
-        "message": "Invalid email format"
-      }
-    ]
-  }
+  "type": "https://problems.gripday.com/validation-error",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "One or more fields contain invalid values",
+  "instance": "/api/v1/auth/signup",
+  "code": "VALIDATION_ERROR",
+  "path": "/api/v1/auth/signup",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024",
+  "fields": [
+    {
+      "field": "password",
+      "code": "Pattern",
+      "message": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "rejectedValue": "***"
+    },
+    {
+      "field": "email",
+      "code": "Email",
+      "message": "Invalid email format",
+      "rejectedValue": "invalid"
+    }
+  ]
 }
 ```
 
@@ -186,31 +195,32 @@ Content-Type: application/json
 **401 Unauthorized - Invalid Credentials:**
 ```json
 {
-  "error": {
-    "code": "AUTH_INVALID_CREDENTIALS",
-    "message": "Authentication failed",
-    "details": "Invalid username or password",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/login",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789"
-  }
+  "type": "https://problems.gripday.com/authentication-error",
+  "title": "Authentication failed",
+  "status": 401,
+  "detail": "Invalid username or password",
+  "instance": "/api/v1/auth/login",
+  "code": "AUTH_INVALID_CREDENTIALS",
+  "path": "/api/v1/auth/login",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024"
 }
 ```
 
 **423 Locked - Account Locked:**
 ```json
 {
-  "error": {
-    "code": "AUTH_ACCOUNT_LOCKED",
-    "message": "Account temporarily locked",
-    "details": "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/login",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789",
-    "retryAfter": "2024-01-15T10:45:00Z"
-  }
+  "type": "https://problems.gripday.com/account-locked",
+  "title": "Account temporarily locked",
+  "status": 423,
+  "detail": "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
+  "instance": "/api/v1/auth/login",
+  "code": "AUTH_ACCOUNT_LOCKED",
+  "path": "/api/v1/auth/login",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024"
 }
 ```
 
@@ -260,15 +270,16 @@ Content-Type: application/json
 **401 Unauthorized - Invalid Refresh Token:**
 ```json
 {
-  "error": {
-    "code": "AUTH_INVALID_TOKEN",
-    "message": "Invalid refresh token",
-    "details": "Refresh token is expired, invalid, or has been revoked",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/refresh",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789"
-  }
+  "type": "https://problems.gripday.com/authentication-error",
+  "title": "Invalid refresh token",
+  "status": 401,
+  "detail": "Refresh token is expired, invalid, or has been revoked",
+  "instance": "/api/v1/auth/refresh",
+  "code": "AUTH_INVALID_TOKEN",
+  "path": "/api/v1/auth/refresh",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024"
 }
 ```
 
@@ -299,15 +310,16 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 **401 Unauthorized - Invalid Token:**
 ```json
 {
-  "error": {
-    "code": "AUTH_INVALID_TOKEN",
-    "message": "Invalid or expired token",
-    "details": "JWT token is invalid, expired, or malformed",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/auth/logout",
-    "method": "POST",
-    "correlationId": "abc123-def456-ghi789"
-  }
+  "type": "https://problems.gripday.com/authentication-error",
+  "title": "Invalid or expired token",
+  "status": 401,
+  "detail": "JWT token is invalid, expired, or malformed",
+  "instance": "/api/v1/auth/logout",
+  "code": "AUTH_INVALID_TOKEN",
+  "path": "/api/v1/auth/logout",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024"
 }
 ```
 
@@ -349,12 +361,10 @@ Content-Type: application/json
 **Error Response (401 Unauthorized):**
 ```json
 {
-  "valid": false,
-  "error": {
-    "code": "AUTH_INVALID_TOKEN",
-    "message": "Token validation failed",
-    "details": "JWT token is invalid, expired, or malformed"
-  }
+  "type": "https://problems.gripday.com/authentication-error",
+  "title": "Token validation failed",
+  "status": 401,
+  "detail": "JWT token is invalid, expired, or malformed"
 }
 ```
 

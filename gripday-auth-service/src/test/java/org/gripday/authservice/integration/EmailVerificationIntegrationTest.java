@@ -138,9 +138,10 @@ class EmailVerificationIntegrationTest {
         mockMvc.perform(get("/api/v1/auth/email/verify")
                 .param("token", invalidToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_TOKEN_INVALID"))
-                .andExpect(jsonPath("$.message").value("Email verification failed"));
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_TOKEN_INVALID"));
     }
 
     @Test
@@ -159,9 +160,10 @@ class EmailVerificationIntegrationTest {
         mockMvc.perform(get("/api/v1/auth/email/verify")
                 .param("token", token))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_TOKEN_EXPIRED"))
-                .andExpect(jsonPath("$.message").value("Email verification failed"));
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_TOKEN_EXPIRED"));
     }
 
     @Test
@@ -197,9 +199,10 @@ class EmailVerificationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_VERIFIED"))
-                .andExpect(jsonPath("$.message").value("Email verification failed"));
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_VERIFIED"));
     }
 
     @Test
@@ -212,9 +215,10 @@ class EmailVerificationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Email verification failed"));
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification failed"))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -253,9 +257,10 @@ class EmailVerificationIntegrationTest {
         mockMvc.perform(get("/api/v1/auth/email/status")
                 .param("email", "nonexistent@example.com"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("Email verification failed"));
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification failed"))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
     }
 
     @Test
@@ -268,10 +273,11 @@ class EmailVerificationIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType("application/problem+json"))
+                .andExpect(jsonPath("$.title").value("Email verification required"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value("Please check your email and click the verification link to activate your account"))
                 .andExpect(jsonPath("$.code").value("EMAIL_VERIFICATION_REQUIRED"))
-                .andExpect(jsonPath("$.message").value("Email verification required"))
-                .andExpect(jsonPath("$.details").value("Please check your email and click the verification link to activate your account"))
                 .andExpect(jsonPath("$.actions.resendEmail").value("/api/v1/auth/email/resend"))
                 .andExpect(jsonPath("$.actions.checkStatus").value("/api/v1/auth/email/status"));
     }

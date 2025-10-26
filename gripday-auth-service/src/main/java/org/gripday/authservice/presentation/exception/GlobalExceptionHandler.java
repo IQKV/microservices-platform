@@ -1,7 +1,6 @@
 package org.gripday.authservice.presentation.exception;
 
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +20,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -54,7 +51,7 @@ public class GlobalExceptionHandler {
         responseCode = "400",
         description = "Validation failed - invalid request data",
         content = @Content(
-            mediaType = "application/json",
+            mediaType = "application/problem+json",
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )
@@ -100,7 +97,7 @@ public class GlobalExceptionHandler {
         responseCode = "401",
         description = "Authentication failed - invalid credentials or token",
         content = @Content(
-            mediaType = "application/json",
+            mediaType = "application/problem+json",
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )
@@ -134,7 +131,7 @@ public class GlobalExceptionHandler {
         responseCode = "401",
         description = "Email verification required - user must verify email before login",
         content = @Content(
-            mediaType = "application/json",
+            mediaType = "application/problem+json",
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )
@@ -173,7 +170,7 @@ public class GlobalExceptionHandler {
         responseCode = "403",
         description = "Access denied - insufficient permissions",
         content = @Content(
-            mediaType = "application/json",
+            mediaType = "application/problem+json",
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )
@@ -209,7 +206,7 @@ public class GlobalExceptionHandler {
         responseCode = "400",
         description = "Email verification failed - invalid token, rate limit, or already verified",
         content = @Content(
-            mediaType = "application/json",
+            mediaType = "application/problem+json",
             schema = @Schema(implementation = ProblemDetail.class)
         )
     )

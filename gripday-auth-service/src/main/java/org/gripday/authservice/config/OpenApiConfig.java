@@ -1,6 +1,7 @@
 package org.gripday.authservice.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -15,7 +16,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -240,10 +240,12 @@ public class OpenApiConfig {
         var errorExample = new Example()
             .summary("Error Response")
             .value(Map.of(
+                "type", "https://problems.gripday.com/example",
+                "title", description,
+                "status", Integer.valueOf(code),
+                "detail", exampleMessage,
+                "instance", "/api/v1/endpoint",
                 "code", "ERROR_CODE",
-                "message", exampleMessage,
-                "details", "Additional error details",
-                "timestamp", "2024-01-15T10:30:00Z",
                 "path", "/api/v1/endpoint",
                 "method", "POST",
                 "correlationId", "abc123-def456-ghi789",
@@ -252,12 +254,11 @@ public class OpenApiConfig {
             ));
         
         var mediaType = new MediaType()
-            .schema(new Schema<>().$ref("#/components/schemas/ApiError"))
             .addExamples("error", errorExample);
         
         return new ApiResponse()
             .description(description)
-            .content(new Content().addMediaType("application/json", mediaType));
+            .content(new Content().addMediaType("application/problem+json", mediaType));
     }
     
     private void addAuthenticationExamples(OpenAPI openApi) {
