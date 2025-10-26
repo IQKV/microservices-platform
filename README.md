@@ -49,7 +49,7 @@ The Gripday platform consists of three services that demonstrate a complete micr
 
 ### 1. Clone and Setup
 ```bash
-git clone <repository-url>
+git clone <repository-url> gripday-platform
 cd gripday-platform
 
 # Start infrastructure services

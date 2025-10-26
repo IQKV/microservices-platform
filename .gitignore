@@ -65,5 +65,4 @@ spring.log
 *.sqlite
 *.sqlite3
 
-# Docker
-.dockerignore
+.env

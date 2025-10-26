@@ -514,7 +514,7 @@ public class AuthenticationService {
         return UUID.randomUUID().toString();
     }
 
-    /**
+  /**
      * Session data record for Redis storage.
      */
     public record SessionData(

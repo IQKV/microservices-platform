@@ -442,50 +442,7 @@ public class AuthenticationResource {
         }
     }
     
-    @GetMapping("/me")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Get current authenticated user",
-        description = "Return the user context derived from the bearer JWT used to authenticate the request.",
-        tags = {"Authentication"}
-    )
-    @Timed(value = "auth.endpoint", extraTags = {"endpoint","me"})
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "User context returned",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserContext.class),
-                examples = @ExampleObject(
-                    name = "User Context",
-                    summary = "Authenticated user information",
-                    value = """
-                    {
-                      "userId": 1,
-                      "username": "john.doe",
-                      "email": "john.doe@example.com",
-                      "roles": ["USER"],
-                      "permissions": [],
-                      "firstName": "John",
-                      "lastName": "Doe",
-                      "tenantId": "tenant-123",
-                      "customClaims": {}
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "401", description = "Unauthorized", ref = "#/components/responses/Unauthorized")
-    })
-    public ResponseEntity<UserContext> getCurrentUser(Authentication authentication) {
-        if (authentication instanceof JwtAuthenticationToken token) {
-            var user = jwtService.extractUserContext(token.getToken());
-            return ResponseEntity.ok(user);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-    
+
     @Operation(
         summary = "Health check", 
         description = "Check authentication service health"

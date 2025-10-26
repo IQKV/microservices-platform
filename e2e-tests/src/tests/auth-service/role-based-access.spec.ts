@@ -132,7 +132,7 @@ test.describe('Role-Based Access Control Tests', () => {
 
     test('should allow user access to user endpoints', async () => {
       const userEndpoints = [
-        { endpoint: '/api/v1/auth/me', method: 'GET' as const, requiredRoles: ['USER'] },
+        { endpoint: '/api/v1/users/me', method: 'GET' as const, requiredRoles: ['USER'] },
         { endpoint: '/api/v1/books', method: 'GET' as const, requiredRoles: ['USER'] },
         { endpoint: '/api/v1/books/1', method: 'GET' as const, requiredRoles: ['USER'] }
       ];
@@ -276,7 +276,7 @@ test.describe('Role-Based Access Control Tests', () => {
       // Test cross-tenant access
       const crossTenantEndpoints = [
         '/api/v1/books',
-        '/api/v1/auth/me'
+        '/api/v1/users/me'
       ];
 
       const isolationTest = await rbacHelpers.testTenantIsolation(
