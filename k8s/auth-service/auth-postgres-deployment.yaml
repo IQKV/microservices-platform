@@ -20,6 +20,14 @@ spec:
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: gripday-platform
     spec:
+      priorityClassName: infrastructure-priority
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: postgres
         image: postgres:15.8-alpine
@@ -77,6 +85,14 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 999
+          capabilities:
+            drop:
+            - ALL
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:

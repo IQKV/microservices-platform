@@ -1,0 +1,45 @@
+---
+# High priority for critical services (gateway, auth)
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+  labels:
+    app.kubernetes.io/part-of: gripday-platform
+value: 1000000
+globalDefault: false
+description: "High priority for critical platform services like gateway and auth"
+---
+# Medium priority for business services
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: medium-priority
+  labels:
+    app.kubernetes.io/part-of: gripday-platform
+value: 500000
+globalDefault: false
+description: "Medium priority for business services like bookstore"
+---
+# Low priority for batch jobs and non-critical workloads
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: low-priority
+  labels:
+    app.kubernetes.io/part-of: gripday-platform
+value: 100000
+globalDefault: false
+description: "Low priority for batch jobs and non-critical workloads"
+---
+# Infrastructure priority for databases and cache
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: infrastructure-priority
+  labels:
+    app.kubernetes.io/part-of: gripday-platform
+value: 900000
+globalDefault: false
+description: "Priority for infrastructure components like databases and caches"
+preemptionPolicy: PreemptLowerPriority

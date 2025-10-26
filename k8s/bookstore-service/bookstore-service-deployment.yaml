@@ -32,14 +32,17 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
     spec:
       serviceAccountName: bookstore-service-sa
+      priorityClassName: medium-priority
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: bookstore-service
-        image: gripday/bookstore-service:latest
+        image: gripday/bookstore-service:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082
@@ -152,6 +155,14 @@ spec:
           capabilities:
             drop:
             - ALL
+        
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - sh
+              - -c
+              - sleep 15
       
       volumes:
       - name: config-volume
@@ -163,7 +174,22 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       
-      # Pod disruption budget for high availability
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-bookstore-service
+            app.kubernetes.io/component: bookstore
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-bookstore-service
+            app.kubernetes.io/component: bookstore
+      
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

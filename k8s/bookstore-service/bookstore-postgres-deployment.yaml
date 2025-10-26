@@ -24,11 +24,14 @@ spec:
         app.kubernetes.io/part-of: gripday-platform
         app.kubernetes.io/version: "15.8"
     spec:
+      priorityClassName: infrastructure-priority
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
         runAsGroup: 999
         fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: postgres
         image: postgres:15.8-alpine

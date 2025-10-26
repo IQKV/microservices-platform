@@ -7,6 +7,9 @@ metadata:
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday-platform
     environment: local
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
 ---
 apiVersion: v1
 kind: Namespace
@@ -15,6 +18,9 @@ metadata:
   labels:
     app.kubernetes.io/part-of: gripday-platform
     environment: staging
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
 ---
 apiVersion: v1
 kind: Namespace
@@ -23,3 +29,6 @@ metadata:
   labels:
     app.kubernetes.io/part-of: gripday-platform
     environment: production
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

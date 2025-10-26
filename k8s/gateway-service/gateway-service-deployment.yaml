@@ -32,14 +32,17 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
     spec:
       serviceAccountName: gateway-service-sa
+      priorityClassName: high-priority
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: gateway-service
-        image: gripday/gateway-service:latest
+        image: gripday/gateway-service:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -137,8 +140,16 @@ spec:
           runAsUser: 1001
           capabilities:
             drop:
-            - ALL  
-    
+            - ALL
+        
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - sh
+              - -c
+              - sleep 15
+      
       volumes:
       - name: config-volume
         configMap:
@@ -148,6 +159,23 @@ spec:
       
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      
+      # Topology spread constraints for better distribution
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-gateway-service
+            app.kubernetes.io/component: gateway
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-gateway-service
+            app.kubernetes.io/component: gateway
       
       # Pod disruption budget for high availability
       affinity:

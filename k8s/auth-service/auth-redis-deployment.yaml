@@ -20,9 +20,17 @@ spec:
         app.kubernetes.io/component: cache
         app.kubernetes.io/part-of: gripday-platform
     spec:
+      priorityClassName: infrastructure-priority
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: redis
-        image: redis:7-alpine
+        image: redis:7.2-alpine
         ports:
         - containerPort: 6379
           name: redis
@@ -71,6 +79,14 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 999
+          capabilities:
+            drop:
+            - ALL
       volumes:
       - name: redis-storage
         persistentVolumeClaim:

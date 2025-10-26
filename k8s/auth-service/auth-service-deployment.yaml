@@ -32,14 +32,17 @@ spec:
         prometheus.io/path: "/actuator/prometheus"
     spec:
       serviceAccountName: auth-service-sa
+      priorityClassName: high-priority
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: auth-service
-        image: gripday/auth-service:latest
+        image: gripday/auth-service:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8081
@@ -166,6 +169,14 @@ spec:
           capabilities:
             drop:
             - ALL
+        
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - sh
+              - -c
+              - sleep 15
       
       volumes:
       - name: config-volume
@@ -176,6 +187,23 @@ spec:
       
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      
+      # Topology spread constraints for better distribution
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-auth-service
+            app.kubernetes.io/component: authentication
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: gripday-auth-service
+            app.kubernetes.io/component: authentication
       
       # Pod disruption budget for high availability
       affinity:
