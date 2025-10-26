@@ -7,6 +7,7 @@ import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -14,6 +15,9 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.net.URI;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Global exception handler for the Gateway Service.
@@ -24,6 +28,12 @@ import java.time.Instant;
 public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private final ObjectMapper objectMapper;
+
+    public GlobalExceptionHandler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
@@ -59,12 +69,35 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             status.value(), errorCode, message, request.getPath().value(), correlationId, tenantId, ex);
         
         response.setStatusCode(status);
-        response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        
-        var errorResponse = createErrorResponse(errorCode, message, request.getPath().value(), correlationId, tenantId);
-        var buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
-        
-        return response.writeWith(Mono.just(buffer));
+        response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, message);
+        pd.setTitle(status.getReasonPhrase());
+        pd.setInstance(URI.create(request.getPath().value()));
+        pd.setType(URI.create("/problems/" + errorCode.toLowerCase()));
+        pd.setProperty("code", errorCode);
+        pd.setProperty("timestamp", Instant.now().toString());
+        if (correlationId != null) {
+            pd.setProperty("correlationId", correlationId);
+        }
+        if (tenantId != null) {
+            pd.setProperty("tenantId", tenantId);
+        }
+
+        try {
+            byte[] body = objectMapper.writeValueAsBytes(pd);
+            var buffer = response.bufferFactory().wrap(body);
+            return response.writeWith(Mono.just(buffer));
+        } catch (Exception writeEx) {
+            var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
+                "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                "  \"status\": " + pd.getStatus() + ",\n" +
+                "  \"detail\": \"" + message + "\",\n" +
+                "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                .getBytes(StandardCharsets.UTF_8);
+            var buffer = response.bufferFactory().wrap(fallback);
+            return response.writeWith(Mono.just(buffer));
+        }
     }
 
     private String determineErrorCode(HttpStatus status) {
@@ -77,27 +110,5 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             case NOT_FOUND -> "RESOURCE_NOT_FOUND";
             default -> "SYSTEM_ERROR";
         };
-    }
-
-    private String createErrorResponse(String errorCode, String message, String path, String correlationId, String tenantId) {
-        var errorResponseBuilder = new StringBuilder();
-        errorResponseBuilder.append("{\n");
-        errorResponseBuilder.append("  \"error\": {\n");
-        errorResponseBuilder.append("    \"code\": \"").append(errorCode).append("\",\n");
-        errorResponseBuilder.append("    \"message\": \"").append(message).append("\",\n");
-        errorResponseBuilder.append("    \"timestamp\": \"").append(Instant.now()).append("\",\n");
-        errorResponseBuilder.append("    \"path\": \"").append(path).append("\"");
-        
-        if (correlationId != null) {
-            errorResponseBuilder.append(",\n    \"correlationId\": \"").append(correlationId).append("\"");
-        }
-        
-        if (tenantId != null) {
-            errorResponseBuilder.append(",\n    \"tenantId\": \"").append(tenantId).append("\"");
-        }
-        
-        errorResponseBuilder.append("\n  }\n}");
-        
-        return errorResponseBuilder.toString();
     }
 }

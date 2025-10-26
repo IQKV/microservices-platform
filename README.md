@@ -1,3 +1,22 @@
+**Password Reset:**
+```bash
+# Initiate password reset (always returns 200)
+curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john@example.com"}'
+
+# Reset password using token from email
+curl -X POST http://localhost:8080/api/v1/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{"token":"<reset-token>","newPassword":"NewSecurePass123!"}'
+```
+
+**Logout from all devices:**
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/logout-all \
+  -H "Authorization: Bearer $TOKEN"
+```
+
 # Gripday Microservices Platform
 
 An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 2025.0.0, and Java 21, providing centralized authentication, intelligent API gateway, and comprehensive observability for scalable microservice architectures.
@@ -100,9 +119,12 @@ Centralized authentication and user management service providing JWT-based authe
 - `POST /api/v1/auth/login` - User authentication (requires verified email)
 - `POST /api/v1/auth/refresh` - Token refresh
 - `POST /api/v1/auth/logout` - User logout
+- `POST /api/v1/auth/logout-all` - Logout from all devices (revoke all refresh tokens and sessions)
 - `GET /api/v1/auth/email/verify` - Email address verification
 - `POST /api/v1/auth/email/resend` - Resend verification email
 - `GET /api/v1/auth/email/status` - Check email verification status
+- `POST /api/v1/auth/forgot-password` - Initiate password reset (non-enumerating)
+- `POST /api/v1/auth/reset-password` - Complete password reset with token
 
 **Documentation:**
 - [Auth Service README](gripday-auth-service/README.md)

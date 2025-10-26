@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import io.micrometer.core.annotation.Timed;
 
 /**
  * REST controller for authentication endpoints using Resource suffix convention.
@@ -279,22 +280,12 @@ public class AuthenticationResource {
         tags = {"Authentication"}
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Logout successful",
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(
-                    name = "Logout Success",
-                    summary = "User logged out successfully",
-                    value = "{}"
-                )
-            )
-        ),
+        @ApiResponse(responseCode = "204", description = "Logout successful"),
         @ApiResponse(responseCode = "401", description = "Invalid or expired token", ref = "#/components/responses/Unauthorized")
     })
     @PostMapping("/logout")
     @SecurityRequirement(name = "bearerAuth")
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","logout"})
     public ResponseEntity<Void> logout(
             @io.swagger.v3.oas.annotations.Parameter(
                 description = "HTTP request containing Authorization header with Bearer token",
@@ -310,7 +301,7 @@ public class AuthenticationResource {
             authenticationService.logoutUser(token, sessionId);
         }
         
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")
@@ -320,9 +311,10 @@ public class AuthenticationResource {
         tags = {"Authentication"}
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Password has been reset successfully"),
+        @ApiResponse(responseCode = "204", description = "Password has been reset successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid input or token", ref = "#/components/responses/BadRequest")
     })
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","reset-password"})
     public ResponseEntity<Void> resetPassword(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Reset password request containing token and new password",
@@ -336,7 +328,7 @@ public class AuthenticationResource {
             HttpServletRequest httpRequest) {
         var clientIp = getClientIpAddress(httpRequest);
         authenticationService.resetPassword(request.token(), request.newPassword(), clientIp);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
     
     @PostMapping("/logout-all")
@@ -347,16 +339,17 @@ public class AuthenticationResource {
         tags = {"Authentication"}
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "All sessions and refresh tokens invalidated"),
+        @ApiResponse(responseCode = "204", description = "All sessions and refresh tokens invalidated"),
         @ApiResponse(responseCode = "401", description = "Unauthorized", ref = "#/components/responses/Unauthorized")
     })
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","logout-all"})
     public ResponseEntity<Void> logoutFromAllDevices(Authentication authentication) {
         if (authentication instanceof JwtAuthenticationToken token) {
             var subject = token.getToken().getSubject();
             try {
                 var userId = Long.parseLong(subject);
                 authenticationService.logoutFromAllDevices(userId);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.noContent().build();
             } catch (NumberFormatException ex) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
@@ -370,6 +363,7 @@ public class AuthenticationResource {
         description = "Validate a JWT (access or refresh) and return its status, metadata, and extracted user context.",
         tags = {"Authentication"}
     )
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","validate"})
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
@@ -455,6 +449,7 @@ public class AuthenticationResource {
         description = "Return the user context derived from the bearer JWT used to authenticate the request.",
         tags = {"Authentication"}
     )
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","me"})
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
@@ -508,9 +503,10 @@ public class AuthenticationResource {
         tags = {"Authentication"}
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "If the email exists, a password reset email will be sent"),
+        @ApiResponse(responseCode = "202", description = "If the email exists, a password reset email will be sent"),
         @ApiResponse(responseCode = "400", description = "Invalid input", ref = "#/components/responses/BadRequest")
     })
+    @Timed(value = "auth.endpoint", extraTags = {"endpoint","forgot-password"})
     public ResponseEntity<Void> forgotPassword(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Forgot password request containing user email",
@@ -525,7 +521,7 @@ public class AuthenticationResource {
         var ipAddress = getClientIpAddress(httpRequest);
         var userAgent = httpRequest.getHeader("User-Agent");
         authenticationService.initiatePasswordReset(request.email(), ipAddress, userAgent);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.accepted().build();
     }
     
     /**

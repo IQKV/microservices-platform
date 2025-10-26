@@ -12,6 +12,8 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -20,8 +22,11 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Reactive JWT authentication filter for token validation with tenant extraction.
@@ -42,9 +47,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     
     private final GatewayProperties gatewayProperties;
     private final SecretKey jwtSecretKey;
+    private final ObjectMapper objectMapper;
 
-    public JwtAuthenticationFilter(GatewayProperties gatewayProperties) {
+    public JwtAuthenticationFilter(GatewayProperties gatewayProperties, ObjectMapper objectMapper) {
         this.gatewayProperties = gatewayProperties;
+        this.objectMapper = objectMapper;
         var secretKeyBytes = gatewayProperties.security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
         this.jwtSecretKey = Keys.hmacShaKeyFor(secretKeyBytes);
     }
@@ -225,24 +232,36 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> handleAuthenticationError(ServerWebExchange exchange, String message) {
         var response = exchange.getResponse();
+        var request = exchange.getRequest();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json");
-        
-        var errorResponse = String.format("""
-            {
-              "error": {
-                "code": "AUTH_TOKEN_INVALID",
-                "message": "%s",
-                "timestamp": "%s",
-                "path": "%s",
-                "correlationId": "%s"
-              }
-            }
-            """, message, java.time.Instant.now(), exchange.getRequest().getPath().value(), 
-            MDC.get("correlationId"));
-        
-        var buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
-        return response.writeWith(Mono.just(buffer));
+        response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+
+        var correlationId = MDC.get("correlationId");
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, message);
+        pd.setTitle(HttpStatus.UNAUTHORIZED.getReasonPhrase());
+        pd.setType(URI.create("/problems/auth_token_invalid"));
+        pd.setInstance(URI.create(request.getPath().value()));
+        pd.setProperty("code", "AUTH_TOKEN_INVALID");
+        pd.setProperty("timestamp", Instant.now().toString());
+        if (correlationId != null) {
+            pd.setProperty("correlationId", correlationId);
+        }
+
+        try {
+            byte[] body = objectMapper.writeValueAsBytes(pd);
+            var buffer = response.bufferFactory().wrap(body);
+            return response.writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
+                "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                "  \"status\": " + pd.getStatus() + ",\n" +
+                "  \"detail\": \"" + message + "\",\n" +
+                "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                .getBytes(StandardCharsets.UTF_8);
+            var buffer = response.bufferFactory().wrap(fallback);
+            return response.writeWith(Mono.just(buffer));
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -19,6 +20,8 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.net.URI;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tenant-aware rate limiting filter with Redis-backed storage.
@@ -34,13 +37,16 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
     private final GatewayProperties gatewayProperties;
     private final ReactiveStringRedisTemplate redisTemplate;
     private final TenantQuotaMonitoringService quotaMonitoringService;
+    private final ObjectMapper objectMapper;
 
     public TenantRateLimitingFilter(GatewayProperties gatewayProperties, 
                                    ReactiveStringRedisTemplate redisTemplate,
-                                   TenantQuotaMonitoringService quotaMonitoringService) {
+                                   TenantQuotaMonitoringService quotaMonitoringService,
+                                   ObjectMapper objectMapper) {
         this.gatewayProperties = gatewayProperties;
         this.redisTemplate = redisTemplate;
         this.quotaMonitoringService = quotaMonitoringService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -202,44 +208,46 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> handleRateLimitExceeded(ServerWebExchange exchange, String message, String tenantId) {
         var response = exchange.getResponse();
+        var request = exchange.getRequest();
         response.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
-        response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
         
         // Add rate limit headers
         response.getHeaders().add("X-RateLimit-Limit", "60");
         response.getHeaders().add("X-RateLimit-Remaining", "0");
         response.getHeaders().add("X-RateLimit-Reset", String.valueOf(Instant.now().plusSeconds(60).getEpochSecond()));
-        
-        var correlationId = MDC.get("correlationId");
-        var errorResponse = createRateLimitErrorResponse(message, exchange.getRequest().getPath().value(), 
-            correlationId, tenantId);
-        
-        var buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
-        return response.writeWith(Mono.just(buffer));
-    }
+        response.getHeaders().add("Retry-After", "60");
 
-    private String createRateLimitErrorResponse(String message, String path, String correlationId, String tenantId) {
-        var errorResponseBuilder = new StringBuilder();
-        errorResponseBuilder.append("{\n");
-        errorResponseBuilder.append("  \"error\": {\n");
-        errorResponseBuilder.append("    \"code\": \"RATE_LIMIT_EXCEEDED\",\n");
-        errorResponseBuilder.append("    \"message\": \"").append(message).append("\",\n");
-        errorResponseBuilder.append("    \"details\": \"Request rate limit exceeded. Please try again later.\",\n");
-        errorResponseBuilder.append("    \"timestamp\": \"").append(Instant.now()).append("\",\n");
-        errorResponseBuilder.append("    \"path\": \"").append(path).append("\"");
-        
+        var correlationId = MDC.get("correlationId");
+
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, message);
+        pd.setTitle(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
+        pd.setType(URI.create("/problems/rate_limit_exceeded"));
+        pd.setInstance(URI.create(request.getPath().value()));
+        pd.setProperty("code", "RATE_LIMIT_EXCEEDED");
+        pd.setProperty("timestamp", Instant.now().toString());
+        pd.setProperty("retryAfter", 60);
         if (correlationId != null) {
-            errorResponseBuilder.append(",\n    \"correlationId\": \"").append(correlationId).append("\"");
+            pd.setProperty("correlationId", correlationId);
         }
-        
         if (tenantId != null) {
-            errorResponseBuilder.append(",\n    \"tenantId\": \"").append(tenantId).append("\"");
+            pd.setProperty("tenantId", tenantId);
         }
-        
-        errorResponseBuilder.append(",\n    \"retryAfter\": 60");
-        errorResponseBuilder.append("\n  }\n}");
-        
-        return errorResponseBuilder.toString();
+
+        try {
+            byte[] body = objectMapper.writeValueAsBytes(pd);
+            var buffer = response.bufferFactory().wrap(body);
+            return response.writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
+                "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                "  \"status\": " + pd.getStatus() + ",\n" +
+                "  \"detail\": \"" + message + "\",\n" +
+                "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                .getBytes(StandardCharsets.UTF_8);
+            var buffer = response.bufferFactory().wrap(fallback);
+            return response.writeWith(Mono.just(buffer));
+        }
     }
 
     @Override

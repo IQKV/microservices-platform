@@ -111,6 +111,41 @@ curl -X POST http://localhost:8081/api/v1/auth/logout \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
+### Logout From All Devices
+```bash
+curl -X POST http://localhost:8081/api/v1/auth/logout-all \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+Revokes all refresh tokens for the authenticated user and invalidates all active sessions.
+
+## Password Reset
+
+### Forgot Password (Initiate)
+Starts the password reset flow. Always returns 200 to avoid user enumeration.
+```bash
+curl -X POST http://localhost:8081/api/v1/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com"
+  }'
+```
+
+### Reset Password (Complete)
+Resets the password using a reset token received by email.
+```bash
+curl -X POST http://localhost:8081/api/v1/auth/reset-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "550e8400-e29b-41d4-a716-446655440000",
+    "newPassword": "NewSecurePass123!"
+  }'
+```
+
+Upon successful reset:
+- User password is updated.
+- All refresh tokens are revoked and all sessions invalidated.
+- Reset token is invalidated.
+
 ## Email Verification Endpoints
 
 ### Email Verification
@@ -190,6 +225,10 @@ SMTP_PASSWORD=your-app-password
 VERIFICATION_FROM_EMAIL=noreply@gripday.com
 VERIFICATION_FROM_NAME=Gripday Platform
 VERIFICATION_BASE_URL=https://app.gripday.com
+
+# Password Reset Email Templates (optional overrides)
+GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_SUBJECT="Reset your Gripday password"
+GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_TEMPLATE="email/password-reset.html"
 
 # Multi-tenant
 GRIPDAY_TENANT_DEFAULT_ID=default
@@ -287,6 +326,9 @@ gripday:
       base-url: https://app.gripday.com
       token-expiry: PT24H
       rate-limit: 3
+    templates:
+      password-reset-subject: "Reset your Gripday password"
+      password-reset-template: "email/password-reset.html"
 ```
 
 ### Security Features
@@ -295,6 +337,12 @@ gripday:
 - **Rate Limiting**: Prevents email spam and abuse
 - **Tenant Isolation**: Tokens are tenant-aware
 - **HTTPS Links**: Verification links use HTTPS in production
+
+### Password Reset Flow
+1. User requests password reset via `POST /api/v1/auth/forgot-password`.
+2. System generates a single-use reset token (30-minute default TTL) and sends an email with a reset link.
+3. User submits `POST /api/v1/auth/reset-password` with token and new password.
+4. Service updates password, revokes all refresh tokens, and invalidates sessions.
 
 ### Monitoring
 - **Metrics**: Email sending success/failure rates

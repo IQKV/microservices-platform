@@ -12,12 +12,15 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Circuit breaker filter for fault tolerance.
@@ -30,10 +33,12 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
     
     private final GatewayProperties gatewayProperties;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final ObjectMapper objectMapper;
 
-    public CircuitBreakerFilter(GatewayProperties gatewayProperties, CircuitBreakerRegistry circuitBreakerRegistry) {
+    public CircuitBreakerFilter(GatewayProperties gatewayProperties, CircuitBreakerRegistry circuitBreakerRegistry, ObjectMapper objectMapper) {
         this.gatewayProperties = gatewayProperties;
         this.circuitBreakerRegistry = circuitBreakerRegistry;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -95,7 +100,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
         }
         
         response.setStatusCode(status);
-        response.getHeaders().add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
         
         // Add circuit breaker headers
         response.getHeaders().add("X-Circuit-Breaker", circuitBreakerName);
@@ -108,46 +113,39 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
         
         var correlationId = MDC.get("correlationId");
         var tenantId = MDC.get("tenantId");
-        
-        var errorResponse = createCircuitBreakerErrorResponse(errorCode, message, 
-            request.getPath().value(), correlationId, tenantId, circuitBreakerName, isCircuitOpen);
-        
-        var buffer = response.bufferFactory().wrap(errorResponse.getBytes(StandardCharsets.UTF_8));
-        return response.writeWith(Mono.just(buffer));
-    }
 
-    private String createCircuitBreakerErrorResponse(String errorCode, String message, String path, 
-            String correlationId, String tenantId, String circuitBreakerName, boolean isCircuitOpen) {
-        
-        var errorResponseBuilder = new StringBuilder();
-        errorResponseBuilder.append("{\n");
-        errorResponseBuilder.append("  \"error\": {\n");
-        errorResponseBuilder.append("    \"code\": \"").append(errorCode).append("\",\n");
-        errorResponseBuilder.append("    \"message\": \"").append(message).append("\",\n");
-        
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, message);
+        pd.setTitle(status.getReasonPhrase());
+        pd.setType(URI.create("/problems/" + (isCircuitOpen ? "circuit_breaker_open" : "service_unavailable")));
+        pd.setInstance(URI.create(request.getPath().value()));
+        pd.setProperty("code", errorCode);
+        pd.setProperty("timestamp", Instant.now().toString());
+        pd.setProperty("circuitBreaker", circuitBreakerName);
         if (isCircuitOpen) {
-            errorResponseBuilder.append("    \"details\": \"The service is temporarily unavailable. Please try again later.\",\n");
             var retryAfter = gatewayProperties.circuitBreaker().waitDurationInOpenState().getSeconds();
-            errorResponseBuilder.append("    \"retryAfter\": ").append(retryAfter).append(",\n");
-        } else {
-            errorResponseBuilder.append("    \"details\": \"The upstream service is currently experiencing issues.\",\n");
+            pd.setProperty("retryAfter", retryAfter);
         }
-        
-        errorResponseBuilder.append("    \"timestamp\": \"").append(Instant.now()).append("\",\n");
-        errorResponseBuilder.append("    \"path\": \"").append(path).append("\",\n");
-        errorResponseBuilder.append("    \"circuitBreaker\": \"").append(circuitBreakerName).append("\"");
-        
         if (correlationId != null) {
-            errorResponseBuilder.append(",\n    \"correlationId\": \"").append(correlationId).append("\"");
+            pd.setProperty("correlationId", correlationId);
         }
-        
         if (tenantId != null) {
-            errorResponseBuilder.append(",\n    \"tenantId\": \"").append(tenantId).append("\"");
+            pd.setProperty("tenantId", tenantId);
         }
-        
-        errorResponseBuilder.append("\n  }\n}");
-        
-        return errorResponseBuilder.toString();
+
+        try {
+            byte[] body = objectMapper.writeValueAsBytes(pd);
+            var buffer = response.bufferFactory().wrap(body);
+            return response.writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
+                "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                "  \"status\": " + pd.getStatus() + ",\n" +
+                "  \"detail\": \"" + message + "\",\n" +
+                "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                .getBytes(StandardCharsets.UTF_8);
+            var buffer = response.bufferFactory().wrap(fallback);
+            return response.writeWith(Mono.just(buffer));
+        }
     }
 
     @Override

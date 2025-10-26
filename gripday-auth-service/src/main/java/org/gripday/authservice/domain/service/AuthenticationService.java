@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class AuthenticationService {
     private final TenantAwareSessionService sessionService;
     private final TenantAwareRedisService redisService;
     private final EmailService emailService;
+    private final MeterRegistry meterRegistry;
     
     public AuthenticationService(UserRepository userRepository, 
                                PasswordEncoder passwordEncoder,
@@ -45,7 +47,8 @@ public class AuthenticationService {
                                InputSanitizer inputSanitizer,
                                TenantAwareSessionService sessionService,
                                TenantAwareRedisService redisService,
-                               EmailService emailService) {
+                               EmailService emailService,
+                               MeterRegistry meterRegistry) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -55,6 +58,7 @@ public class AuthenticationService {
         this.sessionService = sessionService;
         this.redisService = redisService;
         this.emailService = emailService;
+        this.meterRegistry = meterRegistry;
     }
     
     /**
@@ -96,9 +100,11 @@ public class AuthenticationService {
             user.setPasswordHash(passwordEncoder.encode(sanitizedPassword));
             userRepository.save(user);
 
-            // Revoke all refresh tokens for the user and invalidate sessions
-            jwtService.revokeAllRefreshTokensForUser(String.valueOf(user.getId()));
-            sessionService.invalidateAllUserSessions(String.valueOf(user.getId()));
+            // Revoke all refresh tokens for the user
+            jwtService.revokeAllRefreshTokensForUser(String.valueOf(userId));
+
+            // Invalidate all sessions for the user
+            sessionService.invalidateAllUserSessions(String.valueOf(userId));
 
             // Delete the token so it cannot be reused
             redisService.delete(tokenKey);
@@ -108,6 +114,7 @@ public class AuthenticationService {
 
             // Audit
             securityAuditService.logTokenEvent(user.getUsername(), "password_reset_completed", clientIp, "system");
+            meterRegistry.counter("auth.password_reset.completed").increment();
         } catch (AuthenticationException e) {
             throw e;
         } catch (Exception e) {
@@ -250,6 +257,7 @@ public class AuthenticationService {
             if (userOpt.isEmpty()) {
                 // Do not reveal existence; log minimal info
                 securityAuditService.logSecurityEvent("password_reset_requested_unknown_email", ipAddress, userAgent);
+                meterRegistry.counter("auth.password_reset.initiated").increment();
                 return;
             }
 
@@ -386,18 +394,13 @@ public class AuthenticationService {
             sessionService.invalidateAllUserSessions(userId.toString());
             
             // Log security event
-            var user = userRepository.findById(userId);
-            if (user.isPresent()) {
-                securityAuditService.logTokenEvent(
-                    user.get().getUsername(), 
-                    "all_sessions_invalidated", 
-                    "system", 
-                    "system"
-                );
-            }
-            
+            var userOpt = userRepository.findById(userId);
+            userOpt.ifPresent(user -> securityAuditService.logTokenEvent(
+                user.getUsername(), "logout_from_all_devices", "system", "system"
+            ));
+            meterRegistry.counter("auth.logout.all").increment();
         } catch (Exception e) {
-            System.err.println("Error during logout all sessions: " + e.getMessage());
+            System.err.println("Error during logout from all devices: " + e.getMessage());
         } finally {
             MDC.remove("correlationId");
         }
