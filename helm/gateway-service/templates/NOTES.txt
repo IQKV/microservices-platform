@@ -1,0 +1,44 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if .Values.ingress.enabled }}
+
+The API Gateway is accessible via the following URL(s):
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- end }}
+
+Service Information:
+  - Service Name: {{ include "gateway-service.fullname" . }}
+  - Namespace: {{ .Values.namespace.name }}
+  - Port: {{ .Values.service.port }}
+
+{{- if .Values.redis.enabled }}
+  - Redis: gateway-redis:{{ .Values.redis.service.port }}
+{{- end }}
+
+The Gateway routes traffic to:
+  - Auth Service: auth-service.gripday-auth.svc.cluster.local:8081
+  - Bookstore Service: bookstore-service.gripday-bookstore.svc.cluster.local:8082
+
+To get the application logs:
+  $ kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service
+
+To access the gateway directly using port-forward:
+  $ kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "gateway-service.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+
+Then open your browser to:
+  http://localhost:{{ .Values.service.port }}
+
+Health Check:
+  http://localhost:{{ .Values.service.port }}/actuator/health
+
+Gateway Routes:
+  http://localhost:{{ .Values.service.port }}/actuator/gateway/routes

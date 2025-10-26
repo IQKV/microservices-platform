@@ -1,0 +1,118 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore-redis
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "bookstore-service.redis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bookstore-service.redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "bookstore-service.redis.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/part-of: {{ .Values.global.platform }}
+    spec:
+      {{- if .Values.redis.priorityClassName }}
+      priorityClassName: {{ .Values.redis.priorityClassName }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: redis
+        image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+        imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.redis.service.port }}
+          name: redis
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "bookstore-service.fullname" . }}-secrets
+              key: GRIPDAY_CACHE_REDIS_PASSWORD
+              optional: true
+        command:
+        - redis-server
+        - --appendonly
+        - {{ .Values.redis.config.appendonly | quote }}
+        - --maxmemory
+        - {{ .Values.redis.config.maxmemory | quote }}
+        - --maxmemory-policy
+        - {{ .Values.redis.config.maxmemoryPolicy | quote }}
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        resources:
+          {{- toYaml .Values.redis.resources | nindent 10 }}
+        {{- if .Values.redis.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            {{- range .Values.redis.livenessProbe.command }}
+            - {{ . }}
+            {{- end }}
+          initialDelaySeconds: {{ .Values.redis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.redis.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.redis.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command:
+            {{- range .Values.redis.readinessProbe.command }}
+            - {{ . }}
+            {{- end }}
+          initialDelaySeconds: {{ .Values.redis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.redis.readinessProbe.failureThreshold }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 999
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: redis-storage
+        {{- if .Values.redis.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: bookstore-redis-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+{{- if .Values.redis.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookstore-redis-pvc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "bookstore-service.redis.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  {{- range .Values.redis.persistence.accessModes }}
+  - {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size }}
+  {{- if .Values.redis.persistence.storageClass }}
+  storageClassName: {{ .Values.redis.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }}

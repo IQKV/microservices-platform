@@ -1,0 +1,48 @@
+# Gripday Platform - Umbrella Chart Values
+
+# Global settings applied to all sub-charts
+global:
+  environment: local
+  platform: gripday-platform
+
+# Enable/disable individual services
+auth-service:
+  enabled: true
+  namespace:
+    create: true
+    name: gripday-auth
+  replicaCount: 2
+  image:
+    tag: "1.0.0"
+  postgresql:
+    enabled: true
+  redis:
+    enabled: true
+
+bookstore-service:
+  enabled: true
+  namespace:
+    create: true
+    name: gripday-bookstore
+  replicaCount: 2
+  image:
+    tag: "1.0.0"
+  autoscaling:
+    enabled: true
+  postgresql:
+    enabled: true
+  redis:
+    enabled: true
+
+gateway-service:
+  enabled: true
+  namespace:
+    create: true
+    name: gripday-gateway
+  replicaCount: 3
+  image:
+    tag: "1.0.0"
+  autoscaling:
+    enabled: true
+  redis:
+    enabled: true
