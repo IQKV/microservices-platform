@@ -1,23 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: bookstore-service-network-policy
-  namespace: gripday-bookstore
+  name: auth-service-network-policy
+  namespace: gripday-auth
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
-    app.kubernetes.io/component: bookstore
+    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday-platform
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: gripday-bookstore-service
-      app.kubernetes.io/component: bookstore
+      app.kubernetes.io/name: gripday-auth-service
+      app.kubernetes.io/component: authentication
   policyTypes:
   - Ingress
   - Egress
   
   ingress:
-  # Allow traffic from gateway service ONLY (API Gateway pattern)
+  # Allow traffic from gateway service ONLY
   - from:
     - namespaceSelector:
         matchLabels:
@@ -27,14 +27,14 @@ spec:
           app.kubernetes.io/name: gripday-gateway-service
     ports:
     - protocol: TCP
-      port: 8082
+      port: 8081
   
   # Allow traffic from same namespace (for service-to-service communication)
   - from:
     - podSelector: {}
     ports:
     - protocol: TCP
-      port: 8082
+      port: 8081
   
   # Allow traffic from monitoring (Prometheus)
   - from:
@@ -46,22 +46,15 @@ spec:
           app: prometheus
     ports:
     - protocol: TCP
-      port: 8082
+      port: 8081
   
   egress:
-  # Allow DNS resolution
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-  
   # Allow access to PostgreSQL
   - to:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: bookstore-postgres
+          app.kubernetes.io/name: auth-postgres
+          app.kubernetes.io/component: database
     ports:
     - protocol: TCP
       port: 5432
@@ -70,22 +63,17 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: bookstore-redis
+          app.kubernetes.io/name: auth-redis
+          app.kubernetes.io/component: cache
     ports:
     - protocol: TCP
       port: 6379
   
-  # Allow access to auth service for JWT validation
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          app.kubernetes.io/part-of: gripday-platform
-      podSelector:
-        matchLabels:
-          app.kubernetes.io/name: gripday-auth-service
+  # Allow DNS resolution
+  - to: []
     ports:
-    - protocol: TCP
-      port: 8081
+    - protocol: UDP
+      port: 53
   
   # Allow access to observability services
   - to:
@@ -96,41 +84,48 @@ spec:
     - protocol: TCP
       port: 4317  # OTLP gRPC
     - protocol: TCP
-      port: 4318  # OTLP HTTP
-    - protocol: TCP
-      port: 14268 # Jaeger collector
+      port: 14268 # Jaeger
   
-  # Allow HTTPS outbound for external services (if needed)
+  # Allow HTTPS for external OAuth2 providers
   - to: []
     ports:
     - protocol: TCP
       port: 443
 ---
-# Network policy for PostgreSQL
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: bookstore-postgres-network-policy
-  namespace: gripday-bookstore
+  name: auth-postgres-network-policy
+  namespace: gripday-auth
   labels:
-    app.kubernetes.io/name: bookstore-postgres
+    app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday-platform
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: bookstore-postgres
+      app.kubernetes.io/name: auth-postgres
       app.kubernetes.io/component: database
   policyTypes:
   - Ingress
   - Egress
   
   ingress:
-  # Only allow traffic from bookstore service
+  # Allow ingress from auth service only
   - from:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: gripday-bookstore-service
+          app.kubernetes.io/name: gripday-auth-service
+          app.kubernetes.io/component: authentication
+    ports:
+    - protocol: TCP
+      port: 5432
+  
+  # Allow ingress from monitoring for backup/metrics
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: monitoring
     ports:
     - protocol: TCP
       port: 5432
@@ -141,34 +136,41 @@ spec:
     ports:
     - protocol: UDP
       port: 53
-    - protocol: TCP
-      port: 53
 ---
-# Network policy for Redis
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: bookstore-redis-network-policy
-  namespace: gripday-bookstore
+  name: auth-redis-network-policy
+  namespace: gripday-auth
   labels:
-    app.kubernetes.io/name: bookstore-redis
+    app.kubernetes.io/name: auth-redis
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: gripday-platform
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: bookstore-redis
+      app.kubernetes.io/name: auth-redis
       app.kubernetes.io/component: cache
   policyTypes:
   - Ingress
   - Egress
   
   ingress:
-  # Only allow traffic from bookstore service
+  # Allow ingress from auth service only
   - from:
     - podSelector:
         matchLabels:
-          app.kubernetes.io/name: gripday-bookstore-service
+          app.kubernetes.io/name: gripday-auth-service
+          app.kubernetes.io/component: authentication
+    ports:
+    - protocol: TCP
+      port: 6379
+  
+  # Allow ingress from monitoring for metrics
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: monitoring
     ports:
     - protocol: TCP
       port: 6379
@@ -178,6 +180,4 @@ spec:
   - to: []
     ports:
     - protocol: UDP
-      port: 53
-    - protocol: TCP
       port: 53

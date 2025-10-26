@@ -179,8 +179,8 @@ http://auth.local.gripday.com/actuator/*        → Health/metrics
 
 #### Staging Environment
 ```
-https://auth.staging.gripday.com/api/v1/auth/*  → Authentication API
-https://auth.staging.gripday.com/api/v1/users/* → User Management API
+https://auth.gripday.space/api/v1/auth/*  → Authentication API
+https://auth.gripday.space/api/v1/users/* → User Management API
 ```
 
 #### Production Environment

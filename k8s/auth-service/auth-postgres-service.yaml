@@ -22,7 +22,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: auth-postgres-staging
-  namespace: gripday-auth-staging
+  namespace: staging-env
   labels:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database
@@ -44,7 +44,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: auth-postgres-production
-  namespace: gripday-auth-production
+  namespace: production-env
   labels:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database

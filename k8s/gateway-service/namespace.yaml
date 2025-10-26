@@ -11,19 +11,15 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-gateway-staging
+  name: staging-env
   labels:
-    app.kubernetes.io/name: gripday-gateway-service
-    app.kubernetes.io/component: gateway
     app.kubernetes.io/part-of: gripday-platform
     environment: staging
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-gateway-production
+  name: production-env
   labels:
-    app.kubernetes.io/name: gripday-gateway-service
-    app.kubernetes.io/component: gateway
     app.kubernetes.io/part-of: gripday-platform
     environment: production

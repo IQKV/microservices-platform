@@ -131,7 +131,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: auth-service-config-staging
-  namespace: gripday-auth-staging
+  namespace: staging-env
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
@@ -169,7 +169,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: auth-service-config-production
-  namespace: gripday-auth-production
+  namespace: production-env
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication

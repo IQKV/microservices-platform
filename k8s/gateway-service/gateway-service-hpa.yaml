@@ -60,7 +60,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: gateway-service-hpa-staging
-  namespace: gripday-gateway-staging
+  namespace: staging-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -85,13 +85,13 @@ spec:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 80---
-apiV
-ersion: autoscaling/v2
+        averageUtilization: 80
+---
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: gateway-service-hpa-production
-  namespace: gripday-gateway-production
+  namespace: production-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway

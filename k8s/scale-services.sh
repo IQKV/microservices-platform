@@ -48,7 +48,7 @@ Manage horizontal scaling of Gripday Platform services
 
 OPTIONS:
     -e, --environment ENV    Environment (local|staging|production) [default: local]
-    -s, --service SERVICE    Service to scale (auth|gateway|all) [default: all]
+    -s, --service SERVICE    Service to scale (auth|gateway|bookstore|all) [default: all]
     -r, --replicas COUNT     Number of replicas to scale to
     -a, --action ACTION      Action (scale|status|auto) [default: scale]
     -d, --dry-run           Show what would be done without executing
@@ -114,7 +114,7 @@ if [[ ! "$ENVIRONMENT" =~ ^(local|staging|production)$ ]]; then
     exit 1
 fi
 
-if [[ ! "$SERVICE" =~ ^(auth|gateway|all)$ ]]; then
+if [[ ! "$SERVICE" =~ ^(auth|gateway|bookstore|all)$ ]]; then
     print_error "Invalid service: $SERVICE"
     exit 1
 fi
@@ -144,14 +144,20 @@ execute_kubectl() {
     fi
 }
 
-# Function to get namespace suffix
-get_namespace_suffix() {
+# Function to get namespace for environment
+get_namespace() {
     local env="$1"
-    if [[ "$env" == "local" ]]; then
-        echo ""
-    else
-        echo "-$env"
-    fi
+    case "$env" in
+        "local")
+            echo "gripday"
+            ;;
+        "staging")
+            echo "staging-env"
+            ;;
+        "production")
+            echo "production-env"
+            ;;
+    esac
 }
 
 # Function to scale a specific service
@@ -160,18 +166,18 @@ scale_service() {
     local replicas="$2"
     local env="$3"
     
-    local namespace_suffix=$(get_namespace_suffix "$env")
-    local namespace=""
+    local namespace=$(get_namespace "$env")
     local deployment=""
     
     case "$service" in
         "auth")
-            namespace="gripday-auth$namespace_suffix"
             deployment="auth-service"
             ;;
         "gateway")
-            namespace="gripday-gateway$namespace_suffix"
             deployment="gateway-service"
+            ;;
+        "bookstore")
+            deployment="bookstore-service"
             ;;
     esac
     
@@ -191,13 +197,13 @@ show_scaling_status() {
     local service="$1"
     local env="$2"
     
-    local namespace_suffix=$(get_namespace_suffix "$env")
+    local namespace=$(get_namespace "$env")
     
     print_status "Scaling status for $env environment:"
     print_status ""
     
     if [[ "$service" == "all" || "$service" == "auth" ]]; then
-        local auth_namespace="gripday-auth$namespace_suffix"
+        local auth_namespace="$namespace"
         print_status "Auth Service ($auth_namespace):"
         if [[ "$DRY_RUN" == "false" ]]; then
             kubectl get deployment auth-service -n "$auth_namespace" -o wide 2>/dev/null || print_warning "Auth service not found"
@@ -209,13 +215,25 @@ show_scaling_status() {
     fi
     
     if [[ "$service" == "all" || "$service" == "gateway" ]]; then
-        local gateway_namespace="gripday-gateway$namespace_suffix"
+        local gateway_namespace="$namespace"
         print_status "Gateway Service ($gateway_namespace):"
         if [[ "$DRY_RUN" == "false" ]]; then
             kubectl get deployment gateway-service -n "$gateway_namespace" -o wide 2>/dev/null || print_warning "Gateway service not found"
             kubectl get hpa -n "$gateway_namespace" 2>/dev/null || print_debug "No HPA configured for gateway service"
         else
             print_warning "[DRY-RUN] Would show gateway service status"
+        fi
+        print_status ""
+    fi
+    
+    if [[ "$service" == "all" || "$service" == "bookstore" ]]; then
+        local bookstore_namespace="$namespace"
+        print_status "Bookstore Service ($bookstore_namespace):"
+        if [[ "$DRY_RUN" == "false" ]]; then
+            kubectl get deployment bookstore-service -n "$bookstore_namespace" -o wide 2>/dev/null || print_warning "Bookstore service not found"
+            kubectl get hpa -n "$bookstore_namespace" 2>/dev/null || print_debug "No HPA configured for bookstore service"
+        else
+            print_warning "[DRY-RUN] Would show bookstore service status"
         fi
         print_status ""
     fi
@@ -226,13 +244,12 @@ configure_autoscaling() {
     local service="$1"
     local env="$2"
     
-    local namespace_suffix=$(get_namespace_suffix "$env")
+    local namespace=$(get_namespace "$env")
     
     print_status "Configuring auto-scaling for $service in $env environment..."
     
     case "$service" in
         "auth")
-            local namespace="gripday-auth$namespace_suffix"
             print_status "Applying HPA for auth service..."
             # Auth service typically doesn't need aggressive auto-scaling
             if [[ "$DRY_RUN" == "false" ]]; then
@@ -242,13 +259,17 @@ configure_autoscaling() {
             fi
             ;;
         "gateway")
-            local namespace="gripday-gateway$namespace_suffix"
             print_status "Applying HPA for gateway service..."
             execute_kubectl "apply -f gateway-service/gateway-service-hpa.yaml"
+            ;;
+        "bookstore")
+            print_status "Applying HPA for bookstore service..."
+            execute_kubectl "apply -f bookstore-service/bookstore-service-hpa.yaml"
             ;;
         "all")
             configure_autoscaling "auth" "$env"
             configure_autoscaling "gateway" "$env"
+            configure_autoscaling "bookstore" "$env"
             ;;
     esac
 }
@@ -294,6 +315,7 @@ main() {
             if [[ "$SERVICE" == "all" ]]; then
                 scale_service "auth" "$REPLICAS" "$ENVIRONMENT"
                 scale_service "gateway" "$REPLICAS" "$ENVIRONMENT"
+                scale_service "bookstore" "$REPLICAS" "$ENVIRONMENT"
             else
                 scale_service "$SERVICE" "$REPLICAS" "$ENVIRONMENT"
             fi

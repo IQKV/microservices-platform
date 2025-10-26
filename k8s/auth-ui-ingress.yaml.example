@@ -1,0 +1,154 @@
+# Example Ingress Configuration for Auth UI (Frontend)
+# 
+# This file is a template for when you deploy the Auth UI frontend application
+# (React, Vue, Angular, etc.) for login, signup, and password reset pages.
+#
+# Domains reserved:
+#   Production: auth.gripday.com
+#   Staging: auth.gripday.space
+#
+# To use:
+# 1. Deploy your Auth UI application (e.g., auth-ui-deployment.yaml)
+# 2. Copy this file to auth-ui-ingress.yaml
+# 3. Update service names and configurations as needed
+# 4. Apply: kubectl apply -f auth-ui-ingress.yaml
+
+---
+# Staging Auth UI Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-ui-ingress-staging
+  namespace: staging-env
+  labels:
+    app.kubernetes.io/name: gripday-auth-ui
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: gripday-platform
+    environment: staging
+  annotations:
+    # NGINX configuration
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # CORS for staging (allow main app and API gateway)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.space, https://api.gripday.space"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options nosniff;
+      add_header X-Frame-Options DENY;
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Referrer-Policy "strict-origin-when-cross-origin";
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.gripday.space; frame-ancestors 'none';" always;
+    
+    # Rate limiting for auth pages
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+    # TLS certificate
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - auth.gripday.space
+    secretName: auth-ui-tls-staging
+  rules:
+  - host: auth.gripday.space
+    http:
+      paths:
+      # Serve Auth UI frontend application
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-ui-service  # Your Auth UI frontend service
+            port:
+              number: 80  # Or 3000, 8080, depending on your setup
+
+---
+# Production Auth UI Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-ui-ingress-production
+  namespace: production-env
+  labels:
+    app.kubernetes.io/name: gripday-auth-ui
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: gripday-platform
+    environment: production
+  annotations:
+    # NGINX configuration
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    
+    # CORS for production (allow main app and API gateway)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.com, https://api.gripday.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Enhanced security headers for production
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Content-Type-Options nosniff;
+      add_header X-Frame-Options DENY;
+      add_header X-XSS-Protection "1; mode=block";
+      add_header Referrer-Policy "strict-origin-when-cross-origin";
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.gripday.com; frame-ancestors 'none';" always;
+    
+    # Rate limiting for production
+    nginx.ingress.kubernetes.io/rate-limit: "500"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/rate-limit-rps: "20"
+    
+    # TLS certificate
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - auth.gripday.com
+    secretName: auth-ui-tls-production
+  rules:
+  - host: auth.gripday.com
+    http:
+      paths:
+      # Serve Auth UI frontend application
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-ui-service  # Your Auth UI frontend service
+            port:
+              number: 80  # Or 3000, 8080, depending on your setup
+
+---
+# NOTES:
+# 
+# This Auth UI frontend will:
+# 1. Serve login, signup, password reset pages
+# 2. Make API calls to: https://api.gripday.com/api/v1/auth/* (through gateway)
+# 3. Handle OAuth2 redirects
+# 4. Manage JWT tokens in browser (localStorage/cookies)
+# 
+# The Auth UI should be a separate frontend application because:
+# - Security isolation from main app
+# - Independent deployment and scaling
+# - Can be served from CDN
+# - Allows different security policies
+# 
+# Example Auth UI pages:
+# - https://auth.gripday.com/login
+# - https://auth.gripday.com/signup
+# - https://auth.gripday.com/forgot-password
+# - https://auth.gripday.com/reset-password
+# - https://auth.gripday.com/verify-email
+# - https://auth.gripday.com/oauth/callback

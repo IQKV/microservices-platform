@@ -220,7 +220,7 @@ backup_databases() {
         
         # Backup auth database
         print_status "Backing up auth database..."
-        kubectl exec -n gripday-auth-production deployment/auth-postgres -- \
+        kubectl exec -n production-env deployment/auth-postgres -- \
             pg_dump -U gripday_user_prod gripday_auth_production > "$backup_dir/auth_db_backup.sql"
         
         print_status "Database backup completed: $backup_dir"
@@ -242,13 +242,23 @@ update_production_image_tags() {
         sed "s|gripday/gateway-service:latest|gripday/gateway-service:$IMAGE_TAG|g" \
             gateway-service/gateway-service-deployment.yaml > /tmp/gateway-service-deployment-production.yaml
         
+        sed "s|gripday/bookstore-service:latest|gripday/bookstore-service:$IMAGE_TAG|g" \
+            bookstore-service/bookstore-service-deployment.yaml > /tmp/bookstore-service-deployment-production.yaml
+        
         # Update namespace references for production
-        sed -i 's/namespace: gripday-auth$/namespace: gripday-auth-production/g' /tmp/auth-service-deployment-production.yaml
-        sed -i 's/namespace: gripday-gateway$/namespace: gripday-gateway-production/g' /tmp/gateway-service-deployment-production.yaml
+        sed -i 's/namespace: gripday-auth$/namespace: production-env/g' /tmp/auth-service-deployment-production.yaml
+        sed -i 's/namespace: gripday-gateway$/namespace: production-env/g' /tmp/gateway-service-deployment-production.yaml
+        sed -i 's/namespace: gripday-bookstore$/namespace: production-env/g' /tmp/bookstore-service-deployment-production.yaml
+        
+        # Update environment variables for production
+        sed -i 's/value: "local"/value: "production"/g' /tmp/auth-service-deployment-production.yaml
+        sed -i 's/value: "local"/value: "production"/g' /tmp/gateway-service-deployment-production.yaml
+        sed -i 's/value: "local"/value: "production"/g' /tmp/bookstore-service-deployment-production.yaml
         
         # Update resource limits for production
-        sed -i 's/replicas: 2/replicas: 5/g' /tmp/auth-service-deployment-production.yaml
-        sed -i 's/replicas: 3/replicas: 8/g' /tmp/gateway-service-deployment-production.yaml
+        sed -i 's/replicas: 2/replicas: 3/g' /tmp/auth-service-deployment-production.yaml
+        sed -i 's/replicas: 3/replicas: 5/g' /tmp/gateway-service-deployment-production.yaml
+        sed -i 's/replicas: 2/replicas: 3/g' /tmp/bookstore-service-deployment-production.yaml
     else
         print_warning "[DRY-RUN] Would update image tags and create production deployment files"
     fi
@@ -278,6 +288,7 @@ setup_production_namespaces() {
     
     execute_kubectl "apply -f auth-service/namespace.yaml"
     execute_kubectl "apply -f gateway-service/namespace.yaml"
+    execute_kubectl "apply -f bookstore-service/namespace.yaml"
     
     print_status "Production namespaces ready"
 }
@@ -291,23 +302,25 @@ deploy_production_infrastructure() {
     execute_kubectl "apply -f auth-service/secret.yaml"
     execute_kubectl "apply -f gateway-service/configmap.yaml"
     execute_kubectl "apply -f gateway-service/secret.yaml"
+    execute_kubectl "apply -f bookstore-service/configmap.yaml"
+    execute_kubectl "apply -f bookstore-service/secret.yaml"
     
     # Deploy databases (if not already deployed)
     print_status "Ensuring database infrastructure is ready..."
     
     # Note: In production, databases might be managed externally
     # This is a simplified example
-    local postgres_prod=$(sed 's/namespace: gripday-auth$/namespace: gripday-auth-production/g' auth-service/auth-postgres-deployment.yaml)
+    local postgres_prod=$(sed 's/namespace: gripday-auth$/namespace: production-env/g' auth-service/auth-postgres-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_prod" | kubectl apply -f -
     fi
     
-    local redis_auth_prod=$(sed 's/namespace: gripday-auth$/namespace: gripday-auth-production/g' auth-service/auth-redis-deployment.yaml)
+    local redis_auth_prod=$(sed 's/namespace: gripday-auth$/namespace: production-env/g' auth-service/auth-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_auth_prod" | kubectl apply -f -
     fi
     
-    local redis_gateway_prod=$(sed 's/namespace: gripday-gateway$/namespace: gripday-gateway-production/g' gateway-service/gateway-redis-deployment.yaml)
+    local redis_gateway_prod=$(sed 's/namespace: gripday-gateway$/namespace: production-env/g' gateway-service/gateway-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_gateway_prod" | kubectl apply -f -
     fi
@@ -324,7 +337,7 @@ deploy_production_services() {
         execute_kubectl "apply -f /tmp/auth-service-deployment-production.yaml"
         
         # Wait for rollout to complete
-        kubectl rollout status deployment/auth-service -n gripday-auth-production --timeout=600s
+        kubectl rollout status deployment/auth-service -n production-env --timeout=600s
     fi
     
     # Deploy gateway service
@@ -332,15 +345,27 @@ deploy_production_services() {
         execute_kubectl "apply -f /tmp/gateway-service-deployment-production.yaml"
         
         # Wait for rollout to complete
-        kubectl rollout status deployment/gateway-service -n gripday-gateway-production --timeout=600s
+        kubectl rollout status deployment/gateway-service -n production-env --timeout=600s
+    fi
+    
+    # Deploy bookstore service
+    if [[ "$DRY_RUN" == "false" ]]; then
+        execute_kubectl "apply -f /tmp/bookstore-service-deployment-production.yaml"
+        
+        # Wait for rollout to complete
+        kubectl rollout status deployment/bookstore-service -n production-env --timeout=600s
     fi
     
     # Deploy services and ingress
     execute_kubectl "apply -f auth-service/auth-service-service.yaml"
     execute_kubectl "apply -f gateway-service/gateway-service-service.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-service-service.yaml"
     execute_kubectl "apply -f gateway-service/gateway-service-hpa.yaml"
+    execute_kubectl "apply -f bookstore-service/bookstore-service-hpa.yaml"
     execute_kubectl "apply -f gateway-service/network-policy.yaml"
-    execute_kubectl "apply -f auth-service/auth-service-ingress.yaml"
+    execute_kubectl "apply -f bookstore-service/network-policy.yaml"
+    execute_kubectl "apply -f auth-service/network-policy.yaml"
+    # Only gateway has ingress in production (API Gateway pattern)
     execute_kubectl "apply -f gateway-service/gateway-service-ingress.yaml"
     
     print_status "Production services deployed successfully"
@@ -357,16 +382,19 @@ verify_production_deployment() {
     
     # Wait for all pods to be ready
     print_status "Waiting for auth service pods to be ready..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth-production --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n production-env --timeout=300s
     
     print_status "Waiting for gateway service pods to be ready..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n gripday-gateway-production --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n production-env --timeout=300s
+    
+    print_status "Waiting for bookstore service pods to be ready..."
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-bookstore-service -n production-env --timeout=300s
     
     # Perform health checks
     print_status "Performing health checks..."
     
     # Check auth service health
-    local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth-production -o jsonpath='{.items[*].status.phase}')
+    local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-auth-service -n production-env -o jsonpath='{.items[*].status.phase}')
     if [[ "$auth_health" =~ "Running" ]]; then
         print_status "✓ Auth service health check passed"
     else
@@ -375,7 +403,7 @@ verify_production_deployment() {
     fi
     
     # Check gateway service health
-    local gateway_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-gateway-service -n gripday-gateway-production -o jsonpath='{.items[*].status.phase}')
+    local gateway_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-gateway-service -n production-env -o jsonpath='{.items[*].status.phase}')
     if [[ "$gateway_health" =~ "Running" ]]; then
         print_status "✓ Gateway service health check passed"
     else
@@ -386,16 +414,18 @@ verify_production_deployment() {
     print_status "Production deployment verification completed successfully!"
     print_status ""
     print_status "Production URLs:"
+    print_status "  Main App: https://gripday.com"
     print_status "  Auth Service: https://auth.gripday.com"
     print_status "  Gateway Service: https://api.gripday.com"
     print_status ""
     print_status "Monitoring and logs:"
-    print_status "  kubectl logs -f deployment/auth-service -n gripday-auth-production"
-    print_status "  kubectl logs -f deployment/gateway-service -n gripday-gateway-production"
+    print_status "  kubectl logs -f deployment/auth-service -n production-env"
+    print_status "  kubectl logs -f deployment/gateway-service -n production-env"
     
     # Cleanup temporary files
     rm -f /tmp/auth-service-deployment-production.yaml
     rm -f /tmp/gateway-service-deployment-production.yaml
+    rm -f /tmp/bookstore-service-deployment-production.yaml
 }
 
 # Main execution

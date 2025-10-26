@@ -20,7 +20,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: ingress-nginx
+          app.kubernetes.io/name: ingress-nginx
     ports:
     - protocol: TCP
       port: 8080
@@ -28,15 +28,13 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: monitoring
+          app.kubernetes.io/name: monitoring
     ports:
     - protocol: TCP
       port: 8080
   # Allow ingress from same namespace (for service mesh)
   - from:
-    - namespaceSelector:
-        matchLabels:
-          name: gripday-gateway
+    - podSelector: {}
     ports:
     - protocol: TCP
       port: 8080
@@ -45,10 +43,24 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: gripday-auth
+          app.kubernetes.io/part-of: gripday-platform
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gripday-auth-service
     ports:
     - protocol: TCP
       port: 8081
+  # Allow egress to bookstore service
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: gripday-platform
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gripday-bookstore-service
+    ports:
+    - protocol: TCP
+      port: 8082
   # Allow egress to Redis
   - to:
     - podSelector:
@@ -67,7 +79,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          name: monitoring
+          app.kubernetes.io/name: monitoring
     ports:
     - protocol: TCP
       port: 4317  # OTLP
@@ -107,7 +119,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          name: monitoring
+          app.kubernetes.io/name: monitoring
     ports:
     - protocol: TCP
       port: 6379

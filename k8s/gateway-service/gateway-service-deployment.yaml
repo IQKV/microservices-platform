@@ -83,7 +83,7 @@ spec:
         
         # JVM Configuration for reactive workloads
         - name: JAVA_OPTS
-          value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC"
+          value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
         
         volumeMounts:
         - name: config-volume

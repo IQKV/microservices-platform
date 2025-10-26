@@ -171,8 +171,8 @@ http://api.local.gripday.com/actuator/*        → Gateway Health/Metrics
 
 #### Staging Environment
 ```
-https://api.staging.gripday.com/api/v1/auth/*  → Auth Service
-https://api.staging.gripday.com/actuator/*     → Gateway Health/Metrics
+https://api.gripday.space/api/v1/auth/*  → Auth Service
+https://api.gripday.space/actuator/*     → Gateway Health/Metrics
 ```
 
 #### Production Environment

@@ -137,6 +137,10 @@ apply_configs() {
     execute_kubectl "$ACTION -f gateway-service/configmap.yaml"
     execute_kubectl "$ACTION -f gateway-service/secret.yaml"
     
+    # Apply bookstore service configs
+    execute_kubectl "$ACTION -f bookstore-service/configmap.yaml"
+    execute_kubectl "$ACTION -f bookstore-service/secret.yaml"
+    
     print_status "ConfigMaps and Secrets for $env environment processed successfully"
 }
 
@@ -146,13 +150,19 @@ verify_configs() {
     
     print_status "Verifying ConfigMaps and Secrets for $env environment..."
     
-    local namespace_suffix=""
-    if [[ "$env" != "local" ]]; then
-        namespace_suffix="-$env"
-    fi
+    local auth_namespace="gripday-auth"
+    local gateway_namespace="gripday-gateway"
+    local bookstore_namespace="gripday-bookstore"
     
-    local auth_namespace="gripday-auth$namespace_suffix"
-    local gateway_namespace="gripday-gateway$namespace_suffix"
+    if [[ "$env" == "staging" ]]; then
+        auth_namespace="staging-env"
+        gateway_namespace="staging-env"
+        bookstore_namespace="staging-env"
+    elif [[ "$env" == "production" ]]; then
+        auth_namespace="production-env"
+        gateway_namespace="production-env"
+        bookstore_namespace="production-env"
+    fi
     
     if [[ "$DRY_RUN" == "false" && "$ACTION" == "apply" ]]; then
         # Verify auth service configs
@@ -179,6 +189,19 @@ verify_configs() {
             print_status "✓ Gateway service Secret exists in $gateway_namespace"
         else
             print_error "✗ Gateway service Secret not found in $gateway_namespace"
+        fi
+        
+        # Verify bookstore service configs
+        if kubectl get configmap bookstore-service-config -n "$bookstore_namespace" &>/dev/null; then
+            print_status "✓ Bookstore service ConfigMap exists in $bookstore_namespace"
+        else
+            print_error "✗ Bookstore service ConfigMap not found in $bookstore_namespace"
+        fi
+        
+        if kubectl get secret bookstore-service-secrets -n "$bookstore_namespace" &>/dev/null; then
+            print_status "✓ Bookstore service Secret exists in $bookstore_namespace"
+        else
+            print_error "✗ Bookstore service Secret not found in $bookstore_namespace"
         fi
     fi
 }

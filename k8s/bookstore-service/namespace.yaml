@@ -11,19 +11,15 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-bookstore-staging
+  name: staging-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
-    app.kubernetes.io/component: bookstore
     app.kubernetes.io/part-of: gripday-platform
     environment: staging
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-bookstore-production
+  name: production-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
-    app.kubernetes.io/component: bookstore
     app.kubernetes.io/part-of: gripday-platform
     environment: production
