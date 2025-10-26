@@ -1,0 +1,11 @@
+# Minikube deployment artifacts
+*.log
+*.tmp
+
+# Environment-specific overrides
+local-overrides.yaml
+custom-config.yaml
+
+# Backup files
+*.bak
+*.old
