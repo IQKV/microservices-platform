@@ -120,6 +120,8 @@ gripday:
     templates:
       verification-subject: "[STAGING] Verify your Gripday account"
       verification-template: "email/verification.html"
+      password-reset-subject: "[STAGING] Reset your Gripday password"
+      password-reset-template: "email/password-reset.html"
     security:
       password:
         encoder-strength: 12

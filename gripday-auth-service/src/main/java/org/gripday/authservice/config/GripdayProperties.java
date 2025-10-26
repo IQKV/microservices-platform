@@ -120,7 +120,9 @@ public record GripdayProperties(
 
         public record Templates(
             @NotBlank String verificationSubject,
-            @NotBlank String verificationTemplate
+            @NotBlank String verificationTemplate,
+            String passwordResetSubject,
+            String passwordResetTemplate
         ) {}
     }
 

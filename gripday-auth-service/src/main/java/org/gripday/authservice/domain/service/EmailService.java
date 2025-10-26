@@ -110,6 +110,54 @@ public class EmailService implements EmailOperations {
     }
     
     /**
+     * Send password reset email with a reset link.
+     */
+    public void sendPasswordResetEmail(User user, String token) {
+        try {
+            var mimeMessage = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            // Use verification fromEmail settings for outbound emails
+            var emailConfig = gripdayProperties.email();
+            var verificationConfig = emailConfig.verification();
+
+            helper.setFrom(verificationConfig.fromEmail(), verificationConfig.fromName());
+            helper.setTo(user.getEmail());
+            var templatesConfig = emailConfig.templates();
+            var subject = templatesConfig.passwordResetSubject() != null && !templatesConfig.passwordResetSubject().isBlank()
+                ? templatesConfig.passwordResetSubject()
+                : "Password reset request";
+            helper.setSubject(subject);
+
+            var resetUrl = buildPasswordResetUrl(token);
+            // Use Thymeleaf template for HTML email rendering
+            var context = new Context(Locale.getDefault());
+            context.setVariable("user", user);
+            context.setVariable("resetUrl", resetUrl);
+            context.setVariable("fromName", verificationConfig.fromName());
+
+            var templateName = templatesConfig.passwordResetTemplate() != null && !templatesConfig.passwordResetTemplate().isBlank()
+                ? templatesConfig.passwordResetTemplate()
+                : "password-reset";
+            var htmlContent = templateEngine.process(templateName, context);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            throw new EmailServiceException("Failed to send password reset email", e);
+        }
+    }
+
+    /**
+     * Build password reset URL based on base URL configuration.
+     */
+    public String buildPasswordResetUrl(String token) {
+        var baseUrl = gripdayProperties.email().verification().baseUrl();
+        var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        return cleanBaseUrl + "/reset-password?token=" + token;
+    }
+    
+    /**
      * Custom exception for email service errors.
      */
     public static class EmailServiceException extends RuntimeException {

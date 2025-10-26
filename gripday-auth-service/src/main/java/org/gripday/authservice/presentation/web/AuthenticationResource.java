@@ -10,11 +10,15 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.gripday.authservice.domain.service.JwtService;
 import org.gripday.authservice.domain.service.AuthenticationService;
 import org.gripday.authservice.domain.service.UserRegistrationService;
 import org.gripday.authservice.presentation.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,12 +32,15 @@ public class AuthenticationResource {
     
     private final AuthenticationService authenticationService;
     private final UserRegistrationService userRegistrationService;
+    private final JwtService jwtService;
     
     public AuthenticationResource(
             AuthenticationService authenticationService,
-            UserRegistrationService userRegistrationService) {
+            UserRegistrationService userRegistrationService,
+            JwtService jwtService) {
         this.authenticationService = authenticationService;
         this.userRegistrationService = userRegistrationService;
+        this.jwtService = jwtService;
     }
     
     @Operation(
@@ -305,6 +312,184 @@ public class AuthenticationResource {
         
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/reset-password")
+    @Operation(
+        summary = "Reset password",
+        description = "Reset user password using a valid reset token.",
+        tags = {"Authentication"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Password has been reset successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input or token", ref = "#/components/responses/BadRequest")
+    })
+    public ResponseEntity<Void> resetPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Reset password request containing token and new password",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ResetPasswordRequest.class)
+                )
+            )
+            @Valid @RequestBody ResetPasswordRequest request,
+            HttpServletRequest httpRequest) {
+        var clientIp = getClientIpAddress(httpRequest);
+        authenticationService.resetPassword(request.token(), request.newPassword(), clientIp);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/logout-all")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Logout from all devices",
+        description = "Invalidate all refresh tokens and sessions for the currently authenticated user.",
+        tags = {"Authentication"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "All sessions and refresh tokens invalidated"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized", ref = "#/components/responses/Unauthorized")
+    })
+    public ResponseEntity<Void> logoutFromAllDevices(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken token) {
+            var subject = token.getToken().getSubject();
+            try {
+                var userId = Long.parseLong(subject);
+                authenticationService.logoutFromAllDevices(userId);
+                return ResponseEntity.ok().build();
+            } catch (NumberFormatException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @PostMapping("/validate")
+    @Operation(
+        summary = "Validate JWT token",
+        description = "Validate a JWT (access or refresh) and return its status, metadata, and extracted user context.",
+        tags = {"Authentication"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Validation result returned",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ValidateTokenResponse.class),
+                examples = {
+                    @ExampleObject(
+                        name = "Valid Access Token",
+                        summary = "Active access token with user context",
+                        value = """
+                        {
+                          "active": true,
+                          "tokenId": "a1b2c3d4",
+                          "tokenType": "access",
+                          "issuedAt": "2025-10-26T09:45:12Z",
+                          "expiresAt": "2025-10-26T10:00:12Z",
+                          "user": {
+                            "userId": 1,
+                            "username": "john.doe",
+                            "email": "john.doe@example.com",
+                            "roles": ["USER"],
+                            "permissions": [],
+                            "firstName": "John",
+                            "lastName": "Doe",
+                            "tenantId": "tenant-123",
+                            "customClaims": {}
+                          }
+                        }
+                        """
+                    ),
+                    @ExampleObject(
+                        name = "Invalid Token",
+                        summary = "Inactive/invalid token",
+                        value = """
+                        {
+                          "active": false,
+                          "tokenId": null,
+                          "tokenType": null,
+                          "issuedAt": null,
+                          "expiresAt": null,
+                          "user": null
+                        }
+                        """
+                    )
+                }
+            )
+        )
+    })
+    public ResponseEntity<ValidateTokenResponse> validateToken(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Token validation request",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ValidateTokenRequest.class)
+                )
+            )
+            @Valid @RequestBody ValidateTokenRequest request) {
+        try {
+            Jwt jwt = jwtService.validateToken(request.token());
+            var user = jwtService.extractUserContext(jwt);
+            var response = new ValidateTokenResponse(
+                true,
+                jwt.getId(),
+                jwt.getClaimAsString("type"),
+                jwt.getIssuedAt(),
+                jwt.getExpiresAt(),
+                user
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            var response = new ValidateTokenResponse(false, null, null, null, null, null);
+            return ResponseEntity.ok(response);
+        }
+    }
+    
+    @GetMapping("/me")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Get current authenticated user",
+        description = "Return the user context derived from the bearer JWT used to authenticate the request.",
+        tags = {"Authentication"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "User context returned",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = UserContext.class),
+                examples = @ExampleObject(
+                    name = "User Context",
+                    summary = "Authenticated user information",
+                    value = """
+                    {
+                      "userId": 1,
+                      "username": "john.doe",
+                      "email": "john.doe@example.com",
+                      "roles": ["USER"],
+                      "permissions": [],
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "tenantId": "tenant-123",
+                      "customClaims": {}
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized", ref = "#/components/responses/Unauthorized")
+    })
+    public ResponseEntity<UserContext> getCurrentUser(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken token) {
+            var user = jwtService.extractUserContext(token.getToken());
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     
     @Operation(
         summary = "Health check", 
@@ -314,6 +499,33 @@ public class AuthenticationResource {
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> health() {
         return ResponseEntity.ok(new HealthResponse("UP", "Authentication service is running"));
+    }
+    
+    @PostMapping("/forgot-password")
+    @Operation(
+        summary = "Initiate password reset",
+        description = "Start the password reset flow by sending a reset email if the account exists.",
+        tags = {"Authentication"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "If the email exists, a password reset email will be sent"),
+        @ApiResponse(responseCode = "400", description = "Invalid input", ref = "#/components/responses/BadRequest")
+    })
+    public ResponseEntity<Void> forgotPassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Forgot password request containing user email",
+                required = true,
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ForgotPasswordRequest.class)
+                )
+            )
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest) {
+        var ipAddress = getClientIpAddress(httpRequest);
+        var userAgent = httpRequest.getHeader("User-Agent");
+        authenticationService.initiatePasswordReset(request.email(), ipAddress, userAgent);
+        return ResponseEntity.ok().build();
     }
     
     /**
