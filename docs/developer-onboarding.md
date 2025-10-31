@@ -36,7 +36,7 @@ git clone <repository-url>
 cd gripday-platform
 
 # Start infrastructure
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # Build and start services
 mvn clean package
@@ -664,7 +664,7 @@ public class AuthenticationMetrics {
 ### Local Development
 ```bash
 # Start infrastructure
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # Run services in development mode
 cd gripday-auth-service
@@ -677,10 +677,10 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 ### Docker Compose
 ```bash
 # Build and start all services
-docker-compose up --build
+docker compose up --build
 
 # Scale services
-docker-compose up --scale gateway-service=2
+docker compose up --scale gateway-service=2
 
 # View logs
 docker-compose logs -f auth-service
@@ -793,7 +793,7 @@ SELECT tenant_id, COUNT(*) as user_count FROM users GROUP BY tenant_id;
 
 ### Development Tools
 - **Validation Scripts**: `./scripts/validate-platform.sh`
-- **Docker Compose**: `docker-compose up -d`
+- **Docker Compose**: `docker compose up -d`
 - **Kubernetes**: `./k8s/deploy-local.sh`
 
 ### Community

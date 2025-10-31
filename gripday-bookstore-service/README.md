@@ -30,7 +30,7 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
 
 1. **Start dependencies:**
    ```bash
-   docker-compose up -d bookstore-db bookstore-redis
+   docker compose up -d bookstore-db bookstore-redis
    ```
 
 2. **Run the application:**
@@ -47,10 +47,10 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
 
 ```bash
 # Build and run all services
-docker-compose up --build
+docker compose up --build
 
 # Run in background
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f bookstore-service
@@ -125,11 +125,11 @@ OpenAPI documentation is available at `/swagger-ui.html` when the application is
 ### Staging
 
 ```bash
-docker-compose -f docker-compose.staging.yml up -d
+docker compose -f docker-compose.staging.yml up -d
 ```
 
 ### Production
 
 ```bash
-docker-compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml up -d
 ```

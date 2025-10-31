@@ -3240,8 +3240,8 @@ fetch('/api/v1/auth/login', {
 **Quick Development Setup:**
 ```bash
 # 1. Start backend services
-cd gripday-gateway-service && docker-compose up -d
-cd ../gripday-auth-service && docker-compose up -d
+cd gripday-gateway-service && docker compose up -d
+cd ../gripday-auth-service && docker compose up -d
 
 # 2. Start Vite development server
 cd ../frontend
@@ -5327,7 +5327,7 @@ JWT-based authentication and user management microservice.
 
 ```bash
 # Start dependencies
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # Run service
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
@@ -5467,7 +5467,7 @@ CREATE TABLE authorities (
 
 1. **Start dependencies:**
    ```bash
-   docker-compose up -d postgres redis
+   docker compose up -d postgres redis
    ```
 
 2. **Run service:**
@@ -5935,13 +5935,13 @@ echo "Setting up local development environment..."
 # Start observability stack first
 echo "Starting observability stack..."
 cd platform-observability
-docker-compose up -d
+docker compose up -d
 cd ..
 
 # Start auth service
 echo "Starting auth service..."
 cd gripday-auth-service
-docker-compose up -d
+docker compose up -d
 cd ..
 
 # Wait for auth service to be ready
@@ -5951,7 +5951,7 @@ echo "Waiting for auth service to be ready..."
 # Start gateway service
 echo "Starting gateway service..."
 cd gripday-gateway-service
-docker-compose up -d
+docker compose up -d
 cd ..
 
 # Wait for gateway service to be ready
@@ -5975,7 +5975,7 @@ set -euo pipefail
 
 echo "Starting auth service..."
 cd gripday-auth-service
-docker-compose up -d
+docker compose up -d
 cd ..
 
 echo "Auth service started successfully!"
@@ -5991,7 +5991,7 @@ set -euo pipefail
 
 echo "Starting gateway service..."
 cd gripday-gateway-service
-docker-compose up -d
+docker compose up -d
 cd ..
 
 echo "Gateway service started successfully!"
@@ -6047,7 +6047,7 @@ cd ..
 echo "Deploying auth service..."
 cd gripday-auth-service
 export VERSION=$VERSION
-docker-compose -f docker-compose.staging.yml up -d
+docker compose -f docker-compose.staging.yml up -d
 cd ..
 
 # Wait for auth service to be ready
@@ -6058,7 +6058,7 @@ echo "Waiting for auth service to be ready..."
 echo "Deploying gateway service..."
 cd gripday-gateway-service
 export VERSION=$VERSION
-docker-compose -f docker-compose.staging.yml up -d
+docker compose -f docker-compose.staging.yml up -d
 cd ..
 
 # Wait for gateway service to be ready
@@ -6067,9 +6067,9 @@ echo "Waiting for gateway service to be ready..."
 
 echo "Staging deployment complete!"
 echo "Auth Service Status:"
-cd gripday-auth-service && docker-compose -f docker-compose.staging.yml ps && cd ..
+cd gripday-auth-service && docker compose -f docker-compose.staging.yml ps && cd ..
 echo "Gateway Service Status:"
-cd gripday-gateway-service && docker-compose -f docker-compose.staging.yml ps && cd ..
+cd gripday-gateway-service && docker compose -f docker-compose.staging.yml ps && cd ..
 ```
 
 **Production Deployment Script:**
@@ -6124,14 +6124,14 @@ docker tag gripday/gateway-service:$RELEASE_VERSION gripday/gateway-service:late
 # Deploy using Docker Compose
 echo "Deploying to production with Docker Compose..."
 export VERSION=$RELEASE_VERSION
-docker-compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml up -d
 
 # Wait for services to be ready
 echo "Waiting for services to be ready..."
 ./scripts/wait-for-services.sh
 
 echo "Production deployment complete!"
-docker-compose -f docker-compose.production.yml ps
+docker compose -f docker-compose.production.yml ps
 ```
 
 **Service Health Check Script:**
@@ -8158,7 +8158,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Start services
-        run: docker-compose up -d
+        run: docker compose up -d
         
       - name: Wait for services
         run: sleep 30
@@ -8431,7 +8431,7 @@ command -v docker >/dev/null 2>&1 || { echo "Docker required"; exit 1; }
 
 # Start dependencies
 echo "Starting PostgreSQL and Redis..."
-docker-compose -f docker-compose.local.yml up -d postgres redis
+docker compose -f docker-compose.local.yml up -d postgres redis
 
 # Wait for services
 echo "Waiting for services to be ready..."

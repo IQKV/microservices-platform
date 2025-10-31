@@ -53,7 +53,7 @@ git clone <repository-url> gripday-platform
 cd gripday-platform
 
 # Start infrastructure services
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 ```
 
 ### 2. Build and Start Services
@@ -288,7 +288,7 @@ See [Environment Variables Guide](docs/configuration/environment-variables.md) f
 ### Docker Compose Development
 ```bash
 # Start all services with Docker
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f auth-service

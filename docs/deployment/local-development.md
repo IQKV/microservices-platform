@@ -37,7 +37,7 @@ cd gripday-platform
 ### 2. Start Infrastructure Services
 ```bash
 # Start PostgreSQL and Redis
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # Verify services are running
 docker-compose ps
@@ -96,7 +96,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ### Full Platform Deployment
 ```bash
 # Start all services with Docker Compose
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f
@@ -112,11 +112,11 @@ docker-compose down -v
 ```bash
 # Auth service only
 cd gripday-auth-service
-docker-compose up -d
+docker compose up -d
 
 # Gateway service only
 cd gripday-gateway-service
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Environment Configuration

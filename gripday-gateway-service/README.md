@@ -15,7 +15,7 @@ API Gateway providing intelligent routing, JWT authentication, rate limiting, an
 1. **Start dependencies:**
 ```bash
 cd gripday-gateway-service
-docker-compose up -d redis
+docker compose up -d redis
 ```
 
 2. **Ensure Auth Service is running:**
@@ -171,7 +171,7 @@ gripday:
 ### Docker Compose
 ```bash
 # Start gateway with dependencies
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f gateway-service

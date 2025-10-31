@@ -237,7 +237,7 @@ curl http://localhost:8081/actuator/metrics/jvm.memory.used
 curl http://localhost:8081/actuator/metrics/jvm.gc.pause
 
 # Adjust JVM settings if needed
-JAVA_OPTS="-Xmx1g -Xms512m" docker-compose up auth-service
+JAVA_OPTS="-Xmx1g -Xms512m" docker compose up auth-service
 ```
 
 ### Rate Limiting Issues

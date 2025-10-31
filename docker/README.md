@@ -23,7 +23,7 @@ This directory contains Docker configurations for the Gripday microservices plat
 4. **Or use Docker Compose directly:**
    ```bash
    # Build and start all services
-   docker-compose up -d --build
+   docker compose up -d --build
    
    # View logs
    docker-compose logs -f
@@ -43,12 +43,12 @@ This directory contains Docker configurations for the Gripday microservices plat
 
 ### Staging
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
 ```
 
 ### Production
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
 ## Individual Service Development
@@ -56,13 +56,13 @@ docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ### Auth Service Only
 ```bash
 cd gripday-auth-service
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Gateway Service Only
 ```bash
 cd gripday-gateway-service
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Health Checks

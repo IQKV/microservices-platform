@@ -32,7 +32,7 @@ This directory contains the complete observability stack for the Gripday microse
 1. **Start the observability stack**:
    ```bash
    cd docker/observability
-   docker-compose -f docker-compose.observability.yml up -d
+   docker compose -f docker-compose.observability.yml up -d
    ```
 
 2. **Start the microservices**:
@@ -128,7 +128,7 @@ This directory contains the complete observability stack for the Gripday microse
 ### Health Checks
 ```bash
 # Check observability stack health
-docker-compose -f docker-compose.observability.yml ps
+docker compose -f docker-compose.observability.yml ps
 
 # Check service health
 curl http://localhost:8081/actuator/health  # Auth service

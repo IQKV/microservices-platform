@@ -17,7 +17,7 @@ The Bookstore Service uses a multi-stage Docker build with Java 21 and includes:
 
 ```bash
 # Start all services (bookstore, PostgreSQL, Redis)
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f bookstore-service
@@ -230,11 +230,11 @@ All environments include comprehensive health checks:
 ### Local Development
 ```bash
 # Start development environment
-docker-compose up -d
+docker compose up -d
 
 # Rebuild after code changes
 docker-compose build bookstore-service
-docker-compose up -d bookstore-service
+docker compose up -d bookstore-service
 
 # View real-time logs
 docker-compose logs -f bookstore-service
@@ -246,7 +246,7 @@ docker-compose logs -f bookstore-service
 docker-compose exec bookstore-service ./mvnw test
 
 # Integration testing
-docker-compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit
+docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit
 ```
 
 ### Deployment

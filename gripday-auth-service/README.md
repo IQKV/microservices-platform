@@ -15,7 +15,7 @@ Centralized authentication and user management microservice providing JWT-based 
 1. **Start dependencies:**
 ```bash
 cd gripday-auth-service
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 ```
 
 2. **Run database migrations:**
@@ -237,7 +237,7 @@ GRIPDAY_TENANT_DEFAULT_ID=default
 ### Docker Compose
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # View logs
 docker-compose logs -f auth-service

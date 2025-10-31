@@ -45,7 +45,7 @@ nano .env  # or your preferred editor
 
 ```bash
 # Start all services
-docker-compose up -d --build
+docker compose up -d --build
 
 # Check service status
 docker-compose ps
@@ -130,7 +130,7 @@ Both services use multi-stage builds for optimization:
 ### Local Development
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **Features:**
@@ -142,7 +142,7 @@ docker-compose up -d
 ### Staging
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
 ```
 
 **Features:**
@@ -154,7 +154,7 @@ docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
 ### Production
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
 **Features:**
@@ -203,7 +203,7 @@ healthcheck:
 
 ```bash
 cd gripday-auth-service
-docker-compose up -d
+docker compose up -d
 ```
 
 **Includes:**
@@ -215,7 +215,7 @@ docker-compose up -d
 
 ```bash
 cd gripday-gateway-service
-docker-compose up -d
+docker compose up -d
 ```
 
 **Includes:**
@@ -343,7 +343,7 @@ docker-compose ps
 docker-compose restart [service-name]
 
 # Rebuild and restart
-docker-compose up -d --build [service-name]
+docker compose up -d --build [service-name]
 ```
 
 ### Performance Tuning
@@ -401,7 +401,7 @@ docker-compose pull
 docker-compose build --no-cache
 
 # Rolling update (production)
-docker-compose up -d --no-deps [service-name]
+docker compose up -d --no-deps [service-name]
 ```
 
 ### Cleanup
@@ -455,5 +455,5 @@ docker build -t gripday/auth-service:${VERSION} -f gripday-auth-service/Dockerfi
 docker push gripday/auth-service:${VERSION}
 
 # Deploy with specific version
-docker-compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml up -d
 ```
