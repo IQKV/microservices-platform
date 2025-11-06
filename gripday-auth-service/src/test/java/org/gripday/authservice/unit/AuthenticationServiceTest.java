@@ -1,8 +1,10 @@
 package org.gripday.authservice.unit;
 
 import org.gripday.authservice.config.RedisConfiguration.TenantAwareSessionService;
+import org.gripday.authservice.config.RedisConfiguration.TenantAwareRedisService;
 import org.gripday.authservice.domain.service.AccountLockoutService;
 import org.gripday.authservice.domain.service.AuthenticationService;
+import org.gripday.authservice.domain.service.EmailService;
 import org.gripday.authservice.domain.service.JwtService;
 import org.gripday.authservice.domain.service.SecurityAuditService;
 import org.gripday.authservice.infrastructure.entity.Authority;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import java.time.Instant;
 import java.time.Duration;
@@ -57,6 +60,15 @@ class AuthenticationServiceTest {
     @Mock
     private TenantAwareSessionService sessionService;
 
+    @Mock
+    private TenantAwareRedisService redisService;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private MeterRegistry meterRegistry;
+
     private AuthenticationService authenticationService;
     private User testUser;
 
@@ -64,7 +76,8 @@ class AuthenticationServiceTest {
     void setUp() {
         authenticationService = new AuthenticationService(
             userRepository, passwordEncoder, jwtService, accountLockoutService,
-            securityAuditService, inputSanitizer, sessionService
+            securityAuditService, inputSanitizer, sessionService, redisService,
+            emailService, meterRegistry
         );
 
         testUser = createTestUser(1L, "testuser", "test@example.com", "tenant-1");

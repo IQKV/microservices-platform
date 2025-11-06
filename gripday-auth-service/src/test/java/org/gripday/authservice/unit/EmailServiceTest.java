@@ -48,7 +48,8 @@ class EmailServiceTest {
             "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", java.time.Duration.ofHours(24), 3
         );
         var templatesConfig = new GripdayProperties.Email.Templates(
-            "Verify your Gripday account", "email/verification.html"
+            "Verify your Gripday account", "email/verification.html",
+            "Reset your password", "email/password-reset.html"
         );
         var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
         
@@ -85,7 +86,8 @@ class EmailServiceTest {
             "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", java.time.Duration.ofHours(24), 3
         );
         var templatesConfig = new GripdayProperties.Email.Templates(
-            "Verify your Gripday account", "email/verification.html"
+            "Verify your Gripday account", "email/verification.html",
+            "Reset your password", "email/password-reset.html"
         );
         var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
         

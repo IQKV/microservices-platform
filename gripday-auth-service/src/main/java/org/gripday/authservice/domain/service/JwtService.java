@@ -141,6 +141,40 @@ public class JwtService {
     }
     
     /**
+     * Revoke all refresh tokens for a specific user.
+     */
+    public void revokeAllRefreshTokensForUser(String userId) {
+        var pattern = "refresh:token:" + userId + ":*";
+        var keys = redisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+        
+        // Also add user to revoked refresh tokens set
+        var revokedKey = "revoked:refresh:" + userId;
+        redisTemplate.opsForValue().set(revokedKey, String.valueOf(Instant.now().getEpochSecond()));
+    }
+    
+    /**
+     * Check if user's refresh tokens have been revoked after a specific time.
+     */
+    public boolean isUserRefreshRevoked(String userId, Instant tokenIssuedAt) {
+        var revokedKey = "revoked:refresh:" + userId;
+        var revokedAtStr = redisTemplate.opsForValue().get(revokedKey);
+        
+        if (revokedAtStr == null) {
+            return false;
+        }
+        
+        try {
+            var revokedAt = Instant.ofEpochSecond(Long.parseLong(revokedAtStr));
+            return tokenIssuedAt.isBefore(revokedAt);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+    /**
      * Create user context from User entity.
      */
     private UserContext createUserContext(User user) {

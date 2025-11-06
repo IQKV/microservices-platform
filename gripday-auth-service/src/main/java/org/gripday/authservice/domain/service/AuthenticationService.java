@@ -256,7 +256,8 @@ public class AuthenticationService {
             var userOpt = userRepository.findByEmail(sanitizedEmail);
             if (userOpt.isEmpty()) {
                 // Do not reveal existence; log minimal info
-                securityAuditService.logSecurityEvent("password_reset_requested_unknown_email", ipAddress, userAgent);
+                securityAuditService.logSuspiciousActivity(null, 
+                    "Password reset requested for unknown email", ipAddress, userAgent);
                 meterRegistry.counter("auth.password_reset.initiated").increment();
                 return;
             }
@@ -399,6 +400,34 @@ public class AuthenticationService {
                 user.getUsername(), "logout_from_all_devices", "system", "system"
             ));
             meterRegistry.counter("auth.logout.all").increment();
+        } catch (Exception e) {
+            System.err.println("Error during logout from all devices: " + e.getMessage());
+        } finally {
+            MDC.remove("correlationId");
+        }
+    }
+    
+    /**
+     * Logout user from all devices by revoking all refresh tokens and sessions.
+     */
+    public void logoutFromAllDevices(Long userId) {
+        var correlationId = generateCorrelationId();
+        MDC.put("correlationId", correlationId);
+        
+        try {
+            // Revoke all refresh tokens for the user
+            jwtService.revokeAllRefreshTokensForUser(userId.toString());
+            
+            // Logout from all sessions
+            logoutAllUserSessions(userId);
+            
+            // Log security event
+            var userOpt = userRepository.findById(userId);
+            userOpt.ifPresent(user -> securityAuditService.logTokenEvent(
+                user.getUsername(), "logout_from_all_devices", "user", "web"
+            ));
+            
+            meterRegistry.counter("auth.logout.all_devices").increment();
         } catch (Exception e) {
             System.err.println("Error during logout from all devices: " + e.getMessage());
         } finally {

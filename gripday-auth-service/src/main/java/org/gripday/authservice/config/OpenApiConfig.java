@@ -237,21 +237,22 @@ public class OpenApiConfig {
     }
     
     private ApiResponse createErrorResponse(String code, String description, String exampleMessage) {
+        var errorMap = new java.util.HashMap<String, Object>();
+        errorMap.put("type", "https://problems.gripday.com/example");
+        errorMap.put("title", description);
+        errorMap.put("status", Integer.valueOf(code));
+        errorMap.put("detail", exampleMessage);
+        errorMap.put("instance", "/api/v1/endpoint");
+        errorMap.put("code", "ERROR_CODE");
+        errorMap.put("path", "/api/v1/endpoint");
+        errorMap.put("method", "POST");
+        errorMap.put("correlationId", "abc123-def456-ghi789");
+        errorMap.put("requestId", "req-001-2024");
+        errorMap.put("fields", java.util.List.of());
+        
         var errorExample = new Example()
             .summary("Error Response")
-            .value(Map.of(
-                "type", "https://problems.gripday.com/example",
-                "title", description,
-                "status", Integer.valueOf(code),
-                "detail", exampleMessage,
-                "instance", "/api/v1/endpoint",
-                "code", "ERROR_CODE",
-                "path", "/api/v1/endpoint",
-                "method", "POST",
-                "correlationId", "abc123-def456-ghi789",
-                "requestId", "req-001-2024",
-                "fields", java.util.List.of()
-            ));
+            .value(errorMap);
         
         var mediaType = new MediaType()
             .addExamples("error", errorExample);
