@@ -1,0 +1,276 @@
+{
+  "groups": [
+    {
+      "name": "gripday",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties",
+      "description": "Configuration properties for Gripday Gateway Service with gripday prefix"
+    },
+    {
+      "name": "gripday.cache",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties",
+      "description": "Cache configuration properties"
+    },
+    {
+      "name": "gripday.gateway",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties",
+      "description": "Gateway configuration properties for routing, security, rate limiting, circuit breaker, CORS, and transformation"
+    },
+    {
+      "name": "gripday.gateway.routing",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RoutingProperties",
+      "description": "Service routing and load balancing configuration"
+    },
+    {
+      "name": "gripday.gateway.security",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties",
+      "description": "JWT authentication and security configuration"
+    },
+    {
+      "name": "gripday.gateway.rate-limiting",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RateLimitingProperties",
+      "description": "Rate limiting configuration with tenant-aware policies"
+    },
+    {
+      "name": "gripday.gateway.circuit-breaker",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$CircuitBreakerProperties",
+      "description": "Circuit breaker configuration for fault tolerance"
+    },
+    {
+      "name": "gripday.gateway.cors",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$CorsProperties",
+      "description": "CORS configuration for cross-origin requests"
+    },
+    {
+      "name": "gripday.observability",
+      "type": "org.gripday.gatewayservice.config.GripdayGatewayObservabilityProperties",
+      "description": "Observability configuration for tracing, metrics, and logging in reactive applications"
+    }
+  ],
+  "properties": [
+    {
+      "name": "gripday.cache.redis.host",
+      "type": "java.lang.String",
+      "description": "Redis server host",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "gripday.cache.redis.port",
+      "type": "java.lang.Integer",
+      "description": "Redis server port (1-65535)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": 6379
+    },
+    {
+      "name": "gripday.cache.redis.password",
+      "type": "java.lang.String",
+      "description": "Redis server password",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties"
+    },
+    {
+      "name": "gripday.cache.redis.database",
+      "type": "java.lang.Integer",
+      "description": "Redis database index (0-15)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "gripday.cache.redis.timeout",
+      "type": "java.time.Duration",
+      "description": "Redis connection timeout",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "gripday.cache.redis.key-prefix",
+      "type": "java.lang.String",
+      "description": "Redis key prefix for namespacing",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "gripday:gateway:"
+    },
+    {
+      "name": "gripday.cache.redis.default-ttl",
+      "type": "java.time.Duration",
+      "description": "Default TTL for cached entries",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "3600s"
+    },
+    {
+      "name": "gripday.cache.redis.enable-statistics",
+      "type": "java.lang.Boolean",
+      "description": "Enable Redis statistics collection",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "gripday.cache.redis.pool.max-active",
+      "type": "java.lang.Integer",
+      "description": "Maximum active connections in Redis pool (1-100)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties$PoolProperties",
+      "defaultValue": 8
+    },
+    {
+      "name": "gripday.cache.redis.pool.max-idle",
+      "type": "java.lang.Integer",
+      "description": "Maximum idle connections in Redis pool (0-50)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties$PoolProperties",
+      "defaultValue": 8
+    },
+    {
+      "name": "gripday.cache.redis.pool.min-idle",
+      "type": "java.lang.Integer",
+      "description": "Minimum idle connections in Redis pool (0-25)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties$PoolProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "gripday.cache.redis.pool.max-wait",
+      "type": "java.time.Duration",
+      "description": "Maximum wait time for Redis connection",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$CacheProperties$RedisProperties$PoolProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "gripday.gateway.routing.enable-service-discovery",
+      "type": "java.lang.Boolean",
+      "description": "Enable service discovery for dynamic routing",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RoutingProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "gripday.gateway.routing.load-balancing.strategy",
+      "type": "java.lang.String",
+      "description": "Load balancing strategy (round-robin, weighted, least-connections)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RoutingProperties$LoadBalancingProperties",
+      "defaultValue": "round-robin"
+    },
+    {
+      "name": "gripday.gateway.routing.load-balancing.enable-health-check",
+      "type": "java.lang.Boolean",
+      "description": "Enable health checks for load balancing",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RoutingProperties$LoadBalancingProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.gateway.routing.load-balancing.health-check-interval",
+      "type": "java.time.Duration",
+      "description": "Health check interval for services",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$RoutingProperties$LoadBalancingProperties",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.secret-key",
+      "type": "java.lang.String",
+      "description": "JWT secret key for token validation",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.access-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Access token expiration duration",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.refresh-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Refresh token expiration duration",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "defaultValue": "7d"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.issuer",
+      "type": "java.lang.String",
+      "description": "JWT token issuer",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "defaultValue": "gripday-gateway-service"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.audience",
+      "type": "java.lang.String",
+      "description": "JWT token audience",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "defaultValue": "gripday-users"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.algorithm",
+      "type": "java.lang.String",
+      "description": "JWT signing algorithm (HS256 or RS256)",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "defaultValue": "HS256"
+    },
+    {
+      "name": "gripday.gateway.security.authentication.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable authentication service integration",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.gateway.security.authentication.auth-service-url",
+      "type": "java.lang.String",
+      "description": "Authentication service URL for token validation",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",
+      "defaultValue": "http://localhost:8080"
+    },
+    {
+      "name": "gripday.gateway.security.authentication.token-validation-timeout",
+      "type": "java.time.Duration",
+      "description": "Token validation timeout",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "gripday.gateway.security.authentication.enable-user-context-propagation",
+      "type": "java.lang.Boolean",
+      "description": "Enable user context propagation to downstream services",
+      "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "gripday.gateway.routing.load-balancing.strategy",
+      "values": [
+        {
+          "value": "round-robin",
+          "description": "Distribute requests evenly across services"
+        },
+        {
+          "value": "weighted",
+          "description": "Distribute requests based on service weights"
+        },
+        {
+          "value": "least-connections",
+          "description": "Route to service with least active connections"
+        }
+      ]
+    },
+    {
+      "name": "gripday.gateway.security.jwt.algorithm",
+      "values": [
+        {
+          "value": "HS256",
+          "description": "HMAC SHA-256 algorithm (symmetric)"
+        },
+        {
+          "value": "RS256",
+          "description": "RSA SHA-256 algorithm (asymmetric)"
+        }
+      ]
+    },
+    {
+      "name": "gripday.cache.redis.host",
+      "values": [
+        {
+          "value": "localhost",
+          "description": "Local Redis instance"
+        },
+        {
+          "value": "redis",
+          "description": "Docker container name"
+        }
+      ]
+    }
+  ]
+}

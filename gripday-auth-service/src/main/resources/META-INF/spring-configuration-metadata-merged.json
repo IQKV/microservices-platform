@@ -1,0 +1,239 @@
+{
+  "groups": [
+    {
+      "name": "gripday",
+      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties",
+      "description": "Configuration properties for Gripday Auth Service with gripday prefix"
+    },
+    {
+      "name": "gripday.database",
+      "type": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties",
+      "description": "Database configuration properties with gripday.database prefix"
+    },
+    {
+      "name": "gripday.cache",
+      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties",
+      "description": "Cache configuration properties"
+    },
+    {
+      "name": "gripday.auth",
+      "type": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties",
+      "description": "Authentication configuration properties with gripday.auth prefix"
+    },
+    {
+      "name": "gripday.auth.jwt",
+      "type": "org.gripday.authservice.config.JwtConfiguration",
+      "description": "JWT configuration for token generation and validation"
+    },
+    {
+      "name": "gripday.email",
+      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties$EmailProperties",
+      "description": "Email configuration properties"
+    },
+    {
+      "name": "gripday.observability",
+      "type": "org.gripday.authservice.config.GripdayObservabilityProperties",
+      "description": "Observability configuration for tracing, metrics, and logging"
+    }
+  ],
+  "properties": [
+    {
+      "name": "gripday.database.url",
+      "type": "java.lang.String",
+      "description": "Database connection URL (must start with 'jdbc:')",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties"
+    },
+    {
+      "name": "gripday.database.username",
+      "type": "java.lang.String",
+      "description": "Database username",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties"
+    },
+    {
+      "name": "gripday.database.password",
+      "type": "java.lang.String",
+      "description": "Database password",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties"
+    },
+    {
+      "name": "gripday.database.pool.maximum-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum database connection pool size (1-100)",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "gripday.database.pool.minimum-idle",
+      "type": "java.lang.Integer",
+      "description": "Minimum idle connections in pool (0-50)",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "defaultValue": 5
+    },
+    {
+      "name": "gripday.database.pool.connection-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout duration",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "gripday.database.pool.idle-timeout",
+      "type": "java.time.Duration",
+      "description": "Idle connection timeout",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "defaultValue": "600s"
+    },
+    {
+      "name": "gripday.database.pool.max-lifetime",
+      "type": "java.time.Duration",
+      "description": "Maximum connection lifetime",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "defaultValue": "1800s"
+    },
+    {
+      "name": "gripday.database.migration.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable database migration using Liquibase",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.database.migration.contexts",
+      "type": "java.lang.String",
+      "description": "Migration contexts for Liquibase",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
+      "defaultValue": "default"
+    },
+    {
+      "name": "gripday.database.migration.validate-on-migrate",
+      "type": "java.lang.Boolean",
+      "description": "Validate migration on startup",
+      "sourceType": "org.gripday.authservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.cache.redis.host",
+      "type": "java.lang.String",
+      "description": "Redis server host",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "gripday.cache.redis.port",
+      "type": "java.lang.Integer",
+      "description": "Redis server port",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": 6379
+    },
+    {
+      "name": "gripday.cache.redis.password",
+      "type": "java.lang.String",
+      "description": "Redis server password",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties"
+    },
+    {
+      "name": "gripday.cache.redis.database",
+      "type": "java.lang.Integer",
+      "description": "Redis database index",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "gripday.cache.redis.timeout",
+      "type": "java.time.Duration",
+      "description": "Redis connection timeout",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "gripday.cache.redis.key-prefix",
+      "type": "java.lang.String",
+      "description": "Redis key prefix",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "gripday:auth:"
+    },
+    {
+      "name": "gripday.cache.redis.default-ttl",
+      "type": "java.time.Duration",
+      "description": "Default TTL for cached entries",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": "3600s"
+    },
+    {
+      "name": "gripday.cache.redis.enable-statistics",
+      "type": "java.lang.Boolean",
+      "description": "Enable Redis statistics",
+      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "gripday.auth.jwt.secret-key",
+      "type": "java.lang.String",
+      "description": "JWT secret key for token signing",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties"
+    },
+    {
+      "name": "gripday.auth.jwt.access-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Access token expiration duration (must be shorter than refresh token expiry)",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "gripday.auth.jwt.refresh-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Refresh token expiration duration",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
+      "defaultValue": "7d"
+    },
+    {
+      "name": "gripday.auth.jwt.issuer",
+      "type": "java.lang.String",
+      "description": "JWT token issuer",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
+      "defaultValue": "gripday-auth-service"
+    },
+    {
+      "name": "gripday.auth.jwt.audience",
+      "type": "java.lang.String",
+      "description": "JWT token audience",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
+      "defaultValue": "gripday-users"
+    },
+    {
+      "name": "gripday.auth.jwt.algorithm",
+      "type": "java.lang.String",
+      "description": "JWT signing algorithm (HS256 or RS256)",
+      "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
+      "defaultValue": "HS256"
+    }
+  ],
+  "hints": [
+    {
+      "name": "gripday.database.url",
+      "values": [
+        {
+          "value": "jdbc:postgresql://localhost:5432/gripday_auth",
+          "description": "PostgreSQL database URL for local development"
+        },
+        {
+          "value": "jdbc:h2:mem:testdb",
+          "description": "H2 in-memory database for testing"
+        }
+      ]
+    },
+    {
+      "name": "gripday.auth.jwt.algorithm",
+      "values": [
+        {
+          "value": "HS256",
+          "description": "HMAC SHA-256 algorithm (symmetric)"
+        },
+        {
+          "value": "RS256",
+          "description": "RSA SHA-256 algorithm (asymmetric)"
+        }
+      ]
+    }
+  ]
+}
