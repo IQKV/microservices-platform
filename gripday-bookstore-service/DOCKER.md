@@ -5,6 +5,7 @@ This document describes the Docker setup for the Gripday Bookstore Service, incl
 ## Overview
 
 The Bookstore Service uses a multi-stage Docker build with Java 21 and includes:
+
 - PostgreSQL database for data persistence
 - Redis for caching and session management
 - Environment-specific configurations
@@ -74,6 +75,7 @@ gripday-bookstore-service/
 ## Environment Configurations
 
 ### Local Development
+
 - **Profile**: `local`
 - **Database**: PostgreSQL container (localhost:5432)
 - **Redis**: Redis container (localhost:6379)
@@ -82,6 +84,7 @@ gripday-bookstore-service/
 - **Logging**: Console with DEBUG level
 
 ### Staging
+
 - **Profile**: `staging`
 - **Database**: External PostgreSQL (configured via env vars)
 - **Redis**: External Redis (configured via env vars)
@@ -90,6 +93,7 @@ gripday-bookstore-service/
 - **Logging**: JSON format with INFO level
 
 ### Production
+
 - **Profile**: `production`
 - **Database**: External PostgreSQL (configured via env vars)
 - **Redis**: External Redis (configured via env vars)
@@ -102,27 +106,27 @@ gripday-bookstore-service/
 
 ### Required Variables
 
-| Variable | Description | Local | Staging | Production |
-|----------|-------------|-------|---------|------------|
-| `DB_HOST` | Database hostname | bookstore-db | External | External |
-| `DB_USERNAME` | Database username | bookstore_user | Required | Required |
-| `DB_PASSWORD` | Database password | bookstore_pass | Required | Required |
-| `REDIS_HOST` | Redis hostname | bookstore-redis | External | External |
-| `JWT_ISSUER_URI` | JWT issuer URI | Local auth | External | External |
+| Variable         | Description       | Local           | Staging  | Production |
+|------------------|-------------------|-----------------|----------|------------|
+| `DB_HOST`        | Database hostname | bookstore-db    | External | External   |
+| `DB_USERNAME`    | Database username | bookstore_user  | Required | Required   |
+| `DB_PASSWORD`    | Database password | bookstore_pass  | Required | Required   |
+| `REDIS_HOST`     | Redis hostname    | bookstore-redis | External | External   |
+| `JWT_ISSUER_URI` | JWT issuer URI    | Local auth      | External | External   |
 
 ### Optional Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DB_PORT` | Database port | 5432 |
-| `DB_NAME` | Database name | bookstore_db |
-| `REDIS_PORT` | Redis port | 6379 |
-| `REDIS_PASSWORD` | Redis password | (empty) |
-| `SERVER_PORT` | Application port | 8082 |
+| Variable         | Description      | Default      |
+|------------------|------------------|--------------|
+| `DB_PORT`        | Database port    | 5432         |
+| `DB_NAME`        | Database name    | bookstore_db |
+| `REDIS_PORT`     | Redis port       | 6379         |
+| `REDIS_PASSWORD` | Redis password   | (empty)      |
+| `SERVER_PORT`    | Application port | 8082         |
 
 ## Health Checks
 
-All environments include comprehensive health checks:
+All environments include health checks:
 
 - **Endpoint**: `http://localhost:8082/actuator/health`
 - **Interval**: 30 seconds
@@ -133,12 +137,14 @@ All environments include comprehensive health checks:
 ## Resource Management
 
 ### JVM Optimization
+
 - Container-aware JVM settings
 - G1 garbage collector for production
 - Memory percentage-based allocation
 - String deduplication enabled
 
 ### Container Resources
+
 - Memory limits prevent OOM conditions
 - CPU limits ensure fair resource sharing
 - Reserved resources guarantee minimum allocation
@@ -147,12 +153,14 @@ All environments include comprehensive health checks:
 ## Security Features
 
 ### Container Security
+
 - Non-root user execution (UID 1001)
 - Minimal base image (Alpine Linux)
 - Security scanning support (Trivy)
 - Read-only filesystem where possible
 
 ### Network Security
+
 - Internal network isolation
 - No direct external database access
 - Environment-specific network configurations
@@ -161,18 +169,21 @@ All environments include comprehensive health checks:
 ## Monitoring and Observability
 
 ### Metrics
+
 - Prometheus metrics endpoint: `/actuator/prometheus`
 - Custom business metrics included
 - JVM and system metrics
 - Application performance monitoring
 
 ### Logging
+
 - Structured JSON logging (staging/production)
 - Correlation ID propagation
 - Audit logging for admin operations
 - Configurable log levels per environment
 
 ### Tracing
+
 - OpenTelemetry integration
 - Distributed tracing support
 - Request correlation across services
@@ -211,23 +222,24 @@ All environments include comprehensive health checks:
 ### Performance Tuning
 
 1. **Memory Issues**
-   - Adjust `JAVA_OPTS` memory settings
-   - Monitor container memory usage
-   - Check for memory leaks in application logs
+    - Adjust `JAVA_OPTS` memory settings
+    - Monitor container memory usage
+    - Check for memory leaks in application logs
 
 2. **CPU Issues**
-   - Review CPU limits in docker-compose files
-   - Monitor application performance metrics
-   - Consider scaling replicas in production
+    - Review CPU limits in docker-compose files
+    - Monitor application performance metrics
+    - Consider scaling replicas in production
 
 3. **Database Performance**
-   - Monitor connection pool metrics
-   - Review slow query logs
-   - Optimize database indexes
+    - Monitor connection pool metrics
+    - Review slow query logs
+    - Optimize database indexes
 
 ## Development Workflow
 
 ### Local Development
+
 ```bash
 # Start development environment
 docker compose up -d
@@ -241,6 +253,7 @@ docker-compose logs -f bookstore-service
 ```
 
 ### Testing
+
 ```bash
 # Run tests in container
 docker-compose exec bookstore-service ./mvnw test
@@ -250,6 +263,7 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-co
 ```
 
 ### Deployment
+
 ```bash
 # Build and tag for deployment
 ./scripts/docker-build.sh production v1.2.0
@@ -261,28 +275,28 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-co
 ## Best Practices
 
 1. **Image Building**
-   - Use multi-stage builds for smaller images
-   - Leverage Docker layer caching
-   - Minimize image attack surface
+    - Use multi-stage builds for smaller images
+    - Leverage Docker layer caching
+    - Minimize image attack surface
 
 2. **Configuration Management**
-   - Use environment variables for configuration
-   - Keep secrets out of images
-   - Use environment-specific compose files
+    - Use environment variables for configuration
+    - Keep secrets out of images
+    - Use environment-specific compose files
 
 3. **Resource Management**
-   - Set appropriate memory and CPU limits
-   - Monitor resource usage
-   - Scale based on actual demand
+    - Set appropriate memory and CPU limits
+    - Monitor resource usage
+    - Scale based on actual demand
 
 4. **Security**
-   - Run as non-root user
-   - Use official base images
-   - Regularly update dependencies
-   - Scan images for vulnerabilities
+    - Run as non-root user
+    - Use official base images
+    - Regularly update dependencies
+    - Scan images for vulnerabilities
 
 5. **Monitoring**
-   - Implement comprehensive health checks
-   - Use structured logging
-   - Monitor application metrics
-   - Set up alerting for critical issues
+    - Implement health checks
+    - Use structured logging
+    - Monitor application metrics
+    - Set up alerting for critical issues

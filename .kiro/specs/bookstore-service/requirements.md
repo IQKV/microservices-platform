@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Bookstore Service is a microservice that provides comprehensive book catalog management and inventory operations within the existing Spring Boot microservices platform. The service will integrate with the existing authentication and gateway services to provide secure book management capabilities for administrators and book browsing capabilities for authenticated users.
+The Bookstore Service is a microservice that provides book catalog management and inventory operations within the existing Spring Boot microservices platform. The service will integrate with the existing authentication and gateway services to provide secure book management capabilities for administrators and book browsing capabilities for authenticated users.
 
 ## Glossary
 
@@ -99,6 +99,6 @@ The Bookstore Service is a microservice that provides comprehensive book catalog
 
 1. THE Bookstore_Service SHALL use Java 21 modern features including records, var declarations, and text blocks
 2. THE Bookstore_Service SHALL implement RESTful APIs with proper HTTP status codes and error handling
-3. THE Bookstore_Service SHALL include comprehensive unit tests focusing on happy path scenarios
+3. THE Bookstore_Service SHALL include unit tests focusing on happy path scenarios
 4. THE Bookstore_Service SHALL support environment-specific configuration through Spring profiles
 5. THE Bookstore_Service SHALL implement proper CORS configuration and security measures consistent with platform standards

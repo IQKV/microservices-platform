@@ -1,6 +1,6 @@
 # Environment Variables Configuration
 
-This document provides comprehensive configuration examples for all environments and services in the Gripday microservices platform.
+This document provides configuration examples for all environments and services in the Gripday microservices platform.
 
 ## Configuration Strategy
 
@@ -604,4 +604,4 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 curl http://localhost:8081/actuator/env
 ```
 
-This configuration provides a comprehensive foundation for all deployment environments while maintaining security best practices and operational flexibility.
+This configuration provides a foundation for all deployment environments while maintaining security best practices and operational flexibility.

@@ -51,7 +51,7 @@ export interface AuthFlowTestResult {
 }
 
 /**
- * Authentication Test Framework for comprehensive JWT testing
+ * Authentication Test Framework for JWT testing
  */
 export class AuthTestFramework {
   private readonly apiClient: ApiClient;

@@ -411,7 +411,7 @@ test_rate_limiting() {
 
 # Main validation function
 run_platform_validation() {
-    log "INFO" "Starting comprehensive platform validation..."
+    log "INFO" "Starting platform validation..."
     log "INFO" "Gateway URL: $GATEWAY_URL"
     log "INFO" "Auth URL: $AUTH_URL"
     log "INFO" "Prometheus URL: $PROMETHEUS_URL"

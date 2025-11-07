@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gripday Platform - Kubernetes Health Check Script
-# This script performs comprehensive health checks for cluster and services
+# This script performs health checks for cluster and services
 
 set -euo pipefail
 
@@ -47,7 +47,7 @@ show_usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Perform comprehensive health checks for Gripday Platform
+Perform health checks for Gripday Platform
 
 OPTIONS:
     -e, --environment ENV    Environment (local|staging|production|all) [default: local]
@@ -432,11 +432,11 @@ check_service_endpoints() {
     fi
 }
 
-# Function to perform comprehensive health check
+# Function to perform health check
 perform_health_check() {
     local env="$1"
     
-    print_status "Starting comprehensive health check for $env environment..."
+    print_status "Starting health check for $env environment..."
     print_status ""
     
     # Check cluster health (only once for all environments)

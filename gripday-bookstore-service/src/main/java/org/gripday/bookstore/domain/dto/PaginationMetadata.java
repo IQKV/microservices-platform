@@ -9,4 +9,6 @@ public record PaginationMetadata(
     boolean hasPrevious,
     String nextPageUrl,
     String previousPageUrl
-) {}
+) {
+
+}

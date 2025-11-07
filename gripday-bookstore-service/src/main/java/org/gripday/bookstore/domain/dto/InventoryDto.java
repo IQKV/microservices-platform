@@ -11,4 +11,6 @@ public record InventoryDto(
     int lowStockThreshold,
     boolean lowStock,
     LocalDateTime lastUpdated
-) {}
+) {
+
+}

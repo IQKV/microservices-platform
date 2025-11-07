@@ -7,4 +7,6 @@ public record BookCatalogResponse(
     PaginationMetadata pagination,
     FilterMetadata filters,
     SearchMetadata search
-) {}
+) {
+
+}

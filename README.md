@@ -19,7 +19,7 @@ curl -X POST http://localhost:8080/api/v1/auth/logout-all \
 
 # Gripday Microservices Platform
 
-An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 2025.0.0, and Java 21, providing centralized authentication, intelligent API gateway, and comprehensive observability for scalable microservice architectures.
+An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 2025.0.0, and Java 21, providing centralized authentication, intelligent API gateway, and observability for scalable microservice architectures.
 
 ## Overview
 

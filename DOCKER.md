@@ -1,6 +1,6 @@
 # Docker Configuration Guide
 
-This document provides comprehensive information about the Docker setup for the Gripday Microservices Platform.
+This document provides information about the Docker setup for the Gripday Microservices Platform.
 
 ## Overview
 
@@ -186,7 +186,7 @@ Observability
 
 ### Health Checks
 
-All services include comprehensive health checks:
+All services include health checks:
 
 ```yaml
 healthcheck:

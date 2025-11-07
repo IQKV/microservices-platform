@@ -172,7 +172,7 @@ nginx.ingress.kubernetes.io/configuration-snippet: |
 ### 5. Documentation
 
 #### **Secrets Management Guide**
-Created comprehensive guide covering:
+Created guide covering:
 - Why current approach is insecure
 - External Secrets Operator setup
 - Sealed Secrets usage

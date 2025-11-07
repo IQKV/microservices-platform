@@ -135,7 +135,7 @@ gripday:
         concurrent-sessions: 2
     oauth2:
       enabled: false
-      providers: {}
+      providers: { }
 
   # Observability Configuration - Production
   observability:

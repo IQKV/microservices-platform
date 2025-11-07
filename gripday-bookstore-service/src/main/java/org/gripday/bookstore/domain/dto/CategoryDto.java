@@ -9,4 +9,6 @@ public record CategoryDto(
     int bookCount,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
-) {}
+) {
+
+}

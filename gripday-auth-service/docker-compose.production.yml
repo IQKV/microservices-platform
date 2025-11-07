@@ -22,7 +22,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost"]
+      test: [ "CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost" ]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -86,7 +86,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping"]
+      test: [ "CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -213,7 +213,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
       interval: 30s
       timeout: 20s
       retries: 5

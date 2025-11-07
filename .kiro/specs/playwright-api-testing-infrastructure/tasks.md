@@ -143,7 +143,7 @@
     - Test distributed transaction scenarios spanning multiple services
     - _Requirements: 4.3, 4.5_
 
-- [ ] 8. Build comprehensive API endpoint tests
+- [ ] 8. Build API endpoint tests
   - [ ] 8.1 Implement Auth Service API tests
     - Test all authentication endpoints (signup, login, refresh, logout)
     - Validate email verification endpoints and rate limiting
@@ -166,7 +166,7 @@
     - Add HTTPS enforcement and secure header validation
     - _Requirements: 8.1, 8.3, 8.4_
 
-  - [ ] 9.2 Write comprehensive security tests
+  - [ ] 9.2 Write security tests
     - Test authentication bypass attempts and token manipulation
     - Validate authorization boundaries and role enforcement
     - Test rate limiting effectiveness and abuse prevention
@@ -174,7 +174,7 @@
     - _Requirements: 8.2, 8.5_
 
 - [ ] 10. Create test reporting and monitoring system
-  - [ ] 10.1 Implement comprehensive test reporting
+  - [ ] 10.1 Implement test reporting
     - Configure HTML reporter with detailed request/response information
     - Set up JUnit XML output for CI/CD pipeline integration
     - Add screenshot capture for test failures and debugging

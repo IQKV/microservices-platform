@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Maven build script for Gripday Gateway Service
-# Provides comprehensive build, test, and package functionality with environment-specific configurations
+# Provides build, test, and package functionality with environment-specific configurations
 
 set -euo pipefail
 

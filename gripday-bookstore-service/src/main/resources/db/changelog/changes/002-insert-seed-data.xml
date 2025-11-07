@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <changeSet id="004-insert-initial-categories" author="bookstore-service">
@@ -12,63 +12,63 @@
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Non-Fiction"/>
             <column name="description" value="Factual books including biographies, history, and educational content"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Science Fiction"/>
             <column name="description" value="Science fiction and fantasy literature"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Mystery"/>
             <column name="description" value="Mystery, thriller, and crime novels"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Romance"/>
             <column name="description" value="Romance novels and love stories"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Biography"/>
             <column name="description" value="Biographies and autobiographies"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="History"/>
             <column name="description" value="Historical books and documentaries"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Technology"/>
             <column name="description" value="Technology, programming, and computer science books"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Business"/>
             <column name="description" value="Business, economics, and management books"/>
             <column name="created_at" valueDate="now()"/>
             <column name="updated_at" valueDate="now()"/>
         </insert>
-        
+
         <insert tableName="categories">
             <column name="name" value="Self-Help"/>
             <column name="description" value="Self-improvement and personal development books"/>

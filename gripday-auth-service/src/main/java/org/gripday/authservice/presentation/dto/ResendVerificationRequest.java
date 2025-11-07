@@ -1,22 +1,22 @@
 package org.gripday.authservice.presentation.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
- * Request DTO for resending email verification using Java 21 record.
- * Contains email address with validation constraints.
+ * Request DTO for resending email verification using Java 21 record. Contains email address with validation constraints.
  */
 @Schema(
     name = "ResendVerificationRequest",
     description = "Request to resend email verification link",
     example = """
-    {
-      "email": "john.doe@example.com"
-    }
-    """
+        {
+          "email": "john.doe@example.com"
+        }
+        """
 )
 public record ResendVerificationRequest(
     @Schema(
@@ -30,9 +30,10 @@ public record ResendVerificationRequest(
     @Size(max = 255, message = "Email must not exceed 255 characters")
     String email
 ) {
-    // Compact constructor for input sanitization
-    public ResendVerificationRequest {
-        // Trim and normalize email case
-        email = email != null ? email.trim().toLowerCase() : null;
-    }
+
+  // Compact constructor for input sanitization
+  public ResendVerificationRequest {
+    // Trim and normalize email case
+    email = email != null ? email.trim().toLowerCase() : null;
+  }
 }

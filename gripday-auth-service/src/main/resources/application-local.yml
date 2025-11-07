@@ -135,7 +135,7 @@ gripday:
         concurrent-sessions: 5
     oauth2:
       enabled: false  # Disabled for local development
-      providers: {}
+      providers: { }
 
   # Observability Configuration - Development
   observability:

@@ -3,8 +3,7 @@ package org.gripday.authservice.presentation.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response DTO for JWT token information using Java 21 record.
- * Contains access token, refresh token, and user context.
+ * Response DTO for JWT token information using Java 21 record. Contains access token, refresh token, and user context.
  */
 @Schema(
     name = "TokenResponse",
@@ -17,14 +16,14 @@ public record TokenResponse(
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     String accessToken,
-    
+
     @Schema(
         description = "JWT refresh token for obtaining new access tokens",
         example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidHlwZSI6InJlZnJlc2gifQ...",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     String refreshToken,
-    
+
     @Schema(
         description = "Token type identifier",
         example = "Bearer",
@@ -32,33 +31,34 @@ public record TokenResponse(
         defaultValue = "Bearer"
     )
     String tokenType,
-    
+
     @Schema(
         description = "Token expiration time in seconds from issuance",
         example = "900",
         minimum = "1"
     )
     long expiresIn,
-    
+
     @Schema(
         description = "Authenticated user information and context",
         requiredMode = Schema.RequiredMode.REQUIRED
     )
     UserContext user,
-    
+
     @Schema(
         description = "Session identifier for session management",
         example = "550e8400-e29b-41d4-a716-446655440000"
     )
     String sessionId
 ) {
-    // Compact constructor with default token type
-    public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user) {
-        this(accessToken, refreshToken, "Bearer", expiresIn, user, null);
-    }
-    
-    // Constructor with session ID
-    public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user, String sessionId) {
-        this(accessToken, refreshToken, "Bearer", expiresIn, user, sessionId);
-    }
+
+  // Compact constructor with default token type
+  public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user) {
+    this(accessToken, refreshToken, "Bearer", expiresIn, user, null);
+  }
+
+  // Constructor with session ID
+  public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user, String sessionId) {
+    this(accessToken, refreshToken, "Bearer", expiresIn, user, sessionId);
+  }
 }

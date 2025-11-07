@@ -333,7 +333,7 @@ spec:
 
 1. Separate manifests by resource type
 2. Use Kustomize or Helm for configuration
-3. Implement comprehensive security
+3. Implement security
 4. Use external secrets management
 5. Configure proper monitoring and alerting
 6. Plan for disaster recovery

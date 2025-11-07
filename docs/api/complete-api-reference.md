@@ -1,6 +1,6 @@
 # Complete API Reference
 
-This document provides comprehensive API documentation for all Gripday platform endpoints with complete examples, request/response formats, and error handling.
+This document provides API documentation for all Gripday platform endpoints with complete examples, request/response formats, and error handling.
 
 ## Base URLs
 
@@ -777,7 +777,7 @@ profile = client.auth.get_profile()
 
 ## Postman Collection
 
-A comprehensive Postman collection is available with:
+A Postman collection is available with:
 - Pre-configured environments (local, staging, production)
 - Authentication flow automation
 - Variable management for tokens and tenant IDs

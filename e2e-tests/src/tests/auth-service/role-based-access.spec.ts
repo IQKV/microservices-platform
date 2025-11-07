@@ -198,7 +198,7 @@ test.describe('Role-Based Access Control Tests', () => {
 
   test.describe('Access Matrix Testing', () => {
     test('should validate complete access matrix', async () => {
-      // Create comprehensive test users
+      // Create test users
       const testUsers = RbacTestHelpers.createTestUsersWithRoles();
       
       // Register all test users

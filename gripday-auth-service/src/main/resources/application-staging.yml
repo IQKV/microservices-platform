@@ -135,7 +135,7 @@ gripday:
         concurrent-sessions: 3
     oauth2:
       enabled: false
-      providers: {}
+      providers: { }
 
   # Observability Configuration - Staging
   observability:

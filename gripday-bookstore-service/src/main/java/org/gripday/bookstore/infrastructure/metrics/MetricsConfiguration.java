@@ -9,13 +9,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 public class MetricsConfiguration {
-    
-    @Bean
-    public MeterRegistryCustomizer<MeterRegistry> meterRegistryCustomizer() {
-        return registry -> registry.config().commonTags(
-            "application", "bookstore-service",
-            "service", "bookstore",
-            "version", "1.0.0"
-        );
-    }
+
+  @Bean
+  public MeterRegistryCustomizer<MeterRegistry> meterRegistryCustomizer() {
+    return registry -> registry.config().commonTags(
+        "application", "bookstore-service",
+        "service", "bookstore",
+        "version", "1.0.0"
+    );
+  }
 }

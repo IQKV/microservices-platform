@@ -151,13 +151,13 @@ cp .env.example .env.production
 
 ### Required Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `GRIPDAY_DATABASE_URL` | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/gripday_auth` |
-| `GRIPDAY_DATABASE_USERNAME` | Database username | `gripday_user` |
-| `GRIPDAY_DATABASE_PASSWORD` | Database password | `secure_password` |
-| `GRIPDAY_CACHE_REDIS_HOST` | Redis host | `localhost` |
-| `GRIPDAY_AUTH_JWT_SECRET` | JWT signing secret | `your-secure-secret-key` |
+| Variable                    | Description               | Example                                         |
+|-----------------------------|---------------------------|-------------------------------------------------|
+| `GRIPDAY_DATABASE_URL`      | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/gripday_auth` |
+| `GRIPDAY_DATABASE_USERNAME` | Database username         | `gripday_user`                                  |
+| `GRIPDAY_DATABASE_PASSWORD` | Database password         | `secure_password`                               |
+| `GRIPDAY_CACHE_REDIS_HOST`  | Redis host                | `localhost`                                     |
+| `GRIPDAY_AUTH_JWT_SECRET`   | JWT signing secret        | `your-secure-secret-key`                        |
 
 ## Configuration Validation
 

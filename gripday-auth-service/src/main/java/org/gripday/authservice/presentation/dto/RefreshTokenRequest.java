@@ -1,7 +1,8 @@
 package org.gripday.authservice.presentation.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request DTO for JWT token refresh using Java 21 record.
@@ -10,10 +11,10 @@ import jakarta.validation.constraints.NotBlank;
     name = "RefreshTokenRequest",
     description = "Request to refresh JWT access token using refresh token",
     example = """
-    {
-      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    }
-    """
+        {
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        }
+        """
 )
 public record RefreshTokenRequest(
     @Schema(
@@ -23,4 +24,6 @@ public record RefreshTokenRequest(
     )
     @NotBlank(message = "Refresh token is required")
     String refreshToken
-) {}
+) {
+
+}

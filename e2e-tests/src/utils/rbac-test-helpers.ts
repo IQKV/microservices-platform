@@ -44,7 +44,7 @@ export interface RoleTestSuite {
 }
 
 /**
- * RBAC Test Helpers for comprehensive access control testing
+ * RBAC Test Helpers for access control testing
  */
 export class RbacTestHelpers {
   private readonly apiClient: ApiClient;
@@ -410,7 +410,7 @@ export class RbacTestHelpers {
   }
 
   /**
-   * Generate comprehensive RBAC test report
+   * Generate RBAC test report
    */
   generateTestReport(testSuite: RoleTestSuite): {
     summary: {

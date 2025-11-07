@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design outlines a comprehensive Playwright-based API testing infrastructure for the Gripday microservices platform. The solution provides end-to-end automated testing capabilities for all REST APIs across Auth Service, Gateway Service, and Bookstore Service, with support for authentication flows, multi-tenant scenarios, and comprehensive reporting.
+This design outlines a Playwright-based API testing infrastructure for the Gripday microservices platform. The solution provides end-to-end automated testing capabilities for all REST APIs across Auth Service, Gateway Service, and Bookstore Service, with support for authentication flows, multi-tenant scenarios, and reporting.
 
 The testing infrastructure follows a modular, scalable architecture that integrates seamlessly with the existing Docker Compose development environment and CI/CD pipelines.
 

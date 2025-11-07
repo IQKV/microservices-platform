@@ -57,7 +57,6 @@
         </dependency>
 
 
-
         <!-- Database -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -84,7 +83,7 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
-        
+
         <!-- Structured Logging -->
         <dependency>
             <groupId>ch.qos.logback.contrib</groupId>
@@ -127,7 +126,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 
     <build>

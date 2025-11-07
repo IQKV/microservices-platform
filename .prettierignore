@@ -1,0 +1,29 @@
+src
+
+node_modules
+package-lock.json
+pnpm-lock.yaml
+.git
+build/
+dist/
+
+.eslintrc.cjs
+.prettierrc.cjs
+tsconfig.json
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+.pnpm-store
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+CLAUDE.md
+CLAUDE.local.md

@@ -203,7 +203,7 @@ const apiClient = createApiClient(config, 'tenant-id');
 
 ## Request/Response Logging
 
-The client provides comprehensive logging:
+The client provides logging:
 
 ```typescript
 // Enable debug logging
@@ -227,7 +227,7 @@ const apiClient = createApiClient(envConfig, tenantId);
 
 ## Examples
 
-See `api-client-example.ts` for comprehensive usage examples including:
+See `api-client-example.ts` for usage examples including:
 
 - Basic API client usage
 - Multi-tenant scenarios

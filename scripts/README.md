@@ -1,6 +1,6 @@
 # Platform Validation Scripts
 
-This directory contains comprehensive validation scripts for the Gripday microservices platform. These scripts test the complete user authentication flow, multi-tenant functionality, JWT token propagation, and observability stack integration.
+This directory contains validation scripts for the Gripday microservices platform. These scripts test the complete user authentication flow, multi-tenant functionality, JWT token propagation, and observability stack integration.
 
 ## Scripts Overview
 

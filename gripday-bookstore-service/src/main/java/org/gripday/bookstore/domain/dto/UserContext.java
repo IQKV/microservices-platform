@@ -13,26 +13,28 @@ public record UserContext(
     String organizationId,
     Map<String, Object> customClaims
 ) {
-    
-    public boolean hasRole(String role) {
-        return roles != null && roles.contains(role);
+
+  public boolean hasRole(String role) {
+    return roles != null && roles.contains(role);
+  }
+
+  public boolean hasAnyRole(String... roles) {
+    if (this.roles == null) {
+      return false;
     }
-    
-    public boolean hasAnyRole(String... roles) {
-        if (this.roles == null) return false;
-        for (String role : roles) {
-            if (this.roles.contains(role)) {
-                return true;
-            }
-        }
-        return false;
+    for (String role : roles) {
+      if (this.roles.contains(role)) {
+        return true;
+      }
     }
-    
-    public boolean isAdmin() {
-        return hasAnyRole("ADMIN", "SUPERADMIN");
-    }
-    
-    public boolean isSuperAdmin() {
-        return hasRole("SUPERADMIN");
-    }
+    return false;
+  }
+
+  public boolean isAdmin() {
+    return hasAnyRole("ADMIN", "SUPERADMIN");
+  }
+
+  public boolean isSuperAdmin() {
+    return hasRole("SUPERADMIN");
+  }
 }

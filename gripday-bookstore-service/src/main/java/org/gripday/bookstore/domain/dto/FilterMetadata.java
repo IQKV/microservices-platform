@@ -8,28 +8,38 @@ public record FilterMetadata(
     PriceRangeFilter priceRange,
     List<AuthorFilter> authors,
     AvailabilityFilter availability
-) {}
+) {
+
+}
 
 record CategoryFilter(
     Long id,
     String name,
     int bookCount
-) {}
+) {
+
+}
 
 record PriceRangeFilter(
     BigDecimal minPrice,
     BigDecimal maxPrice,
     BigDecimal currentMinPrice,
     BigDecimal currentMaxPrice
-) {}
+) {
+
+}
 
 record AuthorFilter(
     String name,
     int bookCount
-) {}
+) {
+
+}
 
 record AvailabilityFilter(
     int totalBooks,
     int availableBooks,
     int outOfStockBooks
-) {}
+) {
+
+}

@@ -9,4 +9,6 @@ public record ValidateTokenResponse(
     Instant issuedAt,
     Instant expiresAt,
     UserContext user
-) {}
+) {
+
+}

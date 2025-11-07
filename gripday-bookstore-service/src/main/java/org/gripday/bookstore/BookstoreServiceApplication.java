@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 public class BookstoreServiceApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BookstoreServiceApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(BookstoreServiceApplication.class, args);
+  }
 }

@@ -5,7 +5,7 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
 ## Architecture
 
 - **Presentation Layer**: REST controllers in `presentation.web` package
-- **Domain Layer**: Business logic services in `domain.service` package  
+- **Domain Layer**: Business logic services in `domain.service` package
 - **Infrastructure Layer**: Data repositories in `infrastructure.repository` package
 
 ## Technology Stack
@@ -39,9 +39,9 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
    ```
 
 3. **Access the application:**
-   - API: http://localhost:8082
-   - Health Check: http://localhost:8082/actuator/health
-   - Swagger UI: http://localhost:8082/swagger-ui.html
+    - API: http://localhost:8082
+    - Health Check: http://localhost:8082/actuator/health
+    - Swagger UI: http://localhost:8082/swagger-ui.html
 
 ### Docker Development
 

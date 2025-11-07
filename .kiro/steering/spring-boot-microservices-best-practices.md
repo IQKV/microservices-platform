@@ -124,7 +124,7 @@ public record UserContext(
 
 ### Happy Path Testing Focus
 - Focus exclusively on successful execution scenarios for core functionality
-- Prioritize clear, readable test implementations over comprehensive edge case coverage
+- Prioritize clear, readable test implementations over edge case coverage
 - Use straightforward assertions and minimal test data setup
 - Avoid testing multiple failure scenarios unless critical to core functionality
 

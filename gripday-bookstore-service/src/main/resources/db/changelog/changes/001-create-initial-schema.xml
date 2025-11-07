@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <changeSet id="001-create-categories-table" author="bookstore-service">
@@ -21,7 +21,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        
+
         <createIndex tableName="categories" indexName="idx_categories_name">
             <column name="name"/>
         </createIndex>
@@ -58,35 +58,35 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        
+
         <addForeignKeyConstraint
-            baseTableName="books"
-            baseColumnNames="category_id"
-            constraintName="fk_books_category"
-            referencedTableName="categories"
-            referencedColumnNames="id"
-            onDelete="SET NULL"/>
-        
+                baseTableName="books"
+                baseColumnNames="category_id"
+                constraintName="fk_books_category"
+                referencedTableName="categories"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
         <createIndex tableName="books" indexName="idx_books_title">
             <column name="title"/>
         </createIndex>
-        
+
         <createIndex tableName="books" indexName="idx_books_author">
             <column name="author"/>
         </createIndex>
-        
+
         <createIndex tableName="books" indexName="idx_books_isbn">
             <column name="isbn"/>
         </createIndex>
-        
+
         <createIndex tableName="books" indexName="idx_books_category_id">
             <column name="category_id"/>
         </createIndex>
-        
+
         <createIndex tableName="books" indexName="idx_books_available">
             <column name="available"/>
         </createIndex>
-        
+
         <createIndex tableName="books" indexName="idx_books_price">
             <column name="price"/>
         </createIndex>
@@ -116,37 +116,37 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        
+
         <addForeignKeyConstraint
-            baseTableName="inventory"
-            baseColumnNames="book_id"
-            constraintName="fk_inventory_book"
-            referencedTableName="books"
-            referencedColumnNames="id"
-            onDelete="CASCADE"/>
-        
+                baseTableName="inventory"
+                baseColumnNames="book_id"
+                constraintName="fk_inventory_book"
+                referencedTableName="books"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
         <createIndex tableName="inventory" indexName="idx_inventory_book_id">
             <column name="book_id"/>
         </createIndex>
-        
+
         <createIndex tableName="inventory" indexName="idx_inventory_quantity">
             <column name="quantity"/>
         </createIndex>
-        
+
         <addCheckConstraint
-            tableName="inventory"
-            constraintName="chk_inventory_quantity_non_negative"
-            checkCondition="quantity >= 0"/>
-        
+                tableName="inventory"
+                constraintName="chk_inventory_quantity_non_negative"
+                checkCondition="quantity >= 0"/>
+
         <addCheckConstraint
-            tableName="inventory"
-            constraintName="chk_inventory_reserved_quantity_non_negative"
-            checkCondition="reserved_quantity >= 0"/>
-        
+                tableName="inventory"
+                constraintName="chk_inventory_reserved_quantity_non_negative"
+                checkCondition="reserved_quantity >= 0"/>
+
         <addCheckConstraint
-            tableName="inventory"
-            constraintName="chk_inventory_reserved_not_exceed_quantity"
-            checkCondition="reserved_quantity <= quantity"/>
+                tableName="inventory"
+                constraintName="chk_inventory_reserved_not_exceed_quantity"
+                checkCondition="reserved_quantity <= quantity"/>
     </changeSet>
 
 </databaseChangeLog>

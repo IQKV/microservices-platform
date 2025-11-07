@@ -9,4 +9,6 @@ public record BookSearchCriteria(
     BigDecimal minPrice,
     BigDecimal maxPrice,
     Boolean availableOnly
-) {}
+) {
+
+}

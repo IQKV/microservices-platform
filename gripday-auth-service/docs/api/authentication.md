@@ -1,27 +1,34 @@
 # Authentication API Documentation
 
-This document provides comprehensive documentation for the Gripday Auth Service REST API endpoints.
+This document provides documentation for the Gripday Auth Service REST API endpoints.
 
 ## Base URL
+
 - Local Development: `http://localhost:8081`
 - Staging: `https://auth.pynity.website`
 - Production: `https://auth.pynity.com`
 
 ## API Versioning
+
 All endpoints are versioned using URL path: `/api/v1/`
 
 ## Authentication
+
 Most endpoints require JWT authentication via the `Authorization` header:
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 ## Content Type
+
 Successful responses use `application/json`.
 Errors use RFC7807 Problem Details with `application/problem+json`.
 
 ## Multi-Tenant Support
+
 Include tenant context via header:
+
 ```
 X-Tenant-ID: <tenant_id>
 ```
@@ -35,6 +42,7 @@ X-Tenant-ID: <tenant_id>
 Register a new user account.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/signup
 Content-Type: application/json
@@ -60,6 +68,7 @@ Content-Type: application/json
 | tenantId | string | No | Defaults to "default" |
 
 **Success Response (201 Created):**
+
 ```json
 {
   "userId": 1,
@@ -77,6 +86,7 @@ Content-Type: application/json
 **Error Responses:**
 
 **409 Conflict - Username/Email Already Exists:**
+
 ```json
 {
   "type": "https://problems.pynity.com/user-registration",
@@ -101,6 +111,7 @@ Content-Type: application/json
 ```
 
 **400 Bad Request - Validation Error:**
+
 ```json
 {
   "type": "https://problems.pynity.com/validation-error",
@@ -139,6 +150,7 @@ Content-Type: application/json
 Authenticate user and obtain JWT tokens.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
@@ -158,6 +170,7 @@ Content-Type: application/json
 | rememberMe | boolean | No | Extend refresh token expiry (default: false) |
 
 **Success Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lIiwiaWF0IjoxNjQyMjQ4MDAwLCJleHAiOjE2NDIyNDg5MDAsInJvbGVzIjpbIlVTRVIiXSwidGVuYW50SWQiOiJkZWZhdWx0In0...",
@@ -171,8 +184,13 @@ Content-Type: application/json
     "email": "john@example.com",
     "firstName": "John",
     "lastName": "Doe",
-    "roles": ["USER"],
-    "permissions": ["read:profile", "update:profile"],
+    "roles": [
+      "USER"
+    ],
+    "permissions": [
+      "read:profile",
+      "update:profile"
+    ],
     "tenantId": "default",
     "department": "Engineering",
     "customClaims": {}
@@ -193,6 +211,7 @@ Content-Type: application/json
 **Error Responses:**
 
 **401 Unauthorized - Invalid Credentials:**
+
 ```json
 {
   "type": "https://problems.pynity.com/authentication-error",
@@ -209,6 +228,7 @@ Content-Type: application/json
 ```
 
 **423 Locked - Account Locked:**
+
 ```json
 {
   "type": "https://problems.pynity.com/account-locked",
@@ -233,6 +253,7 @@ Content-Type: application/json
 Refresh JWT access token using refresh token.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/refresh
 Content-Type: application/json
@@ -248,6 +269,7 @@ Content-Type: application/json
 | refreshToken | string | Yes | Valid JWT refresh token |
 
 **Success Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -259,7 +281,9 @@ Content-Type: application/json
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": ["USER"],
+    "roles": [
+      "USER"
+    ],
     "tenantId": "default"
   }
 }
@@ -268,6 +292,7 @@ Content-Type: application/json
 **Error Responses:**
 
 **401 Unauthorized - Invalid Refresh Token:**
+
 ```json
 {
   "type": "https://problems.pynity.com/authentication-error",
@@ -292,12 +317,14 @@ Content-Type: application/json
 Invalidate current JWT tokens and logout user.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/logout
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "message": "Successfully logged out",
@@ -308,6 +335,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 **Error Responses:**
 
 **401 Unauthorized - Invalid Token:**
+
 ```json
 {
   "type": "https://problems.pynity.com/authentication-error",
@@ -332,6 +360,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 Validate JWT token (used by other microservices).
 
 **Request:**
+
 ```http
 POST /api/v1/auth/validate
 Content-Type: application/json
@@ -342,6 +371,7 @@ Content-Type: application/json
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "valid": true,
@@ -349,8 +379,13 @@ Content-Type: application/json
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": ["USER"],
-    "permissions": ["read:profile", "update:profile"],
+    "roles": [
+      "USER"
+    ],
+    "permissions": [
+      "read:profile",
+      "update:profile"
+    ],
     "tenantId": "default",
     "department": "Engineering"
   },
@@ -359,6 +394,7 @@ Content-Type: application/json
 ```
 
 **Error Response (401 Unauthorized):**
+
 ```json
 {
   "type": "https://problems.pynity.com/authentication-error",
@@ -372,16 +408,16 @@ Content-Type: application/json
 
 ## Error Codes Reference
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| VALIDATION_ERROR | 400 | Request validation failed |
-| AUTH_INVALID_CREDENTIALS | 401 | Invalid username/password |
-| AUTH_INVALID_TOKEN | 401 | Invalid or expired JWT token |
-| AUTH_INSUFFICIENT_PRIVILEGES | 403 | User lacks required permissions |
-| AUTH_ACCOUNT_LOCKED | 423 | Account temporarily locked |
-| RESOURCE_NOT_FOUND | 404 | Requested resource not found |
-| RATE_LIMIT_EXCEEDED | 429 | Too many requests |
-| SYSTEM_ERROR | 500 | Internal server error |
+| Code                         | HTTP Status | Description                     |
+|------------------------------|-------------|---------------------------------|
+| VALIDATION_ERROR             | 400         | Request validation failed       |
+| AUTH_INVALID_CREDENTIALS     | 401         | Invalid username/password       |
+| AUTH_INVALID_TOKEN           | 401         | Invalid or expired JWT token    |
+| AUTH_INSUFFICIENT_PRIVILEGES | 403         | User lacks required permissions |
+| AUTH_ACCOUNT_LOCKED          | 423         | Account temporarily locked      |
+| RESOURCE_NOT_FOUND           | 404         | Requested resource not found    |
+| RATE_LIMIT_EXCEEDED          | 429         | Too many requests               |
+| SYSTEM_ERROR                 | 500         | Internal server error           |
 
 ---
 
@@ -395,6 +431,7 @@ Authentication endpoints are rate limited:
 - **Logout**: 20 attempts per minute per user
 
 Rate limit headers are included in responses:
+
 ```http
 X-RateLimit-Limit: 5
 X-RateLimit-Remaining: 4
@@ -406,11 +443,13 @@ X-RateLimit-Reset: 1642248060
 ## OpenAPI/Swagger UI
 
 Interactive API documentation is available at:
+
 - Local: `http://localhost:8081/swagger-ui.html`
 - Staging: `https://auth.pynity.website/swagger-ui.html`
 - Production: `https://auth.pynity.com/swagger-ui.html`
 
 Download OpenAPI specification:
+
 - JSON: `/v3/api-docs`
 - YAML: `/v3/api-docs.yaml`
 
@@ -421,6 +460,7 @@ Download OpenAPI specification:
 ### Complete Authentication Flow
 
 1. **Register new user:**
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/signup \
   -H "Content-Type: application/json" \
@@ -435,6 +475,7 @@ curl -X POST http://localhost:8081/api/v1/auth/signup \
 ```
 
 2. **Login and get tokens:**
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -445,6 +486,7 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
 ```
 
 3. **Use access token:**
+
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -456,6 +498,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```
 
 4. **Refresh token:**
+
 ```bash
 REFRESH_TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -467,6 +510,7 @@ curl -X POST http://localhost:8081/api/v1/auth/refresh \
 ```
 
 5. **Logout:**
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"

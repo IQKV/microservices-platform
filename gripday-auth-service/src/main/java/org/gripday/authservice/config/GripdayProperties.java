@@ -1,154 +1,249 @@
 package org.gripday.authservice.config;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import java.time.Duration;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
 /**
- * Configuration properties for Gripday Auth Service.
- * All custom configuration properties use the 'gripday.' prefix for clear namespace separation.
+ * Configuration properties for Gripday Auth Service. All custom configuration properties use the 'gripday.' prefix for clear namespace separation.
  */
 @ConfigurationProperties(prefix = "gripday")
 @Validated
 public record GripdayProperties(
     @Valid @NotNull Database database,
-    @Valid @NotNull Auth auth,
     @Valid @NotNull Cache cache,
+    @Valid @NotNull Auth auth,
     @Valid @NotNull Email email,
     @Valid @NotNull Observability observability
 ) {
 
-    /**
-     * Database configuration properties with gripday.database prefix.
-     */
-    public record Database(
+  /**
+   * Database configuration properties with gripday.database prefix.
+   */
+  public record Database(
+      @NotBlank String url,
+      @NotBlank String username,
+      @NotBlank String password,
+      @Valid @NotNull Pool pool,
+      @Valid @NotNull Migration migration
+  ) {
+
+    public record Pool(
+        @Min(1) @Max(100) int maximumSize,
+        @Min(0) @Max(50) int minimumIdle,
+        @NotNull Duration connectionTimeout,
+        @NotNull Duration idleTimeout,
+        @NotNull Duration maxLifetime
+    ) {
+
+    }
+
+    public record Migration(
+        boolean enabled,
+        @NotBlank String contexts,
+        boolean validateOnMigrate
+    ) {
+
+    }
+  }
+
+  /**
+   * Cache configuration properties with gripday.cache prefix.
+   */
+  public record Cache(
+      @Valid @NotNull GripdayProperties.Cache.Redis redis
+  ) {
+
+    public record Redis(
         @NotBlank String host,
-        @Positive int port,
-        @NotBlank String name,
-        @NotBlank String username,
-        @NotBlank String password,
-        @Valid @NotNull Pool pool
+        @Min(1) @Max(65535) int port,
+        String password,
+        @Min(0) @Max(15) int database,
+        @NotNull Duration timeout,
+        @Valid @NotNull Pool pool,
+        @NotBlank String keyPrefix,
+        @NotNull Duration defaultTtl,
+        boolean enableStatistics
     ) {
-        public record Pool(
-            @Positive int initialSize,
-            @Positive int maxActive,
-            @Positive int maxIdle,
-            @Positive int minIdle,
-            @Positive long maxWait
-        ) {}
+
+      public record Pool(
+          @Min(1) @Max(100) int maxActive,
+          @Min(0) @Max(50) int maxIdle,
+          @Min(0) @Max(25) int minIdle,
+          @NotNull Duration maxWait
+      ) {
+
+      }
+    }
+  }
+
+  /**
+   * Authentication configuration properties with gripday.auth prefix.
+   */
+  public record Auth(
+      @Valid @NotNull Jwt jwt,
+      @Valid @NotNull Security security,
+      @Valid @NotNull OAuth2 oauth2
+  ) {
+
+    public record Jwt(
+        @NotBlank String secretKey,
+        @NotNull Duration accessTokenExpiry,
+        @NotNull Duration refreshTokenExpiry,
+        @NotBlank String issuer,
+        @NotBlank String audience,
+        @Pattern(regexp = "HS256|RS256") String algorithm
+    ) {
+
     }
 
-    /**
-     * Authentication configuration properties with gripday.auth prefix.
-     */
-    public record Auth(
-        @Valid @NotNull Jwt jwt,
-        @Valid @NotNull Security security
+    public record Security(
+        @Valid @NotNull Password password,
+        @Valid @NotNull RateLimiting rateLimiting,
+        @Valid @NotNull Session session
     ) {
-        public record Jwt(
-            @NotBlank String secret,
-            @Positive long accessTokenExpirationMinutes,
-            @Positive long refreshTokenExpirationDays,
-            @NotBlank String issuer,
-            @NotBlank String audience
-        ) {}
 
-        public record Security(
-            @Positive int passwordEncoderStrength,
-            @Positive int maxLoginAttempts,
-            @Positive long lockoutDurationMinutes,
-            @Valid @NotNull RateLimit rateLimit
-        ) {
-            public record RateLimit(
-                @Positive int requestsPerMinute,
-                @Positive long windowSizeMinutes
-            ) {}
-        }
+      public record Password(
+          @Min(4) @Max(20) int encoderStrength,
+          boolean requireSpecialChars,
+          @Min(6) @Max(128) int minLength
+      ) {
+
+      }
+
+      public record RateLimiting(
+          @Min(1) @Max(100) int loginAttempts,
+          @NotNull Duration lockoutDuration
+      ) {
+
+      }
+
+      public record Session(
+          @NotNull Duration timeout,
+          @Min(1) @Max(10) int concurrentSessions
+      ) {
+
+      }
     }
 
-    /**
-     * Cache configuration properties with gripday.cache prefix.
-     */
-    public record Cache(
-        @Valid @NotNull Redis redis
+    public record OAuth2(
+        boolean enabled,
+        Map<String, OAuth2Provider> providers
     ) {
-        public record Redis(
-            @NotBlank String host,
-            @Positive int port,
-            @NotBlank String password,
-            @Positive int database,
-            @Valid @NotNull Pool pool
-        ) {
-            public record Pool(
-                @Positive int maxActive,
-                @Positive int maxIdle,
-                @Positive int minIdle,
-                @Positive long maxWait
-            ) {}
-        }
+
+      public record OAuth2Provider(
+          String clientId,
+          String clientSecret,
+          boolean enabled
+      ) {
+
+      }
+    }
+  }
+
+  /**
+   * Email configuration properties with gripday.email prefix.
+   */
+  public record Email(
+      @Valid @NotNull Smtp smtp,
+      @Valid @NotNull Verification verification,
+      @Valid @NotNull Template templates
+  ) {
+
+    public record Smtp(
+        @NotBlank String host,
+        @Min(1) @Max(65535) int port,
+        String username,
+        String password,
+        boolean auth,
+        boolean starttls,
+        @NotNull Duration timeout
+    ) {
+
     }
 
-    /**
-     * Email configuration properties with gripday.email prefix.
-     */
-    public record Email(
-        @Valid @NotNull Smtp smtp,
-        @Valid @NotNull Verification verification,
-        @Valid @NotNull Templates templates
+    public record Verification(
+        @NotBlank String fromEmail,
+        @NotBlank String fromName,
+        @NotBlank String baseUrl,
+        @NotNull Duration tokenExpiry,
+        @Min(1) @Max(10) int rateLimit
     ) {
-        public record Smtp(
-            @NotBlank String host,
-            @Positive int port,
-            String username,
-            String password,
-            boolean auth,
-            boolean starttls,
-            @NotNull java.time.Duration timeout
-        ) {}
 
-        public record Verification(
-            @NotBlank String fromEmail,
-            @NotBlank String fromName,
-            @NotBlank String baseUrl,
-            @NotNull java.time.Duration tokenExpiry,
-            @Positive int rateLimit
-        ) {}
-
-        public record Templates(
-            @NotBlank String verificationSubject,
-            @NotBlank String verificationTemplate,
-            String passwordResetSubject,
-            String passwordResetTemplate
-        ) {}
     }
 
-    /**
-     * Observability configuration properties with gripday.observability prefix.
-     */
-    public record Observability(
-        @Valid @NotNull Tracing tracing,
-        @Valid @NotNull Metrics metrics,
-        @Valid @NotNull Logging logging
+    public record Template(
+        @NotBlank String verificationSubject,
+        @NotBlank String verificationTemplate,
+        @NotBlank String passwordResetSubject,
+        @NotBlank String passwordResetTemplate
     ) {
-        public record Tracing(
-            boolean enabled,
-            double sampleRate,
-            @NotBlank String serviceName
-        ) {}
 
-        public record Metrics(
-            boolean enabled,
-            @NotBlank String path
-        ) {}
-
-        public record Logging(
-            @NotBlank String level,
-            @NotBlank String format,
-            boolean includeCorrelationId
-        ) {}
     }
+
+  }
+
+
+  /**
+   * Observability configuration properties with gripday.observability prefix.
+   */
+  public record Observability(
+      @Valid @NotNull Tracing tracing,
+      @Valid @NotNull Metrics metrics,
+      @Valid @NotNull Logging logging
+  ) {
+
+    public record Tracing(
+        boolean enabled,
+        @NotBlank String serviceName,
+        @DecimalMin("0.0") @DecimalMax("1.0") double samplingRate,
+        @NotBlank String endpoint,
+        @NotNull Duration timeout,
+        @NotNull Duration exportTimeout,
+        @Positive int batchSize
+    ) {
+
+    }
+
+    public record Metrics(
+        boolean enabled,
+        @NotBlank String path,
+        @NotBlank String prefix,
+        boolean includeHostTag,
+        boolean includeApplicationTag,
+        boolean includeEnvironmentTag,
+        Map<String, String> customTags
+    ) {
+
+    }
+
+    public record Logging(
+        @Pattern(regexp = "DEBUG|INFO|WARN|ERROR") String level,
+        @Pattern(regexp = "console|json") String format,
+        boolean includeCorrelationId,
+        boolean includeTraceId,
+        boolean includeSpanId,
+        boolean includeUserId,
+        boolean includeTenantId,
+        @NotBlank String correlationIdHeader,
+        @NotBlank String requestIdHeader,
+        @NotBlank String tenantIdHeader,
+        boolean enableSqlLogging,
+        boolean enableSecurityEvents,
+        boolean enablePerformanceLogging
+    ) {
+
+    }
+  }
 }

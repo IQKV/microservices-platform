@@ -563,4 +563,4 @@ docker stats --no-stream
 - **GitHub Issues**: Report bugs and request features
 - **Documentation**: Check service-specific README files
 - **Community**: GitHub Discussions for questions
-- **Validation Scripts**: Run `./scripts/validate-platform.sh` for comprehensive testing
+- **Validation Scripts**: Run `./scripts/validate-platform.sh` for testing

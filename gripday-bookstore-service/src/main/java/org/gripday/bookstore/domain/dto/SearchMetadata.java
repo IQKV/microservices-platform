@@ -7,4 +7,6 @@ public record SearchMetadata(
     int resultCount,
     List<String> suggestions,
     String searchType
-) {}
+) {
+
+}

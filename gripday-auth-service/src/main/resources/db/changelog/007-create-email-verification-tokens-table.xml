@@ -6,7 +6,7 @@
 
     <changeSet id="7" author="gripday-platform">
         <comment>Create email_verification_tokens table for user email activation</comment>
-        
+
         <createTable tableName="email_verification_tokens">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -32,11 +32,11 @@
         </createTable>
 
         <addForeignKeyConstraint
-            baseTableName="email_verification_tokens"
-            baseColumnNames="user_id"
-            referencedTableName="users"
-            referencedColumnNames="id"
-            constraintName="fk_email_verification_tokens_user_id"/>
+                baseTableName="email_verification_tokens"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_email_verification_tokens_user_id"/>
 
         <createIndex tableName="email_verification_tokens" indexName="idx_email_verification_token">
             <column name="token"/>

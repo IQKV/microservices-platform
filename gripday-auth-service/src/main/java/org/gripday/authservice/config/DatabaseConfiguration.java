@@ -6,13 +6,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Database configuration for Auth Service.
- * Configures JPA repositories, entity scanning, and transaction management.
+ * Database configuration for Auth Service. Configures JPA repositories, entity scanning, and transaction management.
  */
 @Configuration
 @EnableJpaRepositories(basePackages = "org.gripday.authservice.infrastructure.repository")
 @EntityScan(basePackages = "org.gripday.authservice.infrastructure.entity")
 @EnableTransactionManagement
 public class DatabaseConfiguration {
-    // JPA configuration will be enhanced in subsequent tasks
+  // JPA configuration will be enhanced in subsequent tasks
 }

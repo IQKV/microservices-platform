@@ -2,7 +2,7 @@
   "groups": [
     {
       "name": "gripday",
-      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties",
+      "type": "org.gripday.authservice.config.GripdayProperties",
       "description": "Configuration properties for Gripday Auth Service with gripday prefix"
     },
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "gripday.cache",
-      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties",
+      "type": "org.gripday.authservice.config.GripdayProperties$CacheProperties",
       "description": "Cache configuration properties"
     },
     {
@@ -27,7 +27,7 @@
     },
     {
       "name": "gripday.email",
-      "type": "org.gripday.authservice.infrastructure.config.GripdayProperties$EmailProperties",
+      "type": "org.gripday.authservice.config.GripdayProperties$EmailProperties",
       "description": "Email configuration properties"
     },
     {
@@ -115,55 +115,55 @@
       "name": "gripday.cache.redis.host",
       "type": "java.lang.String",
       "description": "Redis server host",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": "localhost"
     },
     {
       "name": "gripday.cache.redis.port",
       "type": "java.lang.Integer",
       "description": "Redis server port",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": 6379
     },
     {
       "name": "gripday.cache.redis.password",
       "type": "java.lang.String",
       "description": "Redis server password",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties"
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties"
     },
     {
       "name": "gripday.cache.redis.database",
       "type": "java.lang.Integer",
       "description": "Redis database index",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": 0
     },
     {
       "name": "gripday.cache.redis.timeout",
       "type": "java.time.Duration",
       "description": "Redis connection timeout",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": "5s"
     },
     {
       "name": "gripday.cache.redis.key-prefix",
       "type": "java.lang.String",
       "description": "Redis key prefix",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": "gripday:auth:"
     },
     {
       "name": "gripday.cache.redis.default-ttl",
       "type": "java.time.Duration",
       "description": "Default TTL for cached entries",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": "3600s"
     },
     {
       "name": "gripday.cache.redis.enable-statistics",
       "type": "java.lang.Boolean",
       "description": "Enable Redis statistics",
-      "sourceType": "org.gripday.authservice.infrastructure.config.GripdayProperties$CacheProperties$RedisProperties",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$CacheProperties$RedisProperties",
       "defaultValue": false
     },
     {

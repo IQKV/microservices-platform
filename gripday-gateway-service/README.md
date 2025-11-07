@@ -5,6 +5,7 @@ API Gateway providing intelligent routing, JWT authentication, rate limiting, an
 ## Quick Start
 
 ### Prerequisites
+
 - Java 21
 - Docker and Docker Compose
 - Redis 7+
@@ -13,18 +14,21 @@ API Gateway providing intelligent routing, JWT authentication, rate limiting, an
 ### Local Development Setup
 
 1. **Start dependencies:**
+
 ```bash
 cd gripday-gateway-service
 docker compose up -d redis
 ```
 
 2. **Ensure Auth Service is running:**
+
 ```bash
 # Auth service should be available at http://localhost:8081
 curl http://localhost:8081/actuator/health
 ```
 
 3. **Start the gateway:**
+
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
@@ -32,6 +36,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 The gateway will be available at `http://localhost:8080`
 
 ### API Documentation
+
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI Spec: `http://localhost:8080/v3/api-docs`
 
@@ -53,6 +58,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users
 ### Authentication Flow
 
 1. **Obtain JWT token from Auth Service:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -63,6 +69,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 2. **Use token for protected endpoints:**
+
 ```bash
 curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
      -H "X-Tenant-ID: default" \
@@ -74,6 +81,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
 The gateway supports tenant isolation through multiple methods:
 
 **Header-based tenant identification:**
+
 ```bash
 curl -H "Authorization: Bearer <token>" \
      -H "X-Tenant-ID: tenant-123" \
@@ -81,6 +89,7 @@ curl -H "Authorization: Bearer <token>" \
 ```
 
 **Subdomain-based routing:**
+
 ```bash
 # Routes to tenant-123 context
 curl -H "Authorization: Bearer <token>" \
@@ -124,6 +133,7 @@ HTTP/1.1 503 Service Unavailable
 ## Configuration
 
 ### Environment Variables
+
 ```bash
 # Gateway
 GRIPDAY_GATEWAY_PORT=8080
@@ -169,6 +179,7 @@ gripday:
 ```
 
 ### Docker Compose
+
 ```bash
 # Start gateway with dependencies
 docker compose up -d
@@ -181,6 +192,7 @@ docker-compose down
 ```
 
 ## Health Checks
+
 - Health: `GET /actuator/health`
 - Metrics: `GET /actuator/metrics`
 - Gateway Routes: `GET /actuator/gateway/routes`
@@ -191,26 +203,31 @@ docker-compose down
 ### Common Issues
 
 **Service Route Not Found (404)**
+
 - Check service registration in `application.yml`
 - Verify backend service is running and healthy
 - Check gateway route configuration
 
 **Authentication Failed (401)**
+
 - Verify JWT token is valid and not expired
 - Check Authorization header format: `Bearer <token>`
 - Ensure Auth Service is accessible
 
 **Rate Limit Exceeded (429)**
+
 - Check rate limiting configuration
 - Verify Redis connection for rate limiting storage
 - Review rate limit headers in response
 
 **Circuit Breaker Open (503)**
+
 - Check backend service health
 - Review circuit breaker metrics: `/actuator/circuitbreakers`
 - Wait for circuit breaker to transition to half-open state
 
 ### Logs
+
 ```bash
 # View gateway logs
 docker-compose logs -f gateway-service
@@ -223,6 +240,7 @@ export LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY=DEBUG
 ```
 
 ### Monitoring
+
 ```bash
 # Check gateway routes
 curl http://localhost:8080/actuator/gateway/routes
@@ -237,11 +255,13 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 ## Development
 
 ### Build
+
 ```bash
 mvn clean package
 ```
 
 ### Tests
+
 ```bash
 # Unit tests
 mvn test
@@ -253,6 +273,7 @@ mvn verify
 ### Adding New Service Routes
 
 1. **Configure route in application.yml:**
+
 ```yaml
 gripday:
   gateway:
@@ -267,6 +288,7 @@ gripday:
 ```
 
 2. **Update Docker Compose:**
+
 ```yaml
 services:
   new-service:

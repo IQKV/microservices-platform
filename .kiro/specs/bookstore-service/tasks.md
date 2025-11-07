@@ -236,7 +236,7 @@
 
 
     - Set up Swagger UI with security scheme configuration
-    - Add comprehensive API documentation with examples
+    - Add API documentation with examples
     - Include error response schemas and status codes
     - _Requirements: 4.4, 5.2_
   

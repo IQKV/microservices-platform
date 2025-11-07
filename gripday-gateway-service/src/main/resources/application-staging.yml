@@ -129,7 +129,7 @@ gripday:
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000
-        tenant-specific-quotas: {}
+        tenant-specific-quotas: { }
     
     circuit-breaker:
       enabled: true
@@ -177,7 +177,7 @@ gripday:
         additional-headers-to-remove:
           - X-Internal-Service
           - X-Database-Query-Time
-    
+
   # Observability Configuration - Staging
   observability:
     tracing:

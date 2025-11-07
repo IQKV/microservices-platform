@@ -1,10 +1,12 @@
 # Gripday Auth Service
 
-Centralized authentication and user management microservice providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account activation in the Gripday platform.
+Centralized authentication and user management microservice providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account
+activation in the Gripday platform.
 
 ## Quick Start
 
 ### Prerequisites
+
 - Java 21
 - Docker and Docker Compose
 - PostgreSQL 15+
@@ -13,17 +15,20 @@ Centralized authentication and user management microservice providing JWT-based 
 ### Local Development Setup
 
 1. **Start dependencies:**
+
 ```bash
 cd gripday-auth-service
 docker compose up -d postgres redis
 ```
 
 2. **Run database migrations:**
+
 ```bash
 mvn liquibase:update
 ```
 
 3. **Start the service:**
+
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
@@ -31,12 +36,14 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 The service will be available at `http://localhost:8081`
 
 ### API Documentation
+
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 - OpenAPI Spec: `http://localhost:8081/v3/api-docs`
 
 ## Authentication Endpoints
 
 ### User Registration
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/signup \
   -H "Content-Type: application/json" \
@@ -51,6 +58,7 @@ curl -X POST http://localhost:8081/api/v1/auth/signup \
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "userId": 1,
@@ -68,6 +76,7 @@ curl -X POST http://localhost:8081/api/v1/auth/signup \
 **Note**: A verification email is automatically sent to the user's email address. Users must verify their email before they can log in.
 
 ### User Login
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -79,6 +88,7 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -90,13 +100,16 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": ["USER"],
+    "roles": [
+      "USER"
+    ],
     "tenantId": "default"
   }
 }
 ```
 
 ### Token Refresh
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
@@ -106,22 +119,27 @@ curl -X POST http://localhost:8081/api/v1/auth/refresh \
 ```
 
 ### User Logout
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/logout \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ### Logout From All Devices
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/logout-all \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
+
 Revokes all refresh tokens for the authenticated user and invalidates all active sessions.
 
 ## Password Reset
 
 ### Forgot Password (Initiate)
+
 Starts the password reset flow. Always returns 200 to avoid user enumeration.
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/forgot-password \
   -H "Content-Type: application/json" \
@@ -131,7 +149,9 @@ curl -X POST http://localhost:8081/api/v1/auth/forgot-password \
 ```
 
 ### Reset Password (Complete)
+
 Resets the password using a reset token received by email.
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/reset-password \
   -H "Content-Type: application/json" \
@@ -142,6 +162,7 @@ curl -X POST http://localhost:8081/api/v1/auth/reset-password \
 ```
 
 Upon successful reset:
+
 - User password is updated.
 - All refresh tokens are revoked and all sessions invalidated.
 - Reset token is invalidated.
@@ -149,11 +170,13 @@ Upon successful reset:
 ## Email Verification Endpoints
 
 ### Email Verification
+
 ```bash
 curl "http://localhost:8081/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a716-446655440000"
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -164,6 +187,7 @@ curl "http://localhost:8081/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a7
 ```
 
 ### Resend Verification Email
+
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/email/resend \
   -H "Content-Type: application/json" \
@@ -173,6 +197,7 @@ curl -X POST http://localhost:8081/api/v1/auth/email/resend \
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -185,11 +210,13 @@ curl -X POST http://localhost:8081/api/v1/auth/email/resend \
 **Rate Limiting**: Maximum 3 verification emails per hour per user.
 
 ### Check Verification Status
+
 ```bash
 curl "http://localhost:8081/api/v1/auth/email/status?email=john@example.com"
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "email": "john@example.com",
@@ -202,6 +229,7 @@ curl "http://localhost:8081/api/v1/auth/email/status?email=john@example.com"
 ## Configuration
 
 ### Environment Variables
+
 ```bash
 # Database
 GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
@@ -235,6 +263,7 @@ GRIPDAY_TENANT_DEFAULT_ID=default
 ```
 
 ### Docker Compose
+
 ```bash
 # Start all services
 docker compose up -d
@@ -247,6 +276,7 @@ docker-compose down
 ```
 
 ## Health Checks
+
 - Health: `GET /actuator/health`
 - Metrics: `GET /actuator/metrics`
 - Info: `GET /actuator/info`
@@ -256,29 +286,35 @@ docker-compose down
 ### Common Issues
 
 **Database Connection Failed**
+
 - Verify PostgreSQL is running: `docker-compose ps postgres`
 - Check connection settings in `application-local.yml`
 
 **JWT Token Invalid**
+
 - Ensure JWT secret is configured
 - Check token expiration times
 - Verify token format in Authorization header
 
 **Email Verification Required**
+
 - New users must verify their email before login
 - Check verification email in inbox/spam folder
 - Use resend endpoint if email was not received
 
 **Email Sending Failed**
+
 - Verify SMTP configuration and credentials
 - Check SMTP server connectivity
 - Ensure from-email is authorized to send
 
 **Redis Connection Failed**
+
 - Verify Redis is running: `docker-compose ps redis`
 - Check Redis connection settings
 
 ### Logs
+
 ```bash
 # View application logs
 docker-compose logs -f auth-service
@@ -290,9 +326,11 @@ docker-compose logs -f postgres
 ## Email Verification Feature
 
 ### Overview
-The Auth Service includes comprehensive email verification functionality to ensure users have valid email addresses and enhance account security.
+
+The Auth Service includes email verification functionality to ensure users have valid email addresses and enhance account security.
 
 ### Key Features
+
 - **Automatic Email Sending**: Verification emails sent immediately after user registration
 - **Secure Tokens**: UUID-based tokens with 24-hour expiration
 - **Rate Limiting**: Maximum 3 verification emails per hour per user
@@ -301,6 +339,7 @@ The Auth Service includes comprehensive email verification functionality to ensu
 - **Template-Based Emails**: Professional HTML email templates with branding
 
 ### Email Verification Flow
+
 1. User registers with email address
 2. System generates secure verification token
 3. Verification email sent with activation link
@@ -308,6 +347,7 @@ The Auth Service includes comprehensive email verification functionality to ensu
 5. Account is activated and user can log in
 
 ### Configuration
+
 Email verification requires SMTP configuration:
 
 ```yaml
@@ -332,6 +372,7 @@ gripday:
 ```
 
 ### Security Features
+
 - **Token Expiration**: Tokens expire after 24 hours
 - **Single Use**: Tokens cannot be reused after verification
 - **Rate Limiting**: Prevents email spam and abuse
@@ -339,12 +380,14 @@ gripday:
 - **HTTPS Links**: Verification links use HTTPS in production
 
 ### Password Reset Flow
+
 1. User requests password reset via `POST /api/v1/auth/forgot-password`.
 2. System generates a single-use reset token (30-minute default TTL) and sends an email with a reset link.
 3. User submits `POST /api/v1/auth/reset-password` with token and new password.
 4. Service updates password, revokes all refresh tokens, and invalidates sessions.
 
 ### Monitoring
+
 - **Metrics**: Email sending success/failure rates
 - **Logging**: Structured logs for verification events
 - **Cleanup**: Automatic cleanup of expired tokens
@@ -352,11 +395,13 @@ gripday:
 ## Development
 
 ### Build
+
 ```bash
 mvn clean package
 ```
 
 ### Tests
+
 ```bash
 # Unit tests
 mvn test
@@ -366,6 +411,7 @@ mvn verify
 ```
 
 ### Code Quality
+
 ```bash
 mvn clean compile -Pcode-quality
 ```
