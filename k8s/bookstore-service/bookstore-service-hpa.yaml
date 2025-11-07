@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: bookstore-service-hpa
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -112,7 +112,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: bookstore-service-hpa-production
-  namespace: production-env
+  namespace: gripday-production-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore

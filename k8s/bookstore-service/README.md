@@ -153,12 +153,12 @@ http://localhost/bookstore/actuator/*        → Health/metrics
 
 #### Staging Environment
 ```
-https://staging-api.gripday.com/api/v1/bookstore/*  → Bookstore API
+https://api.pynity.website/api/v1/bookstore/*  → Bookstore API
 ```
 
 #### Production Environment
 ```
-https://api.gripday.com/api/v1/bookstore/*  → Bookstore API
+https://api.pynity.com/api/v1/bookstore/*  → Bookstore API
 ```
 
 ### Network Policies

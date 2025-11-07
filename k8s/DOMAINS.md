@@ -2,56 +2,56 @@
 
 This document provides a clear mapping of all domains and their purposes across environments.
 
-## Production Domains (`*.gripday.com`)
+## Production Domains (`*.pynity.com`)
 
 | Domain | Purpose | Service | Ingress | Status |
 |--------|---------|---------|---------|--------|
-| **gripday.com** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
-| **app.gripday.com** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
-| **auth.gripday.com** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
-| **api.gripday.com** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
+| **pynity.com** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
+| **app.pynity.com** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
+| **auth.pynity.com** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
+| **api.pynity.com** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
 
 ### Application Details
-- **app.gripday.com**: Operational dashboard, admin panel, logged-in user features
-- **auth.gripday.com**: Public authentication pages (login, signup, password reset)
-- **api.gripday.com**: All backend API endpoints
+- **app.pynity.com**: Operational dashboard, admin panel, logged-in user features
+- **auth.pynity.com**: Public authentication pages (login, signup, password reset)
+- **api.pynity.com**: All backend API endpoints
 
 ### Backend Services (Internal Only - NO Ingress)
 | Service | Port | Access Method |
 |---------|------|---------------|
-| Auth Service | 8081 | `https://api.gripday.com/api/v1/auth/*` |
-| Bookstore Service | 8082 | `https://api.gripday.com/api/v1/bookstore/*` |
-| Other Services | Various | `https://api.gripday.com/api/v1/*` |
+| Auth Service | 8081 | `https://api.pynity.com/api/v1/auth/*` |
+| Bookstore Service | 8082 | `https://api.pynity.com/api/v1/bookstore/*` |
+| Other Services | Various | `https://api.pynity.com/api/v1/*` |
 
-## Staging Domains (`*.gripday.space`)
+## Staging Domains (`*.pynity.website`)
 
 | Domain | Purpose | Service | Ingress | Status |
 |--------|---------|---------|---------|--------|
-| **gripday.space** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
-| **app.gripday.space** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
-| **auth.gripday.space** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
-| **api.gripday.space** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
+| **pynity.website** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
+| **app.pynity.website** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
+| **auth.pynity.website** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
+| **api.pynity.website** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
 
 ### Application Details
-- **app.gripday.space**: Operational dashboard, admin panel, logged-in user features
-- **auth.gripday.space**: Public authentication pages (login, signup, password reset)
-- **api.gripday.space**: All backend API endpoints
+- **app.pynity.website**: Operational dashboard, admin panel, logged-in user features
+- **auth.pynity.website**: Public authentication pages (login, signup, password reset)
+- **api.pynity.website**: All backend API endpoints
 
 ### Backend Services (Internal Only - NO Ingress)
 | Service | Port | Access Method |
 |---------|------|---------------|
-| Auth Service | 8081 | `https://api.gripday.space/api/v1/auth/*` |
-| Bookstore Service | 8082 | `https://api.gripday.space/api/v1/bookstore/*` |
-| Other Services | Various | `https://api.gripday.space/api/v1/*` |
+| Auth Service | 8081 | `https://api.pynity.website/api/v1/auth/*` |
+| Bookstore Service | 8082 | `https://api.pynity.website/api/v1/bookstore/*` |
+| Other Services | Various | `https://api.pynity.website/api/v1/*` |
 
 ## Local Development Domains
 
 | Domain | Purpose | Service | Port |
 |--------|---------|---------|------|
 | **localhost** | Main Application | React/Vue App | 3000/5173 |
-| **auth.gripday.dev** | Auth Service (Direct) | Auth Service | 8081 |
-| **api.gripday.dev** | API Gateway | Gateway Service | 8080 |
-| **bookstore.gripday.dev** | Bookstore Service (Direct) | Bookstore Service | 8082 |
+| **auth.pynity.site** | Auth Service (Direct) | Auth Service | 8081 |
+| **api.pynity.site** | API Gateway | Gateway Service | 8080 |
+| **bookstore.pynity.site** | Bookstore Service (Direct) | Bookstore Service | 8082 |
 
 > **Note**: In local development, backend services have direct ingress for debugging purposes only.
 
@@ -94,7 +94,7 @@ This document provides a clear mapping of all domains and their purposes across 
 
 ## Domain Purpose Details
 
-### 1. Main Application UI (`app.gripday.com` / `app.gripday.space`)
+### 1. Main Application UI (`app.pynity.com` / `app.pynity.website`)
 
 **Purpose**: Main web application for logged-in users
 
@@ -109,20 +109,20 @@ This document provides a clear mapping of all domains and their purposes across 
 
 **Requires**: Authentication (user must be logged in)
 
-**Makes API calls to**: `api.gripday.com/api/v1/*`
+**Makes API calls to**: `api.pynity.com/api/v1/*`
 
 **Example**:
 ```
-https://app.gripday.com/dashboard
-https://app.gripday.com/admin
-https://app.gripday.com/profile
-https://app.gripday.com/reports
-https://app.gripday.com/settings
+https://app.pynity.com/dashboard
+https://app.pynity.com/admin
+https://app.pynity.com/profile
+https://app.pynity.com/reports
+https://app.pynity.com/settings
 ```
 
 ---
 
-### 2. Auth UI (`auth.gripday.com` / `auth.gripday.space`) - RESERVED
+### 2. Auth UI (`auth.pynity.com` / `auth.pynity.website`) - RESERVED
 
 **Purpose**: Dedicated authentication frontend application
 
@@ -134,16 +134,16 @@ https://app.gripday.com/settings
 - OAuth2 callback handling
 - Two-factor authentication
 
-**Makes API calls to**: `api.gripday.com/api/v1/auth/*`
+**Makes API calls to**: `api.pynity.com/api/v1/auth/*`
 
 **Example**:
 ```
-https://auth.gripday.com/login
-https://auth.gripday.com/signup
-https://auth.gripday.com/forgot-password
-https://auth.gripday.com/reset-password
-https://auth.gripday.com/verify-email
-https://auth.gripday.com/oauth/google/callback
+https://auth.pynity.com/login
+https://auth.pynity.com/signup
+https://auth.pynity.com/forgot-password
+https://auth.pynity.com/reset-password
+https://auth.pynity.com/verify-email
+https://auth.pynity.com/oauth/google/callback
 ```
 
 **Why separate**:
@@ -158,7 +158,7 @@ https://auth.gripday.com/oauth/google/callback
 
 ---
 
-### 3. API Gateway (`api.gripday.com` / `api.gripday.space`)
+### 3. API Gateway (`api.pynity.com` / `api.pynity.website`)
 
 **Purpose**: Single entry point for all backend APIs
 
@@ -174,13 +174,13 @@ https://auth.gripday.com/oauth/google/callback
 **Example API calls**:
 ```bash
 # Login API (called by Auth UI)
-POST https://api.gripday.com/api/v1/auth/login
+POST https://api.pynity.com/api/v1/auth/login
 
 # Get user profile (called by Main UI)
-GET https://api.gripday.com/api/v1/users/me
+GET https://api.pynity.com/api/v1/users/me
 
 # List books (called by Main UI)
-GET https://api.gripday.com/api/v1/bookstore/books
+GET https://api.pynity.com/api/v1/bookstore/books
 ```
 
 ---
@@ -190,22 +190,22 @@ GET https://api.gripday.com/api/v1/bookstore/books
 ### Login Flow
 
 ```
-1. User visits main app: https://app.gripday.com
+1. User visits main app: https://app.pynity.com
    └─> App detects no auth token
    
-2. Redirect to Auth UI: https://auth.gripday.com/login
+2. Redirect to Auth UI: https://auth.pynity.com/login
    └─> Auth UI shows login form
    
 3. User submits credentials
-   └─> POST https://api.gripday.com/api/v1/auth/login
+   └─> POST https://api.pynity.com/api/v1/auth/login
        └─> Gateway routes to Auth Service (internal)
            └─> Returns JWT token
            
 4. Auth UI stores token
-   └─> Redirect back: https://app.gripday.com/dashboard
+   └─> Redirect back: https://app.pynity.com/dashboard
    
 5. Main app makes authenticated requests
-   └─> GET https://api.gripday.com/api/v1/users/me
+   └─> GET https://api.pynity.com/api/v1/users/me
        └─> Include Authorization: Bearer <token>
 ```
 
@@ -216,8 +216,8 @@ GET https://api.gripday.com/api/v1/bookstore/books
 ### ❌ WRONG - Direct backend access
 ```bash
 # These will NOT work in staging/production:
-https://auth.gripday.com/api/v1/auth/login          # Wrong! This is for UI
-https://bookstore.gripday.com/api/v1/books          # Wrong! No ingress
+https://auth.pynity.com/api/v1/auth/login          # Wrong! This is for UI
+https://bookstore.pynity.com/api/v1/books          # Wrong! No ingress
 
 # Backend services have NO direct ingress
 ```
@@ -225,42 +225,42 @@ https://bookstore.gripday.com/api/v1/books          # Wrong! No ingress
 ### ✅ CORRECT - Through API Gateway
 ```bash
 # All backend APIs go through gateway:
-https://api.gripday.com/api/v1/auth/login           # Correct!
-https://api.gripday.com/api/v1/bookstore/books      # Correct!
+https://api.pynity.com/api/v1/auth/login           # Correct!
+https://api.pynity.com/api/v1/bookstore/books      # Correct!
 ```
 
 ### ✅ CORRECT - Frontend applications
 ```bash
 # Frontend UIs have their own ingresses:
-https://app.gripday.com/dashboard                   # Main App (logged-in)
-https://auth.gripday.com/login                      # Auth UI (public)
+https://app.pynity.com/dashboard                   # Main App (logged-in)
+https://auth.pynity.com/login                      # Auth UI (public)
 ```
 
 ---
 
 ## DNS Configuration Required
 
-### Production (gripday.com)
+### Production (pynity.com)
 ```
-gripday.com           A/CNAME  → Landing/Marketing Site (optional)
-app.gripday.com       A/CNAME  → Ingress Controller IP/hostname
-auth.gripday.com      A/CNAME  → Ingress Controller IP/hostname
-api.gripday.com       A/CNAME  → Ingress Controller IP/hostname
+pynity.com           A/CNAME  → Landing/Marketing Site (optional)
+app.pynity.com       A/CNAME  → Ingress Controller IP/hostname
+auth.pynity.com      A/CNAME  → Ingress Controller IP/hostname
+api.pynity.com       A/CNAME  → Ingress Controller IP/hostname
 ```
 
-### Staging (gripday.space)
+### Staging (pynity.website)
 ```
-gripday.space         A/CNAME  → Landing/Marketing Site (optional)
-app.gripday.space     A/CNAME  → Ingress Controller IP/hostname
-auth.gripday.space    A/CNAME  → Ingress Controller IP/hostname
-api.gripday.space     A/CNAME  → Ingress Controller IP/hostname
+pynity.website         A/CNAME  → Landing/Marketing Site (optional)
+app.pynity.website     A/CNAME  → Ingress Controller IP/hostname
+auth.pynity.website    A/CNAME  → Ingress Controller IP/hostname
+api.pynity.website     A/CNAME  → Ingress Controller IP/hostname
 ```
 
 ---
 
 ## Security Considerations
 
-### Auth UI Domain (`auth.gripday.com`)
+### Auth UI Domain (`auth.pynity.com`)
 - ✅ Stricter Content Security Policy (CSP)
 - ✅ HSTS with preload
 - ✅ Frame-Options: DENY
@@ -269,7 +269,7 @@ api.gripday.space     A/CNAME  → Ingress Controller IP/hostname
 - ✅ Can apply Cloudflare Bot Protection
 - ✅ Isolated from main app vulnerabilities
 
-### API Gateway Domain (`api.gripday.com`)
+### API Gateway Domain (`api.pynity.com`)
 - ✅ JWT validation
 - ✅ Rate limiting per endpoint
 - ✅ Request logging with correlation IDs
@@ -283,10 +283,10 @@ api.gripday.space     A/CNAME  → Ingress Controller IP/hostname
 
 ### Additional Domains (when needed)
 ```
-admin.gripday.com     → Admin panel UI
-docs.gripday.com      → API documentation
-cdn.gripday.com       → Static assets CDN
-ws.gripday.com        → WebSocket gateway
+admin.pynity.com     → Admin panel UI
+docs.pynity.com      → API documentation
+cdn.pynity.com       → Static assets CDN
+ws.pynity.com        → WebSocket gateway
 ```
 
 ---
@@ -295,11 +295,11 @@ ws.gripday.com        → WebSocket gateway
 
 | Need | Use |
 |------|-----|
-| User login page | `https://auth.gripday.com/login` |
-| Login API call | `POST https://api.gripday.com/api/v1/auth/login` |
-| Main app dashboard | `https://app.gripday.com/dashboard` |
-| Admin panel | `https://app.gripday.com/admin` |
-| Any backend API | `https://api.gripday.com/api/v1/*` |
+| User login page | `https://auth.pynity.com/login` |
+| Login API call | `POST https://api.pynity.com/api/v1/auth/login` |
+| Main app dashboard | `https://app.pynity.com/dashboard` |
+| Admin panel | `https://app.pynity.com/admin` |
+| Any backend API | `https://api.pynity.com/api/v1/*` |
 | Backend service directly | ❌ Not possible (internal only) |
 
 ---
@@ -312,15 +312,15 @@ kubectl get ingress -A
 
 # Expected in staging/production:
 # NAMESPACE        NAME                          HOSTS
-# staging-env      gateway-service-ingress       api.gripday.space
-# staging-env      auth-ui-ingress (when ready)  auth.gripday.space
-# staging-env      main-app-ingress (when ready) app.gripday.space
+# staging-env      gateway-service-ingress       api.pynity.website
+# staging-env      auth-ui-ingress (when ready)  auth.pynity.website
+# staging-env      main-app-ingress (when ready) app.pynity.website
 
 # Test API gateway
-curl https://api.gripday.com/actuator/health
+curl https://api.pynity.com/actuator/health
 
 # Auth UI (when deployed)
-curl https://auth.gripday.com
+curl https://auth.pynity.com
 
 # Should NOT exist:
 # auth-service-ingress (backend - no direct access)

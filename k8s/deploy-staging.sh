@@ -174,8 +174,8 @@ update_image_tags() {
             gateway-service/gateway-service-deployment.yaml > /tmp/gateway-service-deployment-staging.yaml
         
         # Update namespace references for staging
-        sed -i 's/namespace: gripday-auth$/namespace: staging-env/g' /tmp/auth-service-deployment-staging.yaml
-        sed -i 's/namespace: gripday-gateway$/namespace: staging-env/g' /tmp/gateway-service-deployment-staging.yaml
+        sed -i 's/namespace: gripday-dev-env$/namespace: staging-env/g' /tmp/auth-service-deployment-staging.yaml
+        sed -i 's/namespace: gripday-dev-env$/namespace: staging-env/g' /tmp/gateway-service-deployment-staging.yaml
     else
         print_warning "[DRY-RUN] Would update image tags and create staging deployment files"
     fi
@@ -190,14 +190,14 @@ deploy_auth_service_staging() {
     execute_kubectl "apply -f auth-service/secret.yaml"
     
     # Deploy PostgreSQL for staging
-    local postgres_staging=$(sed 's/namespace: gripday-auth$/namespace: staging-env/g' auth-service/auth-postgres-deployment.yaml)
+    local postgres_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' auth-service/auth-postgres-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_staging" | kubectl apply -f -
     else
         print_warning "[DRY-RUN] Would deploy PostgreSQL to staging"
     fi
     
-    local postgres_svc_staging=$(sed 's/namespace: gripday-auth$/namespace: staging-env/g' auth-service/auth-postgres-service.yaml)
+    local postgres_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' auth-service/auth-postgres-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_svc_staging" | kubectl apply -f -
     else
@@ -205,14 +205,14 @@ deploy_auth_service_staging() {
     fi
     
     # Deploy Redis for staging
-    local redis_staging=$(sed 's/namespace: gripday-auth$/namespace: staging-env/g' auth-service/auth-redis-deployment.yaml)
+    local redis_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' auth-service/auth-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_staging" | kubectl apply -f -
     else
         print_warning "[DRY-RUN] Would deploy Redis to staging"
     fi
     
-    local redis_svc_staging=$(sed 's/namespace: gripday-auth$/namespace: staging-env/g' auth-service/auth-redis-service.yaml)
+    local redis_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' auth-service/auth-redis-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_svc_staging" | kubectl apply -f -
     else
@@ -234,7 +234,7 @@ deploy_auth_service_staging() {
     fi
     
     # Deploy service and ingress
-    local auth_svc_staging=$(sed 's/namespace: gripday-auth$/namespace: staging-env/g' auth-service/auth-service-service.yaml)
+    local auth_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' auth-service/auth-service-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$auth_svc_staging" | kubectl apply -f -
     fi
@@ -254,12 +254,12 @@ deploy_gateway_service_staging() {
     execute_kubectl "apply -f gateway-service/secret.yaml"
     
     # Deploy Redis for staging
-    local redis_staging=$(sed 's/namespace: gripday-gateway$/namespace: staging-env/g' gateway-service/gateway-redis-deployment.yaml)
+    local redis_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' gateway-service/gateway-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_staging" | kubectl apply -f -
     fi
     
-    local redis_svc_staging=$(sed 's/namespace: gripday-gateway$/namespace: staging-env/g' gateway-service/gateway-redis-service.yaml)
+    local redis_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' gateway-service/gateway-redis-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_svc_staging" | kubectl apply -f -
     fi
@@ -276,7 +276,7 @@ deploy_gateway_service_staging() {
     fi
     
     # Deploy service, HPA, network policy, and ingress
-    local gateway_svc_staging=$(sed 's/namespace: gripday-gateway$/namespace: staging-env/g' gateway-service/gateway-service-service.yaml)
+    local gateway_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' gateway-service/gateway-service-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$gateway_svc_staging" | kubectl apply -f -
     fi
@@ -310,10 +310,10 @@ verify_staging_deployment() {
     print_status "Staging deployment verification completed!"
     print_status ""
     print_status "Staging URLs:"
-    print_status "  Main App: https://gripday.space"
-    print_status "  Auth Service: https://auth.gripday.space"
-    print_status "  Gateway Service: https://api.gripday.space"
-    print_status "  Auth Swagger UI: https://auth.gripday.space/swagger-ui.html"
+    print_status "  Main App: https://pynity.website"
+    print_status "  Auth Service: https://auth.pynity.website"
+    print_status "  Gateway Service: https://api.pynity.website"
+    print_status "  Auth Swagger UI: https://auth.pynity.website/swagger-ui.html"
     
     # Cleanup temporary files
     rm -f /tmp/auth-service-deployment-staging.yaml

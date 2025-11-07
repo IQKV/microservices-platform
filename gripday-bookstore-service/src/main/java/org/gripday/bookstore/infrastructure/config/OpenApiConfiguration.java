@@ -54,8 +54,8 @@ public class OpenApiConfiguration {
                 .version("v1.0")
                 .contact(new Contact()
                     .name("Gripday Development Team")
-                    .email("dev@gripday.org")
-                    .url("https://gripday.org"))
+                    .email("dev@pynity.com")
+                    .url("https://pynity.com"))
                 .license(new License()
                     .name("MIT License")
                     .url("https://opensource.org/licenses/MIT")))
@@ -64,10 +64,10 @@ public class OpenApiConfiguration {
                     .url("http://localhost:" + serverPort)
                     .description("Local Development Server"),
                 new Server()
-                    .url("https://api.gripday.org")
+                    .url("https://api.pynity.com")
                     .description("Production Gateway (BFF)"),
                 new Server()
-                    .url("https://staging-api.gripday.org")
+                    .url("https://api.pynity.website")
                     .description("Staging Gateway (BFF)")))
             .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
             .components(new Components()

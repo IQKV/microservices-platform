@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: auth-service-network-policy
-  namespace: gripday-auth
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
@@ -96,7 +96,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: auth-postgres-network-policy
-  namespace: gripday-auth
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database
@@ -141,7 +141,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: auth-redis-network-policy
-  namespace: gripday-auth
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: auth-redis
     app.kubernetes.io/component: cache

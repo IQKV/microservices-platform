@@ -55,8 +55,8 @@ import java.util.Map;
             """,
         contact = @Contact(
             name = "Gripday Platform Team",
-            email = "api-support@gripday.org",
-            url = "https://docs.gripday.org"
+            email = "api-support@pynity.com",
+            url = "https://docs.pynity.com"
         ),
         license = @License(
             name = "MIT License",
@@ -65,11 +65,11 @@ import java.util.Map;
     ),
     servers = {
         @Server(
-            url = "https://api.gripday.org",
+            url = "https://api.pynity.com",
             description = "Production Server"
         ),
         @Server(
-            url = "https://staging-api.gripday.org",
+            url = "https://api.pynity.website",
             description = "Staging Server"
         ),
         @Server(
@@ -238,7 +238,7 @@ public class OpenApiConfig {
     
     private ApiResponse createErrorResponse(String code, String description, String exampleMessage) {
         var errorMap = new java.util.HashMap<String, Object>();
-        errorMap.put("type", "https://problems.gripday.com/example");
+        errorMap.put("type", "https://problems.pynity.com/example");
         errorMap.put("title", description);
         errorMap.put("status", Integer.valueOf(code));
         errorMap.put("detail", exampleMessage);

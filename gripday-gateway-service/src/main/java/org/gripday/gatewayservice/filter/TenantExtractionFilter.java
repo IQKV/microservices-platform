@@ -54,7 +54,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
     private String extractTenantId(org.springframework.http.server.reactive.ServerHttpRequest request) {
         // Priority order for tenant extraction:
         // 1. X-Tenant-ID header (explicit tenant specification)
-        // 2. Subdomain extraction (tenant1.api.gripday.com -> tenant1)
+        // 2. Subdomain extraction (tenant1.api.pynity.com -> tenant1)
         // 3. Query parameter (for development/testing)
         
         // 1. Check X-Tenant-ID header

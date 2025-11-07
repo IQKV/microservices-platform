@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookstore-service
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -207,7 +207,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: bookstore-service-sa
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -218,7 +218,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: bookstore-service-pdb
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore

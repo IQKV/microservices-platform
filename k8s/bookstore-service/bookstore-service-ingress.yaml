@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: bookstore-service-ingress
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -107,5 +107,5 @@ spec:
 # Direct ingress is only available in local development environment for debugging
 # 
 # In staging/production, bookstore is accessed via:
-#   https://api.gripday.space/api/v1/bookstore/* -> Gateway -> Bookstore Service
-#   https://api.gripday.com/api/v1/bookstore/* -> Gateway -> Bookstore Service
+#   https://api.pynity.website/api/v1/bookstore/* -> Gateway -> Bookstore Service
+#   https://api.pynity.com/api/v1/bookstore/* -> Gateway -> Bookstore Service

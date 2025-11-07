@@ -79,7 +79,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.dev, https://*.gripday.dev"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://pynity.site, https://*.pynity.site"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Tenant-ID,X-Correlation-ID"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -96,7 +96,7 @@ ingress:
       more_set_headers "X-XSS-Protection: 1; mode=block";
       more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
   hosts:
-    - host: auth.gripday.dev
+    - host: auth.pynity.site
       paths:
         - path: /
           pathType: Prefix

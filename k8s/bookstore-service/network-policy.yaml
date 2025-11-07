@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-service-network-policy
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -111,7 +111,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-postgres-network-policy
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
@@ -149,7 +149,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-redis-network-policy
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache

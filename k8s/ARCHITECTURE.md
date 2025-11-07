@@ -50,38 +50,38 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 ### Production & Staging Environments
 
 #### ✅ **Services WITH Ingress**
-1. **Gateway Service** - `api.gripday.com` / `api.gripday.space`
+1. **Gateway Service** - `api.pynity.com` / `api.pynity.website`
    - Single entry point for all backend APIs
    - Routes: `/api/v1/*`
    - TLS: Yes (Let's Encrypt)
    - Rate Limiting: Yes
    - CORS: Configured per environment
 
-2. **Main Application** (when deployed) - `app.gripday.com` / `app.gripday.space`
+2. **Main Application** (when deployed) - `app.pynity.com` / `app.pynity.website`
    - Operational dashboard for logged-in users
    - Admin panel and management features
    - Requires authentication
    - TLS: Yes
 
-3. **Auth UI** (when deployed) - `auth.gripday.com` / `auth.gripday.space`
+3. **Auth UI** (when deployed) - `auth.pynity.com` / `auth.pynity.website`
    - Dedicated authentication frontend (login, signup, password reset)
    - Public-facing authentication pages
    - Isolated from main app for security
    - TLS: Yes
 
-4. **Landing Page** (optional) - `gripday.com` / `gripday.space`
+4. **Landing Page** (optional) - `pynity.com` / `pynity.website`
    - Marketing/promotional landing page
    - Public website
    - Can be static site or separate service
 
 #### ❌ **Services WITHOUT Ingress**
 1. **Auth Service** - Internal only
-   - Accessible only via: `https://api.gripday.com/api/v1/auth/*` → Gateway → Auth
+   - Accessible only via: `https://api.pynity.com/api/v1/auth/*` → Gateway → Auth
    - No direct internet access
    - Network policy: Only accepts traffic from gateway
 
 2. **Bookstore Service** - Internal only
-   - Accessible only via: `https://api.gripday.com/api/v1/bookstore/*` → Gateway → Bookstore
+   - Accessible only via: `https://api.pynity.com/api/v1/bookstore/*` → Gateway → Bookstore
    - No direct internet access
    - Network policy: Only accepts traffic from gateway
 
@@ -92,9 +92,9 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 ### Local Development Environment
 
 In local development, **all services have direct ingress** for easier debugging:
-- Auth: `http://auth.gripday.dev`
+- Auth: `http://auth.pynity.site`
 - Bookstore: `http://localhost/api/v1/bookstore/*`
-- Gateway: `http://api.gripday.dev`
+- Gateway: `http://api.pynity.site`
 
 This allows developers to:
 - Test services independently
@@ -125,7 +125,7 @@ The gateway service routes all external traffic to internal services:
 
 ```
 1. Client Request:
-   GET https://api.gripday.com/api/v1/bookstore/books/123
+   GET https://api.pynity.com/api/v1/bookstore/books/123
 
 2. Ingress Controller:
    - Terminates TLS
@@ -208,7 +208,7 @@ The gateway service routes all external traffic to internal services:
 
 All monitoring access goes through proper channels:
 
-1. **Gateway Metrics**: `https://api.gripday.com/actuator/prometheus`
+1. **Gateway Metrics**: `https://api.pynity.com/actuator/prometheus`
 2. **Backend Service Metrics**: Scraped by Prometheus from internal cluster network
 3. **Logs**: Collected by logging sidecar or DaemonSet
 4. **Traces**: Sent to OTLP collector (internal service)
@@ -277,36 +277,36 @@ Network policies allow Prometheus to scrape all services:
 ## Reserved Domains
 
 ### Production Domains
-- **`gripday.com`** → Landing/Marketing page (optional)
-- **`app.gripday.com`** → Main application (dashboard, admin, logged-in features)
-- **`auth.gripday.com`** → Auth UI (login/signup frontend) - RESERVED
-- **`api.gripday.com`** → Gateway Service (all backend APIs)
+- **`pynity.com`** → Landing/Marketing page (optional)
+- **`app.pynity.com`** → Main application (dashboard, admin, logged-in features)
+- **`auth.pynity.com`** → Auth UI (login/signup frontend) - RESERVED
+- **`api.pynity.com`** → Gateway Service (all backend APIs)
 
 ### Staging Domains
-- **`gripday.space`** → Landing/Marketing page (optional)
-- **`app.gripday.space`** → Main application (dashboard, admin, logged-in features)
-- **`auth.gripday.space`** → Auth UI (login/signup frontend) - RESERVED
-- **`api.gripday.space`** → Gateway Service (all backend APIs)
+- **`pynity.website`** → Landing/Marketing page (optional)
+- **`app.pynity.website`** → Main application (dashboard, admin, logged-in features)
+- **`auth.pynity.website`** → Auth UI (login/signup frontend) - RESERVED
+- **`api.pynity.website`** → Gateway Service (all backend APIs)
 
 ### API Access Examples
 
 **Authentication APIs** (through gateway):
 ```bash
 # Main Application (logged-in users)
-https://app.gripday.com/dashboard           # Dashboard page
-https://app.gripday.com/admin               # Admin panel
-https://app.gripday.com/reports             # Reports
+https://app.pynity.com/dashboard           # Dashboard page
+https://app.pynity.com/admin               # Admin panel
+https://app.pynity.com/reports             # Reports
 
 # Auth UI Frontend (public pages)
-https://auth.gripday.com/login              # Login page
-https://auth.gripday.com/signup             # Signup page
-https://auth.gripday.com/forgot-password    # Password reset page
+https://auth.pynity.com/login              # Login page
+https://auth.pynity.com/signup             # Signup page
+https://auth.pynity.com/forgot-password    # Password reset page
 
 # Backend APIs (through gateway)
-POST https://api.gripday.com/api/v1/auth/login       # Login API
-POST https://api.gripday.com/api/v1/auth/signup      # Signup API
-GET  https://api.gripday.com/api/v1/users/me         # Get user profile
-GET  https://api.gripday.com/api/v1/bookstore/books  # Bookstore API
+POST https://api.pynity.com/api/v1/auth/login       # Login API
+POST https://api.pynity.com/api/v1/auth/signup      # Signup API
+GET  https://api.pynity.com/api/v1/users/me         # Get user profile
+GET  https://api.pynity.com/api/v1/bookstore/books  # Bookstore API
 ```
 
 ## Deployment
@@ -330,7 +330,7 @@ kubectl get ingress -A
 
 # Should show:
 # NAMESPACE        NAME                      HOSTS
-# production-env   gateway-service-ingress   api.gripday.com
+# gripday-production-env   gateway-service-ingress   api.pynity.com
 
 # Backend services should have NO ingress in production/staging
 ```
@@ -343,10 +343,10 @@ kubectl get ingress -A
 **Solution**: These are internal-only. Access via gateway:
 ```bash
 # ❌ Wrong (direct access blocked)
-curl https://auth.gripday.com/api/v1/auth/login
+curl https://auth.pynity.com/api/v1/auth/login
 
 # ✅ Correct (through gateway)
-curl https://api.gripday.com/api/v1/auth/login
+curl https://api.pynity.com/api/v1/auth/login
 ```
 
 ### Network Policy Issues
@@ -354,10 +354,10 @@ curl https://api.gripday.com/api/v1/auth/login
 Check if traffic is being blocked:
 ```bash
 # Check network policies
-kubectl get networkpolicies -n production-env
+kubectl get networkpolicies -n gripday-production-env
 
 # Describe specific policy
-kubectl describe networkpolicy auth-service-network-policy -n production-env
+kubectl describe networkpolicy auth-service-network-policy -n gripday-production-env
 ```
 
 ### Gateway Routing Issues
@@ -365,7 +365,7 @@ kubectl describe networkpolicy auth-service-network-policy -n production-env
 Check gateway routes:
 ```bash
 # Access gateway actuator
-kubectl port-forward svc/gateway-service 8080:8080 -n production-env
+kubectl port-forward svc/gateway-service 8080:8080 -n gripday-production-env
 
 # Check routes
 curl http://localhost:8080/actuator/gateway/routes

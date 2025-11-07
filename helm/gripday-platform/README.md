@@ -289,7 +289,7 @@ kubectl exec -n gripday-bookstore bookstore-postgres-<pod> -- pg_dump -U gripday
 ## Support and Contact
 
 For issues, questions, or contributions:
-- Email: platform-team@gripday.dev
+- Email: platform-team@pynity.site
 - GitHub: https://github.com/gripday/platform
 
 ## License

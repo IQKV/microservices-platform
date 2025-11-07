@@ -4,8 +4,8 @@ This document provides comprehensive documentation for the Gripday Auth Service 
 
 ## Base URL
 - Local Development: `http://localhost:8081`
-- Staging: `https://auth-staging.gripday.com`
-- Production: `https://auth.gripday.com`
+- Staging: `https://auth.pynity.website`
+- Production: `https://auth.pynity.com`
 
 ## API Versioning
 All endpoints are versioned using URL path: `/api/v1/`
@@ -79,7 +79,7 @@ Content-Type: application/json
 **409 Conflict - Username/Email Already Exists:**
 ```json
 {
-  "type": "https://problems.gripday.com/user-registration",
+  "type": "https://problems.pynity.com/user-registration",
   "title": "User registration failed",
   "status": 409,
   "detail": "Username or email is already registered",
@@ -103,7 +103,7 @@ Content-Type: application/json
 **400 Bad Request - Validation Error:**
 ```json
 {
-  "type": "https://problems.gripday.com/validation-error",
+  "type": "https://problems.pynity.com/validation-error",
   "title": "Request validation failed",
   "status": 400,
   "detail": "One or more fields contain invalid values",
@@ -195,7 +195,7 @@ Content-Type: application/json
 **401 Unauthorized - Invalid Credentials:**
 ```json
 {
-  "type": "https://problems.gripday.com/authentication-error",
+  "type": "https://problems.pynity.com/authentication-error",
   "title": "Authentication failed",
   "status": 401,
   "detail": "Invalid username or password",
@@ -211,7 +211,7 @@ Content-Type: application/json
 **423 Locked - Account Locked:**
 ```json
 {
-  "type": "https://problems.gripday.com/account-locked",
+  "type": "https://problems.pynity.com/account-locked",
   "title": "Account temporarily locked",
   "status": 423,
   "detail": "Account locked due to multiple failed login attempts. Try again in 15 minutes.",
@@ -270,7 +270,7 @@ Content-Type: application/json
 **401 Unauthorized - Invalid Refresh Token:**
 ```json
 {
-  "type": "https://problems.gripday.com/authentication-error",
+  "type": "https://problems.pynity.com/authentication-error",
   "title": "Invalid refresh token",
   "status": 401,
   "detail": "Refresh token is expired, invalid, or has been revoked",
@@ -310,7 +310,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 **401 Unauthorized - Invalid Token:**
 ```json
 {
-  "type": "https://problems.gripday.com/authentication-error",
+  "type": "https://problems.pynity.com/authentication-error",
   "title": "Invalid or expired token",
   "status": 401,
   "detail": "JWT token is invalid, expired, or malformed",
@@ -361,7 +361,7 @@ Content-Type: application/json
 **Error Response (401 Unauthorized):**
 ```json
 {
-  "type": "https://problems.gripday.com/authentication-error",
+  "type": "https://problems.pynity.com/authentication-error",
   "title": "Token validation failed",
   "status": 401,
   "detail": "JWT token is invalid, expired, or malformed"
@@ -407,8 +407,8 @@ X-RateLimit-Reset: 1642248060
 
 Interactive API documentation is available at:
 - Local: `http://localhost:8081/swagger-ui.html`
-- Staging: `https://auth-staging.gripday.com/swagger-ui.html`
-- Production: `https://auth.gripday.com/swagger-ui.html`
+- Staging: `https://auth.pynity.website/swagger-ui.html`
+- Production: `https://auth.pynity.com/swagger-ui.html`
 
 Download OpenAPI specification:
 - JSON: `/v3/api-docs`

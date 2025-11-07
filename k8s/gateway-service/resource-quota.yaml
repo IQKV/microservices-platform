@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: gateway-service-quota
-  namespace: gripday-gateway
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -36,7 +36,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: gateway-service-limits
-  namespace: gripday-gateway
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway

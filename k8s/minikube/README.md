@@ -14,7 +14,7 @@ Minikube deployment supports **3 access patterns**:
 
 1. **API Gateway Pattern** (Production-like)
    - Traffic flows: Ingress → Gateway → Backend Services
-   - Domain-based routing: `api.gripday.dev`
+   - Domain-based routing: `api.pynity.site`
    - Mirrors staging/production architecture
 
 2. **Direct NodePort** (Quick Testing)
@@ -23,7 +23,7 @@ Minikube deployment supports **3 access patterns**:
    - Great for rapid development
 
 3. **Direct Service Ingress** (Debugging Only)
-   - Domain-based direct access: `auth.gripday.dev`
+   - Domain-based direct access: `auth.pynity.site`
    - Bypasses gateway for debugging
    - **Does NOT exist in production!**
 

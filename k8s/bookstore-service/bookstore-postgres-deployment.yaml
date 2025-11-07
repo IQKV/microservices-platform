@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookstore-postgres
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
@@ -120,7 +120,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: bookstore-postgres-pvc
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
@@ -137,7 +137,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: bookstore-postgres-init
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database

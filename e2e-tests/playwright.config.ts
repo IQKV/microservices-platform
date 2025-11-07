@@ -21,22 +21,22 @@ const environments = {
     workers: 4
   },
   staging: {
-    baseURL: 'https://staging-api.gripday.com',
+    baseURL: 'https://api.pynity.website',
     services: {
-      gateway: 'https://staging-api.gripday.com',
-      auth: 'https://staging-auth.gripday.com',
-      bookstore: 'https://staging-bookstore.gripday.com'
+      gateway: 'https://api.pynity.website',
+      auth: 'https://staging-auth.pynity.com',
+      bookstore: 'https://staging-bookstore.pynity.com'
     },
     timeout: 60000,
     retries: 2,
     workers: 2
   },
   production: {
-    baseURL: 'https://api.gripday.com',
+    baseURL: 'https://api.pynity.com',
     services: {
-      gateway: 'https://api.gripday.com',
-      auth: 'https://auth.gripday.com',
-      bookstore: 'https://bookstore.gripday.com'
+      gateway: 'https://api.pynity.com',
+      auth: 'https://auth.pynity.com',
+      bookstore: 'https://bookstore.pynity.com'
     },
     timeout: 90000,
     retries: 3,

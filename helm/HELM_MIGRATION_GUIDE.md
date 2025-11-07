@@ -80,7 +80,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-service
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 spec:
   replicas: 2
   template:

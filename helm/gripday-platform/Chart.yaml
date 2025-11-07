@@ -10,7 +10,7 @@ keywords:
   - gripday
 maintainers:
   - name: Gripday Platform Team
-home: https://gripday.dev
+home: https://pynity.site
 sources:
   - https://github.com/gripday/platform
 dependencies:

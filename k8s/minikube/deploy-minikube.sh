@@ -183,7 +183,7 @@ if minikube addons list | grep -q "ingress.*enabled"; then
     print_info "Applying ingress configuration..."
     if kubectl apply -f ingress.yaml; then
         print_status "Ingress configuration applied"
-        print_info "Add to /etc/hosts: $(minikube ip) api.gripday.dev auth.gripday.dev bookstore.gripday.dev"
+        print_info "Add to /etc/hosts: $(minikube ip) api.pynity.site auth.pynity.site bookstore.pynity.site"
     else
         print_warning "Failed to apply ingress (not critical for minikube)"
     fi
@@ -234,12 +234,12 @@ echo ""
 
 if minikube addons list | grep -q "ingress.*enabled"; then
     echo -e "${CYAN}=== Ingress Access (Production-like) ===${NC}"
-    echo -e "${GREEN}API Gateway:${NC}       http://api.gripday.dev"
-    echo -e "${GREEN}Auth Service:${NC}      http://auth.gripday.dev (debugging)"
-    echo -e "${GREEN}Bookstore Service:${NC} http://bookstore.gripday.dev (debugging)"
+    echo -e "${GREEN}API Gateway:${NC}       http://api.pynity.site"
+    echo -e "${GREEN}Auth Service:${NC}      http://auth.pynity.site (debugging)"
+    echo -e "${GREEN}Bookstore Service:${NC} http://bookstore.pynity.site (debugging)"
     echo ""
     echo -e "${YELLOW}Note:${NC} Add these to /etc/hosts:"
-    echo -e "      ${MINIKUBE_IP} api.gripday.dev auth.gripday.dev bookstore.gripday.dev"
+    echo -e "      ${MINIKUBE_IP} api.pynity.site auth.pynity.site bookstore.pynity.site"
     echo ""
 fi
 
@@ -277,12 +277,12 @@ ${GREEN}1. Via NodePort (Direct):${NC}
      -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
 
 ${GREEN}2. Via Ingress (Production-like):${NC}
-   curl -X POST http://api.gripday.dev/api/v1/auth/signup \\
+   curl -X POST http://api.pynity.site/api/v1/auth/signup \\
      -H "Content-Type: application/json" \\
      -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
 
 ${GREEN}3. Direct Service Access (Debugging):${NC}
-   curl http://auth.gripday.dev/actuator/health
+   curl http://auth.pynity.site/actuator/health
 
 ${GREEN}4. View Gateway Routes:${NC}
    curl $GATEWAY_URL/actuator/gateway/routes | jq

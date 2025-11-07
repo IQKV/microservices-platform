@@ -105,8 +105,8 @@ namespace: gripday
 
 **Production:** Environment-specific namespaces
 ```yaml
-namespace: gripday-auth-production
-namespace: gripday-auth-staging
+namespace: gripday-production-env
+namespace: gripday-staging-env
 ```
 
 **Why:** Simple namespace structure for local development. Production isolates by service and environment.

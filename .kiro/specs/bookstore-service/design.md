@@ -575,7 +575,7 @@ spring:
           '[/**]':
             allowedOrigins: 
               - "http://localhost:5173"  # Vite + React 19 dev server
-              - "https://bookstore.gripday.org"  # Production
+              - "https://bookstore.pynity.com"  # Production
             allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
             allowedHeaders: "*"
             allowCredentials: true

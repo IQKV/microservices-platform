@@ -247,9 +247,9 @@ gripday:
       auth: true
       starttls: true
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@pynity.com}
       from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
-      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
+      base-url: ${VERIFICATION_BASE_URL:https://app.pynity.com}
       token-expiry: PT24H
       rate-limit: 3  # emails per hour per user
     templates:
@@ -262,12 +262,12 @@ gripday:
 # SMTP Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=noreply@gripday.com
+SMTP_USERNAME=noreply@pynity.com
 SMTP_PASSWORD=app-specific-password
 
 # Email Settings
-VERIFICATION_FROM_EMAIL=noreply@gripday.com
-VERIFICATION_BASE_URL=https://app.gripday.com
+VERIFICATION_FROM_EMAIL=noreply@pynity.com
+VERIFICATION_BASE_URL=https://app.pynity.com
 ```
 
 ## Security Considerations

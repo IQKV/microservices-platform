@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
         var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
             .map(this::createErrorDetail)
             .toList();
-        var pd = problem("https://problems.gripday.com/validation-error",
+        var pd = problem("https://problems.pynity.com/validation-error",
                 "Request validation failed",
                 HttpStatus.BAD_REQUEST,
                 "One or more fields contain invalid values",
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
                 violation.getInvalidValue()
             ))
             .toList();
-        var pd = problem("https://problems.gripday.com/validation-error",
+        var pd = problem("https://problems.pynity.com/validation-error",
                 "Constraint validation failed",
                 HttpStatus.BAD_REQUEST,
                 ex.getMessage(),
@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ProblemDetail> handleAuthenticationException(
             AuthenticationService.AuthenticationException ex, HttpServletRequest request) {
         var errorCode = determineAuthErrorCode(ex.getMessage());
-        var pd = problem("https://problems.gripday.com/authentication-error",
+        var pd = problem("https://problems.pynity.com/authentication-error",
                 "Authentication failed",
                 HttpStatus.UNAUTHORIZED,
                 ex.getMessage(),
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationService.AccountLockedException.class)
     public ResponseEntity<ProblemDetail> handleAccountLockedException(
             AuthenticationService.AccountLockedException ex, HttpServletRequest request) {
-        var pd = problem("https://problems.gripday.com/account-locked",
+        var pd = problem("https://problems.pynity.com/account-locked",
                 "Account temporarily locked",
                 HttpStatus.LOCKED,
                 ex.getMessage(),
@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
     )
     public ResponseEntity<ProblemDetail> handleEmailVerificationRequiredException(
             AuthenticationService.EmailVerificationRequiredException ex, HttpServletRequest request) {
-        var pd = problem("https://problems.gripday.com/email-verification-required",
+        var pd = problem("https://problems.pynity.com/email-verification-required",
                 "Email verification required",
                 HttpStatus.UNAUTHORIZED,
                 "Please check your email and click the verification link to activate your account",
@@ -156,7 +156,7 @@ public class GlobalExceptionHandler {
             UserRegistrationService.UserRegistrationException ex, HttpServletRequest request) {
         var errorCode = determineRegistrationErrorCode(ex.getMessage());
         var status = errorCode.equals("USER_ALREADY_EXISTS") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
-        var pd = problem("https://problems.gripday.com/user-registration",
+        var pd = problem("https://problems.pynity.com/user-registration",
                 "User registration failed",
                 status,
                 ex.getMessage(),
@@ -176,7 +176,7 @@ public class GlobalExceptionHandler {
     )
     public ResponseEntity<ProblemDetail> handleAccessDeniedException(
             AccessDeniedException ex, HttpServletRequest request) {
-        var pd = problem("https://problems.gripday.com/access-denied",
+        var pd = problem("https://problems.pynity.com/access-denied",
                 "Insufficient permissions for this operation",
                 HttpStatus.FORBIDDEN,
                 ex.getMessage(),
@@ -192,7 +192,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         var errorCode = determineUserManagementErrorCode(ex.getMessage());
         var status = errorCode.equals("USER_ALREADY_EXISTS") ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
-        var pd = problem("https://problems.gripday.com/user-management",
+        var pd = problem("https://problems.pynity.com/user-management",
                 "User management operation failed",
                 status,
                 ex.getMessage(),
@@ -214,7 +214,7 @@ public class GlobalExceptionHandler {
             EmailVerificationService.EmailVerificationException ex, HttpServletRequest request) {
         var errorCode = determineEmailVerificationErrorCode(ex.getMessage());
         var status = determineEmailVerificationStatus(errorCode);
-        var pd = problem("https://problems.gripday.com/email-verification",
+        var pd = problem("https://problems.pynity.com/email-verification",
                 "Email verification failed",
                 status,
                 ex.getMessage(),
@@ -227,7 +227,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(
             Exception ex, HttpServletRequest request) {
-        var pd = problem("https://problems.gripday.com/internal-error",
+        var pd = problem("https://problems.pynity.com/internal-error",
                 "Internal system error",
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred",

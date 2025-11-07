@@ -171,22 +171,22 @@ OTEL_SERVICE_NAME=gripday-auth-service
 
 #### Local Environment
 ```
-http://auth.gripday.dev/api/v1/auth/*     → Authentication API
-http://auth.gripday.dev/api/v1/users/*    → User Management API
-http://auth.gripday.dev/swagger-ui/*      → Swagger UI
-http://auth.gripday.dev/actuator/*        → Health/metrics
+http://auth.pynity.site/api/v1/auth/*     → Authentication API
+http://auth.pynity.site/api/v1/users/*    → User Management API
+http://auth.pynity.site/swagger-ui/*      → Swagger UI
+http://auth.pynity.site/actuator/*        → Health/metrics
 ```
 
 #### Staging Environment
 ```
-https://auth.gripday.space/api/v1/auth/*  → Authentication API
-https://auth.gripday.space/api/v1/users/* → User Management API
+https://auth.pynity.website/api/v1/auth/*  → Authentication API
+https://auth.pynity.website/api/v1/users/* → User Management API
 ```
 
 #### Production Environment
 ```
-https://auth.gripday.com/api/v1/auth/*  → Authentication API
-https://auth.gripday.com/api/v1/users/* → User Management API
+https://auth.pynity.com/api/v1/auth/*  → Authentication API
+https://auth.pynity.com/api/v1/users/* → User Management API
 ```
 
 ## Security
@@ -323,7 +323,7 @@ kubectl describe configmap auth-service-config -n gripday-auth
 
 ```bash
 # Test user registration
-curl -X POST http://auth.gripday.dev/api/v1/auth/signup \
+curl -X POST http://auth.pynity.site/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -334,7 +334,7 @@ curl -X POST http://auth.gripday.dev/api/v1/auth/signup \
   }'
 
 # Test user login
-curl -X POST http://auth.gripday.dev/api/v1/auth/login \
+curl -X POST http://auth.pynity.site/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -344,7 +344,7 @@ curl -X POST http://auth.gripday.dev/api/v1/auth/login \
 # Test token validation
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
-     http://auth.gripday.dev/api/v1/users/me
+     http://auth.pynity.site/api/v1/users/me
 ```
 
 ## Integration
@@ -387,16 +387,16 @@ The auth service integrates with the gateway service for:
 3. **Configure local DNS**
    ```bash
    # Add to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
-   echo "$(minikube ip) auth.gripday.dev" >> /etc/hosts
+   echo "$(minikube ip) auth.pynity.site" >> /etc/hosts
    ```
 
 4. **Access services**
    ```bash
    # Test health endpoint
-   curl http://auth.gripday.dev/actuator/health
+   curl http://auth.pynity.site/actuator/health
    
    # Access Swagger UI
-   open http://auth.gripday.dev/swagger-ui.html
+   open http://auth.pynity.site/swagger-ui.html
    ```
 
 ### Testing

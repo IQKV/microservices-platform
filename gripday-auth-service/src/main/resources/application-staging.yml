@@ -112,9 +112,9 @@ gripday:
       starttls: true
       timeout: PT30S
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@staging.gripday.com}
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@staging.pynity.com}
       from-name: ${VERIFICATION_FROM_NAME:Gripday Platform (Staging)}
-      base-url: ${VERIFICATION_BASE_URL:https://staging.gripday.com}
+      base-url: ${VERIFICATION_BASE_URL:https://staging.pynity.com}
       token-expiry: PT24H
       rate-limit: 3
     templates:

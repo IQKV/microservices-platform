@@ -63,34 +63,34 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
 
   staging: {
     name: 'staging',
-    baseUrl: 'https://staging-api.gripday.com',
+    baseUrl: 'https://api.pynity.website',
     services: {
-      gateway: 'https://staging-api.gripday.com',
-      auth: 'https://staging-auth.gripday.com',
-      bookstore: 'https://staging-bookstore.gripday.com'
+      gateway: 'https://api.pynity.website',
+      auth: 'https://staging-auth.pynity.com',
+      bookstore: 'https://staging-bookstore.pynity.com'
     },
     databases: {
       auth: {
-        host: 'staging-postgres-auth.gripday.com',
+        host: 'staging-postgres-auth.pynity.com',
         port: 5432,
         database: 'gripday_auth_staging',
         username: 'gripday_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-auth.gripday.com:5432/gripday_auth_staging`
+        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-auth.pynity.com:5432/gripday_auth_staging`
       },
       bookstore: {
-        host: 'staging-postgres-bookstore.gripday.com',
+        host: 'staging-postgres-bookstore.pynity.com',
         port: 5432,
         database: 'gripday_bookstore_staging',
         username: 'gripday_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-bookstore.gripday.com:5432/gripday_bookstore_staging`
+        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-bookstore.pynity.com:5432/gripday_bookstore_staging`
       }
     },
     redis: {
-      host: 'staging-redis.gripday.com',
+      host: 'staging-redis.pynity.com',
       port: 6379,
-      url: `redis://${process.env.STAGING_REDIS_PASSWORD ? `:${process.env.STAGING_REDIS_PASSWORD}@` : ''}staging-redis.gripday.com:6379`
+      url: `redis://${process.env.STAGING_REDIS_PASSWORD ? `:${process.env.STAGING_REDIS_PASSWORD}@` : ''}staging-redis.pynity.com:6379`
     },
     timeouts: {
       request: 45000,
@@ -116,34 +116,34 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
 
   production: {
     name: 'production',
-    baseUrl: 'https://api.gripday.com',
+    baseUrl: 'https://api.pynity.com',
     services: {
-      gateway: 'https://api.gripday.com',
-      auth: 'https://auth.gripday.com',
-      bookstore: 'https://bookstore.gripday.com'
+      gateway: 'https://api.pynity.com',
+      auth: 'https://auth.pynity.com',
+      bookstore: 'https://bookstore.pynity.com'
     },
     databases: {
       auth: {
-        host: 'prod-postgres-auth.gripday.com',
+        host: 'prod-postgres-auth.pynity.com',
         port: 5432,
         database: 'gripday_auth_prod',
         username: 'gripday_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-auth.gripday.com:5432/gripday_auth_prod`
+        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-auth.pynity.com:5432/gripday_auth_prod`
       },
       bookstore: {
-        host: 'prod-postgres-bookstore.gripday.com',
+        host: 'prod-postgres-bookstore.pynity.com',
         port: 5432,
         database: 'gripday_bookstore_prod',
         username: 'gripday_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-bookstore.gripday.com:5432/gripday_bookstore_prod`
+        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-bookstore.pynity.com:5432/gripday_bookstore_prod`
       }
     },
     redis: {
-      host: 'prod-redis.gripday.com',
+      host: 'prod-redis.pynity.com',
       port: 6379,
-      url: `redis://${process.env.PROD_REDIS_PASSWORD ? `:${process.env.PROD_REDIS_PASSWORD}@` : ''}prod-redis.gripday.com:6379`
+      url: `redis://${process.env.PROD_REDIS_PASSWORD ? `:${process.env.PROD_REDIS_PASSWORD}@` : ''}prod-redis.pynity.com:6379`
     },
     timeouts: {
       request: 60000,

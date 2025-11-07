@@ -390,7 +390,7 @@ const environments = {
     }
   },
   staging: {
-    baseUrl: 'https://staging-api.gripday.com',
+    baseUrl: 'https://api.pynity.website',
     // ... staging configuration
   }
 };

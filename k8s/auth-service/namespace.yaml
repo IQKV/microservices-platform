@@ -25,7 +25,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: production-env
+  name: gripday-production-env
   labels:
     app.kubernetes.io/part-of: gripday-platform
     environment: production

@@ -61,7 +61,7 @@
           "description": "Vite development server (default port)"
         },
         {
-          "value": "https://bookstore.gripday.org",
+          "value": "https://bookstore.pynity.com",
           "description": "Production frontend domain"
         },
         {

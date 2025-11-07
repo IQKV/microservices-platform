@@ -19,7 +19,7 @@ apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
   name: auth-service-secrets
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 spec:
   refreshInterval: 1h
   secretStoreRef:
@@ -108,7 +108,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: rotate-secrets
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 spec:
   schedule: "0 0 1 * *"  # Monthly
   jobTemplate:
@@ -145,7 +145,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: secret-reader
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -156,11 +156,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: auth-service-secret-reader
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 subjects:
 - kind: ServiceAccount
   name: auth-service-sa
-  namespace: gripday-auth
+  namespace: gripday-dev-env
 roleRef:
   kind: Role
   name: secret-reader
@@ -208,7 +208,7 @@ resources:
    kind: SecretStore
    metadata:
      name: vault-backend
-     namespace: gripday-auth
+     namespace: gripday-dev-env
    spec:
      provider:
        vault:

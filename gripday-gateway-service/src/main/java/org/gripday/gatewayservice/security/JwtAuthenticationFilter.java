@@ -185,7 +185,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         if (StringUtils.hasText(host)) {
             var parts = host.split("\\.");
             if (parts.length > 2) {
-                // Extract subdomain as tenant ID (e.g., tenant1.api.gripday.com -> tenant1)
+                // Extract subdomain as tenant ID (e.g., tenant1.api.pynity.com -> tenant1)
                 return parts[0];
             }
         }

@@ -144,7 +144,7 @@ springdoc:
 gripday:
   bookstore:
     cors:
-      allowed-origins: "http://localhost:5173,http://localhost:3000,https://bookstore.gripday.org"
+      allowed-origins: "http://localhost:5173,http://localhost:3000,https://bookstore.pynity.com"
       allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
       allowed-headers: "*"
       allow-credentials: true

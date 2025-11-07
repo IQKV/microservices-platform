@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: gateway-service-hpa
-  namespace: gripday-gateway
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -91,7 +91,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: gateway-service-hpa-production
-  namespace: production-env
+  namespace: gripday-production-env
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway

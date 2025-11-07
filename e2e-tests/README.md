@@ -75,8 +75,8 @@ e2e-tests/
 ### Playwright Configuration
 Environment-specific settings are defined in `playwright.config.ts`:
 - Local: `http://localhost:8080`
-- Staging: `https://staging-api.gripday.com`
-- Production: `https://api.gripday.com`
+- Staging: `https://api.pynity.website`
+- Production: `https://api.pynity.com`
 
 ## Development
 

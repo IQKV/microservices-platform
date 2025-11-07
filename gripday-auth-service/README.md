@@ -220,11 +220,11 @@ GRIPDAY_AUTH_JWT_REFRESH_TOKEN_EXPIRY=P7D
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=noreply@gripday.com
+SMTP_USERNAME=noreply@pynity.com
 SMTP_PASSWORD=your-app-password
-VERIFICATION_FROM_EMAIL=noreply@gripday.com
+VERIFICATION_FROM_EMAIL=noreply@pynity.com
 VERIFICATION_FROM_NAME=Gripday Platform
-VERIFICATION_BASE_URL=https://app.gripday.com
+VERIFICATION_BASE_URL=https://app.pynity.com
 
 # Password Reset Email Templates (optional overrides)
 GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_SUBJECT="Reset your Gripday password"
@@ -316,14 +316,14 @@ gripday:
     smtp:
       host: smtp.gmail.com
       port: 587
-      username: noreply@gripday.com
+      username: noreply@pynity.com
       password: your-app-password
       auth: true
       starttls: true
     verification:
-      from-email: noreply@gripday.com
+      from-email: noreply@pynity.com
       from-name: Gripday Platform
-      base-url: https://app.gripday.com
+      base-url: https://app.pynity.com
       token-expiry: PT24H
       rate-limit: 3
     templates:

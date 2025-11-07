@@ -4,7 +4,7 @@ This document provides comprehensive API documentation for all Gripday platform 
 
 ## Base URLs
 
-- **Gateway Service**: `http://localhost:8080` (Production: `https://api.gripday.com`)
+- **Gateway Service**: `http://localhost:8080` (Production: `https://api.pynity.com`)
 - **Auth Service**: `http://localhost:8081` (Internal service, accessed via Gateway)
 
 ## Authentication
@@ -697,7 +697,7 @@ curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
 
 3. **Subdomain-based** (When configured):
 ```bash
-curl http://tenant-123.api.gripday.com/api/v1/users
+curl http://tenant-123.api.pynity.com/api/v1/users
 ```
 
 ### Tenant Isolation

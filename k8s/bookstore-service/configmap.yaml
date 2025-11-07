@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: bookstore-service-config
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
@@ -187,7 +187,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: bookstore-service-config-production
-  namespace: production-env
+  namespace: gripday-production-env
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
