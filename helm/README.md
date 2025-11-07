@@ -50,6 +50,7 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 **Purpose**: Authentication, authorization, user management, and multi-tenancy
 
 **Components**:
+
 - Spring Boot application (port 8081)
 - PostgreSQL database
 - Redis cache
@@ -57,12 +58,14 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 - Resource quotas
 
 **Key Features**:
+
 - JWT-based authentication
 - OAuth2 integration (Google)
 - Multi-tenant support
 - Role-based access control
 
 **Installation**:
+
 ```bash
 helm install auth-service ./auth-service -n gripday-auth --create-namespace
 ```
@@ -76,6 +79,7 @@ helm install auth-service ./auth-service -n gripday-auth --create-namespace
 **Purpose**: Business domain service for book inventory and management
 
 **Components**:
+
 - Spring Boot application (port 8082)
 - PostgreSQL database
 - Redis cache
@@ -83,12 +87,14 @@ helm install auth-service ./auth-service -n gripday-auth --create-namespace
 - Network policies
 
 **Key Features**:
+
 - Book catalog management
 - Inventory tracking
 - Search capabilities
 - Auto-scaling enabled
 
 **Installation**:
+
 ```bash
 helm install bookstore-service ./bookstore-service -n gripday-bookstore --create-namespace
 ```
@@ -102,12 +108,14 @@ helm install bookstore-service ./bookstore-service -n gripday-bookstore --create
 **Purpose**: API Gateway for routing, rate limiting, and circuit breaking
 
 **Components**:
+
 - Spring Cloud Gateway (port 8080)
 - Redis cache
 - Horizontal Pod Autoscaler
 - Network policies
 
 **Key Features**:
+
 - Request routing
 - Rate limiting
 - Circuit breaker patterns
@@ -115,6 +123,7 @@ helm install bookstore-service ./bookstore-service -n gripday-bookstore --create
 - JWT validation
 
 **Installation**:
+
 ```bash
 helm install gateway-service ./gateway-service -n gripday-gateway --create-namespace
 ```
@@ -128,12 +137,14 @@ helm install gateway-service ./gateway-service -n gripday-gateway --create-names
 **Purpose**: Deploy and manage all services as a unified platform
 
 **Benefits**:
+
 - Single command deployment
 - Coordinated upgrades
 - Centralized configuration
 - Dependency management
 
 **Installation**:
+
 ```bash
 cd gripday-platform
 helm dependency build
@@ -255,6 +266,7 @@ helm install gripday ./gripday-platform \
 ## 🔐 Security Features
 
 All charts include:
+
 - ✅ Pod Security Standards (restricted)
 - ✅ Network Policies
 - ✅ Non-root containers
@@ -266,6 +278,7 @@ All charts include:
 ## 📈 Observability
 
 All services include:
+
 - Prometheus metrics (`/actuator/prometheus`)
 - Health checks (`/actuator/health`)
 - OpenTelemetry tracing support
@@ -360,6 +373,7 @@ When adding or modifying charts:
 ## 📞 Support
 
 For questions or issues:
+
 - **Documentation**: See individual chart READMEs
 - **Issues**: Create issue in project repository
 - **Team**: Contact Gripday Platform Team

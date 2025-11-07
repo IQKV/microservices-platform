@@ -101,7 +101,7 @@ auth-service:
     requests:
       memory: "512Mi"
       cpu: "500m"
-  
+
 gateway-service:
   replicaCount: 5
   autoscaling:
@@ -119,14 +119,15 @@ helm install gripday-platform . -f custom-values.yaml
 
 ### Global Configuration
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `global.environment` | Environment name | `local` |
-| `global.platform` | Platform identifier | `gripday-platform` |
+| Parameter            | Description         | Default            |
+| -------------------- | ------------------- | ------------------ |
+| `global.environment` | Environment name    | `local`            |
+| `global.platform`    | Platform identifier | `gripday-platform` |
 
 ### Service-Specific Configuration
 
 Each service can be configured independently. See individual service READMEs:
+
 - [Auth Service](../auth-service/README.md)
 - [Bookstore Service](../bookstore-service/README.md)
 - [Gateway Service](../gateway-service/README.md)
@@ -189,18 +190,21 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 ### Common Issues
 
 1. **Pods not starting**
+
    ```bash
    kubectl describe pod <pod-name> -n <namespace>
    kubectl logs <pod-name> -n <namespace>
    ```
 
 2. **Service communication issues**
+
    ```bash
    # Test DNS resolution
    kubectl run test-pod --image=busybox --rm -it -- nslookup auth-service.gripday-auth.svc.cluster.local
    ```
 
 3. **Database connection issues**
+
    ```bash
    # Check PostgreSQL
    kubectl exec -it <postgres-pod> -n <namespace> -- psql -U gripday_user -d <database>
@@ -239,6 +243,7 @@ helm install gripday-platform . -f values-production.yaml --namespace production
 ## Network Policies
 
 Network policies are enabled by default for security:
+
 - Gateway accepts external traffic via ingress
 - Services communicate within the cluster
 - Database access restricted to service pods
@@ -266,10 +271,12 @@ kubectl scale deployment auth-service -n gripday-auth --replicas=3
 ### Auto-scaling (HPA)
 
 HPA is configured for:
+
 - Gateway Service (3-10 replicas)
 - Bookstore Service (2-10 replicas)
 
 Monitor HPA:
+
 ```bash
 kubectl get hpa -A
 ```
@@ -289,6 +296,7 @@ kubectl exec -n gripday-bookstore bookstore-postgres-<pod> -- pg_dump -U gripday
 ## Support and Contact
 
 For issues, questions, or contributions:
+
 - Email: platform-team@pynity.site
 - GitHub: https://github.com/gripday/platform
 

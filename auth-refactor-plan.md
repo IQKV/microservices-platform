@@ -121,6 +121,7 @@
 - **Patch both React configs** to use gripday domains and `returnTo`, and refactor App/Auth guards accordingly.
 
 Would you like me to:
+
 - Audit the repo further to locate the gateway/auth service code and current routes?
 - Start implementing the React-side changes (config defaults, returnTo, guards) behind env flags to avoid breaking current flows?
 

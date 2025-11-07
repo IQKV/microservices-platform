@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database for Auth Service - Local Development
@@ -20,7 +20,7 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +55,7 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -83,7 +83,7 @@ services:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: local
       SPRING_APPLICATION_NAME: gripday-auth-service
-      
+
       # Database Configuration
       GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
       GRIPDAY_DATABASE_USERNAME: gripday_user
@@ -91,31 +91,31 @@ services:
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
       GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
       GRIPDAY_DATABASE_JPA_SHOW_SQL: true
-      
+
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-auth
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
-      
+
       # JWT Configuration
       GRIPDAY_AUTH_JWT_SECRET: dev-secret-key-change-in-production-256-bit-minimum
       GRIPDAY_AUTH_JWT_EXPIRATION: 900
       GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
       GRIPDAY_AUTH_JWT_ISSUER: gripday-auth-service
-      
+
       # Security Configuration
       GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
       GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: 60
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: 5
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: 900
-      
+
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
       GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
       GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: DEBUG
-      
+
       # JVM Configuration
       JAVA_OPTS: >-
         -XX:+UseContainerSupport
@@ -128,7 +128,7 @@ services:
         -Dlogging.level.org.springframework.security=DEBUG
     ports:
       - "8081:8081"
-      - "8091:8091"  # Debug port
+      - "8091:8091" # Debug port
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -137,7 +137,7 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -149,10 +149,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
 networks:

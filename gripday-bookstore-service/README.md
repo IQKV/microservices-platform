@@ -29,19 +29,21 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
 ### Local Development
 
 1. **Start dependencies:**
+
    ```bash
    docker compose up -d bookstore-db bookstore-redis
    ```
 
 2. **Run the application:**
+
    ```bash
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
    ```
 
 3. **Access the application:**
-    - API: http://localhost:8082
-    - Health Check: http://localhost:8082/actuator/health
-    - Swagger UI: http://localhost:8082/swagger-ui.html
+   - API: http://localhost:8082
+   - Health Check: http://localhost:8082/actuator/health
+   - Swagger UI: http://localhost:8082/swagger-ui.html
 
 ### Docker Development
 

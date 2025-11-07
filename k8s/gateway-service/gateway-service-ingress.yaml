@@ -24,30 +24,30 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: api.pynity.site
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway-service
-            port:
-              number: 8080
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway-service
-            port:
-              number: 8080
-      - path: /actuator
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway-service
-            port:
-              number: 8080
+    - host: api.pynity.site
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -74,20 +74,20 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
-    - api.pynity.website
-    secretName: gateway-service-tls-staging
+    - hosts:
+        - api.pynity.website
+      secretName: gateway-service-tls-staging
   rules:
-  - host: api.pynity.website
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway-service-staging
-            port:
-              number: 8080
+    - host: api.pynity.website
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service-staging
+                port:
+                  number: 8080
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -115,17 +115,17 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
-    - api.pynity.com
-    secretName: gateway-service-tls-production
+    - hosts:
+        - api.pynity.com
+      secretName: gateway-service-tls-production
   rules:
-  - host: api.pynity.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway-service-production
-            port:
-              number: 8080
+    - host: api.pynity.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service-production
+                port:
+                  number: 8080

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database for Auth Service - Staging Environment
@@ -22,7 +22,7 @@ services:
       - auth-network-staging
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -56,10 +56,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 3G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1.5G
 
   # Redis for Auth Service - Staging Environment
@@ -77,7 +77,7 @@ services:
       - auth-network-staging
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping" ]
+      test: ["CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -103,10 +103,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1.5G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 768M
 
   # Auth Service - Staging Environment
@@ -122,7 +122,7 @@ services:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: staging
       SPRING_APPLICATION_NAME: gripday-auth-service
-      
+
       # Database Configuration
       GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/${GRIPDAY_DATABASE_NAME:-gripday_auth}
       GRIPDAY_DATABASE_USERNAME: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
@@ -130,32 +130,32 @@ services:
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
       GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
       GRIPDAY_DATABASE_JPA_SHOW_SQL: false
-      
+
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-auth
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
       GRIPDAY_CACHE_REDIS_TIMEOUT: 3000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
-      
+
       # JWT Configuration
       GRIPDAY_AUTH_JWT_SECRET: ${GRIPDAY_AUTH_JWT_SECRET}
       GRIPDAY_AUTH_JWT_EXPIRATION: ${GRIPDAY_AUTH_JWT_EXPIRATION:-900}
       GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: ${GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION:-604800}
       GRIPDAY_AUTH_JWT_ISSUER: gripday-auth-service
-      
+
       # Security Configuration
       GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
       GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: ${GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-5}
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION:-900}
-      
+
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
       GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
       GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: INFO
-      
+
       # JVM Configuration for staging
       JAVA_OPTS: >-
         -XX:+UseContainerSupport
@@ -180,7 +180,7 @@ services:
       - auth-network-staging
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -197,10 +197,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 2G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
       restart_policy:
         condition: on-failure

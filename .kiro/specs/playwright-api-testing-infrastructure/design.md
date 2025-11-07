@@ -84,6 +84,7 @@ e2e-tests/
 ### 1. Test Environment Management
 
 **Docker Compose Test Configuration**
+
 - Isolated test environment with dedicated databases
 - Automatic service startup/shutdown
 - Health checks and dependency management
@@ -108,6 +109,7 @@ interface TestEnvironment {
 ### 2. API Client Framework
 
 **Authenticated HTTP Client**
+
 - Automatic JWT token management
 - Request/response logging and debugging
 - Retry logic with exponential backoff
@@ -126,6 +128,7 @@ interface ApiClient {
 ### 3. Test Data Management
 
 **Data Factory System**
+
 - Realistic test data generation using Faker.js
 - Database seeding and cleanup
 - Tenant-aware data creation
@@ -144,6 +147,7 @@ interface TestDataFactory {
 ### 4. Authentication Test Framework
 
 **JWT Token Management**
+
 - Token lifecycle testing (creation, refresh, expiration)
 - Role-based access control validation
 - Multi-tenant token context
@@ -161,6 +165,7 @@ interface AuthTestFramework {
 ### 5. Multi-Tenant Test Support
 
 **Tenant Context Management**
+
 - Header-based tenant identification testing
 - Subdomain routing validation
 - Data isolation verification
@@ -180,7 +185,7 @@ interface TenantTestFramework {
 
 ```typescript
 interface TestConfig {
-  environment: 'local' | 'staging' | 'production';
+  environment: "local" | "staging" | "production";
   baseUrls: {
     gateway: string;
     auth: string;
@@ -243,6 +248,7 @@ interface ErrorResponse {
 ### Test Failure Management
 
 **Comprehensive Error Capture**
+
 - HTTP request/response logging
 - Screenshot capture for visual debugging
 - Database state snapshots
@@ -250,6 +256,7 @@ interface ErrorResponse {
 - Correlation ID tracking
 
 **Retry Strategies**
+
 - Automatic retry for flaky network issues
 - Exponential backoff for rate-limited requests
 - Circuit breaker pattern for service failures
@@ -259,12 +266,12 @@ interface ErrorResponse {
 
 ```typescript
 enum TestErrorType {
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  DATA_INTEGRITY_ERROR = 'DATA_INTEGRITY_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR'
+  NETWORK_ERROR = "NETWORK_ERROR",
+  AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
+  DATA_INTEGRITY_ERROR = "DATA_INTEGRITY_ERROR",
+  TIMEOUT_ERROR = "TIMEOUT_ERROR",
 }
 ```
 
@@ -273,24 +280,28 @@ enum TestErrorType {
 ### Test Categories
 
 **1. Unit API Tests**
+
 - Individual endpoint validation
 - Request/response schema validation
 - Error handling verification
 - Input validation testing
 
 **2. Integration Tests**
+
 - Service-to-service communication
 - Gateway routing validation
 - Authentication flow testing
 - Multi-tenant functionality
 
 **3. End-to-End Tests**
+
 - Complete user workflows
 - Cross-service transactions
 - Real-world scenario simulation
 - Performance validation
 
 **4. Security Tests**
+
 - Authentication bypass attempts
 - Authorization boundary testing
 - Input sanitization validation
@@ -299,12 +310,14 @@ enum TestErrorType {
 ### Test Execution Strategy
 
 **Parallel Execution**
+
 - Worker-based parallelism for faster execution
 - Test isolation through database transactions
 - Tenant-based test partitioning
 - Resource cleanup coordination
 
 **Environment Management**
+
 - Docker Compose for local testing
 - Kubernetes for staging/production testing
 - Environment-specific configuration
@@ -313,12 +326,14 @@ enum TestErrorType {
 ### Test Data Strategy
 
 **Data Isolation**
+
 - Unique test data per test run
 - Tenant-based data partitioning
 - Automatic cleanup after test completion
 - Database transaction rollback for unit tests
 
 **Realistic Data Generation**
+
 - Faker.js for realistic test data
 - Relationship-aware data creation
 - Configurable data volumes
@@ -327,24 +342,28 @@ enum TestErrorType {
 ## Implementation Phases
 
 ### Phase 1: Foundation Setup
+
 - Project structure and configuration
 - Docker Compose test environment
 - Basic API client framework
 - Authentication utilities
 
 ### Phase 2: Core Test Implementation
+
 - Auth Service API tests
 - Gateway Service routing tests
 - Basic integration tests
 - Test data management
 
 ### Phase 3: Advanced Features
+
 - Multi-tenant testing
 - Security testing
 - Performance validation
 - Comprehensive reporting
 
 ### Phase 4: CI/CD Integration
+
 - Pipeline integration
 - Parallel execution optimization
 - Report generation and publishing
@@ -353,6 +372,7 @@ enum TestErrorType {
 ## Technology Stack
 
 ### Core Technologies
+
 - **Playwright**: API testing framework with TypeScript support
 - **TypeScript**: Type-safe test development
 - **Docker Compose**: Test environment orchestration
@@ -360,6 +380,7 @@ enum TestErrorType {
 - **Redis**: Caching and session management
 
 ### Testing Libraries
+
 - **@playwright/test**: Core testing framework
 - **faker-js**: Realistic test data generation
 - **joi**: Schema validation for API responses
@@ -367,6 +388,7 @@ enum TestErrorType {
 - **winston**: Structured logging for tests
 
 ### Reporting and Monitoring
+
 - **Playwright HTML Reporter**: Interactive test reports
 - **JUnit Reporter**: CI/CD integration
 - **Allure Reporter**: Advanced reporting with history
@@ -379,20 +401,20 @@ enum TestErrorType {
 ```typescript
 const environments = {
   local: {
-    baseUrl: 'http://localhost:8080',
+    baseUrl: "http://localhost:8080",
     services: {
-      auth: 'http://localhost:8081',
-      bookstore: 'http://localhost:8082'
+      auth: "http://localhost:8081",
+      bookstore: "http://localhost:8082",
     },
     databases: {
-      auth: 'postgresql://localhost:5432/gripday_auth_test',
-      bookstore: 'postgresql://localhost:5433/gripday_bookstore_test'
-    }
+      auth: "postgresql://localhost:5432/gripday_auth_test",
+      bookstore: "postgresql://localhost:5433/gripday_bookstore_test",
+    },
   },
   staging: {
-    baseUrl: 'https://api.pynity.website',
+    baseUrl: "https://api.pynity.website",
     // ... staging configuration
-  }
+  },
 };
 ```
 
@@ -404,28 +426,31 @@ const testConfig = {
   retries: 2,
   workers: 4,
   reporter: [
-    ['html', { outputFolder: 'reports/html' }],
-    ['junit', { outputFile: 'reports/junit.xml' }],
-    ['json', { outputFile: 'reports/results.json' }]
-  ]
+    ["html", { outputFolder: "reports/html" }],
+    ["junit", { outputFile: "reports/junit.xml" }],
+    ["json", { outputFile: "reports/results.json" }],
+  ],
 };
 ```
 
 ## Security Considerations
 
 ### Test Data Security
+
 - No production data in tests
 - Encrypted sensitive test data
 - Secure credential management
 - Test environment isolation
 
 ### Authentication Security
+
 - JWT token validation
 - Role-based access testing
 - Session management validation
 - Multi-factor authentication testing
 
 ### Network Security
+
 - HTTPS enforcement testing
 - CORS policy validation
 - Rate limiting verification
@@ -434,18 +459,21 @@ const testConfig = {
 ## Monitoring and Observability
 
 ### Test Metrics
+
 - Test execution duration
 - Success/failure rates
 - API response times
 - Error categorization
 
 ### Reporting Features
+
 - Interactive HTML reports
 - Test history tracking
 - Failure analysis
 - Performance trends
 
 ### Integration Points
+
 - CI/CD pipeline integration
 - Slack/Teams notifications
 - Grafana dashboard integration

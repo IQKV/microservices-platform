@@ -4,54 +4,58 @@ This document provides a clear mapping of all domains and their purposes across 
 
 ## Production Domains (`*.pynity.com`)
 
-| Domain | Purpose | Service | Ingress | Status |
-|--------|---------|---------|---------|--------|
-| **pynity.com** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
-| **app.pynity.com** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
-| **auth.pynity.com** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
-| **api.pynity.com** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
+| Domain              | Purpose                | Service         | Ingress | Status           |
+| ------------------- | ---------------------- | --------------- | ------- | ---------------- |
+| **pynity.com**      | Marketing/Landing Page | Static Site     | ✅ Yes  | 🟡 Optional      |
+| **app.pynity.com**  | Main Web Application   | React/Vue App   | ✅ Yes  | 🟡 When deployed |
+| **auth.pynity.com** | Auth UI (Login/Signup) | Auth Frontend   | ✅ Yes  | 🟡 RESERVED      |
+| **api.pynity.com**  | API Gateway            | Gateway Service | ✅ Yes  | ✅ Active        |
 
 ### Application Details
+
 - **app.pynity.com**: Operational dashboard, admin panel, logged-in user features
 - **auth.pynity.com**: Public authentication pages (login, signup, password reset)
 - **api.pynity.com**: All backend API endpoints
 
 ### Backend Services (Internal Only - NO Ingress)
-| Service | Port | Access Method |
-|---------|------|---------------|
-| Auth Service | 8081 | `https://api.pynity.com/api/v1/auth/*` |
-| Bookstore Service | 8082 | `https://api.pynity.com/api/v1/bookstore/*` |
-| Other Services | Various | `https://api.pynity.com/api/v1/*` |
+
+| Service           | Port    | Access Method                               |
+| ----------------- | ------- | ------------------------------------------- |
+| Auth Service      | 8081    | `https://api.pynity.com/api/v1/auth/*`      |
+| Bookstore Service | 8082    | `https://api.pynity.com/api/v1/bookstore/*` |
+| Other Services    | Various | `https://api.pynity.com/api/v1/*`           |
 
 ## Staging Domains (`*.pynity.website`)
 
-| Domain | Purpose | Service | Ingress | Status |
-|--------|---------|---------|---------|--------|
-| **pynity.website** | Marketing/Landing Page | Static Site | ✅ Yes | 🟡 Optional |
-| **app.pynity.website** | Main Web Application | React/Vue App | ✅ Yes | 🟡 When deployed |
-| **auth.pynity.website** | Auth UI (Login/Signup) | Auth Frontend | ✅ Yes | 🟡 RESERVED |
-| **api.pynity.website** | API Gateway | Gateway Service | ✅ Yes | ✅ Active |
+| Domain                  | Purpose                | Service         | Ingress | Status           |
+| ----------------------- | ---------------------- | --------------- | ------- | ---------------- |
+| **pynity.website**      | Marketing/Landing Page | Static Site     | ✅ Yes  | 🟡 Optional      |
+| **app.pynity.website**  | Main Web Application   | React/Vue App   | ✅ Yes  | 🟡 When deployed |
+| **auth.pynity.website** | Auth UI (Login/Signup) | Auth Frontend   | ✅ Yes  | 🟡 RESERVED      |
+| **api.pynity.website**  | API Gateway            | Gateway Service | ✅ Yes  | ✅ Active        |
 
 ### Application Details
+
 - **app.pynity.website**: Operational dashboard, admin panel, logged-in user features
 - **auth.pynity.website**: Public authentication pages (login, signup, password reset)
 - **api.pynity.website**: All backend API endpoints
 
 ### Backend Services (Internal Only - NO Ingress)
-| Service | Port | Access Method |
-|---------|------|---------------|
-| Auth Service | 8081 | `https://api.pynity.website/api/v1/auth/*` |
-| Bookstore Service | 8082 | `https://api.pynity.website/api/v1/bookstore/*` |
-| Other Services | Various | `https://api.pynity.website/api/v1/*` |
+
+| Service           | Port    | Access Method                                   |
+| ----------------- | ------- | ----------------------------------------------- |
+| Auth Service      | 8081    | `https://api.pynity.website/api/v1/auth/*`      |
+| Bookstore Service | 8082    | `https://api.pynity.website/api/v1/bookstore/*` |
+| Other Services    | Various | `https://api.pynity.website/api/v1/*`           |
 
 ## Local Development Domains
 
-| Domain | Purpose | Service | Port |
-|--------|---------|---------|------|
-| **localhost** | Main Application | React/Vue App | 3000/5173 |
-| **auth.pynity.site** | Auth Service (Direct) | Auth Service | 8081 |
-| **api.pynity.site** | API Gateway | Gateway Service | 8080 |
-| **bookstore.pynity.site** | Bookstore Service (Direct) | Bookstore Service | 8082 |
+| Domain                    | Purpose                    | Service           | Port      |
+| ------------------------- | -------------------------- | ----------------- | --------- |
+| **localhost**             | Main Application           | React/Vue App     | 3000/5173 |
+| **auth.pynity.site**      | Auth Service (Direct)      | Auth Service      | 8081      |
+| **api.pynity.site**       | API Gateway                | Gateway Service   | 8080      |
+| **bookstore.pynity.site** | Bookstore Service (Direct) | Bookstore Service | 8082      |
 
 > **Note**: In local development, backend services have direct ingress for debugging purposes only.
 
@@ -99,6 +103,7 @@ This document provides a clear mapping of all domains and their purposes across 
 **Purpose**: Main web application for logged-in users
 
 **Serves**:
+
 - Operational Dashboard
 - Admin Panel
 - User profile pages
@@ -112,6 +117,7 @@ This document provides a clear mapping of all domains and their purposes across 
 **Makes API calls to**: `api.pynity.com/api/v1/*`
 
 **Example**:
+
 ```
 https://app.pynity.com/dashboard
 https://app.pynity.com/admin
@@ -127,6 +133,7 @@ https://app.pynity.com/settings
 **Purpose**: Dedicated authentication frontend application
 
 **Serves**:
+
 - Login page
 - Signup/registration
 - Password reset
@@ -137,6 +144,7 @@ https://app.pynity.com/settings
 **Makes API calls to**: `api.pynity.com/api/v1/auth/*`
 
 **Example**:
+
 ```
 https://auth.pynity.com/login
 https://auth.pynity.com/signup
@@ -147,6 +155,7 @@ https://auth.pynity.com/oauth/google/callback
 ```
 
 **Why separate**:
+
 - ✅ Security isolation from main app
 - ✅ Can apply stricter CSP policies
 - ✅ Independent deployment and updates
@@ -163,6 +172,7 @@ https://auth.pynity.com/oauth/google/callback
 **Purpose**: Single entry point for all backend APIs
 
 **Routes**:
+
 ```yaml
 /api/v1/auth/**       → Auth Service (8081)
 /api/v1/users/**      → Auth Service (8081)
@@ -172,6 +182,7 @@ https://auth.pynity.com/oauth/google/callback
 ```
 
 **Example API calls**:
+
 ```bash
 # Login API (called by Auth UI)
 POST https://api.pynity.com/api/v1/auth/login
@@ -192,18 +203,18 @@ GET https://api.pynity.com/api/v1/bookstore/books
 ```
 1. User visits main app: https://app.pynity.com
    └─> App detects no auth token
-   
+
 2. Redirect to Auth UI: https://auth.pynity.com/login
    └─> Auth UI shows login form
-   
+
 3. User submits credentials
    └─> POST https://api.pynity.com/api/v1/auth/login
        └─> Gateway routes to Auth Service (internal)
            └─> Returns JWT token
-           
+
 4. Auth UI stores token
    └─> Redirect back: https://app.pynity.com/dashboard
-   
+
 5. Main app makes authenticated requests
    └─> GET https://api.pynity.com/api/v1/users/me
        └─> Include Authorization: Bearer <token>
@@ -214,6 +225,7 @@ GET https://api.pynity.com/api/v1/bookstore/books
 ## Common Mistakes to Avoid
 
 ### ❌ WRONG - Direct backend access
+
 ```bash
 # These will NOT work in staging/production:
 https://auth.pynity.com/api/v1/auth/login          # Wrong! This is for UI
@@ -223,6 +235,7 @@ https://bookstore.pynity.com/api/v1/books          # Wrong! No ingress
 ```
 
 ### ✅ CORRECT - Through API Gateway
+
 ```bash
 # All backend APIs go through gateway:
 https://api.pynity.com/api/v1/auth/login           # Correct!
@@ -230,6 +243,7 @@ https://api.pynity.com/api/v1/bookstore/books      # Correct!
 ```
 
 ### ✅ CORRECT - Frontend applications
+
 ```bash
 # Frontend UIs have their own ingresses:
 https://app.pynity.com/dashboard                   # Main App (logged-in)
@@ -241,6 +255,7 @@ https://auth.pynity.com/login                      # Auth UI (public)
 ## DNS Configuration Required
 
 ### Production (pynity.com)
+
 ```
 pynity.com           A/CNAME  → Landing/Marketing Site (optional)
 app.pynity.com       A/CNAME  → Ingress Controller IP/hostname
@@ -249,6 +264,7 @@ api.pynity.com       A/CNAME  → Ingress Controller IP/hostname
 ```
 
 ### Staging (pynity.website)
+
 ```
 pynity.website         A/CNAME  → Landing/Marketing Site (optional)
 app.pynity.website     A/CNAME  → Ingress Controller IP/hostname
@@ -261,6 +277,7 @@ api.pynity.website     A/CNAME  → Ingress Controller IP/hostname
 ## Security Considerations
 
 ### Auth UI Domain (`auth.pynity.com`)
+
 - ✅ Stricter Content Security Policy (CSP)
 - ✅ HSTS with preload
 - ✅ Frame-Options: DENY
@@ -270,6 +287,7 @@ api.pynity.website     A/CNAME  → Ingress Controller IP/hostname
 - ✅ Isolated from main app vulnerabilities
 
 ### API Gateway Domain (`api.pynity.com`)
+
 - ✅ JWT validation
 - ✅ Rate limiting per endpoint
 - ✅ Request logging with correlation IDs
@@ -282,6 +300,7 @@ api.pynity.website     A/CNAME  → Ingress Controller IP/hostname
 ## Future Considerations
 
 ### Additional Domains (when needed)
+
 ```
 admin.pynity.com     → Admin panel UI
 docs.pynity.com      → API documentation
@@ -293,14 +312,14 @@ ws.pynity.com        → WebSocket gateway
 
 ## Quick Reference
 
-| Need | Use |
-|------|-----|
-| User login page | `https://auth.pynity.com/login` |
-| Login API call | `POST https://api.pynity.com/api/v1/auth/login` |
-| Main app dashboard | `https://app.pynity.com/dashboard` |
-| Admin panel | `https://app.pynity.com/admin` |
-| Any backend API | `https://api.pynity.com/api/v1/*` |
-| Backend service directly | ❌ Not possible (internal only) |
+| Need                     | Use                                             |
+| ------------------------ | ----------------------------------------------- |
+| User login page          | `https://auth.pynity.com/login`                 |
+| Login API call           | `POST https://api.pynity.com/api/v1/auth/login` |
+| Main app dashboard       | `https://app.pynity.com/dashboard`              |
+| Admin panel              | `https://app.pynity.com/admin`                  |
+| Any backend API          | `https://api.pynity.com/api/v1/*`               |
+| Backend service directly | ❌ Not possible (internal only)                 |
 
 ---
 

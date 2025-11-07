@@ -13,7 +13,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    
+
     # CORS configuration for development
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:5173, http://localhost:3000"
@@ -21,26 +21,26 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Correlation-ID,X-Request-ID,X-Tenant-ID"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-max-age: "86400"
-    
+
     # Rate limiting
     nginx.ingress.kubernetes.io/rate-limit-connections: "10"
     nginx.ingress.kubernetes.io/rate-limit-requests-per-minute: "60"
-    
+
     # Request size limits
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
-    
+
     # Timeouts
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    
+
     # Health check
     nginx.ingress.kubernetes.io/health-check-path: "/actuator/health"
     nginx.ingress.kubernetes.io/health-check-interval: "30s"
-    
+
     # Load balancing
     nginx.ingress.kubernetes.io/load-balance: "round_robin"
-    
+
     # Security headers
     nginx.ingress.kubernetes.io/configuration-snippet: |
       add_header X-Content-Type-Options nosniff;
@@ -50,53 +50,53 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: localhost
-    http:
-      paths:
-      # Public API endpoints (no authentication required)
-      - path: /api/v1/bookstore/public(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: bookstore-service
-            port:
-              number: 8082
-      
-      # Protected API endpoints (authentication required)
-      - path: /api/v1/bookstore(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: bookstore-service
-            port:
-              number: 8082
-      
-      # Health and monitoring endpoints
-      - path: /bookstore/actuator(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: bookstore-service
-            port:
-              number: 8082
-      
-      # API documentation
-      - path: /bookstore/swagger-ui(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: bookstore-service
-            port:
-              number: 8082
-      
-      - path: /bookstore/api-docs(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: bookstore-service
-            port:
-              number: 8082
-  
+    - host: localhost
+      http:
+        paths:
+          # Public API endpoints (no authentication required)
+          - path: /api/v1/bookstore/public(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bookstore-service
+                port:
+                  number: 8082
+
+          # Protected API endpoints (authentication required)
+          - path: /api/v1/bookstore(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bookstore-service
+                port:
+                  number: 8082
+
+          # Health and monitoring endpoints
+          - path: /bookstore/actuator(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bookstore-service
+                port:
+                  number: 8082
+
+          # API documentation
+          - path: /bookstore/swagger-ui(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bookstore-service
+                port:
+                  number: 8082
+
+          - path: /bookstore/api-docs(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: bookstore-service
+                port:
+                  number: 8082
+
   # TLS configuration (uncomment for HTTPS)
   # tls:
   # - hosts:
@@ -105,7 +105,7 @@ spec:
 # NOTE: Staging and production environments do NOT have direct ingress
 # All traffic routes through the Gateway Service (API Gateway pattern)
 # Direct ingress is only available in local development environment for debugging
-# 
+#
 # In staging/production, bookstore is accessed via:
 #   https://api.pynity.website/api/v1/bookstore/* -> Gateway -> Bookstore Service
 #   https://api.pynity.com/api/v1/bookstore/* -> Gateway -> Bookstore Service

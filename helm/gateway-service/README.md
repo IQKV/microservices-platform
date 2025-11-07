@@ -17,6 +17,7 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 ## Configuration
 
 Key parameters:
+
 - `replicaCount`: 3
 - `service.port`: 8080
 - `autoscaling.enabled`: true

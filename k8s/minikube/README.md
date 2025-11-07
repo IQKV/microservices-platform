@@ -159,13 +159,13 @@ curl -X POST $GATEWAY_URL/api/v1/auth/login \
 
 Optimized for local development with minimal resource usage:
 
-| Service | Replicas | CPU Request | Memory Request |
-|---------|----------|-------------|----------------|
-| Gateway | 1 | 100m | 256Mi |
-| Auth | 1 | 100m | 256Mi |
-| Bookstore | 1 | 100m | 256Mi |
-| PostgreSQL | 1 | 100m | 128Mi |
-| Redis | 1 | 50m | 64Mi |
+| Service    | Replicas | CPU Request | Memory Request |
+| ---------- | -------- | ----------- | -------------- |
+| Gateway    | 1        | 100m        | 256Mi          |
+| Auth       | 1        | 100m        | 256Mi          |
+| Bookstore  | 1        | 100m        | 256Mi          |
+| PostgreSQL | 1        | 100m        | 128Mi          |
+| Redis      | 1        | 50m         | 64Mi           |
 
 ## Useful Commands
 
@@ -370,5 +370,6 @@ minikube start --cpus=6 --memory=12288
 ## Support
 
 For issues and questions:
+
 - Check [Troubleshooting Guide](../../docs/troubleshooting/common-issues.md)
 - Review service-specific READMEs in each service directory

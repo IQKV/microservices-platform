@@ -5,6 +5,7 @@
 The microservices platform is designed as an extensible foundation that enables secure, scalable, and observable microservice architectures. Built on Spring Boot 3.5.6 and Spring Cloud 2025.0.0, the platform provides two core services that work together to create a robust foundation for any microservices ecosystem. The auth service acts as the centralized authentication, authorization, and user lifecycle management hub for all connected microservices, ensuring consistent security policies and user management across the entire platform.
 
 **Extensibility Design Principles:**
+
 - **Container Orchestration**: Docker Compose for local development and Kubernetes for staging/production service networking
 - **Centralized Security**: JWT-based authentication that can protect endpoints across any connected microservice
 - **User Context Propagation**: Seamless user information flow through JWT claims to all services
@@ -20,6 +21,7 @@ The platform follows reactive programming principles, implements security throug
 **Design Rationale:** Apache Maven serves as the exclusive build automation and dependency management tool for the entire microservices platform. This enforces consistent build processes, standardized project structure, centralized dependency management, and seamless integration with containerization and CI/CD pipelines. The Maven-first approach ensures predictable builds, simplified onboarding, and maintainable project organization across all microservices.
 
 **Key Benefits:**
+
 - **Standardized Build Process**: Consistent compilation, testing, and packaging across all services
 - **Centralized Dependency Management**: Parent POM controls versions and prevents conflicts
 - **Project Structure Consistency**: Standard Maven directory layout enforced across services
@@ -30,51 +32,52 @@ The platform follows reactive programming principles, implements security throug
 ### Multi-Module Maven Project Structure
 
 **Parent POM Configuration (gripday-platform/pom.xml):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>org.gripday</groupId>
     <artifactId>gripday-platform</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <name>Gripday Microservices Platform</name>
     <description>Extensible microservices platform with centralized authentication and gateway</description>
-    
+
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
+
         <!-- Spring Boot and Cloud versions -->
         <spring-boot.version>3.5.6</spring-boot.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
-        
+
         <!-- Database and persistence -->
         <postgresql.version>42.7.3</postgresql.version>
         <liquibase.version>4.29.2</liquibase.version>
         <hibernate.version>6.6.1.Final</hibernate.version>
-        
+
         <!-- Security and JWT -->
         <spring-security.version>6.4.1</spring-security.version>
         <jjwt.version>0.12.6</jjwt.version>
-        
+
         <!-- Observability -->
         <micrometer.version>1.14.1</micrometer.version>
         <opentelemetry.version>1.42.1</opentelemetry.version>
-        
+
         <!-- Testing -->
         <junit.version>5.11.3</junit.version>
         <testcontainers.version>1.20.3</testcontainers.version>
         <archunit.version>1.3.0</archunit.version>
         <spring-modulith.version>1.3.0</spring-modulith.version>
-        
+
         <!-- Build plugins -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
@@ -83,12 +86,12 @@ The platform follows reactive programming principles, implements security throug
         <spotbugs-maven-plugin.version>4.8.6.4</spotbugs-maven-plugin.version>
         <checkstyle-maven-plugin.version>3.5.0</checkstyle-maven-plugin.version>
     </properties>
-    
+
     <modules>
         <module>gripday-auth-service</module>
         <module>gripday-gateway-service</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
             <!-- Spring Boot BOM -->
@@ -99,7 +102,7 @@ The platform follows reactive programming principles, implements security throug
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
+
             <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -108,41 +111,41 @@ The platform follows reactive programming principles, implements security throug
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
+
             <!-- Database dependencies -->
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-core</artifactId>
                 <version>${liquibase.version}</version>
             </dependency>
-            
+
             <!-- JWT dependencies -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
                 <version>${jjwt.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-impl</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
             </dependency>
-            
+
             <!-- Testing dependencies -->
             <dependency>
                 <groupId>org.testcontainers</groupId>
@@ -151,14 +154,14 @@ The platform follows reactive programming principles, implements security throug
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>
                 <version>${archunit.version}</version>
                 <scope>test</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.springframework.modulith</groupId>
                 <artifactId>spring-modulith-bom</artifactId>
@@ -168,7 +171,7 @@ The platform follows reactive programming principles, implements security throug
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <pluginManagement>
             <plugins>
@@ -185,7 +188,7 @@ The platform follows reactive programming principles, implements security throug
                         </compilerArgs>
                     </configuration>
                 </plugin>
-                
+
                 <!-- Spring Boot Maven plugin -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
@@ -199,7 +202,7 @@ The platform follows reactive programming principles, implements security throug
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <!-- Surefire for unit tests -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -216,7 +219,7 @@ The platform follows reactive programming principles, implements security throug
                         </excludes>
                     </configuration>
                 </plugin>
-                
+
                 <!-- Failsafe for integration tests -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -237,7 +240,7 @@ The platform follows reactive programming principles, implements security throug
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <!-- JaCoCo for code coverage -->
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -258,7 +261,7 @@ The platform follows reactive programming principles, implements security throug
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <!-- SpotBugs for static analysis -->
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
@@ -270,7 +273,7 @@ The platform follows reactive programming principles, implements security throug
                         <xmlOutput>true</xmlOutput>
                     </configuration>
                 </plugin>
-                
+
                 <!-- Checkstyle for code style -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -284,31 +287,31 @@ The platform follows reactive programming principles, implements security throug
                 </plugin>
             </plugins>
         </pluginManagement>
-        
+
         <plugins>
             <!-- Apply common plugins to all modules -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-    
+
     <profiles>
         <!-- Minimal Maven profiles - rely primarily on Spring profiles -->
         <profile>
@@ -326,7 +329,7 @@ The platform follows reactive programming principles, implements security throug
                             </execution>
                         </executions>
                     </plugin>
-                    
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
@@ -348,145 +351,146 @@ The platform follows reactive programming principles, implements security throug
 ### Service-Specific Maven Configuration
 
 **Auth Service POM (gripday-auth-service/pom.xml):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.gripday</groupId>
         <artifactId>gripday-platform</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>gripday-auth-service</artifactId>
     <packaging>jar</packaging>
-    
+
     <name>Gripday Auth Service</name>
     <description>Centralized authentication and user management service</description>
-    
+
     <dependencies>
         <!-- Spring Boot starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        
+
         <!-- Database -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
-        
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
         </dependency>
-        
+
         <!-- OpenAPI documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
-        
+
         <!-- Observability -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
-        
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -499,119 +503,120 @@ The platform follows reactive programming principles, implements security throug
 ```
 
 **Gateway Service POM (gripday-gateway-service/pom.xml):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>org.gripday</groupId>
         <artifactId>gripday-platform</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>gripday-gateway-service</artifactId>
     <packaging>jar</packaging>
-    
+
     <name>Gripday Gateway Service</name>
     <description>API Gateway with routing, authentication, and rate limiting</description>
-    
+
     <dependencies>
         <!-- Spring Cloud Gateway -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        
+
         <!-- Circuit breaker -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
-        
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
         </dependency>
-        
+
         <!-- OpenAPI documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
         </dependency>
-        
+
         <!-- Observability -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
-        
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>redis</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -626,6 +631,7 @@ The platform follows reactive programming principles, implements security throug
 ### Maven Directory Structure Enforcement
 
 **Standard Maven Directory Layout:**
+
 ```
 gripday-platform/                    # Parent project root
 ├── pom.xml                         # Parent POM
@@ -701,6 +707,7 @@ gripday-platform/                    # Parent project root
 ### Maven Integration with Docker and CI/CD
 
 **Dockerfile Integration with Maven:**
+
 ```dockerfile
 # Auth Service Dockerfile
 FROM eclipse-temurin:21-jre-alpine
@@ -733,6 +740,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 **Maven Build Commands:**
+
 ```bash
 # Build entire platform
 mvn clean compile
@@ -765,6 +773,7 @@ mvn package -DskipTests
 ### Maven Enforcement Rules
 
 **Enforcer Plugin Configuration (added to parent POM):**
+
 ```xml
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
@@ -782,18 +791,18 @@ mvn package -DskipTests
                     <requireMavenVersion>
                         <version>[3.9.0,)</version>
                     </requireMavenVersion>
-                    
+
                     <!-- Require Java 21 -->
                     <requireJavaVersion>
                         <version>[21,)</version>
                     </requireJavaVersion>
-                    
+
                     <!-- No duplicate dependencies -->
                     <banDuplicatePomDependencyVersions/>
-                    
+
                     <!-- Require dependency convergence -->
                     <dependencyConvergence/>
-                    
+
                     <!-- Ban problematic dependencies -->
                     <bannedDependencies>
                         <excludes>
@@ -808,7 +817,7 @@ mvn package -DskipTests
                             <exclude>log4j:log4j</exclude>
                         </excludes>
                     </bannedDependencies>
-                    
+
                     <!-- Require specific file presence -->
                     <requireFilesExist>
                         <files>
@@ -825,6 +834,7 @@ mvn package -DskipTests
 ```
 
 **Alternative Build Tool Prevention:**
+
 - Enforcer plugin explicitly bans Gradle, SBT, and Ant dependencies
 - CI/CD pipelines validate presence of `pom.xml` files
 - Docker builds rely exclusively on Maven-generated JAR files
@@ -840,16 +850,16 @@ graph TB
     Client[Client Applications] --> Gateway[Gateway Service]
     Gateway --> Auth[Auth Service]
     Gateway --> Future[Future Microservices]
-    
+
     Gateway --> GatewayRedis[(Gateway Redis)]
     Gateway --> GatewayDB[(Gateway PostgreSQL)]
     Auth --> AuthDB[(Auth PostgreSQL)]
     Future --> FutureDB[(Future Service DB)]
-    
+
     Gateway --> Observability[OpenTelemetry]
     Auth --> Observability
     Future --> Observability
-    
+
     Observability --> Prometheus[Prometheus]
     Observability --> Loki[Loki]
     Prometheus --> Grafana[Grafana]
@@ -865,7 +875,7 @@ sequenceDiagram
     participant A as Auth Service
     participant R as Redis
     participant M as Target Microservice
-    
+
     C->>G: Request with JWT
     G->>R: Check rate limit
     G->>A: Validate JWT token
@@ -884,6 +894,7 @@ sequenceDiagram
 **Design Rationale:** Active utilization of Java 21 features improves code readability, maintainability, and performance while leveraging the latest language capabilities. The platform adopts a pragmatic approach, using modern features where they provide clear benefits without over-engineering simple solutions.
 
 **Implementation Strategy:**
+
 - Use `var` for local variable type inference to improve readability
 - Implement records for immutable DTOs and value objects
 - Apply text blocks for multi-line strings (SQL, JSON templates)
@@ -896,425 +907,310 @@ The platform actively leverages Java 21 features to improve code readability, ma
 ### Local Variable Type Inference with var
 
 **Service Layer Implementation:**
+
 ```java
 @Service
 public class UserService {
-    
-    public UserDto authenticateUser(LoginRequest request) {
-        var username = request.getUsername();
-        var password = request.getPassword();
-        
-        var userOptional = userRepository.findByUsernameOrEmail(username, username);
-        if (userOptional.isEmpty()) {
-            throw new AuthenticationException("User not found");
-        }
-        
-        var user = userOptional.get();
-        var encodedPassword = user.getPasswordHash();
-        
-        if (!passwordEncoder.matches(password, encodedPassword)) {
-            throw new AuthenticationException("Invalid credentials");
-        }
-        
-        var authorities = user.getAuthorities().stream()
-            .map(Authority::getName)
-            .collect(Collectors.toSet());
-            
-        return UserDto.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .roles(authorities)
-            .build();
+
+  public UserDto authenticateUser(LoginRequest request) {
+    var username = request.getUsername();
+    var password = request.getPassword();
+
+    var userOptional = userRepository.findByUsernameOrEmail(username, username);
+    if (userOptional.isEmpty()) {
+      throw new AuthenticationException("User not found");
     }
+
+    var user = userOptional.get();
+    var encodedPassword = user.getPasswordHash();
+
+    if (!passwordEncoder.matches(password, encodedPassword)) {
+      throw new AuthenticationException("Invalid credentials");
+    }
+
+    var authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet());
+
+    return UserDto.builder().id(user.getId()).username(user.getUsername()).email(user.getEmail()).roles(authorities).build();
+  }
 }
 ```
 
 ### Records for Data Transfer Objects
 
 **Immutable DTOs using Records:**
+
 ```java
 // User context record for JWT claims
 public record UserContext(
-    Long userId,
-    String username,
-    String email,
-    Set<String> roles,
-    Set<String> permissions,
-    String department,
-    String organizationId,
-    Map<String, Object> customClaims
+  Long userId,
+  String username,
+  String email,
+  Set<String> roles,
+  Set<String> permissions,
+  String department,
+  String organizationId,
+  Map<String, Object> customClaims
 ) {
-    // Compact constructor for validation
-    public UserContext {
-        Objects.requireNonNull(userId, "User ID cannot be null");
-        Objects.requireNonNull(username, "Username cannot be null");
-        roles = roles != null ? Set.copyOf(roles) : Set.of();
-        permissions = permissions != null ? Set.copyOf(permissions) : Set.of();
-        customClaims = customClaims != null ? Map.copyOf(customClaims) : Map.of();
-    }
-    
-    public boolean hasRole(String role) {
-        return roles.contains(role);
-    }
-    
-    public boolean hasPermission(String permission) {
-        return permissions.contains(permission);
-    }
+  // Compact constructor for validation
+  public UserContext {
+    Objects.requireNonNull(userId, "User ID cannot be null");
+    Objects.requireNonNull(username, "Username cannot be null");
+    roles = roles != null ? Set.copyOf(roles) : Set.of();
+    permissions = permissions != null ? Set.copyOf(permissions) : Set.of();
+    customClaims = customClaims != null ? Map.copyOf(customClaims) : Map.of();
+  }
+
+  public boolean hasRole(String role) {
+    return roles.contains(role);
+  }
+
+  public boolean hasPermission(String permission) {
+    return permissions.contains(permission);
+  }
 }
 
 // API request/response records
-public record LoginRequest(
-    @NotBlank String username,
-    @NotBlank String password,
-    boolean rememberMe
-) {}
+public record LoginRequest(@NotBlank String username, @NotBlank String password, boolean rememberMe) {}
 
 public record SignupRequest(
-    @NotBlank @Size(min = 3, max = 50) String username,
-    @NotBlank @Email String email,
-    @NotBlank @Size(min = 8, max = 100) String password,
-    @NotBlank String firstName,
-    @NotBlank String lastName,
-    String tenantId
+  @NotBlank @Size(min = 3, max = 50) String username,
+  @NotBlank @Email String email,
+  @NotBlank @Size(min = 8, max = 100) String password,
+  @NotBlank String firstName,
+  @NotBlank String lastName,
+  String tenantId
 ) {}
 
-public record RefreshTokenRequest(
-    @NotBlank String refreshToken
-) {}
+public record RefreshTokenRequest(@NotBlank String refreshToken) {}
 
-public record TokenResponse(
-    String accessToken,
-    String refreshToken,
-    String tokenType,
-    long expiresIn,
-    UserContext user
-) {}
+public record TokenResponse(String accessToken, String refreshToken, String tokenType, long expiresIn, UserContext user) {}
 
-public record UserRegistrationResponse(
-    Long userId,
-    String username,
-    String email,
-    String firstName,
-    String lastName,
-    boolean emailVerified,
-    Instant createdAt,
-    String message
-) {}
+public record UserRegistrationResponse(Long userId, String username, String email, String firstName, String lastName, boolean emailVerified, Instant createdAt, String message) {}
 
-public record ErrorDetail(
-    String field,
-    String code,
-    String message,
-    Object rejectedValue
-) {}
+public record ErrorDetail(String field, String code, String message, Object rejectedValue) {}
 
-public record ApiError(
-    String code,
-    String message,
-    String details,
-    Instant timestamp,
-    String path,
-    String method,
-    String correlationId,
-    String requestId,
-    List<ErrorDetail> fields
-) {}
+public record ApiError(String code, String message, String details, Instant timestamp, String path, String method, String correlationId, String requestId, List<ErrorDetail> fields) {}
 ```
 
 ### Simple Authentication Response Handling
 
 **Simple Authentication Result Classes:**
+
 ```java
 // Simple success response
-public record AuthenticationSuccess(
-    UserContext user,
-    String accessToken,
-    String refreshToken,
-    String correlationId,
-    Instant timestamp
-) {}
+public record AuthenticationSuccess(UserContext user, String accessToken, String refreshToken, String correlationId, Instant timestamp) {}
 
 // Simple failure response
-public record AuthenticationFailure(
-    String reason,
-    String errorCode,
-    String correlationId,
-    Instant timestamp
-) {}
+public record AuthenticationFailure(String reason, String errorCode, String correlationId, Instant timestamp) {}
 
 // Simple service with straightforward logic
 @Service
 public class AuthenticationService {
-    
-    public ResponseEntity<?> handleAuthenticationSuccess(AuthenticationSuccess success) {
-        return ResponseEntity.ok(new TokenResponse(
-            success.accessToken(),
-            success.refreshToken(),
-            "Bearer",
-            900,
-            success.user()
-        ));
-    }
-    
-    public ResponseEntity<?> handleAuthenticationFailure(AuthenticationFailure failure) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ApiError(
-                failure.errorCode(),
-                "Authentication failed",
-                failure.reason(),
-                failure.timestamp(),
-                "/api/v1/auth/login",
-                "POST",
-                failure.correlationId(),
-                generateRequestId(),
-                List.of()
-            ));
-    }
+
+  public ResponseEntity<?> handleAuthenticationSuccess(AuthenticationSuccess success) {
+    return ResponseEntity.ok(new TokenResponse(success.accessToken(), success.refreshToken(), "Bearer", 900, success.user()));
+  }
+
+  public ResponseEntity<?> handleAuthenticationFailure(AuthenticationFailure failure) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+      new ApiError(failure.errorCode(), "Authentication failed", failure.reason(), failure.timestamp(), "/api/v1/auth/login", "POST", failure.correlationId(), generateRequestId(), List.of())
+    );
+  }
 }
 ```
 
 ### Pattern Matching and Switch Expressions
 
 **Simple Error Handling:**
+
 ```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ApiError> handleValidationException(ValidationException ex, HttpServletRequest request) {
-        var errorResponse = createErrorResponse(
-            "VALIDATION_ERROR",
-            "Request validation failed",
-            ex.getMessage(),
-            request,
-            ex.getFieldErrors()
-        );
-        return ResponseEntity.badRequest().body(errorResponse);
-    }
-    
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiError> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
-        var errorResponse = createErrorResponse(
-            "AUTH_INVALID_CREDENTIALS",
-            "Invalid username or password",
-            ex.getMessage(),
-            request,
-            List.of()
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-    }
-    
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        var errorResponse = createErrorResponse(
-            "AUTH_INSUFFICIENT_PERMISSIONS",
-            "Insufficient permissions for this operation",
-            ex.getMessage(),
-            request,
-            List.of()
-        );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
-    }
-    
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
-        var errorResponse = createErrorResponse(
-            "SYSTEM_INTERNAL_ERROR",
-            "Internal system error",
-            "An unexpected error occurred",
-            request,
-            List.of()
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-    
-    private ApiError createErrorResponse(String code, String message, String details, 
-                                       HttpServletRequest request, List<ErrorDetail> fields) {
-        return new ApiError(
-            code,
-            message,
-            details,
-            Instant.now(),
-            request.getRequestURI(),
-            request.getMethod(),
-            MDC.get("correlationId"),
-            generateRequestId(),
-            fields
-        );
-    }
+
+  @ExceptionHandler(ValidationException.class)
+  public ResponseEntity<ApiError> handleValidationException(ValidationException ex, HttpServletRequest request) {
+    var errorResponse = createErrorResponse("VALIDATION_ERROR", "Request validation failed", ex.getMessage(), request, ex.getFieldErrors());
+    return ResponseEntity.badRequest().body(errorResponse);
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiError> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+    var errorResponse = createErrorResponse("AUTH_INVALID_CREDENTIALS", "Invalid username or password", ex.getMessage(), request, List.of());
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+    var errorResponse = createErrorResponse("AUTH_INSUFFICIENT_PERMISSIONS", "Insufficient permissions for this operation", ex.getMessage(), request, List.of());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
+    var errorResponse = createErrorResponse("SYSTEM_INTERNAL_ERROR", "Internal system error", "An unexpected error occurred", request, List.of());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+  }
+
+  private ApiError createErrorResponse(String code, String message, String details, HttpServletRequest request, List<ErrorDetail> fields) {
+    return new ApiError(code, message, details, Instant.now(), request.getRequestURI(), request.getMethod(), MDC.get("correlationId"), generateRequestId(), fields);
+  }
 }
 ```
 
 ### Text Blocks for Multi-line Strings
 
 **SQL Queries and JSON Templates:**
+
 ```java
 @Repository
 public class UserRepository {
-    
-    private static final String FIND_USERS_WITH_ROLES_QUERY = """
-        SELECT u.*, a.name as authority_name
-        FROM users u
-        LEFT JOIN user_authorities ua ON u.id = ua.user_id
-        LEFT JOIN authorities a ON ua.authority_id = a.id
-        WHERE u.enabled = true
-        AND (:username IS NULL OR u.username ILIKE :username)
-        AND (:email IS NULL OR u.email ILIKE :email)
-        ORDER BY u.created_at DESC
-        """;
-    
-    @Query(value = FIND_USERS_WITH_ROLES_QUERY, nativeQuery = true)
-    List<UserProjection> findUsersWithRoles(
-        @Param("username") String username,
-        @Param("email") String email
-    );
+
+  private static final String FIND_USERS_WITH_ROLES_QUERY = """
+    SELECT u.*, a.name as authority_name
+    FROM users u
+    LEFT JOIN user_authorities ua ON u.id = ua.user_id
+    LEFT JOIN authorities a ON ua.authority_id = a.id
+    WHERE u.enabled = true
+    AND (:username IS NULL OR u.username ILIKE :username)
+    AND (:email IS NULL OR u.email ILIKE :email)
+    ORDER BY u.created_at DESC
+    """;
+
+  @Query(value = FIND_USERS_WITH_ROLES_QUERY, nativeQuery = true)
+  List<UserProjection> findUsersWithRoles(@Param("username") String username, @Param("email") String email);
 }
 
 @Component
 public class PostmanCollectionGenerator {
-    
-    private static final String AUTHENTICATION_TEST_SCRIPT = """
-        pm.test("Status code is 200", function () {
-            pm.response.to.have.status(200);
-        });
-        
-        pm.test("Response has access token", function () {
-            var jsonData = pm.response.json();
-            pm.expect(jsonData).to.have.property('accessToken');
-            pm.globals.set("access_token", jsonData.accessToken);
-        });
-        
-        pm.test("Response has user information", function () {
-            var jsonData = pm.response.json();
-            pm.expect(jsonData).to.have.property('user');
-            pm.expect(jsonData.user).to.have.property('username');
-        });
-        """;
-    
-    private static final String LOGIN_REQUEST_BODY = """
-        {
-          "username": "{{username}}",
-          "password": "{{password}}",
-          "rememberMe": true
-        }
-        """;
+
+  private static final String AUTHENTICATION_TEST_SCRIPT = """
+    pm.test("Status code is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    pm.test("Response has access token", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property('accessToken');
+        pm.globals.set("access_token", jsonData.accessToken);
+    });
+
+    pm.test("Response has user information", function () {
+        var jsonData = pm.response.json();
+        pm.expect(jsonData).to.have.property('user');
+        pm.expect(jsonData.user).to.have.property('username');
+    });
+    """;
+
+  private static final String LOGIN_REQUEST_BODY = """
+    {
+      "username": "{{username}}",
+      "password": "{{password}}",
+      "rememberMe": true
+    }
+    """;
 }
 ```
 
 ### Enhanced instanceof with Pattern Variables
 
 **Simple JWT Token Processing:**
+
 ```java
 @Component
 public class JwtTokenProcessor {
-    
-    public UserContext extractUserContext(Map<String, Object> claims) {
-        var userId = extractLong(claims.get("sub"));
-        var username = extractString(claims.get("username"));
-        var email = extractString(claims.get("email"));
-        var roles = extractStringSet(claims.get("roles"));
-        var permissions = extractStringSet(claims.get("permissions"));
-        var department = extractString(claims.get("department"));
-        var organizationId = extractString(claims.get("organization_id"));
-        var customClaims = extractCustomClaims(claims);
-        
-        return new UserContext(
-            userId, username, email, roles, permissions, 
-            department, organizationId, customClaims
-        );
+
+  public UserContext extractUserContext(Map<String, Object> claims) {
+    var userId = extractLong(claims.get("sub"));
+    var username = extractString(claims.get("username"));
+    var email = extractString(claims.get("email"));
+    var roles = extractStringSet(claims.get("roles"));
+    var permissions = extractStringSet(claims.get("permissions"));
+    var department = extractString(claims.get("department"));
+    var organizationId = extractString(claims.get("organization_id"));
+    var customClaims = extractCustomClaims(claims);
+
+    return new UserContext(userId, username, email, roles, permissions, department, organizationId, customClaims);
+  }
+
+  private String extractString(Object value) {
+    if (value instanceof String) {
+      return (String) value;
     }
-    
-    private String extractString(Object value) {
-        if (value instanceof String) {
-            return (String) value;
-        }
+    return null;
+  }
+
+  private Long extractLong(Object value) {
+    if (value instanceof Long) {
+      return (Long) value;
+    }
+    if (value instanceof Integer) {
+      return ((Integer) value).longValue();
+    }
+    if (value instanceof String) {
+      try {
+        return Long.parseLong((String) value);
+      } catch (NumberFormatException e) {
         return null;
+      }
     }
-    
-    private Long extractLong(Object value) {
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        }
-        if (value instanceof String) {
-            try {
-                return Long.parseLong((String) value);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return null;
+    return null;
+  }
+
+  private Set<String> extractStringSet(Object value) {
+    if (value instanceof List<?>) {
+      return ((List<?>) value).stream().filter(String.class::isInstance).map(String.class::cast).collect(Collectors.toSet());
     }
-    
-    private Set<String> extractStringSet(Object value) {
-        if (value instanceof List<?>) {
-            return ((List<?>) value).stream()
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .collect(Collectors.toSet());
-        }
-        return Set.of();
-    }
+    return Set.of();
+  }
 }
 ```
 
 ### Virtual Threads for Improved Concurrency
 
 **Async Processing with Virtual Threads:**
+
 ```java
 @Service
 public class AsyncUserService {
-    
-    private final ExecutorService virtualThreadExecutor = 
-        Executors.newVirtualThreadPerTaskExecutor();
-    
-    public CompletableFuture<List<UserDto>> processUsersAsync(List<Long> userIds) {
-        var futures = userIds.stream()
-            .map(userId -> CompletableFuture.supplyAsync(
-                () -> processUser(userId),
-                virtualThreadExecutor
-            ))
-            .toList();
-        
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(ignored -> futures.stream()
-                .map(CompletableFuture::join)
-                .filter(Objects::nonNull)
-                .toList()
-            );
+
+  private final ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
+  public CompletableFuture<List<UserDto>> processUsersAsync(List<Long> userIds) {
+    var futures = userIds
+      .stream()
+      .map((userId) -> CompletableFuture.supplyAsync(() -> processUser(userId), virtualThreadExecutor))
+      .toList();
+
+    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply((ignored) -> futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList());
+  }
+
+  private UserDto processUser(Long userId) {
+    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+      var userTask = scope.fork(() -> userRepository.findById(userId));
+      var rolesTask = scope.fork(() -> authorityRepository.findByUserId(userId));
+      var auditTask = scope.fork(() -> auditLogRepository.findLatestByUserId(userId));
+
+      scope.join();
+      scope.throwIfFailed();
+
+      var user = userTask.resultNow().orElse(null);
+      if (user == null) return null;
+
+      var roles = rolesTask.resultNow();
+      var lastActivity = auditTask.resultNow();
+
+      return UserDto.builder()
+        .id(user.getId())
+        .username(user.getUsername())
+        .email(user.getEmail())
+        .roles(roles.stream().map(Authority::getName).collect(Collectors.toSet()))
+        .lastActivity(lastActivity.map(UserAuditLog::getCreatedAt).orElse(null))
+        .build();
+    } catch (InterruptedException | ExecutionException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Failed to process user: " + userId, e);
     }
-    
-    private UserDto processUser(Long userId) {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var userTask = scope.fork(() -> userRepository.findById(userId));
-            var rolesTask = scope.fork(() -> authorityRepository.findByUserId(userId));
-            var auditTask = scope.fork(() -> auditLogRepository.findLatestByUserId(userId));
-            
-            scope.join();
-            scope.throwIfFailed();
-            
-            var user = userTask.resultNow().orElse(null);
-            if (user == null) return null;
-            
-            var roles = rolesTask.resultNow();
-            var lastActivity = auditTask.resultNow();
-            
-            return UserDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .roles(roles.stream().map(Authority::getName).collect(Collectors.toSet()))
-                .lastActivity(lastActivity.map(UserAuditLog::getCreatedAt).orElse(null))
-                .build();
-                
-        } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to process user: " + userId, e);
-        }
-    }
+  }
 }
 ```
 
@@ -1327,18 +1223,21 @@ public class AsyncUserService {
 Each microservice follows a strict three-tier architecture pattern:
 
 **Presentation Layer (Controllers/Web)**
+
 - REST controllers and reactive handlers
 - Request/response DTOs and validation
 - Exception handlers and error responses
 - OpenAPI documentation and contracts
 
 **Domain Layer (Services/Domain)**
+
 - Domain logic and domain services
 - Transaction management and orchestration
 - Domain models and domain rules
 - Security and authorization logic
 
 **Data Access Layer (Repositories/Infrastructure)**
+
 - Spring Data JPA repositories with Hibernate 6.x ORM
 - Jakarta Persistence API 3.1+ entities and annotations
 - Database access with enhanced SQL generation and batch processing
@@ -1348,7 +1247,7 @@ Each microservice follows a strict three-tier architecture pattern:
 
 ### Package Structure
 
-```
+````
 org.gripday.{servicename}/        # Service-specific Package
 ├── presentation/                 # Presentation Layer (Auth Service)
 │   ├── web/                      # REST controllers with Resource suffix
@@ -1385,20 +1284,23 @@ public class AuthServiceApplication {
         SpringApplication.run(AuthServiceApplication.class, args);
     }
 }
-```
+````
 
 **Gateway Service Application:**
+
 ```java
 package org.gripday.gatewayservice;
 
 @SpringBootApplication
 public class GatewayServiceApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(GatewayServiceApplication.class, args);
-    }
+
+  public static void main(String[] args) {
+    SpringApplication.run(GatewayServiceApplication.class, args);
+  }
 }
 ```
-```
+
+````
 
 ### Architectural Rules
 
@@ -1435,45 +1337,44 @@ static final ArchRule layered_architecture = layeredArchitecture()
     .whereLayer("Infrastructure").mayOnlyBeAccessedByLayers("Domain");
 
 @ArchTest
-static final ArchRule controllers_should_only_depend_on_services = 
+static final ArchRule controllers_should_only_depend_on_services =
     classes().that().resideInAPackage("..presentation.web..")
     .should().onlyDependOnClassesThat()
     .resideInAnyPackage("..domain.service..", "java..", "org.springframework..", "..presentation.dto..");
 
 @ArchTest
-static final ArchRule rest_controllers_should_be_in_web_package = 
+static final ArchRule rest_controllers_should_be_in_web_package =
     classes().that().areAnnotatedWith(RestController.class)
     .should().resideInAPackage("..presentation.web..");
 
 @ArchTest
-static final ArchRule rest_controllers_should_have_resource_suffix = 
+static final ArchRule rest_controllers_should_have_resource_suffix =
     classes().that().areAnnotatedWith(RestController.class)
     .should().haveSimpleNameEndingWith("Resource");
 
 @ArchTest
-static final ArchRule rest_controllers_should_follow_naming_conventions = 
+static final ArchRule rest_controllers_should_follow_naming_conventions =
     classes().that().areAnnotatedWith(RestController.class)
     .should().resideInAPackage("..presentation.web..")
     .andShould().haveSimpleNameEndingWith("Resource");
-```
+````
 
 **Spring Modulith Validation:**
+
 ```java
 @Modulith
 @ApplicationModuleTest
 class ModularityTests {
-    
-    @Test
-    void verifyModularity() {
-        ApplicationModules.of(AuthServiceApplication.class).verify();
-    }
-    
-    @Test
-    void writeDocumentation() throws IOException {
-        new Documenter(ApplicationModules.of(AuthServiceApplication.class))
-            .writeModulesAsPlantUml()
-            .writeIndividualModulesAsPlantUml();
-    }
+
+  @Test
+  void verifyModularity() {
+    ApplicationModules.of(AuthServiceApplication.class).verify();
+  }
+
+  @Test
+  void writeDocumentation() throws IOException {
+    new Documenter(ApplicationModules.of(AuthServiceApplication.class)).writeModulesAsPlantUml().writeIndividualModulesAsPlantUml();
+  }
 }
 ```
 
@@ -1485,16 +1386,17 @@ The authentication service provides the following REST endpoints for user manage
 
 **Base URL:** `/api/v1/auth`
 
-| Method | Endpoint | Description | Request Body | Response | Status Codes |
-|--------|----------|-------------|--------------|----------|--------------|
-| POST | `/signup` | Register new user account | `SignupRequest` | `UserRegistrationResponse` | 201, 400, 409 |
-| POST | `/login` | Authenticate user with credentials | `LoginRequest` | `TokenResponse` | 200, 401, 423 |
-| POST | `/refresh` | Refresh JWT access token | `RefreshTokenRequest` | `TokenResponse` | 200, 401 |
-| POST | `/logout` | Logout user and invalidate tokens | None | None | 200, 401 |
+| Method | Endpoint   | Description                        | Request Body          | Response                   | Status Codes  |
+| ------ | ---------- | ---------------------------------- | --------------------- | -------------------------- | ------------- |
+| POST   | `/signup`  | Register new user account          | `SignupRequest`       | `UserRegistrationResponse` | 201, 400, 409 |
+| POST   | `/login`   | Authenticate user with credentials | `LoginRequest`        | `TokenResponse`            | 200, 401, 423 |
+| POST   | `/refresh` | Refresh JWT access token           | `RefreshTokenRequest` | `TokenResponse`            | 200, 401      |
+| POST   | `/logout`  | Logout user and invalidate tokens  | None                  | None                       | 200, 401      |
 
 **Request/Response Examples:**
 
 **User Signup:**
+
 ```json
 POST /api/v1/auth/signup
 {
@@ -1520,6 +1422,7 @@ Response (201 Created):
 ```
 
 **User Login:**
+
 ```json
 POST /api/v1/auth/login
 {
@@ -1551,13 +1454,13 @@ Response (200 OK):
 
 **Base URL:** `/api/v1/users` (Admin-only endpoints)
 
-| Method | Endpoint | Description | Request Body | Response | Status Codes |
-|--------|----------|-------------|--------------|----------|--------------|
-| GET | `/` | List users (paginated) | Query params | `Page<UserDto>` | 200, 403 |
-| POST | `/` | Create new user | `CreateUserRequest` | `UserDto` | 201, 400, 403, 409 |
-| GET | `/{id}` | Get user by ID | None | `UserDto` | 200, 403, 404 |
-| PUT | `/{id}` | Update user | `UpdateUserRequest` | `UserDto` | 200, 400, 403, 404 |
-| DELETE | `/{id}` | Delete user | None | None | 204, 403, 404 |
+| Method | Endpoint | Description            | Request Body        | Response        | Status Codes       |
+| ------ | -------- | ---------------------- | ------------------- | --------------- | ------------------ |
+| GET    | `/`      | List users (paginated) | Query params        | `Page<UserDto>` | 200, 403           |
+| POST   | `/`      | Create new user        | `CreateUserRequest` | `UserDto`       | 201, 400, 403, 409 |
+| GET    | `/{id}`  | Get user by ID         | None                | `UserDto`       | 200, 403, 404      |
+| PUT    | `/{id}`  | Update user            | `UpdateUserRequest` | `UserDto`       | 200, 400, 403, 404 |
+| DELETE | `/{id}`  | Delete user            | None                | None            | 204, 403, 404      |
 
 ## REST Controller Design Patterns
 
@@ -1566,6 +1469,7 @@ Response (200 OK):
 **Design Rationale:** Standardized REST controller naming and package conventions ensure consistent code organization, improve discoverability, and maintain architectural integrity across all microservices. The "Resource" suffix clearly identifies REST endpoints, while the `presentation.web` package structure enforces proper layering.
 
 **Package Structure Requirements:**
+
 - All @RestController classes must reside in `presentation.web` package
 - All @RestController classes must have "Resource" suffix in their class names
 - Controllers represent REST resources and should be named accordingly
@@ -1573,6 +1477,7 @@ Response (200 OK):
 **Example REST Controller Implementation:**
 
 **Auth Service Controllers:**
+
 ```java
 package org.gripday.authservice.presentation.web;
 
@@ -1580,77 +1485,62 @@ package org.gripday.authservice.presentation.web;
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "User authentication, registration, and token management")
 public class AuthenticationResource {
-    
-    private final AuthenticationService authenticationService;
-    private final UserRegistrationService userRegistrationService;
-    
-    public AuthenticationResource(
-        AuthenticationService authenticationService,
-        UserRegistrationService userRegistrationService
-    ) {
-        this.authenticationService = authenticationService;
-        this.userRegistrationService = userRegistrationService;
+
+  private final AuthenticationService authenticationService;
+  private final UserRegistrationService userRegistrationService;
+
+  public AuthenticationResource(AuthenticationService authenticationService, UserRegistrationService userRegistrationService) {
+    this.authenticationService = authenticationService;
+    this.userRegistrationService = userRegistrationService;
+  }
+
+  @Operation(summary = "User signup", description = "Register a new user account with username, email, and password")
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "201", description = "User registered successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid input data"),
+      @ApiResponse(responseCode = "409", description = "Username or email already exists"),
     }
-    
-    @Operation(
-        summary = "User signup", 
-        description = "Register a new user account with username, email, and password"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "User registered successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid input data"),
-        @ApiResponse(responseCode = "409", description = "Username or email already exists")
-    })
-    @PostMapping("/signup")
-    public ResponseEntity<UserRegistrationResponse> signup(@Valid @RequestBody SignupRequest request) {
-        var result = userRegistrationService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+  )
+  @PostMapping("/signup")
+  public ResponseEntity<UserRegistrationResponse> signup(@Valid @RequestBody SignupRequest request) {
+    var result = userRegistrationService.registerUser(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(result);
+  }
+
+  @Operation(summary = "User login", description = "Authenticate user with username/email and password")
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "200", description = "Authentication successful"),
+      @ApiResponse(responseCode = "401", description = "Invalid credentials"),
+      @ApiResponse(responseCode = "423", description = "Account locked"),
     }
-    
-    @Operation(
-        summary = "User login", 
-        description = "Authenticate user with username/email and password"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Authentication successful"),
-        @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-        @ApiResponse(responseCode = "423", description = "Account locked")
-    })
-    @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
-        var result = authenticationService.authenticateUser(request);
-        return ResponseEntity.ok(result);
-    }
-    
-    @Operation(
-        summary = "Refresh token", 
-        description = "Refresh JWT access token using refresh token"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Token refreshed successfully"),
-        @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")
-    })
-    @PostMapping("/refresh")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        var result = authenticationService.refreshToken(request);
-        return ResponseEntity.ok(result);
-    }
-    
-    @Operation(
-        summary = "User logout", 
-        description = "Logout user and invalidate tokens"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Logout successful"),
-        @ApiResponse(responseCode = "401", description = "Invalid token")
-    })
-    @PostMapping("/logout")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
-        authenticationService.logout(request);
-        return ResponseEntity.ok().build();
-    }
+  )
+  @PostMapping("/login")
+  public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
+    var result = authenticationService.authenticateUser(request);
+    return ResponseEntity.ok(result);
+  }
+
+  @Operation(summary = "Refresh token", description = "Refresh JWT access token using refresh token")
+  @ApiResponses(
+    value = { @ApiResponse(responseCode = "200", description = "Token refreshed successfully"), @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token") }
+  )
+  @PostMapping("/refresh")
+  @SecurityRequirement(name = "bearerAuth")
+  public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    var result = authenticationService.refreshToken(request);
+    return ResponseEntity.ok(result);
+  }
+
+  @Operation(summary = "User logout", description = "Logout user and invalidate tokens")
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Logout successful"), @ApiResponse(responseCode = "401", description = "Invalid token") })
+  @PostMapping("/logout")
+  @SecurityRequirement(name = "bearerAuth")
+  public ResponseEntity<Void> logout(HttpServletRequest request) {
+    authenticationService.logout(request);
+    return ResponseEntity.ok().build();
+  }
 }
 
 @RestController
@@ -1659,59 +1549,53 @@ public class AuthenticationResource {
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 public class UserManagementResource {
-    
-    private final UserManagementService userManagementService;
-    
-    public UserManagementResource(UserManagementService userManagementService) {
-        this.userManagementService = userManagementService;
-    }
-    
-    @Operation(summary = "List users", description = "Get paginated list of users")
-    @GetMapping
-    public ResponseEntity<Page<UserDto>> getUsers(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) String search
-    ) {
-        var users = userManagementService.getUsers(page, size, search);
-        return ResponseEntity.ok(users);
-    }
-    
-    @Operation(summary = "Create user", description = "Create new user account")
-    @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
-        var user = userManagementService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    }
-    
-    @Operation(summary = "Get user by ID", description = "Retrieve user details by ID")
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
-        var user = userManagementService.getUserById(id);
-        return ResponseEntity.ok(user);
-    }
-    
-    @Operation(summary = "Update user", description = "Update existing user")
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(
-        @PathVariable Long id, 
-        @Valid @RequestBody UpdateUserRequest request
-    ) {
-        var user = userManagementService.updateUser(id, request);
-        return ResponseEntity.ok(user);
-    }
-    
-    @Operation(summary = "Delete user", description = "Delete user account")
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userManagementService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
+
+  private final UserManagementService userManagementService;
+
+  public UserManagementResource(UserManagementService userManagementService) {
+    this.userManagementService = userManagementService;
+  }
+
+  @Operation(summary = "List users", description = "Get paginated list of users")
+  @GetMapping
+  public ResponseEntity<Page<UserDto>> getUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, @RequestParam(required = false) String search) {
+    var users = userManagementService.getUsers(page, size, search);
+    return ResponseEntity.ok(users);
+  }
+
+  @Operation(summary = "Create user", description = "Create new user account")
+  @PostMapping
+  public ResponseEntity<UserDto> createUser(@Valid @RequestBody CreateUserRequest request) {
+    var user = userManagementService.createUser(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(user);
+  }
+
+  @Operation(summary = "Get user by ID", description = "Retrieve user details by ID")
+  @GetMapping("/{id}")
+  public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+    var user = userManagementService.getUserById(id);
+    return ResponseEntity.ok(user);
+  }
+
+  @Operation(summary = "Update user", description = "Update existing user")
+  @PutMapping("/{id}")
+  public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
+    var user = userManagementService.updateUser(id, request);
+    return ResponseEntity.ok(user);
+  }
+
+  @Operation(summary = "Delete user", description = "Delete user account")
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    userManagementService.deleteUser(id);
+    return ResponseEntity.noContent().build();
+  }
 }
 ```
 
 **Gateway Service Controllers:**
+
 ```java
 package org.gripday.gatewayservice.presentation.web;
 
@@ -1719,64 +1603,66 @@ package org.gripday.gatewayservice.presentation.web;
 @RequestMapping("/api/v1/gateway")
 @Tag(name = "Gateway Management", description = "Gateway configuration and monitoring")
 public class GatewayManagementResource {
-    
-    private final GatewayConfigurationService gatewayConfigurationService;
-    
-    public GatewayManagementResource(GatewayConfigurationService gatewayConfigurationService) {
-        this.gatewayConfigurationService = gatewayConfigurationService;
-    }
-    
-    @Operation(summary = "Get routes", description = "List all configured routes")
-    @GetMapping("/routes")
-    public ResponseEntity<List<RouteDto>> getRoutes() {
-        var routes = gatewayConfigurationService.getAllRoutes();
-        return ResponseEntity.ok(routes);
-    }
-    
-    @Operation(summary = "Get route by ID", description = "Get specific route configuration")
-    @GetMapping("/routes/{routeId}")
-    public ResponseEntity<RouteDto> getRoute(@PathVariable String routeId) {
-        var route = gatewayConfigurationService.getRoute(routeId);
-        return ResponseEntity.ok(route);
-    }
+
+  private final GatewayConfigurationService gatewayConfigurationService;
+
+  public GatewayManagementResource(GatewayConfigurationService gatewayConfigurationService) {
+    this.gatewayConfigurationService = gatewayConfigurationService;
+  }
+
+  @Operation(summary = "Get routes", description = "List all configured routes")
+  @GetMapping("/routes")
+  public ResponseEntity<List<RouteDto>> getRoutes() {
+    var routes = gatewayConfigurationService.getAllRoutes();
+    return ResponseEntity.ok(routes);
+  }
+
+  @Operation(summary = "Get route by ID", description = "Get specific route configuration")
+  @GetMapping("/routes/{routeId}")
+  public ResponseEntity<RouteDto> getRoute(@PathVariable String routeId) {
+    var route = gatewayConfigurationService.getRoute(routeId);
+    return ResponseEntity.ok(route);
+  }
 }
 
 @RestController
 @RequestMapping("/api/v1/monitoring")
 @Tag(name = "Monitoring", description = "Gateway monitoring and health checks")
 public class MonitoringResource {
-    
-    private final MonitoringService monitoringService;
-    
-    public MonitoringResource(MonitoringService monitoringService) {
-        this.monitoringService = monitoringService;
-    }
-    
-    @Operation(summary = "Health check", description = "Gateway health status")
-    @GetMapping("/health")
-    public ResponseEntity<HealthStatus> getHealth() {
-        var health = monitoringService.getHealthStatus();
-        return ResponseEntity.ok(health);
-    }
-    
-    @Operation(summary = "Metrics", description = "Gateway performance metrics")
-    @GetMapping("/metrics")
-    public ResponseEntity<GatewayMetrics> getMetrics() {
-        var metrics = monitoringService.getMetrics();
-        return ResponseEntity.ok(metrics);
-    }
+
+  private final MonitoringService monitoringService;
+
+  public MonitoringResource(MonitoringService monitoringService) {
+    this.monitoringService = monitoringService;
+  }
+
+  @Operation(summary = "Health check", description = "Gateway health status")
+  @GetMapping("/health")
+  public ResponseEntity<HealthStatus> getHealth() {
+    var health = monitoringService.getHealthStatus();
+    return ResponseEntity.ok(health);
+  }
+
+  @Operation(summary = "Metrics", description = "Gateway performance metrics")
+  @GetMapping("/metrics")
+  public ResponseEntity<GatewayMetrics> getMetrics() {
+    var metrics = monitoringService.getMetrics();
+    return ResponseEntity.ok(metrics);
+  }
 }
 ```
 
 ### Controller Design Guidelines
 
 **Resource Naming Patterns:**
+
 - `AuthenticationResource` - Handles authentication operations
-- `UserManagementResource` - Manages user CRUD operations  
+- `UserManagementResource` - Manages user CRUD operations
 - `GatewayManagementResource` - Gateway configuration management
 - `MonitoringResource` - Health checks and monitoring endpoints
 
 **Package Organization:**
+
 ```
 org.gripday.authservice/
 ├── presentation/
@@ -1796,6 +1682,7 @@ org.gripday.gatewayservice/
 ```
 
 **Architectural Validation:**
+
 - ArchUnit tests enforce package placement in `presentation.web`
 - ArchUnit tests validate "Resource" suffix for all @RestController classes
 - Spring Modulith tests verify module boundaries and encapsulation
@@ -1808,6 +1695,7 @@ org.gripday.gatewayservice/
 The platform implements RESTful API design with consistent HTTP method usage:
 
 **GET - Retrieve Resources**
+
 ```http
 GET /api/v1/users          # List all users
 GET /api/v1/users/{id}     # Get specific user
@@ -1815,6 +1703,7 @@ GET /api/v1/users/search?q=john  # Search users
 ```
 
 **POST - Create Resources**
+
 ```http
 POST /api/v1/users         # Create new user
 POST /api/v1/auth/login    # Authenticate user
@@ -1822,17 +1711,20 @@ POST /api/v1/users/bulk    # Bulk create users
 ```
 
 **PUT - Full Resource Update**
+
 ```http
 PUT /api/v1/users/{id}     # Replace entire user resource
 ```
 
 **PATCH - Partial Resource Update**
+
 ```http
 PATCH /api/v1/users/{id}   # Update specific user fields
 PATCH /api/v1/users/{id}/status  # Update user status only
 ```
 
 **DELETE - Remove Resources**
+
 ```http
 DELETE /api/v1/users/{id}  # Delete specific user
 DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
@@ -1841,12 +1733,14 @@ DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
 ### HTTP Status Code Standards
 
 **Success Responses (2xx)**
+
 - `200 OK` - Successful GET, PUT, PATCH operations
 - `201 Created` - Successful POST operations with resource creation
 - `202 Accepted` - Asynchronous operations accepted for processing
 - `204 No Content` - Successful DELETE operations or updates with no response body
 
 **Client Error Responses (4xx)**
+
 - `400 Bad Request` - Invalid request syntax or validation errors
 - `401 Unauthorized` - Authentication required or invalid credentials
 - `403 Forbidden` - Valid authentication but insufficient permissions
@@ -1857,6 +1751,7 @@ DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
 - `429 Too Many Requests` - Rate limit exceeded
 
 **Server Error Responses (5xx)**
+
 - `500 Internal Server Error` - Unexpected server error
 - `502 Bad Gateway` - Invalid response from upstream service
 - `503 Service Unavailable` - Service temporarily unavailable
@@ -1865,6 +1760,7 @@ DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
 ### Consistent Error Response Format
 
 **Standard Error Response Structure:**
+
 ```json
 {
   "error": {
@@ -1895,151 +1791,154 @@ DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
 ```
 
 **Error Code Categories:**
+
 ```java
 public enum ErrorCode {
-    // Authentication & Authorization (AUTH_*)
-    AUTH_INVALID_CREDENTIALS("AUTH_001", "Invalid username or password"),
-    AUTH_TOKEN_EXPIRED("AUTH_002", "JWT token has expired"),
-    AUTH_INSUFFICIENT_PERMISSIONS("AUTH_003", "Insufficient permissions for this operation"),
-    AUTH_ACCOUNT_LOCKED("AUTH_004", "User account is locked"),
-    
-    // Validation Errors (VALIDATION_*)
-    VALIDATION_REQUIRED_FIELD("VALIDATION_001", "Required field is missing"),
-    VALIDATION_INVALID_FORMAT("VALIDATION_002", "Field format is invalid"),
-    VALIDATION_OUT_OF_RANGE("VALIDATION_003", "Field value is out of allowed range"),
-    
-    // Resource Errors (RESOURCE_*)
-    RESOURCE_NOT_FOUND("RESOURCE_001", "Requested resource not found"),
-    RESOURCE_ALREADY_EXISTS("RESOURCE_002", "Resource already exists"),
-    RESOURCE_CONFLICT("RESOURCE_003", "Resource state conflict"),
-    
-    // Domain Logic Errors (DOMAIN_*)
-    DOMAIN_RULE_VIOLATION("DOMAIN_001", "Domain rule violation"),
-    DOMAIN_OPERATION_NOT_ALLOWED("DOMAIN_002", "Operation not allowed in current state"),
-    
-    // System Errors (SYSTEM_*)
-    SYSTEM_INTERNAL_ERROR("SYSTEM_001", "Internal system error"),
-    SYSTEM_SERVICE_UNAVAILABLE("SYSTEM_002", "Service temporarily unavailable"),
-    SYSTEM_TIMEOUT("SYSTEM_003", "Operation timeout"),
-    
-    // Rate Limiting (RATE_*)
-    RATE_LIMIT_EXCEEDED("RATE_001", "Rate limit exceeded"),
-    RATE_QUOTA_EXCEEDED("RATE_002", "API quota exceeded");
+  // Authentication & Authorization (AUTH_*)
+  AUTH_INVALID_CREDENTIALS("AUTH_001", "Invalid username or password"),
+  AUTH_TOKEN_EXPIRED("AUTH_002", "JWT token has expired"),
+  AUTH_INSUFFICIENT_PERMISSIONS("AUTH_003", "Insufficient permissions for this operation"),
+  AUTH_ACCOUNT_LOCKED("AUTH_004", "User account is locked"),
+
+  // Validation Errors (VALIDATION_*)
+  VALIDATION_REQUIRED_FIELD("VALIDATION_001", "Required field is missing"),
+  VALIDATION_INVALID_FORMAT("VALIDATION_002", "Field format is invalid"),
+  VALIDATION_OUT_OF_RANGE("VALIDATION_003", "Field value is out of allowed range"),
+
+  // Resource Errors (RESOURCE_*)
+  RESOURCE_NOT_FOUND("RESOURCE_001", "Requested resource not found"),
+  RESOURCE_ALREADY_EXISTS("RESOURCE_002", "Resource already exists"),
+  RESOURCE_CONFLICT("RESOURCE_003", "Resource state conflict"),
+
+  // Domain Logic Errors (DOMAIN_*)
+  DOMAIN_RULE_VIOLATION("DOMAIN_001", "Domain rule violation"),
+  DOMAIN_OPERATION_NOT_ALLOWED("DOMAIN_002", "Operation not allowed in current state"),
+
+  // System Errors (SYSTEM_*)
+  SYSTEM_INTERNAL_ERROR("SYSTEM_001", "Internal system error"),
+  SYSTEM_SERVICE_UNAVAILABLE("SYSTEM_002", "Service temporarily unavailable"),
+  SYSTEM_TIMEOUT("SYSTEM_003", "Operation timeout"),
+
+  // Rate Limiting (RATE_*)
+  RATE_LIMIT_EXCEEDED("RATE_001", "Rate limit exceeded"),
+  RATE_QUOTA_EXCEEDED("RATE_002", "API quota exceeded"),
 }
 ```
 
 ### Global Exception Handler
 
 **Centralized Error Handling:**
+
 ```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidationException ex, HttpServletRequest request) {
-        String correlationId = MDC.get("correlationId");
-        
-        ErrorResponse error = ErrorResponse.builder()
-            .code(ex.getErrorCode().getCode())
-            .message(ex.getErrorCode().getMessage())
-            .details(ex.getMessage())
-            .timestamp(Instant.now())
-            .path(request.getRequestURI())
-            .method(request.getMethod())
-            .correlationId(correlationId)
-            .requestId(generateRequestId())
-            .fields(ex.getFieldErrors())
-            .build();
-            
-        logger.warn("Validation error: {} - {}", correlationId, ex.getMessage());
-        return error;
-    }
-    
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
-        String correlationId = MDC.get("correlationId");
-        
-        ErrorResponse error = ErrorResponse.builder()
-            .code(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
-            .message(ErrorCode.AUTH_INVALID_CREDENTIALS.getMessage())
-            .timestamp(Instant.now())
-            .path(request.getRequestURI())
-            .method(request.getMethod())
-            .correlationId(correlationId)
-            .requestId(generateRequestId())
-            .build();
-            
-        logger.warn("Authentication failed: {} - {}", correlationId, ex.getMessage());
-        return error;
-    }
-    
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        String correlationId = MDC.get("correlationId");
-        
-        ErrorResponse error = ErrorResponse.builder()
-            .code(ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS.getCode())
-            .message(ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS.getMessage())
-            .timestamp(Instant.now())
-            .path(request.getRequestURI())
-            .method(request.getMethod())
-            .correlationId(correlationId)
-            .requestId(generateRequestId())
-            .build();
-            
-        logger.warn("Access denied: {} - {}", correlationId, ex.getMessage());
-        return error;
-    }
-    
-    @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
-        String correlationId = MDC.get("correlationId");
-        
-        ErrorResponse error = ErrorResponse.builder()
-            .code(ErrorCode.RESOURCE_NOT_FOUND.getCode())
-            .message(ErrorCode.RESOURCE_NOT_FOUND.getMessage())
-            .details(ex.getMessage())
-            .timestamp(Instant.now())
-            .path(request.getRequestURI())
-            .method(request.getMethod())
-            .correlationId(correlationId)
-            .requestId(generateRequestId())
-            .build();
-            
-        logger.info("Resource not found: {} - {}", correlationId, ex.getMessage());
-        return error;
-    }
-    
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleGenericException(Exception ex, HttpServletRequest request) {
-        String correlationId = MDC.get("correlationId");
-        
-        ErrorResponse error = ErrorResponse.builder()
-            .code(ErrorCode.SYSTEM_INTERNAL_ERROR.getCode())
-            .message(ErrorCode.SYSTEM_INTERNAL_ERROR.getMessage())
-            .timestamp(Instant.now())
-            .path(request.getRequestURI())
-            .method(request.getMethod())
-            .correlationId(correlationId)
-            .requestId(generateRequestId())
-            .build();
-            
-        logger.error("Unexpected error: {} - {}", correlationId, ex.getMessage(), ex);
-        return error;
-    }
+
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+  @ExceptionHandler(ValidationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleValidationException(ValidationException ex, HttpServletRequest request) {
+    String correlationId = MDC.get("correlationId");
+
+    ErrorResponse error = ErrorResponse.builder()
+      .code(ex.getErrorCode().getCode())
+      .message(ex.getErrorCode().getMessage())
+      .details(ex.getMessage())
+      .timestamp(Instant.now())
+      .path(request.getRequestURI())
+      .method(request.getMethod())
+      .correlationId(correlationId)
+      .requestId(generateRequestId())
+      .fields(ex.getFieldErrors())
+      .build();
+
+    logger.warn("Validation error: {} - {}", correlationId, ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ErrorResponse handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+    String correlationId = MDC.get("correlationId");
+
+    ErrorResponse error = ErrorResponse.builder()
+      .code(ErrorCode.AUTH_INVALID_CREDENTIALS.getCode())
+      .message(ErrorCode.AUTH_INVALID_CREDENTIALS.getMessage())
+      .timestamp(Instant.now())
+      .path(request.getRequestURI())
+      .method(request.getMethod())
+      .correlationId(correlationId)
+      .requestId(generateRequestId())
+      .build();
+
+    logger.warn("Authentication failed: {} - {}", correlationId, ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ErrorResponse handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+    String correlationId = MDC.get("correlationId");
+
+    ErrorResponse error = ErrorResponse.builder()
+      .code(ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS.getCode())
+      .message(ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS.getMessage())
+      .timestamp(Instant.now())
+      .path(request.getRequestURI())
+      .method(request.getMethod())
+      .correlationId(correlationId)
+      .requestId(generateRequestId())
+      .build();
+
+    logger.warn("Access denied: {} - {}", correlationId, ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ErrorResponse handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
+    String correlationId = MDC.get("correlationId");
+
+    ErrorResponse error = ErrorResponse.builder()
+      .code(ErrorCode.RESOURCE_NOT_FOUND.getCode())
+      .message(ErrorCode.RESOURCE_NOT_FOUND.getMessage())
+      .details(ex.getMessage())
+      .timestamp(Instant.now())
+      .path(request.getRequestURI())
+      .method(request.getMethod())
+      .correlationId(correlationId)
+      .requestId(generateRequestId())
+      .build();
+
+    logger.info("Resource not found: {} - {}", correlationId, ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ErrorResponse handleGenericException(Exception ex, HttpServletRequest request) {
+    String correlationId = MDC.get("correlationId");
+
+    ErrorResponse error = ErrorResponse.builder()
+      .code(ErrorCode.SYSTEM_INTERNAL_ERROR.getCode())
+      .message(ErrorCode.SYSTEM_INTERNAL_ERROR.getMessage())
+      .timestamp(Instant.now())
+      .path(request.getRequestURI())
+      .method(request.getMethod())
+      .correlationId(correlationId)
+      .requestId(generateRequestId())
+      .build();
+
+    logger.error("Unexpected error: {} - {}", correlationId, ex.getMessage(), ex);
+    return error;
+  }
 }
 ```
 
 ### Content Type and Header Standards
 
 **Request/Response Headers:**
+
 ```http
 # Request Headers
 Content-Type: application/json
@@ -2057,6 +1956,7 @@ X-Rate-Limit-Reset: 1640998800
 ```
 
 **Supported Content Types:**
+
 - `application/json` - Primary format for all APIs
 - `application/xml` - Alternative format for specific endpoints
 - `text/plain` - Simple text responses for health checks
@@ -2065,6 +1965,7 @@ X-Rate-Limit-Reset: 1640998800
 ### Rate Limiting Error Responses
 
 **Rate Limit Exceeded Response:**
+
 ```json
 {
   "error": {
@@ -2087,6 +1988,7 @@ X-Rate-Limit-Reset: 1640998800
 ### Circuit Breaker Error Responses
 
 **Service Unavailable Response:**
+
 ```json
 {
   "error": {
@@ -2113,6 +2015,7 @@ X-Rate-Limit-Reset: 1640998800
 The platform implements a API versioning strategy to ensure backward compatibility and smooth evolution:
 
 **1. URL Path-Based Versioning**
+
 ```
 /api/v1/auth/login
 /api/v2/auth/login
@@ -2121,6 +2024,7 @@ The platform implements a API versioning strategy to ensure backward compatibili
 ```
 
 **2. Header-Based Versioning**
+
 ```http
 Accept: application/vnd.gripday.v1+json
 API-Version: 1.0
@@ -2129,6 +2033,7 @@ API-Version: 2.0
 ```
 
 **3. Content Negotiation**
+
 ```http
 Accept: application/json;version=1
 Accept: application/xml;version=2
@@ -2137,11 +2042,13 @@ Accept: application/xml;version=2
 ### Version Management
 
 **Semantic Versioning (SemVer)**
+
 - **Major Version**: Breaking changes requiring client updates
 - **Minor Version**: New features with backward compatibility
 - **Patch Version**: Bug fixes and security updates
 
 **Version Support Policy**
+
 - Support minimum 2 previous major versions
 - 6-month deprecation notice for major version changes
 - 12-month support window for deprecated versions
@@ -2150,12 +2057,14 @@ Accept: application/xml;version=2
 ### API Evolution Patterns
 
 **Backward Compatible Changes**
+
 - Adding new optional fields to requests/responses
 - Adding new endpoints
 - Adding new query parameters with defaults
 - Relaxing validation rules
 
 **Breaking Changes (Require New Version)**
+
 - Removing or renaming fields
 - Changing field types or formats
 - Modifying required fields
@@ -2165,78 +2074,75 @@ Accept: application/xml;version=2
 ### Version Routing and Transformation
 
 **Gateway-Level Version Handling**
+
 ```java
 @Component
 public class ApiVersionRoutingFilter implements GlobalFilter {
-    
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String version = extractVersion(exchange.getRequest());
-        String targetPath = transformPath(exchange.getRequest().getPath(), version);
-        
-        ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-            .path(targetPath)
-            .header("X-API-Version", version)
-            .build();
-            
-        return chain.filter(exchange.mutate().request(modifiedRequest).build());
-    }
+
+  @Override
+  public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    String version = extractVersion(exchange.getRequest());
+    String targetPath = transformPath(exchange.getRequest().getPath(), version);
+
+    ServerHttpRequest modifiedRequest = exchange.getRequest().mutate().path(targetPath).header("X-API-Version", version).build();
+
+    return chain.filter(exchange.mutate().request(modifiedRequest).build());
+  }
 }
 ```
 
 **Version-Specific DTOs**
+
 ```java
 // V1 DTOs
 @JsonTypeName("v1")
 public class UserDtoV1 {
-    private Long id;
-    private String username;
-    private String email;
+
+  private Long id;
+  private String username;
+  private String email;
 }
 
 // V2 DTOs with additional fields
 @JsonTypeName("v2")
 public class UserDtoV2 {
-    private Long id;
-    private String username;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private Set<String> roles;
+
+  private Long id;
+  private String username;
+  private String email;
+  private String firstName;
+  private String lastName;
+  private Set<String> roles;
 }
 ```
 
 **Version Mapping Service**
+
 ```java
 @Service
 public class ApiVersionMappingService {
-    
-    public UserDtoV1 mapToV1(User user) {
-        return UserDtoV1.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .build();
-    }
-    
-    public UserDtoV2 mapToV2(User user) {
-        return UserDtoV2.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .roles(user.getAuthorities().stream()
-                .map(Authority::getName)
-                .collect(Collectors.toSet()))
-            .build();
-    }
+
+  public UserDtoV1 mapToV1(User user) {
+    return UserDtoV1.builder().id(user.getId()).username(user.getUsername()).email(user.getEmail()).build();
+  }
+
+  public UserDtoV2 mapToV2(User user) {
+    return UserDtoV2.builder()
+      .id(user.getId())
+      .username(user.getUsername())
+      .email(user.getEmail())
+      .firstName(user.getFirstName())
+      .lastName(user.getLastName())
+      .roles(user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet()))
+      .build();
+  }
 }
 ```
 
 ### Deprecation and Migration
 
 **Deprecation Headers**
+
 ```http
 HTTP/1.1 200 OK
 Deprecation: true
@@ -2246,6 +2152,7 @@ Warning: 299 - "API version 1 is deprecated. Please migrate to version 2."
 ```
 
 **Migration Documentation**
+
 - Automated API documentation generation per version
 - Migration guides with code examples
 - Breaking change notifications
@@ -2254,6 +2161,7 @@ Warning: 299 - "API version 1 is deprecated. Please migrate to version 2."
 ### OpenAPI Specification per Version
 
 **Version-Specific Documentation**
+
 ```yaml
 # openapi-v1.yaml
 openapi: 3.0.3
@@ -2262,7 +2170,7 @@ info:
   version: 1.0.0
   description: Version 1 of the Gripday Platform API
 
-# openapi-v2.yaml  
+# openapi-v2.yaml
 openapi: 3.0.3
 info:
   title: Gripday Platform API
@@ -2279,576 +2187,442 @@ The platform implements API documentation using SpringDoc OpenAPI, providing int
 ### SpringDoc Configuration
 
 **Global OpenAPI Configuration:**
+
 ```java
 @Configuration
 @OpenAPIDefinition(
-    info = @Info(
-        title = "Gripday Platform API",
-        version = "1.0.0",
-        description = "Comprehensive microservices platform for authentication, authorization, and user management",
-        contact = @Contact(
-            name = "Gripday Platform Team",
-            email = "api-support@pynity.com",
-            url = "https://docs.pynity.com"
-        ),
-        license = @License(
-            name = "MIT License",
-            url = "https://opensource.org/licenses/MIT"
-        )
-    ),
-    servers = {
-        @Server(
-            url = "https://api.pynity.com",
-            description = "Production Server"
-        ),
-        @Server(
-            url = "https://api.pynity.website",
-            description = "Staging Server"
-        ),
-        @Server(
-            url = "http://localhost:8080",
-            description = "Local Development Server"
-        )
-    },
-    security = {
-        @SecurityRequirement(name = "bearerAuth"),
-        @SecurityRequirement(name = "apiKey")
-    }
+  info = @Info(
+    title = "Gripday Platform API",
+    version = "1.0.0",
+    description = "Comprehensive microservices platform for authentication, authorization, and user management",
+    contact = @Contact(name = "Gripday Platform Team", email = "api-support@pynity.com", url = "https://docs.pynity.com"),
+    license = @License(name = "MIT License", url = "https://opensource.org/licenses/MIT")
+  ),
+  servers = {
+    @Server(url = "https://api.pynity.com", description = "Production Server"),
+    @Server(url = "https://api.pynity.website", description = "Staging Server"),
+    @Server(url = "http://localhost:8080", description = "Local Development Server"),
+  },
+  security = { @SecurityRequirement(name = "bearerAuth"), @SecurityRequirement(name = "apiKey") }
 )
-@SecuritySchemes({
+@SecuritySchemes(
+  {
+    @SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT", description = "JWT Bearer token authentication"),
     @SecurityScheme(
-        name = "bearerAuth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT",
-        description = "JWT Bearer token authentication"
+      name = "apiKey",
+      type = SecuritySchemeType.APIKEY,
+      in = SecuritySchemeIn.HEADER,
+      paramName = "X-API-Key",
+      description = "API Key authentication for service-to-service communication"
     ),
-    @SecurityScheme(
-        name = "apiKey",
-        type = SecuritySchemeType.APIKEY,
-        in = SecuritySchemeIn.HEADER,
-        paramName = "X-API-Key",
-        description = "API Key authentication for service-to-service communication"
-    )
-})
+  }
+)
 public class OpenApiConfig {
-    
-    @Bean
-    public GroupedOpenApi authServiceApi() {
-        return GroupedOpenApi.builder()
-            .group("auth-service")
-            .pathsToMatch("/api/*/auth/**", "/api/*/users/**")
-            .addOpenApiCustomizer(openApi -> {
-                openApi.info(new Info()
-                    .title("Auth Service API")
-                    .version("1.0.0")
-                    .description("Authentication and user management service"));
-            })
-            .build();
-    }
-    
-    @Bean
-    public GroupedOpenApi gatewayServiceApi() {
-        return GroupedOpenApi.builder()
-            .group("gateway-service")
-            .pathsToMatch("/api/*/gateway/**")
-            .addOpenApiCustomizer(openApi -> {
-                openApi.info(new Info()
-                    .title("Gateway Service API")
-                    .version("1.0.0")
-                    .description("API Gateway service for routing and rate limiting"));
-            })
-            .build();
-    }
-    
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-            .group("public")
-            .pathsToMatch("/api/**")
-            .pathsToExclude("/api/*/internal/**")
-            .build();
-    }
-    
-    @Bean
-    public GroupedOpenApi internalApi() {
-        return GroupedOpenApi.builder()
-            .group("internal")
-            .pathsToMatch("/api/*/internal/**")
-            .addOpenApiCustomizer(openApi -> {
-                openApi.info(new Info()
-                    .title("Internal APIs")
-                    .version("1.0.0")
-                    .description("Internal service-to-service APIs"));
-            })
-            .build();
-    }
+
+  @Bean
+  public GroupedOpenApi authServiceApi() {
+    return GroupedOpenApi.builder()
+      .group("auth-service")
+      .pathsToMatch("/api/*/auth/**", "/api/*/users/**")
+      .addOpenApiCustomizer((openApi) -> {
+        openApi.info(new Info().title("Auth Service API").version("1.0.0").description("Authentication and user management service"));
+      })
+      .build();
+  }
+
+  @Bean
+  public GroupedOpenApi gatewayServiceApi() {
+    return GroupedOpenApi.builder()
+      .group("gateway-service")
+      .pathsToMatch("/api/*/gateway/**")
+      .addOpenApiCustomizer((openApi) -> {
+        openApi.info(new Info().title("Gateway Service API").version("1.0.0").description("API Gateway service for routing and rate limiting"));
+      })
+      .build();
+  }
+
+  @Bean
+  public GroupedOpenApi publicApi() {
+    return GroupedOpenApi.builder().group("public").pathsToMatch("/api/**").pathsToExclude("/api/*/internal/**").build();
+  }
+
+  @Bean
+  public GroupedOpenApi internalApi() {
+    return GroupedOpenApi.builder()
+      .group("internal")
+      .pathsToMatch("/api/*/internal/**")
+      .addOpenApiCustomizer((openApi) -> {
+        openApi.info(new Info().title("Internal APIs").version("1.0.0").description("Internal service-to-service APIs"));
+      })
+      .build();
+  }
 }
 ```
 
 ### API Documentation Annotations
 
 **Controller Documentation:**
+
 ```java
 @RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication", description = "User authentication and token management")
 @SecurityRequirement(name = "bearerAuth")
 public class AuthController {
-    
-    @Operation(
-        summary = "User login",
-        description = "Authenticate user with username/email and password, returns JWT tokens",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Login successful",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = TokenResponse.class),
-                    examples = @ExampleObject(
-                        name = "Successful login",
-                        value = """
-                        {
-                          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                          "tokenType": "Bearer",
-                          "expiresIn": 900,
-                          "user": {
-                            "id": 1,
-                            "username": "john.doe",
-                            "email": "john.doe@example.com",
-                            "roles": ["USER"]
-                          }
-                        }
-                        """
-                    )
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "Invalid credentials",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(
-                        name = "Invalid credentials",
-                        value = """
-                        {
-                          "error": {
-                            "code": "AUTH_001",
-                            "message": "Invalid username or password",
-                            "timestamp": "2024-01-15T10:30:00Z",
-                            "path": "/api/v1/auth/login",
-                            "correlationId": "abc123-def456-ghi789"
-                          }
-                        }
-                        """
-                    )
-                )
-            ),
-            @ApiResponse(
-                responseCode = "429",
-                description = "Rate limit exceeded",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = ErrorResponse.class)
-                )
-            )
-        }
-    )
-    @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(
-        @Parameter(
-            description = "User login credentials",
-            required = true,
-            schema = @Schema(implementation = LoginRequest.class)
+
+  @Operation(
+    summary = "User login",
+    description = "Authenticate user with username/email and password, returns JWT tokens",
+    responses = {
+      @ApiResponse(
+        responseCode = "200",
+        description = "Login successful",
+        content = @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = TokenResponse.class),
+          examples = @ExampleObject(
+            name = "Successful login",
+            value = """
+            {
+              "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "tokenType": "Bearer",
+              "expiresIn": 900,
+              "user": {
+                "id": 1,
+                "username": "john.doe",
+                "email": "john.doe@example.com",
+                "roles": ["USER"]
+              }
+            }
+            """
+          )
         )
-        @Valid @RequestBody LoginRequest request,
-        
-        @Parameter(
-            description = "Client IP address for audit logging",
-            in = ParameterIn.HEADER,
-            schema = @Schema(type = "string", example = "192.168.1.100")
+      ),
+      @ApiResponse(
+        responseCode = "401",
+        description = "Invalid credentials",
+        content = @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = ErrorResponse.class),
+          examples = @ExampleObject(
+            name = "Invalid credentials",
+            value = """
+            {
+              "error": {
+                "code": "AUTH_001",
+                "message": "Invalid username or password",
+                "timestamp": "2024-01-15T10:30:00Z",
+                "path": "/api/v1/auth/login",
+                "correlationId": "abc123-def456-ghi789"
+              }
+            }
+            """
+          )
         )
-        @RequestHeader(value = "X-Forwarded-For", required = false) String clientIp
-    ) {
-        // Implementation
+      ),
+      @ApiResponse(responseCode = "429", description = "Rate limit exceeded", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     }
-    
-    @Operation(
-        summary = "Get current user information",
-        description = "Retrieve detailed information about the currently authenticated user",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "User information retrieved successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = UserDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Authentication required",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-        )
-    })
-    @GetMapping("/user-info")
-    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
-        // Implementation
+  )
+  @PostMapping("/login")
+  public ResponseEntity<TokenResponse> login(
+    @Parameter(description = "User login credentials", required = true, schema = @Schema(implementation = LoginRequest.class)) @Valid @RequestBody LoginRequest request,
+    @Parameter(description = "Client IP address for audit logging", in = ParameterIn.HEADER, schema = @Schema(type = "string", example = "192.168.1.100")) @RequestHeader(
+      value = "X-Forwarded-For",
+      required = false
+    ) String clientIp
+  ) {
+    // Implementation
+  }
+
+  @Operation(
+    summary = "Get current user information",
+    description = "Retrieve detailed information about the currently authenticated user",
+    security = @SecurityRequirement(name = "bearerAuth")
+  )
+  @ApiResponses(
+    {
+      @ApiResponse(
+        responseCode = "200",
+        description = "User information retrieved successfully",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+      ),
+      @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     }
+  )
+  @GetMapping("/user-info")
+  public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+    // Implementation
+  }
 }
 ```
 
 **DTO Schema Documentation:**
+
 ```java
 @Schema(
-    name = "LoginRequest",
-    description = "User login credentials",
-    example = """
-    {
-      "username": "john.doe",
-      "password": "securePassword123",
-      "rememberMe": true
-    }
-    """
+  name = "LoginRequest",
+  description = "User login credentials",
+  example = """
+  {
+    "username": "john.doe",
+    "password": "securePassword123",
+    "rememberMe": true
+  }
+  """
 )
 public class LoginRequest {
-    
-    @Schema(
-        description = "Username or email address",
-        example = "john.doe",
-        minLength = 3,
-        maxLength = 50
-    )
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    private String username;
-    
-    @Schema(
-        description = "User password",
-        example = "securePassword123",
-        minLength = 8,
-        maxLength = 100,
-        format = "password"
-    )
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
-    private String password;
-    
-    @Schema(
-        description = "Whether to extend session duration",
-        example = "true",
-        defaultValue = "false"
-    )
-    private boolean rememberMe = false;
+
+  @Schema(description = "Username or email address", example = "john.doe", minLength = 3, maxLength = 50)
+  @NotBlank(message = "Username is required")
+  @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+  private String username;
+
+  @Schema(description = "User password", example = "securePassword123", minLength = 8, maxLength = 100, format = "password")
+  @NotBlank(message = "Password is required")
+  @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+  private String password;
+
+  @Schema(description = "Whether to extend session duration", example = "true", defaultValue = "false")
+  private boolean rememberMe = false;
 }
 
-@Schema(
-    name = "TokenResponse",
-    description = "JWT token response with user information"
-)
+@Schema(name = "TokenResponse", description = "JWT token response with user information")
 public class TokenResponse {
-    
-    @Schema(
-        description = "JWT access token",
-        example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    )
-    private String accessToken;
-    
-    @Schema(
-        description = "JWT refresh token",
-        example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    )
-    private String refreshToken;
-    
-    @Schema(
-        description = "Token type",
-        example = "Bearer",
-        allowableValues = {"Bearer"}
-    )
-    private String tokenType = "Bearer";
-    
-    @Schema(
-        description = "Token expiration time in seconds",
-        example = "900",
-        minimum = "1"
-    )
-    private long expiresIn;
-    
-    @Schema(description = "Authenticated user information")
-    private UserDto user;
+
+  @Schema(description = "JWT access token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+  private String accessToken;
+
+  @Schema(description = "JWT refresh token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+  private String refreshToken;
+
+  @Schema(description = "Token type", example = "Bearer", allowableValues = { "Bearer" })
+  private String tokenType = "Bearer";
+
+  @Schema(description = "Token expiration time in seconds", example = "900", minimum = "1")
+  private long expiresIn;
+
+  @Schema(description = "Authenticated user information")
+  private UserDto user;
 }
 
-@Schema(
-    name = "ErrorResponse",
-    description = "Standard error response format"
-)
+@Schema(name = "ErrorResponse", description = "Standard error response format")
 public class ErrorResponse {
-    
-    @Schema(description = "Error details")
-    private ErrorDetail error;
-    
-    @Schema(name = "ErrorDetail")
-    public static class ErrorDetail {
-        
-        @Schema(
-            description = "Error code",
-            example = "AUTH_001"
-        )
-        private String code;
-        
-        @Schema(
-            description = "Human-readable error message",
-            example = "Invalid username or password"
-        )
-        private String message;
-        
-        @Schema(
-            description = "Additional error details",
-            example = "The provided credentials do not match any user account"
-        )
-        private String details;
-        
-        @Schema(
-            description = "Error timestamp",
-            example = "2024-01-15T10:30:00Z",
-            format = "date-time"
-        )
-        private Instant timestamp;
-        
-        @Schema(
-            description = "Request path that caused the error",
-            example = "/api/v1/auth/login"
-        )
-        private String path;
-        
-        @Schema(
-            description = "HTTP method used",
-            example = "POST"
-        )
-        private String method;
-        
-        @Schema(
-            description = "Correlation ID for request tracing",
-            example = "abc123-def456-ghi789"
-        )
-        private String correlationId;
-        
-        @Schema(description = "Field-specific validation errors")
-        private List<FieldError> fields;
-    }
+
+  @Schema(description = "Error details")
+  private ErrorDetail error;
+
+  @Schema(name = "ErrorDetail")
+  public static class ErrorDetail {
+
+    @Schema(description = "Error code", example = "AUTH_001")
+    private String code;
+
+    @Schema(description = "Human-readable error message", example = "Invalid username or password")
+    private String message;
+
+    @Schema(description = "Additional error details", example = "The provided credentials do not match any user account")
+    private String details;
+
+    @Schema(description = "Error timestamp", example = "2024-01-15T10:30:00Z", format = "date-time")
+    private Instant timestamp;
+
+    @Schema(description = "Request path that caused the error", example = "/api/v1/auth/login")
+    private String path;
+
+    @Schema(description = "HTTP method used", example = "POST")
+    private String method;
+
+    @Schema(description = "Correlation ID for request tracing", example = "abc123-def456-ghi789")
+    private String correlationId;
+
+    @Schema(description = "Field-specific validation errors")
+    private List<FieldError> fields;
+  }
 }
 ```
 
 ### API Versioning Documentation
 
 **Version-Specific Documentation:**
+
 ```java
 @Configuration
 public class VersionedOpenApiConfig {
-    
-    @Bean
-    public GroupedOpenApi v1Api() {
-        return GroupedOpenApi.builder()
-            .group("v1")
-            .pathsToMatch("/api/v1/**")
-            .addOpenApiCustomizer(openApi -> {
-                openApi.info(new Info()
-                    .title("Gripday Platform API v1")
-                    .version("1.0.0")
-                    .description("Version 1 of the Gripday Platform API - Basic functionality"));
-                
-                // Add deprecation notice for v1
-                openApi.getInfo().addExtension("x-api-deprecated", true);
-                openApi.getInfo().addExtension("x-api-sunset-date", "2024-12-31");
-                openApi.getInfo().addExtension("x-api-successor-version", "v2");
-            })
-            .build();
-    }
-    
-    @Bean
-    public GroupedOpenApi v2Api() {
-        return GroupedOpenApi.builder()
-            .group("v2")
-            .pathsToMatch("/api/v2/**")
-            .addOpenApiCustomizer(openApi -> {
-                openApi.info(new Info()
-                    .title("Gripday Platform API v2")
-                    .version("2.0.0")
-                    .description("Version 2 of the Gripday Platform API - Enhanced features and improved security"));
-            })
-            .build();
-    }
+
+  @Bean
+  public GroupedOpenApi v1Api() {
+    return GroupedOpenApi.builder()
+      .group("v1")
+      .pathsToMatch("/api/v1/**")
+      .addOpenApiCustomizer((openApi) -> {
+        openApi.info(new Info().title("Gripday Platform API v1").version("1.0.0").description("Version 1 of the Gripday Platform API - Basic functionality"));
+
+        // Add deprecation notice for v1
+        openApi.getInfo().addExtension("x-api-deprecated", true);
+        openApi.getInfo().addExtension("x-api-sunset-date", "2024-12-31");
+        openApi.getInfo().addExtension("x-api-successor-version", "v2");
+      })
+      .build();
+  }
+
+  @Bean
+  public GroupedOpenApi v2Api() {
+    return GroupedOpenApi.builder()
+      .group("v2")
+      .pathsToMatch("/api/v2/**")
+      .addOpenApiCustomizer((openApi) -> {
+        openApi.info(new Info().title("Gripday Platform API v2").version("2.0.0").description("Version 2 of the Gripday Platform API - Enhanced features and improved security"));
+      })
+      .build();
+  }
 }
 ```
 
 ### Interactive Documentation Features
 
 **Swagger UI Customization:**
+
 ```java
 @Configuration
 public class SwaggerConfig {
-    
-    @Bean
-    public OpenApiCustomizer openApiCustomizer() {
-        return openApi -> {
-            // Add custom extensions
-            openApi.addExtension("x-logo", Map.of(
-                "url", "https://pynity.com/logo.png",
-                "altText", "Gripday Platform"
-            ));
-            
-            // Add common responses
-            Components components = openApi.getComponents();
-            if (components == null) {
-                components = new Components();
-                openApi.setComponents(components);
-            }
-            
-            // Add reusable error responses
-            components.addResponses("UnauthorizedError", new ApiResponse()
-                .description("Authentication required")
-                .content(new Content()
-                    .addMediaType("application/json", new MediaType()
-                        .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))));
-            
-            components.addResponses("ForbiddenError", new ApiResponse()
-                .description("Insufficient permissions")
-                .content(new Content()
-                    .addMediaType("application/json", new MediaType()
-                        .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))));
-            
-            components.addResponses("NotFoundError", new ApiResponse()
-                .description("Resource not found")
-                .content(new Content()
-                    .addMediaType("application/json", new MediaType()
-                        .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))));
-            
-            components.addResponses("ValidationError", new ApiResponse()
-                .description("Validation failed")
-                .content(new Content()
-                    .addMediaType("application/json", new MediaType()
-                        .schema(new Schema<>().$ref("#/components/schemas/ErrorResponse")))));
-        };
-    }
+
+  @Bean
+  public OpenApiCustomizer openApiCustomizer() {
+    return (openApi) -> {
+      // Add custom extensions
+      openApi.addExtension("x-logo", Map.of("url", "https://pynity.com/logo.png", "altText", "Gripday Platform"));
+
+      // Add common responses
+      Components components = openApi.getComponents();
+      if (components == null) {
+        components = new Components();
+        openApi.setComponents(components);
+      }
+
+      // Add reusable error responses
+      components.addResponses(
+        "UnauthorizedError",
+        new ApiResponse()
+          .description("Authentication required")
+          .content(new Content().addMediaType("application/json", new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))))
+      );
+
+      components.addResponses(
+        "ForbiddenError",
+        new ApiResponse()
+          .description("Insufficient permissions")
+          .content(new Content().addMediaType("application/json", new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))))
+      );
+
+      components.addResponses(
+        "NotFoundError",
+        new ApiResponse()
+          .description("Resource not found")
+          .content(new Content().addMediaType("application/json", new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))))
+      );
+
+      components.addResponses(
+        "ValidationError",
+        new ApiResponse()
+          .description("Validation failed")
+          .content(new Content().addMediaType("application/json", new MediaType().schema(new Schema<>().$ref("#/components/schemas/ErrorResponse"))))
+      );
+    };
+  }
 }
 ```
 
 ### Centralized API Portal
 
 **Gateway-Level Documentation Aggregation:**
+
 ```java
 @RestController
 @RequestMapping("/docs")
 @Tag(name = "Documentation", description = "API documentation and discovery")
 public class DocumentationController {
-    
-    @Operation(
-        summary = "Get available API documentation",
-        description = "Retrieve list of all available API documentation endpoints"
-    )
-    @GetMapping
-    public ResponseEntity<ApiDocumentationIndex> getApiDocumentation() {
-        ApiDocumentationIndex index = ApiDocumentationIndex.builder()
-            .services(List.of(
-                ServiceDocumentation.builder()
-                    .name("auth-service")
-                    .title("Authentication Service")
-                    .version("1.0.0")
-                    .description("User authentication and management")
-                    .swaggerUrl("/docs/auth-service/swagger-ui.html")
-                    .openApiUrl("/docs/auth-service/v3/api-docs")
-                    .build(),
-                ServiceDocumentation.builder()
-                    .name("gateway-service")
-                    .title("Gateway Service")
-                    .version("1.0.0")
-                    .description("API Gateway and routing")
-                    .swaggerUrl("/docs/gateway-service/swagger-ui.html")
-                    .openApiUrl("/docs/gateway-service/v3/api-docs")
-                    .build()
-            ))
-            .build();
-        
-        return ResponseEntity.ok(index);
-    }
-    
-    @Operation(
-        summary = "Download OpenAPI specification",
-        description = "Download OpenAPI specification in JSON or YAML format"
-    )
-    @GetMapping("/{service}/openapi.{format}")
-    public ResponseEntity<String> downloadOpenApiSpec(
-        @Parameter(description = "Service name", example = "auth-service")
-        @PathVariable String service,
-        
-        @Parameter(description = "Format", schema = @Schema(allowableValues = {"json", "yaml"}))
-        @PathVariable String format
-    ) {
-        // Implementation to serve OpenAPI specs
-        return ResponseEntity.ok()
-            .contentType("yaml".equals(format) ? 
-                MediaType.parseMediaType("application/yaml") : 
-                MediaType.APPLICATION_JSON)
-            .body(getOpenApiSpecification(service, format));
-    }
+
+  @Operation(summary = "Get available API documentation", description = "Retrieve list of all available API documentation endpoints")
+  @GetMapping
+  public ResponseEntity<ApiDocumentationIndex> getApiDocumentation() {
+    ApiDocumentationIndex index = ApiDocumentationIndex.builder()
+      .services(
+        List.of(
+          ServiceDocumentation.builder()
+            .name("auth-service")
+            .title("Authentication Service")
+            .version("1.0.0")
+            .description("User authentication and management")
+            .swaggerUrl("/docs/auth-service/swagger-ui.html")
+            .openApiUrl("/docs/auth-service/v3/api-docs")
+            .build(),
+          ServiceDocumentation.builder()
+            .name("gateway-service")
+            .title("Gateway Service")
+            .version("1.0.0")
+            .description("API Gateway and routing")
+            .swaggerUrl("/docs/gateway-service/swagger-ui.html")
+            .openApiUrl("/docs/gateway-service/v3/api-docs")
+            .build()
+        )
+      )
+      .build();
+
+    return ResponseEntity.ok(index);
+  }
+
+  @Operation(summary = "Download OpenAPI specification", description = "Download OpenAPI specification in JSON or YAML format")
+  @GetMapping("/{service}/openapi.{format}")
+  public ResponseEntity<String> downloadOpenApiSpec(
+    @Parameter(description = "Service name", example = "auth-service") @PathVariable String service,
+    @Parameter(description = "Format", schema = @Schema(allowableValues = { "json", "yaml" })) @PathVariable String format
+  ) {
+    // Implementation to serve OpenAPI specs
+    return ResponseEntity.ok().contentType("yaml".equals(format) ? MediaType.parseMediaType("application/yaml") : MediaType.APPLICATION_JSON).body(getOpenApiSpecification(service, format));
+  }
 }
 ```
 
 ### Documentation Testing and Validation
 
 **OpenAPI Contract Testing:**
+
 ```java
 @SpringBootTest
 @AutoConfigureTestDatabase
 class OpenApiContractTest {
-    
-    @Autowired
-    private TestRestTemplate restTemplate;
-    
-    @Test
-    void shouldGenerateValidOpenApiSpecification() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-            "/v3/api-docs", String.class);
-        
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        
-        // Validate OpenAPI specification
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        
-        SwaggerParseResult result = parser.readContents(
-            response.getBody(), null, options);
-        
-        assertThat(result.getMessages()).isEmpty();
-        assertThat(result.getOpenAPI()).isNotNull();
-        assertThat(result.getOpenAPI().getInfo().getTitle())
-            .isEqualTo("Gripday Platform API");
-    }
-    
-    @Test
-    void shouldIncludeAllEndpointsInDocumentation() {
-        ResponseEntity<String> response = restTemplate.getForEntity(
-            "/v3/api-docs", String.class);
-        
-        OpenAPI openAPI = new OpenAPIV3Parser()
-            .readContents(response.getBody(), null, new ParseOptions())
-            .getOpenAPI();
-        
-        // Verify all expected endpoints are documented
-        assertThat(openAPI.getPaths()).containsKeys(
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",
-            "/api/v1/auth/refresh",
-            "/api/v1/users",
-            "/api/v1/users/{id}"
-        );
-    }
+
+  @Autowired
+  private TestRestTemplate restTemplate;
+
+  @Test
+  void shouldGenerateValidOpenApiSpecification() {
+    ResponseEntity<String> response = restTemplate.getForEntity("/v3/api-docs", String.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    // Validate OpenAPI specification
+    OpenAPIV3Parser parser = new OpenAPIV3Parser();
+    ParseOptions options = new ParseOptions();
+    options.setResolve(true);
+
+    SwaggerParseResult result = parser.readContents(response.getBody(), null, options);
+
+    assertThat(result.getMessages()).isEmpty();
+    assertThat(result.getOpenAPI()).isNotNull();
+    assertThat(result.getOpenAPI().getInfo().getTitle()).isEqualTo("Gripday Platform API");
+  }
+
+  @Test
+  void shouldIncludeAllEndpointsInDocumentation() {
+    ResponseEntity<String> response = restTemplate.getForEntity("/v3/api-docs", String.class);
+
+    OpenAPI openAPI = new OpenAPIV3Parser().readContents(response.getBody(), null, new ParseOptions()).getOpenAPI();
+
+    // Verify all expected endpoints are documented
+    assertThat(openAPI.getPaths()).containsKeys("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/users", "/api/v1/users/{id}");
+  }
 }
 ```
 
@@ -2857,6 +2631,7 @@ class OpenApiContractTest {
 ### Gateway Service (gripday-gateway-service)
 
 **Package Structure:**
+
 ```
 org.gripday.gatewayservice/
 ├── config/                        # Configuration classes
@@ -2869,6 +2644,7 @@ org.gripday.gatewayservice/
 ```
 
 **Technology Stack:**
+
 - Spring Cloud Gateway (Reactive)
 - Spring Security (Reactive)
 - Resilience4j for circuit breakers
@@ -2895,6 +2671,7 @@ org.gripday.gatewayservice/
    - Session management with Redis
 
 **Key Interfaces:**
+
 ```java
 // Route configuration
 package org.gripday.gatewayservice.config;
@@ -2949,6 +2726,7 @@ public class UserContext {
 **Design Rationale:** Simple and developer-friendly CORS configuration that enables seamless development with modern frontend frameworks like Vite 6 + React 19. The configuration provides secure defaults for production while allowing flexible development workflows.
 
 **Development-Friendly CORS Setup:**
+
 - Supports Vite's default development server (http://localhost:5173)
 - Allows common React development ports (3000, 3001, 5173, 5174)
 - Enables all necessary HTTP methods for REST API interactions
@@ -2956,94 +2734,69 @@ public class UserContext {
 - Configurable per environment (permissive for development, restrictive for production)
 
 **Gateway Service CORS Configuration:**
+
 ```java
 package org.gripday.gatewayservice.config;
 
 @Configuration
 @EnableWebFluxSecurity
 public class CorsConfiguration {
-    
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow origins based on environment
-        if (isLocalDevelopment()) {
-            // Development: Allow common frontend development servers
-            configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "https://localhost:*"
-            ));
-        } else if (isStaging()) {
-            // Staging: Allow staging frontend URLs
-            configuration.setAllowedOrigins(Arrays.asList(
-                "https://staging-app.pynity.com",
-                "https://staging.pynity.com"
-            ));
-        } else {
-            // Production: Restrict to production domains only
-            configuration.setAllowedOrigins(Arrays.asList(
-                "https://app.pynity.com",
-                "https://pynity.com",
-                "https://www.pynity.com"
-            ));
-        }
-        
-        // Allow all common HTTP methods for REST APIs
-        configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
-        ));
-        
-        // Allow common headers for React/Vite applications
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization",
-            "Content-Type",
-            "Accept",
-            "Origin",
-            "X-Requested-With",
-            "X-Correlation-ID",
-            "X-API-Version",
-            "Cache-Control"
-        ));
-        
-        // Expose headers that frontend might need
-        configuration.setExposedHeaders(Arrays.asList(
-            "X-Correlation-ID",
-            "X-Request-ID",
-            "X-Rate-Limit-Remaining",
-            "X-Rate-Limit-Reset"
-        ));
-        
-        // Allow credentials for authentication
-        configuration.setAllowCredentials(true);
-        
-        // Cache preflight requests for 1 hour in development, 24 hours in production
-        configuration.setMaxAge(isLocalDevelopment() ? 3600L : 86400L);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    // Allow origins based on environment
+    if (isLocalDevelopment()) {
+      // Development: Allow common frontend development servers
+      configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "http://127.0.0.1:*", "https://localhost:*"));
+    } else if (isStaging()) {
+      // Staging: Allow staging frontend URLs
+      configuration.setAllowedOrigins(Arrays.asList("https://staging-app.pynity.com", "https://staging.pynity.com"));
+    } else {
+      // Production: Restrict to production domains only
+      configuration.setAllowedOrigins(Arrays.asList("https://app.pynity.com", "https://pynity.com", "https://www.pynity.com"));
     }
-    
-    @Bean
-    public WebFilter corsWebFilter() {
-        return new CorsWebFilter(corsConfigurationSource());
-    }
-    
-    private boolean isLocalDevelopment() {
-        return Arrays.asList(environment.getActiveProfiles()).contains("local");
-    }
-    
-    private boolean isStaging() {
-        return Arrays.asList(environment.getActiveProfiles()).contains("staging");
-    }
+
+    // Allow all common HTTP methods for REST APIs
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+
+    // Allow common headers for React/Vite applications
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With", "X-Correlation-ID", "X-API-Version", "Cache-Control"));
+
+    // Expose headers that frontend might need
+    configuration.setExposedHeaders(Arrays.asList("X-Correlation-ID", "X-Request-ID", "X-Rate-Limit-Remaining", "X-Rate-Limit-Reset"));
+
+    // Allow credentials for authentication
+    configuration.setAllowCredentials(true);
+
+    // Cache preflight requests for 1 hour in development, 24 hours in production
+    configuration.setMaxAge(isLocalDevelopment() ? 3600L : 86400L);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+  @Bean
+  public WebFilter corsWebFilter() {
+    return new CorsWebFilter(corsConfigurationSource());
+  }
+
+  private boolean isLocalDevelopment() {
+    return Arrays.asList(environment.getActiveProfiles()).contains("local");
+  }
+
+  private boolean isStaging() {
+    return Arrays.asList(environment.getActiveProfiles()).contains("staging");
+  }
 }
 ```
 
 **Environment-Specific CORS Configuration:**
 
 **Local Development (application-local.yml):**
+
 ```yaml
 # gateway-service/application-local.yml
 spring:
@@ -3054,19 +2807,20 @@ gripday:
   cors:
     # Development: Very permissive for easy frontend development
     allowed-origins:
-      - "http://localhost:3000"    # Create React App default
-      - "http://localhost:3001"    # Alternative React port
-      - "http://localhost:5173"    # Vite default port
-      - "http://localhost:5174"    # Alternative Vite port
-      - "http://127.0.0.1:5173"    # Vite with 127.0.0.1
+      - "http://localhost:3000" # Create React App default
+      - "http://localhost:3001" # Alternative React port
+      - "http://localhost:5173" # Vite default port
+      - "http://localhost:5174" # Alternative Vite port
+      - "http://127.0.0.1:5173" # Vite with 127.0.0.1
     allowed-origin-patterns:
-      - "http://localhost:*"       # Any localhost port
-      - "http://127.0.0.1:*"       # Any 127.0.0.1 port
-    max-age: 3600                  # 1 hour cache for development
+      - "http://localhost:*" # Any localhost port
+      - "http://127.0.0.1:*" # Any 127.0.0.1 port
+    max-age: 3600 # 1 hour cache for development
     allow-credentials: true
 ```
 
 **Staging Environment (application-staging.yml):**
+
 ```yaml
 # gateway-service/application-staging.yml
 spring:
@@ -3079,11 +2833,12 @@ gripday:
     allowed-origins:
       - "https://staging-app.pynity.com"
       - "https://staging.pynity.com"
-    max-age: 86400                 # 24 hours cache
+    max-age: 86400 # 24 hours cache
     allow-credentials: true
 ```
 
 **Production Environment (application-production.yml):**
+
 ```yaml
 # gateway-service/application-production.yml
 spring:
@@ -3097,39 +2852,41 @@ gripday:
       - "https://app.pynity.com"
       - "https://pynity.com"
       - "https://www.pynity.com"
-    max-age: 86400                 # 24 hours cache
+    max-age: 86400 # 24 hours cache
     allow-credentials: true
 ```
 
 **Vite 6 + React 19 Integration Example:**
 
 **Vite Configuration (vite.config.js):**
+
 ```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',  // Gateway Service
+      "/api": {
+        target: "http://localhost:8080", // Gateway Service
         changeOrigin: true,
-        secure: false
-      }
-    }
+        secure: false,
+      },
+    },
   },
   preview: {
-    port: 5173
-  }
-})
+    port: 5173,
+  },
+});
 ```
 
 **React API Client Example:**
+
 ```javascript
 // src/services/apiClient.js
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 class ApiClient {
   constructor() {
@@ -3138,47 +2895,47 @@ class ApiClient {
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config = {
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
         ...options.headers,
       },
-      credentials: 'include', // Important for CORS with credentials
+      credentials: "include", // Important for CORS with credentials
       ...options,
     };
 
     // Add JWT token if available
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       throw error;
     }
   }
 
   // Auth methods
   async login(credentials) {
-    return this.request('/api/v1/auth/login', {
-      method: 'POST',
+    return this.request("/api/v1/auth/login", {
+      method: "POST",
       body: JSON.stringify(credentials),
     });
   }
 
   async getCurrentUser() {
-    return this.request('/api/v1/auth/user-info');
+    return this.request("/api/v1/auth/user-info");
   }
 }
 
@@ -3186,6 +2943,7 @@ export default new ApiClient();
 ```
 
 **Environment Variables (.env files):**
+
 ```bash
 # .env.local
 VITE_API_URL=http://localhost:8080
@@ -3202,6 +2960,7 @@ VITE_API_URL=https://api.pynity.com
 **Common CORS Issues and Solutions:**
 
 **1. "Access to fetch blocked by CORS policy"**
+
 ```bash
 # Solution: Ensure your frontend development server is running on an allowed port
 # Default Vite port (5173) is pre-configured
@@ -3209,25 +2968,28 @@ npm run dev  # Should start on http://localhost:5173
 ```
 
 **2. "Credentials not included in CORS request"**
+
 ```javascript
 // Solution: Ensure credentials are included in fetch requests
-fetch('/api/v1/auth/login', {
-  method: 'POST',
-  credentials: 'include',  // This is crucial
+fetch("/api/v1/auth/login", {
+  method: "POST",
+  credentials: "include", // This is crucial
   headers: {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json",
   },
-  body: JSON.stringify(loginData)
+  body: JSON.stringify(loginData),
 });
 ```
 
 **3. "Preflight request doesn't pass access control check"**
+
 ```yaml
 # Solution: Verify OPTIONS method is allowed in CORS configuration
 # This is already configured in the provided setup
 ```
 
 **4. Custom Development Port**
+
 ```bash
 # If using a different port, update the CORS configuration or use Vite proxy
 # Option 1: Use Vite proxy (recommended)
@@ -3238,6 +3000,7 @@ fetch('/api/v1/auth/login', {
 ```
 
 **Quick Development Setup:**
+
 ```bash
 # 1. Start backend services
 cd gripday-gateway-service && docker compose up -d
@@ -3253,34 +3016,38 @@ npm run dev  # Starts on http://localhost:5173
 ```
 
 **Production Deployment Notes:**
+
 - CORS origins are automatically restricted based on Spring profiles
 - Staging and production environments require explicit domain configuration
 - Always use HTTPS in production environments
 - Consider using a CDN with proper CORS headers for static assets
+
 ```
 
 ### Auth Service (gripday-auth-service)
 
 **Package Structure:**
 ```
+
 org.gripday.authservice/
-├── presentation/                  # Presentation Layer
-│   ├── controller/               # REST controllers
-│   ├── dto/                      # Data transfer objects
-│   ├── validation/               # Input validation
-│   └── exception/                # Exception handlers
-├── domain/                       # Domain Layer
-│   ├── service/                  # Domain services
-│   ├── model/                    # Domain models
-│   ├── security/                 # Security logic
-│   └── config/                   # Domain configuration
-├── infrastructure/               # Data Access Layer
-│   ├── repository/               # Data repositories
-│   ├── entity/                   # JPA entities
-│   ├── cache/                    # Caching logic
-│   └── integration/              # External integrations
-└── AuthServiceApplication.java   # Main application class
-```
+├── presentation/ # Presentation Layer
+│ ├── controller/ # REST controllers
+│ ├── dto/ # Data transfer objects
+│ ├── validation/ # Input validation
+│ └── exception/ # Exception handlers
+├── domain/ # Domain Layer
+│ ├── service/ # Domain services
+│ ├── model/ # Domain models
+│ ├── security/ # Security logic
+│ └── config/ # Domain configuration
+├── infrastructure/ # Data Access Layer
+│ ├── repository/ # Data repositories
+│ ├── entity/ # JPA entities
+│ ├── cache/ # Caching logic
+│ └── integration/ # External integrations
+└── AuthServiceApplication.java # Main application class
+
+````
 
 **Technology Stack:**
 - Spring Boot Web (Reactive optional)
@@ -3326,11 +3093,11 @@ package org.gripday.authservice.config;
 @Configuration
 @EnableWebSecurity
 public class AuthServiceCorsConfiguration {
-    
+
     @Bean
     public CorsConfigurationSource authCorsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
+
         // Environment-based origins (same as Gateway Service)
         if (isLocalDevelopment()) {
             configuration.setAllowedOriginPatterns(Arrays.asList(
@@ -3348,18 +3115,18 @@ public class AuthServiceCorsConfiguration {
                 "https://pynity.com"
             ));
         }
-        
+
         configuration.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
-        
+
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization", "Content-Type", "Accept", "Origin"
         ));
-        
+
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(isLocalDevelopment() ? 3600L : 86400L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
@@ -3374,19 +3141,19 @@ package org.gripday.authservice.presentation.controller;
 @RestController
 @RequestMapping("/api")
 public class AuthController {
-    
+
     // Version 1 endpoints
     @PostMapping("/v1/auth/login")
-    @PostMapping("/v1/auth/register") 
+    @PostMapping("/v1/auth/register")
     @PostMapping("/v1/auth/refresh")
     @GetMapping("/v1/auth/validate")
     @PostMapping("/v1/auth/logout")
     @GetMapping("/v1/auth/user-info")
-    
+
     // Version 2 endpoints with enhanced features
     @PostMapping("/v2/auth/login")
     @PostMapping("/v2/auth/register")
-    @PostMapping("/v2/auth/refresh") 
+    @PostMapping("/v2/auth/refresh")
     @GetMapping("/v2/auth/validate")
     @PostMapping("/v2/auth/logout")
     @GetMapping("/v2/auth/user-info")
@@ -3461,14 +3228,14 @@ public interface UserLifecycleService {
 @RestController
 @RequestMapping("/api")
 public class UserManagementController {
-    
+
     // Version 1 endpoints
     @GetMapping("/v1/users")
     @PostMapping("/v1/users")
     @GetMapping("/v1/users/{id}")
     @PutMapping("/v1/users/{id}")
     @DeleteMapping("/v1/users/{id}")
-    
+
     // Version 2 endpoints with enhanced features
     @GetMapping("/v2/users")
     @PostMapping("/v2/users")
@@ -3497,7 +3264,7 @@ public interface UserManagementService {
     void removeRole(Long userId, Long roleId, Authentication auth);
     AuditLogDto getUserAuditLog(Long userId, Authentication auth);
 }
-```
+````
 
 ## Database Per Microservice Pattern
 
@@ -3506,6 +3273,7 @@ public interface UserManagementService {
 **Database Per Microservice Pattern Implementation:** Each microservice owns its data and has its own dedicated database instance. This ensures data isolation, independent scaling, technology diversity, and autonomous deployment capabilities. The pattern prevents tight coupling between services and enables each service to choose the most appropriate database technology for its specific needs.
 
 **Key Benefits:**
+
 - **Data Isolation**: Each service has complete control over its data schema and access patterns
 - **Independent Scaling**: Database resources can be scaled independently per service
 - **Technology Diversity**: Services can choose different database technologies (PostgreSQL, MongoDB, etc.)
@@ -3521,17 +3289,17 @@ graph TB
         AuthService[Auth Service] --> AuthDB[(Auth PostgreSQL)]
         AuthService --> AuthRedis[(Auth Redis)]
     end
-    
+
     subgraph "Gateway Service"
         GatewayService[Gateway Service] --> GatewayRedis[(Gateway Redis)]
         GatewayService --> GatewayDB[(Gateway PostgreSQL)]
     end
-    
+
     subgraph "Future Microservice"
         FutureService[Future Service] --> FutureDB[(Service-Specific DB)]
         FutureService --> FutureCache[(Service-Specific Cache)]
     end
-    
+
     AuthService -.->|JWT Validation| GatewayService
     GatewayService -.->|Route Requests| FutureService
 ```
@@ -3539,6 +3307,7 @@ graph TB
 ### Service-Specific Database Configuration
 
 **Auth Service Database (gripday_auth_db):**
+
 - **Purpose**: User management, authentication, authorization data
 - **Technology**: PostgreSQL 15+
 - **Schema**: Users, authorities, user_authorities, audit logs
@@ -3546,6 +3315,7 @@ graph TB
 - **Scaling**: Optimized for user lookup and JWT operations
 
 **Gateway Service Database (gripday_gateway_db):**
+
 - **Purpose**: Route configurations, rate limiting rules, circuit breaker state
 - **Technology**: PostgreSQL 15+ (with Redis for caching)
 - **Schema**: Routes, rate_limits, circuit_breaker_state, request_logs
@@ -3553,6 +3323,7 @@ graph TB
 - **Scaling**: Optimized for fast route resolution and rate limiting
 
 **Future Microservices:**
+
 - **Flexibility**: Each service can choose its optimal database technology
 - **Independence**: Complete schema and migration autonomy
 - **Integration**: Services communicate via APIs, not shared databases
@@ -3560,40 +3331,43 @@ graph TB
 ### Cross-Service Data Access Patterns
 
 **API-Only Communication:**
+
 - Services communicate exclusively through REST APIs
 - No direct database access between services
 - JWT tokens carry user context across service boundaries
 - Eventual consistency through event-driven patterns when needed
 
 **Data Consistency Strategies:**
+
 - **Strong Consistency**: Within service boundaries using ACID transactions
 - **Eventual Consistency**: Between services using event sourcing or saga patterns
 - **Reference Data**: Services maintain their own copies of frequently accessed reference data
 - **User Context**: Propagated through JWT claims, not database joins
 
 **Example Cross-Service Integration:**
+
 ```java
 // Gateway Service - No direct database access to Auth Service
 @Component
 public class UserContextService {
-    
-    private final AuthServiceClient authServiceClient;
-    
-    public UserContext validateAndEnrichToken(String jwt) {
-        // Call Auth Service API, not database
-        return authServiceClient.validateToken(jwt);
-    }
+
+  private final AuthServiceClient authServiceClient;
+
+  public UserContext validateAndEnrichToken(String jwt) {
+    // Call Auth Service API, not database
+    return authServiceClient.validateToken(jwt);
+  }
 }
 
 // Auth Service - Owns user data exclusively
 @RestController
 public class AuthValidationController {
-    
-    @PostMapping("/internal/validate-token")
-    public UserContext validateToken(@RequestBody TokenValidationRequest request) {
-        // Access own database only
-        return userService.validateAndExtractContext(request.getToken());
-    }
+
+  @PostMapping("/internal/validate-token")
+  public UserContext validateToken(@RequestBody TokenValidationRequest request) {
+    // Access own database only
+    return userService.validateAndExtractContext(request.getToken());
+  }
 }
 ```
 
@@ -3608,6 +3382,7 @@ public class AuthValidationController {
 All database schema changes will be managed through Liquibase XML migrations using liquibase-core and postgresql dependencies. Migrations will be executed automatically by Spring Boot on application startup, not through Maven plugin.
 
 **Spring Boot JPA and Liquibase Configuration:**
+
 ```yaml
 # application.yml
 spring:
@@ -3642,7 +3417,7 @@ spring:
         batch_versioned_data: true
     show-sql: false
     open-in-view: false
-    
+
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
@@ -3652,10 +3427,10 @@ spring:
     rollback-file: classpath:db/changelog/rollback.sql
     parameters:
       lockTimeout: 300s
-    
 ```
 
 **Maven Dependencies (pom.xml):**
+
 ```xml
 <dependencies>
     <!-- Spring Data JPA with Hibernate 6.x -->
@@ -3663,38 +3438,38 @@ spring:
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
-    
+
     <!-- Jakarta Persistence API 3.1+ -->
     <dependency>
         <groupId>jakarta.persistence</groupId>
         <artifactId>jakarta.persistence-api</artifactId>
     </dependency>
-    
+
     <!-- Hibernate 6.x Core -->
     <dependency>
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-core</artifactId>
     </dependency>
-    
+
     <!-- Hibernate Validator with Jakarta Bean Validation -->
     <dependency>
         <groupId>org.hibernate.validator</groupId>
         <artifactId>hibernate-validator</artifactId>
     </dependency>
-    
+
     <!-- PostgreSQL Driver -->
     <dependency>
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <scope>runtime</scope>
     </dependency>
-    
+
     <!-- Liquibase -->
     <dependency>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-core</artifactId>
     </dependency>
-    
+
     <!-- Hibernate Second Level Cache (Optional) -->
     <dependency>
         <groupId>org.hibernate.orm</groupId>
@@ -3708,6 +3483,7 @@ spring:
 ```
 
 **Liquibase Master Changelog (`db/changelog/db.changelog-master.xml`):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3724,6 +3500,7 @@ spring:
 ```
 
 **Example Changeset (`db/changelog/changes/001-create-users-table.xml`):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3783,18 +3560,21 @@ spring:
 ### Database Per Service Migration Strategy
 
 **Independent Migration Lifecycle:**
+
 - Each service manages its own database schema evolution
 - Migrations run automatically on service startup via Spring Boot Liquibase integration
 - No coordination required between services for schema changes
 - Service teams have full autonomy over their data model
 
 **Cross-Service Schema Changes:**
+
 - API contract versioning handles interface changes between services
 - Backward compatibility maintained through API versioning, not shared schema
 - Data synchronization handled through event-driven patterns when needed
 - No cascading schema dependencies between services
 
 **Auth Service Database Tables:**
+
 - **users**: Core user account information with security flags
 - **authorities**: Role and permission definitions
 - **user_authorities**: Many-to-many relationship between users and authorities
@@ -3807,12 +3587,14 @@ spring:
 **Design Rationale:** Gateway service maintains its own database for route configurations, rate limiting rules, and operational state. This ensures the gateway can operate independently and scale its data storage according to routing and traffic management needs.
 
 **Gateway Service Database Tables:**
+
 - **routes**: Dynamic route configurations and load balancing rules
 - **rate_limits**: Rate limiting policies and current usage counters
 - **circuit_breaker_state**: Circuit breaker status and failure tracking
 - **request_logs**: Request routing and performance audit trail
 
-**Example Gateway Migration (V1__Create_routes_table.xml):**
+**Example Gateway Migration (V1\_\_Create_routes_table.xml):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <sql>
@@ -3864,6 +3646,7 @@ spring:
 **Design Rationale:** Hibernate 6.x provides enhanced performance, better SQL generation, and full Jakarta EE compatibility. The migration from javax.persistence to jakarta.persistence ensures future compatibility and access to the latest JPA 3.1+ features including improved criteria queries, entity graphs, and native query enhancements.
 
 **Key Hibernate 6.x Features Utilized:**
+
 - Enhanced SQL generation and query optimization
 - Improved batch processing and lazy loading
 - Better support for modern Java features (records, var, etc.)
@@ -3875,73 +3658,70 @@ package org.gripday.authservice.infrastructure.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import org.hibernate.annotations.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import org.hibernate.annotations.*;
 
 @Entity
 @Table(name = "users")
 @DynamicUpdate
 @SelectBeforeUpdate
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(unique = true, nullable = false, length = 50)
-    @NotBlank
-    @Size(min = 3, max = 50)
-    private String username;
-    
-    @Column(unique = true, nullable = false, length = 100)
-    @NotBlank
-    @Email
-    @Size(max = 100)
-    private String email;
-    
-    @Column(name = "password_hash", nullable = false, length = 255)
-    @NotBlank
-    private String passwordHash;
-    
-    @Column(name = "first_name", length = 50)
-    @Size(max = 50)
-    private String firstName;
-    
-    @Column(name = "last_name", length = 50)
-    @Size(max = 50)
-    private String lastName;
-    
-    @Column(nullable = false)
-    private Boolean enabled = true;
-    
-    @Column(name = "account_non_expired", nullable = false)
-    private Boolean accountNonExpired = true;
-    
-    @Column(name = "account_non_locked", nullable = false)
-    private Boolean accountNonLocked = true;
-    
-    @Column(name = "credentials_non_expired", nullable = false)
-    private Boolean credentialsNonExpired = true;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-    
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "user_authorities",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "authority_id")
-    )
-    @BatchSize(size = 20)
-    private Set<Authority> authorities = new HashSet<>();
-    
-    // Constructors, getters, setters, equals, hashCode
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(unique = true, nullable = false, length = 50)
+  @NotBlank
+  @Size(min = 3, max = 50)
+  private String username;
+
+  @Column(unique = true, nullable = false, length = 100)
+  @NotBlank
+  @Email
+  @Size(max = 100)
+  private String email;
+
+  @Column(name = "password_hash", nullable = false, length = 255)
+  @NotBlank
+  private String passwordHash;
+
+  @Column(name = "first_name", length = 50)
+  @Size(max = 50)
+  private String firstName;
+
+  @Column(name = "last_name", length = 50)
+  @Size(max = 50)
+  private String lastName;
+
+  @Column(nullable = false)
+  private Boolean enabled = true;
+
+  @Column(name = "account_non_expired", nullable = false)
+  private Boolean accountNonExpired = true;
+
+  @Column(name = "account_non_locked", nullable = false)
+  private Boolean accountNonLocked = true;
+
+  @Column(name = "credentials_non_expired", nullable = false)
+  private Boolean credentialsNonExpired = true;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
+  @BatchSize(size = 20)
+  private Set<Authority> authorities = new HashSet<>();
+
+  // Constructors, getters, setters, equals, hashCode
 }
 
 @Entity
@@ -3949,61 +3729,63 @@ public class User {
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class Authority {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(unique = true, nullable = false, length = 50)
-    @NotBlank
-    @Size(min = 2, max = 50)
-    private String name;
-    
-    @Column(length = 255)
-    @Size(max = 255)
-    private String description;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    // Constructors, getters, setters, equals, hashCode
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(unique = true, nullable = false, length = 50)
+  @NotBlank
+  @Size(min = 2, max = 50)
+  private String name;
+
+  @Column(length = 255)
+  @Size(max = 255)
+  private String description;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  // Constructors, getters, setters, equals, hashCode
 }
 
 @Entity
 @Table(name = "user_audit_log")
 @Immutable
 public class UserAuditLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-    
-    @Column(nullable = false, length = 100)
-    @NotBlank
-    private String action;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performed_by")
-    private User performedBy;
-    
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String details;
-    
-    @Column(name = "ip_address", length = 45)
-    private String ipAddress;
-    
-    @Column(name = "user_agent", length = 500)
-    private String userAgent;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    // Constructors, getters, setters
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
+  @Column(nullable = false, length = 100)
+  @NotBlank
+  private String action;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "performed_by")
+  private User performedBy;
+
+  @Column(columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
+  private String details;
+
+  @Column(name = "ip_address", length = 45)
+  private String ipAddress;
+
+  @Column(name = "user_agent", length = 500)
+  private String userAgent;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  // Constructors, getters, setters
 }
 ```
 
@@ -4014,53 +3796,56 @@ package org.gripday.gatewayservice.infrastructure.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import org.hibernate.annotations.*;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.*;
 
 @Entity
 @Table(name = "routes")
 @DynamicUpdate
 public class Route {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(name = "route_id", unique = true, nullable = false, length = 100)
-    @NotBlank
-    @Size(min = 3, max = 100)
-    private String routeId;
-    
-    @Column(name = "service_name", nullable = false, length = 100)
-    @NotBlank
-    @Size(min = 2, max = 100)
-    private String serviceName;
-    
-    @Column(name = "path_pattern", nullable = false, length = 255)
-    @NotBlank
-    private String pathPattern;
-    
-    @Column(name = "target_uri", nullable = false, length = 255)
-    @NotBlank
-    private String targetUri;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "load_balancer_type", length = 50)
-    private LoadBalancerType loadBalancerType = LoadBalancerType.ROUND_ROBIN;
-    
-    @Column(nullable = false)
-    private Boolean enabled = true;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-    
-    public enum LoadBalancerType {
-        ROUND_ROBIN, WEIGHTED_RESPONSE_TIME, RANDOM
-    }
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(name = "route_id", unique = true, nullable = false, length = 100)
+  @NotBlank
+  @Size(min = 3, max = 100)
+  private String routeId;
+
+  @Column(name = "service_name", nullable = false, length = 100)
+  @NotBlank
+  @Size(min = 2, max = 100)
+  private String serviceName;
+
+  @Column(name = "path_pattern", nullable = false, length = 255)
+  @NotBlank
+  private String pathPattern;
+
+  @Column(name = "target_uri", nullable = false, length = 255)
+  @NotBlank
+  private String targetUri;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "load_balancer_type", length = 50)
+  private LoadBalancerType loadBalancerType = LoadBalancerType.ROUND_ROBIN;
+
+  @Column(nullable = false)
+  private Boolean enabled = true;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
+
+  public enum LoadBalancerType {
+    ROUND_ROBIN,
+    WEIGHTED_RESPONSE_TIME,
+    RANDOM,
+  }
 }
 
 @Entity
@@ -4068,72 +3853,76 @@ public class Route {
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class RateLimit {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(name = "service_name", nullable = false, length = 100)
-    @NotBlank
-    private String serviceName;
-    
-    @Column(name = "path_pattern", nullable = false, length = 255)
-    @NotBlank
-    private String pathPattern;
-    
-    @Column(name = "requests_per_minute", nullable = false)
-    @Min(1)
-    @Max(10000)
-    private Integer requestsPerMinute = 100;
-    
-    @Column(name = "burst_capacity", nullable = false)
-    @Min(1)
-    private Integer burstCapacity = 200;
-    
-    @Column(nullable = false)
-    private Boolean enabled = true;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(name = "service_name", nullable = false, length = 100)
+  @NotBlank
+  private String serviceName;
+
+  @Column(name = "path_pattern", nullable = false, length = 255)
+  @NotBlank
+  private String pathPattern;
+
+  @Column(name = "requests_per_minute", nullable = false)
+  @Min(1)
+  @Max(10000)
+  private Integer requestsPerMinute = 100;
+
+  @Column(name = "burst_capacity", nullable = false)
+  @Min(1)
+  private Integer burstCapacity = 200;
+
+  @Column(nullable = false)
+  private Boolean enabled = true;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 }
 
 @Entity
 @Table(name = "circuit_breaker_state")
 @DynamicUpdate
 public class CircuitBreakerState {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(name = "service_name", unique = true, nullable = false, length = 100)
-    @NotBlank
-    private String serviceName;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private CircuitState state = CircuitState.CLOSED;
-    
-    @Column(name = "failure_count", nullable = false)
-    @Min(0)
-    private Integer failureCount = 0;
-    
-    @Column(name = "last_failure_time")
-    private LocalDateTime lastFailureTime;
-    
-    @Column(name = "next_attempt_time")
-    private LocalDateTime nextAttemptTime;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-    
-    public enum CircuitState {
-        CLOSED, OPEN, HALF_OPEN
-    }
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(name = "service_name", unique = true, nullable = false, length = 100)
+  @NotBlank
+  private String serviceName;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private CircuitState state = CircuitState.CLOSED;
+
+  @Column(name = "failure_count", nullable = false)
+  @Min(0)
+  private Integer failureCount = 0;
+
+  @Column(name = "last_failure_time")
+  private LocalDateTime lastFailureTime;
+
+  @Column(name = "next_attempt_time")
+  private LocalDateTime nextAttemptTime;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
+
+  public enum CircuitState {
+    CLOSED,
+    OPEN,
+    HALF_OPEN,
+  }
 }
 ```
 
@@ -4153,30 +3942,30 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    
+
     @EntityGraph(attributePaths = {"authorities"})
     Optional<User> findByUsernameOrEmail(String username, String email);
-    
+
     @EntityGraph(attributePaths = {"authorities"})
     Optional<User> findByUsername(String username);
-    
+
     @Query("""
-        SELECT u FROM User u 
-        JOIN FETCH u.authorities a 
-        WHERE u.enabled = true 
-        AND u.accountNonLocked = true 
+        SELECT u FROM User u
+        JOIN FETCH u.authorities a
+        WHERE u.enabled = true
+        AND u.accountNonLocked = true
         AND a.name IN :roles
         """)
     List<User> findActiveUsersByRoles(@Param("roles") List<String> roles);
-    
+
     @Query(value = """
-        SELECT COUNT(*) FROM users u 
-        JOIN user_authorities ua ON u.id = ua.user_id 
-        JOIN authorities a ON ua.authority_id = a.id 
+        SELECT COUNT(*) FROM users u
+        JOIN user_authorities ua ON u.id = ua.user_id
+        JOIN authorities a ON ua.authority_id = a.id
         WHERE a.name = :role AND u.enabled = true
         """, nativeQuery = true)
     long countActiveUsersByRole(@Param("role") String role);
-    
+
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 }
@@ -4193,17 +3982,17 @@ import java.util.Optional;
 
 @Repository
 public interface RouteRepository extends JpaRepository<Route, Long> {
-    
+
     List<Route> findByEnabledTrueOrderByCreatedAtAsc();
-    
+
     Optional<Route> findByRouteIdAndEnabledTrue(String routeId);
-    
+
     List<Route> findByServiceNameAndEnabledTrue(String serviceName);
-    
+
     @Query("""
-        SELECT r FROM Route r 
-        WHERE r.enabled = true 
-        AND r.pathPattern LIKE :pathPattern 
+        SELECT r FROM Route r
+        WHERE r.enabled = true
+        AND r.pathPattern LIKE :pathPattern
         ORDER BY LENGTH(r.pathPattern) DESC
         """)
     List<Route> findMatchingRoutes(@Param("pathPattern") String pathPattern);
@@ -4222,78 +4011,81 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class HibernateConfig {
-    
-    @Bean
-    public HibernatePropertiesCustomizer hibernatePropertiesCustomizer() {
-        return hibernateProperties -> {
-            // Enable Hibernate 6.x specific features
-            hibernateProperties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, true);
-            hibernateProperties.put(AvailableSettings.USE_QUERY_CACHE, true);
-            hibernateProperties.put(AvailableSettings.CACHE_REGION_FACTORY, 
-                "org.hibernate.cache.jcache.JCacheRegionFactory");
-            
-            // Enhanced SQL generation
-            hibernateProperties.put(AvailableSettings.USE_SQL_COMMENTS, true);
-            hibernateProperties.put(AvailableSettings.FORMAT_SQL, true);
-            hibernateProperties.put(AvailableSettings.HIGHLIGHT_SQL, true);
-            
-            // Batch processing optimization
-            hibernateProperties.put(AvailableSettings.DEFAULT_BATCH_FETCH_SIZE, 16);
-            hibernateProperties.put(AvailableSettings.STATEMENT_BATCH_SIZE, 20);
-            
-            // Jakarta Persistence API 3.1+ features
-            hibernateProperties.put(AvailableSettings.JAKARTA_VALIDATION_MODE, "AUTO");
-            hibernateProperties.put(AvailableSettings.JPA_VALIDATION_GROUP_PRE_PERSIST, "");
-            hibernateProperties.put(AvailableSettings.JPA_VALIDATION_GROUP_PRE_UPDATE, "");
-        };
-    }
+
+  @Bean
+  public HibernatePropertiesCustomizer hibernatePropertiesCustomizer() {
+    return (hibernateProperties) -> {
+      // Enable Hibernate 6.x specific features
+      hibernateProperties.put(AvailableSettings.USE_SECOND_LEVEL_CACHE, true);
+      hibernateProperties.put(AvailableSettings.USE_QUERY_CACHE, true);
+      hibernateProperties.put(AvailableSettings.CACHE_REGION_FACTORY, "org.hibernate.cache.jcache.JCacheRegionFactory");
+
+      // Enhanced SQL generation
+      hibernateProperties.put(AvailableSettings.USE_SQL_COMMENTS, true);
+      hibernateProperties.put(AvailableSettings.FORMAT_SQL, true);
+      hibernateProperties.put(AvailableSettings.HIGHLIGHT_SQL, true);
+
+      // Batch processing optimization
+      hibernateProperties.put(AvailableSettings.DEFAULT_BATCH_FETCH_SIZE, 16);
+      hibernateProperties.put(AvailableSettings.STATEMENT_BATCH_SIZE, 20);
+
+      // Jakarta Persistence API 3.1+ features
+      hibernateProperties.put(AvailableSettings.JAKARTA_VALIDATION_MODE, "AUTO");
+      hibernateProperties.put(AvailableSettings.JPA_VALIDATION_GROUP_PRE_PERSIST, "");
+      hibernateProperties.put(AvailableSettings.JPA_VALIDATION_GROUP_PRE_UPDATE, "");
+    };
+  }
 }
 ```
 
 ### Hibernate 6.x Performance Optimizations
 
 **Enhanced Query Performance:**
+
 - **Improved SQL Generation**: Hibernate 6.x generates more efficient SQL with better join optimization
 - **Entity Graphs**: Use `@EntityGraph` for optimized fetch strategies and N+1 query prevention
 - **Batch Processing**: Enhanced batch insert/update operations with configurable batch sizes
 - **Query Plan Cache**: Improved query plan caching for better performance on repeated queries
 
 **Modern Java Integration:**
+
 - **Records Support**: Use Java records for read-only projections and DTOs
 - **Optional Integration**: Better integration with Java Optional for null-safe operations
 - **Stream API**: Enhanced support for Java Streams in query results
 - **CompletableFuture**: Async query execution support for reactive programming
 
 **Jakarta EE Compatibility:**
+
 - **Jakarta Persistence API 3.1+**: Full compatibility with latest JPA specifications
 - **Jakarta Bean Validation**: Integrated validation with Hibernate Validator
 - **Jakarta Transactions**: Enhanced transaction management and propagation
 - **Jakarta CDI**: Better integration with dependency injection frameworks
 
 **Example Performance-Optimized Repository:**
+
 ```java
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    
+
     // Entity Graph for optimized loading
     @EntityGraph(attributePaths = {"authorities"})
     @Query("SELECT u FROM User u WHERE u.username = :username")
     Optional<User> findByUsernameWithAuthorities(@Param("username") String username);
-    
+
     // Batch processing for bulk operations
     @Modifying
     @Query("UPDATE User u SET u.enabled = :enabled WHERE u.id IN :ids")
     int updateEnabledStatusBatch(@Param("enabled") boolean enabled, @Param("ids") List<Long> ids);
-    
+
     // Projection with records (Java 14+)
     @Query("SELECT new org.gripday.authservice.dto.UserSummary(u.id, u.username, u.email) FROM User u WHERE u.enabled = true")
     List<UserSummary> findUserSummaries();
-    
+
     // Stream processing for large datasets
     @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = "50"))
     Stream<User> streamByEnabledTrue();
 }
-    
+
     private String description;
 }
 
@@ -4303,27 +4095,27 @@ public class UserAuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    
+
     @Column(nullable = false)
     private String action;
-    
+
     @ManyToOne
     @JoinColumn(name = "performed_by")
     private User performedBy;
-    
+
     @Column(columnDefinition = "jsonb")
     private String details;
-    
+
     @Column(name = "ip_address")
     private String ipAddress;
-    
+
     @Column(name = "user_agent")
     private String userAgent;
-    
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -4336,6 +4128,7 @@ public class UserAuditLog {
 **Design Rationale:** Admin-only user management ensures security and data integrity by restricting user lifecycle operations to authorized administrators. This approach prevents unauthorized access to sensitive user data and maintains clear separation between regular users and administrative functions.
 
 **Simple Admin-Only Access Control:**
+
 ```
 Role          | User Management API Access | Create Users | Read Users | Update Users | Delete Users | Assign Roles
 ------------- | -------------------------- | ------------ | ---------- | ------------ | ------------ | ------------
@@ -4346,33 +4139,36 @@ USER          | ✗ Access Denied            | None         | None       | None 
 ```
 
 **Simple Access Control Rules:**
+
 - **Admin-Only Endpoints**: All user management CRUD operations require ADMIN or SUPER_ADMIN role
 - **HTTP 403 Forbidden**: Non-administrative users receive 403 status for any user management endpoint access
 - **Role-Based Operations**: SUPER_ADMIN has full access, ADMIN has full user management access but limited role assignment
 - **Audit Trail**: All administrative operations are logged with full context
 
 **Security Implementation:**
+
 ```java
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserManagementController {
-    
-    @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') and @userSecurityService.canManageUser(authentication, #userId))")
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long userId, Authentication authentication) {
-        // Implementation with hierarchical access control
-    }
-    
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    @PostMapping("/{userId}/roles")
-    public ResponseEntity<Void> assignRole(@PathVariable Long userId, @RequestBody AssignRoleRequest request) {
-        // Only SUPER_ADMIN can assign roles
-    }
+
+  @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') and @userSecurityService.canManageUser(authentication, #userId))")
+  @GetMapping("/{userId}")
+  public ResponseEntity<UserDto> getUser(@PathVariable Long userId, Authentication authentication) {
+    // Implementation with hierarchical access control
+  }
+
+  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PostMapping("/{userId}/roles")
+  public ResponseEntity<Void> assignRole(@PathVariable Long userId, @RequestBody AssignRoleRequest request) {
+    // Only SUPER_ADMIN can assign roles
+  }
 }
 ```
 
 **Search and Pagination:**
+
 - Full-text search across user fields
 - Advanced filtering by role, status, creation date
 - Cursor-based pagination for large datasets
@@ -4381,6 +4177,7 @@ public class UserManagementController {
 ### Redis Data Structures
 
 **Rate Limiting:**
+
 ```
 Key: rate_limit:{client_id}:{endpoint}
 Value: {count: number, window_start: timestamp}
@@ -4388,6 +4185,7 @@ TTL: Rate limit window duration
 ```
 
 **Session Storage:**
+
 ```
 Key: session:{session_id}
 Value: {user_id, authorities, created_at, expires_at}
@@ -4428,17 +4226,20 @@ TTL: Session timeout duration
 ## Testing Strategy
 
 ### Unit Testing
+
 - **Gateway Service**: Test filters, route configurations, and security components
 - **Auth Service**: Test authentication logic, user management, and JWT operations
 - **Coverage Target**: 80% code coverage minimum
 
 ### Architectural Testing
+
 - **ArchUnit Tests**: Enforce three-tier architecture rules and layer dependencies
 - **Spring Modulith Tests**: Validate module boundaries and encapsulation
 - **Package Structure Tests**: Ensure naming conventions and package organization
 - **Dependency Rules Tests**: Prevent architectural violations and circular dependencies
 
 ### Integration Testing
+
 - **Service-Specific Database Integration**: Test each service's Spring Data JPA repositories with Hibernate 6.x and Liquibase migrations independently
 - **Auth Service Database**: Test user management, authentication, and authorization data operations
 - **Gateway Service Database**: Test route configuration, rate limiting, and circuit breaker state management
@@ -4447,10 +4248,12 @@ TTL: Session timeout duration
 - **Database Isolation**: Verify services cannot access each other's databases
 
 ### Contract Testing
+
 - **API Contracts**: Use Spring Cloud Contract for service contracts
 - **Database Contracts**: Test database schema compatibility
 
 ### End-to-End Testing
+
 - **Authentication Flow**: Complete OAuth2 and JWT flow testing
 - **Rate Limiting**: Test distributed rate limiting across instances
 - **Circuit Breaker**: Test fault tolerance and recovery mechanisms
@@ -4462,6 +4265,7 @@ TTL: Session timeout duration
 **Container-First Approach:** The platform uses container orchestration instead of traditional service discovery mechanisms like Eureka. This approach provides simpler deployment, better resource isolation, and leverages modern container orchestration capabilities for service networking and discovery.
 
 **Environment-Specific Orchestration:**
+
 - **Local Development**: Docker Compose with container DNS resolution
 - **Staging/Production**: Kubernetes (minikube, podman desktop) with native service discovery
 - **No External Dependencies**: Eliminates need for separate service registry infrastructure
@@ -4469,9 +4273,10 @@ TTL: Session timeout duration
 ### Local Development with Docker Compose
 
 **Service Networking:**
+
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   auth-service:
     build: ./gripday-auth-service
@@ -4507,6 +4312,7 @@ networks:
 ```
 
 **Gateway Service Configuration:**
+
 ```yaml
 # application-local.yml
 gripday:
@@ -4525,6 +4331,7 @@ gripday:
 ### Kubernetes Integration
 
 **Service Discovery with Kubernetes DNS:**
+
 ```yaml
 # k8s/auth-service-deployment.yaml
 apiVersion: apps/v1
@@ -4542,15 +4349,15 @@ spec:
         app: auth-service
     spec:
       containers:
-      - name: auth-service
-        image: gripday/auth-service:latest
-        ports:
-        - containerPort: 8081
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "production"
-        - name: GRIPDAY_DATABASE_HOST
-          value: "auth-postgres-service"
+        - name: auth-service
+          image: gripday/auth-service:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "production"
+            - name: GRIPDAY_DATABASE_HOST
+              value: "auth-postgres-service"
 
 ---
 apiVersion: v1
@@ -4561,12 +4368,13 @@ spec:
   selector:
     app: auth-service
   ports:
-  - port: 8081
-    targetPort: 8081
+    - port: 8081
+      targetPort: 8081
   type: ClusterIP
 ```
 
 **Gateway Service Kubernetes Configuration:**
+
 ```yaml
 # application-production.yml
 gripday:
@@ -4585,40 +4393,41 @@ gripday:
 ### Static Route Configuration
 
 **Gateway Route Configuration:**
+
 ```java
 @Configuration
 public class GatewayRoutesConfig {
-    
-    @Value("${gripday.gateway.routes.auth-service.uri}")
-    private String authServiceUri;
-    
-    @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-        return builder.routes()
-            .route("auth-service", r -> r
-                .path("/api/*/auth/**")
-                .uri(authServiceUri))
-            .route("user-management", r -> r
-                .path("/api/*/users/**")
-                .uri(authServiceUri))
-            .build();
-    }
+
+  @Value("${gripday.gateway.routes.auth-service.uri}")
+  private String authServiceUri;
+
+  @Bean
+  public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+    return builder
+      .routes()
+      .route("auth-service", (r) -> r.path("/api/*/auth/**").uri(authServiceUri))
+      .route("user-management", (r) -> r.path("/api/*/users/**").uri(authServiceUri))
+      .build();
+  }
 }
 ```
 
 ### Service Communication Patterns
 
 **Container DNS Resolution:**
+
 - Services communicate using container names as hostnames
 - Docker Compose provides automatic DNS resolution within networks
 - Kubernetes provides service discovery through DNS (service-name.namespace.svc.cluster.local)
 
 **Configuration-Based Routing:**
+
 - Gateway routes are configured statically in application configuration
 - Environment-specific service URLs through Spring profiles
 - No runtime service discovery or registration required
 
 **Health Checks and Load Balancing:**
+
 - Container orchestration handles health checks and restarts
 - Kubernetes provides native load balancing across pod replicas
 - Docker Compose can be configured with health checks and restart policies
@@ -4626,16 +4435,19 @@ public class GatewayRoutesConfig {
 ### Benefits of Container Orchestration Approach
 
 **Simplified Architecture:**
+
 - No additional service registry infrastructure to maintain
 - Reduced complexity and potential points of failure
 - Leverages proven container orchestration capabilities
 
 **Environment Consistency:**
+
 - Same networking approach across development and production
 - Container orchestration handles service lifecycle management
 - Native integration with monitoring and observability tools
 
 **Operational Simplicity:**
+
 - Standard container deployment patterns
 - Familiar tooling for DevOps teams
 - Reduced learning curve for platform adoption
@@ -4647,6 +4459,7 @@ public class GatewayRoutesConfig {
 **Design Rationale:** Exclusive use of YAML (.yml) files ensures consistent configuration management across all microservices with improved readability, hierarchical structure support, and better integration with Spring Boot's configuration binding. The `gripday.` prefix convention provides clear namespace separation between custom application properties and Spring Boot standard properties.
 
 **Configuration File Standards:**
+
 - **YAML Only**: All configuration properties must use YAML (.yml) format exclusively
 - **No Properties Files**: .properties files are prohibited across all microservices
 - **Custom Property Prefix**: All custom configuration properties must use `gripday.` prefix
@@ -4656,6 +4469,7 @@ public class GatewayRoutesConfig {
 ### Custom Property Prefix Convention
 
 **Gripday Namespace Structure:**
+
 ```yaml
 # All custom properties must use gripday. prefix
 gripday:
@@ -4674,8 +4488,8 @@ gripday:
     password:
       min-length: 8
       require-special-chars: true
-      
-  # Gateway service configuration  
+
+  # Gateway service configuration
   gateway:
     cors:
       allowed-origins:
@@ -4690,7 +4504,7 @@ gripday:
     circuit-breaker:
       failure-threshold: 5
       timeout-duration: 30s
-      
+
   # Database configuration
   database:
     connection-pool:
@@ -4700,7 +4514,7 @@ gripday:
     liquibase:
       enabled: true
       change-log: classpath:db/changelog/db.changelog-master.xml
-      
+
   # Redis configuration
   cache:
     redis:
@@ -4709,7 +4523,7 @@ gripday:
       password: ${REDIS_PASSWORD:}
       database: 0
       timeout: 2000ms
-      
+
   # Observability configuration
   observability:
     tracing:
@@ -4726,6 +4540,7 @@ gripday:
 ### Environment-Specific Configuration Examples
 
 **Local Development (application-local.yml):**
+
 ```yaml
 spring:
   profiles:
@@ -4746,9 +4561,9 @@ gripday:
   auth:
     jwt:
       secret: local-development-secret-key-not-for-production
-      expiration: 3600  # 1 hour for development
+      expiration: 3600 # 1 hour for development
     password:
-      min-length: 6  # Relaxed for development
+      min-length: 6 # Relaxed for development
   gateway:
     cors:
       allowed-origins:
@@ -4759,7 +4574,7 @@ gripday:
       max-age: 3600
   observability:
     tracing:
-      sampling-rate: 1.0  # Full sampling in development
+      sampling-rate: 1.0 # Full sampling in development
     logging:
       level: DEBUG
 
@@ -4772,6 +4587,7 @@ logging:
 ```
 
 **Staging Environment (application-staging.yml):**
+
 ```yaml
 spring:
   profiles:
@@ -4793,7 +4609,7 @@ gripday:
   auth:
     jwt:
       secret: ${JWT_SECRET}
-      expiration: 900  # 15 minutes
+      expiration: 900 # 15 minutes
     oauth2:
       enabled: true
       providers:
@@ -4825,6 +4641,7 @@ logging:
 ```
 
 **Production Environment (application-production.yml):**
+
 ```yaml
 spring:
   profiles:
@@ -4847,8 +4664,8 @@ gripday:
   auth:
     jwt:
       secret: ${JWT_SECRET}
-      expiration: 900  # 15 minutes
-      refresh-expiration: 86400  # 24 hours
+      expiration: 900 # 15 minutes
+      refresh-expiration: 86400 # 24 hours
     oauth2:
       enabled: true
       providers:
@@ -4868,7 +4685,7 @@ gripday:
         - "https://www.pynity.com"
       max-age: 86400
     rate-limiting:
-      default-requests-per-minute: 60  # More restrictive in production
+      default-requests-per-minute: 60 # More restrictive in production
       burst-capacity: 120
   database:
     connection-pool:
@@ -4897,6 +4714,7 @@ logging:
 ### Configuration Validation
 
 **Spring Boot Configuration Properties:**
+
 ```java
 package org.gripday.authservice.config;
 
@@ -4904,51 +4722,51 @@ package org.gripday.authservice.config;
 @Validated
 @Data
 public class AuthConfigurationProperties {
-    
+
     @Valid
     private JwtConfig jwt = new JwtConfig();
-    
+
     @Valid
     private OAuth2Config oauth2 = new OAuth2Config();
-    
+
     @Valid
     private PasswordConfig password = new PasswordConfig();
-    
+
     @Data
     public static class JwtConfig {
         @NotBlank
         private String secret;
-        
+
         @Min(60)
         @Max(86400)
         private int expiration = 900;
-        
+
         @Min(3600)
         @Max(604800)
         private int refreshExpiration = 86400;
     }
-    
+
     @Data
     public static class OAuth2Config {
         private boolean enabled = false;
         private Map<String, OAuth2Provider> providers = new HashMap<>();
-        
+
         @Data
         public static class OAuth2Provider {
             @NotBlank
             private String clientId;
-            
+
             @NotBlank
             private String clientSecret;
         }
     }
-    
+
     @Data
     public static class PasswordConfig {
         @Min(6)
         @Max(128)
         private int minLength = 8;
-        
+
         private boolean requireSpecialChars = true;
         private boolean requireNumbers = true;
         private boolean requireUppercase = true;
@@ -4961,47 +4779,47 @@ package org.gripday.gatewayservice.config;
 @Validated
 @Data
 public class GatewayConfigurationProperties {
-    
+
     @Valid
     private CorsConfig cors = new CorsConfig();
-    
+
     @Valid
     private RateLimitingConfig rateLimiting = new RateLimitingConfig();
-    
+
     @Valid
     private CircuitBreakerConfig circuitBreaker = new CircuitBreakerConfig();
-    
+
     @Data
     public static class CorsConfig {
         @NotEmpty
         private List<String> allowedOrigins = new ArrayList<>();
-        
+
         @Min(0)
         @Max(86400)
         private long maxAge = 3600;
-        
+
         private boolean allowCredentials = true;
     }
-    
+
     @Data
     public static class RateLimitingConfig {
         @Min(1)
         @Max(10000)
         private int defaultRequestsPerMinute = 100;
-        
+
         @Min(1)
         private int burstCapacity = 200;
-        
+
         @NotBlank
         private String redisKeyPrefix = "rate_limit";
     }
-    
+
     @Data
     public static class CircuitBreakerConfig {
         @Min(1)
         @Max(100)
         private int failureThreshold = 5;
-        
+
         @NotNull
         private Duration timeoutDuration = Duration.ofSeconds(30);
     }
@@ -5011,12 +4829,13 @@ public class GatewayConfigurationProperties {
 ### Configuration Security
 
 **Sensitive Data Handling:**
+
 ```yaml
 # Use environment variables for sensitive data
 gripday:
   auth:
     jwt:
-      secret: ${JWT_SECRET}  # Never hardcode secrets
+      secret: ${JWT_SECRET} # Never hardcode secrets
     oauth2:
       providers:
         google:
@@ -5030,59 +4849,57 @@ gripday:
 ```
 
 **Configuration Encryption (Optional):**
+
 ```yaml
 # Using Spring Cloud Config encryption
 gripday:
   auth:
     jwt:
-      secret: '{cipher}AQA...'  # Encrypted value
+      secret: "{cipher}AQA..." # Encrypted value
 ```
 
 ### Configuration Testing
 
 **Configuration Properties Testing:**
+
 ```java
 @SpringBootTest
-@TestPropertySource(properties = {
-    "gripday.auth.jwt.secret=test-secret",
-    "gripday.auth.jwt.expiration=3600",
-    "gripday.gateway.cors.allowed-origins[0]=http://localhost:3000"
-})
+@TestPropertySource(properties = { "gripday.auth.jwt.secret=test-secret", "gripday.auth.jwt.expiration=3600", "gripday.gateway.cors.allowed-origins[0]=http://localhost:3000" })
 class ConfigurationPropertiesTest {
-    
-    @Autowired
-    private AuthConfigurationProperties authConfig;
-    
-    @Autowired
-    private GatewayConfigurationProperties gatewayConfig;
-    
-    @Test
-    void shouldLoadAuthConfiguration() {
-        assertThat(authConfig.getJwt().getSecret()).isEqualTo("test-secret");
-        assertThat(authConfig.getJwt().getExpiration()).isEqualTo(3600);
-    }
-    
-    @Test
-    void shouldLoadGatewayConfiguration() {
-        assertThat(gatewayConfig.getCors().getAllowedOrigins())
-            .contains("http://localhost:3000");
-    }
-    
-    @Test
-    void shouldValidateConfigurationProperties() {
-        // Test validation constraints
-        assertThatThrownBy(() -> {
-            var invalidConfig = new AuthConfigurationProperties.JwtConfig();
-            invalidConfig.setSecret("");  // Should fail @NotBlank validation
-            invalidConfig.setExpiration(30);  // Should fail @Min(60) validation
-        });
-    }
+
+  @Autowired
+  private AuthConfigurationProperties authConfig;
+
+  @Autowired
+  private GatewayConfigurationProperties gatewayConfig;
+
+  @Test
+  void shouldLoadAuthConfiguration() {
+    assertThat(authConfig.getJwt().getSecret()).isEqualTo("test-secret");
+    assertThat(authConfig.getJwt().getExpiration()).isEqualTo(3600);
+  }
+
+  @Test
+  void shouldLoadGatewayConfiguration() {
+    assertThat(gatewayConfig.getCors().getAllowedOrigins()).contains("http://localhost:3000");
+  }
+
+  @Test
+  void shouldValidateConfigurationProperties() {
+    // Test validation constraints
+    assertThatThrownBy(() -> {
+      var invalidConfig = new AuthConfigurationProperties.JwtConfig();
+      invalidConfig.setSecret(""); // Should fail @NotBlank validation
+      invalidConfig.setExpiration(30); // Should fail @Min(60) validation
+    });
+  }
 }
 ```
 
 ### Migration from Properties Files
 
 **Conversion Guidelines:**
+
 ```bash
 # Old .properties format (NOT ALLOWED)
 gripday.auth.jwt.secret=my-secret
@@ -5102,11 +4919,12 @@ gripday:
 ```
 
 **Automated Conversion Tool (Optional):**
-```java
+
+````java
 // Utility to help convert existing .properties to .yml
 @Component
 public class PropertiesToYamlConverter {
-    
+
     public void convertPropertiesFile(Path propertiesFile, Path yamlFile) {
         Properties props = new Properties();
         // Load properties and convert to YAML structure
@@ -5136,16 +4954,16 @@ public class PropertiesToYamlConverter {
 ```java
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    
+
     @Mock
     private UserRepository userRepository;
-    
+
     @Mock
     private PasswordEncoder passwordEncoder;
-    
+
     @InjectMocks
     private UserService userService;
-    
+
     @Test
     void shouldCreateUserSuccessfully() {
         // Given - Simple test data setup
@@ -5156,20 +4974,20 @@ class UserServiceTest {
             .email("john@example.com")
             .enabled(true)
             .build();
-        
+
         when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        
+
         // When - Test the happy path
         var result = userService.createUser(createRequest);
-        
+
         // Then - Straightforward assertions
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getUsername()).isEqualTo("john.doe");
         assertThat(result.getEmail()).isEqualTo("john@example.com");
         assertThat(result.isEnabled()).isTrue();
     }
-    
+
     @Test
     void shouldAuthenticateUserSuccessfully() {
         // Given
@@ -5180,110 +4998,94 @@ class UserServiceTest {
             .passwordHash("encoded-password")
             .enabled(true)
             .build();
-        
+
         when(userRepository.findByUsernameOrEmail("john.doe", "john.doe"))
             .thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encoded-password"))
             .thenReturn(true);
-        
+
         // When
         var result = userService.authenticateUser(loginRequest);
-        
+
         // Then
         assertThat(result.getUsername()).isEqualTo("john.doe");
         assertThat(result.getId()).isEqualTo(1L);
     }
 }
-```
+````
 
 **Integration Testing Guidelines:**
+
 ```java
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserControllerIntegrationTest {
-    
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
-        .withDatabaseName("test_db")
-        .withUsername("test")
-        .withPassword("test");
-    
-    @Autowired
-    private TestRestTemplate restTemplate;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Test
-    void shouldCreateUserViaApi() {
-        // Given
-        var request = new CreateUserRequest("jane.doe", "jane@example.com", "password123");
-        
-        // When
-        var response = restTemplate.postForEntity("/api/v1/users", request, UserDto.class);
-        
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody().getUsername()).isEqualTo("jane.doe");
-        assertThat(response.getBody().getEmail()).isEqualTo("jane@example.com");
-        
-        // Verify in database
-        var savedUser = userRepository.findByUsername("jane.doe");
-        assertThat(savedUser).isPresent();
-        assertThat(savedUser.get().getEmail()).isEqualTo("jane@example.com");
-    }
-    
-    @Test
-    void shouldLoginUserViaApi() {
-        // Given - Create user first
-        var user = User.builder()
-            .username("test.user")
-            .email("test@example.com")
-            .passwordHash("encoded-password")
-            .enabled(true)
-            .build();
-        userRepository.save(user);
-        
-        var loginRequest = new LoginRequest("test.user", "password123");
-        
-        // When
-        var response = restTemplate.postForEntity("/api/v1/auth/login", loginRequest, TokenResponse.class);
-        
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getAccessToken()).isNotNull();
-        assertThat(response.getBody().getUser().getUsername()).isEqualTo("test.user");
-    }
+
+  @Container
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15").withDatabaseName("test_db").withUsername("test").withPassword("test");
+
+  @Autowired
+  private TestRestTemplate restTemplate;
+
+  @Autowired
+  private UserRepository userRepository;
+
+  @Test
+  void shouldCreateUserViaApi() {
+    // Given
+    var request = new CreateUserRequest("jane.doe", "jane@example.com", "password123");
+
+    // When
+    var response = restTemplate.postForEntity("/api/v1/users", request, UserDto.class);
+
+    // Then
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(response.getBody().getUsername()).isEqualTo("jane.doe");
+    assertThat(response.getBody().getEmail()).isEqualTo("jane@example.com");
+
+    // Verify in database
+    var savedUser = userRepository.findByUsername("jane.doe");
+    assertThat(savedUser).isPresent();
+    assertThat(savedUser.get().getEmail()).isEqualTo("jane@example.com");
+  }
+
+  @Test
+  void shouldLoginUserViaApi() {
+    // Given - Create user first
+    var user = User.builder().username("test.user").email("test@example.com").passwordHash("encoded-password").enabled(true).build();
+    userRepository.save(user);
+
+    var loginRequest = new LoginRequest("test.user", "password123");
+
+    // When
+    var response = restTemplate.postForEntity("/api/v1/auth/login", loginRequest, TokenResponse.class);
+
+    // Then
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody().getAccessToken()).isNotNull();
+    assertThat(response.getBody().getUser().getUsername()).isEqualTo("test.user");
+  }
 }
 ```
 
 **Test Data Management:**
+
 ```java
 @Component
 public class TestDataBuilder {
-    
-    public static User createValidUser() {
-        return User.builder()
-            .username("test.user")
-            .email("test@example.com")
-            .passwordHash("encoded-password")
-            .enabled(true)
-            .createdAt(Instant.now())
-            .build();
-    }
-    
-    public static CreateUserRequest createValidUserRequest() {
-        return new CreateUserRequest(
-            "new.user",
-            "new@example.com",
-            "password123"
-        );
-    }
-    
-    public static LoginRequest createValidLoginRequest() {
-        return new LoginRequest("test.user", "password123");
-    }
+
+  public static User createValidUser() {
+    return User.builder().username("test.user").email("test@example.com").passwordHash("encoded-password").enabled(true).createdAt(Instant.now()).build();
+  }
+
+  public static CreateUserRequest createValidUserRequest() {
+    return new CreateUserRequest("new.user", "new@example.com", "password123");
+  }
+
+  public static LoginRequest createValidLoginRequest() {
+    return new LoginRequest("test.user", "password123");
+  }
 }
 ```
 
@@ -5292,6 +5094,7 @@ public class TestDataBuilder {
 **Design Rationale:** Documentation approach that provides essential information in minimal, focused content without verbose explanations or excessive detail. This approach enables developers to quickly understand and use the platform while maintaining coverage of core functionality.
 
 **Documentation Principles:**
+
 - Provide essential information in minimal, focused content
 - Use bullet points, code examples, and brief descriptions over lengthy prose
 - Focus on actionable information and practical usage examples
@@ -5300,6 +5103,7 @@ public class TestDataBuilder {
 - Provide quick reference guides and essential configuration examples
 
 **Service Documentation Structure:**
+
 ```
 docs/
 ├── README.md                    # Quick start and overview
@@ -5318,7 +5122,8 @@ docs/
 ```
 
 **README.md Template:**
-```markdown
+
+````markdown
 # Auth Service
 
 JWT-based authentication and user management microservice.
@@ -5332,6 +5137,7 @@ docker compose up -d postgres redis
 # Run service
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
+````
 
 ## API Endpoints
 
@@ -5343,6 +5149,7 @@ docker compose up -d postgres redis
 ## Configuration
 
 Set environment variables:
+
 - `AUTH_DATABASE_URL` - PostgreSQL connection
 - `REDIS_HOST` - Redis server
 - `JWT_SECRET` - JWT signing key
@@ -5352,7 +5159,8 @@ Set environment variables:
 - [API Reference](docs/api/)
 - [Architecture](docs/architecture/)
 - [Deployment](docs/deployment/)
-```
+
+````
 
 **API Documentation Template:**
 ```markdown
@@ -5368,9 +5176,10 @@ Content-Type: application/json
   "username": "john.doe",
   "password": "password123"
 }
-```
+````
 
 **Response:**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
@@ -5387,6 +5196,7 @@ Content-Type: application/json
 ```
 
 **Errors:**
+
 - `401` - Invalid credentials
 - `429` - Rate limit exceeded
 
@@ -5404,7 +5214,8 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created` with user details
-```
+
+````
 
 **Architecture Documentation Template:**
 ```markdown
@@ -5429,7 +5240,7 @@ Content-Type: application/json
   "department": "engineering",
   "organization_id": "org-123"
 }
-```
+````
 
 ## Database Schema
 
@@ -5450,7 +5261,8 @@ CREATE TABLE authorities (
     name VARCHAR(50) UNIQUE NOT NULL
 );
 ```
-```
+
+````
 
 **Deployment Documentation Template:**
 ```markdown
@@ -5468,9 +5280,10 @@ CREATE TABLE authorities (
 1. **Start dependencies:**
    ```bash
    docker compose up -d postgres redis
-   ```
+````
 
 2. **Run service:**
+
    ```bash
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
    ```
@@ -5483,6 +5296,7 @@ CREATE TABLE authorities (
 ## Configuration
 
 Create `application-local.yml`:
+
 ```yaml
 spring:
   datasource:
@@ -5509,7 +5323,8 @@ gripday:
 # Run with coverage
 ./mvnw test jacoco:report
 ```
-```
+
+````
 
 ## Environment Configuration Strategy
 
@@ -5532,7 +5347,7 @@ spring:
     hikari:
       maximum-pool-size: 5
       minimum-idle: 2
-  
+
   data:
     redis:
       host: localhost
@@ -5572,18 +5387,19 @@ gripday:
     secret: local-development-secret-key-change-in-production
     expiration: 900000  # 15 minutes
     refresh-expiration: 604800000  # 7 days
-  
+
   rate-limiting:
     enabled: true
     requests-per-minute: 1000
-    
+
   observability:
     tracing:
       enabled: true
       sample-rate: 1.0
-```
+````
 
 **Gateway Service Local Development Profile (local)**
+
 ```yaml
 # gateway-service/application-local.yml
 spring:
@@ -5596,7 +5412,7 @@ spring:
     hikari:
       maximum-pool-size: 5
       minimum-idle: 2
-  
+
   data:
     redis:
       host: localhost
@@ -5606,6 +5422,7 @@ spring:
 ```
 
 **Auth Service Staging Environment Profile (staging)**
+
 ```yaml
 # auth-service/application-staging.yml
 spring:
@@ -5621,7 +5438,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
+
   data:
     redis:
       host: ${REDIS_HOST:staging-redis}
@@ -5662,11 +5479,11 @@ gripday:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:900000}
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
-  
+
   rate-limiting:
     enabled: true
     requests-per-minute: ${RATE_LIMIT_RPM:500}
-    
+
   observability:
     tracing:
       enabled: true
@@ -5674,6 +5491,7 @@ gripday:
 ```
 
 **Gateway Service Staging Environment Profile (staging)**
+
 ```yaml
 # gateway-service/application-staging.yml
 spring:
@@ -5686,7 +5504,7 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 3
-  
+
   data:
     redis:
       host: ${GATEWAY_REDIS_HOST:staging-gateway-redis}
@@ -5696,7 +5514,8 @@ spring:
 ```
 
 **Auth Service Production Environment Profile (production)**
-```yaml
+
+````yaml
 # auth-service/application-production.yml
 spring:
   profiles:
@@ -5729,7 +5548,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
+
   data:
     redis:
       host: ${GATEWAY_REDIS_HOST}
@@ -5770,33 +5589,34 @@ gripday:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:900000}
     refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
-  
+
   rate-limiting:
     enabled: true
     requests-per-minute: ${RATE_LIMIT_RPM:100}
-    
+
   observability:
     tracing:
       enabled: ${TRACING_ENABLED:true}
       sample-rate: ${TRACING_SAMPLE_RATE:0.01}
-```
+````
 
 ### Minimal Maven Configuration
 
 **Parent POM Configuration:**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>org.gripday</groupId>
     <artifactId>microservices-platform</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <properties>
         <java.version>21</java.version>
         <spring-boot.version>3.5.6</spring-boot.version>
@@ -5805,14 +5625,14 @@ gripday:
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
     <modules>
         <module>gripday-auth-service</module>
         <module>gripday-gateway-service</module>
     </modules>
-    
+
     <!-- No Maven profiles - rely on Spring profiles instead -->
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -5839,6 +5659,7 @@ gripday:
 **Environment Variables by Profile:**
 
 **Local Development:**
+
 ```bash
 # auth-service/.env.local
 SPRING_PROFILES_ACTIVE=local
@@ -5858,6 +5679,7 @@ GATEWAY_REDIS_DATABASE=1
 ```
 
 **Staging Environment:**
+
 ```bash
 # auth-service/.env.staging
 SPRING_PROFILES_ACTIVE=staging
@@ -5881,6 +5703,7 @@ TRACING_SAMPLE_RATE=0.1
 ```
 
 **Production Environment:**
+
 ```bash
 # auth-service/.env.production
 SPRING_PROFILES_ACTIVE=production
@@ -5915,6 +5738,7 @@ TRACING_SAMPLE_RATE=0.01
 **Design Rationale:** All deployment and operational scripts are designed for POSIX-compliant systems (Unix, Linux, macOS) to ensure broad compatibility and consistent behavior across development, staging, and production environments. This approach eliminates platform-specific deployment issues and provides a unified operational experience.
 
 **POSIX Compatibility Requirements:**
+
 - All shell scripts use `#!/bin/bash` shebang
 - Scripts include `set -euo pipefail` for robust error handling
 - Commands and utilities are POSIX-compliant
@@ -5924,6 +5748,7 @@ TRACING_SAMPLE_RATE=0.01
 **Deployment Scripts for POSIX Systems (Unix/Mac):**
 
 **Local Development Setup Script:**
+
 ```bash
 #!/bin/bash
 # scripts/setup-local.sh
@@ -5967,6 +5792,7 @@ echo "Grafana: http://localhost:3000"
 ```
 
 **Individual Service Management Scripts:**
+
 ```bash
 #!/bin/bash
 # scripts/start-auth-service.sh
@@ -6000,6 +5826,7 @@ echo "Health check: http://localhost:8080/actuator/health"
 ```
 
 **Staging Deployment Script:**
+
 ```bash
 #!/bin/bash
 # scripts/deploy-staging.sh
@@ -6073,6 +5900,7 @@ cd gripday-gateway-service && docker compose -f docker-compose.staging.yml ps &&
 ```
 
 **Production Deployment Script:**
+
 ```bash
 #!/bin/bash
 # scripts/deploy-production.sh
@@ -6135,6 +5963,7 @@ docker compose -f docker-compose.production.yml ps
 ```
 
 **Service Health Check Script:**
+
 ```bash
 #!/bin/bash
 # scripts/wait-for-services.sh
@@ -6146,20 +5975,20 @@ check_service() {
     local url=$2
     local max_attempts=30
     local attempt=1
-    
+
     echo "Checking $service_name at $url..."
-    
+
     while [[ $attempt -le $max_attempts ]]; do
         if curl -f -s "$url/actuator/health" > /dev/null 2>&1; then
             echo "$service_name is ready!"
             return 0
         fi
-        
+
         echo "Attempt $attempt/$max_attempts: $service_name not ready yet..."
         sleep 2
         ((attempt++))
     done
-    
+
     echo "ERROR: $service_name failed to start within expected time"
     return 1
 }
@@ -6191,13 +6020,14 @@ echo "Gateway Redis is ready!"
 # Check Auth Service
 check_service "Auth Service" "http://localhost:8081"
 
-# Check Gateway Service  
+# Check Gateway Service
 check_service "Gateway Service" "http://localhost:8080"
 
 echo "All services are ready!"
 ```
 
 **Environment Variable Loading Script:**
+
 ```bash
 #!/bin/bash
 # scripts/load-env.sh
@@ -6233,6 +6063,7 @@ done
 ```
 
 **Maven Build Script:**
+
 ```bash
 #!/bin/bash
 # scripts/build.sh
@@ -6277,58 +6108,64 @@ echo "Build completed successfully for $ENVIRONMENT environment!"
 ### Configuration Management Best Practices
 
 **1. Externalized Configuration:**
+
 - All environment-specific values use environment variables
 - Default values provided in application.yml for development
 - Sensitive values (passwords, secrets) never committed to version control
 - POSIX shell scripts for environment management and deployment
 
 **2. Profile Activation:**
+
 - Single environment variable `SPRING_PROFILES_ACTIVE` controls configuration
 - No Maven profile switching required for different environments
 - Runtime profile switching through environment variables
 - Shell scripts for automated environment setup and validation
 
 **3. Configuration Validation:**
+
 ```java
 @Configuration
 @ConfigurationProperties(prefix = "gripday")
 @Validated
 public class GripdayProperties {
-    
-    @NotBlank
-    private String jwtSecret;
-    
-    @Min(60000) // Minimum 1 minute
-    private long jwtExpiration = 900000; // 15 minutes default
-    
-    @Min(3600000) // Minimum 1 hour
-    private long jwtRefreshExpiration = 604800000; // 7 days default
-    
+
+  @NotBlank
+  private String jwtSecret;
+
+  @Min(60000) // Minimum 1 minute
+  private long jwtExpiration = 900000; // 15 minutes default
+
+  @Min(3600000) // Minimum 1 hour
+  private long jwtRefreshExpiration = 604800000; // 7 days default
+
+  @Valid
+  private RateLimiting rateLimiting = new RateLimiting();
+
+  @Valid
+  private Observability observability = new Observability();
+
+  public static class RateLimiting {
+
+    private boolean enabled = true;
+
+    @Min(1)
+    private int requestsPerMinute = 100;
+  }
+
+  public static class Observability {
+
     @Valid
-    private RateLimiting rateLimiting = new RateLimiting();
-    
-    @Valid
-    private Observability observability = new Observability();
-    
-    public static class RateLimiting {
-        private boolean enabled = true;
-        
-        @Min(1)
-        private int requestsPerMinute = 100;
+    private Tracing tracing = new Tracing();
+
+    public static class Tracing {
+
+      private boolean enabled = true;
+
+      @DecimalMin("0.0")
+      @DecimalMax("1.0")
+      private double sampleRate = 0.01;
     }
-    
-    public static class Observability {
-        @Valid
-        private Tracing tracing = new Tracing();
-        
-        public static class Tracing {
-            private boolean enabled = true;
-            
-            @DecimalMin("0.0")
-            @DecimalMax("1.0")
-            private double sampleRate = 0.01;
-        }
-    }
+  }
 }
 ```
 
@@ -6339,6 +6176,7 @@ public class GripdayProperties {
 **Environment-Specific Structured Logging:** The platform implements structured logging with different configurations for development, staging, and production environments. This approach optimizes developer experience during development while providing machine-readable logs for production analysis and monitoring.
 
 **Key Benefits:**
+
 - **Development Efficiency**: Human-readable logs with detailed debugging information
 - **Production Analysis**: JSON-structured logs for efficient parsing and analysis
 - **Correlation Tracking**: Request correlation IDs propagated through all microservices
@@ -6348,6 +6186,7 @@ public class GripdayProperties {
 ### Environment-Specific Logging Configuration
 
 **Local Development Logging Configuration:**
+
 ```yaml
 # auth-service/application-local.yml
 logging:
@@ -6379,6 +6218,7 @@ logging:
 ```
 
 **Staging Environment Logging Configuration:**
+
 ```yaml
 # auth-service/application-staging.yml
 logging:
@@ -6405,6 +6245,7 @@ logging:
 ```
 
 **Production Environment Logging Configuration:**
+
 ```yaml
 # auth-service/application-production.yml
 logging:
@@ -6433,6 +6274,7 @@ logging:
 ### Logback Configuration for Structured Logging
 
 **Logback Spring Configuration (logback-spring.xml):**
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
@@ -6443,7 +6285,7 @@ logging:
                 <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
-        
+
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>logs/${spring.application.name}-local.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -6455,13 +6297,13 @@ logging:
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{50} - %msg%n</pattern>
             </encoder>
         </appender>
-        
+
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>
-    
+
     <springProfile name="staging,production">
         <!-- Staging/Production: JSON structured logging -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -6477,7 +6319,7 @@ logging:
                 </providers>
             </encoder>
         </appender>
-        
+
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>logs/${spring.application.name}.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -6506,7 +6348,7 @@ logging:
                 </providers>
             </encoder>
         </appender>
-        
+
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
@@ -6518,147 +6360,142 @@ logging:
 ### Correlation ID Implementation
 
 **Correlation ID Filter for Gateway Service:**
+
 ```java
 package org.gripday.gatewayservice.filter;
 
 @Component
 public class CorrelationIdGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
-    
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-    private static final String CORRELATION_ID_MDC_KEY = "correlationId";
-    
-    @Override
-    public GatewayFilter apply(Object config) {
-        return (exchange, chain) -> {
-            ServerHttpRequest request = exchange.getRequest();
-            
-            // Get or generate correlation ID
-            String correlationId = request.getHeaders().getFirst(CORRELATION_ID_HEADER);
-            if (correlationId == null || correlationId.isEmpty()) {
-                correlationId = UUID.randomUUID().toString();
-            }
-            
-            // Add to MDC for logging
-            MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
-            
-            // Add to request headers for downstream services
-            ServerHttpRequest modifiedRequest = request.mutate()
-                .header(CORRELATION_ID_HEADER, correlationId)
-                .build();
-            
-            // Add to response headers
-            ServerHttpResponse response = exchange.getResponse();
-            response.getHeaders().add(CORRELATION_ID_HEADER, correlationId);
-            
-            return chain.filter(exchange.mutate().request(modifiedRequest).build())
-                .doFinally(signalType -> MDC.clear());
-        };
-    }
+
+  private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
+  private static final String CORRELATION_ID_MDC_KEY = "correlationId";
+
+  @Override
+  public GatewayFilter apply(Object config) {
+    return (exchange, chain) -> {
+      ServerHttpRequest request = exchange.getRequest();
+
+      // Get or generate correlation ID
+      String correlationId = request.getHeaders().getFirst(CORRELATION_ID_HEADER);
+      if (correlationId == null || correlationId.isEmpty()) {
+        correlationId = UUID.randomUUID().toString();
+      }
+
+      // Add to MDC for logging
+      MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
+
+      // Add to request headers for downstream services
+      ServerHttpRequest modifiedRequest = request.mutate().header(CORRELATION_ID_HEADER, correlationId).build();
+
+      // Add to response headers
+      ServerHttpResponse response = exchange.getResponse();
+      response.getHeaders().add(CORRELATION_ID_HEADER, correlationId);
+
+      return chain.filter(exchange.mutate().request(modifiedRequest).build()).doFinally((signalType) -> MDC.clear());
+    };
+  }
 }
 ```
 
 **Correlation ID Filter for Auth Service:**
+
 ```java
 package org.gripday.authservice.infrastructure.filter;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorrelationIdFilter implements Filter {
-    
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-    private static final String CORRELATION_ID_MDC_KEY = "correlationId";
-    
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        
-        // Get or generate correlation ID
-        String correlationId = httpRequest.getHeader(CORRELATION_ID_HEADER);
-        if (correlationId == null || correlationId.isEmpty()) {
-            correlationId = UUID.randomUUID().toString();
-        }
-        
-        // Add to MDC for logging
-        MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
-        
-        // Add to response headers
-        httpResponse.setHeader(CORRELATION_ID_HEADER, correlationId);
-        
-        try {
-            chain.doFilter(request, response);
-        } finally {
-            MDC.clear();
-        }
+
+  private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
+  private static final String CORRELATION_ID_MDC_KEY = "correlationId";
+
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    HttpServletRequest httpRequest = (HttpServletRequest) request;
+    HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+    // Get or generate correlation ID
+    String correlationId = httpRequest.getHeader(CORRELATION_ID_HEADER);
+    if (correlationId == null || correlationId.isEmpty()) {
+      correlationId = UUID.randomUUID().toString();
     }
+
+    // Add to MDC for logging
+    MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
+
+    // Add to response headers
+    httpResponse.setHeader(CORRELATION_ID_HEADER, correlationId);
+
+    try {
+      chain.doFilter(request, response);
+    } finally {
+      MDC.clear();
+    }
+  }
 }
 ```
 
 ### Security Audit Logging
 
 **Authentication Audit Logger:**
+
 ```java
 package org.gripday.authservice.domain.service;
 
 @Component
 public class SecurityAuditLogger {
-    
-    private static final Logger auditLogger = LoggerFactory.getLogger("SECURITY_AUDIT");
-    
-    public void logAuthenticationAttempt(String username, String ipAddress, boolean success) {
-        if (success) {
-            auditLogger.info("Authentication successful - username: {}, ip: {}, correlationId: {}", 
-                username, ipAddress, MDC.get("correlationId"));
-        } else {
-            auditLogger.warn("Authentication failed - username: {}, ip: {}, correlationId: {}", 
-                username, ipAddress, MDC.get("correlationId"));
-        }
+
+  private static final Logger auditLogger = LoggerFactory.getLogger("SECURITY_AUDIT");
+
+  public void logAuthenticationAttempt(String username, String ipAddress, boolean success) {
+    if (success) {
+      auditLogger.info("Authentication successful - username: {}, ip: {}, correlationId: {}", username, ipAddress, MDC.get("correlationId"));
+    } else {
+      auditLogger.warn("Authentication failed - username: {}, ip: {}, correlationId: {}", username, ipAddress, MDC.get("correlationId"));
     }
-    
-    public void logUserManagementOperation(String operation, String targetUser, String adminUser) {
-        auditLogger.info("User management operation - operation: {}, targetUser: {}, adminUser: {}, correlationId: {}", 
-            operation, targetUser, adminUser, MDC.get("correlationId"));
-    }
-    
-    public void logRoleAssignment(String targetUser, String role, String adminUser, boolean granted) {
-        String action = granted ? "granted" : "revoked";
-        auditLogger.info("Role {} - targetUser: {}, role: {}, adminUser: {}, correlationId: {}", 
-            action, targetUser, role, adminUser, MDC.get("correlationId"));
-    }
-    
-    public void logSensitiveDataAccess(String dataType, String userId, String operation) {
-        auditLogger.info("Sensitive data access - dataType: {}, userId: {}, operation: {}, correlationId: {}", 
-            dataType, userId, operation, MDC.get("correlationId"));
-    }
+  }
+
+  public void logUserManagementOperation(String operation, String targetUser, String adminUser) {
+    auditLogger.info("User management operation - operation: {}, targetUser: {}, adminUser: {}, correlationId: {}", operation, targetUser, adminUser, MDC.get("correlationId"));
+  }
+
+  public void logRoleAssignment(String targetUser, String role, String adminUser, boolean granted) {
+    String action = granted ? "granted" : "revoked";
+    auditLogger.info("Role {} - targetUser: {}, role: {}, adminUser: {}, correlationId: {}", action, targetUser, role, adminUser, MDC.get("correlationId"));
+  }
+
+  public void logSensitiveDataAccess(String dataType, String userId, String operation) {
+    auditLogger.info("Sensitive data access - dataType: {}, userId: {}, operation: {}, correlationId: {}", dataType, userId, operation, MDC.get("correlationId"));
+  }
 }
 ```
 
 ### Request/Response Logging
 
 **Request Logging Configuration:**
+
 ```java
 package org.gripday.authservice.config;
 
 @Configuration
 public class RequestLoggingConfiguration {
-    
-    @Bean
-    @ConditionalOnProperty(name = "gripday.logging.request-response.enabled", havingValue = "true")
-    public CommonsRequestLoggingFilter requestLoggingFilter() {
-        CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
-        filter.setIncludeQueryString(true);
-        filter.setIncludePayload(true);
-        filter.setMaxPayloadLength(10000);
-        filter.setIncludeHeaders(false);
-        filter.setAfterMessagePrefix("REQUEST DATA: ");
-        return filter;
-    }
+
+  @Bean
+  @ConditionalOnProperty(name = "gripday.logging.request-response.enabled", havingValue = "true")
+  public CommonsRequestLoggingFilter requestLoggingFilter() {
+    CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
+    filter.setIncludeQueryString(true);
+    filter.setIncludePayload(true);
+    filter.setMaxPayloadLength(10000);
+    filter.setIncludeHeaders(false);
+    filter.setAfterMessagePrefix("REQUEST DATA: ");
+    return filter;
+  }
 }
 ```
 
 **Environment-Specific Request Logging:**
+
 ```yaml
 # Local Development
 gripday:
@@ -6686,6 +6523,7 @@ gripday:
 ### Log Aggregation with Loki
 
 **Promtail Configuration for Log Collection:**
+
 ```yaml
 # promtail-config.yml
 server:
@@ -6735,6 +6573,7 @@ scrape_configs:
 ### Maven Dependencies for Structured Logging
 
 **Required Dependencies:**
+
 ```xml
 <dependencies>
     <!-- Logback JSON encoder for structured logging -->
@@ -6743,13 +6582,13 @@ scrape_configs:
         <artifactId>logstash-logback-encoder</artifactId>
         <version>7.4</version>
     </dependency>
-    
+
     <!-- SLF4J MDC support -->
     <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
     </dependency>
-    
+
     <!-- Spring Boot Starter Logging (includes Logback) -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -6765,6 +6604,7 @@ scrape_configs:
 Each microservice has its own Docker Compose configuration and Dockerfile to ensure independent deployment and scaling. This approach provides better isolation, easier maintenance, and service-specific configuration management.
 
 **Auth Service Structure:**
+
 ```
 gripday-auth-service/
 ├── Dockerfile
@@ -6775,8 +6615,9 @@ gripday-auth-service/
 ```
 
 **Auth Service Docker Compose (docker-compose.yml):**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   auth-postgresql:
     image: postgres:15
@@ -6790,7 +6631,7 @@ services:
       - auth_postgres_data:/var/lib/postgresql/data
     networks:
       - auth-network
-  
+
   auth-service:
     build: .
     ports:
@@ -6816,6 +6657,7 @@ networks:
 ```
 
 **Gateway Service Structure:**
+
 ```
 gripday-gateway-service/
 ├── Dockerfile
@@ -6826,8 +6668,9 @@ gripday-gateway-service/
 ```
 
 **Gateway Service Docker Compose (docker-compose.yml):**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   gateway-postgresql:
     image: postgres:15
@@ -6841,7 +6684,7 @@ services:
       - gateway_postgres_data:/var/lib/postgresql/data
     networks:
       - gateway-network
-  
+
   gateway-redis:
     image: redis:7-alpine
     ports:
@@ -6850,7 +6693,7 @@ services:
       - gateway_redis_data:/data
     networks:
       - gateway-network
-  
+
   gateway-service:
     build: .
     ports:
@@ -6884,6 +6727,7 @@ networks:
 ```
 
 **Platform-Level Observability Stack:**
+
 ```
 platform-observability/
 ├── docker-compose.yml
@@ -6894,8 +6738,9 @@ platform-observability/
 ```
 
 **Observability Docker Compose:**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   prometheus:
     image: prom/prometheus
@@ -6904,7 +6749,7 @@ services:
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-  
+
   grafana:
     image: grafana/grafana
     ports:
@@ -6914,7 +6759,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./config/grafana:/etc/grafana/provisioning
-  
+
   loki:
     image: grafana/loki
     ports:
@@ -6930,6 +6775,7 @@ volumes:
 ```
 
 **Individual Service Benefits:**
+
 - Independent deployment and scaling per service
 - Service-specific environment configurations
 - Isolated dependency management
@@ -6939,16 +6785,19 @@ volumes:
 ### Observability Implementation
 
 **OpenTelemetry Configuration:**
+
 - Automatic instrumentation for Spring Boot applications
 - Custom spans for domain logic
 - Correlation IDs for request tracing
 
 **Metrics Collection:**
+
 - Application metrics: JVM, HTTP requests, database connections
 - Domain metrics: User registrations, authentication attempts
 - Infrastructure metrics: Pod resources, network traffic
 
 **Log Aggregation:**
+
 - Structured logging with JSON format
 - Centralized log collection with Promtail
 - Log correlation with trace IDs
@@ -6964,511 +6813,498 @@ The platform implements a multi-tenant architecture that provides complete isola
 ### Tenant Isolation Strategy
 
 **Database-Level Isolation:**
+
 ```java
 // Tenant-aware data source configuration
 @Configuration
 public class MultiTenantDataSourceConfiguration {
-    
-    @Bean
-    @Primary
-    public DataSource dataSource() {
-        return new TenantRoutingDataSource();
-    }
-    
-    @Bean
-    public MultiTenantConnectionProvider multiTenantConnectionProvider() {
-        return new SchemaBasedMultiTenantConnectionProvider();
-    }
-    
-    @Bean
-    public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
-        return new RequestBasedTenantIdentifierResolver();
-    }
+
+  @Bean
+  @Primary
+  public DataSource dataSource() {
+    return new TenantRoutingDataSource();
+  }
+
+  @Bean
+  public MultiTenantConnectionProvider multiTenantConnectionProvider() {
+    return new SchemaBasedMultiTenantConnectionProvider();
+  }
+
+  @Bean
+  public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
+    return new RequestBasedTenantIdentifierResolver();
+  }
 }
 
 // Schema-based tenant isolation
 public class SchemaBasedMultiTenantConnectionProvider implements MultiTenantConnectionProvider {
-    
-    @Override
-    public Connection getConnection(String tenantIdentifier) throws SQLException {
-        var connection = dataSource.getConnection();
-        connection.createStatement().execute("SET search_path TO " + tenantIdentifier);
-        return connection;
-    }
+
+  @Override
+  public Connection getConnection(String tenantIdentifier) throws SQLException {
+    var connection = dataSource.getConnection();
+    connection.createStatement().execute("SET search_path TO " + tenantIdentifier);
+    return connection;
+  }
 }
 
 // Request-based tenant resolution
 @Component
 public class RequestBasedTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
-    
-    @Override
-    public String resolveCurrentTenantIdentifier() {
-        var tenantId = TenantContext.getCurrentTenantId();
-        return tenantId != null ? tenantId : "public";
-    }
+
+  @Override
+  public String resolveCurrentTenantIdentifier() {
+    var tenantId = TenantContext.getCurrentTenantId();
+    return tenantId != null ? tenantId : "public";
+  }
 }
 ```
 
 **Tenant Context Management:**
+
 ```java
 // Thread-local tenant context
 public class TenantContext {
-    private static final ThreadLocal<String> TENANT_ID = new ThreadLocal<>();
-    private static final ThreadLocal<TenantMetadata> TENANT_METADATA = new ThreadLocal<>();
-    
-    public static void setTenantId(String tenantId) {
-        TENANT_ID.set(tenantId);
-    }
-    
-    public static String getCurrentTenantId() {
-        return TENANT_ID.get();
-    }
-    
-    public static void setTenantMetadata(TenantMetadata metadata) {
-        TENANT_METADATA.set(metadata);
-    }
-    
-    public static TenantMetadata getCurrentTenantMetadata() {
-        return TENANT_METADATA.get();
-    }
-    
-    public static void clear() {
-        TENANT_ID.remove();
-        TENANT_METADATA.remove();
-    }
+
+  private static final ThreadLocal<String> TENANT_ID = new ThreadLocal<>();
+  private static final ThreadLocal<TenantMetadata> TENANT_METADATA = new ThreadLocal<>();
+
+  public static void setTenantId(String tenantId) {
+    TENANT_ID.set(tenantId);
+  }
+
+  public static String getCurrentTenantId() {
+    return TENANT_ID.get();
+  }
+
+  public static void setTenantMetadata(TenantMetadata metadata) {
+    TENANT_METADATA.set(metadata);
+  }
+
+  public static TenantMetadata getCurrentTenantMetadata() {
+    return TENANT_METADATA.get();
+  }
+
+  public static void clear() {
+    TENANT_ID.remove();
+    TENANT_METADATA.remove();
+  }
 }
 
 // Tenant metadata record
 public record TenantMetadata(
-    String tenantId,
-    String organizationName,
-    String subscriptionTier,
-    Map<String, Object> configuration,
-    Set<String> enabledFeatures,
-    ResourceQuotas quotas,
-    Instant createdAt,
-    Instant lastActiveAt
+  String tenantId,
+  String organizationName,
+  String subscriptionTier,
+  Map<String, Object> configuration,
+  Set<String> enabledFeatures,
+  ResourceQuotas quotas,
+  Instant createdAt,
+  Instant lastActiveAt
 ) {}
 
 // Resource quotas record
-public record ResourceQuotas(
-    int maxUsers,
-    int maxApiCallsPerMinute,
-    long maxStorageBytes,
-    int maxConcurrentSessions,
-    Map<String, Integer> customLimits
-) {}
+public record ResourceQuotas(int maxUsers, int maxApiCallsPerMinute, long maxStorageBytes, int maxConcurrentSessions, Map<String, Integer> customLimits) {}
 ```
 
 ### JWT-Based Tenant Propagation
 
 **Enhanced JWT Claims with Tenant Information:**
+
 ```java
 // Tenant-aware JWT claims
 public record TenantAwareUserContext(
-    Long userId,
-    String username,
-    String email,
-    Set<String> roles,
-    Set<String> permissions,
-    String department,
-    String tenantId,                    // Tenant identifier
-    String organizationName,            // Organization display name
-    String subscriptionTier,            // Subscription level
-    Set<String> enabledFeatures,        // Tenant-specific features
-    Map<String, Object> tenantConfig,   // Tenant configuration
-    Map<String, Object> customClaims
+  Long userId,
+  String username,
+  String email,
+  Set<String> roles,
+  Set<String> permissions,
+  String department,
+  String tenantId, // Tenant identifier
+  String organizationName, // Organization display name
+  String subscriptionTier, // Subscription level
+  Set<String> enabledFeatures, // Tenant-specific features
+  Map<String, Object> tenantConfig, // Tenant configuration
+  Map<String, Object> customClaims
 ) {
-    public boolean hasFeature(String feature) {
-        return enabledFeatures.contains(feature);
-    }
-    
-    public boolean isFeatureEnabled(String feature) {
-        return enabledFeatures.contains(feature);
-    }
-    
-    public <T> T getTenantConfig(String key, Class<T> type) {
-        return type.cast(tenantConfig.get(key));
-    }
+  public boolean hasFeature(String feature) {
+    return enabledFeatures.contains(feature);
+  }
+
+  public boolean isFeatureEnabled(String feature) {
+    return enabledFeatures.contains(feature);
+  }
+
+  public <T> T getTenantConfig(String key, Class<T> type) {
+    return type.cast(tenantConfig.get(key));
+  }
 }
 
 // JWT token service with tenant support
 @Service
 public class TenantAwareJwtService {
-    
-    public String generateToken(TenantAwareUserContext userContext) {
-        var claims = Jwts.claims().setSubject(userContext.userId().toString());
-        claims.put("username", userContext.username());
-        claims.put("email", userContext.email());
-        claims.put("roles", userContext.roles());
-        claims.put("permissions", userContext.permissions());
-        claims.put("tenant_id", userContext.tenantId());
-        claims.put("organization_name", userContext.organizationName());
-        claims.put("subscription_tier", userContext.subscriptionTier());
-        claims.put("enabled_features", userContext.enabledFeatures());
-        claims.put("tenant_config", userContext.tenantConfig());
-        claims.put("custom_claims", userContext.customClaims());
-        
-        return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
-            .signWith(SignatureAlgorithm.HS512, jwtSecret)
-            .compact();
-    }
-    
-    public TenantAwareUserContext extractUserContext(String token) {
-        var claims = Jwts.parser()
-            .setSigningKey(jwtSecret)
-            .parseClaimsJws(token)
-            .getBody();
-            
-        return new TenantAwareUserContext(
-            Long.parseLong(claims.getSubject()),
-            claims.get("username", String.class),
-            claims.get("email", String.class),
-            extractStringSet(claims.get("roles")),
-            extractStringSet(claims.get("permissions")),
-            claims.get("department", String.class),
-            claims.get("tenant_id", String.class),
-            claims.get("organization_name", String.class),
-            claims.get("subscription_tier", String.class),
-            extractStringSet(claims.get("enabled_features")),
-            extractMap(claims.get("tenant_config")),
-            extractMap(claims.get("custom_claims"))
-        );
-    }
+
+  public String generateToken(TenantAwareUserContext userContext) {
+    var claims = Jwts.claims().setSubject(userContext.userId().toString());
+    claims.put("username", userContext.username());
+    claims.put("email", userContext.email());
+    claims.put("roles", userContext.roles());
+    claims.put("permissions", userContext.permissions());
+    claims.put("tenant_id", userContext.tenantId());
+    claims.put("organization_name", userContext.organizationName());
+    claims.put("subscription_tier", userContext.subscriptionTier());
+    claims.put("enabled_features", userContext.enabledFeatures());
+    claims.put("tenant_config", userContext.tenantConfig());
+    claims.put("custom_claims", userContext.customClaims());
+
+    return Jwts.builder()
+      .setClaims(claims)
+      .setIssuedAt(new Date())
+      .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+      .signWith(SignatureAlgorithm.HS512, jwtSecret)
+      .compact();
+  }
+
+  public TenantAwareUserContext extractUserContext(String token) {
+    var claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+
+    return new TenantAwareUserContext(
+      Long.parseLong(claims.getSubject()),
+      claims.get("username", String.class),
+      claims.get("email", String.class),
+      extractStringSet(claims.get("roles")),
+      extractStringSet(claims.get("permissions")),
+      claims.get("department", String.class),
+      claims.get("tenant_id", String.class),
+      claims.get("organization_name", String.class),
+      claims.get("subscription_tier", String.class),
+      extractStringSet(claims.get("enabled_features")),
+      extractMap(claims.get("tenant_config")),
+      extractMap(claims.get("custom_claims"))
+    );
+  }
 }
 ```
 
 ### Tenant-Aware Request Processing
 
 **Gateway Service Tenant Filtering:**
+
 ```java
 // Tenant extraction filter
 @Component
 public class TenantExtractionFilter implements GlobalFilter, Ordered {
-    
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        return extractTenantFromRequest(exchange)
-            .flatMap(tenantId -> {
-                TenantContext.setTenantId(tenantId);
-                return loadTenantMetadata(tenantId);
-            })
-            .flatMap(metadata -> {
-                TenantContext.setTenantMetadata(metadata);
-                return chain.filter(exchange);
-            })
-            .doFinally(signalType -> TenantContext.clear());
+
+  @Override
+  public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    return extractTenantFromRequest(exchange)
+      .flatMap((tenantId) -> {
+        TenantContext.setTenantId(tenantId);
+        return loadTenantMetadata(tenantId);
+      })
+      .flatMap((metadata) -> {
+        TenantContext.setTenantMetadata(metadata);
+        return chain.filter(exchange);
+      })
+      .doFinally((signalType) -> TenantContext.clear());
+  }
+
+  private Mono<String> extractTenantFromRequest(ServerWebExchange exchange) {
+    // Extract from JWT token
+    var authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+      var token = authHeader.substring(7);
+      var userContext = jwtService.extractUserContext(token);
+      return Mono.just(userContext.tenantId());
     }
-    
-    private Mono<String> extractTenantFromRequest(ServerWebExchange exchange) {
-        // Extract from JWT token
-        var authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            var token = authHeader.substring(7);
-            var userContext = jwtService.extractUserContext(token);
-            return Mono.just(userContext.tenantId());
-        }
-        
-        // Extract from custom header
-        var tenantHeader = exchange.getRequest().getHeaders().getFirst("X-Tenant-ID");
-        if (tenantHeader != null) {
-            return Mono.just(tenantHeader);
-        }
-        
-        // Extract from subdomain
-        var host = exchange.getRequest().getHeaders().getFirst("Host");
-        if (host != null && host.contains(".")) {
-            var subdomain = host.split("\\.")[0];
-            return tenantService.getTenantBySubdomain(subdomain)
-                .map(TenantMetadata::tenantId);
-        }
-        
-        return Mono.error(new TenantNotFoundException("No tenant identifier found"));
+
+    // Extract from custom header
+    var tenantHeader = exchange.getRequest().getHeaders().getFirst("X-Tenant-ID");
+    if (tenantHeader != null) {
+      return Mono.just(tenantHeader);
     }
-    
-    @Override
-    public int getOrder() {
-        return -100; // Execute early in filter chain
+
+    // Extract from subdomain
+    var host = exchange.getRequest().getHeaders().getFirst("Host");
+    if (host != null && host.contains(".")) {
+      var subdomain = host.split("\\.")[0];
+      return tenantService.getTenantBySubdomain(subdomain).map(TenantMetadata::tenantId);
     }
+
+    return Mono.error(new TenantNotFoundException("No tenant identifier found"));
+  }
+
+  @Override
+  public int getOrder() {
+    return -100; // Execute early in filter chain
+  }
 }
 
 // Tenant-aware rate limiting
 @Component
 public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
-    
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        var tenantId = TenantContext.getCurrentTenantId();
-        var metadata = TenantContext.getCurrentTenantMetadata();
-        
-        return checkRateLimit(tenantId, metadata.quotas())
-            .flatMap(allowed -> {
-                if (allowed) {
-                    return chain.filter(exchange);
-                } else {
-                    return handleRateLimitExceeded(exchange);
-                }
-            });
-    }
-    
-    private Mono<Boolean> checkRateLimit(String tenantId, ResourceQuotas quotas) {
-        var key = "rate_limit:" + tenantId;
-        var limit = quotas.maxApiCallsPerMinute();
-        
-        return redisTemplate.opsForValue()
-            .increment(key)
-            .flatMap(count -> {
-                if (count == 1) {
-                    return redisTemplate.expire(key, Duration.ofMinutes(1))
-                        .thenReturn(true);
-                }
-                return Mono.just(count <= limit);
-            });
-    }
+
+  @Override
+  public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    var tenantId = TenantContext.getCurrentTenantId();
+    var metadata = TenantContext.getCurrentTenantMetadata();
+
+    return checkRateLimit(tenantId, metadata.quotas()).flatMap((allowed) -> {
+      if (allowed) {
+        return chain.filter(exchange);
+      } else {
+        return handleRateLimitExceeded(exchange);
+      }
+    });
+  }
+
+  private Mono<Boolean> checkRateLimit(String tenantId, ResourceQuotas quotas) {
+    var key = "rate_limit:" + tenantId;
+    var limit = quotas.maxApiCallsPerMinute();
+
+    return redisTemplate
+      .opsForValue()
+      .increment(key)
+      .flatMap((count) -> {
+        if (count == 1) {
+          return redisTemplate.expire(key, Duration.ofMinutes(1)).thenReturn(true);
+        }
+        return Mono.just(count <= limit);
+      });
+  }
 }
 ```
 
 ### Tenant-Aware Data Access
 
 **Repository Layer with Tenant Filtering:**
+
 ```java
 // Base tenant-aware repository
 @NoRepositoryBean
 public interface TenantAwareRepository<T, ID> extends JpaRepository<T, ID> {
-    
-    @Query("SELECT e FROM #{#entityName} e WHERE e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
-    List<T> findAllForCurrentTenant();
-    
-    @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
-    Optional<T> findByIdForCurrentTenant(@Param("id") ID id);
-    
-    @Modifying
-    @Query("DELETE FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
-    void deleteByIdForCurrentTenant(@Param("id") ID id);
+  @Query("SELECT e FROM #{#entityName} e WHERE e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  List<T> findAllForCurrentTenant();
+
+  @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  Optional<T> findByIdForCurrentTenant(@Param("id") ID id);
+
+  @Modifying
+  @Query("DELETE FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  void deleteByIdForCurrentTenant(@Param("id") ID id);
 }
 
 // Tenant-aware entity base class
 @MappedSuperclass
 public abstract class TenantAwareEntity {
-    
-    @Column(name = "tenant_id", nullable = false, updatable = false)
-    private String tenantId;
-    
-    @PrePersist
-    public void prePersist() {
-        if (tenantId == null) {
-            tenantId = TenantContext.getCurrentTenantId();
-        }
+
+  @Column(name = "tenant_id", nullable = false, updatable = false)
+  private String tenantId;
+
+  @PrePersist
+  public void prePersist() {
+    if (tenantId == null) {
+      tenantId = TenantContext.getCurrentTenantId();
     }
-    
-    // Getters and setters
-    public String getTenantId() { return tenantId; }
-    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+  }
+
+  // Getters and setters
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId) {
+    this.tenantId = tenantId;
+  }
 }
 
 // User entity with tenant support
 @Entity
 @Table(name = "users")
 public class User extends TenantAwareEntity {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(unique = true, nullable = false)
-    private String username;
-    
-    @Column(unique = true, nullable = false)
-    private String email;
-    
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-    
-    @Enumerated(EnumType.STRING)
-    private UserStatus status;
-    
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_authorities",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "authority_id")
-    )
-    private Set<Authority> authorities = new HashSet<>();
-    
-    // Constructors, getters, setters
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(unique = true, nullable = false)
+  private String username;
+
+  @Column(unique = true, nullable = false)
+  private String email;
+
+  @Column(name = "password_hash", nullable = false)
+  private String passwordHash;
+
+  @Enumerated(EnumType.STRING)
+  private UserStatus status;
+
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
+  private Set<Authority> authorities = new HashSet<>();
+
+  // Constructors, getters, setters
 }
 
 // User repository with tenant awareness
 public interface UserRepository extends TenantAwareRepository<User, Long> {
-    
-    @Query("SELECT u FROM User u WHERE (u.username = :identifier OR u.email = :identifier) AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
-    Optional<User> findByUsernameOrEmailForCurrentTenant(@Param("identifier") String identifier);
-    
-    @Query("SELECT u FROM User u WHERE u.status = :status AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
-    List<User> findByStatusForCurrentTenant(@Param("status") UserStatus status);
+  @Query("SELECT u FROM User u WHERE (u.username = :identifier OR u.email = :identifier) AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  Optional<User> findByUsernameOrEmailForCurrentTenant(@Param("identifier") String identifier);
+
+  @Query("SELECT u FROM User u WHERE u.status = :status AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  List<User> findByStatusForCurrentTenant(@Param("status") UserStatus status);
 }
 ```
 
 ### Tenant-Aware Caching
 
 **Redis Namespace Isolation:**
+
 ```java
 // Tenant-aware cache configuration
 @Configuration
 @EnableCaching
 public class TenantAwareCacheConfiguration {
-    
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        var configuration = RedisCacheConfiguration.defaultCacheConfig()
-            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-            .computePrefixWith(cacheName -> TenantContext.getCurrentTenantId() + ":" + cacheName + ":");
-            
-        return RedisCacheManager.builder(connectionFactory)
-            .cacheDefaults(configuration)
-            .build();
-    }
-    
-    @Bean
-    public RedisTemplate<String, Object> tenantAwareRedisTemplate(RedisConnectionFactory connectionFactory) {
-        var template = new RedisTemplate<String, Object>();
-        template.setConnectionFactory(connectionFactory);
-        template.setKeySerializer(new TenantAwareKeySerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
-    }
+
+  @Bean
+  public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    var configuration = RedisCacheConfiguration.defaultCacheConfig()
+      .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+      .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+      .computePrefixWith((cacheName) -> TenantContext.getCurrentTenantId() + ":" + cacheName + ":");
+
+    return RedisCacheManager.builder(connectionFactory).cacheDefaults(configuration).build();
+  }
+
+  @Bean
+  public RedisTemplate<String, Object> tenantAwareRedisTemplate(RedisConnectionFactory connectionFactory) {
+    var template = new RedisTemplate<String, Object>();
+    template.setConnectionFactory(connectionFactory);
+    template.setKeySerializer(new TenantAwareKeySerializer());
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    return template;
+  }
 }
 
 // Tenant-aware key serializer
 public class TenantAwareKeySerializer implements RedisSerializer<String> {
-    
-    private final StringRedisSerializer stringSerializer = new StringRedisSerializer();
-    
-    @Override
-    public byte[] serialize(String key) throws SerializationException {
-        var tenantId = TenantContext.getCurrentTenantId();
-        var tenantAwareKey = tenantId != null ? tenantId + ":" + key : key;
-        return stringSerializer.serialize(tenantAwareKey);
+
+  private final StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
+  @Override
+  public byte[] serialize(String key) throws SerializationException {
+    var tenantId = TenantContext.getCurrentTenantId();
+    var tenantAwareKey = tenantId != null ? tenantId + ":" + key : key;
+    return stringSerializer.serialize(tenantAwareKey);
+  }
+
+  @Override
+  public String deserialize(byte[] bytes) throws SerializationException {
+    var key = stringSerializer.deserialize(bytes);
+    if (key != null && key.contains(":")) {
+      return key.substring(key.indexOf(":") + 1);
     }
-    
-    @Override
-    public String deserialize(byte[] bytes) throws SerializationException {
-        var key = stringSerializer.deserialize(bytes);
-        if (key != null && key.contains(":")) {
-            return key.substring(key.indexOf(":") + 1);
-        }
-        return key;
-    }
+    return key;
+  }
 }
 
 // Tenant-aware service with caching
 @Service
 public class TenantAwareUserService {
-    
-    @Cacheable(value = "users", key = "#id")
-    public UserDto getUserById(Long id) {
-        var user = userRepository.findByIdForCurrentTenant(id)
-            .orElseThrow(() -> new UserNotFoundException("User not found: " + id));
-        return userMapper.toDto(user);
-    }
-    
-    @CacheEvict(value = "users", key = "#id")
-    public void evictUserCache(Long id) {
-        // Cache eviction handled by annotation
-    }
-    
-    @Cacheable(value = "tenant_config", key = "'config'")
-    public TenantConfiguration getTenantConfiguration() {
-        var tenantId = TenantContext.getCurrentTenantId();
-        return tenantConfigurationRepository.findByTenantId(tenantId)
-            .orElse(TenantConfiguration.getDefault());
-    }
+
+  @Cacheable(value = "users", key = "#id")
+  public UserDto getUserById(Long id) {
+    var user = userRepository.findByIdForCurrentTenant(id).orElseThrow(() -> new UserNotFoundException("User not found: " + id));
+    return userMapper.toDto(user);
+  }
+
+  @CacheEvict(value = "users", key = "#id")
+  public void evictUserCache(Long id) {
+    // Cache eviction handled by annotation
+  }
+
+  @Cacheable(value = "tenant_config", key = "'config'")
+  public TenantConfiguration getTenantConfiguration() {
+    var tenantId = TenantContext.getCurrentTenantId();
+    return tenantConfigurationRepository.findByTenantId(tenantId).orElse(TenantConfiguration.getDefault());
+  }
 }
 ```
 
 ### Tenant Management APIs
 
 **Tenant Administration Service:**
+
 ```java
 // Tenant management service
 @Service
 @Transactional
 public class TenantManagementService {
-    
-    public TenantDto createTenant(CreateTenantRequest request) {
-        // Create tenant schema
-        createTenantSchema(request.getTenantId());
-        
-        // Create tenant metadata
-        var tenant = new Tenant();
-        tenant.setTenantId(request.getTenantId());
-        tenant.setOrganizationName(request.getOrganizationName());
-        tenant.setSubscriptionTier(request.getSubscriptionTier());
-        tenant.setConfiguration(request.getConfiguration());
-        tenant.setEnabledFeatures(request.getEnabledFeatures());
-        tenant.setQuotas(request.getQuotas());
-        tenant.setStatus(TenantStatus.ACTIVE);
-        
-        var savedTenant = tenantRepository.save(tenant);
-        
-        // Create default admin user
-        createDefaultAdminUser(savedTenant);
-        
-        // Initialize tenant-specific data
-        initializeTenantData(savedTenant);
-        
-        return tenantMapper.toDto(savedTenant);
-    }
-    
-    public TenantDto updateTenant(String tenantId, UpdateTenantRequest request) {
-        var tenant = tenantRepository.findByTenantId(tenantId)
-            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
-            
-        tenant.setOrganizationName(request.getOrganizationName());
-        tenant.setSubscriptionTier(request.getSubscriptionTier());
-        tenant.setConfiguration(request.getConfiguration());
-        tenant.setEnabledFeatures(request.getEnabledFeatures());
-        tenant.setQuotas(request.getQuotas());
-        
-        var savedTenant = tenantRepository.save(tenant);
-        
-        // Invalidate tenant cache
-        evictTenantCache(tenantId);
-        
-        return tenantMapper.toDto(savedTenant);
-    }
-    
-    public void deleteTenant(String tenantId) {
-        var tenant = tenantRepository.findByTenantId(tenantId)
-            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
-            
-        // Soft delete tenant
-        tenant.setStatus(TenantStatus.DELETED);
-        tenant.setDeletedAt(Instant.now());
-        tenantRepository.save(tenant);
-        
-        // Schedule data cleanup
-        scheduleDataCleanup(tenantId);
-        
-        // Invalidate all tenant caches
-        evictAllTenantCaches(tenantId);
-    }
-    
-    private void createTenantSchema(String tenantId) {
-        var sql = "CREATE SCHEMA IF NOT EXISTS " + tenantId;
-        jdbcTemplate.execute(sql);
-        
-        // Run migrations for new schema
-        var flyway = Flyway.configure()
-            .dataSource(dataSource)
-            .schemas(tenantId)
-            .load();
-        flyway.migrate();
-    }
+
+  public TenantDto createTenant(CreateTenantRequest request) {
+    // Create tenant schema
+    createTenantSchema(request.getTenantId());
+
+    // Create tenant metadata
+    var tenant = new Tenant();
+    tenant.setTenantId(request.getTenantId());
+    tenant.setOrganizationName(request.getOrganizationName());
+    tenant.setSubscriptionTier(request.getSubscriptionTier());
+    tenant.setConfiguration(request.getConfiguration());
+    tenant.setEnabledFeatures(request.getEnabledFeatures());
+    tenant.setQuotas(request.getQuotas());
+    tenant.setStatus(TenantStatus.ACTIVE);
+
+    var savedTenant = tenantRepository.save(tenant);
+
+    // Create default admin user
+    createDefaultAdminUser(savedTenant);
+
+    // Initialize tenant-specific data
+    initializeTenantData(savedTenant);
+
+    return tenantMapper.toDto(savedTenant);
+  }
+
+  public TenantDto updateTenant(String tenantId, UpdateTenantRequest request) {
+    var tenant = tenantRepository.findByTenantId(tenantId).orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+
+    tenant.setOrganizationName(request.getOrganizationName());
+    tenant.setSubscriptionTier(request.getSubscriptionTier());
+    tenant.setConfiguration(request.getConfiguration());
+    tenant.setEnabledFeatures(request.getEnabledFeatures());
+    tenant.setQuotas(request.getQuotas());
+
+    var savedTenant = tenantRepository.save(tenant);
+
+    // Invalidate tenant cache
+    evictTenantCache(tenantId);
+
+    return tenantMapper.toDto(savedTenant);
+  }
+
+  public void deleteTenant(String tenantId) {
+    var tenant = tenantRepository.findByTenantId(tenantId).orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+
+    // Soft delete tenant
+    tenant.setStatus(TenantStatus.DELETED);
+    tenant.setDeletedAt(Instant.now());
+    tenantRepository.save(tenant);
+
+    // Schedule data cleanup
+    scheduleDataCleanup(tenantId);
+
+    // Invalidate all tenant caches
+    evictAllTenantCaches(tenantId);
+  }
+
+  private void createTenantSchema(String tenantId) {
+    var sql = "CREATE SCHEMA IF NOT EXISTS " + tenantId;
+    jdbcTemplate.execute(sql);
+
+    // Run migrations for new schema
+    var flyway = Flyway.configure().dataSource(dataSource).schemas(tenantId).load();
+    flyway.migrate();
+  }
 }
 
 // Tenant management REST controller
@@ -7477,180 +7313,175 @@ public class TenantManagementService {
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 @Tag(name = "Tenant Management", description = "Tenant administration operations")
 public class TenantManagementResource {
-    
-    private final TenantManagementService tenantManagementService;
-    
-    @Operation(summary = "Create tenant", description = "Create new tenant organization")
-    @PostMapping
-    public ResponseEntity<TenantDto> createTenant(@Valid @RequestBody CreateTenantRequest request) {
-        var tenant = tenantManagementService.createTenant(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(tenant);
-    }
-    
-    @Operation(summary = "List tenants", description = "Get paginated list of tenants")
-    @GetMapping
-    public ResponseEntity<Page<TenantDto>> getTenants(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) String search
-    ) {
-        var tenants = tenantManagementService.getTenants(page, size, search);
-        return ResponseEntity.ok(tenants);
-    }
-    
-    @Operation(summary = "Get tenant", description = "Get tenant by ID")
-    @GetMapping("/{tenantId}")
-    public ResponseEntity<TenantDto> getTenant(@PathVariable String tenantId) {
-        var tenant = tenantManagementService.getTenant(tenantId);
-        return ResponseEntity.ok(tenant);
-    }
-    
-    @Operation(summary = "Update tenant", description = "Update tenant configuration")
-    @PutMapping("/{tenantId}")
-    public ResponseEntity<TenantDto> updateTenant(
-        @PathVariable String tenantId,
-        @Valid @RequestBody UpdateTenantRequest request
-    ) {
-        var tenant = tenantManagementService.updateTenant(tenantId, request);
-        return ResponseEntity.ok(tenant);
-    }
-    
-    @Operation(summary = "Delete tenant", description = "Soft delete tenant")
-    @DeleteMapping("/{tenantId}")
-    public ResponseEntity<Void> deleteTenant(@PathVariable String tenantId) {
-        tenantManagementService.deleteTenant(tenantId);
-        return ResponseEntity.noContent().build();
-    }
+
+  private final TenantManagementService tenantManagementService;
+
+  @Operation(summary = "Create tenant", description = "Create new tenant organization")
+  @PostMapping
+  public ResponseEntity<TenantDto> createTenant(@Valid @RequestBody CreateTenantRequest request) {
+    var tenant = tenantManagementService.createTenant(request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(tenant);
+  }
+
+  @Operation(summary = "List tenants", description = "Get paginated list of tenants")
+  @GetMapping
+  public ResponseEntity<Page<TenantDto>> getTenants(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, @RequestParam(required = false) String search) {
+    var tenants = tenantManagementService.getTenants(page, size, search);
+    return ResponseEntity.ok(tenants);
+  }
+
+  @Operation(summary = "Get tenant", description = "Get tenant by ID")
+  @GetMapping("/{tenantId}")
+  public ResponseEntity<TenantDto> getTenant(@PathVariable String tenantId) {
+    var tenant = tenantManagementService.getTenant(tenantId);
+    return ResponseEntity.ok(tenant);
+  }
+
+  @Operation(summary = "Update tenant", description = "Update tenant configuration")
+  @PutMapping("/{tenantId}")
+  public ResponseEntity<TenantDto> updateTenant(@PathVariable String tenantId, @Valid @RequestBody UpdateTenantRequest request) {
+    var tenant = tenantManagementService.updateTenant(tenantId, request);
+    return ResponseEntity.ok(tenant);
+  }
+
+  @Operation(summary = "Delete tenant", description = "Soft delete tenant")
+  @DeleteMapping("/{tenantId}")
+  public ResponseEntity<Void> deleteTenant(@PathVariable String tenantId) {
+    tenantManagementService.deleteTenant(tenantId);
+    return ResponseEntity.noContent().build();
+  }
 }
 ```
 
 ### Tenant-Aware Logging and Monitoring
 
 **Structured Logging with Tenant Context:**
+
 ```java
 // Tenant-aware logging configuration
 @Configuration
 public class TenantLoggingConfiguration {
-    
-    @Bean
-    public Logger tenantAwareLogger() {
-        var loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        var logger = loggerContext.getLogger("TENANT_AWARE");
-        
-        // Add tenant context to MDC
-        logger.addAppender(new TenantContextAppender());
-        
-        return logger;
-    }
+
+  @Bean
+  public Logger tenantAwareLogger() {
+    var loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+    var logger = loggerContext.getLogger("TENANT_AWARE");
+
+    // Add tenant context to MDC
+    logger.addAppender(new TenantContextAppender());
+
+    return logger;
+  }
 }
 
 // Custom appender for tenant context
 public class TenantContextAppender extends AppenderBase<ILoggingEvent> {
-    
-    @Override
-    protected void append(ILoggingEvent event) {
-        var tenantId = TenantContext.getCurrentTenantId();
-        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
-        
-        if (tenantId != null) {
-            MDC.put("tenant_id", tenantId);
-        }
-        
-        if (tenantMetadata != null) {
-            MDC.put("organization_name", tenantMetadata.organizationName());
-            MDC.put("subscription_tier", tenantMetadata.subscriptionTier());
-        }
+
+  @Override
+  protected void append(ILoggingEvent event) {
+    var tenantId = TenantContext.getCurrentTenantId();
+    var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+
+    if (tenantId != null) {
+      MDC.put("tenant_id", tenantId);
     }
+
+    if (tenantMetadata != null) {
+      MDC.put("organization_name", tenantMetadata.organizationName());
+      MDC.put("subscription_tier", tenantMetadata.subscriptionTier());
+    }
+  }
 }
 
 // Tenant-aware audit logging
 @Service
 public class TenantAuditService {
-    
-    private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
-    
-    public void logUserAction(String action, String resource, Object details) {
-        var tenantId = TenantContext.getCurrentTenantId();
-        var userContext = SecurityContextHolder.getContext().getAuthentication();
-        
-        var auditEvent = AuditEvent.builder()
-            .tenantId(tenantId)
-            .userId(userContext.getName())
-            .action(action)
-            .resource(resource)
-            .details(details)
-            .timestamp(Instant.now())
-            .correlationId(MDC.get("correlationId"))
-            .build();
-            
-        auditLogger.info("Audit event: {}", auditEvent);
-    }
+
+  private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
+
+  public void logUserAction(String action, String resource, Object details) {
+    var tenantId = TenantContext.getCurrentTenantId();
+    var userContext = SecurityContextHolder.getContext().getAuthentication();
+
+    var auditEvent = AuditEvent.builder()
+      .tenantId(tenantId)
+      .userId(userContext.getName())
+      .action(action)
+      .resource(resource)
+      .details(details)
+      .timestamp(Instant.now())
+      .correlationId(MDC.get("correlationId"))
+      .build();
+
+    auditLogger.info("Audit event: {}", auditEvent);
+  }
 }
 ```
 
 ### Feature Flag Management
 
 **Tenant-Specific Feature Flags:**
+
 ```java
 // Feature flag service
 @Service
 public class TenantFeatureFlagService {
-    
-    public boolean isFeatureEnabled(String feature) {
-        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
-        if (tenantMetadata == null) {
-            return false;
-        }
-        
-        return tenantMetadata.enabledFeatures().contains(feature);
+
+  public boolean isFeatureEnabled(String feature) {
+    var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+    if (tenantMetadata == null) {
+      return false;
     }
-    
-    public <T> T getFeatureConfig(String feature, Class<T> type) {
-        var tenantMetadata = TenantContext.getCurrentTenantMetadata();
-        if (tenantMetadata == null) {
-            return null;
-        }
-        
-        var config = tenantMetadata.configuration().get(feature);
-        return type.cast(config);
+
+    return tenantMetadata.enabledFeatures().contains(feature);
+  }
+
+  public <T> T getFeatureConfig(String feature, Class<T> type) {
+    var tenantMetadata = TenantContext.getCurrentTenantMetadata();
+    if (tenantMetadata == null) {
+      return null;
     }
-    
-    public void enableFeature(String tenantId, String feature) {
-        var tenant = tenantRepository.findByTenantId(tenantId)
-            .orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
-            
-        var features = new HashSet<>(tenant.getEnabledFeatures());
-        features.add(feature);
-        tenant.setEnabledFeatures(features);
-        
-        tenantRepository.save(tenant);
-        evictTenantCache(tenantId);
-    }
+
+    var config = tenantMetadata.configuration().get(feature);
+    return type.cast(config);
+  }
+
+  public void enableFeature(String tenantId, String feature) {
+    var tenant = tenantRepository.findByTenantId(tenantId).orElseThrow(() -> new TenantNotFoundException("Tenant not found: " + tenantId));
+
+    var features = new HashSet<>(tenant.getEnabledFeatures());
+    features.add(feature);
+    tenant.setEnabledFeatures(features);
+
+    tenantRepository.save(tenant);
+    evictTenantCache(tenantId);
+  }
 }
 
 // Feature flag annotation
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequireFeature {
-    String value();
-    String message() default "Feature not enabled for tenant";
+  String value();
+
+  String message() default "Feature not enabled for tenant";
 }
 
 // Feature flag aspect
 @Aspect
 @Component
 public class FeatureFlagAspect {
-    
-    @Around("@annotation(requireFeature)")
-    public Object checkFeatureFlag(ProceedingJoinPoint joinPoint, RequireFeature requireFeature) throws Throwable {
-        var feature = requireFeature.value();
-        
-        if (!featureFlagService.isFeatureEnabled(feature)) {
-            throw new FeatureNotEnabledException(requireFeature.message());
-        }
-        
-        return joinPoint.proceed();
+
+  @Around("@annotation(requireFeature)")
+  public Object checkFeatureFlag(ProceedingJoinPoint joinPoint, RequireFeature requireFeature) throws Throwable {
+    var feature = requireFeature.value();
+
+    if (!featureFlagService.isFeatureEnabled(feature)) {
+      throw new FeatureNotEnabledException(requireFeature.message());
     }
+
+    return joinPoint.proceed();
+  }
 }
 ```
 
@@ -7668,12 +7499,14 @@ This multi-tenant architecture provides:
 ## Security Considerations
 
 ### JWT Token Security and User Context Propagation
+
 - Short-lived access tokens (15 minutes) with embedded user context
 - Long-lived refresh tokens (7 days)
 - Token rotation on refresh with context updates
 - Secure token storage recommendations
 
 **JWT Claims Structure:**
+
 ```json
 {
   "sub": "user123",
@@ -7698,35 +7531,48 @@ Each microservice implements its own user context extraction utilities without s
 // Auth Service Implementation
 @Component
 public class AuthUserContextExtractor {
-    public UserContext extractFromJwt(String token);
-    public UserContext getCurrentUserContext();
-    public boolean hasPermission(String permission);
-    public boolean hasRole(String role);
-    public Set<String> getUserPermissions();
+
+  public UserContext extractFromJwt(String token);
+
+  public UserContext getCurrentUserContext();
+
+  public boolean hasPermission(String permission);
+
+  public boolean hasRole(String role);
+
+  public Set<String> getUserPermissions();
 }
 
-// Gateway Service Implementation  
+// Gateway Service Implementation
 @Component
 public class GatewayUserContextExtractor {
-    public UserContext extractFromJwt(String token);
-    public UserContext getCurrentUserContext();
-    public boolean hasPermission(String permission);
-    public boolean hasRole(String role);
-    public Set<String> getUserPermissions();
+
+  public UserContext extractFromJwt(String token);
+
+  public UserContext getCurrentUserContext();
+
+  public boolean hasPermission(String permission);
+
+  public boolean hasRole(String role);
+
+  public Set<String> getUserPermissions();
 }
 ```
 
 ### OAuth2 Implementation
+
 - Authorization Code flow with PKCE
 - Client credentials for service-to-service
 - Scope-based access control
 
 ### Network Security
+
 - TLS 1.3 for all communications
 - Certificate management with Let's Encrypt
 - Docker network isolation and security
 
 ### Data Protection
+
 - Password hashing with bcrypt
 - Sensitive data encryption at rest
 - PII data handling compliance
@@ -7742,48 +7588,45 @@ The platform provides Postman collections for all REST APIs, enabling efficient 
 ### Automated Collection Generation
 
 **OpenAPI to Postman Conversion:**
+
 ```java
 @Component
 public class PostmanCollectionGenerator {
-    
-    @Autowired
-    private OpenApiSpecificationService openApiService;
-    
-    public PostmanCollection generateCollection(String serviceName, String version) {
-        OpenApiSpec spec = openApiService.getSpecification(serviceName, version);
-        
-        return PostmanCollection.builder()
-            .info(createCollectionInfo(serviceName, version))
-            .auth(createAuthConfiguration())
-            .variables(createCollectionVariables())
-            .items(generateRequestItems(spec))
-            .events(createCollectionEvents())
-            .build();
-    }
-    
-    private CollectionInfo createCollectionInfo(String serviceName, String version) {
-        return CollectionInfo.builder()
-            .name(String.format("Gripday %s API v%s", serviceName, version))
-            .description(String.format("Comprehensive API collection for %s service", serviceName))
-            .version(version)
-            .schema("https://schema.getpostman.com/json/collection/v2.1.0/collection.json")
-            .build();
-    }
-    
-    private AuthConfiguration createAuthConfiguration() {
-        return AuthConfiguration.builder()
-            .type("bearer")
-            .bearer(BearerAuth.builder()
-                .token("{{jwt_token}}")
-                .build())
-            .build();
-    }
+
+  @Autowired
+  private OpenApiSpecificationService openApiService;
+
+  public PostmanCollection generateCollection(String serviceName, String version) {
+    OpenApiSpec spec = openApiService.getSpecification(serviceName, version);
+
+    return PostmanCollection.builder()
+      .info(createCollectionInfo(serviceName, version))
+      .auth(createAuthConfiguration())
+      .variables(createCollectionVariables())
+      .items(generateRequestItems(spec))
+      .events(createCollectionEvents())
+      .build();
+  }
+
+  private CollectionInfo createCollectionInfo(String serviceName, String version) {
+    return CollectionInfo.builder()
+      .name(String.format("Gripday %s API v%s", serviceName, version))
+      .description(String.format("Comprehensive API collection for %s service", serviceName))
+      .version(version)
+      .schema("https://schema.getpostman.com/json/collection/v2.1.0/collection.json")
+      .build();
+  }
+
+  private AuthConfiguration createAuthConfiguration() {
+    return AuthConfiguration.builder().type("bearer").bearer(BearerAuth.builder().token("{{jwt_token}}").build()).build();
+  }
 }
 ```
 
 ### Collection Structure and Organization
 
 **Service-Based Collections:**
+
 ```
 postman/
 ├── collections/
@@ -7808,6 +7651,7 @@ postman/
 ### Environment Configuration
 
 **Local Development Environment:**
+
 ```json
 {
   "id": "local-dev-env",
@@ -7849,6 +7693,7 @@ postman/
 ```
 
 **Production Environment:**
+
 ```json
 {
   "id": "production-env",
@@ -7881,6 +7726,7 @@ postman/
 ### Collection Variables and Authentication
 
 **Global Variables:**
+
 ```json
 {
   "id": "platform-globals",
@@ -7911,6 +7757,7 @@ postman/
 ```
 
 **Authentication Flow Collection:**
+
 ```json
 {
   "name": "Authentication Flow",
@@ -7971,66 +7818,72 @@ postman/
 ### Automated Test Scripts
 
 **Request Validation Scripts:**
+
 ```javascript
 // Pre-request script for authentication
-if (!pm.globals.get('jwt_token') || pm.globals.get('token_expires') < Date.now()) {
-    // Automatically login if token is missing or expired
-    pm.sendRequest({
-        url: pm.environment.get('auth_url') + '/api/' + pm.environment.get('api_version') + '/auth/login',
-        method: 'POST',
-        header: {
-            'Content-Type': 'application/json',
-            'X-Correlation-ID': pm.globals.get('correlation_id')
-        },
-        body: {
-            mode: 'raw',
-            raw: JSON.stringify({
-                username: pm.environment.get('admin_username'),
-                password: pm.environment.get('admin_password'),
-                rememberMe: false
-            })
-        }
-    }, function (err, response) {
-        if (response.code === 200) {
-            const responseJson = response.json();
-            pm.globals.set('jwt_token', responseJson.accessToken);
-            pm.globals.set('token_expires', Date.now() + (responseJson.expiresIn * 1000));
-        }
-    });
+if (!pm.globals.get("jwt_token") || pm.globals.get("token_expires") < Date.now()) {
+  // Automatically login if token is missing or expired
+  pm.sendRequest(
+    {
+      url: pm.environment.get("auth_url") + "/api/" + pm.environment.get("api_version") + "/auth/login",
+      method: "POST",
+      header: {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": pm.globals.get("correlation_id"),
+      },
+      body: {
+        mode: "raw",
+        raw: JSON.stringify({
+          username: pm.environment.get("admin_username"),
+          password: pm.environment.get("admin_password"),
+          rememberMe: false,
+        }),
+      },
+    },
+    function (err, response) {
+      if (response.code === 200) {
+        const responseJson = response.json();
+        pm.globals.set("jwt_token", responseJson.accessToken);
+        pm.globals.set("token_expires", Date.now() + responseJson.expiresIn * 1000);
+      }
+    }
+  );
 }
 ```
 
 **Response Validation Scripts:**
+
 ```javascript
 // Common response validation
-pm.test('Response time is acceptable', function () {
-    pm.expect(pm.response.responseTime).to.be.below(2000);
+pm.test("Response time is acceptable", function () {
+  pm.expect(pm.response.responseTime).to.be.below(2000);
 });
 
-pm.test('Response has correlation ID', function () {
-    pm.expect(pm.response.headers.get('X-Correlation-ID')).to.exist;
+pm.test("Response has correlation ID", function () {
+  pm.expect(pm.response.headers.get("X-Correlation-ID")).to.exist;
 });
 
-pm.test('Content-Type is JSON', function () {
-    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+pm.test("Content-Type is JSON", function () {
+  pm.expect(pm.response.headers.get("Content-Type")).to.include("application/json");
 });
 
 // Error response validation
 if (pm.response.code >= 400) {
-    pm.test('Error response has proper structure', function () {
-        const responseJson = pm.response.json();
-        pm.expect(responseJson).to.have.property('error');
-        pm.expect(responseJson.error).to.have.property('code');
-        pm.expect(responseJson.error).to.have.property('message');
-        pm.expect(responseJson.error).to.have.property('timestamp');
-        pm.expect(responseJson.error).to.have.property('correlationId');
-    });
+  pm.test("Error response has proper structure", function () {
+    const responseJson = pm.response.json();
+    pm.expect(responseJson).to.have.property("error");
+    pm.expect(responseJson.error).to.have.property("code");
+    pm.expect(responseJson.error).to.have.property("message");
+    pm.expect(responseJson.error).to.have.property("timestamp");
+    pm.expect(responseJson.error).to.have.property("correlationId");
+  });
 }
 ```
 
 ### Collection Generation Pipeline
 
 **Maven Plugin Configuration:**
+
 ```xml
 <plugin>
     <groupId>org.openapitools</groupId>
@@ -8059,89 +7912,85 @@ if (pm.response.code >= 400) {
 ```
 
 **Custom Collection Enhancement:**
+
 ```java
 @Component
 public class PostmanCollectionEnhancer {
-    
-    public void enhanceCollection(PostmanCollection collection) {
-        // Add authentication configuration
-        addAuthenticationFlow(collection);
-        
-        // Add environment variables
-        addEnvironmentVariables(collection);
-        
-        // Add test scripts
-        addAutomatedTests(collection);
-        
-        // Add error handling
-        addErrorHandling(collection);
-        
-        // Add documentation
-        addRequestDocumentation(collection);
-    }
-    
-    private void addAuthenticationFlow(PostmanCollection collection) {
-        // Add login request with token extraction
-        // Add token refresh logic
-        // Add logout request
-    }
-    
-    private void addAutomatedTests(PostmanCollection collection) {
-        collection.getItems().forEach(item -> {
-            if (item.getRequest() != null) {
-                addResponseValidation(item);
-                addStatusCodeTests(item);
-                addSchemaValidation(item);
-            }
-        });
-    }
+
+  public void enhanceCollection(PostmanCollection collection) {
+    // Add authentication configuration
+    addAuthenticationFlow(collection);
+
+    // Add environment variables
+    addEnvironmentVariables(collection);
+
+    // Add test scripts
+    addAutomatedTests(collection);
+
+    // Add error handling
+    addErrorHandling(collection);
+
+    // Add documentation
+    addRequestDocumentation(collection);
+  }
+
+  private void addAuthenticationFlow(PostmanCollection collection) {
+    // Add login request with token extraction
+    // Add token refresh logic
+    // Add logout request
+  }
+
+  private void addAutomatedTests(PostmanCollection collection) {
+    collection
+      .getItems()
+      .forEach((item) -> {
+        if (item.getRequest() != null) {
+          addResponseValidation(item);
+          addStatusCodeTests(item);
+          addSchemaValidation(item);
+        }
+      });
+  }
 }
 ```
 
 ### Collection Distribution and Usage
 
 **Download Endpoints:**
+
 ```java
 @RestController
 @RequestMapping("/api/v1/postman")
 public class PostmanCollectionController {
-    
-    @GetMapping("/collections/{serviceName}")
-    public ResponseEntity<Resource> downloadCollection(
-        @PathVariable String serviceName,
-        @RequestParam(defaultValue = "v1") String version
-    ) {
-        PostmanCollection collection = collectionGenerator.generateCollection(serviceName, version);
-        ByteArrayResource resource = new ByteArrayResource(
-            objectMapper.writeValueAsBytes(collection)
-        );
-        
-        return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, 
-                String.format("attachment; filename=%s-v%s.postman_collection.json", serviceName, version))
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(resource);
-    }
-    
-    @GetMapping("/environments/{environment}")
-    public ResponseEntity<Resource> downloadEnvironment(@PathVariable String environment) {
-        PostmanEnvironment env = environmentGenerator.generateEnvironment(environment);
-        ByteArrayResource resource = new ByteArrayResource(
-            objectMapper.writeValueAsBytes(env)
-        );
-        
-        return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, 
-                String.format("attachment; filename=%s.postman_environment.json", environment))
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(resource);
-    }
+
+  @GetMapping("/collections/{serviceName}")
+  public ResponseEntity<Resource> downloadCollection(@PathVariable String serviceName, @RequestParam(defaultValue = "v1") String version) {
+    PostmanCollection collection = collectionGenerator.generateCollection(serviceName, version);
+    ByteArrayResource resource = new ByteArrayResource(objectMapper.writeValueAsBytes(collection));
+
+    return ResponseEntity.ok()
+      .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s-v%s.postman_collection.json", serviceName, version))
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(resource);
+  }
+
+  @GetMapping("/environments/{environment}")
+  public ResponseEntity<Resource> downloadEnvironment(@PathVariable String environment) {
+    PostmanEnvironment env = environmentGenerator.generateEnvironment(environment);
+    ByteArrayResource resource = new ByteArrayResource(objectMapper.writeValueAsBytes(env));
+
+    return ResponseEntity.ok()
+      .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.postman_environment.json", environment))
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(resource);
+  }
 }
 ```
 
 ### Integration with CI/CD
 
 **Automated Collection Testing:**
+
 ```yaml
 # .github/workflows/postman-tests.yml
 name: Postman API Tests
@@ -8156,20 +8005,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Start services
         run: docker compose up -d
-        
+
       - name: Wait for services
         run: sleep 30
-        
+
       - name: Run Postman collection tests
         uses: matt-ball/newman-action@master
         with:
           collection: postman/collections/platform/platform-integration-tests.postman_collection.json
           environment: postman/environments/local-development.postman_environment.json
           reporters: cli,json,htmlextra
-          
+
       - name: Upload test results
         uses: actions/upload-artifact@v3
         if: always()
@@ -8189,6 +8038,7 @@ Each microservice maintains documentation following a standardized structure to 
 **Design Rationale:** Standardized documentation structure ensures consistency across all microservices, improves discoverability, and reduces onboarding time for developers. The three-folder approach (api, architecture, deployment) provides clear separation of concerns while maintaining coverage of all service aspects.
 
 **Root Level Documentation:**
+
 ```
 gripday-{service-name}/
 ├── README.md                    # Service overview and quick start
@@ -8219,7 +8069,8 @@ gripday-{service-name}/
 ### Service README Template
 
 **gripday-auth-service/README.md:**
-```markdown
+
+````markdown
 # Gripday Auth Service
 
 Centralized authentication and authorization service providing JWT-based security for the Gripday microservices platform.
@@ -8227,12 +8078,14 @@ Centralized authentication and authorization service providing JWT-based securit
 ## Quick Start
 
 ### Prerequisites
+
 - Java 21
 - PostgreSQL 15+
 - Redis 7+
 - Maven 3.9+
 
 ### Local Development (POSIX)
+
 ```bash
 # Clone and setup
 git clone <repository-url>
@@ -8244,8 +8097,10 @@ cd gripday-auth-service
 # Run service
 ./scripts/start-local.sh
 ```
+````
 
 ### Key Features
+
 - JWT token generation and validation
 - OAuth2 authorization server
 - Role-based access control (RBAC)
@@ -8254,29 +8109,36 @@ cd gripday-auth-service
 - Comprehensive audit logging
 
 ### API Documentation
+
 - **Swagger UI**: http://localhost:8081/swagger-ui.html
 - **OpenAPI Spec**: http://localhost:8081/v3/api-docs
 - **Postman Collections**: [docs/api/postman/](docs/api/postman/)
 
 ### Architecture
+
 Built with three-tier architecture using Java 21 features:
+
 - **Presentation Layer**: REST controllers with OpenAPI documentation
 - **Domain Layer**: Service classes with domain logic
 - **Infrastructure Layer**: JPA repositories and external integrations
 
 ### Configuration
+
 Uses Spring profiles for environment-specific configuration:
+
 - `local`: Development environment
-- `staging`: Staging environment  
+- `staging`: Staging environment
 - `production`: Production environment
 
 See [docs/deployment/configuration.md](docs/deployment/configuration.md) for details.
 
 ### Documentation
+
 - [API Documentation](docs/api/README.md)
 - [Architecture Guide](docs/architecture/README.md)
 - [Deployment Guide](docs/deployment/README.md)
-```
+
+````
 
 ### API Documentation Structure
 
@@ -8293,33 +8155,40 @@ All protected endpoints require JWT Bearer token authentication:
 curl -H "Authorization: Bearer <jwt-token>" \
      -H "Content-Type: application/json" \
      https://api.pynity.com/api/v1/users
-```
+````
 
 ## Base URLs
+
 - **Local**: http://localhost:8081
-- **Staging**: https://staging-auth.pynity.com  
+- **Staging**: https://staging-auth.pynity.com
 - **Production**: https://auth.pynity.com
 
 ## API Versions
+
 - **v1**: Current stable version
 - **v2**: Enhanced version with additional features
 
 ## Rate Limiting
+
 - **Local**: 1000 requests/minute
 - **Staging**: 500 requests/minute
 - **Production**: 100 requests/minute
 
 ## Error Handling
+
 All errors follow RFC 7807 Problem Details format with correlation IDs for tracing.
 
 ## Interactive Documentation
+
 - **Swagger UI**: `/swagger-ui.html`
 - **OpenAPI Spec**: `/v3/api-docs`
 
 ## Collections
+
 - [Postman Collections](postman/)
 - [Newman Test Scripts](postman/tests/)
-```
+
+````
 
 ### Architecture Documentation Structure
 
@@ -8338,7 +8207,7 @@ The Auth Service implements a three-tier architecture with clear separation of c
 - Global exception handling with pattern matching
 - API versioning support
 
-### Domain Layer  
+### Domain Layer
 - Service classes with domain logic
 - Domain models and validation
 - Security and authorization logic
@@ -8367,44 +8236,52 @@ The Auth Service implements a three-tier architecture with clear separation of c
 - Comprehensive audit logging
 
 See [design-decisions.md](design-decisions.md) for detailed rationale.
-```
+````
 
 ### Deployment Documentation Structure
 
 **docs/deployment/README.md:**
-```markdown
+
+````markdown
 # Auth Service Deployment Guide
 
 ## Overview
+
 Comprehensive deployment guide for all environments using Docker Compose and POSIX-compatible systems.
 
 ## Environments
+
 - [Local Development](local.md) - Docker Compose development setup
 - [Staging](staging.md) - Docker Compose staging deployment
 - [Production](production.md) - Docker Compose production deployment
 
 ## Quick Deploy (POSIX)
+
 ```bash
 # Local development
 ./scripts/setup-local.sh
 
-# Staging deployment  
+# Staging deployment
 ./scripts/deploy-staging.sh
 
 # Production deployment
 ./scripts/deploy-production.sh
 ```
+````
 
 ## Configuration Management
+
 Environment-specific configuration using Spring profiles:
+
 - Database connections
-- Redis configuration  
+- Redis configuration
 - JWT settings
 - Observability configuration
 
 See [configuration.md](configuration.md) for details.
 
 ## Monitoring
+
 - Health checks: `/actuator/health`
 - Metrics: `/actuator/prometheus`
 - Logs: Structured JSON with correlation IDs
@@ -8412,8 +8289,10 @@ See [configuration.md](configuration.md) for details.
 See [monitoring.md](monitoring.md) for observability setup.
 
 ## Troubleshooting
+
 Common issues and solutions in [troubleshooting.md](troubleshooting.md).
-```
+
+````
 
 ### POSIX Script Examples
 
@@ -8447,9 +8326,10 @@ echo "Database migrations will run automatically on application startup..."
 # Start application
 echo "Starting Auth Service..."
 mvn spring-boot:run -Dspring-boot.run.profiles=local
-```
+````
 
 **scripts/wait-for-services.sh:**
+
 ```bash
 #!/bin/bash
 set -euo pipefail
@@ -8476,6 +8356,7 @@ echo "All services are ready!"
 ### Documentation Standards
 
 **Content Guidelines:**
+
 - **Concise**: Focus on essential information
 - **Actionable**: Provide clear steps and examples
 - **POSIX-Compatible**: All scripts and commands work on Unix/Linux/macOS
@@ -8483,6 +8364,7 @@ echo "All services are ready!"
 - **Current**: Keep documentation synchronized with code changes
 
 **Markdown Formatting:**
+
 - Use clear headings and structure
 - Include code blocks with syntax highlighting
 - Provide working examples and commands
@@ -8490,6 +8372,7 @@ echo "All services are ready!"
 - Include diagrams where helpful
 
 **Script Standards:**
+
 - Use `#!/bin/bash` shebang
 - Include `set -euo pipefail` for safety
 - Add descriptive comments

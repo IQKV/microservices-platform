@@ -15,7 +15,7 @@ spec:
       app.kubernetes.io/name: bookstore-postgres
       app.kubernetes.io/component: database
   strategy:
-    type: Recreate  # Use Recreate for stateful services with persistent volumes
+    type: Recreate # Use Recreate for stateful services with persistent volumes
   template:
     metadata:
       labels:
@@ -33,86 +33,86 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: postgres
-        image: postgres:15.8-alpine
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 5432
-          name: postgres
-          protocol: TCP
-        env:
-        - name: POSTGRES_DB
-          value: "gripday_bookstore_local"
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: bookstore-service-secrets
-              key: GRIPDAY_DATABASE_USERNAME
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: bookstore-service-secrets
-              key: GRIPDAY_DATABASE_PASSWORD
-        - name: PGDATA
-          value: "/var/lib/postgresql/data/pgdata"
-        
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
-        - name: postgres-init
-          mountPath: /docker-entrypoint-initdb.d
-          readOnly: true
-        
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        
-        livenessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1 -p 5432
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
-          successThreshold: 1
-        
-        readinessProbe:
-          exec:
-            command:
-            - /bin/sh
-            - -c
-            - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1 -p 5432
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
-          successThreshold: 1
-        
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false  # PostgreSQL needs to write to data directory
-          runAsNonRoot: true
-          runAsUser: 999
-          capabilities:
-            drop:
-            - ALL
-      
+        - name: postgres
+          image: postgres:15.8-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: postgres
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: "gripday_bookstore_local"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bookstore-service-secrets
+                  key: GRIPDAY_DATABASE_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bookstore-service-secrets
+                  key: GRIPDAY_DATABASE_PASSWORD
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false # PostgreSQL needs to write to data directory
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
+
       volumes:
-      - name: postgres-storage
-        persistentVolumeClaim:
-          claimName: bookstore-postgres-pvc
-      - name: postgres-init
-        configMap:
-          name: bookstore-postgres-init
-          defaultMode: 0755
-      
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: bookstore-postgres-pvc
+        - name: postgres-init
+          configMap:
+            name: bookstore-postgres-init
+            defaultMode: 0755
+
       restartPolicy: Always
       terminationGracePeriodSeconds: 60
 ---
@@ -131,7 +131,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: standard  # Adjust based on your cluster's storage classes
+  storageClassName: standard # Adjust based on your cluster's storage classes
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -147,7 +147,7 @@ data:
     -- Enable required PostgreSQL extensions
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     CREATE EXTENSION IF NOT EXISTS "pg_trgm";
-    
+
     -- Create indexes for better search performance
     -- These will be created by Liquibase migrations, but having them here as backup
     -- CREATE INDEX IF NOT EXISTS idx_books_title_trgm ON books USING gin (title gin_trgm_ops);

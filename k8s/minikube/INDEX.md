@@ -24,8 +24,10 @@ k8s/minikube/
 ### Documentation Files
 
 #### `README.md`
+
 **Purpose:** Comprehensive documentation for minikube deployment  
 **Contains:**
+
 - Detailed setup instructions
 - Architecture diagrams
 - Configuration reference
@@ -35,8 +37,10 @@ k8s/minikube/
 **Use when:** You need complete information about the minikube setup
 
 #### `QUICKSTART.md`
+
 **Purpose:** Fast-track guide to get running in minutes  
 **Contains:**
+
 - 3-step deployment process
 - Common commands
 - Quick troubleshooting
@@ -45,8 +49,10 @@ k8s/minikube/
 **Use when:** You want to deploy quickly without reading everything
 
 #### `COMPARISON.md`
+
 **Purpose:** Explains differences between minikube and production manifests  
 **Contains:**
+
 - Feature-by-feature comparison
 - Resource usage differences
 - When to use each approach
@@ -55,8 +61,10 @@ k8s/minikube/
 **Use when:** You need to understand why minikube setup differs from production
 
 #### `INDEX.md`
+
 **Purpose:** This file - quick reference to all files  
 **Contains:**
+
 - File structure overview
 - File descriptions
 - Quick usage guide
@@ -66,8 +74,10 @@ k8s/minikube/
 ### Kubernetes Manifests
 
 #### `all-in-one.yaml`
+
 **Purpose:** Single file to deploy the entire platform  
 **Contains:**
+
 - Namespace
 - ConfigMaps
 - Secrets
@@ -78,11 +88,13 @@ k8s/minikube/
 **Use when:** You want to deploy everything at once
 
 **Deploy with:**
+
 ```bash
 kubectl apply -f all-in-one.yaml
 ```
 
 **What gets deployed:**
+
 - ✅ 2 PostgreSQL databases (auth + bookstore)
 - ✅ 1 Redis instance
 - ✅ 3 microservices (auth, gateway, bookstore)
@@ -90,28 +102,33 @@ kubectl apply -f all-in-one.yaml
 - ✅ Health checks and resource limits
 
 #### `infrastructure-only.yaml`
+
 **Purpose:** Deploy just the databases and Redis  
 **Contains:**
+
 - PostgreSQL for Auth (NodePort 30432)
 - PostgreSQL for Bookstore (NodePort 30433)
 - Redis (NodePort 30379)
 
 **Use when:**
+
 - Running services locally but need databases in K8s
 - Testing database migrations
 - Developing without full platform deployment
 
 **Deploy with:**
+
 ```bash
 kubectl apply -f infrastructure-only.yaml
 ```
 
 **Access infrastructure:**
+
 ```bash
 # PostgreSQL Auth
 psql -h $(minikube ip) -p 30432 -U gripday_user -d gripday_auth
 
-# PostgreSQL Bookstore  
+# PostgreSQL Bookstore
 psql -h $(minikube ip) -p 30433 -U gripday_user -d gripday_bookstore
 
 # Redis
@@ -121,8 +138,10 @@ redis-cli -h $(minikube ip) -p 30379
 ### Deployment Scripts
 
 #### `deploy-minikube.sh` (Linux/Mac)
+
 **Purpose:** Automated deployment script with options  
 **Features:**
+
 - Prerequisite checking
 - Optional image building
 - Wait for pod readiness
@@ -130,6 +149,7 @@ redis-cli -h $(minikube ip) -p 30379
 - Service URL display
 
 **Usage:**
+
 ```bash
 # Basic deployment
 ./deploy-minikube.sh
@@ -145,16 +165,19 @@ redis-cli -h $(minikube ip) -p 30379
 ```
 
 **Flags:**
+
 - `-b, --build` - Build Docker images first
 - `-n, --no-wait` - Don't wait for pods to be ready
 - `-o, --open` - Open services in browser
 - `-h, --help` - Show help
 
 #### `deploy-minikube.ps1` (Windows)
+
 **Purpose:** PowerShell version of deployment script  
 **Features:** Same as bash version
 
 **Usage:**
+
 ```powershell
 # Basic deployment
 .\deploy-minikube.ps1
@@ -172,13 +195,16 @@ redis-cli -h $(minikube ip) -p 30379
 ### Cleanup Scripts
 
 #### `cleanup-minikube.sh` (Linux/Mac)
+
 **Purpose:** Remove all deployed resources  
 **Features:**
+
 - Confirmation prompt
 - Namespace deletion
 - Wait for complete cleanup
 
 **Usage:**
+
 ```bash
 # Cleanup with confirmation
 ./cleanup-minikube.sh
@@ -188,10 +214,12 @@ redis-cli -h $(minikube ip) -p 30379
 ```
 
 #### `cleanup-minikube.ps1` (Windows)
+
 **Purpose:** PowerShell cleanup script  
 **Features:** Same as bash version
 
 **Usage:**
+
 ```powershell
 # Cleanup with confirmation
 .\cleanup-minikube.ps1
@@ -203,8 +231,10 @@ redis-cli -h $(minikube ip) -p 30379
 ### Configuration Files
 
 #### `.gitignore`
+
 **Purpose:** Prevent committing temporary and local files  
 **Ignores:**
+
 - Log files
 - Temporary files
 - Local configuration overrides
@@ -221,27 +251,32 @@ redis-cli -h $(minikube ip) -p 30379
 ### Common Scenarios
 
 #### Scenario 1: Quick Deploy Everything
+
 ```bash
 ./deploy-minikube.sh
 ```
 
 #### Scenario 2: Build Images and Deploy
+
 ```bash
 ./deploy-minikube.sh --build
 ```
 
 #### Scenario 3: Deploy Infrastructure Only
+
 ```bash
 kubectl apply -f infrastructure-only.yaml
 ```
 
 #### Scenario 4: Clean Up and Redeploy
+
 ```bash
 ./cleanup-minikube.sh --force
 ./deploy-minikube.sh
 ```
 
 #### Scenario 5: Deploy and Monitor
+
 ```bash
 ./deploy-minikube.sh
 kubectl get pods -n gripday -w
@@ -251,28 +286,30 @@ kubectl get pods -n gripday -w
 
 ### What Gets Deployed (all-in-one.yaml)
 
-| Component | Replicas | CPU Request | Memory Request | Port |
-|-----------|----------|-------------|----------------|------|
-| Gateway Service | 1 | 100m | 256Mi | 30080 |
-| Auth Service | 1 | 100m | 256Mi | 30081 |
-| Bookstore Service | 1 | 100m | 256Mi | 30082 |
-| PostgreSQL Auth | 1 | 100m | 128Mi | 5432 |
-| PostgreSQL Bookstore | 1 | 100m | 128Mi | 5432 |
-| Redis | 1 | 50m | 64Mi | 6379 |
+| Component            | Replicas | CPU Request | Memory Request | Port  |
+| -------------------- | -------- | ----------- | -------------- | ----- |
+| Gateway Service      | 1        | 100m        | 256Mi          | 30080 |
+| Auth Service         | 1        | 100m        | 256Mi          | 30081 |
+| Bookstore Service    | 1        | 100m        | 256Mi          | 30082 |
+| PostgreSQL Auth      | 1        | 100m        | 128Mi          | 5432  |
+| PostgreSQL Bookstore | 1        | 100m        | 128Mi          | 5432  |
+| Redis                | 1        | 50m         | 64Mi           | 6379  |
 
 **Total Resources:**
+
 - CPU: 550m (0.55 cores)
 - Memory: 960Mi (~1GB)
 
 ### What Gets Deployed (infrastructure-only.yaml)
 
-| Component | CPU Request | Memory Request | NodePort |
-|-----------|-------------|----------------|----------|
-| PostgreSQL Auth | 100m | 128Mi | 30432 |
-| PostgreSQL Bookstore | 100m | 128Mi | 30433 |
-| Redis | 50m | 64Mi | 30379 |
+| Component            | CPU Request | Memory Request | NodePort |
+| -------------------- | ----------- | -------------- | -------- |
+| PostgreSQL Auth      | 100m        | 128Mi          | 30432    |
+| PostgreSQL Bookstore | 100m        | 128Mi          | 30433    |
+| Redis                | 50m         | 64Mi           | 30379    |
 
 **Total Resources:**
+
 - CPU: 250m (0.25 cores)
 - Memory: 320Mi
 
@@ -294,16 +331,19 @@ kubectl get pods -n gripday -w
 ## 💡 Tips
 
 ### For Bash Users (Linux/Mac)
+
 - Make scripts executable: `chmod +x *.sh`
 - Use tab completion for kubectl commands
 - Add alias: `alias k=kubectl`
 
 ### For PowerShell Users (Windows)
+
 - Enable script execution: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 - Use PowerShell 7+ for best experience
 - Add alias: `Set-Alias -Name k -Value kubectl`
 
 ### General Tips
+
 - Always check minikube status first: `minikube status`
 - Use `kubectl get all -n gripday` to see everything
 - Monitor logs with: `kubectl logs -f deployment/<name> -n gripday`
@@ -312,11 +352,13 @@ kubectl get pods -n gripday -w
 ## 🆘 Getting Help
 
 ### Quick Help
+
 - Run scripts with `--help` or `-Help` flag
 - Check `QUICKSTART.md` for common issues
 - Review `README.md` troubleshooting section
 
 ### Detailed Help
+
 - Read `COMPARISON.md` to understand design choices
 - Check project docs in `../../docs/`
 - Review service-specific READMEs

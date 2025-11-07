@@ -11,7 +11,7 @@ data:
   application.yml: |
     server:
       port: 8080
-    
+
     spring:
       application:
         name: gripday-gateway-service
@@ -98,7 +98,7 @@ data:
           
           default-filters:
           - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-    
+
     # OpenTelemetry Configuration
     management:
       endpoints:
@@ -122,7 +122,7 @@ data:
       tracing:
         sampling:
           probability: 1.0
-    
+
     # Gripday-specific configuration properties
     gripday:
       gateway:
@@ -178,7 +178,7 @@ data:
   application-staging.yml: |
     server:
       port: 8080
-    
+
     spring:
       profiles:
         active: staging
@@ -230,12 +230,12 @@ data:
             - Path=/actuator/**
             filters:
             - StripPrefix=0
-    
+
     management:
       tracing:
         sampling:
           probability: 0.1
-    
+
     gripday:
       gateway:
         rate-limiting:
@@ -261,7 +261,7 @@ data:
   application-production.yml: |
     server:
       port: 8080
-    
+
     spring:
       profiles:
         active: production
@@ -313,12 +313,12 @@ data:
             - Path=/actuator/**
             filters:
             - StripPrefix=0
-    
+
     management:
       tracing:
         sampling:
           probability: 0.01
-    
+
     gripday:
       gateway:
         rate-limiting:

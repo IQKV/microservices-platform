@@ -24,11 +24,13 @@ The auth service provides centralized authentication, authorization, and user ma
 ## Components
 
 ### Core Service
+
 - **auth-service**: Main Spring Boot application (port 8081)
 - **auth-postgres**: PostgreSQL 15.8 database for user data and authentication
 - **auth-redis**: Redis 7.4 for session management and caching
 
 ### Kubernetes Resources
+
 - **Deployment**: Application pods with rolling update strategy
 - **Service**: ClusterIP service for internal communication
 - **Ingress**: HTTP/HTTPS routing with environment-specific CORS
@@ -129,15 +131,16 @@ OTEL_SERVICE_NAME=gripday-auth-service
 
 ### Resource Requirements
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Auth Service | 250m | 500m | 384Mi | 768Mi |
-| PostgreSQL | 250m | 500m | 256Mi | 512Mi |
-| Redis | 100m | 200m | 128Mi | 256Mi |
+| Component    | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ------------ | ----------- | --------- | -------------- | ------------ |
+| Auth Service | 250m        | 500m      | 384Mi          | 768Mi        |
+| PostgreSQL   | 250m        | 500m      | 256Mi          | 512Mi        |
+| Redis        | 100m        | 200m      | 128Mi          | 256Mi        |
 
 ### Environment-Specific Configuration
 
 #### Local Environment
+
 - **Replicas**: 2
 - **CORS**: Permissive (localhost, minikube)
 - **TLS**: Disabled
@@ -145,6 +148,7 @@ OTEL_SERVICE_NAME=gripday-auth-service
 - **Log Level**: DEBUG
 
 #### Staging Environment
+
 - **Replicas**: 2
 - **CORS**: Restricted to staging domain
 - **TLS**: Let's Encrypt staging certificates
@@ -153,6 +157,7 @@ OTEL_SERVICE_NAME=gripday-auth-service
 - **Rate Limiting**: 100 requests/minute
 
 #### Production Environment
+
 - **Replicas**: 3
 - **CORS**: Restricted to production domain
 - **TLS**: Let's Encrypt production certificates
@@ -163,6 +168,7 @@ OTEL_SERVICE_NAME=gripday-auth-service
 ## Networking
 
 ### Service Ports
+
 - **Auth Service**: 8081 (HTTP)
 - **PostgreSQL**: 5432
 - **Redis**: 6379
@@ -170,6 +176,7 @@ OTEL_SERVICE_NAME=gripday-auth-service
 ### Ingress Routes
 
 #### Local Environment
+
 ```
 http://auth.pynity.site/api/v1/auth/*     → Authentication API
 http://auth.pynity.site/api/v1/users/*    → User Management API
@@ -178,12 +185,14 @@ http://auth.pynity.site/actuator/*        → Health/metrics
 ```
 
 #### Staging Environment
+
 ```
 https://auth.pynity.website/api/v1/auth/*  → Authentication API
 https://auth.pynity.website/api/v1/users/* → User Management API
 ```
 
 #### Production Environment
+
 ```
 https://auth.pynity.com/api/v1/auth/*  → Authentication API
 https://auth.pynity.com/api/v1/users/* → User Management API
@@ -192,6 +201,7 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 ## Security
 
 ### Pod Security
+
 - **Non-root user**: Runs as UID 1001
 - **Read-only root filesystem**: Prevents runtime modifications
 - **No privilege escalation**: Security hardening
@@ -199,12 +209,14 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 - **Service account**: Dedicated service account with no token mounting
 
 ### Network Security
+
 - **TLS termination**: At ingress level for staging/production
 - **CORS policies**: Environment-specific CORS configuration
 - **Rate limiting**: Request rate limiting at ingress
 - **Pod anti-affinity**: Spread pods across nodes for availability
 
 ### Secrets Management
+
 - **JWT secrets**: Secure random keys for token signing
 - **Database credentials**: Environment-specific credentials
 - **OAuth2 secrets**: External provider credentials
@@ -213,11 +225,13 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 ## Monitoring and Observability
 
 ### Health Checks
+
 - **Liveness Probe**: `/actuator/health/liveness` (60s delay, 30s interval)
 - **Readiness Probe**: `/actuator/health/readiness` (30s delay, 10s interval)
 - **Startup Probe**: `/actuator/health` (30s delay, 10s interval, 12 failures)
 
 ### Metrics
+
 - **Prometheus metrics**: Available at `/actuator/prometheus`
 - **Custom metrics**: Authentication operations, user registrations, JWT operations
 - **JVM metrics**: Memory, GC, thread pools
@@ -225,12 +239,14 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 - **Redis metrics**: Cache hit rates, connection status
 
 ### Tracing
+
 - **OpenTelemetry**: Distributed tracing integration
 - **Jaeger**: Trace collection and visualization
 - **Correlation IDs**: Request correlation across services
 - **User context**: User and tenant information in traces
 
 ### Logging
+
 - **Structured logging**: JSON format for staging/production
 - **Log levels**: DEBUG (local), INFO (staging), WARN (production)
 - **Audit logging**: Authentication events, user operations
@@ -239,6 +255,7 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 ## API Endpoints
 
 ### Authentication Endpoints
+
 - `POST /api/v1/auth/signup` - User registration
 - `POST /api/v1/auth/login` - User authentication
 - `POST /api/v1/auth/refresh` - Token refresh
@@ -247,6 +264,7 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 - `POST /api/v1/auth/reset-password` - Password reset confirmation
 
 ### User Management Endpoints (Admin Only)
+
 - `GET /api/v1/users` - List users with pagination
 - `GET /api/v1/users/{id}` - Get user details
 - `POST /api/v1/users` - Create user (admin only)
@@ -255,12 +273,14 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 - `PUT /api/v1/users/{id}/roles` - Update user roles (admin only)
 
 ### Tenant Management Endpoints (Admin Only)
+
 - `GET /api/v1/tenants` - List tenants
 - `POST /api/v1/tenants` - Create tenant
 - `PUT /api/v1/tenants/{id}` - Update tenant
 - `DELETE /api/v1/tenants/{id}` - Delete tenant
 
 ### Management Endpoints
+
 - `GET /actuator/health` - Health check
 - `GET /actuator/metrics` - Application metrics
 - `GET /actuator/prometheus` - Prometheus metrics
@@ -271,22 +291,26 @@ https://auth.pynity.com/api/v1/users/* → User Management API
 ### Common Issues
 
 1. **Pod not starting**
+
    ```bash
    kubectl describe pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth
    kubectl logs -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth
    ```
 
 2. **Database connection issues**
+
    ```bash
    kubectl exec -it deployment/auth-postgres -n gripday-auth -- psql -U auth_user -d gripday_auth_local
    ```
 
 3. **Redis connection issues**
+
    ```bash
    kubectl exec -it deployment/auth-redis -n gripday-auth -- redis-cli ping
    ```
 
 4. **JWT token validation issues**
+
    ```bash
    kubectl logs -f deployment/auth-service -n gripday-auth | grep JWT
    ```
@@ -350,19 +374,23 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Integration
 
 ### Gateway Service Integration
+
 The auth service integrates with the gateway service for:
+
 - **JWT token validation**: Shared JWT secret for token verification
 - **User context propagation**: Standard JWT claims format
 - **Multi-tenant support**: Tenant information in JWT tokens
 - **Rate limiting coordination**: Shared Redis instance for distributed rate limiting
 
 ### Platform Integration
+
 - **Microservice authentication**: All platform services validate JWT tokens
 - **User context sharing**: Standardized user context format across services
 - **Tenant isolation**: Multi-tenant data separation and routing
 - **Observability**: Centralized tracing and metrics collection
 
 ### External Integrations
+
 - **OAuth2 providers**: Google, GitHub, Microsoft (configurable)
 - **Email services**: Password reset and notification emails
 - **Audit systems**: Security event logging and monitoring
@@ -373,28 +401,32 @@ The auth service integrates with the gateway service for:
 ### Local Development Setup
 
 1. **Start minikube**
+
    ```bash
    minikube start
    minikube addons enable ingress
    ```
 
 2. **Deploy auth service**
+
    ```bash
    kubectl apply -f namespace.yaml
    kubectl apply -f .
    ```
 
 3. **Configure local DNS**
+
    ```bash
    # Add to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
    echo "$(minikube ip) auth.pynity.site" >> /etc/hosts
    ```
 
 4. **Access services**
+
    ```bash
    # Test health endpoint
    curl http://auth.pynity.site/actuator/health
-   
+
    # Access Swagger UI
    open http://auth.pynity.site/swagger-ui.html
    ```
@@ -420,24 +452,28 @@ kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 ## Maintenance
 
 ### Backup
+
 - **Database backup**: Use pg_dump for PostgreSQL backups
 - **Redis backup**: Use BGSAVE for Redis snapshots
 - **Configuration backup**: Store manifests in version control
 - **Secrets backup**: Secure backup of JWT keys and credentials
 
 ### Updates
+
 - **Rolling updates**: Use deployment rolling update strategy
 - **Database migrations**: Liquibase handles schema migrations automatically
 - **Configuration updates**: Update ConfigMaps and restart pods
 - **Security updates**: Regular updates of base images and dependencies
 
 ### Monitoring
+
 - **Resource usage**: Monitor CPU, memory, and storage usage
 - **Performance metrics**: Track response times and error rates
 - **Security metrics**: Monitor authentication failures and suspicious activities
 - **Business metrics**: Track user registrations, login patterns, and tenant usage
 
 ### Scaling
+
 - **Horizontal scaling**: Add more auth service replicas
 - **Database scaling**: Consider read replicas for high load
 - **Redis scaling**: Use Redis Cluster for high availability

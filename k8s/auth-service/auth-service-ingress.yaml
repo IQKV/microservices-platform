@@ -35,44 +35,44 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: auth.pynity.site
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-service
-            port:
-              number: 8081
-      - path: /api
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-service
-            port:
-              number: 8081
-      - path: /actuator
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-service
-            port:
-              number: 8081
-      - path: /swagger-ui
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-service
-            port:
-              number: 8081
-      - path: /api-docs
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-service
-            port:
-              number: 8081
+    - host: auth.pynity.site
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8081
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8081
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8081
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8081
+          - path: /api-docs
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8081
 # NOTE: Staging and production environments do NOT have direct ingress
 # All traffic routes through the Gateway Service (API Gateway pattern)
 # Direct ingress is only available in local development environment for debugging

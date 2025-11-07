@@ -7,6 +7,7 @@ This document explains the differences between the minikube-optimized manifests 
 ### 1. Resource Requirements
 
 **Minikube (Local Development)**
+
 ```yaml
 resources:
   requests:
@@ -18,6 +19,7 @@ resources:
 ```
 
 **Production**
+
 ```yaml
 resources:
   requests:
@@ -32,31 +34,33 @@ resources:
 
 ### 2. Replicas
 
-| Service | Minikube | Production |
-|---------|----------|------------|
-| Gateway | 1 | 3 |
-| Auth | 1 | 3 |
-| Bookstore | 1 | 2 |
+| Service   | Minikube | Production |
+| --------- | -------- | ---------- |
+| Gateway   | 1        | 3          |
+| Auth      | 1        | 3          |
+| Bookstore | 1        | 2          |
 
 **Why:** Single replicas reduce resource usage for local development. Production needs redundancy.
 
 ### 3. Service Types
 
 **Minikube:** `NodePort` (30080, 30081, 30082)
+
 ```yaml
 spec:
   type: NodePort
   ports:
-  - port: 8080
-    nodePort: 30080
+    - port: 8080
+      nodePort: 30080
 ```
 
 **Production:** `ClusterIP` with Ingress
+
 ```yaml
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
+    - port: 8080
 ```
 
 **Why:** NodePort provides easy access in minikube. Production uses Ingress for proper routing and TLS.
@@ -64,18 +68,20 @@ spec:
 ### 4. Storage
 
 **Minikube:** `emptyDir` (ephemeral)
+
 ```yaml
 volumes:
-- name: postgres-data
-  emptyDir: {}
+  - name: postgres-data
+    emptyDir: {}
 ```
 
 **Production:** `PersistentVolumeClaim`
+
 ```yaml
 volumes:
-- name: postgres-data
-  persistentVolumeClaim:
-    claimName: postgres-auth-pvc
+  - name: postgres-data
+    persistentVolumeClaim:
+      claimName: postgres-auth-pvc
 ```
 
 **Why:** Data persistence not needed for local development. Production requires durable storage.
@@ -83,11 +89,13 @@ volumes:
 ### 5. Security Context
 
 **Minikube:** Relaxed
+
 - No pod security policies
 - Simplified service accounts
 - Basic security context
 
 **Production:** Hardened
+
 - Pod security policies enforced
 - Network policies enabled
 - Read-only root filesystem
@@ -99,11 +107,13 @@ volumes:
 ### 6. Namespaces
 
 **Minikube:** Single namespace `gripday`
+
 ```yaml
-namespace: gripday
+namespace: gripday-dev-env
 ```
 
 **Production:** Environment-specific namespaces
+
 ```yaml
 namespace: gripday-production-env
 namespace: gripday-staging-env
@@ -114,11 +124,13 @@ namespace: gripday-staging-env
 ### 7. Configuration Management
 
 **Minikube:** All-in-one file
+
 - Single `all-in-one.yaml` contains everything
 - Embedded configuration
 - Default secrets included
 
 **Production:** Separated by concern
+
 - Separate files per resource type
 - External secret management
 - Environment-specific ConfigMaps
@@ -128,14 +140,16 @@ namespace: gripday-staging-env
 ### 8. Probes and Timeouts
 
 **Minikube:** Longer timeouts
+
 ```yaml
 startupProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
-  failureThreshold: 12  # 2 minutes
+  failureThreshold: 12 # 2 minutes
 ```
 
 **Production:** Tighter SLAs
+
 ```yaml
 startupProbe:
   initialDelaySeconds: 30
@@ -148,17 +162,19 @@ startupProbe:
 ### 9. Init Containers
 
 **Minikube:** Simple wait logic
+
 ```yaml
 initContainers:
-- name: wait-for-postgres
-  image: busybox:1.36
-  command:
-  - sh
-  - -c
-  - until nc -z postgres-auth 5432; do sleep 2; done
+  - name: wait-for-postgres
+    image: busybox:1.36
+    command:
+      - sh
+      - -c
+      - until nc -z postgres-auth 5432; do sleep 2; done
 ```
 
 **Production:** Robust readiness checks
+
 - Health endpoint verification
 - Retry logic with exponential backoff
 - Comprehensive error handling
@@ -168,11 +184,13 @@ initContainers:
 ### 10. Observability
 
 **Minikube:** Basic
+
 - Health checks enabled
 - Basic logging
 - Optional metrics
 
 **Production:** Comprehensive
+
 - Prometheus metrics
 - OpenTelemetry tracing
 - Structured JSON logging
@@ -184,11 +202,13 @@ initContainers:
 ### 11. Image Pull Policy
 
 **Minikube:** `IfNotPresent`
+
 ```yaml
 imagePullPolicy: IfNotPresent
 ```
 
 **Production:** `Always` or specific tags
+
 ```yaml
 imagePullPolicy: Always
 image: gripday/auth-service:v1.2.3
@@ -199,10 +219,12 @@ image: gripday/auth-service:v1.2.3
 ### 12. Auto-scaling
 
 **Minikube:** None
+
 - Fixed single replica
 - No HPA configured
 
 **Production:** Horizontal Pod Autoscaler
+
 ```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -217,9 +239,11 @@ spec:
 ### 13. Network Policies
 
 **Minikube:** None
+
 - All pods can communicate freely
 
 **Production:** Restricted
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -228,10 +252,10 @@ spec:
     matchLabels:
       app: auth-service
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: gateway-service
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway-service
 ```
 
 **Why:** Minikube prioritizes simplicity. Production enforces least privilege.
@@ -239,10 +263,12 @@ spec:
 ### 14. TLS/SSL
 
 **Minikube:** None
+
 - HTTP only
 - No certificates
 
 **Production:** Enforced
+
 - HTTPS only
 - Cert-manager integration
 - Let's Encrypt certificates
@@ -255,6 +281,7 @@ spec:
 **Minikube:** None
 
 **Production:** Configured
+
 ```yaml
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -304,18 +331,18 @@ spec:
 
 ### Quick Comparison Table
 
-| Feature | Minikube | Production |
-|---------|----------|------------|
-| Deployment Time | < 5 min | 15-30 min |
-| Resource Usage | Low | High |
-| Complexity | Simple | Complex |
-| Replicas | 1 | 2-10 |
-| Storage | Ephemeral | Persistent |
-| Networking | NodePort | Ingress + TLS |
-| Security | Basic | Hardened |
-| Observability | Basic | Full stack |
-| Auto-scaling | No | Yes |
-| Cost | Free | $$$ |
+| Feature         | Minikube  | Production    |
+| --------------- | --------- | ------------- |
+| Deployment Time | < 5 min   | 15-30 min     |
+| Resource Usage  | Low       | High          |
+| Complexity      | Simple    | Complex       |
+| Replicas        | 1         | 2-10          |
+| Storage         | Ephemeral | Persistent    |
+| Networking      | NodePort  | Ingress + TLS |
+| Security        | Basic     | Hardened      |
+| Observability   | Basic     | Full stack    |
+| Auto-scaling    | No        | Yes           |
+| Cost            | Free      | $$$           |
 
 ## Best Practices
 
@@ -347,5 +374,6 @@ spec:
 The minikube manifests prioritize **developer experience** and **ease of use**, while production manifests prioritize **reliability**, **security**, and **scalability**. Both serve their purpose well in their respective environments.
 
 Choose the right tool for your needs:
+
 - **Developing?** Use minikube manifests
 - **Deploying?** Use production manifests

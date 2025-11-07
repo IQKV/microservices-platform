@@ -15,7 +15,7 @@ spec:
       app.kubernetes.io/name: bookstore-redis
       app.kubernetes.io/component: cache
   strategy:
-    type: Recreate  # Use Recreate for stateful services
+    type: Recreate # Use Recreate for stateful services
   template:
     metadata:
       labels:
@@ -33,72 +33,72 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: redis
-        image: redis:7.4-alpine
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 6379
-          name: redis
-          protocol: TCP
-        command:
-        - redis-server
-        - /etc/redis/redis.conf
-        
-        volumeMounts:
-        - name: redis-config
-          mountPath: /etc/redis
-          readOnly: true
-        - name: redis-storage
-          mountPath: /data
-        
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        
-        livenessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-          successThreshold: 1
-        
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-          successThreshold: 1
-        
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false  # Redis needs to write to data directory
-          runAsNonRoot: true
-          runAsUser: 999
-          capabilities:
-            drop:
-            - ALL
-      
+        - name: redis
+          image: redis:7.4-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: redis
+              protocol: TCP
+          command:
+            - redis-server
+            - /etc/redis/redis.conf
+
+          volumeMounts:
+            - name: redis-config
+              mountPath: /etc/redis
+              readOnly: true
+            - name: redis-storage
+              mountPath: /data
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false # Redis needs to write to data directory
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
+
       volumes:
-      - name: redis-config
-        configMap:
-          name: bookstore-redis-config
-          defaultMode: 0644
-      - name: redis-storage
-        persistentVolumeClaim:
-          claimName: bookstore-redis-pvc
-      
+        - name: redis-config
+          configMap:
+            name: bookstore-redis-config
+            defaultMode: 0644
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: bookstore-redis-pvc
+
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
 ---
@@ -117,7 +117,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard  # Adjust based on your cluster's storage classes
+  storageClassName: standard # Adjust based on your cluster's storage classes
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -131,11 +131,11 @@ metadata:
 data:
   redis.conf: |
     # Redis configuration for bookstore service
-    
+
     # Network
     bind 0.0.0.0
     port 6379
-    
+
     # General
     daemonize no
     supervised no
@@ -143,7 +143,7 @@ data:
     loglevel notice
     logfile ""
     databases 16
-    
+
     # Persistence
     save 900 1
     save 300 10
@@ -153,19 +153,19 @@ data:
     rdbchecksum yes
     dbfilename dump.rdb
     dir /data
-    
+
     # Memory management
     maxmemory 200mb
     maxmemory-policy allkeys-lru
-    
+
     # Security (password will be set via environment if needed)
     # requirepass will be set via REDIS_PASSWORD env var if provided
-    
+
     # Performance
     tcp-keepalive 300
     timeout 0
     tcp-backlog 511
-    
+
     # Disable dangerous commands in production
     # rename-command FLUSHDB ""
     # rename-command FLUSHALL ""

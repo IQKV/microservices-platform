@@ -50,6 +50,7 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 ### Production & Staging Environments
 
 #### ✅ **Services WITH Ingress**
+
 1. **Gateway Service** - `api.pynity.com` / `api.pynity.website`
    - Single entry point for all backend APIs
    - Routes: `/api/v1/*`
@@ -75,6 +76,7 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
    - Can be static site or separate service
 
 #### ❌ **Services WITHOUT Ingress**
+
 1. **Auth Service** - Internal only
    - Accessible only via: `https://api.pynity.com/api/v1/auth/*` → Gateway → Auth
    - No direct internet access
@@ -92,11 +94,13 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 ### Local Development Environment
 
 In local development, **all services have direct ingress** for easier debugging:
+
 - Auth: `http://auth.pynity.site`
 - Bookstore: `http://localhost/api/v1/bookstore/*`
 - Gateway: `http://api.pynity.site`
 
 This allows developers to:
+
 - Test services independently
 - Access Swagger UI directly
 - Debug without gateway overhead
@@ -152,11 +156,13 @@ The gateway service routes all external traffic to internal services:
 ### Gateway Service Network Policy
 
 **Ingress:**
+
 - ✅ From: Ingress Controller (nginx-ingress namespace)
 - ✅ From: Monitoring (Prometheus)
 - ✅ From: Same namespace (service mesh)
 
 **Egress:**
+
 - ✅ To: Auth Service (port 8081)
 - ✅ To: Bookstore Service (port 8082)
 - ✅ To: Redis (rate limiting)
@@ -166,6 +172,7 @@ The gateway service routes all external traffic to internal services:
 ### Backend Services Network Policy (Auth, Bookstore, etc.)
 
 **Ingress:**
+
 - ✅ From: Gateway Service ONLY
 - ✅ From: Same namespace (pod-to-pod)
 - ✅ From: Monitoring (Prometheus)
@@ -173,6 +180,7 @@ The gateway service routes all external traffic to internal services:
 - ❌ From: Internet (BLOCKED)
 
 **Egress:**
+
 - ✅ To: Own database (PostgreSQL)
 - ✅ To: Own cache (Redis)
 - ✅ To: DNS
@@ -182,22 +190,26 @@ The gateway service routes all external traffic to internal services:
 ## Security Benefits
 
 ### 1. **Reduced Attack Surface**
+
 - Only 1-2 services exposed to internet (Gateway + UI)
 - Backend services completely isolated
 - Defense in depth with network policies
 
 ### 2. **Centralized Security**
+
 - Single point for authentication
 - Unified rate limiting
 - Consistent CORS policies
 - Centralized TLS certificate management
 
 ### 3. **Network Isolation**
+
 - Backend services can't be accessed directly
 - Even if gateway is compromised, backend services have additional security layers
 - Database and cache services only accessible from their respective service pods
 
 ### 4. **Simplified Secrets Management**
+
 - TLS certificates only on gateway/UI
 - OAuth2 credentials only in auth service
 - Database credentials isolated to service level
@@ -216,38 +228,42 @@ All monitoring access goes through proper channels:
 ### Prometheus Scraping
 
 Network policies allow Prometheus to scrape all services:
+
 ```yaml
 - from:
-  - namespaceSelector:
-      matchLabels:
-        app.kubernetes.io/name: monitoring
+    - namespaceSelector:
+        matchLabels:
+          app.kubernetes.io/name: monitoring
 ```
 
 ## Environment Comparison
 
-| Feature | Local | Staging | Production |
-|---------|-------|---------|------------|
-| Backend Service Ingress | ✅ Yes (debugging) | ❌ No | ❌ No |
-| Gateway Ingress | ✅ Yes | ✅ Yes | ✅ Yes |
-| UI Ingress | ✅ Yes | ✅ Yes | ✅ Yes |
-| TLS | ❌ No | ✅ Yes | ✅ Yes |
-| Rate Limiting | 60/min | 120/min | 1000/min |
-| Network Policies | ⚠️  Permissive | ✅ Enforced | ✅ Enforced |
-| Direct Service Access | ✅ Allowed | ❌ Blocked | ❌ Blocked |
+| Feature                 | Local              | Staging     | Production  |
+| ----------------------- | ------------------ | ----------- | ----------- |
+| Backend Service Ingress | ✅ Yes (debugging) | ❌ No       | ❌ No       |
+| Gateway Ingress         | ✅ Yes             | ✅ Yes      | ✅ Yes      |
+| UI Ingress              | ✅ Yes             | ✅ Yes      | ✅ Yes      |
+| TLS                     | ❌ No              | ✅ Yes      | ✅ Yes      |
+| Rate Limiting           | 60/min             | 120/min     | 1000/min    |
+| Network Policies        | ⚠️ Permissive      | ✅ Enforced | ✅ Enforced |
+| Direct Service Access   | ✅ Allowed         | ❌ Blocked  | ❌ Blocked  |
 
 ## Unified Namespace Strategy
 
 ### Staging Environment
+
 - **Namespace**: `staging-env`
 - **All Services**: Auth, Gateway, Bookstore in same namespace
 - **Benefits**: Simplified RBAC, easier resource quotas, simpler network policies
 
 ### Production Environment
+
 - **Namespace**: `production-env`
 - **All Services**: Auth, Gateway, Bookstore in same namespace
 - **Benefits**: Complete isolation from staging, unified monitoring
 
 ### Local Environment
+
 - **Namespaces**: Separate per service (`gripday-auth`, `gripday-gateway`, `gripday-bookstore`)
 - **Reason**: Mirrors production-like namespace complexity for testing
 
@@ -277,12 +293,14 @@ Network policies allow Prometheus to scrape all services:
 ## Reserved Domains
 
 ### Production Domains
+
 - **`pynity.com`** → Landing/Marketing page (optional)
 - **`app.pynity.com`** → Main application (dashboard, admin, logged-in features)
 - **`auth.pynity.com`** → Auth UI (login/signup frontend) - RESERVED
 - **`api.pynity.com`** → Gateway Service (all backend APIs)
 
 ### Staging Domains
+
 - **`pynity.website`** → Landing/Marketing page (optional)
 - **`app.pynity.website`** → Main application (dashboard, admin, logged-in features)
 - **`auth.pynity.website`** → Auth UI (login/signup frontend) - RESERVED
@@ -291,6 +309,7 @@ Network policies allow Prometheus to scrape all services:
 ### API Access Examples
 
 **Authentication APIs** (through gateway):
+
 ```bash
 # Main Application (logged-in users)
 https://app.pynity.com/dashboard           # Dashboard page
@@ -341,6 +360,7 @@ kubectl get ingress -A
 
 **Problem**: Can't reach auth or bookstore service
 **Solution**: These are internal-only. Access via gateway:
+
 ```bash
 # ❌ Wrong (direct access blocked)
 curl https://auth.pynity.com/api/v1/auth/login
@@ -352,6 +372,7 @@ curl https://api.pynity.com/api/v1/auth/login
 ### Network Policy Issues
 
 Check if traffic is being blocked:
+
 ```bash
 # Check network policies
 kubectl get networkpolicies -n gripday-production-env
@@ -363,6 +384,7 @@ kubectl describe networkpolicy auth-service-network-policy -n gripday-production
 ### Gateway Routing Issues
 
 Check gateway routes:
+
 ```bash
 # Access gateway actuator
 kubectl port-forward svc/gateway-service 8080:8080 -n gripday-production-env

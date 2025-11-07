@@ -25,10 +25,12 @@ The gateway service is the central entry point for the Gripday platform, providi
 ## Components
 
 ### Core Service
+
 - **gateway-service**: Main Spring Cloud Gateway application (port 8080)
 - **gateway-redis**: Redis 7.4 for rate limiting and session management
 
 ### Kubernetes Resources
+
 - **Deployment**: Application pods with rolling update strategy
 - **Service**: ClusterIP service for internal communication
 - **Ingress**: HTTP/HTTPS routing with environment-specific configuration
@@ -124,14 +126,15 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 
 ### Resource Requirements
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Gateway Service | 500m | 1000m | 768Mi | 1536Mi |
-| Redis | 100m | 200m | 256Mi | 512Mi |
+| Component       | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| --------------- | ----------- | --------- | -------------- | ------------ |
+| Gateway Service | 500m        | 1000m     | 768Mi          | 1536Mi       |
+| Redis           | 100m        | 200m      | 256Mi          | 512Mi        |
 
 ### Environment-Specific Configuration
 
 #### Local Environment
+
 - **Replicas**: 3
 - **CORS**: Permissive (localhost, minikube)
 - **TLS**: Disabled
@@ -140,6 +143,7 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 - **HPA**: 3-10 replicas, 70% CPU threshold
 
 #### Staging Environment
+
 - **Replicas**: 2
 - **CORS**: Restricted to staging domain
 - **TLS**: Let's Encrypt staging certificates
@@ -148,6 +152,7 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 - **HPA**: 2-6 replicas, 70% CPU threshold
 
 #### Production Environment
+
 - **Replicas**: 5
 - **CORS**: Restricted to production domain
 - **TLS**: Let's Encrypt production certificates
@@ -158,24 +163,28 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 ## Networking
 
 ### Service Ports
+
 - **Gateway Service**: 8080 (HTTP)
 - **Redis**: 6379
 
 ### Ingress Routes
 
 #### Local Environment
+
 ```
 http://api.pynity.site/api/v1/auth/*     → Auth Service
 http://api.pynity.site/actuator/*        → Gateway Health/Metrics
 ```
 
 #### Staging Environment
+
 ```
 https://api.pynity.website/api/v1/auth/*  → Auth Service
 https://api.pynity.website/actuator/*     → Gateway Health/Metrics
 ```
 
 #### Production Environment
+
 ```
 https://api.pynity.com/api/v1/auth/*  → Auth Service
 https://api.pynity.com/actuator/*     → Gateway Health/Metrics
@@ -190,18 +199,19 @@ spring:
   cloud:
     gateway:
       routes:
-      - id: auth-service
-        uri: http://auth-service.gripday-auth.svc.cluster.local:8081
-        predicates:
-        - Path=/api/*/auth/**
-        filters:
-        - JwtAuthenticationFilter
-        - RateLimitingFilter
+        - id: auth-service
+          uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+          predicates:
+            - Path=/api/*/auth/**
+          filters:
+            - JwtAuthenticationFilter
+            - RateLimitingFilter
 ```
 
 ## Security
 
 ### Pod Security
+
 - **Non-root user**: Runs as UID 1001
 - **Read-only root filesystem**: Prevents runtime modifications
 - **No privilege escalation**: Security hardening
@@ -209,6 +219,7 @@ spring:
 - **Service account**: Dedicated service account with no token mounting
 
 ### Network Security
+
 - **Network policies**: Restrict traffic between pods
 - **TLS termination**: At ingress level for staging/production
 - **CORS policies**: Environment-specific CORS configuration
@@ -216,6 +227,7 @@ spring:
 - **Pod anti-affinity**: Spread pods across nodes for availability
 
 ### Authentication & Authorization
+
 - **JWT validation**: Validates tokens from auth service
 - **User context propagation**: Extracts user information from JWT
 - **Tenant context**: Multi-tenant request routing
@@ -224,6 +236,7 @@ spring:
 ## Rate Limiting
 
 ### Configuration
+
 - **Backend**: Redis-based distributed rate limiting
 - **Algorithm**: Token bucket with burst capacity
 - **Granularity**: Per-user, per-IP, per-tenant
@@ -232,12 +245,13 @@ spring:
 ### Rate Limits by Environment
 
 | Environment | Requests/Minute | Burst Capacity | Replenish Rate |
-|-------------|-----------------|----------------|----------------|
-| Local | 60 | 10 | 1/second |
-| Staging | 120 | 20 | 2/second |
-| Production | 1000 | 100 | 16/second |
+| ----------- | --------------- | -------------- | -------------- |
+| Local       | 60              | 10             | 1/second       |
+| Staging     | 120             | 20             | 2/second       |
+| Production  | 1000            | 100            | 16/second      |
 
 ### Rate Limiting Headers
+
 ```
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
@@ -247,12 +261,14 @@ X-RateLimit-Reset: 1640995200
 ## Circuit Breaker
 
 ### Configuration
+
 - **Failure Rate Threshold**: 50%
 - **Wait Duration**: 30 seconds (open state)
 - **Sliding Window**: 10 requests
 - **Minimum Calls**: 5 requests
 
 ### Circuit Breaker States
+
 - **Closed**: Normal operation, requests pass through
 - **Open**: Failures exceed threshold, requests fail fast
 - **Half-Open**: Test requests to check if service recovered
@@ -260,11 +276,13 @@ X-RateLimit-Reset: 1640995200
 ## Monitoring and Observability
 
 ### Health Checks
+
 - **Liveness Probe**: `/actuator/health/liveness` (60s delay, 30s interval)
 - **Readiness Probe**: `/actuator/health/readiness` (30s delay, 10s interval)
 - **Startup Probe**: `/actuator/health` (30s delay, 10s interval, 12 failures)
 
 ### Metrics
+
 - **Prometheus metrics**: Available at `/actuator/prometheus`
 - **Gateway metrics**: Request routing, response times, error rates
 - **Rate limiting metrics**: Rate limit hits, remaining capacity
@@ -272,12 +290,14 @@ X-RateLimit-Reset: 1640995200
 - **JVM metrics**: Memory, GC, thread pools optimized for reactive workloads
 
 ### Tracing
+
 - **OpenTelemetry**: Distributed tracing integration
 - **Jaeger**: Trace collection and visualization
 - **Correlation IDs**: Request correlation across all services
 - **User context**: User and tenant information in traces
 
 ### Logging
+
 - **Structured logging**: JSON format for staging/production
 - **Log levels**: DEBUG (local), INFO (staging), WARN (production)
 - **Request logging**: HTTP requests, routing decisions, authentication events
@@ -288,6 +308,7 @@ X-RateLimit-Reset: 1640995200
 ### Horizontal Pod Autoscaler (HPA)
 
 #### Local Environment
+
 ```yaml
 minReplicas: 3
 maxReplicas: 10
@@ -298,6 +319,7 @@ metrics:
 ```
 
 #### Staging Environment
+
 ```yaml
 minReplicas: 2
 maxReplicas: 6
@@ -307,6 +329,7 @@ metrics:
 ```
 
 #### Production Environment
+
 ```yaml
 minReplicas: 5
 maxReplicas: 20
@@ -317,6 +340,7 @@ metrics:
 ```
 
 ### Scaling Policies
+
 - **Scale Up**: Fast response (50% increase, max 4 pods/minute)
 - **Scale Down**: Conservative (10% decrease, max 2 pods/5 minutes)
 - **Stabilization**: Prevent flapping with stabilization windows
@@ -324,6 +348,7 @@ metrics:
 ## API Endpoints
 
 ### Gateway Management
+
 - `GET /actuator/health` - Health check
 - `GET /actuator/metrics` - Application metrics
 - `GET /actuator/prometheus` - Prometheus metrics
@@ -331,12 +356,15 @@ metrics:
 - `POST /actuator/gateway/refresh` - Refresh route configuration
 
 ### Proxied Endpoints
+
 All requests are proxied to backend services:
+
 - `/api/v1/auth/**` → Auth Service
 - `/api/v1/users/**` → Auth Service (User Management)
 - `/api/v1/tenants/**` → Auth Service (Tenant Management)
 
 ### Headers Added by Gateway
+
 - `X-Correlation-ID` - Request correlation ID
 - `X-Request-ID` - Unique request identifier
 - `X-User-ID` - Authenticated user ID (from JWT)
@@ -347,23 +375,27 @@ All requests are proxied to backend services:
 ### Common Issues
 
 1. **Gateway not starting**
+
    ```bash
    kubectl describe pod -l app.kubernetes.io/name=gripday-gateway-service -n gripday-gateway
    kubectl logs -l app.kubernetes.io/name=gripday-gateway-service -n gripday-gateway
    ```
 
 2. **Redis connection issues**
+
    ```bash
    kubectl exec -it deployment/gateway-redis -n gripday-gateway -- redis-cli ping
    kubectl logs -f deployment/gateway-redis -n gripday-gateway
    ```
 
 3. **Route not working**
+
    ```bash
    kubectl exec -it deployment/gateway-service -n gripday-gateway -- curl localhost:8080/actuator/gateway/routes
    ```
 
 4. **Rate limiting issues**
+
    ```bash
    kubectl exec -it deployment/gateway-redis -n gripday-gateway -- redis-cli monitor
    kubectl logs -f deployment/gateway-service -n gripday-gateway | grep -i rate
@@ -429,18 +461,21 @@ done
 ## Integration
 
 ### Auth Service Integration
+
 - **JWT validation**: Validates tokens using shared secret
 - **User context**: Extracts user information from JWT tokens
 - **Route protection**: Automatically protects routes requiring authentication
 - **Token refresh**: Handles token refresh flows
 
 ### Backend Service Integration
+
 - **Service discovery**: Routes to services via Kubernetes DNS
 - **Load balancing**: Distributes requests across service replicas
 - **Health checking**: Monitors backend service health
 - **Circuit breaking**: Protects against cascading failures
 
 ### Observability Stack Integration
+
 - **Prometheus**: Metrics collection and alerting
 - **Grafana**: Dashboards and visualization
 - **Jaeger**: Distributed tracing
@@ -451,23 +486,27 @@ done
 ### Local Development Setup
 
 1. **Start minikube**
+
    ```bash
    minikube start
    minikube addons enable ingress
    ```
 
 2. **Deploy auth service first**
+
    ```bash
    kubectl apply -f ../auth-service/
    ```
 
 3. **Deploy gateway service**
+
    ```bash
    kubectl apply -f namespace.yaml
    kubectl apply -f .
    ```
 
 4. **Configure local DNS**
+
    ```bash
    # Add to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
    echo "$(minikube ip) api.pynity.site" >> /etc/hosts
@@ -499,23 +538,27 @@ kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 ## Maintenance
 
 ### Backup
+
 - **Redis backup**: Use BGSAVE for Redis snapshots
 - **Configuration backup**: Store manifests in version control
 - **Route configuration**: Export current routes for backup
 
 ### Updates
+
 - **Rolling updates**: Use deployment rolling update strategy
 - **Route updates**: Update ConfigMaps and refresh routes
 - **Configuration updates**: Update ConfigMaps and restart pods
 - **Zero-downtime**: Ensure minimum replicas during updates
 
 ### Monitoring
+
 - **Resource usage**: Monitor CPU, memory, and network usage
 - **Performance metrics**: Track response times, throughput, and error rates
 - **Rate limiting**: Monitor rate limit effectiveness and adjust as needed
 - **Circuit breaker**: Monitor circuit breaker state and failure patterns
 
 ### Scaling
+
 - **Horizontal scaling**: HPA automatically scales based on metrics
 - **Redis scaling**: Consider Redis Cluster for high availability
 - **Load balancing**: Ensure proper load distribution

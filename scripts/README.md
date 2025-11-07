@@ -5,9 +5,11 @@ This directory contains validation scripts for the Gripday microservices platfor
 ## Scripts Overview
 
 ### 1. validate-platform.sh
+
 Core validation script that performs end-to-end testing of the platform functionality.
 
 **Features:**
+
 - Complete user authentication flow testing
 - Multi-tenant functionality validation
 - JWT token propagation and user context testing
@@ -16,6 +18,7 @@ Core validation script that performs end-to-end testing of the platform function
 - Comprehensive logging and reporting
 
 **Usage:**
+
 ```bash
 # Make executable (if needed)
 chmod +x scripts/validate-platform.sh
@@ -32,9 +35,11 @@ GRAFANA_URL=http://localhost:3000 \
 ```
 
 ### 2. validate-docker-compose.sh
+
 Docker Compose specific validation that manages the platform lifecycle and runs validation.
 
 **Features:**
+
 - Automatic platform startup using Docker Compose
 - Service health monitoring
 - Complete validation suite execution
@@ -42,6 +47,7 @@ Docker Compose specific validation that manages the platform lifecycle and runs 
 - Configurable timeout and compose file selection
 
 **Usage:**
+
 ```bash
 # Make executable (if needed)
 chmod +x scripts/validate-docker-compose.sh
@@ -60,6 +66,7 @@ chmod +x scripts/validate-docker-compose.sh
 ```
 
 **Options:**
+
 - `--no-start`: Don't start services (assume they're already running)
 - `--no-stop`: Don't stop services after validation
 - `--compose-file FILE`: Use specific Docker Compose file
@@ -67,9 +74,11 @@ chmod +x scripts/validate-docker-compose.sh
 - `-h, --help`: Show help message
 
 ### 3. validate-kubernetes.sh
+
 Kubernetes specific validation for deployed platform instances.
 
 **Features:**
+
 - Kubernetes deployment readiness verification
 - Pod health monitoring
 - Service URL discovery (LoadBalancer, NodePort, port-forward)
@@ -77,6 +86,7 @@ Kubernetes specific validation for deployed platform instances.
 - Kubernetes-specific logging and troubleshooting
 
 **Usage:**
+
 ```bash
 # Make executable (if needed)
 chmod +x scripts/validate-kubernetes.sh
@@ -95,6 +105,7 @@ chmod +x scripts/validate-kubernetes.sh
 ```
 
 **Options:**
+
 - `--namespace NAME`: Kubernetes namespace (default: gripday)
 - `--timeout SECONDS`: Validation timeout in seconds (default: 600)
 - `--no-logs`: Don't show logs on failure
@@ -103,6 +114,7 @@ chmod +x scripts/validate-kubernetes.sh
 ## Validation Test Coverage
 
 ### Authentication Flow Tests
+
 - User registration with tenant isolation and email verification
 - Email verification token validation and account activation
 - User authentication with username/email (requires verified email)
@@ -111,23 +123,27 @@ chmod +x scripts/validate-kubernetes.sh
 - User logout and token invalidation
 
 ### Multi-Tenant Functionality
+
 - Tenant-specific user registration
 - Cross-tenant access prevention
 - Tenant context propagation
 - Tenant isolation verification
 
 ### JWT Token and User Context
+
 - JWT token structure validation
 - User context claims verification
 - Token expiration and refresh
 - Cross-service token propagation
 
 ### Rate Limiting
+
 - Rate limit trigger testing
 - Tenant-specific rate limiting
 - Rate limit response validation
 
 ### Observability Stack
+
 - Prometheus metrics endpoint testing
 - Grafana accessibility verification
 - Service metrics collection validation
@@ -136,22 +152,26 @@ chmod +x scripts/validate-kubernetes.sh
 ## Environment Variables
 
 ### Core Service URLs
+
 - `GATEWAY_URL`: Gateway service URL (default: http://localhost:8080)
 - `AUTH_URL`: Auth service URL (default: http://localhost:8081)
 - `PROMETHEUS_URL`: Prometheus URL (default: http://localhost:9090)
 - `GRAFANA_URL`: Grafana URL (default: http://localhost:3000)
 
 ### Docker Compose Configuration
+
 - `COMPOSE_FILE`: Docker Compose file path (default: docker-compose.yml)
 - `VALIDATION_TIMEOUT`: Validation timeout in seconds (default: 300)
 
 ### Kubernetes Configuration
+
 - `NAMESPACE`: Kubernetes namespace (default: gripday)
 - `KUBECTL_CMD`: kubectl command (default: kubectl)
 
 ## Dependencies
 
 ### Required Tools
+
 - `curl`: HTTP client for API testing
 - `jq`: JSON processor for response parsing
 - `docker-compose` or `docker compose`: For Docker Compose validation
@@ -160,17 +180,20 @@ chmod +x scripts/validate-kubernetes.sh
 ### Installation Examples
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt-get update
 sudo apt-get install curl jq
 ```
 
 **macOS:**
+
 ```bash
 brew install curl jq
 ```
 
 **CentOS/RHEL:**
+
 ```bash
 sudo yum install curl jq
 ```
@@ -178,16 +201,19 @@ sudo yum install curl jq
 ## Output and Logging
 
 ### Console Output
+
 - Color-coded log messages (INFO, SUCCESS, ERROR, WARN)
 - Real-time validation progress
 - Test result summary
 
 ### Log Files
+
 - Detailed validation logs saved to `platform-validation-YYYYMMDD-HHMMSS.log`
 - Complete request/response details
 - Timestamp and correlation information
 
 ### Exit Codes
+
 - `0`: All validations passed successfully
 - `1`: One or more validations failed
 - `1`: Missing dependencies or configuration errors
@@ -197,28 +223,34 @@ sudo yum install curl jq
 ### Common Issues
 
 **Services Not Ready:**
+
 - Increase timeout with `--timeout` option
 - Check service logs for startup errors
 - Verify network connectivity and port availability
 
 **Authentication Failures:**
+
 - Verify JWT configuration and secrets
 - Check database connectivity and schema
 - Validate tenant configuration
 - Ensure email verification is completed for new users
 
 **Rate Limiting Issues:**
+
 - Adjust rate limiting configuration
 - Check Redis connectivity
 - Verify tenant-specific rate limits
 
 **Observability Stack Issues:**
+
 - Verify Prometheus and Grafana deployment
 - Check metrics endpoint accessibility
 - Validate observability configuration
 
 ### Debug Mode
+
 Enable verbose logging by setting environment variables:
+
 ```bash
 export DEBUG=1
 export VERBOSE=1
@@ -226,7 +258,9 @@ export VERBOSE=1
 ```
 
 ### Manual Testing
+
 For manual testing and debugging, you can run individual test functions:
+
 ```bash
 # Source the script to access functions
 source scripts/validate-platform.sh
@@ -240,6 +274,7 @@ test_observability_stack
 ## Integration with CI/CD
 
 ### GitHub Actions Example
+
 ```yaml
 - name: Validate Platform
   run: |
@@ -248,6 +283,7 @@ test_observability_stack
 ```
 
 ### Jenkins Pipeline Example
+
 ```groovy
 stage('Platform Validation') {
     steps {
@@ -258,6 +294,7 @@ stage('Platform Validation') {
 ```
 
 ### GitLab CI Example
+
 ```yaml
 validate_platform:
   script:

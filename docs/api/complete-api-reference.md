@@ -26,9 +26,11 @@ X-Tenant-ID: <tenant-id>
 ### Authentication Endpoints
 
 #### POST /api/v1/auth/signup
+
 Register a new user account.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
@@ -44,6 +46,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ```
 
 **Request Body:**
+
 ```json
 {
   "username": "string (3-50 chars, alphanumeric + underscore)",
@@ -56,6 +59,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ```
 
 **Success Response (201 Created):**
+
 ```json
 {
   "userId": 123,
@@ -72,6 +76,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ```
 
 **Error Responses:**
+
 ```json
 // 409 Conflict - Username/Email already exists
 {
@@ -111,9 +116,11 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ```
 
 #### POST /api/v1/auth/login
+
 Authenticate user and receive JWT tokens.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -126,6 +133,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 **Request Body:**
+
 ```json
 {
   "username": "string (username or email)",
@@ -135,6 +143,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -156,6 +165,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 **Error Responses:**
+
 ```json
 // 401 Unauthorized - Invalid credentials
 {
@@ -186,9 +196,11 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 #### POST /api/v1/auth/refresh
+
 Refresh JWT access token using refresh token.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
@@ -199,6 +211,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "string (valid JWT refresh token)"
@@ -206,6 +219,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -217,6 +231,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 **Error Responses:**
+
 ```json
 // 401 Unauthorized - Invalid refresh token
 {
@@ -233,9 +248,11 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 #### POST /api/v1/auth/logout
+
 Logout user and invalidate tokens.
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -243,6 +260,7 @@ curl -X POST http://localhost:8080/api/v1/auth/logout \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "message": "Successfully logged out",
@@ -251,9 +269,11 @@ curl -X POST http://localhost:8080/api/v1/auth/logout \
 ```
 
 #### GET /api/v1/auth/profile
+
 Get current user profile information.
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/auth/profile \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -261,6 +281,7 @@ curl -X GET http://localhost:8080/api/v1/auth/profile \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "userId": 123,
@@ -280,9 +301,11 @@ curl -X GET http://localhost:8080/api/v1/auth/profile \
 ### User Management Endpoints (Admin Only)
 
 #### GET /api/v1/users
+
 List users with pagination and filtering (Admin/Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,desc&search=john" \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -290,6 +313,7 @@ curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,de
 ```
 
 **Query Parameters:**
+
 - `page`: Page number (0-based, default: 0)
 - `size`: Page size (1-100, default: 20)
 - `sort`: Sort criteria (field,direction)
@@ -298,6 +322,7 @@ curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,de
 - `authority`: Filter by authority/role
 
 **Success Response (200 OK):**
+
 ```json
 {
   "content": [
@@ -341,9 +366,11 @@ curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,de
 ```
 
 #### GET /api/v1/users/{userId}
+
 Get specific user by ID (Admin/Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/users/123 \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -351,6 +378,7 @@ curl -X GET http://localhost:8080/api/v1/users/123 \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "userId": 123,
@@ -371,9 +399,11 @@ curl -X GET http://localhost:8080/api/v1/users/123 \
 ```
 
 #### PUT /api/v1/users/{userId}
+
 Update user information (Admin/Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X PUT http://localhost:8080/api/v1/users/123 \
   -H "Content-Type: application/json" \
@@ -388,6 +418,7 @@ curl -X PUT http://localhost:8080/api/v1/users/123 \
 ```
 
 **Request Body:**
+
 ```json
 {
   "firstName": "string (optional)",
@@ -398,6 +429,7 @@ curl -X PUT http://localhost:8080/api/v1/users/123 \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "userId": 123,
@@ -415,9 +447,11 @@ curl -X PUT http://localhost:8080/api/v1/users/123 \
 ```
 
 #### DELETE /api/v1/users/{userId}
+
 Delete user account (Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/users/123 \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -425,14 +459,17 @@ curl -X DELETE http://localhost:8080/api/v1/users/123 \
 ```
 
 **Success Response (204 No Content):**
+
 ```
 (Empty response body)
 ```
 
 #### POST /api/v1/users/{userId}/authorities
+
 Assign authority/role to user (Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/123/authorities \
   -H "Content-Type: application/json" \
@@ -444,6 +481,7 @@ curl -X POST http://localhost:8080/api/v1/users/123/authorities \
 ```
 
 **Request Body:**
+
 ```json
 {
   "authorityName": "string (USER, ADMIN, SUPER_ADMIN)"
@@ -451,6 +489,7 @@ curl -X POST http://localhost:8080/api/v1/users/123/authorities \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "message": "Authority assigned successfully",
@@ -461,9 +500,11 @@ curl -X POST http://localhost:8080/api/v1/users/123/authorities \
 ```
 
 #### DELETE /api/v1/users/{userId}/authorities/{authorityName}
+
 Remove authority/role from user (Super Admin only).
 
 **Request:**
+
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/users/123/authorities/ADMIN \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -471,6 +512,7 @@ curl -X DELETE http://localhost:8080/api/v1/users/123/authorities/ADMIN \
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "message": "Authority removed successfully",
@@ -485,14 +527,17 @@ curl -X DELETE http://localhost:8080/api/v1/users/123/authorities/ADMIN \
 ### Health and Status Endpoints
 
 #### GET /actuator/health
+
 Get service health status.
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/actuator/health
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "status": "UP",
@@ -520,14 +565,17 @@ curl -X GET http://localhost:8080/actuator/health
 ```
 
 #### GET /actuator/metrics
+
 Get available metrics.
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/actuator/metrics
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "names": [
@@ -544,14 +592,17 @@ curl -X GET http://localhost:8080/actuator/metrics
 ```
 
 #### GET /actuator/metrics/{metricName}
+
 Get specific metric details.
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "name": "gateway.requests",
@@ -607,7 +658,8 @@ All API endpoints use a consistent error response format:
 
 ### Error Codes
 
-#### Authentication Errors (AUTH_*)
+#### Authentication Errors (AUTH\_\*)
+
 - `AUTH_INVALID_CREDENTIALS`: Invalid username or password
 - `AUTH_INVALID_TOKEN`: Invalid or expired JWT token
 - `AUTH_TOKEN_EXPIRED`: JWT token has expired
@@ -615,22 +667,26 @@ All API endpoints use a consistent error response format:
 - `AUTH_ACCOUNT_DISABLED`: Account is disabled
 - `AUTH_INSUFFICIENT_PRIVILEGES`: Insufficient permissions for operation
 
-#### Validation Errors (VALIDATION_*)
+#### Validation Errors (VALIDATION\_\*)
+
 - `VALIDATION_ERROR`: General validation error
 - `VALIDATION_REQUIRED_FIELD`: Required field is missing
 - `VALIDATION_INVALID_FORMAT`: Field format is invalid
 - `VALIDATION_DUPLICATE_VALUE`: Value already exists
 
-#### Resource Errors (RESOURCE_*)
+#### Resource Errors (RESOURCE\_\*)
+
 - `RESOURCE_NOT_FOUND`: Requested resource not found
 - `RESOURCE_CONFLICT`: Resource conflict (e.g., duplicate)
 - `RESOURCE_FORBIDDEN`: Access to resource is forbidden
 
-#### Rate Limiting Errors (RATE_*)
+#### Rate Limiting Errors (RATE\_\*)
+
 - `RATE_LIMIT_EXCEEDED`: Rate limit exceeded
 - `RATE_LIMIT_QUOTA_EXCEEDED`: Quota limit exceeded
 
-#### System Errors (SYSTEM_*)
+#### System Errors (SYSTEM\_\*)
+
 - `SYSTEM_ERROR`: Internal system error
 - `SYSTEM_UNAVAILABLE`: System temporarily unavailable
 - `SYSTEM_TIMEOUT`: Operation timed out
@@ -638,11 +694,13 @@ All API endpoints use a consistent error response format:
 ## HTTP Status Codes
 
 ### Success Codes (2xx)
+
 - `200 OK`: Request successful
 - `201 Created`: Resource created successfully
 - `204 No Content`: Request successful, no content to return
 
 ### Client Error Codes (4xx)
+
 - `400 Bad Request`: Invalid request format or validation error
 - `401 Unauthorized`: Authentication required or invalid
 - `403 Forbidden`: Access denied due to insufficient permissions
@@ -652,6 +710,7 @@ All API endpoints use a consistent error response format:
 - `429 Too Many Requests`: Rate limit exceeded
 
 ### Server Error Codes (5xx)
+
 - `500 Internal Server Error`: Unexpected server error
 - `502 Bad Gateway`: Gateway received invalid response from upstream
 - `503 Service Unavailable`: Service temporarily unavailable
@@ -660,6 +719,7 @@ All API endpoints use a consistent error response format:
 ## Rate Limiting
 
 ### Rate Limit Headers
+
 All responses include rate limiting information:
 
 ```
@@ -670,7 +730,9 @@ X-RateLimit-Retry-After: 60
 ```
 
 ### Rate Limit Configuration
+
 Default rate limits per tenant:
+
 - **Authentication endpoints**: 10 requests per minute
 - **User management endpoints**: 50 requests per minute
 - **General API endpoints**: 100 requests per minute
@@ -678,14 +740,17 @@ Default rate limits per tenant:
 ## Multi-Tenant Support
 
 ### Tenant Identification
+
 Tenants can be identified through multiple methods:
 
 1. **Header-based** (Recommended):
+
 ```bash
 curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
 ```
 
 2. **JWT token claims** (Automatic):
+
 ```json
 {
   "sub": "johndoe",
@@ -696,11 +761,13 @@ curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
 ```
 
 3. **Subdomain-based** (When configured):
+
 ```bash
 curl http://tenant-123.api.pynity.com/api/v1/users
 ```
 
 ### Tenant Isolation
+
 - All data is automatically filtered by tenant context
 - Cross-tenant access is prevented at the database level
 - JWT tokens include tenant claims for context propagation
@@ -709,18 +776,19 @@ curl http://tenant-123.api.pynity.com/api/v1/users
 ## SDK and Client Libraries
 
 ### JavaScript/TypeScript
+
 ```javascript
-import { GripdayClient } from '@gripday/client-js';
+import { GripdayClient } from "@gripday/client-js";
 
 const client = new GripdayClient({
-  baseUrl: 'http://localhost:8080',
-  tenantId: 'default'
+  baseUrl: "http://localhost:8080",
+  tenantId: "default",
 });
 
 // Authenticate
 const { accessToken } = await client.auth.login({
-  username: 'johndoe',
-  password: 'SecurePass123!'
+  username: "johndoe",
+  password: "SecurePass123!",
 });
 
 // Set token for subsequent requests
@@ -731,6 +799,7 @@ const profile = await client.auth.getProfile();
 ```
 
 ### Java
+
 ```java
 import com.gripday.client.GripdayClient;
 import com.gripday.client.auth.AuthService;
@@ -754,6 +823,7 @@ UserProfile profile = client.auth().getProfile();
 ```
 
 ### Python
+
 ```python
 from gripday_client import GripdayClient
 
@@ -778,6 +848,7 @@ profile = client.auth.get_profile()
 ## Postman Collection
 
 A Postman collection is available with:
+
 - Pre-configured environments (local, staging, production)
 - Authentication flow automation
 - Variable management for tokens and tenant IDs
@@ -788,9 +859,11 @@ Download: [Gripday Platform Postman Collection](postman/gripday-platform.postman
 ## OpenAPI Specifications
 
 Interactive API documentation is available via Swagger UI:
+
 - **Gateway Service**: http://localhost:8080/swagger-ui.html
 - **Auth Service**: http://localhost:8081/swagger-ui.html
 
 Download OpenAPI specifications:
+
 - **Gateway Service**: http://localhost:8080/v3/api-docs
 - **Auth Service**: http://localhost:8081/v3/api-docs

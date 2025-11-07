@@ -1,4 +1,5 @@
 **Password Reset:**
+
 ```bash
 # Initiate password reset (always returns 200)
 curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
@@ -12,6 +13,7 @@ curl -X POST http://localhost:8080/api/v1/auth/reset-password \
 ```
 
 **Logout from all devices:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/logout-all \
   -H "Authorization: Bearer $TOKEN"
@@ -33,7 +35,7 @@ The Gripday platform consists of three services that demonstrate a complete micr
 
 - 🔐 **JWT-based Authentication** - Stateless authentication with user context propagation
 - 📧 **Email Verification** - Secure account activation with HTML email templates
-- 🌐 **API Gateway** - Intelligent routing, rate limiting, and circuit breaker patterns  
+- 🌐 **API Gateway** - Intelligent routing, rate limiting, and circuit breaker patterns
 - 🏢 **Multi-Tenant Architecture** - Complete tenant isolation and context management
 - 📊 **Observability** - OpenTelemetry, Prometheus metrics, and structured logging
 - 🐳 **Container-First** - Docker Compose for development, Kubernetes-ready
@@ -43,11 +45,13 @@ The Gripday platform consists of three services that demonstrate a complete micr
 ## Quick Start
 
 ### Prerequisites
+
 - Java 21
 - Maven 3.9+
 - Docker and Docker Compose
 
 ### 1. Clone and Setup
+
 ```bash
 git clone <repository-url> gripday-platform
 cd gripday-platform
@@ -57,6 +61,7 @@ docker compose up -d postgres redis
 ```
 
 ### 2. Build and Start Services
+
 ```bash
 # Build all services
 mvn clean package
@@ -73,6 +78,7 @@ cd gripday-bookstore-service && mvn spring-boot:run -Dspring-boot.run.profiles=l
 ```
 
 ### 3. Verify Installation
+
 ```bash
 # Check service health
 curl http://localhost:8081/actuator/health  # Auth Service
@@ -84,7 +90,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
-    "email": "test@example.com", 
+    "email": "test@example.com",
     "password": "TestPass123!",
     "firstName": "Test",
     "lastName": "User"
@@ -96,6 +102,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 **Note**: New users must verify their email address before they can log in. Check the application logs for the verification link in development mode.
 
 ### 4. Test Complete Flow
+
 ```bash
 # Login to get token
 TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
@@ -112,9 +119,11 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Services
 
 ### Auth Service (Port 8081)
+
 Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account activation.
 
 **Key Endpoints:**
+
 - `POST /api/v1/auth/signup` - User registration with email verification
 - `POST /api/v1/auth/login` - User authentication (requires verified email)
 - `POST /api/v1/auth/refresh` - Token refresh
@@ -127,13 +136,16 @@ Centralized authentication and user management service providing JWT-based authe
 - `POST /api/v1/auth/reset-password` - Complete password reset with token
 
 **Documentation:**
+
 - [Auth Service README](gripday-auth-service/README.md)
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 
 ### Gateway Service (Port 8080)
+
 API Gateway providing intelligent routing, security, and resilience patterns for all microservices.
 
 **Features:**
+
 - JWT authentication for protected routes
 - Redis-backed rate limiting
 - Circuit breaker patterns with Resilience4j
@@ -141,13 +153,16 @@ API Gateway providing intelligent routing, security, and resilience patterns for
 - CORS handling
 
 **Documentation:**
+
 - [Gateway Service README](gripday-gateway-service/README.md)
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ### Bookstore Service (Port 8082)
+
 Example business microservice demonstrating book catalog and inventory management with full three-tier architecture implementation.
 
 **Features:**
+
 - Book catalog management (CRUD operations)
 - Inventory tracking and management
 - JWT authentication integration
@@ -155,12 +170,14 @@ Example business microservice demonstrating book catalog and inventory managemen
 - PostgreSQL with Liquibase migrations
 
 **Documentation:**
+
 - [Bookstore Service README](gripday-bookstore-service/README.md)
 - Swagger UI: `http://localhost:8082/swagger-ui.html`
 
 ## Architecture
 
 ### Service Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Gateway Service │    │   Auth Service  │    │ Bookstore Service│
@@ -176,6 +193,7 @@ Example business microservice demonstrating book catalog and inventory managemen
 ```
 
 ### Three-Tier Architecture
+
 Each service follows a strict three-tier architecture pattern:
 
 ```
@@ -183,7 +201,7 @@ org.gripday.{servicename}/
 ├── presentation/web/          # REST controllers (Resource suffix)
 │   ├── AuthenticationResource.java
 │   └── UserManagementResource.java
-├── domain/service/           # Business logic services  
+├── domain/service/           # Business logic services
 │   ├── AuthenticationService.java
 │   └── UserRegistrationService.java
 └── infrastructure/repository/ # Data access repositories
@@ -192,11 +210,13 @@ org.gripday.{servicename}/
 ```
 
 **Implemented Services:**
+
 - `org.gripday.authservice` - Authentication and user management
-- `org.gripday.gatewayservice` - API gateway and routing  
+- `org.gripday.gatewayservice` - API gateway and routing
 - `org.gripday.bookstoreservice` - Book catalog and inventory management
 
 ### Multi-Tenant Support
+
 Complete tenant isolation with multiple identification methods:
 
 ```bash
@@ -214,6 +234,7 @@ curl -H "Authorization: Bearer <token>" \
 ```
 
 ### Technology Stack
+
 - **Runtime**: Java 21 with modern language features
 - **Framework**: Spring Boot 3.5.6, Spring Cloud 2025.0.0
 - **Database**: PostgreSQL 15+ with Liquibase migrations (XML format)
@@ -226,12 +247,14 @@ curl -H "Authorization: Bearer <token>" \
 ## Configuration
 
 ### Environment Profiles
+
 - `local` - Development environment with Docker Compose
-- `staging` - Pre-production testing environment  
+- `staging` - Pre-production testing environment
 - `production` - Live production deployment
 - `test` - Automated testing with Testcontainers
 
 ### Key Configuration
+
 ```yaml
 # Auth Service
 gripday:
@@ -257,7 +280,7 @@ gripday:
     redis:
       host: ${REDIS_HOST}
 
-# Gateway Service  
+# Gateway Service
 gripday:
   gateway:
     auth-service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
@@ -268,6 +291,7 @@ gripday:
 ```
 
 ### Email Configuration
+
 ```bash
 # SMTP Settings
 SMTP_HOST=smtp.gmail.com
@@ -286,6 +310,7 @@ See [Environment Variables Guide](docs/configuration/environment-variables.md) f
 ## Development
 
 ### Docker Compose Development
+
 ```bash
 # Start all services with Docker
 docker compose up -d
@@ -300,6 +325,7 @@ docker-compose down
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 mvn test
@@ -315,6 +341,7 @@ mvn clean test jacoco:report
 ```
 
 ### Code Quality
+
 ```bash
 # Run code quality checks
 mvn clean compile -Pcode-quality
@@ -329,12 +356,14 @@ mvn checkstyle:check
 ## API Documentation
 
 ### Interactive Documentation
+
 - Auth Service: `http://localhost:8081/swagger-ui.html`
 - Gateway Service: `http://localhost:8080/swagger-ui.html`
 
 ### API Examples
 
 **User Registration:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
@@ -342,12 +371,13 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
     "username": "johndoe",
     "email": "john@example.com",
     "password": "SecurePass123!",
-    "firstName": "John", 
+    "firstName": "John",
     "lastName": "Doe"
   }'
 ```
 
 **Email Verification:**
+
 ```bash
 # Check verification status
 curl "http://localhost:8080/api/v1/auth/email/status?email=john@example.com"
@@ -362,6 +392,7 @@ curl -X POST http://localhost:8080/api/v1/auth/email/resend \
 ```
 
 **User Login:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -374,6 +405,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 **Note**: Users must verify their email address before they can successfully log in.
 
 **Authenticated Request:**
+
 ```bash
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 
@@ -389,6 +421,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```
 
 **Bookstore Service Examples:**
+
 ```bash
 # Create a book (requires authentication)
 curl -X POST http://localhost:8080/api/v1/books \
@@ -417,17 +450,19 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Monitoring and Observability
 
 ### Health Checks
+
 ```bash
 # Service health
 curl http://localhost:8081/actuator/health
 curl http://localhost:8080/actuator/health
 
-# Component health  
+# Component health
 curl http://localhost:8081/actuator/health/db
 curl http://localhost:8081/actuator/health/redis
 ```
 
 ### Metrics
+
 ```bash
 # Prometheus metrics
 curl http://localhost:8081/actuator/prometheus
@@ -439,6 +474,7 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
 ### Structured Logging
+
 - **Development**: Human-readable console output
 - **Production**: JSON format with correlation IDs
 - **Correlation**: Request tracing across all services
@@ -450,11 +486,13 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 The platform demonstrates extensibility with the included Bookstore Service. To add new services:
 
 1. **Create new Maven module:**
+
 ```xml
 <module>gripday-new-service</module>
 ```
 
 2. **Configure gateway routing:**
+
 ```yaml
 spring:
   cloud:
@@ -469,6 +507,7 @@ spring:
 ```
 
 3. **Follow architecture patterns:**
+
 - Three-tier architecture (presentation/domain/infrastructure)
 - JWT authentication integration
 - Multi-tenant support
@@ -476,8 +515,9 @@ spring:
 - Observability integration
 
 ### Service Integration Patterns
+
 - **Authentication**: Validate JWT tokens via Auth Service
-- **User Context**: Extract user information from JWT claims  
+- **User Context**: Extract user information from JWT claims
 - **Tenant Context**: Support multi-tenant data isolation
 - **Error Handling**: Consistent error response format
 - **Observability**: OpenTelemetry tracing and metrics
@@ -485,20 +525,24 @@ spring:
 ## Documentation
 
 ### Getting Started
+
 - [Developer Onboarding Guide](docs/developer-onboarding.md) - Complete setup and development guide
 - [Platform Validation Scripts](scripts/README.md) - End-to-end testing and validation
 
 ### API Documentation
+
 - [Complete API Reference](docs/api/complete-api-reference.md) - Comprehensive endpoint documentation
 - [Authentication API](gripday-auth-service/docs/api/authentication.md) - Auth service specific endpoints
 - Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8081/swagger-ui.html)
 
 ### Deployment and Operations
+
 - [Local Development Setup](docs/deployment/local-development.md) - Development environment setup
 - [Environment Configuration](docs/configuration/environment-variables.md) - Configuration management
 - [Troubleshooting Guide](docs/troubleshooting/common-issues.md) - Common issues and solutions
 
 ### Service Documentation
+
 - [Auth Service README](gripday-auth-service/README.md) - Authentication service details
 - [Gateway Service README](gripday-gateway-service/README.md) - API gateway service details
 - [Bookstore Service README](gripday-bookstore-service/README.md) - Example business service implementation
@@ -506,6 +550,7 @@ spring:
 ## Troubleshooting
 
 ### Common Issues
+
 - **Database Connection**: Check PostgreSQL container and connection settings
 - **JWT Token Issues**: Verify token format and secret configuration
 - **Email Verification Required**: New users must verify email before login
@@ -516,10 +561,11 @@ spring:
 See [Troubleshooting Guide](docs/troubleshooting/common-issues.md) for detailed solutions.
 
 ### Getting Help
+
 ```bash
 # Collect diagnostic information
 curl http://localhost:8081/actuator/info  # Auth Service
-curl http://localhost:8080/actuator/info  # Gateway Service  
+curl http://localhost:8080/actuator/info  # Gateway Service
 curl http://localhost:8082/actuator/info  # Bookstore Service
 
 # Check service health
@@ -536,6 +582,7 @@ docker-compose logs --tail=50 bookstore-service
 ## Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/new-feature`
 3. Follow coding standards and architectural patterns
@@ -544,6 +591,7 @@ docker-compose logs --tail=50 bookstore-service
 6. Submit pull request
 
 ### Coding Standards
+
 - Java 21 modern features (var, records, pattern matching)
 - Three-tier architecture with clear layer separation
 - Comprehensive error handling and logging

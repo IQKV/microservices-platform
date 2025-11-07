@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database for Auth Service - Staging
@@ -13,10 +13,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
 
   # Redis - Staging Configuration
   redis:
@@ -24,10 +24,10 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
         reservations:
           memory: 256M
-          cpus: '0.1'
+          cpus: "0.1"
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
   # Auth Service - Staging
@@ -45,10 +45,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -65,10 +65,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -83,7 +83,7 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
 
   grafana:
     environment:
@@ -95,7 +95,7 @@ services:
       resources:
         limits:
           memory: 256M
-          cpus: '0.25'
+          cpus: "0.25"
 
 volumes:
   postgres_auth_staging_data:

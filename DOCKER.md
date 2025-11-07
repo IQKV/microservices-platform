@@ -5,6 +5,7 @@ This document provides information about the Docker setup for the Gripday Micros
 ## Overview
 
 The platform includes:
+
 - **Multi-stage Dockerfiles** for optimized container images
 - **Environment-specific** Docker Compose configurations
 - **Service isolation** with dedicated networks
@@ -65,20 +66,20 @@ docker-compose logs -f
 
 ### Docker Compose Files
 
-| File | Purpose | Usage |
-|------|---------|-------|
-| `docker-compose.yml` | Base configuration | Local development |
-| `docker-compose.staging.yml` | Staging overrides | Staging deployment |
-| `docker-compose.production.yml` | Production overrides | Production deployment |
-| `gripday-auth-service/docker-compose.yml` | Auth service only | Individual development |
+| File                                         | Purpose              | Usage                  |
+| -------------------------------------------- | -------------------- | ---------------------- |
+| `docker-compose.yml`                         | Base configuration   | Local development      |
+| `docker-compose.staging.yml`                 | Staging overrides    | Staging deployment     |
+| `docker-compose.production.yml`              | Production overrides | Production deployment  |
+| `gripday-auth-service/docker-compose.yml`    | Auth service only    | Individual development |
 | `gripday-gateway-service/docker-compose.yml` | Gateway service only | Individual development |
 
 ### Environment Files
 
-| File | Purpose |
-|------|---------|
-| `.env.example` | Environment template |
-| `.env` | Local environment variables (create from example) |
+| File           | Purpose                                           |
+| -------------- | ------------------------------------------------- |
+| `.env.example` | Environment template                              |
+| `.env`         | Local environment variables (create from example) |
 
 ### Configuration Directories
 
@@ -134,6 +135,7 @@ docker compose up -d
 ```
 
 **Features:**
+
 - Debug-friendly settings
 - Exposed ports for direct access
 - Volume mounts for development
@@ -146,6 +148,7 @@ docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
 ```
 
 **Features:**
+
 - Resource limits
 - Environment variable externalization
 - Production-like configuration
@@ -158,6 +161,7 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ```
 
 **Features:**
+
 - High availability (replicas)
 - Strict resource limits
 - Security hardening
@@ -207,6 +211,7 @@ docker compose up -d
 ```
 
 **Includes:**
+
 - PostgreSQL database
 - Redis cache
 - Auth service
@@ -219,6 +224,7 @@ docker compose up -d
 ```
 
 **Includes:**
+
 - Redis cache
 - Mock auth service (WireMock)
 - Gateway service
@@ -234,6 +240,7 @@ docker compose up -d
 ### Service Communication
 
 Services communicate using container names:
+
 - `auth-service:8081`
 - `gateway-service:8080`
 - `postgres-auth:5432`
@@ -243,13 +250,13 @@ Services communicate using container names:
 
 ### Named Volumes
 
-| Volume | Purpose | Persistence |
-|--------|---------|-------------|
-| `gripday_postgres_auth_data` | Auth database | Persistent |
-| `gripday_redis_data` | Cache data | Persistent |
-| `gripday_prometheus_data` | Metrics | Persistent |
-| `gripday_grafana_data` | Dashboards | Persistent |
-| `gripday_loki_data` | Logs | Persistent |
+| Volume                       | Purpose       | Persistence |
+| ---------------------------- | ------------- | ----------- |
+| `gripday_postgres_auth_data` | Auth database | Persistent  |
+| `gripday_redis_data`         | Cache data    | Persistent  |
+| `gripday_prometheus_data`    | Metrics       | Persistent  |
+| `gripday_grafana_data`       | Dashboards    | Persistent  |
+| `gripday_loki_data`          | Logs          | Persistent  |
 
 ### Volume Commands
 

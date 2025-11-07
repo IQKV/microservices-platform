@@ -29,17 +29,18 @@ spec:
     name: auth-service-secrets
     creationPolicy: Owner
   data:
-  - secretKey: GRIPDAY_DATABASE_PASSWORD
-    remoteRef:
-      key: gripday/auth/database
-      property: password
-  - secretKey: GRIPDAY_AUTH_JWT_SECRET
-    remoteRef:
-      key: gripday/auth/jwt
-      property: secret
+    - secretKey: GRIPDAY_DATABASE_PASSWORD
+      remoteRef:
+        key: gripday/auth/database
+        property: password
+    - secretKey: GRIPDAY_AUTH_JWT_SECRET
+      remoteRef:
+        key: gripday/auth/jwt
+        property: secret
 ```
 
 **Supported Backends:**
+
 - HashiCorp Vault
 - AWS Secrets Manager
 - Azure Key Vault
@@ -110,15 +111,15 @@ metadata:
   name: rotate-secrets
   namespace: gripday-dev-env
 spec:
-  schedule: "0 0 1 * *"  # Monthly
+  schedule: "0 0 1 * *" # Monthly
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: rotate
-            image: your-rotation-script:latest
-            command: ["/scripts/rotate-secrets.sh"]
+            - name: rotate
+              image: your-rotation-script:latest
+              command: ["/scripts/rotate-secrets.sh"]
 ```
 
 ### 2. Audit Logging
@@ -129,11 +130,11 @@ Enable audit logging for secret access:
 apiVersion: audit.k8s.io/v1
 kind: Policy
 rules:
-- level: RequestResponse
-  resources:
-  - group: ""
-    resources: ["secrets"]
-  namespaces: ["gripday-auth", "gripday-bookstore", "gripday-gateway"]
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["secrets"]
+    namespaces: ["gripday-auth", "gripday-bookstore", "gripday-gateway"]
 ```
 
 ### 3. RBAC Restrictions
@@ -147,10 +148,10 @@ metadata:
   name: secret-reader
   namespace: gripday-dev-env
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  resourceNames: ["auth-service-secrets"]
-  verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["auth-service-secrets"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -158,9 +159,9 @@ metadata:
   name: auth-service-secret-reader
   namespace: gripday-dev-env
 subjects:
-- kind: ServiceAccount
-  name: auth-service-sa
-  namespace: gripday-dev-env
+  - kind: ServiceAccount
+    name: auth-service-sa
+    namespace: gripday-dev-env
 roleRef:
   kind: Role
   name: secret-reader
@@ -176,13 +177,13 @@ apiVersion: apiserver.config.k8s.io/v1
 kind: EncryptionConfiguration
 resources:
   - resources:
-    - secrets
+      - secrets
     providers:
-    - aescbc:
-        keys:
-        - name: key1
-          secret: <base64-encoded-32-byte-key>
-    - identity: {}
+      - aescbc:
+          keys:
+            - name: key1
+              secret: <base64-encoded-32-byte-key>
+      - identity: {}
 ```
 
 ## Migration Steps
@@ -190,6 +191,7 @@ resources:
 ### From Current Setup to External Secrets Operator
 
 1. **Install External Secrets Operator:**
+
    ```bash
    helm repo add external-secrets https://charts.external-secrets.io
    helm install external-secrets external-secrets/external-secrets \
@@ -197,12 +199,14 @@ resources:
    ```
 
 2. **Set up your secrets backend (e.g., HashiCorp Vault):**
+
    ```bash
    vault kv put secret/gripday/auth/database password="secure-password"
    vault kv put secret/gripday/auth/jwt secret="secure-jwt-secret"
    ```
 
 3. **Create SecretStore:**
+
    ```yaml
    apiVersion: external-secrets.io/v1beta1
    kind: SecretStore
@@ -232,7 +236,9 @@ resources:
 ## Environment-Specific Secrets
 
 ### Local Development
+
 Use `.env` files that are gitignored:
+
 ```bash
 # .env.local (NEVER commit this)
 GRIPDAY_DATABASE_PASSWORD=localpass
@@ -240,6 +246,7 @@ GRIPDAY_AUTH_JWT_SECRET=local-jwt-secret
 ```
 
 ### Staging/Production
+
 Use secrets manager or sealed secrets. Never use the same secrets across environments.
 
 ## Generating Strong Secrets
@@ -258,6 +265,7 @@ openssl rand -hex 32
 ## Monitoring and Alerts
 
 Set up alerts for:
+
 - Unauthorized secret access attempts
 - Secret rotation failures
 - Expired secrets

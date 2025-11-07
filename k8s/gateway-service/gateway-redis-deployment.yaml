@@ -29,71 +29,71 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: redis
-        image: redis:7.2-alpine
-        ports:
-        - containerPort: 6379
-          name: redis
-        env:
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: gateway-service-secrets
-              key: GRIPDAY_CACHE_REDIS_PASSWORD
-              optional: true
-        command:
-        - redis-server
-        - --appendonly
-        - "yes"
-        - --maxmemory
-        - "512mb"
-        - --maxmemory-policy
-        - "allkeys-lru"
-        volumeMounts:
-        - name: redis-storage
-          mountPath: /data
-        - name: redis-config
-          mountPath: /usr/local/etc/redis
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "200m"
-        livenessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
-          runAsNonRoot: true
-          runAsUser: 999
-          capabilities:
-            drop:
-            - ALL
+        - name: redis
+          image: redis:7.2-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-service-secrets
+                  key: GRIPDAY_CACHE_REDIS_PASSWORD
+                  optional: true
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+            - --maxmemory
+            - "512mb"
+            - --maxmemory-policy
+            - "allkeys-lru"
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+            - name: redis-config
+              mountPath: /usr/local/etc/redis
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
       volumes:
-      - name: redis-storage
-        persistentVolumeClaim:
-          claimName: gateway-redis-pvc
-      - name: redis-config
-        configMap:
-          name: gateway-redis-config
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: gateway-redis-pvc
+        - name: redis-config
+          configMap:
+            name: gateway-redis-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -131,21 +131,21 @@ data:
     save 900 1
     save 300 10
     save 60 10000
-    
+
     # Security settings
     protected-mode yes
     bind 0.0.0.0
     port 6379
-    
+
     # Logging
     loglevel notice
     logfile ""
-    
+
     # Performance tuning for rate limiting
     tcp-keepalive 300
     timeout 0
     tcp-backlog 511
-    
+
     # Rate limiting specific settings
     hash-max-ziplist-entries 512
     hash-max-ziplist-value 64

@@ -28,12 +28,14 @@ minikube start --cpus=4 --memory=8192
 ### 2. Deploy Platform
 
 **Linux/Mac:**
+
 ```bash
 cd k8s/minikube
 ./deploy-minikube.sh
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 cd k8s\minikube
 .\deploy-minikube.ps1
@@ -44,6 +46,7 @@ cd k8s\minikube
 You have **3 ways** to access services:
 
 #### Option A: NodePort (Easiest - No Setup)
+
 ```bash
 MINIKUBE_IP=$(minikube ip)
 echo "Gateway: http://$MINIKUBE_IP:30080"
@@ -52,6 +55,7 @@ echo "Bookstore: http://$MINIKUBE_IP:30082"
 ```
 
 #### Option B: Ingress (Production-like)
+
 ```bash
 # 1. Enable ingress addon
 minikube addons enable ingress
@@ -70,6 +74,7 @@ echo "Auth (debug): http://auth.pynity.site"
 ```
 
 #### Option C: Port Forward (Debugging)
+
 ```bash
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 # Access at http://localhost:8080
@@ -125,11 +130,13 @@ kubectl get all -n gripday
 To build Docker images locally and deploy:
 
 **Linux/Mac:**
+
 ```bash
 ./deploy-minikube.sh --build
 ```
 
 **Windows:**
+
 ```powershell
 .\deploy-minikube.ps1 -Build
 ```
@@ -137,11 +144,13 @@ To build Docker images locally and deploy:
 ## 🧹 Cleanup
 
 **Linux/Mac:**
+
 ```bash
 ./cleanup-minikube.sh
 ```
 
 **Windows:**
+
 ```powershell
 .\cleanup-minikube.ps1
 ```
@@ -229,6 +238,7 @@ minikube service gateway-service -n gripday
 If images aren't available:
 
 1. Build them locally:
+
    ```bash
    eval $(minikube docker-env)
    ./deploy-minikube.sh --build
@@ -266,12 +276,13 @@ For complete documentation, see [README.md](README.md)
 ## 🎯 What's Deployed?
 
 - **Gateway Service** - API Gateway with routing, rate limiting
-- **Auth Service** - Authentication & user management  
+- **Auth Service** - Authentication & user management
 - **Bookstore Service** - Example business service
 - **PostgreSQL** - Two databases (auth & bookstore)
 - **Redis** - Caching and session storage
 
 All services are configured with:
+
 - ✅ Health checks
 - ✅ Resource limits
 - ✅ Auto-restart on failure
@@ -280,16 +291,19 @@ All services are configured with:
 ## 💡 Tips
 
 1. **Increase minikube resources** for better performance:
+
    ```bash
    minikube start --cpus=6 --memory=12288
    ```
 
 2. **Use dashboard** for visual monitoring:
+
    ```bash
    minikube dashboard
    ```
 
 3. **Access logs easily**:
+
    ```bash
    kubectl logs -f deployment/gateway-service -n gripday --tail=50
    ```

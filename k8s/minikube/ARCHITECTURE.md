@@ -7,6 +7,7 @@ The minikube deployment mirrors the production architecture (API Gateway pattern
 ## Architecture Comparison
 
 ### Production/Staging Architecture
+
 ```
 Internet → Ingress → Gateway Service → Backend Services
                                         (auth, bookstore)
@@ -14,15 +15,16 @@ Internet → Ingress → Gateway Service → Backend Services
 ```
 
 ### Minikube Architecture
+
 ```
 Developer → Multiple Access Methods:
-            
+
             1. Ingress (production-like)
                → Gateway → Backend Services
-            
+
             2. NodePort (convenience)
                → Direct to any service
-            
+
             3. Port Forward (debugging)
                → Direct to any pod
 ```
@@ -30,18 +32,21 @@ Developer → Multiple Access Methods:
 ## Why Multiple Access Methods?
 
 ### 1. **Ingress (Production-like)** ✅ Recommended for Testing
+
 - **URL**: `http://api.pynity.site`
 - **Purpose**: Test the actual production flow
 - **Requires**: Ingress addon, /etc/hosts configuration
 - **Benefit**: Validates the API Gateway pattern
 
 ### 2. **NodePort (Direct Access)** 🔧 Quick Testing
+
 - **URL**: `http://$(minikube ip):30080`
 - **Purpose**: Quick API testing without DNS setup
 - **Requires**: Nothing
 - **Benefit**: Works immediately after deployment
 
 ### 3. **Direct Service Ingress** 🐛 Debugging Only
+
 - **URL**: `http://auth.pynity.site`
 - **Purpose**: Debug backend services directly
 - **Requires**: Ingress addon, /etc/hosts
@@ -89,6 +94,7 @@ Developer → Multiple Access Methods:
 ### Method 1: Ingress (Production-like)
 
 **Setup:**
+
 ```bash
 # Enable ingress addon
 minikube addons enable ingress
@@ -105,6 +111,7 @@ sudo nano /etc/hosts
 ```
 
 **Usage:**
+
 ```bash
 # Via Gateway (production-like)
 curl http://api.pynity.site/api/v1/auth/login
@@ -117,12 +124,14 @@ curl http://bookstore.pynity.site/api/v1/bookstore/books
 ```
 
 **Benefits:**
+
 - ✅ Tests production flow
 - ✅ Human-readable URLs
 - ✅ CORS configuration testing
 - ✅ Validates gateway routing
 
 **Drawbacks:**
+
 - ⚠️ Requires DNS setup
 - ⚠️ Requires ingress addon
 
@@ -131,11 +140,13 @@ curl http://bookstore.pynity.site/api/v1/bookstore/books
 ### Method 2: NodePort (Quick Testing)
 
 **Setup:**
+
 ```bash
 # Nothing needed - works out of the box
 ```
 
 **Usage:**
+
 ```bash
 # Get minikube IP
 MINIKUBE_IP=$(minikube ip)
@@ -151,11 +162,13 @@ curl http://$MINIKUBE_IP:30082/api/v1/bookstore/books
 ```
 
 **Benefits:**
+
 - ✅ Works immediately
 - ✅ No DNS configuration
 - ✅ Easy to script
 
 **Drawbacks:**
+
 - ⚠️ Not production-like
 - ⚠️ IP-based (harder to remember)
 
@@ -164,6 +177,7 @@ curl http://$MINIKUBE_IP:30082/api/v1/bookstore/books
 ### Method 3: Port Forward (Pod Debugging)
 
 **Setup:**
+
 ```bash
 # Forward gateway service
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
@@ -173,6 +187,7 @@ kubectl port-forward -n gripday svc/auth-service 8081:8081
 ```
 
 **Usage:**
+
 ```bash
 # Access on localhost
 curl http://localhost:8080/api/v1/auth/login
@@ -180,11 +195,13 @@ curl http://localhost:8081/api/v1/auth/login
 ```
 
 **Benefits:**
+
 - ✅ Perfect for debugging
 - ✅ Uses localhost
 - ✅ Can forward to specific pods
 
 **Drawbacks:**
+
 - ⚠️ Blocks terminal
 - ⚠️ Manual setup per service
 
@@ -193,18 +210,21 @@ curl http://localhost:8081/api/v1/auth/login
 ## Recommended Workflow
 
 ### Day-to-Day Development
+
 ```bash
 # Use NodePort for quick API testing
 curl http://$(minikube ip):30080/api/v1/auth/login
 ```
 
 ### Testing API Gateway Logic
+
 ```bash
 # Use Ingress to test production flow
 curl http://api.pynity.site/api/v1/auth/login
 ```
 
 ### Debugging Backend Service
+
 ```bash
 # Use direct service ingress OR port forward
 curl http://auth.pynity.site/actuator/health
@@ -216,32 +236,35 @@ curl http://localhost:8081/actuator/health
 ## Configuration Files
 
 ### 1. `all-in-one.yaml`
+
 - Single namespace: `gripday`
 - All services (gateway, auth, bookstore)
 - Databases (postgres, redis)
 - NodePort services for direct access
 
 ### 2. `ingress.yaml`
+
 - Gateway ingress (production-like)
 - Auth ingress (debugging only)
 - Bookstore ingress (debugging only)
 - Optional - only applied if ingress addon enabled
 
 ### 3. `infrastructure-only.yaml`
+
 - Just databases and Redis
 - Useful for testing services locally with kubectl
 
 ## Key Differences from Production
 
-| Feature | Minikube | Production | Reason |
-|---------|----------|------------|--------|
-| Backend Service Ingress | ✅ Yes | ❌ No | Debugging convenience |
-| NodePort Services | ✅ Yes | ❌ No | Direct access without DNS |
-| TLS/HTTPS | ❌ No | ✅ Yes | Not needed for local |
-| Network Policies | ⚠️ Optional | ✅ Enforced | Permissive for debugging |
-| Separate Namespaces | ❌ No | ✅ Yes | Simpler for local |
-| Rate Limiting | ⚠️ Lenient | ✅ Strict | Allow rapid testing |
-| Resource Limits | ⚠️ Lower | ✅ Higher | Limited local resources |
+| Feature                 | Minikube    | Production  | Reason                    |
+| ----------------------- | ----------- | ----------- | ------------------------- |
+| Backend Service Ingress | ✅ Yes      | ❌ No       | Debugging convenience     |
+| NodePort Services       | ✅ Yes      | ❌ No       | Direct access without DNS |
+| TLS/HTTPS               | ❌ No       | ✅ Yes      | Not needed for local      |
+| Network Policies        | ⚠️ Optional | ✅ Enforced | Permissive for debugging  |
+| Separate Namespaces     | ❌ No       | ✅ Yes      | Simpler for local         |
+| Rate Limiting           | ⚠️ Lenient  | ✅ Strict   | Allow rapid testing       |
+| Resource Limits         | ⚠️ Lower    | ✅ Higher   | Limited local resources   |
 
 ## Network Policy (Optional)
 
@@ -262,6 +285,7 @@ kubectl apply -f ../bookstore-service/network-policy.yaml
 ## Troubleshooting
 
 ### Ingress Not Working
+
 ```bash
 # Check if ingress addon is enabled
 minikube addons list | grep ingress
@@ -280,6 +304,7 @@ cat /etc/hosts | grep gripday
 ```
 
 ### Services Not Accessible
+
 ```bash
 # Check pods are running
 kubectl get pods -n gripday
@@ -296,6 +321,7 @@ kubectl exec -n gripday deployment/gateway-service -- curl http://auth-service:8
 ```
 
 ### Gateway Not Routing
+
 ```bash
 # Check gateway routes
 curl http://$(minikube ip):30080/actuator/gateway/routes
@@ -309,15 +335,15 @@ curl http://$(minikube ip):30081/actuator/health
 
 ## Quick Reference
 
-| I want to... | Use... |
-|--------------|--------|
-| Quick API test | NodePort: `http://$(minikube ip):30080` |
-| Test production flow | Ingress: `http://api.pynity.site` |
-| Debug auth service | Direct: `http://auth.pynity.site` OR NodePort: `:30081` |
-| Debug bookstore | Direct: `http://bookstore.pynity.site` OR NodePort: `:30082` |
-| Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes` |
-| View logs | `kubectl logs -n gripday deployment/<service-name>` |
-| Get into pod | `kubectl exec -n gripday -it deployment/<service-name> -- /bin/sh` |
+| I want to...         | Use...                                                             |
+| -------------------- | ------------------------------------------------------------------ |
+| Quick API test       | NodePort: `http://$(minikube ip):30080`                            |
+| Test production flow | Ingress: `http://api.pynity.site`                                  |
+| Debug auth service   | Direct: `http://auth.pynity.site` OR NodePort: `:30081`            |
+| Debug bookstore      | Direct: `http://bookstore.pynity.site` OR NodePort: `:30082`       |
+| Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes`         |
+| View logs            | `kubectl logs -n gripday deployment/<service-name>`                |
+| Get into pod         | `kubectl exec -n gripday -it deployment/<service-name> -- /bin/sh` |
 
 ## Benefits of This Approach
 

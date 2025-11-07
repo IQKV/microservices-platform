@@ -5,6 +5,7 @@ This document provides configuration examples for all environments and services 
 ## Configuration Strategy
 
 The platform uses Spring profiles for environment-specific configuration with the following hierarchy:
+
 1. **Environment Variables** (highest priority)
 2. **application-{profile}.yml** files
 3. **application.yml** (default values)
@@ -13,16 +14,17 @@ All custom configuration properties use the `gripday.` prefix for clear namespac
 
 ## Environment Profiles
 
-| Profile | Description | Use Case |
-|---------|-------------|----------|
-| `local` | Development environment | Local development with Docker Compose |
-| `staging` | Staging environment | Pre-production testing |
-| `production` | Production environment | Live production deployment |
-| `test` | Test environment | Automated testing with Testcontainers |
+| Profile      | Description             | Use Case                              |
+| ------------ | ----------------------- | ------------------------------------- |
+| `local`      | Development environment | Local development with Docker Compose |
+| `staging`    | Staging environment     | Pre-production testing                |
+| `production` | Production environment  | Live production deployment            |
+| `test`       | Test environment        | Automated testing with Testcontainers |
 
 ## Common Environment Variables
 
 ### Database Configuration
+
 ```bash
 # PostgreSQL Connection
 GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
@@ -39,6 +41,7 @@ GRIPDAY_DATABASE_HIKARI_MAX_LIFETIME=1800000
 ```
 
 ### Redis Configuration
+
 ```bash
 # Redis Connection
 GRIPDAY_CACHE_REDIS_HOST=localhost
@@ -54,6 +57,7 @@ GRIPDAY_CACHE_REDIS_LETTUCE_POOL_MIN_IDLE=0
 ```
 
 ### JWT Configuration
+
 ```bash
 # JWT Settings
 GRIPDAY_AUTH_JWT_SECRET=your_secret_key_minimum_256_bits_for_security
@@ -68,6 +72,7 @@ GRIPDAY_AUTH_JWT_PUBLIC_KEY_PATH=/etc/ssl/certs/jwt-public.pem
 ```
 
 ### Multi-Tenant Configuration
+
 ```bash
 # Tenant Settings
 GRIPDAY_TENANT_DEFAULT_ID=default
@@ -78,6 +83,7 @@ GRIPDAY_TENANT_CACHE_NAMESPACE_ENABLED=true
 ```
 
 ### Observability Configuration
+
 ```bash
 # OpenTelemetry
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
@@ -96,6 +102,7 @@ MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
 ## Auth Service Configuration
 
 ### Local Development (.env.local)
+
 ```bash
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
@@ -138,6 +145,7 @@ GRIPDAY_DATABASE_LIQUIBASE_ENABLED=true
 ```
 
 ### Staging Environment (.env.staging)
+
 ```bash
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
@@ -180,6 +188,7 @@ OTEL_TRACES_SAMPLER_ARG=0.5
 ```
 
 ### Production Environment (.env.production)
+
 ```bash
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
@@ -231,6 +240,7 @@ MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
 ## Gateway Service Configuration
 
 ### Local Development (.env.local)
+
 ```bash
 # Service Configuration
 GRIPDAY_GATEWAY_SERVICE_NAME=gripday-gateway-service
@@ -276,6 +286,7 @@ LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_REACTIVE=DEBUG
 ```
 
 ### Staging Environment (.env.staging)
+
 ```bash
 # Service Configuration
 GRIPDAY_GATEWAY_SERVICE_NAME=gripday-gateway-service
@@ -317,6 +328,7 @@ OTEL_TRACES_SAMPLER_ARG=0.5
 ```
 
 ### Production Environment (.env.production)
+
 ```bash
 # Service Configuration
 GRIPDAY_GATEWAY_SERVICE_NAME=gripday-gateway-service
@@ -371,6 +383,7 @@ MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,gateway
 ## YAML Configuration Examples
 
 ### Auth Service - application-local.yml
+
 ```yaml
 gripday:
   auth:
@@ -461,6 +474,7 @@ management:
 ```
 
 ### Gateway Service - application-local.yml
+
 ```yaml
 gripday:
   gateway:
@@ -520,7 +534,7 @@ spring:
                 redis-rate-limiter.burstCapacity: ${gripday.gateway.rate-limiting.burst-capacity}
       globalcors:
         cors-configurations:
-          '[/**]':
+          "[/**]":
             allowed-origins: ${gripday.gateway.cors.allowed-origins}
             allowed-methods: ${gripday.gateway.cors.allowed-methods}
             allowed-headers: ${gripday.gateway.cors.allowed-headers}
@@ -562,6 +576,7 @@ resilience4j:
 ## Security Configuration
 
 ### JWT Key Generation
+
 ```bash
 # Generate RSA key pair for JWT signing (production)
 openssl genrsa -out jwt-private.pem 2048
@@ -573,6 +588,7 @@ export GRIPDAY_AUTH_JWT_PUBLIC_KEY_PATH=/etc/ssl/certs/jwt-public.pem
 ```
 
 ### Password Requirements
+
 ```bash
 # Password validation configuration
 GRIPDAY_AUTH_PASSWORD_MIN_LENGTH=8
@@ -585,6 +601,7 @@ GRIPDAY_AUTH_PASSWORD_REQUIRE_SPECIAL_CHAR=true
 ## Validation and Testing
 
 ### Configuration Validation
+
 ```bash
 # Validate configuration
 mvn spring-boot:run -Dspring-boot.run.profiles=local -Dspring.config.on-not-found=fail
@@ -595,6 +612,7 @@ curl http://localhost:8080/actuator/configprops
 ```
 
 ### Environment Variable Testing
+
 ```bash
 # Test with environment variables
 export GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/test_db

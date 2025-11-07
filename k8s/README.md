@@ -32,6 +32,7 @@ cd minikube
 ```
 
 **Features:**
+
 - ✅ Single-command deployment
 - ✅ Optimized for laptop/desktop
 - ✅ All-in-one manifest
@@ -59,6 +60,7 @@ cd ..
 ```
 
 **Features:**
+
 - ✅ High availability (3 replicas)
 - ✅ Ingress with TLS
 - ✅ Persistent storage
@@ -67,7 +69,8 @@ cd ..
 - ✅ Pod disruption budgets
 - ✅ Security hardening
 
-**Read More:** 
+**Read More:**
+
 - [auth-service/README.md](auth-service/README.md)
 - [gateway-service/README.md](gateway-service/README.md)
 - [bookstore-service/README.md](bookstore-service/README.md)
@@ -83,6 +86,7 @@ cd ..
 ```
 
 **Features:**
+
 - ✅ Production-like configuration
 - ✅ Let's Encrypt staging certificates
 - ✅ 2 replicas for redundancy
@@ -93,11 +97,13 @@ cd ..
 ### For Local Development (Minikube)
 
 1. **Start minikube:**
+
    ```bash
    minikube start --cpus=4 --memory=8192
    ```
 
 2. **Deploy platform:**
+
    ```bash
    cd minikube
    ./deploy-minikube.sh
@@ -120,6 +126,7 @@ cd ..
    - Cert-manager (for TLS)
 
 2. **Deploy services:**
+
    ```bash
    ./deploy-production.sh
    ```
@@ -133,33 +140,36 @@ cd ..
 
 ## 📊 Comparison
 
-| Feature | Minikube | Staging | Production |
-|---------|----------|---------|------------|
-| **Environment** | Local laptop | Cloud/Server | Cloud cluster |
-| **Replicas** | 1 | 2 | 3+ |
-| **Storage** | emptyDir | PVC | PVC + Backups |
-| **Access** | NodePort | Ingress (HTTP) | Ingress (HTTPS) |
-| **Resources** | Low | Medium | High |
-| **Security** | Basic | Medium | Hardened |
-| **Monitoring** | Basic | Full | Full + Alerts |
-| **Setup Time** | < 5 min | 15 min | 30 min |
-| **Use Case** | Development | Testing | Production |
+| Feature         | Minikube     | Staging        | Production      |
+| --------------- | ------------ | -------------- | --------------- |
+| **Environment** | Local laptop | Cloud/Server   | Cloud cluster   |
+| **Replicas**    | 1            | 2              | 3+              |
+| **Storage**     | emptyDir     | PVC            | PVC + Backups   |
+| **Access**      | NodePort     | Ingress (HTTP) | Ingress (HTTPS) |
+| **Resources**   | Low          | Medium         | High            |
+| **Security**    | Basic        | Medium         | Hardened        |
+| **Monitoring**  | Basic        | Full           | Full + Alerts   |
+| **Setup Time**  | < 5 min      | 15 min         | 30 min          |
+| **Use Case**    | Development  | Testing        | Production      |
 
 **Detailed comparison:** [minikube/COMPARISON.md](minikube/COMPARISON.md)
 
 ## 📖 Documentation
 
 ### Getting Started
+
 - [Minikube Quick Start](minikube/QUICKSTART.md) - Start here!
 - [Minikube Complete Guide](minikube/README.md)
 - [Minikube vs Production](minikube/COMPARISON.md)
 
 ### Service Documentation
+
 - [Auth Service Deployment](auth-service/README.md)
 - [Gateway Service Deployment](gateway-service/README.md)
 - [Bookstore Service Deployment](bookstore-service/README.md)
 
 ### Scripts and Automation
+
 - [Deployment Scripts](scripts/README.md)
 - [Health Check Script](health-check.sh)
 - [Scaling Script](scale-services.sh)
@@ -202,23 +212,27 @@ cd minikube
 ## 🔧 Common Tasks
 
 ### Deploy Everything (Minikube)
+
 ```bash
 cd k8s/minikube
 ./deploy-minikube.sh
 ```
 
 ### Deploy Everything (Production)
+
 ```bash
 cd k8s
 ./deploy-production.sh
 ```
 
 ### Check Health
+
 ```bash
 ./health-check.sh
 ```
 
 ### View Logs
+
 ```bash
 # Minikube
 kubectl logs -f deployment/gateway-service -n gripday
@@ -228,11 +242,13 @@ kubectl logs -f deployment/gateway-service -n gripday-gateway-production
 ```
 
 ### Scale Services
+
 ```bash
 ./scale-services.sh gateway-service 5
 ```
 
 ### Clean Up (Minikube)
+
 ```bash
 cd minikube
 ./cleanup-minikube.sh
@@ -241,6 +257,7 @@ cd minikube
 ## 🏗️ Architecture
 
 ### Minikube Architecture
+
 ```
 ┌─────────────────────────────────┐
 │      Single Namespace: gripday  │
@@ -261,6 +278,7 @@ cd minikube
 ```
 
 ### Production Architecture
+
 ```
 ┌─────────────────────────────────────────┐
 │    Ingress Controller (TLS)             │
@@ -283,6 +301,7 @@ cd minikube
 ## 💡 Best Practices
 
 ### For Local Development (Minikube)
+
 1. Use the provided automation scripts
 2. Keep resources minimal (1 replica)
 3. Use NodePort for easy access
@@ -290,6 +309,7 @@ cd minikube
 5. Quick iteration: deploy → test → teardown → repeat
 
 ### For Production
+
 1. Use separate namespaces per service
 2. Enable all security features
 3. Configure persistent storage
@@ -302,12 +322,14 @@ cd minikube
 ## 🔐 Security
 
 ### Minikube (Development)
+
 - Basic security context
 - Default credentials (CHANGE for any external access)
 - No network policies (all pods can communicate)
 - HTTP only (no TLS)
 
 ### Production
+
 - Pod security policies enforced
 - Secrets from vault/sealed-secrets
 - Network policies (least privilege)
@@ -319,12 +341,14 @@ cd minikube
 ## 📦 Resource Requirements
 
 ### Minikube Cluster
+
 - **CPU:** 4 cores recommended
 - **Memory:** 8GB recommended
 - **Disk:** 20GB
 - **Platform Usage:** ~0.5 CPU, ~1GB RAM
 
 ### Production Cluster (per environment)
+
 - **Nodes:** 3+ worker nodes
 - **CPU:** 8+ cores per node
 - **Memory:** 16+ GB per node
@@ -334,14 +358,18 @@ cd minikube
 ## 🆘 Troubleshooting
 
 ### Minikube Issues
+
 See [minikube/README.md#troubleshooting](minikube/README.md#troubleshooting)
 
 ### Production Issues
+
 See service-specific READMEs:
+
 - [Auth Service Troubleshooting](auth-service/README.md#troubleshooting)
 - [Gateway Service Troubleshooting](gateway-service/README.md#troubleshooting)
 
 ### Common Issues
+
 - **Pods not starting:** Check resources, events, and logs
 - **Can't access services:** Verify service type and ports
 - **Database connection errors:** Check credentials and network
@@ -358,12 +386,14 @@ See service-specific READMEs:
 ## 🚀 Next Steps
 
 ### New Users
+
 1. Start with [minikube/QUICKSTART.md](minikube/QUICKSTART.md)
 2. Deploy to minikube
 3. Test the API
 4. Review [COMPARISON.md](minikube/COMPARISON.md)
 
 ### Production Deployment
+
 1. Review [auth-service/README.md](auth-service/README.md)
 2. Set up infrastructure (cluster, storage, ingress)
 3. Configure secrets

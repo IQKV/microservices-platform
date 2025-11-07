@@ -14,10 +14,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
   selector:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -35,10 +35,10 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
   selector:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -60,10 +60,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
   selector:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
@@ -86,10 +86,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: http
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
   selector:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway

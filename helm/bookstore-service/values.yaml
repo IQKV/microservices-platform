@@ -55,7 +55,7 @@ securityContext:
   runAsUser: 1001
   capabilities:
     drop:
-    - ALL
+      - ALL
 
 service:
   type: ClusterIP
@@ -126,22 +126,22 @@ autoscaling:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 50
-        periodSeconds: 60
-      - type: Pods
-        value: 2
-        periodSeconds: 60
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 2
+          periodSeconds: 60
       selectPolicy: Min
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 60
-      - type: Pods
-        value: 4
-        periodSeconds: 60
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+        - type: Pods
+          value: 4
+          periodSeconds: 60
       selectPolicy: Max
 
 # Pod Disruption Budget
@@ -160,15 +160,15 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - gripday-bookstore-service
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - gripday-bookstore-service
+          topologyKey: kubernetes.io/hostname
 
 # Topology spread constraints
 topologySpreadConstraints:
@@ -215,9 +215,9 @@ lifecycle:
   preStop:
     exec:
       command:
-      - sh
-      - -c
-      - sleep 15
+        - sh
+        - -c
+        - sleep 15
 
 # Volumes
 volumes:
@@ -232,7 +232,7 @@ configMap:
     application.yml: |
       server:
         port: 8082
-      
+
       spring:
         application:
           name: gripday-bookstore-service
@@ -262,7 +262,7 @@ configMap:
           type: redis
           redis:
             time-to-live: PT1H
-      
+
       springdoc:
         api-docs:
           enabled: true
@@ -293,7 +293,7 @@ configMap:
             paths-to-match: /api/*/search/**
         show-actuator: true
         use-management-port: false
-      
+
       management:
         endpoints:
           web:
@@ -320,7 +320,7 @@ configMap:
         tracing:
           sampling:
             probability: 1.0
-      
+
       gripday:
         observability:
           tracing:
@@ -405,64 +405,64 @@ networkPolicy:
     - Egress
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            app.kubernetes.io/part-of: gripday-platform
-        podSelector:
-          matchLabels:
-            app.kubernetes.io/name: gripday-gateway-service
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: gripday-platform
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gripday-gateway-service
       ports:
-      - protocol: TCP
-        port: 8082
+        - protocol: TCP
+          port: 8082
     - from:
-      - podSelector: {}
+        - podSelector: {}
       ports:
-      - protocol: TCP
-        port: 8082
+        - protocol: TCP
+          port: 8082
     - from:
-      - namespaceSelector:
-          matchLabels:
-            app.kubernetes.io/name: monitoring
-        podSelector:
-          matchLabels:
-            app: prometheus
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
       ports:
-      - protocol: TCP
-        port: 8082
+        - protocol: TCP
+          port: 8082
   egress:
     - to:
-      - podSelector:
-          matchLabels:
-            app.kubernetes.io/name: bookstore-postgres
-            app.kubernetes.io/component: database
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bookstore-postgres
+              app.kubernetes.io/component: database
       ports:
-      - protocol: TCP
-        port: 5432
+        - protocol: TCP
+          port: 5432
     - to:
-      - podSelector:
-          matchLabels:
-            app.kubernetes.io/name: bookstore-redis
-            app.kubernetes.io/component: cache
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bookstore-redis
+              app.kubernetes.io/component: cache
       ports:
-      - protocol: TCP
-        port: 6379
+        - protocol: TCP
+          port: 6379
     - to: []
       ports:
-      - protocol: UDP
-        port: 53
+        - protocol: UDP
+          port: 53
     - to:
-      - namespaceSelector:
-          matchLabels:
-            app.kubernetes.io/name: observability
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: observability
       ports:
-      - protocol: TCP
-        port: 4317
-      - protocol: TCP
-        port: 14268
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 14268
     - to: []
       ports:
-      - protocol: TCP
-        port: 443
+        - protocol: TCP
+          port: 443
 
 # Resource Quota
 resourceQuota:
@@ -575,20 +575,20 @@ postgresql:
     enabled: true
     ingress:
       - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: gripday-bookstore-service
-              app.kubernetes.io/component: bookstore
+          - podSelector:
+              matchLabels:
+                app.kubernetes.io/name: gripday-bookstore-service
+                app.kubernetes.io/component: bookstore
         ports:
-        - protocol: TCP
-          port: 5432
+          - protocol: TCP
+            port: 5432
       - from:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/name: monitoring
+          - namespaceSelector:
+              matchLabels:
+                app.kubernetes.io/name: monitoring
         ports:
-        - protocol: TCP
-          port: 5432
+          - protocol: TCP
+            port: 5432
 
 # Redis configuration
 redis:
@@ -641,17 +641,17 @@ redis:
     enabled: true
     ingress:
       - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: gripday-bookstore-service
-              app.kubernetes.io/component: bookstore
+          - podSelector:
+              matchLabels:
+                app.kubernetes.io/name: gripday-bookstore-service
+                app.kubernetes.io/component: bookstore
         ports:
-        - protocol: TCP
-          port: 6379
+          - protocol: TCP
+            port: 6379
       - from:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/name: monitoring
+          - namespaceSelector:
+              matchLabels:
+                app.kubernetes.io/name: monitoring
         ports:
-        - protocol: TCP
-          port: 6379
+          - protocol: TCP
+            port: 6379

@@ -184,13 +184,8 @@ Content-Type: application/json
     "email": "john@example.com",
     "firstName": "John",
     "lastName": "Doe",
-    "roles": [
-      "USER"
-    ],
-    "permissions": [
-      "read:profile",
-      "update:profile"
-    ],
+    "roles": ["USER"],
+    "permissions": ["read:profile", "update:profile"],
     "tenantId": "default",
     "department": "Engineering",
     "customClaims": {}
@@ -281,9 +276,7 @@ Content-Type: application/json
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": [
-      "USER"
-    ],
+    "roles": ["USER"],
     "tenantId": "default"
   }
 }
@@ -379,13 +372,8 @@ Content-Type: application/json
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": [
-      "USER"
-    ],
-    "permissions": [
-      "read:profile",
-      "update:profile"
-    ],
+    "roles": ["USER"],
+    "permissions": ["read:profile", "update:profile"],
     "tenantId": "default",
     "department": "Engineering"
   },
@@ -409,7 +397,7 @@ Content-Type: application/json
 ## Error Codes Reference
 
 | Code                         | HTTP Status | Description                     |
-|------------------------------|-------------|---------------------------------|
+| ---------------------------- | ----------- | ------------------------------- |
 | VALIDATION_ERROR             | 400         | Request validation failed       |
 | AUTH_INVALID_CREDENTIALS     | 401         | Invalid username/password       |
 | AUTH_INVALID_TOKEN           | 401         | Invalid or expired JWT token    |

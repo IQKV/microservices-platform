@@ -100,9 +100,7 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
     "userId": 1,
     "username": "johndoe",
     "email": "john@example.com",
-    "roles": [
-      "USER"
-    ],
+    "roles": ["USER"],
     "tenantId": "default"
   }
 }

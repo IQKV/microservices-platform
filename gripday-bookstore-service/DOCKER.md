@@ -107,7 +107,7 @@ gripday-bookstore-service/
 ### Required Variables
 
 | Variable         | Description       | Local           | Staging  | Production |
-|------------------|-------------------|-----------------|----------|------------|
+| ---------------- | ----------------- | --------------- | -------- | ---------- |
 | `DB_HOST`        | Database hostname | bookstore-db    | External | External   |
 | `DB_USERNAME`    | Database username | bookstore_user  | Required | Required   |
 | `DB_PASSWORD`    | Database password | bookstore_pass  | Required | Required   |
@@ -117,7 +117,7 @@ gripday-bookstore-service/
 ### Optional Variables
 
 | Variable         | Description      | Default      |
-|------------------|------------------|--------------|
+| ---------------- | ---------------- | ------------ |
 | `DB_PORT`        | Database port    | 5432         |
 | `DB_NAME`        | Database name    | bookstore_db |
 | `REDIS_PORT`     | Redis port       | 6379         |
@@ -193,28 +193,31 @@ All environments include health checks:
 ### Common Issues
 
 1. **Service won't start**
+
    ```bash
    # Check logs
    docker-compose logs bookstore-service
-   
+
    # Check health
    curl http://localhost:8082/actuator/health
    ```
 
 2. **Database connection issues**
+
    ```bash
    # Check database container
    docker-compose logs bookstore-db
-   
+
    # Test connection
    docker-compose exec bookstore-db psql -U bookstore_user -d bookstore_db
    ```
 
 3. **Redis connection issues**
+
    ```bash
    # Check Redis container
    docker-compose logs bookstore-redis
-   
+
    # Test connection
    docker-compose exec bookstore-redis redis-cli ping
    ```
@@ -222,19 +225,19 @@ All environments include health checks:
 ### Performance Tuning
 
 1. **Memory Issues**
-    - Adjust `JAVA_OPTS` memory settings
-    - Monitor container memory usage
-    - Check for memory leaks in application logs
+   - Adjust `JAVA_OPTS` memory settings
+   - Monitor container memory usage
+   - Check for memory leaks in application logs
 
 2. **CPU Issues**
-    - Review CPU limits in docker-compose files
-    - Monitor application performance metrics
-    - Consider scaling replicas in production
+   - Review CPU limits in docker-compose files
+   - Monitor application performance metrics
+   - Consider scaling replicas in production
 
 3. **Database Performance**
-    - Monitor connection pool metrics
-    - Review slow query logs
-    - Optimize database indexes
+   - Monitor connection pool metrics
+   - Review slow query logs
+   - Optimize database indexes
 
 ## Development Workflow
 
@@ -275,28 +278,28 @@ docker compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-co
 ## Best Practices
 
 1. **Image Building**
-    - Use multi-stage builds for smaller images
-    - Leverage Docker layer caching
-    - Minimize image attack surface
+   - Use multi-stage builds for smaller images
+   - Leverage Docker layer caching
+   - Minimize image attack surface
 
 2. **Configuration Management**
-    - Use environment variables for configuration
-    - Keep secrets out of images
-    - Use environment-specific compose files
+   - Use environment variables for configuration
+   - Keep secrets out of images
+   - Use environment-specific compose files
 
 3. **Resource Management**
-    - Set appropriate memory and CPU limits
-    - Monitor resource usage
-    - Scale based on actual demand
+   - Set appropriate memory and CPU limits
+   - Monitor resource usage
+   - Scale based on actual demand
 
 4. **Security**
-    - Run as non-root user
-    - Use official base images
-    - Regularly update dependencies
-    - Scan images for vulnerabilities
+   - Run as non-root user
+   - Use official base images
+   - Regularly update dependencies
+   - Scan images for vulnerabilities
 
 5. **Monitoring**
-    - Implement health checks
-    - Use structured logging
-    - Monitor application metrics
-    - Set up alerting for critical issues
+   - Implement health checks
+   - Use structured logging
+   - Monitor application metrics
+   - Set up alerting for critical issues

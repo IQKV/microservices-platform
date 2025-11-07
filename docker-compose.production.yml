@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database for Auth Service - Production
@@ -13,10 +13,10 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '1.0'
+          cpus: "1.0"
         reservations:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -39,10 +39,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -80,10 +80,10 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '1.0'
+          cpus: "1.0"
         reservations:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -114,10 +114,10 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '1.0'
+          cpus: "1.0"
         reservations:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -137,17 +137,17 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
-      - '--storage.tsdb.retention.size=10GB'
-      - '--web.enable-lifecycle'
-      - '--web.enable-admin-api'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=10GB"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
 
   grafana:
     environment:
@@ -163,10 +163,10 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 256M
-          cpus: '0.25'
+          cpus: "0.25"
 
   loki:
     volumes:
@@ -176,10 +176,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
 
 volumes:
   postgres_auth_production_data:

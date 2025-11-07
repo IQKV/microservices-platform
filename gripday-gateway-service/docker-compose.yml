@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Redis for Gateway Service - Local Development
@@ -13,7 +13,7 @@ services:
     networks:
       - gateway-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,7 +40,7 @@ services:
     networks:
       - gateway-network
     healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health" ]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -60,42 +60,42 @@ services:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: local
       SPRING_APPLICATION_NAME: gripday-gateway-service
-      
+
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-gateway
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
-      
+
       # Gateway Configuration
       GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://mock-auth-service:8080
       GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173"
       GRIPDAY_GATEWAY_CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
       GRIPDAY_GATEWAY_CORS_ALLOWED_HEADERS: "*"
       GRIPDAY_GATEWAY_CORS_ALLOW_CREDENTIALS: true
-      
+
       # Rate Limiting Configuration
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
       GRIPDAY_GATEWAY_RATE_LIMITING_BURST_CAPACITY: 200
       GRIPDAY_GATEWAY_RATE_LIMITING_REPLENISH_RATE: 50
-      
+
       # Circuit Breaker Configuration
       GRIPDAY_GATEWAY_CIRCUIT_BREAKER_ENABLED: true
       GRIPDAY_GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD: 50
       GRIPDAY_GATEWAY_CIRCUIT_BREAKER_WAIT_DURATION_IN_OPEN_STATE: 30s
       GRIPDAY_GATEWAY_CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE: 10
-      
+
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
       GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
       GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: DEBUG
-      
+
       # Reactive Configuration
       SPRING_WEBFLUX_MULTIPART_MAX_IN_MEMORY_SIZE: 1MB
       SPRING_WEBFLUX_MULTIPART_MAX_DISK_USAGE_PER_PART: 10MB
       SPRING_WEBFLUX_MULTIPART_MAX_PARTS: 128
-      
+
       # JVM Configuration for reactive workloads
       JAVA_OPTS: >-
         -XX:+UseContainerSupport
@@ -112,7 +112,7 @@ services:
         -Dlogging.level.reactor.netty=DEBUG
     ports:
       - "8080:8080"
-      - "8090:8090"  # Debug port
+      - "8090:8090" # Debug port
     depends_on:
       redis-gateway:
         condition: service_healthy
@@ -121,7 +121,7 @@ services:
     networks:
       - gateway-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -133,10 +133,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 
 networks:

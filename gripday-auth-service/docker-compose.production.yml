@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database for Auth Service - Production Environment
@@ -22,7 +22,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -60,10 +60,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
+          cpus: "4.0"
           memory: 6G
         reservations:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 3G
       restart_policy:
         condition: on-failure
@@ -86,7 +86,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping" ]
+      test: ["CMD", "redis-cli", "-a", "${GRIPDAY_CACHE_REDIS_PASSWORD}", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -117,10 +117,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 3G
         reservations:
-          cpus: '1.0'
+          cpus: "1.0"
           memory: 1.5G
       restart_policy:
         condition: on-failure
@@ -141,7 +141,7 @@ services:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: production
       SPRING_APPLICATION_NAME: gripday-auth-service
-      
+
       # Database Configuration
       GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/${GRIPDAY_DATABASE_NAME:-gripday_auth}
       GRIPDAY_DATABASE_USERNAME: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
@@ -149,32 +149,32 @@ services:
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
       GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
       GRIPDAY_DATABASE_JPA_SHOW_SQL: false
-      
+
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-auth
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
       GRIPDAY_CACHE_REDIS_TIMEOUT: 5000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
-      
+
       # JWT Configuration
       GRIPDAY_AUTH_JWT_SECRET: ${GRIPDAY_AUTH_JWT_SECRET}
       GRIPDAY_AUTH_JWT_EXPIRATION: ${GRIPDAY_AUTH_JWT_EXPIRATION:-900}
       GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: ${GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION:-604800}
       GRIPDAY_AUTH_JWT_ISSUER: gripday-auth-service
-      
+
       # Security Configuration
       GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
       GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: ${GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE:-200}
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-3}
       GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION:-1800}
-      
+
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
       GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
       GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: WARN
-      
+
       # JVM Configuration for production
       JAVA_OPTS: >-
         -XX:+UseContainerSupport
@@ -203,7 +203,7 @@ services:
         -Dcom.sun.management.jmxremote.ssl=false
     ports:
       - "${AUTH_SERVICE_PORT:-8081}:8081"
-      - "${JMX_PORT:-9999}:9999"  # JMX monitoring port
+      - "${JMX_PORT:-9999}:9999" # JMX monitoring port
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -213,7 +213,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 20s
       retries: 5
@@ -230,10 +230,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
+          cpus: "4.0"
           memory: 4G
         reservations:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 2G
       restart_policy:
         condition: on-failure

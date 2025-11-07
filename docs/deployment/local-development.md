@@ -5,6 +5,7 @@ This guide provides step-by-step instructions for setting up the Gripday microse
 ## Prerequisites
 
 ### Required Software
+
 - **Java 21** - OpenJDK or Oracle JDK
 - **Maven 3.9+** - Build automation tool
 - **Docker 24+** - Container runtime
@@ -12,6 +13,7 @@ This guide provides step-by-step instructions for setting up the Gripday microse
 - **Git** - Version control
 
 ### Verification Commands
+
 ```bash
 # Verify Java version
 java -version
@@ -29,12 +31,14 @@ docker-compose --version
 ## Quick Start
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/gripday/gripday-platform.git
 cd gripday-platform
 ```
 
 ### 2. Start Infrastructure Services
+
 ```bash
 # Start PostgreSQL and Redis
 docker compose up -d postgres redis
@@ -44,6 +48,7 @@ docker-compose ps
 ```
 
 ### 3. Build Services
+
 ```bash
 # Build all services
 mvn clean package
@@ -54,6 +59,7 @@ mvn clean package -pl gripday-gateway-service
 ```
 
 ### 4. Run Database Migrations
+
 ```bash
 cd gripday-auth-service
 mvn liquibase:update -Dspring.profiles.active=local
@@ -61,6 +67,7 @@ cd ..
 ```
 
 ### 5. Start Services
+
 ```bash
 # Terminal 1 - Auth Service
 cd gripday-auth-service
@@ -72,6 +79,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 ### 6. Verify Deployment
+
 ```bash
 # Check auth service health
 curl http://localhost:8081/actuator/health
@@ -94,6 +102,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ## Docker Compose Setup
 
 ### Full Platform Deployment
+
 ```bash
 # Start all services with Docker Compose
 docker compose up -d
@@ -109,6 +118,7 @@ docker-compose down -v
 ```
 
 ### Individual Service Deployment
+
 ```bash
 # Auth service only
 cd gripday-auth-service
@@ -124,6 +134,7 @@ docker compose up -d
 ### Environment Variables
 
 Create `.env` file in project root:
+
 ```bash
 # Database Configuration
 POSTGRES_DB=gripday_platform
@@ -161,6 +172,7 @@ CORS_ALLOWED_HEADERS=*
 ### Service-Specific Environment Files
 
 **Auth Service (.env.local):**
+
 ```bash
 # Database
 GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
@@ -186,6 +198,7 @@ LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
 ```
 
 **Gateway Service (.env.local):**
+
 ```bash
 # Gateway
 GRIPDAY_GATEWAY_PORT=8080
@@ -216,6 +229,7 @@ LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY=DEBUG
 ### PostgreSQL Configuration
 
 **Docker Compose PostgreSQL:**
+
 ```yaml
 services:
   postgres:
@@ -239,6 +253,7 @@ services:
 ### Database Initialization
 
 **Create databases:**
+
 ```sql
 -- Connect as postgres user
 CREATE DATABASE gripday_auth;
@@ -253,6 +268,7 @@ GRANT ALL PRIVILEGES ON DATABASE gripday_gateway TO gripday;
 ### Liquibase Migrations
 
 **Run migrations manually:**
+
 ```bash
 cd gripday-auth-service
 
@@ -267,6 +283,7 @@ mvn liquibase:rollback -Dliquibase.rollbackCount=1 -Dspring.profiles.active=loca
 ```
 
 **Migration files location:**
+
 ```
 gripday-auth-service/src/main/resources/db/changelog/
 ├── db.changelog-master.xml
@@ -282,6 +299,7 @@ gripday-auth-service/src/main/resources/db/changelog/
 ### Redis Configuration
 
 **Docker Compose Redis:**
+
 ```yaml
 services:
   redis:
@@ -299,6 +317,7 @@ services:
 ```
 
 ### Redis Verification
+
 ```bash
 # Connect to Redis
 docker exec -it gripday-platform_redis_1 redis-cli
@@ -316,6 +335,7 @@ PONG
 ### Hot Reload Development
 
 **Using Spring Boot DevTools:**
+
 ```bash
 # Add to pom.xml (already included)
 <dependency>
@@ -332,12 +352,14 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 ### IDE Configuration
 
 **IntelliJ IDEA:**
+
 1. Import as Maven project
 2. Set Project SDK to Java 21
 3. Enable annotation processing
 4. Configure run configurations with `local` profile
 
 **VS Code:**
+
 1. Install Java Extension Pack
 2. Install Spring Boot Extension Pack
 3. Configure `launch.json` with local profile
@@ -345,6 +367,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 ### Testing
 
 **Run all tests:**
+
 ```bash
 # Unit tests
 mvn test
@@ -360,6 +383,7 @@ mvn package -DskipTests
 ```
 
 **Test with Docker:**
+
 ```bash
 # Run tests with Testcontainers
 mvn verify -Dspring.profiles.active=test
@@ -371,6 +395,7 @@ docker system prune -f
 ## Monitoring and Observability
 
 ### Health Checks
+
 ```bash
 # Auth service health
 curl http://localhost:8081/actuator/health
@@ -384,6 +409,7 @@ curl http://localhost:8081/actuator/health/redis
 ```
 
 ### Metrics
+
 ```bash
 # Prometheus metrics
 curl http://localhost:8081/actuator/prometheus
@@ -395,6 +421,7 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
 ### Logs
+
 ```bash
 # View application logs
 docker-compose logs -f auth-service
@@ -413,6 +440,7 @@ docker-compose logs -f auth-service | grep ERROR
 ### Common Issues
 
 **Port Already in Use:**
+
 ```bash
 # Find process using port
 lsof -i :8080
@@ -426,6 +454,7 @@ mvn spring-boot:run -Dserver.port=8082
 ```
 
 **Database Connection Failed:**
+
 ```bash
 # Check PostgreSQL status
 docker-compose ps postgres
@@ -438,6 +467,7 @@ psql -h localhost -U gripday -d gripday_auth
 ```
 
 **Redis Connection Failed:**
+
 ```bash
 # Check Redis status
 docker-compose ps redis
@@ -447,6 +477,7 @@ redis-cli -h localhost -p 6379 ping
 ```
 
 **Maven Build Issues:**
+
 ```bash
 # Clean and rebuild
 mvn clean install
@@ -461,6 +492,7 @@ mvn dependency:tree
 ### Performance Tuning
 
 **JVM Options for Development:**
+
 ```bash
 export MAVEN_OPTS="-Xmx2g -Xms1g -XX:+UseG1GC"
 
@@ -469,6 +501,7 @@ export MAVEN_OPTS="-Xmx2g -Xms1g -XX:+UseG1GC"
 ```
 
 **Docker Resource Limits:**
+
 ```yaml
 services:
   auth-service:
@@ -476,10 +509,10 @@ services:
       resources:
         limits:
           memory: 1G
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 512M
-          cpus: '0.25'
+          cpus: "0.25"
 ```
 
 ## Next Steps

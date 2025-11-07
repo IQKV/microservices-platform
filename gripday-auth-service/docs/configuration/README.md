@@ -152,7 +152,7 @@ cp .env.example .env.production
 ### Required Environment Variables
 
 | Variable                    | Description               | Example                                         |
-|-----------------------------|---------------------------|-------------------------------------------------|
+| --------------------------- | ------------------------- | ----------------------------------------------- |
 | `GRIPDAY_DATABASE_URL`      | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/gripday_auth` |
 | `GRIPDAY_DATABASE_USERNAME` | Database username         | `gripday_user`                                  |
 | `GRIPDAY_DATABASE_PASSWORD` | Database password         | `secure_password`                               |

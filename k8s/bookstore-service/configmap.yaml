@@ -11,7 +11,7 @@ data:
   application.yml: |
     server:
       port: 8082
-    
+
     spring:
       application:
         name: gripday-bookstore-service
@@ -33,18 +33,18 @@ data:
             order_inserts: true
             order_updates: true
         open-in-view: false
-    
+
       # Liquibase Configuration
       liquibase:
         change-log: classpath:db/changelog/db.changelog-master.xml
         enabled: true
-    
+
       # Cache Configuration
       cache:
         type: redis
         redis:
           time-to-live: PT1H  # 1 hour default TTL
-    
+
     # SpringDoc OpenAPI Configuration
     springdoc:
       api-docs:
@@ -76,7 +76,7 @@ data:
           paths-to-match: /api/*/search/**
       show-actuator: true
       use-management-port: false
-    
+
     # OpenTelemetry Configuration
     management:
       endpoints:
@@ -104,7 +104,7 @@ data:
       tracing:
         sampling:
           probability: 1.0
-    
+
     # Gripday-specific configuration properties
     gripday:
       bookstore:
@@ -155,7 +155,7 @@ data:
   application-staging.yml: |
     server:
       port: 8082
-    
+
     spring:
       profiles:
         active: staging
@@ -166,12 +166,12 @@ data:
           hibernate:
             format_sql: false
             use_sql_comments: false
-    
+
     management:
       tracing:
         sampling:
           probability: 0.1
-    
+
     gripday:
       observability:
         tracing:
@@ -197,7 +197,7 @@ data:
   application-production.yml: |
     server:
       port: 8082
-    
+
     spring:
       profiles:
         active: production
@@ -208,12 +208,12 @@ data:
           hibernate:
             format_sql: false
             use_sql_comments: false
-    
+
     management:
       tracing:
         sampling:
           probability: 0.01
-    
+
     gripday:
       observability:
         tracing:

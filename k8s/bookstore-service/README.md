@@ -24,11 +24,13 @@ The bookstore service provides book catalog management, inventory tracking, and 
 ## Components
 
 ### Core Service
+
 - **bookstore-service**: Main Spring Boot application (port 8082)
 - **bookstore-postgres**: PostgreSQL 15.8 database for persistent storage
 - **bookstore-redis**: Redis 7.4 for caching and session management
 
 ### Kubernetes Resources
+
 - **Deployment**: Application pods with rolling update strategy
 - **Service**: ClusterIP service for internal communication
 - **Ingress**: HTTP/HTTPS routing with CORS and rate limiting
@@ -121,11 +123,11 @@ OTEL_SERVICE_NAME=gripday-bookstore-service
 
 ### Resource Requirements
 
-| Component | CPU Request | CPU Limit | Memory Request | Memory Limit |
-|-----------|-------------|-----------|----------------|--------------|
-| Bookstore Service | 250m | 500m | 384Mi | 768Mi |
-| PostgreSQL | 250m | 500m | 256Mi | 512Mi |
-| Redis | 100m | 200m | 128Mi | 256Mi |
+| Component         | CPU Request | CPU Limit | Memory Request | Memory Limit |
+| ----------------- | ----------- | --------- | -------------- | ------------ |
+| Bookstore Service | 250m        | 500m      | 384Mi          | 768Mi        |
+| PostgreSQL        | 250m        | 500m      | 256Mi          | 512Mi        |
+| Redis             | 100m        | 200m      | 128Mi          | 256Mi        |
 
 ### Scaling Configuration
 
@@ -137,6 +139,7 @@ OTEL_SERVICE_NAME=gripday-bookstore-service
 ## Networking
 
 ### Service Ports
+
 - **Bookstore Service**: 8082 (HTTP)
 - **PostgreSQL**: 5432
 - **Redis**: 6379
@@ -144,6 +147,7 @@ OTEL_SERVICE_NAME=gripday-bookstore-service
 ### Ingress Routes
 
 #### Local Environment
+
 ```
 http://localhost/api/v1/bookstore/*          → Bookstore API (protected)
 http://localhost/api/v1/bookstore/public/*   → Public API (no auth)
@@ -152,11 +156,13 @@ http://localhost/bookstore/actuator/*        → Health/metrics
 ```
 
 #### Staging Environment
+
 ```
 https://api.pynity.website/api/v1/bookstore/*  → Bookstore API
 ```
 
 #### Production Environment
+
 ```
 https://api.pynity.com/api/v1/bookstore/*  → Bookstore API
 ```
@@ -164,6 +170,7 @@ https://api.pynity.com/api/v1/bookstore/*  → Bookstore API
 ### Network Policies
 
 The deployment includes network policies that:
+
 - Allow ingress from gateway service and ingress controller
 - Allow egress to PostgreSQL and Redis
 - Allow egress to auth service for JWT validation
@@ -173,18 +180,21 @@ The deployment includes network policies that:
 ## Security
 
 ### Pod Security
+
 - **Non-root user**: Runs as UID 1001
 - **Read-only root filesystem**: Prevents runtime modifications
 - **No privilege escalation**: Security hardening
 - **Dropped capabilities**: Minimal required capabilities
 
 ### Network Security
+
 - **Network policies**: Restrict traffic between pods
 - **TLS termination**: At ingress level for staging/production
 - **CORS policies**: Environment-specific CORS configuration
 - **Rate limiting**: Request rate limiting at ingress
 
 ### Secrets Management
+
 - **JWT secrets**: Shared with auth service
 - **Database credentials**: Environment-specific
 - **Redis passwords**: Optional for local, required for staging/production
@@ -192,21 +202,25 @@ The deployment includes network policies that:
 ## Monitoring and Observability
 
 ### Health Checks
+
 - **Liveness Probe**: `/actuator/health/liveness` (60s delay, 30s interval)
 - **Readiness Probe**: `/actuator/health/readiness` (30s delay, 10s interval)
 - **Startup Probe**: `/actuator/health` (30s delay, 10s interval, 12 failures)
 
 ### Metrics
+
 - **Prometheus metrics**: Available at `/actuator/prometheus`
 - **Custom metrics**: Book operations, inventory levels, search performance
 - **JVM metrics**: Memory, GC, thread pools
 
 ### Tracing
+
 - **OpenTelemetry**: Distributed tracing integration
 - **Jaeger**: Trace collection and visualization
 - **Correlation IDs**: Request correlation across services
 
 ### Logging
+
 - **Structured logging**: JSON format for staging/production
 - **Log levels**: DEBUG (local), INFO (staging), WARN (production)
 - **Audit logging**: Administrative operations tracking
@@ -216,17 +230,20 @@ The deployment includes network policies that:
 ### Common Issues
 
 1. **Pod not starting**
+
    ```bash
    kubectl describe pod -l app.kubernetes.io/name=gripday-bookstore-service -n gripday-bookstore
    kubectl logs -l app.kubernetes.io/name=gripday-bookstore-service -n gripday-bookstore
    ```
 
 2. **Database connection issues**
+
    ```bash
    kubectl exec -it deployment/bookstore-postgres -n gripday-bookstore -- psql -U bookstore_user -d gripday_bookstore_local
    ```
 
 3. **Redis connection issues**
+
    ```bash
    kubectl exec -it deployment/bookstore-redis -n gripday-bookstore -- redis-cli ping
    ```
@@ -262,17 +279,20 @@ kubectl get networkpolicy -n gripday-bookstore
 ## API Endpoints
 
 ### Public Endpoints (No Authentication)
+
 - `GET /api/v1/bookstore/public/books` - List books with pagination
 - `GET /api/v1/bookstore/public/books/{id}` - Get book details
 - `GET /api/v1/bookstore/public/search` - Search books
 
 ### Protected Endpoints (Authentication Required)
+
 - `POST /api/v1/bookstore/books` - Create book (admin only)
 - `PUT /api/v1/bookstore/books/{id}` - Update book (admin only)
 - `DELETE /api/v1/bookstore/books/{id}` - Delete book (admin only)
 - `PUT /api/v1/bookstore/inventory/{bookId}` - Update inventory (admin only)
 
 ### Management Endpoints
+
 - `GET /actuator/health` - Health check
 - `GET /actuator/metrics` - Application metrics
 - `GET /actuator/prometheus` - Prometheus metrics
@@ -281,18 +301,22 @@ kubectl get networkpolicy -n gripday-bookstore
 ## Integration
 
 ### Gateway Service Integration
+
 The bookstore service integrates with the gateway service for:
+
 - **Routing**: All requests routed through gateway
 - **Authentication**: JWT validation via gateway
 - **Rate limiting**: Distributed rate limiting
 - **CORS**: Centralized CORS handling
 
 ### Auth Service Integration
+
 - **JWT validation**: Shared JWT secret for token validation
 - **User context**: Extract user information from JWT tokens
 - **Role-based access**: Admin operations require admin role
 
 ### Observability Stack Integration
+
 - **Prometheus**: Metrics collection
 - **Grafana**: Dashboards and visualization
 - **Jaeger**: Distributed tracing
@@ -303,23 +327,26 @@ The bookstore service integrates with the gateway service for:
 ### Local Development Setup
 
 1. **Start minikube**
+
    ```bash
    minikube start
    ```
 
 2. **Deploy bookstore service**
+
    ```bash
    ./deploy-bookstore.sh
    ```
 
 3. **Access services**
+
    ```bash
    # Add to /etc/hosts
    echo "$(minikube ip) localhost" >> /etc/hosts
-   
+
    # Access API
    curl http://localhost/api/v1/bookstore/public/books
-   
+
    # Access Swagger UI
    open http://localhost/bookstore/swagger-ui.html
    ```
@@ -340,16 +367,19 @@ kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 ## Maintenance
 
 ### Backup
+
 - **Database backup**: Use pg_dump for PostgreSQL backups
 - **Redis backup**: Use BGSAVE for Redis snapshots
 - **Configuration backup**: Store manifests in version control
 
 ### Updates
+
 - **Rolling updates**: Use deployment rolling update strategy
 - **Database migrations**: Liquibase handles schema migrations
 - **Configuration updates**: Update ConfigMaps and restart pods
 
 ### Monitoring
+
 - **Resource usage**: Monitor CPU, memory, and storage usage
 - **Performance metrics**: Track response times and error rates
 - **Business metrics**: Monitor book operations and search performance

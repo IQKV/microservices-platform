@@ -29,77 +29,77 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: postgres
-        image: postgres:15.8-alpine
-        ports:
-        - containerPort: 5432
-          name: postgres
-        env:
-        - name: POSTGRES_DB
-          value: "gripday_auth_local"
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: auth-service-secrets
-              key: GRIPDAY_DATABASE_USERNAME
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: auth-service-secrets
-              key: GRIPDAY_DATABASE_PASSWORD
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
-        - name: postgres-init
-          mountPath: /docker-entrypoint-initdb.d
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - $(POSTGRES_USER)
-            - -d
-            - $(POSTGRES_DB)
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - $(POSTGRES_USER)
-            - -d
-            - $(POSTGRES_DB)
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
-          runAsNonRoot: true
-          runAsUser: 999
-          capabilities:
-            drop:
-            - ALL
+        - name: postgres
+          image: postgres:15.8-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: "gripday_auth_local"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: GRIPDAY_DATABASE_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secrets
+                  key: GRIPDAY_DATABASE_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - $(POSTGRES_USER)
+                - -d
+                - $(POSTGRES_DB)
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - $(POSTGRES_USER)
+                - -d
+                - $(POSTGRES_DB)
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 999
+            capabilities:
+              drop:
+                - ALL
       volumes:
-      - name: postgres-storage
-        persistentVolumeClaim:
-          claimName: auth-postgres-pvc
-      - name: postgres-init
-        configMap:
-          name: postgres-init-config
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: auth-postgres-pvc
+        - name: postgres-init
+          configMap:
+            name: postgres-init-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -132,6 +132,6 @@ data:
     -- Create extensions if needed
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-    
+
     -- Grant necessary permissions
     GRANT ALL PRIVILEGES ON DATABASE gripday_auth_local TO gripday_user;

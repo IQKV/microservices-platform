@@ -65,7 +65,7 @@ gripday:
         strategy: round-robin
         enable-health-check: true
         health-check-interval: PT30S
-    
+
     security:
       jwt:
         secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
@@ -87,7 +87,7 @@ gripday:
         - /api/v1/auth/email/resend
         - /api/v1/auth/email/status
         - /actuator/health
-    
+
     rate-limiting:
       enabled: true
       redis:
@@ -104,7 +104,7 @@ gripday:
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000
-    
+
     circuit-breaker:
       enabled: true
       failure-rate-threshold: 50
@@ -114,7 +114,7 @@ gripday:
       wait-duration-in-open-state: PT30S
       sliding-window-size: 100
       sliding-window-type: COUNT_BASED
-    
+
     cors:
       enabled: true
       allowed-origins:
@@ -191,7 +191,7 @@ cp .env.example .env.production
 ### Required Environment Variables
 
 | Variable                                    | Description          | Example                  |
-|---------------------------------------------|----------------------|--------------------------|
+| ------------------------------------------- | -------------------- | ------------------------ |
 | `GRIPDAY_CACHE_REDIS_HOST`                  | Redis host           | `localhost`              |
 | `GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI`  | Auth service URL     | `http://localhost:8081`  |
 | `GRIPDAY_GATEWAY_SECURITY_JWT_SECRET`       | JWT signing secret   | `your-secure-secret-key` |

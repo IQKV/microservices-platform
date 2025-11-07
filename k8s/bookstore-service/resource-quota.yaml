@@ -14,23 +14,23 @@ spec:
     requests.memory: "12Gi"
     limits.cpu: "12"
     limits.memory: "24Gi"
-    
+
     # Storage
     requests.storage: "30Gi"
     persistentvolumeclaims: "5"
-    
+
     # Object counts
     pods: "25"
     services: "10"
     configmaps: "10"
     secrets: "10"
     replicationcontrollers: "0"
-  
+
   scopeSelector:
     matchExpressions:
-    - operator: In
-      scopeName: PriorityClass
-      values: ["high-priority", "medium-priority", "low-priority"]
+      - operator: In
+        scopeName: PriorityClass
+        values: ["high-priority", "medium-priority", "low-priority"]
 ---
 apiVersion: v1
 kind: LimitRange
@@ -43,36 +43,36 @@ metadata:
     app.kubernetes.io/part-of: gripday-platform
 spec:
   limits:
-  # Container limits
-  - type: Container
-    max:
-      cpu: "2"
-      memory: "4Gi"
-    min:
-      cpu: "50m"
-      memory: "64Mi"
-    default:
-      cpu: "500m"
-      memory: "512Mi"
-    defaultRequest:
-      cpu: "250m"
-      memory: "256Mi"
-    maxLimitRequestRatio:
-      cpu: "4"
-      memory: "4"
-  
-  # Pod limits
-  - type: Pod
-    max:
-      cpu: "4"
-      memory: "8Gi"
-    min:
-      cpu: "100m"
-      memory: "128Mi"
-  
-  # PVC limits
-  - type: PersistentVolumeClaim
-    max:
-      storage: "15Gi"
-    min:
-      storage: "1Gi"
+    # Container limits
+    - type: Container
+      max:
+        cpu: "2"
+        memory: "4Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "250m"
+        memory: "256Mi"
+      maxLimitRequestRatio:
+        cpu: "4"
+        memory: "4"
+
+    # Pod limits
+    - type: Pod
+      max:
+        cpu: "4"
+        memory: "8Gi"
+      min:
+        cpu: "100m"
+        memory: "128Mi"
+
+    # PVC limits
+    - type: PersistentVolumeClaim
+      max:
+        storage: "15Gi"
+      min:
+        storage: "1Gi"

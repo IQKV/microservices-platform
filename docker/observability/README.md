@@ -5,23 +5,27 @@ This directory contains the complete observability stack for the Gripday microse
 ## Components
 
 ### OpenTelemetry & Jaeger
+
 - **Jaeger**: Distributed tracing system for monitoring and troubleshooting microservices
 - **Port**: 16686 (UI), 4317 (OTLP gRPC), 4318 (OTLP HTTP)
 - **URL**: http://localhost:16686
 
 ### Prometheus
+
 - **Purpose**: Metrics collection and monitoring
 - **Port**: 9090
 - **URL**: http://localhost:9090
 - **Scrapes**: Auth service (8081), Gateway service (8080)
 
 ### Grafana
+
 - **Purpose**: Dashboards and visualization
 - **Port**: 3000
 - **URL**: http://localhost:3000
 - **Credentials**: admin/admin (default)
 
 ### Loki & Promtail
+
 - **Loki**: Log aggregation system
 - **Promtail**: Log shipping agent
 - **Port**: 3100 (Loki)
@@ -30,12 +34,14 @@ This directory contains the complete observability stack for the Gripday microse
 ## Quick Start
 
 1. **Start the observability stack**:
+
    ```bash
    cd docker/observability
    docker compose -f docker-compose.observability.yml up -d
    ```
 
 2. **Start the microservices**:
+
    ```bash
    # Terminal 1 - Auth Service
    cd gripday-auth-service
@@ -54,11 +60,13 @@ This directory contains the complete observability stack for the Gripday microse
 ## Monitoring Endpoints
 
 ### Auth Service (Port 8081)
+
 - Health: http://localhost:8081/actuator/health
 - Metrics: http://localhost:8081/actuator/prometheus
 - Info: http://localhost:8081/actuator/info
 
 ### Gateway Service (Port 8080)
+
 - Health: http://localhost:8080/actuator/health
 - Metrics: http://localhost:8080/actuator/prometheus
 - Info: http://localhost:8080/actuator/info
@@ -66,16 +74,19 @@ This directory contains the complete observability stack for the Gripday microse
 ## Configuration
 
 ### Environment Variables
+
 - `OTEL_EXPORTER_OTLP_ENDPOINT`: OpenTelemetry collector endpoint
 - `GRAFANA_USER`: Grafana admin username
 - `GRAFANA_PASSWORD`: Grafana admin password
 
 ### Logging Levels by Environment
+
 - **Local**: DEBUG level with human-readable format
 - **Staging**: INFO level with JSON format
 - **Production**: WARN level with JSON format
 
 ### Tracing Sampling Rates
+
 - **Local**: 100% sampling (1.0)
 - **Staging**: 10% sampling (0.1)
 - **Production**: 1% sampling (0.01)
@@ -83,6 +94,7 @@ This directory contains the complete observability stack for the Gripday microse
 ## Custom Metrics
 
 ### Auth Service Metrics
+
 - `gripday_auth_authentication_duration`: Authentication request duration
 - `gripday_auth_authentication_total`: Total authentication attempts (success/failure)
 - `gripday_auth_registration_duration`: User registration duration
@@ -91,6 +103,7 @@ This directory contains the complete observability stack for the Gripday microse
 - `gripday_auth_token_refresh_total`: Total token refresh attempts
 
 ### Gateway Service Metrics
+
 - `gripday_gateway_request_duration`: Gateway request processing time
 - `gripday_gateway_request_total`: Total gateway requests
 - `gripday_gateway_authentication_duration`: Authentication validation time
@@ -100,6 +113,7 @@ This directory contains the complete observability stack for the Gripday microse
 ## Structured Logging
 
 ### Log Fields
+
 - `timestamp`: ISO 8601 timestamp in UTC
 - `level`: Log level (DEBUG, INFO, WARN, ERROR)
 - `message`: Log message
@@ -112,6 +126,7 @@ This directory contains the complete observability stack for the Gripday microse
 - `logger`: Logger name
 
 ### Correlation ID Flow
+
 1. Gateway generates correlation ID for incoming requests
 2. Correlation ID propagated to downstream services via headers
 3. All log entries include correlation ID for request tracing
@@ -120,12 +135,14 @@ This directory contains the complete observability stack for the Gripday microse
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Services not appearing in Prometheus**: Check if actuator endpoints are accessible
 2. **No traces in Jaeger**: Verify OTEL_EXPORTER_OTLP_ENDPOINT configuration
 3. **Missing logs in Loki**: Check Promtail configuration and log file paths
 4. **Grafana datasource errors**: Ensure all services are running and accessible
 
 ### Health Checks
+
 ```bash
 # Check observability stack health
 docker compose -f docker-compose.observability.yml ps

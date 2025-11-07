@@ -17,23 +17,23 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gripday-config
-  namespace: gripday
+  namespace: gripday-dev-env
 data:
   # Database URLs
   AUTH_DB_URL: "jdbc:postgresql://postgres-auth:5432/gripday_auth"
   BOOKSTORE_DB_URL: "jdbc:postgresql://postgres-bookstore:5432/gripday_bookstore"
-  
+
   # Redis
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
-  
+
   # Service URLs
   AUTH_SERVICE_URL: "http://auth-service:8081"
   BOOKSTORE_SERVICE_URL: "http://bookstore-service:8082"
-  
+
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "local"
-  
+
   # JVM Options
   JAVA_OPTS: "-Xms128m -Xmx256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
@@ -43,16 +43,16 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: gripday-secrets
-  namespace: gripday
+  namespace: gripday-dev-env
 type: Opaque
 data:
   # Database credentials (gripday_user:gripday_password)
   DB_USERNAME: Z3JpcGRheV91c2Vy
   DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
-  
+
   # JWT Secret (local-dev-secret-key-change-in-production)
   JWT_SECRET: bG9jYWwtZGV2LXNlY3JldC1rZXktY2hhbmdlLWluLXByb2R1Y3Rpb24=
-  
+
   # Redis password (empty for local)
   REDIS_PASSWORD: ""
 
@@ -62,7 +62,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-auth
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: postgres-auth
     component: database
@@ -78,68 +78,68 @@ spec:
         component: database
     spec:
       containers:
-      - name: postgres
-        image: postgres:15-alpine
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_DB
-          value: gripday_auth
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_USERNAME
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_PASSWORD
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-        livenessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - gripday_user
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - gripday_user
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: gripday_auth
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - gripday_user
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - gripday_user
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: postgres-data
-        emptyDir: {}
+        - name: postgres-data
+          emptyDir: {}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres-auth
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: postgres-auth
 spec:
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      targetPort: 5432
   selector:
     app: postgres-auth
 
@@ -149,7 +149,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-bookstore
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: postgres-bookstore
     component: database
@@ -165,68 +165,68 @@ spec:
         component: database
     spec:
       containers:
-      - name: postgres
-        image: postgres:15-alpine
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_DB
-          value: gripday_bookstore
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_USERNAME
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_PASSWORD
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
-        livenessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - gripday_user
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - pg_isready
-            - -U
-            - gripday_user
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: gripday_bookstore
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - gripday_user
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - gripday_user
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: postgres-data
-        emptyDir: {}
+        - name: postgres-data
+          emptyDir: {}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: postgres-bookstore
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: postgres-bookstore
 spec:
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      targetPort: 5432
   selector:
     app: postgres-bookstore
 
@@ -236,7 +236,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: redis
     component: cache
@@ -252,55 +252,55 @@ spec:
         component: cache
     spec:
       containers:
-      - name: redis
-        image: redis:7-alpine
-        ports:
-        - containerPort: 6379
-        command:
-        - redis-server
-        - --appendonly
-        - "yes"
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        volumeMounts:
-        - name: redis-data
-          mountPath: /data
-        livenessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: redis-data
-        emptyDir: {}
+        - name: redis-data
+          emptyDir: {}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: redis
 spec:
   type: ClusterIP
   ports:
-  - port: 6379
-    targetPort: 6379
+    - port: 6379
+      targetPort: 6379
   selector:
     app: redis
 
@@ -310,7 +310,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: auth-service
     component: microservice
@@ -326,122 +326,122 @@ spec:
         component: microservice
     spec:
       initContainers:
-      - name: wait-for-postgres
-        image: busybox:1.36
-        command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for PostgreSQL to be ready..."
-          until nc -z postgres-auth 5432; do
-            echo "Waiting for postgres-auth..."
-            sleep 2
-          done
-          echo "PostgreSQL is ready!"
-      - name: wait-for-redis
-        image: busybox:1.36
-        command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for Redis to be ready..."
-          until nc -z redis 6379; do
-            echo "Waiting for redis..."
-            sleep 2
-          done
-          echo "Redis is ready!"
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until nc -z postgres-auth 5432; do
+                echo "Waiting for postgres-auth..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+        - name: wait-for-redis
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Redis to be ready..."
+              until nc -z redis 6379; do
+                echo "Waiting for redis..."
+                sleep 2
+              done
+              echo "Redis is ready!"
       containers:
-      - name: auth-service
-        image: gripday/auth-service:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8081
-          name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: GRIPDAY_DATABASE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: AUTH_DB_URL
-        - name: GRIPDAY_DATABASE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_USERNAME
-        - name: GRIPDAY_DATABASE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_PASSWORD
-        - name: GRIPDAY_CACHE_REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_HOST
-        - name: GRIPDAY_CACHE_REDIS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_PORT
-        - name: GRIPDAY_AUTH_JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: JWT_SECRET
-        - name: JAVA_OPTS
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: JAVA_OPTS
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8081
-          initialDelaySeconds: 90
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8081
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
-        startupProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8081
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 12
+        - name: auth-service
+          image: gripday/auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: GRIPDAY_DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: AUTH_DB_URL
+            - name: GRIPDAY_DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_USERNAME
+            - name: GRIPDAY_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_PASSWORD
+            - name: GRIPDAY_CACHE_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_HOST
+            - name: GRIPDAY_CACHE_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_PORT
+            - name: GRIPDAY_AUTH_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: JWT_SECRET
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: JAVA_OPTS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: auth-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: auth-service
 spec:
   type: NodePort
   ports:
-  - port: 8081
-    targetPort: 8081
-    nodePort: 30081
-    name: http
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30081
+      name: http
   selector:
     app: auth-service
 
@@ -451,7 +451,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookstore-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: bookstore-service
     component: microservice
@@ -467,119 +467,119 @@ spec:
         component: microservice
     spec:
       initContainers:
-      - name: wait-for-postgres
-        image: busybox:1.36
-        command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for PostgreSQL to be ready..."
-          until nc -z postgres-bookstore 5432; do
-            echo "Waiting for postgres-bookstore..."
-            sleep 2
-          done
-          echo "PostgreSQL is ready!"
-      - name: wait-for-redis
-        image: busybox:1.36
-        command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for Redis to be ready..."
-          until nc -z redis 6379; do
-            echo "Waiting for redis..."
-            sleep 2
-          done
-          echo "Redis is ready!"
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until nc -z postgres-bookstore 5432; do
+                echo "Waiting for postgres-bookstore..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+        - name: wait-for-redis
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Redis to be ready..."
+              until nc -z redis 6379; do
+                echo "Waiting for redis..."
+                sleep 2
+              done
+              echo "Redis is ready!"
       containers:
-      - name: bookstore-service
-        image: gripday/bookstore-service:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8082
-          name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: SPRING_DATASOURCE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: BOOKSTORE_DB_URL
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_USERNAME
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: gripday-secrets
-              key: DB_PASSWORD
-        - name: SPRING_DATA_REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_HOST
-        - name: SPRING_DATA_REDIS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_PORT
-        - name: JWT_ISSUER_URI
-          value: "http://auth-service:8081"
-        - name: JAVA_OPTS
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: JAVA_OPTS
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8082
-          initialDelaySeconds: 90
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8082
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
-        startupProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8082
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 12
+        - name: bookstore-service
+          image: gripday/bookstore-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: BOOKSTORE_DB_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gripday-secrets
+                  key: DB_PASSWORD
+            - name: SPRING_DATA_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_HOST
+            - name: SPRING_DATA_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_PORT
+            - name: JWT_ISSUER_URI
+              value: "http://auth-service:8081"
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: JAVA_OPTS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: bookstore-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: bookstore-service
 spec:
   type: NodePort
   ports:
-  - port: 8082
-    targetPort: 8082
-    nodePort: 30082
-    name: http
+    - port: 8082
+      targetPort: 8082
+      nodePort: 30082
+      name: http
   selector:
     app: bookstore-service
 
@@ -589,7 +589,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: gateway-service
     component: gateway
@@ -605,103 +605,103 @@ spec:
         component: gateway
     spec:
       initContainers:
-      - name: wait-for-services
-        image: busybox:1.36
-        command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for backend services..."
-          until nc -z auth-service 8081 && nc -z bookstore-service 8082 && nc -z redis 6379; do
-            echo "Waiting for services to be ready..."
-            sleep 3
-          done
-          echo "All services are ready!"
+        - name: wait-for-services
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for backend services..."
+              until nc -z auth-service 8081 && nc -z bookstore-service 8082 && nc -z redis 6379; do
+                echo "Waiting for services to be ready..."
+                sleep 3
+              done
+              echo "All services are ready!"
       containers:
-      - name: gateway-service
-        image: gripday/gateway-service:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: http
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: SPRING_PROFILES_ACTIVE
-        - name: SPRING_DATA_REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_HOST
-        - name: SPRING_DATA_REDIS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: REDIS_PORT
-        - name: GRIPDAY_GATEWAY_AUTH_SERVICE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: AUTH_SERVICE_URL
-        - name: GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: BOOKSTORE_SERVICE_URL
-        - name: GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED
-          value: "true"
-        - name: GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE
-          value: "100"
-        - name: JAVA_OPTS
-          valueFrom:
-            configMapKeyRef:
-              name: gripday-config
-              key: JAVA_OPTS
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 8080
-          initialDelaySeconds: 90
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
-        startupProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 12
+        - name: gateway-service
+          image: gripday/gateway-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATA_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_HOST
+            - name: SPRING_DATA_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: REDIS_PORT
+            - name: GRIPDAY_GATEWAY_AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: AUTH_SERVICE_URL
+            - name: GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: BOOKSTORE_SERVICE_URL
+            - name: GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED
+              value: "true"
+            - name: GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE
+              value: "100"
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: gripday-config
+                  key: JAVA_OPTS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: gateway-service
-  namespace: gripday
+  namespace: gripday-dev-env
   labels:
     app: gateway-service
 spec:
   type: NodePort
   ports:
-  - port: 8080
-    targetPort: 8080
-    nodePort: 30080
-    name: http
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+      name: http
   selector:
     app: gateway-service

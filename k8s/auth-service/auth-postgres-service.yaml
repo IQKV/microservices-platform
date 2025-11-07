@@ -10,10 +10,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
-    protocol: TCP
-    name: postgres
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
   selector:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database
@@ -31,10 +31,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
-    protocol: TCP
-    name: postgres
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
   selector:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database
@@ -53,10 +53,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 5432
-    targetPort: 5432
-    protocol: TCP
-    name: postgres
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
   selector:
     app.kubernetes.io/name: auth-postgres
     app.kubernetes.io/component: database

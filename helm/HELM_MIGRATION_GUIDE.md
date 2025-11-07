@@ -39,6 +39,7 @@ This document provides guidance on migrating from raw Kubernetes manifests to He
 ### From K8s Manifests to Helm
 
 #### Current State (k8s/)
+
 ```
 k8s/
 ├── auth-service/
@@ -55,6 +56,7 @@ k8s/
 ```
 
 #### New State (helm/)
+
 ```
 helm/
 ├── auth-service/
@@ -75,6 +77,7 @@ helm/
 ### 1. Parameterization
 
 **Before (K8s manifest)**:
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -86,24 +89,25 @@ spec:
   template:
     spec:
       containers:
-      - name: auth-service
-        image: gripday/auth-service:1.0.0
+        - name: auth-service
+          image: gripday/auth-service:1.0.0
 ```
 
 **After (Helm template)**:
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "auth-service.fullname" . }}
-  namespace: {{ .Values.namespace.name }}
+  name: { { include "auth-service.fullname" . } }
+  namespace: { { .Values.namespace.name } }
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: { { .Values.replicaCount } }
   template:
     spec:
       containers:
-      - name: auth-service
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        - name: auth-service
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 ```
 
 ### 2. Environment-Specific Values
@@ -166,6 +170,7 @@ Test and validate, then migrate traffic.
 #### Option B: In-Place Upgrade (For Production)
 
 1. **Backup current state**:
+
 ```bash
 kubectl get all -n gripday-auth -o yaml > backup-auth.yaml
 kubectl get all -n gripday-bookstore -o yaml > backup-bookstore.yaml
@@ -173,6 +178,7 @@ kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 ```
 
 2. **Delete existing resources**:
+
 ```bash
 kubectl delete -f k8s/auth-service/
 kubectl delete -f k8s/bookstore-service/
@@ -180,6 +186,7 @@ kubectl delete -f k8s/gateway-service/
 ```
 
 3. **Install Helm charts**:
+
 ```bash
 helm install gripday ./helm/gripday-platform
 ```
@@ -204,11 +211,13 @@ curl http://localhost:8080/actuator/health
 ### Step 4: Update CI/CD Pipelines
 
 **Before**:
+
 ```bash
 kubectl apply -f k8s/auth-service/
 ```
 
 **After**:
+
 ```bash
 helm upgrade --install auth-service ./helm/auth-service \
   --namespace gripday-auth \
@@ -218,21 +227,25 @@ helm upgrade --install auth-service ./helm/auth-service \
 ## Benefits of Helm Charts
 
 ### 1. **Reusability**
+
 - Single chart for multiple environments
 - Parameterized configurations
 - Template functions for common patterns
 
 ### 2. **Version Management**
+
 - Chart versioning
 - Rollback capability
 - Release history
 
 ### 3. **Dependency Management**
+
 - Umbrella charts
 - Sub-chart dependencies
 - Coordinated deployments
 
 ### 4. **Simplified Operations**
+
 ```bash
 # Single command deployment
 helm install gripday ./helm/gripday-platform
@@ -245,21 +258,22 @@ helm rollback gripday
 ```
 
 ### 5. **Configuration Management**
+
 - Values files for environments
 - Override mechanisms
 - Secret management integration
 
 ## Comparison: K8s vs Helm
 
-| Feature | K8s Manifests | Helm Charts |
-|---------|---------------|-------------|
-| Deployment | `kubectl apply` | `helm install` |
-| Updates | Manual file edits | Values override |
-| Rollback | Manual | `helm rollback` |
-| Templating | Kustomize/manual | Built-in Go templates |
-| Packaging | Multiple files | Single archive |
-| Versioning | Git only | Chart version + app version |
-| Dependencies | Manual ordering | Declared dependencies |
+| Feature      | K8s Manifests          | Helm Charts                 |
+| ------------ | ---------------------- | --------------------------- |
+| Deployment   | `kubectl apply`        | `helm install`              |
+| Updates      | Manual file edits      | Values override             |
+| Rollback     | Manual                 | `helm rollback`             |
+| Templating   | Kustomize/manual       | Built-in Go templates       |
+| Packaging    | Multiple files         | Single archive              |
+| Versioning   | Git only               | Chart version + app version |
+| Dependencies | Manual ordering        | Declared dependencies       |
 | Environments | Multiple manifest sets | Single chart + values files |
 
 ## Best Practices
@@ -298,6 +312,7 @@ helm install auth-service ./auth-service \
 ### 3. Chart Versioning
 
 Follow semantic versioning:
+
 - **Major**: Breaking changes
 - **Minor**: New features, backward compatible
 - **Patch**: Bug fixes
@@ -373,6 +388,7 @@ helm dependency update
 ## Support
 
 For questions or issues with Helm migration:
+
 - Review individual chart READMEs
 - Check Helm documentation: https://helm.sh/docs/
 - Contact: Gripday Platform Team
