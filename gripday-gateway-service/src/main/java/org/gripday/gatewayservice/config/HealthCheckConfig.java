@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
  */
 @Configuration
 @EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
-public class HealthCheckConfiguration {
+public class HealthCheckConfig {
 
   /**
    * Custom reactive health indicator for Redis connectivity and performance.

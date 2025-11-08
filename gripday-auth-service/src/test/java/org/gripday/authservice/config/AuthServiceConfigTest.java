@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-class AuthServiceConfigurationTest {
+class AuthServiceConfigTest {
 
   @Test
   void contextLoads() {

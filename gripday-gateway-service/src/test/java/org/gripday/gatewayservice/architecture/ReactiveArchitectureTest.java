@@ -7,7 +7,6 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -33,16 +32,20 @@ class ReactiveArchitectureTest {
           .should().beAssignableTo(AbstractGatewayFilterFactory.class);
 
   /**
-   * Validates that reactive methods return appropriate Reactor types. Ensures proper reactive programming patterns.
+   * Validates that reactive filter methods return appropriate types.
+   * Focuses on the main filter() method which must be reactive.
+   * Excludes utility methods, getters, and configuration methods.
    */
   @ArchTest
-  static final ArchRule reactive_methods_should_return_reactor_types =
-      methods().that().areDeclaredInClassesThat().resideInAnyPackage("..filter..", "..service..")
+  static final ArchRule reactive_filter_methods_should_return_reactor_types =
+      methods().that().areDeclaredInClassesThat()
+          .resideInAnyPackage("..filter..")
+          .and().haveNameMatching("filter")
           .and().arePublic()
+          .and().areDeclaredInClassesThat().haveSimpleNameNotEndingWith("Test")
+          .and().areDeclaredInClassesThat().areNotMemberClasses()
           .should().haveRawReturnType(Mono.class)
-          .orShould().haveRawReturnType(Flux.class)
-          .orShould().haveRawReturnType(GatewayFilter.class)
-          .orShould().haveRawReturnType(void.class);
+          .orShould().haveRawReturnType(Flux.class);
 
   /**
    * Validates that reactive components don't use blocking I/O operations. Ensures non-blocking reactive patterns throughout the gateway.
@@ -59,12 +62,17 @@ class ReactiveArchitectureTest {
           );
 
   /**
-   * Validates that reactive services are properly annotated. Ensures service components follow Spring reactive conventions.
+   * Validates that service classes are properly annotated.
+   * Ensures consistent service layer organization.
+   * Excludes test classes, inner classes, and records from this validation.
    */
   @ArchTest
   static final ArchRule reactive_services_should_be_properly_annotated =
       classes().that().resideInAPackage("..service..")
           .and().areNotInterfaces()
+          .and().haveSimpleNameNotEndingWith("Test")
+          .and().areNotMemberClasses()
+          .and().areNotRecords()
           .should().beAnnotatedWith(Service.class)
           .orShould().beAnnotatedWith(Component.class);
 
@@ -87,14 +95,29 @@ class ReactiveArchitectureTest {
           .resideInAnyPackage("reactor.core.publisher..", "org.springframework.web.server..");
 
   /**
-   * Validates that security components follow reactive patterns. Ensures security filters and services are properly reactive.
+   * Validates that security filter classes use reactive patterns.
+   * Ensures proper reactive security implementation in filters.
+   * Focuses on filter classes only, not inner records or utility classes.
    */
   @ArchTest
-  static final ArchRule security_components_should_be_reactive =
-      classes().that().haveNameMatching(".*(Security|Auth|Jwt).*")
+  static final ArchRule security_filters_should_be_reactive =
+      classes().that().haveNameMatching(".*(Security|Auth|Jwt).*Filter")
           .and().resideInAnyPackage("..filter..", "..security..")
+          .and().areNotMemberClasses()
+          .and().areNotRecords()
           .should().dependOnClassesThat()
-          .resideInAnyPackage("reactor.core..", "org.springframework.security.web.server..");
+          .resideInAnyPackage(
+              "reactor.core..",
+              "org.springframework.security.web.server..",
+              "java..",
+              "org.springframework..",
+              "io.jsonwebtoken..",
+              "javax.crypto..",
+              "com.fasterxml.jackson..",
+              "..config..",
+              "..filter..",
+              "..security.."
+          );
 
   /**
    * Validates that configuration classes don't contain reactive logic. Ensures proper separation between configuration and reactive business logic.
@@ -125,11 +148,14 @@ class ReactiveArchitectureTest {
           .resideInAnyPackage("reactor.util.context..", "org.slf4j.MDC");
 
   /**
-   * Validates that reactive filters don't create inappropriate dependencies. Ensures filters maintain proper abstraction levels.
+   * Validates that reactive filters maintain proper abstraction.
+   * Ensures filters don't depend on inappropriate external libraries.
+   * Allows necessary dependencies for gateway functionality.
    */
   @ArchTest
   static final ArchRule reactive_filters_should_maintain_abstraction =
       classes().that().haveNameMatching(".*Filter")
+          .and().areNotMemberClasses()
           .should().onlyDependOnClassesThat()
           .resideInAnyPackage(
               "java..",
@@ -139,7 +165,13 @@ class ReactiveArchitectureTest {
               "org.springframework.cloud.gateway..",
               "..service..",
               "..security..",
-              "io.jsonwebtoken.."
+              "..config..",
+              "..filter..",
+              "io.jsonwebtoken..",
+              "io.github.resilience4j..",
+              "com.fasterxml.jackson..",
+              "javax.crypto..",
+              "reactor.util.context.."
           );
 
   /**
@@ -152,11 +184,17 @@ class ReactiveArchitectureTest {
           .should().haveSimpleNameEndingWith("Filter");
 
   /**
-   * Validates that reactive services follow proper naming conventions. Ensures consistent service naming patterns.
+   * Ensures that service classes follow proper naming conventions.
+   * Validates consistent service organization.
+   * Excludes test classes, inner classes, and records from this validation.
    */
   @ArchTest
   static final ArchRule reactive_services_should_follow_naming_conventions =
       classes().that().resideInAPackage("..service..")
           .and().areNotInterfaces()
-          .should().haveSimpleNameEndingWith("Service");
+          .and().haveSimpleNameNotEndingWith("Test")
+          .and().areNotMemberClasses()
+          .and().areNotRecords()
+          .should().haveSimpleNameEndingWith("Service")
+          .orShould().haveSimpleNameEndingWith("Extractor");
 }

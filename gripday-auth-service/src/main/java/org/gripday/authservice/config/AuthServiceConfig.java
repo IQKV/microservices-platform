@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(GripdayProperties.class)
-public class AuthServiceConfiguration {
+public class AuthServiceConfig {
   // Configuration beans will be added in subsequent tasks
 }

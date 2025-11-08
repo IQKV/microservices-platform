@@ -12,6 +12,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "org.gripday.authservice.infrastructure.repository")
 @EntityScan(basePackages = "org.gripday.authservice.infrastructure.entity")
 @EnableTransactionManagement
-public class DatabaseConfiguration {
+public class DatabaseConfig {
   // JPA configuration will be enhanced in subsequent tasks
 }

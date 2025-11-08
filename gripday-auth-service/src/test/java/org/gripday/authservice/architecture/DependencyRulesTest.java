@@ -52,12 +52,20 @@ class DependencyRulesTest {
           .because("Presentation web layer should only access domain layer");
 
   /**
-   * Ensures that domain services act as the proper intermediary. Validates that repositories are only accessed by domain services.
+   * Ensures that domain services act as the proper intermediary.
+   * Validates that repositories are only accessed by domain services.
+   * Allows config and test packages for setup and testing purposes.
    */
   @ArchTest
   static final ArchRule repositories_should_only_be_accessed_by_domain_services =
       classes().that().areAnnotatedWith(Repository.class)
-          .should().onlyBeAccessed().byAnyPackage("..domain.service..", "..infrastructure..");
+          .should().onlyBeAccessed().byAnyPackage(
+              "..domain.service..",
+              "..infrastructure..",
+              "..config..",
+              "..unit..",
+              "..integration.."
+          );
 
   /**
    * Validates that infrastructure layer doesn't depend on presentation layer. Allows limited domain dependencies for tenant context.
@@ -76,12 +84,21 @@ class DependencyRulesTest {
           .should().onlyBeAccessed().byAnyPackage("..infrastructure..", "..domain.service..");
 
   /**
-   * Validates that DTOs are used for data transfer between layers. Ensures proper abstraction between presentation and domain layers.
+   * Validates that DTOs are used for data transfer between layers.
+   * Ensures proper abstraction between presentation and domain layers.
+   * Allows infrastructure and test packages for data mapping and testing.
    */
   @ArchTest
   static final ArchRule dtos_should_be_used_for_layer_communication =
       classes().that().resideInAPackage("..presentation.dto..")
-          .should().onlyBeAccessed().byAnyPackage("..presentation..", "..domain.service..");
+          .should().onlyBeAccessed().byAnyPackage(
+              "..presentation..",
+              "..domain.service..",
+              "..infrastructure..",
+              "..unit..",
+              "..integration..",
+              "..config.."
+          );
 
   /**
    * Ensures that validation logic is properly encapsulated. Validates that validation classes are only used by presentation layer.

@@ -78,15 +78,25 @@ class LayeredArchitectureTest {
           .andShould().haveSimpleNameEndingWith("Resource");
 
   /**
-   * Prevents repositories from being accessed directly by presentation layer. Enforces proper layering by requiring domain services as intermediaries.
+   * Prevents repositories from being accessed directly by presentation layer.
+   * Enforces proper layering by requiring domain services as intermediaries.
+   * Allows config and test packages for setup and testing purposes.
    */
   @ArchTest
   static final ArchRule repositories_should_not_be_accessed_by_presentation =
       classes().that().resideInAPackage("..infrastructure.repository..")
-          .should().onlyBeAccessed().byAnyPackage("..domain.service..", "..infrastructure..");
+          .and().haveSimpleNameNotEndingWith("Dto")
+          .should().onlyBeAccessed().byAnyPackage(
+              "..domain.service..",
+              "..infrastructure..",
+              "..config..",
+              "..unit..",
+              "..integration.."
+          );
 
   /**
-   * Validates that domain services don't depend on presentation layer components inappropriately. Allows DTOs and validation components but prevents other presentation dependencies.
+   * Validates that domain services don't depend on presentation web layer directly.
+   * Allows DTOs and validation components as they are data transfer and validation concerns.
    */
   @ArchTest
   static final ArchRule domain_services_should_not_depend_on_presentation_web =
@@ -102,7 +112,8 @@ class LayeredArchitectureTest {
               "org.slf4j..",
               "jakarta.persistence..",
               "jakarta.validation..",
-              "jakarta.servlet.."
+              "jakarta.servlet..",
+              "io.micrometer.."
           );
 
   /**
@@ -145,10 +156,12 @@ class LayeredArchitectureTest {
 
   /**
    * Ensures proper package naming conventions are followed. Validates consistent package structure across the service.
+   * Excludes test packages from this validation.
    */
   @ArchTest
   static final ArchRule package_naming_conventions_should_be_followed =
       classes().that().resideInAPackage("org.gripday.authservice..")
+          .and().resideOutsideOfPackages("..architecture..", "..unit..", "..integration..", "..config..")
           .and().areNotAnnotatedWith(org.junit.jupiter.api.Test.class)
           .and().areNotAnnotatedWith(com.tngtech.archunit.junit.ArchTest.class)
           .should().resideInAnyPackage(

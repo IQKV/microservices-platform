@@ -8,12 +8,12 @@ import org.springframework.boot.actuate.health.Status;
 /**
  * Test for gateway health check configuration.
  */
-class HealthCheckConfigurationTest {
+class HealthCheckConfigTest {
 
   @Test
   void shouldCreateCircuitBreakerHealthIndicator() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.CircuitBreakerHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.CircuitBreakerHealthIndicator();
 
     // When
     var healthMono = healthIndicator.health();
@@ -29,7 +29,7 @@ class HealthCheckConfigurationTest {
   @Test
   void shouldIndicateCircuitBreakerHealthCorrectly() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.CircuitBreakerHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.CircuitBreakerHealthIndicator();
 
     // When
     var healthMono = healthIndicator.health();
@@ -49,7 +49,7 @@ class HealthCheckConfigurationTest {
   @Test
   void shouldHandleHealthCheckExceptionsGracefully() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.CircuitBreakerHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.CircuitBreakerHealthIndicator();
 
     // When
     var healthMono = healthIndicator.health();
@@ -64,7 +64,7 @@ class HealthCheckConfigurationTest {
   @Test
   void shouldCompleteHealthCheckWithinTimeout() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.CircuitBreakerHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.CircuitBreakerHealthIndicator();
 
     // When
     var healthMono = healthIndicator.health();
