@@ -74,9 +74,6 @@ management:
     prometheus:
       enabled: true
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         http.server.requests: true
@@ -85,6 +82,10 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # Gripday-specific configuration properties
 gripday:
@@ -103,9 +104,9 @@ gripday:
       starttls: true
       timeout: PT30S
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@pynity.com}
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
       from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
-      base-url: ${VERIFICATION_BASE_URL:https://app.pynity.com}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H  # 24 hours
       rate-limit: 3  # emails per hour per user
     templates:

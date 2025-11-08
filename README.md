@@ -270,8 +270,8 @@ gripday:
       username: ${SMTP_USERNAME}
       password: ${SMTP_PASSWORD}
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@pynity.com}
-      base-url: ${VERIFICATION_BASE_URL:https://app.pynity.com}
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H
       rate-limit: 3
   database:
@@ -296,13 +296,13 @@ gripday:
 # SMTP Settings
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=noreply@pynity.com
+SMTP_USERNAME=noreply@gripday.com
 SMTP_PASSWORD=your-app-password
 
 # Email Verification
-VERIFICATION_FROM_EMAIL=noreply@pynity.com
+VERIFICATION_FROM_EMAIL=noreply@gripday.com
 VERIFICATION_FROM_NAME=Gripday Platform
-VERIFICATION_BASE_URL=https://app.pynity.com
+VERIFICATION_BASE_URL=https://app.gripday.com
 ```
 
 See [Environment Variables Guide](docs/configuration/environment-variables.md) for complete configuration options.

@@ -31,9 +31,6 @@ spring:
         jwt:
           issuer-uri: # Disable JWT for tests
 
-eureka:
-  client:
-    enabled: false
 
 logging:
   level:

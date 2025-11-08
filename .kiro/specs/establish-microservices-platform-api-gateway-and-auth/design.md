@@ -2195,12 +2195,12 @@ The platform implements API documentation using SpringDoc OpenAPI, providing int
     title = "Gripday Platform API",
     version = "1.0.0",
     description = "Comprehensive microservices platform for authentication, authorization, and user management",
-    contact = @Contact(name = "Gripday Platform Team", email = "api-support@pynity.com", url = "https://docs.pynity.com"),
+    contact = @Contact(name = "Gripday Platform Team", email = "api-support@gripday.com", url = "https://docs.gripday.com"),
     license = @License(name = "MIT License", url = "https://opensource.org/licenses/MIT")
   ),
   servers = {
-    @Server(url = "https://api.pynity.com", description = "Production Server"),
-    @Server(url = "https://api.pynity.website", description = "Staging Server"),
+    @Server(url = "https://api.gripday.com", description = "Production Server"),
+    @Server(url = "https://api.gripday.website", description = "Staging Server"),
     @Server(url = "http://localhost:8080", description = "Local Development Server"),
   },
   security = { @SecurityRequirement(name = "bearerAuth"), @SecurityRequirement(name = "apiKey") }
@@ -2491,7 +2491,7 @@ public class SwaggerConfig {
   public OpenApiCustomizer openApiCustomizer() {
     return (openApi) -> {
       // Add custom extensions
-      openApi.addExtension("x-logo", Map.of("url", "https://pynity.com/logo.png", "altText", "Gripday Platform"));
+      openApi.addExtension("x-logo", Map.of("url", "https://gripday.com/logo.png", "altText", "Gripday Platform"));
 
       // Add common responses
       Components components = openApi.getComponents();
@@ -2752,10 +2752,10 @@ public class CorsConfiguration {
       configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "http://127.0.0.1:*", "https://localhost:*"));
     } else if (isStaging()) {
       // Staging: Allow staging frontend URLs
-      configuration.setAllowedOrigins(Arrays.asList("https://staging-app.pynity.com", "https://staging.pynity.com"));
+      configuration.setAllowedOrigins(Arrays.asList("https://staging-app.gripday.com", "https://gripday.website"));
     } else {
       // Production: Restrict to production domains only
-      configuration.setAllowedOrigins(Arrays.asList("https://app.pynity.com", "https://pynity.com", "https://www.pynity.com"));
+      configuration.setAllowedOrigins(Arrays.asList("https://app.gripday.com", "https://gripday.com", "https://www.gripday.com"));
     }
 
     // Allow all common HTTP methods for REST APIs
@@ -2831,8 +2831,8 @@ gripday:
   cors:
     # Staging: Specific staging URLs only
     allowed-origins:
-      - "https://staging-app.pynity.com"
-      - "https://staging.pynity.com"
+      - "https://staging-app.gripday.com"
+      - "https://gripday.website"
     max-age: 86400 # 24 hours cache
     allow-credentials: true
 ```
@@ -2849,9 +2849,9 @@ gripday:
   cors:
     # Production: Strict domain restrictions
     allowed-origins:
-      - "https://app.pynity.com"
-      - "https://pynity.com"
-      - "https://www.pynity.com"
+      - "https://app.gripday.com"
+      - "https://gripday.com"
+      - "https://www.gripday.com"
     max-age: 86400 # 24 hours cache
     allow-credentials: true
 ```
@@ -2949,10 +2949,10 @@ export default new ApiClient();
 VITE_API_URL=http://localhost:8080
 
 # .env.staging
-VITE_API_URL=https://api.pynity.website
+VITE_API_URL=https://api.gripday.website
 
 # .env.production
-VITE_API_URL=https://api.pynity.com
+VITE_API_URL=https://api.gripday.com
 ```
 
 ### CORS Troubleshooting for Frontend Development
@@ -3106,13 +3106,13 @@ public class AuthServiceCorsConfiguration {
             ));
         } else if (isStaging()) {
             configuration.setAllowedOrigins(Arrays.asList(
-                "https://staging-app.pynity.com",
-                "https://staging.pynity.com"
+                "https://staging-app.gripday.com",
+                "https://gripday.website"
             ));
         } else {
             configuration.setAllowedOrigins(Arrays.asList(
-                "https://app.pynity.com",
-                "https://pynity.com"
+                "https://app.gripday.com",
+                "https://gripday.com"
             ));
         }
 
@@ -4593,7 +4593,7 @@ spring:
   profiles:
     active: staging
   datasource:
-    url: jdbc:postgresql://${DB_HOST:staging-db.pynity.com}:5432/gripday_auth_staging
+    url: jdbc:postgresql://${DB_HOST:staging-db.gripday.com}:5432/gripday_auth_staging
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -4601,7 +4601,7 @@ spring:
     hibernate:
       ddl-auto: validate
   redis:
-    host: ${REDIS_HOST:staging-redis.pynity.com}
+    host: ${REDIS_HOST:staging-redis.gripday.com}
     port: 6379
     password: ${REDIS_PASSWORD}
 
@@ -4619,8 +4619,8 @@ gripday:
   gateway:
     cors:
       allowed-origins:
-        - "https://staging-app.pynity.com"
-        - "https://staging.pynity.com"
+        - "https://staging-app.gripday.com"
+        - "https://gripday.website"
       max-age: 86400
   database:
     connection-pool:
@@ -4680,9 +4680,9 @@ gripday:
   gateway:
     cors:
       allowed-origins:
-        - "https://app.pynity.com"
-        - "https://pynity.com"
-        - "https://www.pynity.com"
+        - "https://app.gripday.com"
+        - "https://gripday.com"
+        - "https://www.gripday.com"
       max-age: 86400
     rate-limiting:
       default-requests-per-minute: 60 # More restrictive in production
@@ -5456,7 +5456,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:https://staging-auth.pynity.com}
+          issuer-uri: ${JWT_ISSUER_URI:https://staging-auth.gripday.com}
 
 logging:
   level:
@@ -5687,7 +5687,7 @@ AUTH_DATABASE_URL=jdbc:postgresql://staging-auth-db.internal:5432/gripday_auth_s
 AUTH_DATABASE_USERNAME=gripday_auth_staging
 AUTH_DATABASE_PASSWORD=${STAGING_AUTH_DB_PASSWORD}
 JWT_SECRET=${STAGING_JWT_SECRET}
-JWT_ISSUER_URI=https://staging-auth.pynity.com
+JWT_ISSUER_URI=https://staging-auth.gripday.com
 TRACING_SAMPLE_RATE=0.1
 
 # gateway-service/.env.staging
@@ -5713,7 +5713,7 @@ AUTH_DATABASE_PASSWORD=${PRODUCTION_AUTH_DB_PASSWORD}
 AUTH_DATABASE_POOL_SIZE=50
 AUTH_DATABASE_POOL_MIN_IDLE=10
 JWT_SECRET=${PRODUCTION_JWT_SECRET}
-JWT_ISSUER_URI=https://auth.pynity.com
+JWT_ISSUER_URI=https://auth.gripday.com
 TRACING_ENABLED=true
 TRACING_SAMPLE_RATE=0.01
 
@@ -7082,14 +7082,14 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
 // Base tenant-aware repository
 @NoRepositoryBean
 public interface TenantAwareRepository<T, ID> extends JpaRepository<T, ID> {
-  @Query("SELECT e FROM #{#entityName} e WHERE e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  @Query("SELECT e FROM #{#entityName} e WHERE e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
   List<T> findAllForCurrentTenant();
 
-  @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
   Optional<T> findByIdForCurrentTenant(@Param("id") ID id);
 
   @Modifying
-  @Query("DELETE FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  @Query("DELETE FROM #{#entityName} e WHERE e.id = :id AND e.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
   void deleteByIdForCurrentTenant(@Param("id") ID id);
 }
 
@@ -7147,10 +7147,10 @@ public class User extends TenantAwareEntity {
 
 // User repository with tenant awareness
 public interface UserRepository extends TenantAwareRepository<User, Long> {
-  @Query("SELECT u FROM User u WHERE (u.username = :identifier OR u.email = :identifier) AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  @Query("SELECT u FROM User u WHERE (u.username = :identifier OR u.email = :identifier) AND u.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
   Optional<User> findByUsernameOrEmailForCurrentTenant(@Param("identifier") String identifier);
 
-  @Query("SELECT u FROM User u WHERE u.status = :status AND u.tenantId = :#{T(org.pynity.common.TenantContext).getCurrentTenantId()}")
+  @Query("SELECT u FROM User u WHERE u.status = :status AND u.tenantId = :#{T(org.gripday.common.TenantContext).getCurrentTenantId()}")
   List<User> findByStatusForCurrentTenant(@Param("status") UserStatus status);
 }
 ```
@@ -7679,7 +7679,7 @@ postman/
     },
     {
       "key": "admin_username",
-      "value": "admin@pynity.com",
+      "value": "admin@gripday.com",
       "enabled": true
     },
     {
@@ -7701,17 +7701,17 @@ postman/
   "values": [
     {
       "key": "base_url",
-      "value": "https://api.pynity.com",
+      "value": "https://api.gripday.com",
       "enabled": true
     },
     {
       "key": "auth_url",
-      "value": "https://auth.pynity.com",
+      "value": "https://auth.gripday.com",
       "enabled": true
     },
     {
       "key": "gateway_url",
-      "value": "https://gateway.pynity.com",
+      "value": "https://gateway.gripday.com",
       "enabled": true
     },
     {
@@ -8154,14 +8154,14 @@ All protected endpoints require JWT Bearer token authentication:
 ```bash
 curl -H "Authorization: Bearer <jwt-token>" \
      -H "Content-Type: application/json" \
-     https://api.pynity.com/api/v1/users
+     https://api.gripday.com/api/v1/users
 ````
 
 ## Base URLs
 
 - **Local**: http://localhost:8081
-- **Staging**: https://staging-auth.pynity.com
-- **Production**: https://auth.pynity.com
+- **Staging**: https://staging-auth.gripday.com
+- **Production**: https://auth.gripday.com
 
 ## API Versions
 

@@ -81,11 +81,6 @@ management:
     diskspace:
       enabled: true
   metrics:
-    export:
-      prometheus:
-        enabled: true
-        step: 60s
-        descriptions: true
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
@@ -95,6 +90,12 @@ management:
     tags:
       application: bookstore-service
       environment: ${spring.profiles.active:local}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 60s
+        descriptions: true
 
 logging:
   level:
@@ -144,7 +145,7 @@ springdoc:
 gripday:
   bookstore:
     cors:
-      allowed-origins: "http://localhost:5173,http://localhost:3000,https://bookstore.pynity.com"
+      allowed-origins: "http://localhost:5173,http://localhost:3000,https://bookstore.gripday.com"
       allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
       allowed-headers: "*"
       allow-credentials: true

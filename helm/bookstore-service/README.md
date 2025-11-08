@@ -65,7 +65,7 @@ The following table lists the configurable parameters of the Bookstore Service c
 | ----------------------- | ------------------ | ----------------------- |
 | `ingress.enabled`       | Enable ingress     | `true`                  |
 | `ingress.className`     | Ingress class name | `nginx`                 |
-| `ingress.hosts[0].host` | Hostname           | `bookstore.pynity.site` |
+| `ingress.hosts[0].host` | Hostname           | `bookstore.gripday.site` |
 
 ### Resources
 

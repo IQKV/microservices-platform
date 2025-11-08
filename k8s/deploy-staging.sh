@@ -310,10 +310,10 @@ verify_staging_deployment() {
     print_status "Staging deployment verification completed!"
     print_status ""
     print_status "Staging URLs:"
-    print_status "  Main App: https://pynity.website"
-    print_status "  Auth Service: https://auth.pynity.website"
-    print_status "  Gateway Service: https://api.pynity.website"
-    print_status "  Auth Swagger UI: https://auth.pynity.website/swagger-ui.html"
+    print_status "  Main App: https://gripday.website"
+    print_status "  Auth Service: https://auth.gripday.website"
+    print_status "  Gateway Service: https://api.gripday.website"
+    print_status "  Auth Swagger UI: https://auth.gripday.website/swagger-ui.html"
     
     # Cleanup temporary files
     rm -f /tmp/auth-service-deployment-staging.yaml

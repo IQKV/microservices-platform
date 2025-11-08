@@ -112,9 +112,9 @@ gripday:
       starttls: true
       timeout: PT30S
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@pynity.com}
+      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
       from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
-      base-url: ${VERIFICATION_BASE_URL:https://app.pynity.com}
+      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H
       rate-limit: 3
     templates:
@@ -194,11 +194,8 @@ management:
     health:
       show-details: never
     prometheus:
-      enabled: true
+      access: read_only
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         http.server.requests: true
@@ -207,6 +204,10 @@ management:
   tracing:
     sampling:
       probability: 0.01  # Minimal sampling for production
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # SpringDoc Configuration - Production
 springdoc:

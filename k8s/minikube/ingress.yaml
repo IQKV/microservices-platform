@@ -5,7 +5,7 @@
 #
 # Enable ingress addon: minikube addons enable ingress
 # Add to /etc/hosts:
-#   $(minikube ip) api.pynity.site app.pynity.site auth.pynity.site
+#   $(minikube ip) api.gripday.site app.gripday.site auth.gripday.site
 #
 ---
 # Gateway Service Ingress (Main API Entry Point)
@@ -27,7 +27,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.pynity.site
+    - host: api.gripday.site
       http:
         paths:
           - path: /
@@ -58,7 +58,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: auth.pynity.site
+    - host: auth.gripday.site
       http:
         paths:
           - path: /
@@ -89,7 +89,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: bookstore.pynity.site
+    - host: bookstore.gripday.site
       http:
         paths:
           - path: /
@@ -106,13 +106,13 @@ spec:
 # This ingress configuration provides TWO ways to access services:
 #
 # 1. PRODUCTION-LIKE (API Gateway Pattern):
-#    - http://api.pynity.site/api/v1/auth/login    → Gateway → Auth Service
-#    - http://api.pynity.site/api/v1/bookstore/*   → Gateway → Bookstore Service
+#    - http://api.gripday.site/api/v1/auth/login    → Gateway → Auth Service
+#    - http://api.gripday.site/api/v1/bookstore/*   → Gateway → Bookstore Service
 #    - This mirrors production/staging architecture
 #
 # 2. DIRECT ACCESS (Development/Debugging):
-#    - http://auth.pynity.site/api/v1/auth/login   → Auth Service (direct)
-#    - http://bookstore.pynity.site/api/v1/books   → Bookstore Service (direct)
+#    - http://auth.gripday.site/api/v1/auth/login   → Auth Service (direct)
+#    - http://bookstore.gripday.site/api/v1/books   → Bookstore Service (direct)
 #    - This bypasses the gateway for easier debugging
 #
 # Additionally, NodePort access is still available:

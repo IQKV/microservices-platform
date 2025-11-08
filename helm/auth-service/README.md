@@ -65,7 +65,7 @@ The following table lists the configurable parameters of the Auth Service chart 
 | ----------------------- | ------------------ | ------------------ |
 | `ingress.enabled`       | Enable ingress     | `true`             |
 | `ingress.className`     | Ingress class name | `nginx`            |
-| `ingress.hosts[0].host` | Hostname           | `auth.pynity.site` |
+| `ingress.hosts[0].host` | Hostname           | `auth.gripday.site` |
 
 ### Resources
 

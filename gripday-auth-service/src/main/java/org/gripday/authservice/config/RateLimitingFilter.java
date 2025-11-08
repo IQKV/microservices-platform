@@ -105,7 +105,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
 
     var errorResponse = Map.of(
-        "type", "https://problems.pynity.com/rate-limit-exceeded",
+        "type", "https://problems.gripday.com/rate-limit-exceeded",
         "title", "Too Many Requests",
         "status", HttpStatus.TOO_MANY_REQUESTS.value(),
         "detail", "Too many requests. Please try again later.",

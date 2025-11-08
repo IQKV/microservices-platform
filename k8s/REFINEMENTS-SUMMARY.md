@@ -170,7 +170,7 @@ Added LimitRanges to enforce container resource boundaries:
 #### **CORS Restrictions**
 
 - ❌ Changed from `cors-allow-origin: "*"` (insecure)
-- ✅ Changed to `cors-allow-origin: "https://pynity.site, https://*.pynity.site"` (secure)
+- ✅ Changed to `cors-allow-origin: "https://gripday.site, https://*.gripday.site"` (secure)
 - ✅ Added `cors-allow-credentials: "true"`
 
 #### **Security Headers**

@@ -41,7 +41,7 @@ class EmailTemplateRenderingTest {
   void shouldRenderVerificationEmailTemplate() {
     // Given
     var user = createTestUser();
-    var verificationUrl = "https://test.pynity.com/verify?token=test-token-123";
+    var verificationUrl = "https://test.gripday.site/verify?token=test-token-123";
     var fromName = "Gripday Platform";
 
     var context = new Context(Locale.getDefault());
@@ -83,7 +83,7 @@ class EmailTemplateRenderingTest {
     var user = createTestUser();
     user.setFirstName(null);
 
-    var verificationUrl = "https://test.pynity.com/verify?token=test-token-123";
+    var verificationUrl = "https://test.gripday.site/verify?token=test-token-123";
     var fromName = "Gripday Platform";
 
     var context = new Context(Locale.getDefault());
@@ -113,7 +113,7 @@ class EmailTemplateRenderingTest {
     user.setLastName("García-López");
     user.setUsername("jose.garcia@example.com");
 
-    var verificationUrl = "https://test.pynity.com/verify?token=test-token-123&user=josé";
+    var verificationUrl = "https://test.gripday.site/verify?token=test-token-123&user=josé";
     var fromName = "Gripday Platform";
 
     var context = new Context(Locale.getDefault());
@@ -142,7 +142,7 @@ class EmailTemplateRenderingTest {
     var user = new User("minimal-user", "minimal@example.com", "password-hash",
         "Min", "User", "test-tenant");
 
-    var verificationUrl = "https://test.pynity.com/verify?token=minimal-token";
+    var verificationUrl = "https://test.gripday.site/verify?token=minimal-token";
     var fromName = "Test Platform";
 
     var context = new Context(Locale.getDefault());

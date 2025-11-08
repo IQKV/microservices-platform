@@ -172,22 +172,22 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 #### Local Environment
 
 ```
-http://api.pynity.site/api/v1/auth/*     → Auth Service
-http://api.pynity.site/actuator/*        → Gateway Health/Metrics
+http://api.gripday.site/api/v1/auth/*     → Auth Service
+http://api.gripday.site/actuator/*        → Gateway Health/Metrics
 ```
 
 #### Staging Environment
 
 ```
-https://api.pynity.website/api/v1/auth/*  → Auth Service
-https://api.pynity.website/actuator/*     → Gateway Health/Metrics
+https://api.gripday.website/api/v1/auth/*  → Auth Service
+https://api.gripday.website/actuator/*     → Gateway Health/Metrics
 ```
 
 #### Production Environment
 
 ```
-https://api.pynity.com/api/v1/auth/*  → Auth Service
-https://api.pynity.com/actuator/*     → Gateway Health/Metrics
+https://api.gripday.com/api/v1/auth/*  → Auth Service
+https://api.gripday.com/actuator/*     → Gateway Health/Metrics
 ```
 
 ### Routing Configuration
@@ -436,10 +436,10 @@ kubectl get networkpolicy -n gripday-gateway
 
 ```bash
 # Test gateway health
-curl http://api.pynity.site/actuator/health
+curl http://api.gripday.site/actuator/health
 
 # Test auth service routing
-curl -X POST http://api.pynity.site/api/v1/auth/login \
+curl -X POST http://api.gripday.site/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -450,11 +450,11 @@ curl -X POST http://api.pynity.site/api/v1/auth/login \
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
      -H "X-Tenant-ID: default" \
-     http://api.pynity.site/api/v1/users/me
+     http://api.gripday.site/api/v1/users/me
 
 # Test rate limiting
 for i in {1..70}; do
-  curl -w "%{http_code}\n" -o /dev/null -s http://api.pynity.site/actuator/health
+  curl -w "%{http_code}\n" -o /dev/null -s http://api.gripday.site/actuator/health
 done
 ```
 
@@ -509,12 +509,12 @@ done
 
    ```bash
    # Add to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
-   echo "$(minikube ip) api.pynity.site" >> /etc/hosts
+   echo "$(minikube ip) api.gripday.site" >> /etc/hosts
    ```
 
 5. **Test gateway**
    ```bash
-   curl http://api.pynity.site/actuator/health
+   curl http://api.gripday.site/actuator/health
    ```
 
 ### Testing

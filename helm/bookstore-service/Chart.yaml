@@ -10,7 +10,7 @@ keywords:
   - gripday
 maintainers:
   - name: Gripday Platform Team
-home: https://pynity.site
+home: https://gripday.site
 sources:
   - https://github.com/gripday/bookstore-service
 dependencies: []

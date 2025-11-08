@@ -64,13 +64,13 @@ minikube addons enable ingress
 MINIKUBE_IP=$(minikube ip)
 
 # 3. Add to /etc/hosts (Linux/Mac):
-sudo echo "$MINIKUBE_IP api.pynity.site auth.pynity.site" >> /etc/hosts
+sudo echo "$MINIKUBE_IP api.gripday.site auth.gripday.site" >> /etc/hosts
 
 # Windows: Add to C:\Windows\System32\drivers\etc\hosts
 
 # 4. Access via domain names:
-echo "API Gateway: http://api.pynity.site"
-echo "Auth (debug): http://auth.pynity.site"
+echo "API Gateway: http://api.gripday.site"
+echo "Auth (debug): http://auth.gripday.site"
 ```
 
 #### Option C: Port Forward (Debugging)
@@ -103,12 +103,12 @@ curl http://$MINIKUBE_IP:30080/actuator/gateway/routes | jq
 
 ```bash
 # Through API Gateway (production pattern)
-curl -X POST http://api.pynity.site/api/v1/auth/signup \
+curl -X POST http://api.gripday.site/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!"}'
 
 # Direct to auth service (debugging only - doesn't exist in production!)
-curl http://auth.pynity.site/actuator/health
+curl http://auth.gripday.site/actuator/health
 ```
 
 ## 📊 Monitor Deployment

@@ -33,7 +33,7 @@ Developer → Multiple Access Methods:
 
 ### 1. **Ingress (Production-like)** ✅ Recommended for Testing
 
-- **URL**: `http://api.pynity.site`
+- **URL**: `http://api.gripday.site`
 - **Purpose**: Test the actual production flow
 - **Requires**: Ingress addon, /etc/hosts configuration
 - **Benefit**: Validates the API Gateway pattern
@@ -47,7 +47,7 @@ Developer → Multiple Access Methods:
 
 ### 3. **Direct Service Ingress** 🐛 Debugging Only
 
-- **URL**: `http://auth.pynity.site`
+- **URL**: `http://auth.gripday.site`
 - **Purpose**: Debug backend services directly
 - **Requires**: Ingress addon, /etc/hosts
 - **Note**: Does NOT exist in production!
@@ -105,7 +105,7 @@ minikube ip
 # Add to /etc/hosts (Linux/Mac)
 sudo nano /etc/hosts
 # Add line:
-192.168.49.2 api.pynity.site auth.pynity.site bookstore.pynity.site
+192.168.49.2 api.gripday.site auth.gripday.site bookstore.gripday.site
 
 # Or Windows: C:\Windows\System32\drivers\etc\hosts
 ```
@@ -114,13 +114,13 @@ sudo nano /etc/hosts
 
 ```bash
 # Via Gateway (production-like)
-curl http://api.pynity.site/api/v1/auth/login
+curl http://api.gripday.site/api/v1/auth/login
 
 # Direct to Auth (debugging only)
-curl http://auth.pynity.site/api/v1/auth/login
+curl http://auth.gripday.site/api/v1/auth/login
 
 # Direct to Bookstore (debugging only)
-curl http://bookstore.pynity.site/api/v1/bookstore/books
+curl http://bookstore.gripday.site/api/v1/bookstore/books
 ```
 
 **Benefits:**
@@ -220,14 +220,14 @@ curl http://$(minikube ip):30080/api/v1/auth/login
 
 ```bash
 # Use Ingress to test production flow
-curl http://api.pynity.site/api/v1/auth/login
+curl http://api.gripday.site/api/v1/auth/login
 ```
 
 ### Debugging Backend Service
 
 ```bash
 # Use direct service ingress OR port forward
-curl http://auth.pynity.site/actuator/health
+curl http://auth.gripday.site/actuator/health
 # OR
 kubectl port-forward -n gripday svc/auth-service 8081:8081
 curl http://localhost:8081/actuator/health
@@ -338,9 +338,9 @@ curl http://$(minikube ip):30081/actuator/health
 | I want to...         | Use...                                                             |
 | -------------------- | ------------------------------------------------------------------ |
 | Quick API test       | NodePort: `http://$(minikube ip):30080`                            |
-| Test production flow | Ingress: `http://api.pynity.site`                                  |
-| Debug auth service   | Direct: `http://auth.pynity.site` OR NodePort: `:30081`            |
-| Debug bookstore      | Direct: `http://bookstore.pynity.site` OR NodePort: `:30082`       |
+| Test production flow | Ingress: `http://api.gripday.site`                                  |
+| Debug auth service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`            |
+| Debug bookstore      | Direct: `http://bookstore.gripday.site` OR NodePort: `:30082`       |
 | Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes`         |
 | View logs            | `kubectl logs -n gripday deployment/<service-name>`                |
 | Get into pod         | `kubectl exec -n gripday -it deployment/<service-name> -- /bin/sh` |

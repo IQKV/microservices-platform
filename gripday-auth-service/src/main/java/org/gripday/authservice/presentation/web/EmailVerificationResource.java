@@ -92,7 +92,7 @@ public class EmailVerificationResource {
                   summary = "Token is invalid or expired",
                   value = """
                       {
-                        "type": "https://problems.pynity.com/email-verification",
+                        "type": "https://problems.gripday.com/email-verification",
                         "title": "Email verification failed",
                         "status": 400,
                         "detail": "Verification token is invalid or has expired",
@@ -179,7 +179,7 @@ public class EmailVerificationResource {
                   summary = "Email is already verified",
                   value = """
                       {
-                        "type": "https://problems.pynity.com/email-verification",
+                        "type": "https://problems.gripday.com/email-verification",
                         "title": "Email verification not required",
                         "status": 400,
                         "detail": "Email address is already verified",
@@ -205,7 +205,7 @@ public class EmailVerificationResource {
                   summary = "Too many resend requests",
                   value = """
                       {
-                        "type": "https://problems.pynity.com/email-verification",
+                        "type": "https://problems.gripday.com/email-verification",
                         "title": "Rate limit exceeded",
                         "status": 429,
                         "detail": "Maximum 3 verification emails per hour. Please try again later.",
@@ -304,7 +304,7 @@ public class EmailVerificationResource {
                   summary = "Email address not registered",
                   value = """
                       {
-                        "type": "https://problems.pynity.com/user-management",
+                        "type": "https://problems.gripday.com/user-management",
                         "title": "User not found",
                         "status": 404,
                         "detail": "No user found with the specified email address",

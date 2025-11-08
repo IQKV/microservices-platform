@@ -196,13 +196,10 @@ management:
     health:
       show-details: always  # Always show health details in development
     liquibase:
-      enabled: true
+      access: read_only
     prometheus:
-      enabled: true
+      access: read_only
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         http.server.requests: true
@@ -211,6 +208,10 @@ management:
   tracing:
     sampling:
       probability: 1.0  # Full tracing in development
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # SpringDoc Configuration - Development
 springdoc:

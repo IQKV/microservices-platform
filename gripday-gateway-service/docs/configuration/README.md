@@ -196,7 +196,7 @@ cp .env.example .env.production
 | `GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI`  | Auth service URL     | `http://localhost:8081`  |
 | `GRIPDAY_GATEWAY_SECURITY_JWT_SECRET`       | JWT signing secret   | `your-secure-secret-key` |
 | `GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL` | Auth service URL     | `http://localhost:8081`  |
-| `GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS`      | Allowed CORS origins | `https://app.pynity.com` |
+| `GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS`      | Allowed CORS origins | `https://app.gripday.com` |
 
 ## Configuration Validation
 

@@ -13,7 +13,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
     # CORS Configuration - Restrict to specific origins in production
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://pynity.site, https://*.pynity.site"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.site, https://*.gripday.site"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Tenant-ID,X-Correlation-ID"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -35,7 +35,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: auth.pynity.site
+    - host: auth.gripday.site
       http:
         paths:
           - path: /

@@ -39,9 +39,11 @@ spring:
             - Path=/actuator/health
           filters:
             - StripPrefix=0
-      discovery:
-        locator:
-          enabled: false  # Disabled for local development
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
 
 # Gripday Gateway Configuration - Local Environment
 gripday:

@@ -270,9 +270,9 @@ verify_deployment() {
         print_status "  Swagger UI: http://localhost/bookstore/swagger-ui.html"
         print_status "  Health Check: http://localhost/bookstore/actuator/health"
     elif [[ "$ENVIRONMENT" == "staging" ]]; then
-        print_status "  API: https://api.pynity.website/api/v1/bookstore"
+        print_status "  API: https://api.gripday.website/api/v1/bookstore"
     elif [[ "$ENVIRONMENT" == "production" ]]; then
-        print_status "  API: https://api.pynity.com/api/v1/bookstore"
+        print_status "  API: https://api.gripday.com/api/v1/bookstore"
     fi
     
     print_status "Deployment verification completed!"

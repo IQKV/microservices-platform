@@ -24,7 +24,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.pynity.site
+    - host: api.gripday.site
       http:
         paths:
           - path: /
@@ -63,7 +63,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.pynity.website, https://auth.pynity.website"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.website, https://auth.gripday.website"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Tenant-ID,X-Correlation-ID"
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -75,10 +75,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - api.pynity.website
+        - api.gripday.website
       secretName: gateway-service-tls-staging
   rules:
-    - host: api.pynity.website
+    - host: api.gripday.website
       http:
         paths:
           - path: /
@@ -103,7 +103,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.pynity.com, https://auth.pynity.com"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.com, https://auth.gripday.com"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Tenant-ID,X-Correlation-ID"
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -116,10 +116,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - api.pynity.com
+        - api.gripday.com
       secretName: gateway-service-tls-production
   rules:
-    - host: api.pynity.com
+    - host: api.gripday.com
       http:
         paths:
           - path: /

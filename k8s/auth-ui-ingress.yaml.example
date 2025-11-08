@@ -4,8 +4,8 @@
 # (React, Vue, Angular, etc.) for login, signup, and password reset pages.
 #
 # Domains reserved:
-#   Production: auth.pynity.com
-#   Staging: auth.pynity.website
+#   Production: auth.gripday.com
+#   Staging: auth.gripday.website
 #
 # To use:
 # 1. Deploy your Auth UI application (e.g., auth-ui-deployment.yaml)
@@ -32,7 +32,7 @@ metadata:
     
     # CORS for staging (allow main app and API gateway)
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.pynity.website, https://api.pynity.website"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.website, https://api.gripday.website"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -44,7 +44,7 @@ metadata:
       add_header X-XSS-Protection "1; mode=block";
       add_header Referrer-Policy "strict-origin-when-cross-origin";
       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.pynity.website; frame-ancestors 'none';" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.gripday.website; frame-ancestors 'none';" always;
     
     # Rate limiting for auth pages
     nginx.ingress.kubernetes.io/rate-limit: "100"
@@ -56,10 +56,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - auth.pynity.website
+    - auth.gripday.website
     secretName: auth-ui-tls-staging
   rules:
-  - host: auth.pynity.website
+  - host: auth.gripday.website
     http:
       paths:
       # Serve Auth UI frontend application
@@ -90,7 +90,7 @@ metadata:
     
     # CORS for production (allow main app and API gateway)
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.pynity.com, https://api.pynity.com"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.gripday.com, https://api.gripday.com"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -102,7 +102,7 @@ metadata:
       add_header X-XSS-Protection "1; mode=block";
       add_header Referrer-Policy "strict-origin-when-cross-origin";
       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.pynity.com; frame-ancestors 'none';" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.gripday.com; frame-ancestors 'none';" always;
     
     # Rate limiting for production
     nginx.ingress.kubernetes.io/rate-limit: "500"
@@ -115,10 +115,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - auth.pynity.com
+    - auth.gripday.com
     secretName: auth-ui-tls-production
   rules:
-  - host: auth.pynity.com
+  - host: auth.gripday.com
     http:
       paths:
       # Serve Auth UI frontend application
@@ -135,7 +135,7 @@ spec:
 # 
 # This Auth UI frontend will:
 # 1. Serve login, signup, password reset pages
-# 2. Make API calls to: https://api.pynity.com/api/v1/auth/* (through gateway)
+# 2. Make API calls to: https://api.gripday.com/api/v1/auth/* (through gateway)
 # 3. Handle OAuth2 redirects
 # 4. Manage JWT tokens in browser (localStorage/cookies)
 # 
@@ -146,9 +146,9 @@ spec:
 # - Allows different security policies
 # 
 # Example Auth UI pages:
-# - https://auth.pynity.com/login
-# - https://auth.pynity.com/signup
-# - https://auth.pynity.com/forgot-password
-# - https://auth.pynity.com/reset-password
-# - https://auth.pynity.com/verify-email
-# - https://auth.pynity.com/oauth/callback
+# - https://auth.gripday.com/login
+# - https://auth.gripday.com/signup
+# - https://auth.gripday.com/forgot-password
+# - https://auth.gripday.com/reset-password
+# - https://auth.gripday.com/verify-email
+# - https://auth.gripday.com/oauth/callback

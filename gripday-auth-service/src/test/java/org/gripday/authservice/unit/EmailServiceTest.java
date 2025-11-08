@@ -48,7 +48,7 @@ class EmailServiceTest {
         "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
     );
     var verificationConfig = new GripdayProperties.Email.Verification(
-        "noreply@pynity.com", "Gripday Platform", "https://app.pynity.com", java.time.Duration.ofHours(24), 3
+        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/verification.html",
@@ -76,7 +76,7 @@ class EmailServiceTest {
     var result = emailService.buildVerificationUrl(token);
 
     // Then
-    assertEquals("https://app.pynity.com/api/v1/auth/email/verify?token=test-token-123", result);
+    assertEquals("https://app.gripday.com/api/v1/auth/email/verify?token=test-token-123", result);
   }
 
   @Test
@@ -86,7 +86,7 @@ class EmailServiceTest {
         "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
     );
     var verificationConfig = new GripdayProperties.Email.Verification(
-        "noreply@pynity.com", "Gripday Platform", "https://app.pynity.com/", java.time.Duration.ofHours(24), 3
+        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/verification.html",
@@ -109,7 +109,7 @@ class EmailServiceTest {
     var result = service.buildVerificationUrl(token);
 
     // Then
-    assertEquals("https://app.pynity.com/api/v1/auth/email/verify?token=test-token-123", result);
+    assertEquals("https://app.gripday.com/api/v1/auth/email/verify?token=test-token-123", result);
   }
 
   @Test
