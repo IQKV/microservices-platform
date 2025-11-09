@@ -27,11 +27,11 @@ import org.springframework.session.web.context.AbstractHttpSessionApplicationIni
 @EnableCaching
 @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 1800) // 30 minutes session timeout
 @EnableConfigurationProperties(GripdayProperties.class)
-public class RedisConfiguration extends AbstractHttpSessionApplicationInitializer {
+public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
 
   private final GripdayProperties gripdayProperties;
 
-  public RedisConfiguration(GripdayProperties gripdayProperties) {
+  public RedisConfig(GripdayProperties gripdayProperties) {
     this.gripdayProperties = gripdayProperties;
   }
 

@@ -8,12 +8,12 @@ import org.springframework.boot.actuate.health.Status;
 /**
  * Test for health check configuration.
  */
-class HealthCheckConfigurationTest {
+class HealthCheckConfigTest {
 
   @Test
   void shouldCreateJwtServiceHealthIndicator() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.JwtServiceHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.JwtServiceHealthIndicator();
 
     // When
     var health = healthIndicator.health();
@@ -28,7 +28,7 @@ class HealthCheckConfigurationTest {
   @Test
   void shouldIndicateJwtServiceHealthBasedOnConfiguration() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.JwtServiceHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.JwtServiceHealthIndicator();
 
     // When
     var health = healthIndicator.health();
@@ -47,7 +47,7 @@ class HealthCheckConfigurationTest {
   @Test
   void shouldHandleHealthCheckExceptions() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.JwtServiceHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.JwtServiceHealthIndicator();
 
     // When
     var health = healthIndicator.health();

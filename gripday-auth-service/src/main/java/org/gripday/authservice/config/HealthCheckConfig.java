@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 @Configuration
 @EnableConfigurationProperties(GripdayObservabilityProperties.class)
-public class HealthCheckConfiguration {
+public class HealthCheckConfig {
 
   /**
    * Custom health indicator for database connectivity and performance.

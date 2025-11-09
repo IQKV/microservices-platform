@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class CacheConfigurationTest {
+class CacheConfigTest {
 
   @Autowired
   private CacheManager cacheManager;
@@ -22,23 +22,23 @@ class CacheConfigurationTest {
     // Verify cache names are configured
     var cacheNames = cacheManager.getCacheNames();
     assertThat(cacheNames).contains(
-        CacheConfiguration.BOOK_CACHE,
-        CacheConfiguration.BOOK_SEARCH_CACHE,
-        CacheConfiguration.CATEGORY_CACHE,
-        CacheConfiguration.AUTHOR_CACHE,
-        CacheConfiguration.POPULAR_BOOKS_CACHE
+        CacheConfig.BOOK_CACHE,
+        CacheConfig.BOOK_SEARCH_CACHE,
+        CacheConfig.CATEGORY_CACHE,
+        CacheConfig.AUTHOR_CACHE,
+        CacheConfig.POPULAR_BOOKS_CACHE
     );
   }
 
   @Test
   void shouldCreateCacheInstances() {
-    var bookCache = cacheManager.getCache(CacheConfiguration.BOOK_CACHE);
+    var bookCache = cacheManager.getCache(CacheConfig.BOOK_CACHE);
     assertThat(bookCache).isNotNull();
 
-    var searchCache = cacheManager.getCache(CacheConfiguration.BOOK_SEARCH_CACHE);
+    var searchCache = cacheManager.getCache(CacheConfig.BOOK_SEARCH_CACHE);
     assertThat(searchCache).isNotNull();
 
-    var categoryCache = cacheManager.getCache(CacheConfiguration.CATEGORY_CACHE);
+    var categoryCache = cacheManager.getCache(CacheConfig.CATEGORY_CACHE);
     assertThat(categoryCache).isNotNull();
   }
 }

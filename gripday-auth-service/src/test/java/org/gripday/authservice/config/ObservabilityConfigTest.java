@@ -141,7 +141,7 @@ class ObservabilityConfigTest {
   @Test
   void shouldCreateJwtServiceHealthIndicator() {
     // Given
-    var healthIndicator = new HealthCheckConfiguration.JwtServiceHealthIndicator();
+    var healthIndicator = new HealthCheckConfig.JwtServiceHealthIndicator();
 
     // When
     var health = healthIndicator.health();

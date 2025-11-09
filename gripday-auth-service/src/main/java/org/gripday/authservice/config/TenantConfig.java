@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * Configuration for tenant-aware JPA and Hibernate settings. Provides tenant context resolution for multi-tenant data isolation.
  */
 @Configuration
-public class TenantConfiguration {
+public class TenantConfig {
 
   /**
    * Custom tenant identifier resolver for Hibernate multi-tenancy. Resolves tenant ID from ThreadLocal context.

@@ -10,51 +10,51 @@ import org.slf4j.MDC;
 /**
  * Test for gateway structured logging configuration.
  */
-class StructuredLoggingConfigurationTest {
+class StructuredLoggingConfigTest {
 
   @Test
   void shouldCreateStructuredLogger() {
     // Given
-    var config = new StructuredLoggingConfiguration();
+    var config = new StructuredLoggingConfig();
 
     // When
     var logger = config.structuredLogger();
 
     // Then
     assertThat(logger).isNotNull();
-    assertThat(logger).isInstanceOf(StructuredLoggingConfiguration.StructuredLogger.class);
+    assertThat(logger).isInstanceOf(StructuredLoggingConfig.StructuredLogger.class);
   }
 
   @Test
   void shouldCreateRequestLogger() {
     // Given
-    var config = new StructuredLoggingConfiguration();
+    var config = new StructuredLoggingConfig();
 
     // When
     var logger = config.requestLogger();
 
     // Then
     assertThat(logger).isNotNull();
-    assertThat(logger).isInstanceOf(StructuredLoggingConfiguration.RequestLogger.class);
+    assertThat(logger).isInstanceOf(StructuredLoggingConfig.RequestLogger.class);
   }
 
   @Test
   void shouldCreatePerformanceLogger() {
     // Given
-    var config = new StructuredLoggingConfiguration();
+    var config = new StructuredLoggingConfig();
 
     // When
     var logger = config.performanceLogger();
 
     // Then
     assertThat(logger).isNotNull();
-    assertThat(logger).isInstanceOf(StructuredLoggingConfiguration.PerformanceLogger.class);
+    assertThat(logger).isInstanceOf(StructuredLoggingConfig.PerformanceLogger.class);
   }
 
   @Test
   void shouldLogGatewayRequestSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logGatewayRequest("GET", "/api/v1/auth/login", "auth-service", "192.168.1.1", "Mozilla/5.0", "tenant-123");
@@ -69,7 +69,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogGatewayResponseSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logGatewayResponse("GET", "/api/v1/auth/login", "auth-service", 200, 150L, "success");
@@ -83,7 +83,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogAuthenticationEventSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logAuthenticationEvent("testuser", "success", null, "auth-service");
@@ -97,7 +97,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogRateLimitEventSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logRateLimitEvent("/api/v1/auth/login", "tenant-123", "allowed", 5, 10);
@@ -111,7 +111,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogCircuitBreakerEventSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logCircuitBreakerEvent("auth-service", "open", "failure_rate_exceeded");
@@ -125,7 +125,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogIncomingRequestSuccessfully() {
     // Given
-    var requestLogger = new StructuredLoggingConfiguration.RequestLogger();
+    var requestLogger = new StructuredLoggingConfig.RequestLogger();
     var headers = Map.of("Authorization", "Bearer token", "Content-Type", "application/json");
 
     // When - Should not throw exceptions
@@ -140,7 +140,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogOutgoingRequestSuccessfully() {
     // Given
-    var requestLogger = new StructuredLoggingConfiguration.RequestLogger();
+    var requestLogger = new StructuredLoggingConfig.RequestLogger();
     var headers = Map.of("X-Forwarded-For", "192.168.1.1");
 
     // When - Should not throw exceptions
@@ -155,7 +155,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogResponseSuccessfully() {
     // Given
-    var requestLogger = new StructuredLoggingConfiguration.RequestLogger();
+    var requestLogger = new StructuredLoggingConfig.RequestLogger();
     var headers = Map.of("Content-Type", "application/json");
 
     // When - Should not throw exceptions
@@ -170,7 +170,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogSlowRequestSuccessfully() {
     // Given
-    var performanceLogger = new StructuredLoggingConfiguration.PerformanceLogger();
+    var performanceLogger = new StructuredLoggingConfig.PerformanceLogger();
 
     // When - Should not throw exceptions
     performanceLogger.logSlowRequest("GET", "/api/v1/auth/login", "auth-service", 5000L, "downstream_timeout");
@@ -184,7 +184,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogResourceUsageSuccessfully() {
     // Given
-    var performanceLogger = new StructuredLoggingConfiguration.PerformanceLogger();
+    var performanceLogger = new StructuredLoggingConfig.PerformanceLogger();
 
     // When - Should not throw exceptions
     performanceLogger.logResourceUsage("cpu", 85.5, 80.0, "%");
@@ -198,7 +198,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogThroughputMetricsSuccessfully() {
     // Given
-    var performanceLogger = new StructuredLoggingConfiguration.PerformanceLogger();
+    var performanceLogger = new StructuredLoggingConfig.PerformanceLogger();
 
     // When - Should not throw exceptions
     performanceLogger.logThroughputMetrics("/api/v1/auth/login", 150, 200);

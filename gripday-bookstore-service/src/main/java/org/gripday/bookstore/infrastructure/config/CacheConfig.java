@@ -20,9 +20,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableCaching
-public class CacheConfiguration {
+public class CacheConfig {
 
-  private static final Logger logger = LoggerFactory.getLogger(CacheConfiguration.class);
+  private static final Logger logger = LoggerFactory.getLogger(CacheConfig.class);
 
   // Cache names
   public static final String BOOK_CACHE = "books";

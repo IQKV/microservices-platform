@@ -1,6 +1,6 @@
 package org.gripday.bookstore.domain.service;
 
-import org.gripday.bookstore.infrastructure.config.CacheConfiguration;
+import org.gripday.bookstore.infrastructure.config.CacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -100,19 +100,19 @@ public class CacheWarmupService {
   public void evictBookCaches() {
     logger.info("Evicting book-related caches...");
 
-    var bookCache = cacheManager.getCache(CacheConfiguration.BOOK_CACHE);
+    var bookCache = cacheManager.getCache(CacheConfig.BOOK_CACHE);
     if (bookCache != null) {
       bookCache.clear();
       logger.debug("Cleared book cache");
     }
 
-    var searchCache = cacheManager.getCache(CacheConfiguration.BOOK_SEARCH_CACHE);
+    var searchCache = cacheManager.getCache(CacheConfig.BOOK_SEARCH_CACHE);
     if (searchCache != null) {
       searchCache.clear();
       logger.debug("Cleared book search cache");
     }
 
-    var popularCache = cacheManager.getCache(CacheConfiguration.POPULAR_BOOKS_CACHE);
+    var popularCache = cacheManager.getCache(CacheConfig.POPULAR_BOOKS_CACHE);
     if (popularCache != null) {
       popularCache.clear();
       logger.debug("Cleared popular books cache");

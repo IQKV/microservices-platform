@@ -20,12 +20,12 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration {
+public class SecurityConfig {
 
   private final JwtDecoder jwtDecoder;
   private final RateLimitingFilter rateLimitingFilter;
 
-  public SecurityConfiguration(JwtDecoder jwtDecoder, RateLimitingFilter rateLimitingFilter) {
+  public SecurityConfig(JwtDecoder jwtDecoder, RateLimitingFilter rateLimitingFilter) {
     this.jwtDecoder = jwtDecoder;
     this.rateLimitingFilter = rateLimitingFilter;
   }

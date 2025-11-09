@@ -10,7 +10,7 @@ import org.gripday.bookstore.domain.dto.UserContext;
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.InsufficientInventoryException;
 import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
-import org.gripday.bookstore.infrastructure.config.CacheConfiguration;
+import org.gripday.bookstore.infrastructure.config.CacheConfig;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics;
 import org.gripday.bookstore.infrastructure.repository.BookRepository;
@@ -53,9 +53,9 @@ public class InventoryService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#bookId"),
-      @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+      @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#bookId"),
+      @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true)
   })
   public InventoryDto updateInventory(Long bookId, UpdateInventoryRequest request, UserContext userContext) {
     logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
@@ -107,9 +107,9 @@ public class InventoryService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = CacheConfiguration.BOOK_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+      @CacheEvict(value = CacheConfig.BOOK_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true)
   })
   public List<InventoryDto> bulkUpdateInventory(List<BulkInventoryRequest> requests, UserContext userContext) {
     logger.info("Bulk updating inventory for {} books by user: {}", requests.size(), userContext.username());

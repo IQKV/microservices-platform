@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareRedisService;
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareSessionService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareRedisService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.authservice.domain.service.AccountLockoutService;
 import org.gripday.authservice.domain.service.AuthenticationService;
 import org.gripday.authservice.domain.service.EmailService;

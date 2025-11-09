@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration;
  * Gateway routing configuration using programmatic route definitions. Provides centralized routing configuration with environment-specific settings.
  */
 @Configuration
-public class GatewayConfiguration {
+public class GatewayConfig {
 
   private final GatewayProperties gatewayProperties;
   private final RequestTransformationFilter requestTransformationFilter;
   private final ResponseTransformationFilter responseTransformationFilter;
   private final LoadBalancingFilter loadBalancingFilter;
 
-  public GatewayConfiguration(
+  public GatewayConfig(
       GatewayProperties gatewayProperties,
       RequestTransformationFilter requestTransformationFilter,
       ResponseTransformationFilter responseTransformationFilter,

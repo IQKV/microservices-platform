@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
-public class StructuredLoggingConfiguration {
+public class StructuredLoggingConfig {
 
   /**
    * Structured logging utility for consistent log formatting in reactive context.

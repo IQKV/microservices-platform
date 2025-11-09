@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
         title = "Gripday Auth Service API",
         version = "1.0.0",
         description = """
-            Comprehensive authentication and user management service for the Gripday Platform.
+            Centralized authentication and user management service for the Gripday microservices platform.
             
             ## Features
             - JWT-based authentication with refresh tokens

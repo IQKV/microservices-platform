@@ -13,9 +13,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @EnableAsync
 @EnableScheduling
-public class AsyncConfiguration {
+public class AsyncConfig {
 
-  private static final Logger logger = LoggerFactory.getLogger(AsyncConfiguration.class);
+  private static final Logger logger = LoggerFactory.getLogger(AsyncConfig.class);
 
   @Bean(name = "cacheWarmupExecutor")
   public Executor cacheWarmupExecutor() {

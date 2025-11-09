@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class QueryOptimizationConfiguration {
+public class QueryOptimizationConfig {
 
   @Bean
   @Profile("!test")

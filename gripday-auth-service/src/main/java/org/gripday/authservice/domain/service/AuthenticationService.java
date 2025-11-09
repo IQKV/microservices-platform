@@ -5,8 +5,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareRedisService;
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareSessionService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareRedisService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.authservice.infrastructure.entity.User;
 import org.gripday.authservice.infrastructure.repository.UserRepository;
 import org.gripday.authservice.presentation.dto.AuthenticationResult;

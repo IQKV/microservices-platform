@@ -1,7 +1,6 @@
 package org.gripday.gatewayservice.config;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +14,13 @@ import org.springframework.context.annotation.Configuration;
  * Circuit breaker configuration using Resilience4j. Provides fault tolerance patterns for service failures.
  */
 @Configuration
-public class CircuitBreakerConfiguration {
+public class CircuitBreakerConfig {
 
-  private static final Logger logger = LoggerFactory.getLogger(CircuitBreakerConfiguration.class);
+  private static final Logger logger = LoggerFactory.getLogger(CircuitBreakerConfig.class);
 
   private final GatewayProperties gatewayProperties;
 
-  public CircuitBreakerConfiguration(GatewayProperties gatewayProperties) {
+  public CircuitBreakerConfig(GatewayProperties gatewayProperties) {
     this.gatewayProperties = gatewayProperties;
   }
 
@@ -59,17 +58,17 @@ public class CircuitBreakerConfiguration {
     return registry.circuitBreaker("auth-service");
   }
 
-  private CircuitBreakerConfig createCircuitBreakerConfig() {
+  private io.github.resilience4j.circuitbreaker.CircuitBreakerConfig createCircuitBreakerConfig() {
     var cbConfig = gatewayProperties.circuitBreaker();
 
-    return CircuitBreakerConfig.custom()
+    return io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.custom()
         .failureRateThreshold(cbConfig.failureRateThreshold())
         .slowCallRateThreshold(cbConfig.slowCallRateThreshold())
         .slowCallDurationThreshold(cbConfig.slowCallDurationThreshold())
         .minimumNumberOfCalls(cbConfig.minimumNumberOfCalls())
         .waitDurationInOpenState(cbConfig.waitDurationInOpenState())
         .slidingWindowSize(cbConfig.slidingWindowSize())
-        .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.valueOf(cbConfig.slidingWindowType()))
+        .slidingWindowType(io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.SlidingWindowType.valueOf(cbConfig.slidingWindowType()))
         .permittedNumberOfCallsInHalfOpenState(5)
         .automaticTransitionFromOpenToHalfOpenEnabled(true)
         .recordExceptions(

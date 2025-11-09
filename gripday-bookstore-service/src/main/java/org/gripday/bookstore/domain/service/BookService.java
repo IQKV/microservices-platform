@@ -11,7 +11,7 @@ import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.CategoryNotFoundException;
 import org.gripday.bookstore.domain.exception.DuplicateIsbnException;
 import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
-import org.gripday.bookstore.infrastructure.config.CacheConfiguration;
+import org.gripday.bookstore.infrastructure.config.CacheConfig;
 import org.gripday.bookstore.infrastructure.entity.Book;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics;
@@ -48,7 +48,7 @@ public class BookService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfiguration.BOOK_SEARCH_CACHE,
+  @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
       key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> findBooks(BookSearchCriteria criteria, Pageable pageable) {
     logger.debug("Finding books with criteria: {}", criteria);
@@ -73,7 +73,7 @@ public class BookService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfiguration.BOOK_CACHE, key = "#id")
+  @Cacheable(value = CacheConfig.BOOK_CACHE, key = "#id")
   public Optional<BookDto> findBookById(Long id) {
     logger.debug("Finding book by ID: {}", id);
 
@@ -82,9 +82,9 @@ public class BookService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.AUTHOR_CACHE, allEntries = true)
+      @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.AUTHOR_CACHE, allEntries = true)
   })
   public BookDto createBook(CreateBookRequest request, UserContext userContext) {
     logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
@@ -136,10 +136,10 @@ public class BookService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#id"),
-      @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.AUTHOR_CACHE, allEntries = true)
+      @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#id"),
+      @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.AUTHOR_CACHE, allEntries = true)
   })
   public BookDto updateBook(Long id, UpdateBookRequest request, UserContext userContext) {
     logger.info("Updating book ID: {} by user: {}", id, userContext.username());
@@ -179,9 +179,9 @@ public class BookService {
   }
 
   @Caching(evict = {
-      @CacheEvict(value = CacheConfiguration.BOOK_CACHE, key = "#id"),
-      @CacheEvict(value = CacheConfiguration.BOOK_SEARCH_CACHE, allEntries = true),
-      @CacheEvict(value = CacheConfiguration.POPULAR_BOOKS_CACHE, allEntries = true)
+      @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#id"),
+      @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
+      @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true)
   })
   public void deleteBook(Long id, UserContext userContext) {
     logger.info("Deleting book ID: {} by user: {}", id, userContext.username());
@@ -210,7 +210,7 @@ public class BookService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfiguration.BOOK_CACHE, key = "'isbn_' + #isbn")
+  @Cacheable(value = CacheConfig.BOOK_CACHE, key = "'isbn_' + #isbn")
   public Optional<BookDto> findBookByIsbn(String isbn) {
     logger.debug("Finding book by ISBN: {}", isbn);
 
@@ -219,7 +219,7 @@ public class BookService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfiguration.POPULAR_BOOKS_CACHE,
+  @Cacheable(value = CacheConfig.POPULAR_BOOKS_CACHE,
       key = "'available_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> findAvailableBooks(Pageable pageable) {
     logger.debug("Finding available books");
@@ -229,7 +229,7 @@ public class BookService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfiguration.POPULAR_BOOKS_CACHE,
+  @Cacheable(value = CacheConfig.POPULAR_BOOKS_CACHE,
       key = "'in_stock_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> findBooksInStock(Pageable pageable) {
     logger.debug("Finding books in stock");

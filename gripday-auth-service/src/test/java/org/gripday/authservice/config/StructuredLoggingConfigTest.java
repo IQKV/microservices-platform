@@ -10,38 +10,38 @@ import org.slf4j.MDC;
 /**
  * Test for structured logging configuration.
  */
-class StructuredLoggingConfigurationTest {
+class StructuredLoggingConfigTest {
 
   @Test
   void shouldCreateStructuredLogger() {
     // Given
-    var config = new StructuredLoggingConfiguration();
+    var config = new StructuredLoggingConfig();
 
     // When
     var logger = config.structuredLogger();
 
     // Then
     assertThat(logger).isNotNull();
-    assertThat(logger).isInstanceOf(StructuredLoggingConfiguration.StructuredLogger.class);
+    assertThat(logger).isInstanceOf(StructuredLoggingConfig.StructuredLogger.class);
   }
 
   @Test
   void shouldCreateSecurityLogger() {
     // Given
-    var config = new StructuredLoggingConfiguration();
+    var config = new StructuredLoggingConfig();
 
     // When
     var logger = config.securityLogger();
 
     // Then
     assertThat(logger).isNotNull();
-    assertThat(logger).isInstanceOf(StructuredLoggingConfiguration.SecurityLogger.class);
+    assertThat(logger).isInstanceOf(StructuredLoggingConfig.SecurityLogger.class);
   }
 
   @Test
   void shouldLogAuthenticationAttemptSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logAuthenticationAttempt("testuser", "success", null, "192.168.1.1", "Mozilla/5.0");
@@ -55,7 +55,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogUserRegistrationSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logUserRegistration("testuser", "test@example.com", "success", null);
@@ -69,7 +69,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogTokenOperationSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logTokenOperation("refresh", "testuser", "success", "access_token");
@@ -83,7 +83,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogDatabaseOperationSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
     logger.logDatabaseOperation("SELECT", "users", 150L, "success");
@@ -97,7 +97,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogBusinessEventSuccessfully() {
     // Given
-    var logger = new StructuredLoggingConfiguration.StructuredLogger();
+    var logger = new StructuredLoggingConfig.StructuredLogger();
     var context = Map.of("userId", "123", "action", "profile_update");
 
     // When - Should not throw exceptions
@@ -112,7 +112,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogSecurityEventSuccessfully() {
     // Given
-    var securityLogger = new StructuredLoggingConfiguration.SecurityLogger();
+    var securityLogger = new StructuredLoggingConfig.SecurityLogger();
     var additionalContext = Map.of("attemptCount", "3");
 
     // When - Should not throw exceptions
@@ -128,7 +128,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogAccountLockoutSuccessfully() {
     // Given
-    var securityLogger = new StructuredLoggingConfiguration.SecurityLogger();
+    var securityLogger = new StructuredLoggingConfig.SecurityLogger();
 
     // When - Should not throw exceptions
     securityLogger.logAccountLockout("testuser", "too_many_attempts", "192.168.1.1", 5);
@@ -142,7 +142,7 @@ class StructuredLoggingConfigurationTest {
   @Test
   void shouldLogPrivilegeEscalationSuccessfully() {
     // Given
-    var securityLogger = new StructuredLoggingConfiguration.SecurityLogger();
+    var securityLogger = new StructuredLoggingConfig.SecurityLogger();
 
     // When - Should not throw exceptions
     securityLogger.logPrivilegeEscalation("testuser", "USER", "ADMIN", "admin@example.com");

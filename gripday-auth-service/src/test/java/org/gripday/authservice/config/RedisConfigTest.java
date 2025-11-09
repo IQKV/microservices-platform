@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareRedisService;
-import org.gripday.authservice.config.RedisConfiguration.TenantAwareSessionService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareRedisService;
+import org.gripday.authservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.authservice.domain.service.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-class RedisConfigurationTest {
+class RedisConfigTest {
 
   @Autowired
   private RedisTemplate<String, Object> redisTemplate;
