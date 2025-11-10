@@ -4,8 +4,8 @@ This document provides a clear mapping of all domains and their purposes across 
 
 ## Production Domains (`*.gripday.com`)
 
-| Domain              | Purpose                | Service         | Ingress | Status           |
-| ------------------- | ---------------------- | --------------- | ------- | ---------------- |
+| Domain               | Purpose                | Service         | Ingress | Status           |
+| -------------------- | ---------------------- | --------------- | ------- | ---------------- |
 | **gripday.com**      | Marketing/Landing Page | Static Site     | ✅ Yes  | 🟡 Optional      |
 | **app.gripday.com**  | Main Web Application   | React/Vue App   | ✅ Yes  | 🟡 When deployed |
 | **auth.gripday.com** | Auth UI (Login/Signup) | Auth Frontend   | ✅ Yes  | 🟡 RESERVED      |
@@ -19,16 +19,16 @@ This document provides a clear mapping of all domains and their purposes across 
 
 ### Backend Services (Internal Only - NO Ingress)
 
-| Service           | Port    | Access Method                               |
-| ----------------- | ------- | ------------------------------------------- |
+| Service           | Port    | Access Method                                |
+| ----------------- | ------- | -------------------------------------------- |
 | Auth Service      | 8081    | `https://api.gripday.com/api/v1/auth/*`      |
 | Bookstore Service | 8082    | `https://api.gripday.com/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.com/api/v1/*`           |
 
 ## Staging Domains (`*.gripday.website`)
 
-| Domain                  | Purpose                | Service         | Ingress | Status           |
-| ----------------------- | ---------------------- | --------------- | ------- | ---------------- |
+| Domain                   | Purpose                | Service         | Ingress | Status           |
+| ------------------------ | ---------------------- | --------------- | ------- | ---------------- |
 | **gripday.website**      | Marketing/Landing Page | Static Site     | ✅ Yes  | 🟡 Optional      |
 | **app.gripday.website**  | Main Web Application   | React/Vue App   | ✅ Yes  | 🟡 When deployed |
 | **auth.gripday.website** | Auth UI (Login/Signup) | Auth Frontend   | ✅ Yes  | 🟡 RESERVED      |
@@ -42,17 +42,17 @@ This document provides a clear mapping of all domains and their purposes across 
 
 ### Backend Services (Internal Only - NO Ingress)
 
-| Service           | Port    | Access Method                                   |
-| ----------------- | ------- | ----------------------------------------------- |
+| Service           | Port    | Access Method                                    |
+| ----------------- | ------- | ------------------------------------------------ |
 | Auth Service      | 8081    | `https://api.gripday.website/api/v1/auth/*`      |
 | Bookstore Service | 8082    | `https://api.gripday.website/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.website/api/v1/*`           |
 
 ## Local Development Domains
 
-| Domain                    | Purpose                    | Service           | Port      |
-| ------------------------- | -------------------------- | ----------------- | --------- |
-| **localhost**             | Main Application           | React/Vue App     | 3000/5173 |
+| Domain                     | Purpose                    | Service           | Port      |
+| -------------------------- | -------------------------- | ----------------- | --------- |
+| **localhost**              | Main Application           | React/Vue App     | 3000/5173 |
 | **auth.gripday.site**      | Auth Service (Direct)      | Auth Service      | 8081      |
 | **api.gripday.site**       | API Gateway                | Gateway Service   | 8080      |
 | **bookstore.gripday.site** | Bookstore Service (Direct) | Bookstore Service | 8082      |
@@ -312,14 +312,14 @@ ws.gripday.com        → WebSocket gateway
 
 ## Quick Reference
 
-| Need                     | Use                                             |
-| ------------------------ | ----------------------------------------------- |
+| Need                     | Use                                              |
+| ------------------------ | ------------------------------------------------ |
 | User login page          | `https://auth.gripday.com/login`                 |
 | Login API call           | `POST https://api.gripday.com/api/v1/auth/login` |
 | Main app dashboard       | `https://app.gripday.com/dashboard`              |
 | Admin panel              | `https://app.gripday.com/admin`                  |
 | Any backend API          | `https://api.gripday.com/api/v1/*`               |
-| Backend service directly | ❌ Not possible (internal only)                 |
+| Backend service directly | ❌ Not possible (internal only)                  |
 
 ---
 

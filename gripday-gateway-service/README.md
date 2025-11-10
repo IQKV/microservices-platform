@@ -42,14 +42,28 @@ The gateway will be available at `http://localhost:8080`
 
 ## Routing and Security
 
+### API Prefix Configuration
+
+The gateway supports environment-specific API prefixes:
+
+- **Local/Staging**: Uses `/api` prefix → `http://localhost:8080/api/v1/auth/login`
+- **Production**: No prefix when deployed on `api.gripday.com` → `https://api.gripday.com/v1/auth/login`
+
+This allows clean URLs in production while maintaining clear API identification in development. See [API Prefix Configuration](docs/API-PREFIX-CONFIGURATION.md) for details.
+
 ### Service Routes
 
 The gateway automatically routes requests to backend services:
 
 ```bash
 # Auth service routes (no authentication required)
+# Local/Staging
 curl http://localhost:8080/api/v1/auth/login
 curl http://localhost:8080/api/v1/auth/signup
+
+# Production (api.gripday.com)
+curl https://api.gripday.com/v1/auth/login
+curl https://api.gripday.com/v1/auth/signup
 
 # Protected routes (JWT token required)
 curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users

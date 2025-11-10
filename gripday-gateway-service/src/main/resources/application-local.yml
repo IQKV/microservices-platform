@@ -67,10 +67,15 @@ gripday:
   # Gateway Configuration
   gateway:
     routing:
+      # API prefix configuration - keep /api prefix in local development
+      api-prefix:
+        enabled: true
+        prefix: /api
+        strip-count: 0  # Don't strip in local development
       services:
         auth-service:
           uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI:http://localhost:8081}
-          path: /api/v1/auth/**
+          path: /v1/auth/**
           enabled: true
           connect-timeout: 10000  # Extended for development
           response-timeout: 60000  # Extended for development

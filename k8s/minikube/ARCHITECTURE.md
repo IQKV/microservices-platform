@@ -338,9 +338,9 @@ curl http://$(minikube ip):30081/actuator/health
 | I want to...         | Use...                                                             |
 | -------------------- | ------------------------------------------------------------------ |
 | Quick API test       | NodePort: `http://$(minikube ip):30080`                            |
-| Test production flow | Ingress: `http://api.gripday.site`                                  |
-| Debug auth service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`            |
-| Debug bookstore      | Direct: `http://bookstore.gripday.site` OR NodePort: `:30082`       |
+| Test production flow | Ingress: `http://api.gripday.site`                                 |
+| Debug auth service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`           |
+| Debug bookstore      | Direct: `http://bookstore.gripday.site` OR NodePort: `:30082`      |
 | Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes`         |
 | View logs            | `kubectl logs -n gripday deployment/<service-name>`                |
 | Get into pod         | `kubectl exec -n gripday -it deployment/<service-name> -- /bin/sh` |

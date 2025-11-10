@@ -12,8 +12,9 @@ spring:
         - id: auth-service
           uri: ${gripday.gateway.routing.services.auth-service.uri}
           predicates:
-            - Path=${gripday.gateway.routing.services.auth-service.path}
+            - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.auth-service.path}
           filters:
+            - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
@@ -21,8 +22,9 @@ spring:
         - id: bookstore-service
           uri: ${gripday.gateway.routing.services.bookstore-service.uri}
           predicates:
-            - Path=${gripday.gateway.routing.services.bookstore-service.path}
+            - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.bookstore-service.path}
           filters:
+            - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
@@ -42,16 +44,21 @@ spring:
 gripday:
   gateway:
     routing:
+      # API prefix configuration - allows stripping /api prefix when deployed on api.gripday.com
+      api-prefix:
+        enabled: true
+        prefix: /api
+        strip-in-production: true
       services:
         auth-service:
           uri: http://localhost:8081
-          path: /api/v1/auth/**
+          path: /v1/auth/**
           enabled: true
           connect-timeout: 5000
           response-timeout: 30000
         bookstore-service:
           uri: http://localhost:8082
-          path: /api/v1/bookstore/**
+          path: /v1/bookstore/**
           enabled: true
           connect-timeout: 5000
           response-timeout: 30000
@@ -82,6 +89,14 @@ gripday:
         - /api/v1/auth/email/status
         - /api/v1/bookstore/books
         - /api/v1/bookstore/books/**
+        - /v1/auth/login
+        - /v1/auth/signup
+        - /v1/auth/refresh
+        - /v1/auth/email/verify
+        - /v1/auth/email/resend
+        - /v1/auth/email/status
+        - /v1/bookstore/books
+        - /v1/bookstore/books/**
         - /actuator/health
         - /actuator/info
     
