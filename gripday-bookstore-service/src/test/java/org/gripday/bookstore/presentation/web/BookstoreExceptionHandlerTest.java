@@ -69,7 +69,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "9780123456786",
+        "9781234567897", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         1L,
@@ -100,7 +100,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "978-0123456789",
+        "9781234567890", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         999L, // Non-existent category
@@ -126,7 +126,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "978-0123456789",
+        "9781234567883", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         1L,
@@ -147,12 +147,12 @@ class BookstoreExceptionHandlerTest {
   @Test
   void handleDuplicateIsbnException_ShouldReturn409WithProblemDetail() throws Exception {
     when(bookService.createBook(any(CreateBookRequest.class), any(UserContext.class)))
-        .thenThrow(new DuplicateIsbnException("9780123456786"));
+        .thenThrow(new DuplicateIsbnException("9781234567876"));
 
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "9780123456786", // Duplicate ISBN
+        "9781234567876", // Valid ISBN-13 - Duplicate
         "Description",
         new BigDecimal("29.99"),
         1L,
@@ -178,7 +178,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "978-0123456789",
+        "9781234567869", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         1L,
@@ -243,7 +243,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "978-0123456789",
+        "9781234567852", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         1L,
@@ -270,7 +270,7 @@ class BookstoreExceptionHandlerTest {
     var request = new CreateBookRequest(
         "Test Book",
         "Test Author",
-        "978-0123456789",
+        "9781234567845", // Valid ISBN-13
         "Description",
         new BigDecimal("29.99"),
         1L,

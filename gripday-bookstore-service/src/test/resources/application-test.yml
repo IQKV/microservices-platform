@@ -24,12 +24,6 @@ spring:
   
   cache:
     type: simple
-  
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: # Disable JWT for tests
 
 
 logging:

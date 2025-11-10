@@ -40,6 +40,12 @@ class InventoryServiceTest {
   @Mock
   private BookRepository bookRepository;
 
+  @Mock
+  private org.gripday.bookstore.infrastructure.security.AuditLogger auditLogger;
+
+  @Mock
+  private org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics bookstoreMetrics;
+
   @InjectMocks
   private InventoryService inventoryService;
 

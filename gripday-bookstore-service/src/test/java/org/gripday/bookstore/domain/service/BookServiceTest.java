@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +47,12 @@ class BookServiceTest {
 
   @Mock
   private CategoryRepository categoryRepository;
+
+  @Mock
+  private org.gripday.bookstore.infrastructure.security.AuditLogger auditLogger;
+
+  @Mock
+  private org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics bookstoreMetrics;
 
   @InjectMocks
   private BookService bookService;
@@ -108,6 +115,10 @@ class BookServiceTest {
         "Test", "Author", "Fiction",
         new BigDecimal("10.00"), new BigDecimal("50.00"), true
     );
+
+    // Setup metrics mocks (lenient to avoid UnnecessaryStubbingException)
+    org.mockito.Mockito.lenient().when(bookstoreMetrics.startBookSearchTimer()).thenReturn(mock(io.micrometer.core.instrument.Timer.Sample.class));
+    org.mockito.Mockito.lenient().when(bookstoreMetrics.startBookCreationTimer()).thenReturn(mock(io.micrometer.core.instrument.Timer.Sample.class));
   }
 
   @Test

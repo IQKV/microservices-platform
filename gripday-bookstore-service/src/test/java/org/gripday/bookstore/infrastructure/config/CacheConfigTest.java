@@ -2,14 +2,17 @@ package org.gripday.bookstore.infrastructure.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.gripday.bookstore.integration.TestJwtConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import({TestJwtConfiguration.class, TestCacheConfiguration.class})
 class CacheConfigTest {
 
   @Autowired

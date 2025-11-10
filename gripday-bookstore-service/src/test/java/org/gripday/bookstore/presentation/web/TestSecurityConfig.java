@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.gripday.bookstore.domain.dto.UserContext;
+import org.gripday.bookstore.infrastructure.config.ApiDeprecationNotice;
+import org.gripday.bookstore.infrastructure.config.ApiVersionInterceptor;
 import org.gripday.bookstore.infrastructure.security.UserContextExtractor;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -55,5 +57,17 @@ public class TestSecurityConfig {
         );
       }
     };
+  }
+
+  @Bean
+  @Primary
+  public ApiDeprecationNotice testApiDeprecationNotice() {
+    return new ApiDeprecationNotice();
+  }
+
+  @Bean
+  @Primary
+  public ApiVersionInterceptor testApiVersionInterceptor(ApiDeprecationNotice apiDeprecationNotice) {
+    return new ApiVersionInterceptor(apiDeprecationNotice);
   }
 }
