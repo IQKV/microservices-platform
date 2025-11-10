@@ -21,6 +21,11 @@
       "description": "Service routing and load balancing configuration"
     },
     {
+      "name": "gripday.gateway.routing.api-prefix",
+      "type": "org.gripday.gatewayservice.config.GatewayProperties$Routing$ApiPrefix",
+      "description": "API prefix configuration for environment-specific routing. Allows configuring /api prefix in development/staging and clean URLs in production (e.g., api.gripday.com)"
+    },
+    {
       "name": "gripday.gateway.security",
       "type": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties",
       "description": "JWT authentication and security configuration"
@@ -159,6 +164,27 @@
       "defaultValue": "30s"
     },
     {
+      "name": "gripday.gateway.routing.api-prefix.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable API prefix handling for environment-specific routing",
+      "sourceType": "org.gripday.gatewayservice.config.GatewayProperties$Routing$ApiPrefix",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.gateway.routing.api-prefix.prefix",
+      "type": "java.lang.String",
+      "description": "API prefix to prepend to all routes. Use '/api' for development/staging, empty string for production when deployed on api.gripday.com subdomain",
+      "sourceType": "org.gripday.gatewayservice.config.GatewayProperties$Routing$ApiPrefix",
+      "defaultValue": "/api"
+    },
+    {
+      "name": "gripday.gateway.routing.api-prefix.strip-count",
+      "type": "java.lang.Integer",
+      "description": "Number of path segments to strip from incoming requests before forwarding to backend services. Usually 0 (no stripping) or 1 (strip /api)",
+      "sourceType": "org.gripday.gatewayservice.config.GatewayProperties$Routing$ApiPrefix",
+      "defaultValue": 0
+    },
+    {
       "name": "gripday.gateway.security.jwt.secret-key",
       "type": "java.lang.String",
       "description": "JWT secret key for token validation",
@@ -269,6 +295,40 @@
         {
           "value": "redis",
           "description": "Docker container name"
+        }
+      ]
+    },
+    {
+      "name": "gripday.gateway.routing.api-prefix.prefix",
+      "values": [
+        {
+          "value": "/api",
+          "description": "Standard API prefix for development and staging environments"
+        },
+        {
+          "value": "",
+          "description": "No prefix for production when deployed on api.gripday.com subdomain"
+        },
+        {
+          "value": "/v1",
+          "description": "Version-specific prefix (alternative approach)"
+        }
+      ]
+    },
+    {
+      "name": "gripday.gateway.routing.api-prefix.strip-count",
+      "values": [
+        {
+          "value": 0,
+          "description": "No stripping - forward full path to backend (recommended)"
+        },
+        {
+          "value": 1,
+          "description": "Strip one segment (e.g., /api) before forwarding to backend"
+        },
+        {
+          "value": 2,
+          "description": "Strip two segments (e.g., /api/v1) before forwarding to backend"
         }
       ]
     }

@@ -29,10 +29,23 @@ public record GatewayProperties(
    * Routing configuration for service discovery and load balancing.
    */
   public record Routing(
+      @Valid @NotNull ApiPrefix apiPrefix,
       @Valid @NotNull Services services,
       @NotNull Boolean enableServiceDiscovery,
       @NotNull LoadBalancing loadBalancing
   ) {
+
+    /**
+     * API prefix configuration for environment-specific routing.
+     * Allows configuring /api prefix in development/staging and clean URLs in production.
+     */
+    public record ApiPrefix(
+        @NotNull Boolean enabled,
+        @NotBlank String prefix,
+        int stripCount
+    ) {
+
+    }
 
     public record Services(
         @Valid @NotNull AuthService authService
