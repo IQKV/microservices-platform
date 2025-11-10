@@ -49,10 +49,10 @@ class JwtServiceTest {
 
   @BeforeEach
   void setUp() {
-    // Mock JWT configuration
-    when(jwtConfiguration.getAccessTokenExpiry()).thenReturn(java.time.Duration.ofMinutes(15));
-    when(jwtConfiguration.getRefreshTokenExpiry()).thenReturn(java.time.Duration.ofDays(7));
-    when(jwtConfiguration.getIssuer()).thenReturn("gripday-auth-service");
+    // Mock JWT configuration with lenient to avoid unnecessary stubbing errors
+    org.mockito.Mockito.lenient().when(jwtConfiguration.getAccessTokenExpiry()).thenReturn(java.time.Duration.ofMinutes(15));
+    org.mockito.Mockito.lenient().when(jwtConfiguration.getRefreshTokenExpiry()).thenReturn(java.time.Duration.ofDays(7));
+    org.mockito.Mockito.lenient().when(jwtConfiguration.getIssuer()).thenReturn("gripday-auth-service");
 
     jwtService = new JwtService(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate);
     testUser = createTestUser(1L, "testuser", "test@example.com", "tenant-1");
@@ -121,9 +121,9 @@ class JwtServiceTest {
     var tokenString = "valid.jwt.token";
     var mockJwt = createMockJwtWithClaims();
 
-    // Mock JWT decoder and Redis template
-    when(jwtDecoder.decode(tokenString)).thenReturn(mockJwt);
-    when(redisTemplate.hasKey(anyString())).thenReturn(false);
+    // Mock JWT decoder and Redis template with lenient
+    org.mockito.Mockito.lenient().when(jwtDecoder.decode(tokenString)).thenReturn(mockJwt);
+    org.mockito.Mockito.lenient().when(redisTemplate.hasKey(anyString())).thenReturn(false);
 
     // When
     var jwt = jwtService.validateToken(tokenString);
@@ -254,9 +254,9 @@ class JwtServiceTest {
     var tokenString = "valid.token";
     var mockJwt = createMockJwtWithClaims();
 
-    // Mock JWT decoder and Redis template
-    when(jwtDecoder.decode(tokenString)).thenReturn(mockJwt);
-    when(redisTemplate.hasKey(anyString())).thenReturn(false);
+    // Mock JWT decoder and Redis template with lenient
+    org.mockito.Mockito.lenient().when(jwtDecoder.decode(tokenString)).thenReturn(mockJwt);
+    org.mockito.Mockito.lenient().when(redisTemplate.hasKey(anyString())).thenReturn(false);
 
     // When
     var jwt = jwtService.validateToken(tokenString);

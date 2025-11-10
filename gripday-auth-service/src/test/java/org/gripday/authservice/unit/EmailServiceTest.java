@@ -120,6 +120,16 @@ class EmailServiceTest {
 
     var token = "verification-token-123";
 
+    // Mock metrics service to avoid NullPointerException
+    var metricsService = mock(EmailVerificationMetricsService.class);
+    var timerSample = mock(io.micrometer.core.instrument.Timer.Sample.class);
+    var emailTimer = mock(io.micrometer.core.instrument.Timer.class);
+    when(metricsService.startEmailSendTimer()).thenReturn(timerSample);
+    when(metricsService.getEmailSendTimer()).thenReturn(emailTimer);
+    
+    // Recreate email service with mocked metrics
+    emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService);
+
     when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
     when(templateEngine.process(eq("email/verification.html"), any(Context.class)))
         .thenReturn("<html><body>Test email content</body></html>");

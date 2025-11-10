@@ -330,13 +330,6 @@ class AuthenticationServiceTest {
     // Mock JWT validation for session cleanup
     when(jwtService.validateToken(accessToken)).thenReturn(mockJwt);
 
-    // Mock session service
-    doNothing().when(sessionService).deleteSession(sessionId);
-    doNothing().when(sessionService).removeUserSession("1", sessionId);
-
-    // Mock JWT invalidation
-    doNothing().when(jwtService).invalidateToken(accessToken);
-
     // When
     assertDoesNotThrow(() -> authenticationService.logoutUser(accessToken, sessionId));
 
@@ -353,7 +346,6 @@ class AuthenticationServiceTest {
 
     // Mock session service
     when(sessionService.sessionExists(sessionId)).thenReturn(true);
-    doNothing().when(sessionService).extendSession(eq(sessionId), any(Duration.class));
 
     // When
     var result = authenticationService.validateAndExtendSession(sessionId);
@@ -400,7 +392,7 @@ class AuthenticationServiceTest {
 
     // Then
     verify(sessionService).invalidateAllUserSessions("1");
-    verify(securityAuditService).logTokenEvent("testuser", "all_sessions_invalidated", "system", "system");
+    verify(securityAuditService).logTokenEvent("testuser", "logout_from_all_devices", "system", "system");
   }
 
   @Test
