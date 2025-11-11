@@ -116,6 +116,8 @@
                         <excludes>
                            <exclude>**/dto/*.class</exclude>
                            <exclude>**/config/*.class</exclude>
+                           <exclude>**/infrastructure/*.class</exclude>
+                           <exclude>**/presentation/*.class</exclude>
                         </excludes>
                     </configuration>
                     <executions>
