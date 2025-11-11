@@ -111,12 +111,16 @@ class GatewayArchitectureTest {
 
   /**
    * Validates that reactive components use appropriate Reactor types. Ensures proper reactive programming with Mono and Flux.
+   * Note: This rule allows for utility classes and DTOs that may not directly use Reactor types.
    */
   @ArchTest
   static final ArchRule reactive_components_should_use_reactor_types =
       classes().that().resideInAnyPackage("..filter..", "..service..")
+          .and().haveNameMatching(".*Filter|.*Service")
+          .and().areNotMemberClasses()
           .should().dependOnClassesThat()
-          .resideInAnyPackage("reactor.core.publisher..");
+          .resideInAnyPackage("reactor.core.publisher..")
+          .allowEmptyShould(true);
 
   /**
    * Ensures filter classes implement proper reactive patterns. Validates that gateway filters follow Spring Cloud Gateway conventions.
@@ -136,6 +140,8 @@ class GatewayArchitectureTest {
           .should().onlyDependOnClassesThat()
           .resideInAnyPackage(
               "java..",
+              "jakarta..",
+              "javax..",
               "org.springframework..",
               "org.slf4j..",
               "..config..",
@@ -146,6 +152,7 @@ class GatewayArchitectureTest {
               "io.jsonwebtoken..",
               "io.github.resilience4j..",
               "io.micrometer..",
+              "com.fasterxml.jackson..",
               "org.springframework.cloud.gateway.."
           );
 

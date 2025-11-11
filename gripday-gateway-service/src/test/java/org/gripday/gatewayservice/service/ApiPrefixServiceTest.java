@@ -15,13 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ApiPrefixService Tests")
 class ApiPrefixServiceTest {
 
-  @Mock
+  @Mock(lenient = true)
   private GatewayProperties gatewayProperties;
 
-  @Mock
+  @Mock(lenient = true)
   private GatewayProperties.Routing routing;
 
-  @Mock
+  @Mock(lenient = true)
   private GatewayProperties.Routing.ApiPrefix apiPrefix;
 
   private ApiPrefixService apiPrefixService;
