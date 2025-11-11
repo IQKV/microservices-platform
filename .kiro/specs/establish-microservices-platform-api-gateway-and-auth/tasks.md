@@ -7,7 +7,7 @@
   - Configure Spring Boot 3.5.6 and Spring Cloud 2025.0.0 dependencies
   - Create isolated module structure for gripday-auth-service and gripday-gateway-service
   - Set up Maven compiler plugin with Java 21 features (var, records, pattern matching, text blocks)
-  - Configure Maven Surefire and Failsafe plugins for testing
+  - Configure Maven Surefire plugins for testing
   - Add ArchUnit and Spring Modulith dependencies for architectural testing
   - Create Maven wrapper (mvnw) for consistent build environment
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 25.1, 25.2, 25.3, 25.4, 25.5_

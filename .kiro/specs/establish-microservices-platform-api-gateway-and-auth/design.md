@@ -81,7 +81,6 @@ The platform follows reactive programming principles, implements security throug
         <!-- Build plugins -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <spotbugs-maven-plugin.version>4.8.6.4</spotbugs-maven-plugin.version>
         <checkstyle-maven-plugin.version>3.5.0</checkstyle-maven-plugin.version>
@@ -220,27 +219,6 @@ The platform follows reactive programming principles, implements security throug
                     </configuration>
                 </plugin>
 
-                <!-- Failsafe for integration tests -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven-failsafe-plugin.version}</version>
-                    <configuration>
-                        <includes>
-                            <include>**/*IntegrationTest.java</include>
-                            <include>**/*IT.java</include>
-                        </includes>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
                 <!-- JaCoCo for code coverage -->
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -299,12 +277,7 @@ The platform follows reactive programming principles, implements security throug
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-
+           
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
