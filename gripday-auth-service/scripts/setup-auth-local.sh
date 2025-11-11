@@ -172,15 +172,15 @@ display_setup_info() {
     echo
     log_info "Environment Details:"
     echo "  - Profile: local"
-    echo "  - Auth Service Port: 8081"
+    echo "  - Auth Service Port: 8080"
     echo "  - PostgreSQL Port: 5432"
     echo "  - Redis Port: 6379"
     echo "  - Environment File: $ENV_FILE"
     echo
     log_info "Next Steps:"
     echo "  1. Start the auth service: mvn spring-boot:run -Dspring.profiles.active=local"
-    echo "  2. Access Swagger UI: http://localhost:8081/swagger-ui.html"
-    echo "  3. Check health: http://localhost:8081/actuator/health"
+    echo "  2. Access Swagger UI: http://localhost:8080/swagger-ui.html"
+    echo "  3. Check health: http://localhost:8080/actuator/health"
     echo
     log_info "Useful Commands:"
     echo "  - View logs: docker-compose logs -f postgres redis"

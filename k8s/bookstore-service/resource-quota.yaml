@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   hard:
     # Compute resources
@@ -40,7 +40,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   limits:
     # Container limits

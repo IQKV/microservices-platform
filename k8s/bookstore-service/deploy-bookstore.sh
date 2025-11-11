@@ -252,7 +252,7 @@ verify_deployment() {
     
     # Check pod status
     print_status "Pod status:"
-    kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/part-of=gripday-platform
+    kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/part-of=gripday
     
     # Check service status
     print_status "Service status:"

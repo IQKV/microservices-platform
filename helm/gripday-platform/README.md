@@ -24,7 +24,7 @@ This umbrella chart deploys the complete Gripday Platform microservices architec
         ▼                      ▼
 ┌───────────────┐      ┌──────────────────┐
 │ Auth Service  │      │Bookstore Service │
-│  (Port 8081)  │      │   (Port 8082)    │
+│  (Port 8080)  │      │   (Port 8080)    │
 ├───────────────┤      ├──────────────────┤
 │ PostgreSQL    │      │  PostgreSQL      │
 │ Redis         │      │  Redis           │
@@ -55,7 +55,7 @@ kubectl apply -f ../k8s/priority-classes.yaml
 helm dependency build
 
 # Install all services
-helm install gripday-platform . --namespace gripday-platform --create-namespace
+helm install gripday . --namespace gripday --create-namespace
 ```
 
 ### 3. Verify Installation
@@ -81,10 +81,10 @@ kubectl get ingress -A
 
 ```bash
 # Install only auth service
-helm install gripday-platform . --set bookstore-service.enabled=false --set gateway-service.enabled=false
+helm install gripday . --set bookstore-service.enabled=false --set gateway-service.enabled=false
 
 # Install without gateway
-helm install gripday-platform . --set gateway-service.enabled=false
+helm install gripday . --set gateway-service.enabled=false
 ```
 
 ### Custom Values
@@ -112,7 +112,7 @@ gateway-service:
 Install with custom values:
 
 ```bash
-helm install gripday-platform . -f custom-values.yaml
+helm install gripday . -f custom-values.yaml
 ```
 
 ## Configuration
@@ -122,7 +122,7 @@ helm install gripday-platform . -f custom-values.yaml
 | Parameter            | Description         | Default            |
 | -------------------- | ------------------- | ------------------ |
 | `global.environment` | Environment name    | `local`            |
-| `global.platform`    | Platform identifier | `gripday-platform` |
+| `global.platform`    | Platform identifier | `gripday` |
 
 ### Service-Specific Configuration
 
@@ -136,17 +136,17 @@ Each service can be configured independently. See individual service READMEs:
 
 ```bash
 # Upgrade with new values
-helm upgrade gripday-platform . -f custom-values.yaml
+helm upgrade gripday . -f custom-values.yaml
 
 # Upgrade specific service version
-helm upgrade gripday-platform . --set auth-service.image.tag=1.1.0
+helm upgrade gripday . --set auth-service.image.tag=1.1.0
 ```
 
 ## Uninstalling
 
 ```bash
 # Uninstall the platform
-helm uninstall gripday-platform --namespace gripday-platform
+helm uninstall gripday --namespace gripday
 
 # Clean up namespaces
 kubectl delete namespace gripday-auth
@@ -164,12 +164,12 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Auth service health
-kubectl port-forward -n gripday-auth svc/auth-service 8081:8081
-curl http://localhost:8081/actuator/health
+kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
+curl http://localhost:8080/actuator/health
 
 # Bookstore service health
-kubectl port-forward -n gripday-bookstore svc/bookstore-service 8082:8082
-curl http://localhost:8082/actuator/health
+kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
+curl http://localhost:8080/actuator/health
 ```
 
 ### View Logs
@@ -222,7 +222,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 
 ```bash
 # Install in local/dev mode
-helm install gripday-platform . --set global.environment=local
+helm install gripday . --set global.environment=local
 
 # Use port-forwarding for local access
 kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
@@ -231,13 +231,13 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 ### Staging Deployment
 
 ```bash
-helm install gripday-platform . -f values-staging.yaml --namespace staging
+helm install gripday . -f values-staging.yaml --namespace staging
 ```
 
 ### Production Deployment
 
 ```bash
-helm install gripday-platform . -f values-production.yaml --namespace production
+helm install gripday . -f values-production.yaml --namespace production
 ```
 
 ## Network Policies

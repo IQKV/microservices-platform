@@ -27,9 +27,9 @@ An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 
 
 The Gripday platform consists of three services that demonstrate a complete microservices ecosystem:
 
-- **Auth Service** (Port 8081) - Centralized authentication, authorization, and user management with JWT tokens
+- **Auth Service** (Port 8080) - Centralized authentication, authorization, and user management with JWT tokens
 - **Gateway Service** (Port 8080) - Intelligent API gateway with routing, rate limiting, and circuit breaker functionality
-- **Bookstore Service** (Port 8082) - Example business service for book catalog and inventory management
+- **Bookstore Service** (Port 8080) - Example business service for book catalog and inventory management
 
 ### Key Features
 
@@ -53,8 +53,8 @@ The Gripday platform consists of three services that demonstrate a complete micr
 ### 1. Clone and Setup
 
 ```bash
-git clone <repository-url> gripday-platform
-cd gripday-platform
+git clone <repository-url> gripday
+cd gripday
 
 # Start infrastructure services
 docker compose up -d postgres redis
@@ -81,9 +81,9 @@ cd gripday-bookstore-service && mvn spring-boot:run -Dspring-boot.run.profiles=l
 
 ```bash
 # Check service health
-curl http://localhost:8081/actuator/health  # Auth Service
+curl http://localhost:8080/actuator/health  # Auth Service
 curl http://localhost:8080/actuator/health  # Gateway Service
-curl http://localhost:8082/actuator/health  # Bookstore Service
+curl http://localhost:8080/actuator/health  # Bookstore Service
 
 # Test authentication flow
 curl -X POST http://localhost:8080/api/v1/auth/signup \
@@ -118,7 +118,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ## Services
 
-### Auth Service (Port 8081)
+### Auth Service (Port 8080)
 
 Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account activation.
 
@@ -138,7 +138,7 @@ Centralized authentication and user management service providing JWT-based authe
 **Documentation:**
 
 - [Auth Service README](gripday-auth-service/README.md)
-- Swagger UI: `http://localhost:8081/swagger-ui.html`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ### Gateway Service (Port 8080)
 
@@ -157,7 +157,7 @@ API Gateway providing intelligent routing, security, and resilience patterns for
 - [Gateway Service README](gripday-gateway-service/README.md)
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
-### Bookstore Service (Port 8082)
+### Bookstore Service (Port 8080)
 
 Example business microservice demonstrating book catalog and inventory management with full three-tier architecture implementation.
 
@@ -172,7 +172,7 @@ Example business microservice demonstrating book catalog and inventory managemen
 **Documentation:**
 
 - [Bookstore Service README](gripday-bookstore-service/README.md)
-- Swagger UI: `http://localhost:8082/swagger-ui.html`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ## Architecture
 
@@ -181,7 +181,7 @@ Example business microservice demonstrating book catalog and inventory managemen
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Gateway Service │    │   Auth Service  │    │ Bookstore Service│
-│   (Port 8080)   │◄──►│   (Port 8081)   │    │   (Port 8082)   │
+│   (Port 8080)   │◄──►│   (Port 8080)   │    │   (Port 8080)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
@@ -283,7 +283,7 @@ gripday:
 # Gateway Service
 gripday:
   gateway:
-    auth-service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+    auth-service-url: ${AUTH_SERVICE_URL:http://localhost:8080}
     rate-limiting:
       default-requests-per-minute: 100
     circuit-breaker:
@@ -357,7 +357,7 @@ mvn checkstyle:check
 
 ### Interactive Documentation
 
-- Auth Service: `http://localhost:8081/swagger-ui.html`
+- Auth Service: `http://localhost:8080/swagger-ui.html`
 - Gateway Service: `http://localhost:8080/swagger-ui.html`
 
 ### API Examples
@@ -453,23 +453,23 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 # Service health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/health
 
 # Component health
-curl http://localhost:8081/actuator/health/db
-curl http://localhost:8081/actuator/health/redis
+curl http://localhost:8080/actuator/health/db
+curl http://localhost:8080/actuator/health/redis
 ```
 
 ### Metrics
 
 ```bash
 # Prometheus metrics
-curl http://localhost:8081/actuator/prometheus
+curl http://localhost:8080/actuator/prometheus
 curl http://localhost:8080/actuator/prometheus
 
 # Application metrics
-curl http://localhost:8081/actuator/metrics
+curl http://localhost:8080/actuator/metrics
 curl http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
@@ -533,7 +533,7 @@ spring:
 
 - [Complete API Reference](docs/api/complete-api-reference.md) - Comprehensive endpoint documentation
 - [Authentication API](gripday-auth-service/docs/api/authentication.md) - Auth service specific endpoints
-- Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8081/swagger-ui.html)
+- Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8080/swagger-ui.html)
 
 ### Deployment and Operations
 
@@ -564,14 +564,14 @@ See [Troubleshooting Guide](docs/troubleshooting/common-issues.md) for detailed 
 
 ```bash
 # Collect diagnostic information
-curl http://localhost:8081/actuator/info  # Auth Service
+curl http://localhost:8080/actuator/info  # Auth Service
 curl http://localhost:8080/actuator/info  # Gateway Service
-curl http://localhost:8082/actuator/info  # Bookstore Service
+curl http://localhost:8080/actuator/info  # Bookstore Service
 
 # Check service health
-curl http://localhost:8081/actuator/health
 curl http://localhost:8080/actuator/health
-curl http://localhost:8082/actuator/health
+curl http://localhost:8080/actuator/health
+curl http://localhost:8080/actuator/health
 
 # View service logs
 docker-compose logs --tail=50 auth-service

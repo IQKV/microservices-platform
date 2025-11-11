@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -57,7 +57,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -97,7 +97,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /

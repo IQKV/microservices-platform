@@ -33,8 +33,8 @@ docker-compose --version
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/gripday/gripday-platform.git
-cd gripday-platform
+git clone https://github.com/gripday/gripday.git
+cd gripday
 ```
 
 ### 2. Start Infrastructure Services
@@ -82,7 +82,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 ```bash
 # Check auth service health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 
 # Check gateway service health
 curl http://localhost:8080/actuator/health
@@ -155,11 +155,11 @@ JWT_REFRESH_TOKEN_EXPIRY=P7D
 
 # Gateway Configuration
 GATEWAY_PORT=8080
-AUTH_SERVICE_URL=http://localhost:8081
+AUTH_SERVICE_URL=http://localhost:8080
 
 # Observability
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-OTEL_SERVICE_NAME=gripday-platform
+OTEL_SERVICE_NAME=gripday
 OTEL_TRACES_SAMPLER=traceidratio
 OTEL_TRACES_SAMPLER_ARG=0.1
 
@@ -202,7 +202,7 @@ LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=DEBUG
 ```bash
 # Gateway
 GRIPDAY_GATEWAY_PORT=8080
-GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8081
+GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8080
 
 # Redis
 GRIPDAY_CACHE_REDIS_HOST=localhost
@@ -320,7 +320,7 @@ services:
 
 ```bash
 # Connect to Redis
-docker exec -it gripday-platform_redis_1 redis-cli
+docker exec -it gripday_redis_1 redis-cli
 
 # Test Redis connection
 127.0.0.1:6379> ping
@@ -398,25 +398,25 @@ docker system prune -f
 
 ```bash
 # Auth service health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 
 # Gateway service health
 curl http://localhost:8080/actuator/health
 
 # Detailed health info
-curl http://localhost:8081/actuator/health/db
-curl http://localhost:8081/actuator/health/redis
+curl http://localhost:8080/actuator/health/db
+curl http://localhost:8080/actuator/health/redis
 ```
 
 ### Metrics
 
 ```bash
 # Prometheus metrics
-curl http://localhost:8081/actuator/prometheus
+curl http://localhost:8080/actuator/prometheus
 curl http://localhost:8080/actuator/prometheus
 
 # Application metrics
-curl http://localhost:8081/actuator/metrics
+curl http://localhost:8080/actuator/metrics
 curl http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
@@ -444,13 +444,13 @@ docker-compose logs -f auth-service | grep ERROR
 ```bash
 # Find process using port
 lsof -i :8080
-lsof -i :8081
+lsof -i :8080
 
 # Kill process
 kill -9 <PID>
 
 # Or use different ports
-mvn spring-boot:run -Dserver.port=8082
+mvn spring-boot:run -Dserver.port=8080
 ```
 
 **Database Connection Failed:**
@@ -519,7 +519,7 @@ services:
 
 After successful local setup:
 
-1. **Explore APIs**: Visit Swagger UI at `http://localhost:8081/swagger-ui.html`
+1. **Explore APIs**: Visit Swagger UI at `http://localhost:8080/swagger-ui.html`
 2. **Test Authentication**: Use provided cURL examples
 3. **Add New Services**: Follow the extensible platform patterns
 4. **Configure IDE**: Set up debugging and hot reload

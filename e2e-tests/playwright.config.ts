@@ -13,8 +13,8 @@ const environments = {
     baseURL: "http://localhost:8080",
     services: {
       gateway: "http://localhost:8080",
-      auth: "http://localhost:8081",
-      bookstore: "http://localhost:8082",
+      auth: "http://localhost:8080",
+      bookstore: "http://localhost:8080",
     },
     timeout: 30000,
     retries: 1,

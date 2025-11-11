@@ -11,7 +11,7 @@ The auth service provides centralized authentication, authorization, and user ma
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Ingress       │    │   Auth Service  │    │   PostgreSQL    │
-│   Controller    │───▶│   (Port 8081)   │───▶│   Database      │
+│   Controller    │───▶│   (Port 8080)   │───▶│   Database      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
                               ▼
@@ -25,7 +25,7 @@ The auth service provides centralized authentication, authorization, and user ma
 
 ### Core Service
 
-- **auth-service**: Main Spring Boot application (port 8081)
+- **auth-service**: Main Spring Boot application (port 8080)
 - **auth-postgres**: PostgreSQL 15.8 database for user data and authentication
 - **auth-redis**: Redis 7.4 for session management and caching
 
@@ -169,7 +169,7 @@ OTEL_SERVICE_NAME=gripday-auth-service
 
 ### Service Ports
 
-- **Auth Service**: 8081 (HTTP)
+- **Auth Service**: 8080 (HTTP)
 - **PostgreSQL**: 5432
 - **Redis**: 6379
 
@@ -331,7 +331,7 @@ kubectl get all -n gripday-auth
 kubectl logs -f deployment/auth-service -n gripday-auth
 
 # Port forward for local access
-kubectl port-forward service/auth-service 8081:8081 -n gripday-auth
+kubectl port-forward service/auth-service 8080:8080 -n gripday-auth
 
 # Scale manually
 kubectl scale deployment auth-service --replicas=3 -n gripday-auth
@@ -435,7 +435,7 @@ The auth service integrates with the gateway service for:
 
 ```bash
 # Run health checks
-kubectl exec -it deployment/auth-service -n gripday-auth -- curl localhost:8081/actuator/health
+kubectl exec -it deployment/auth-service -n gripday-auth -- curl localhost:8080/actuator/health
 
 # Test database connectivity
 kubectl exec -it deployment/auth-postgres -n gripday-auth -- pg_isready -U auth_user
@@ -446,7 +446,7 @@ kubectl exec -it deployment/auth-redis -n gripday-auth -- redis-cli ping
 # Load testing
 kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 # Inside the pod:
-# while true; do wget -q -O- http://auth-service:8081/actuator/health; sleep 1; done
+# while true; do wget -q -O- http://auth-service:8080/actuator/health; sleep 1; done
 ```
 
 ## Maintenance

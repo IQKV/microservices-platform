@@ -127,7 +127,7 @@ Example Route Configuration:
 --------------------------------------------------------------------------------
 Configured Service Routes:
   Auth Service:
-    URI: http://localhost:8081
+    URI: http://localhost:8080
     Path Pattern: /api/v1/auth/**
     Connect Timeout: 10000ms
     Response Timeout: 60000ms

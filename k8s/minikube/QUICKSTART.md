@@ -166,10 +166,10 @@ If NodePort doesn't work, use port forwarding:
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 # Auth Service
-kubectl port-forward -n gripday svc/auth-service 8081:8081
+kubectl port-forward -n gripday svc/auth-service 8080:8080
 
 # Bookstore Service
-kubectl port-forward -n gripday svc/bookstore-service 8082:8082
+kubectl port-forward -n gripday svc/bookstore-service 8080:8080
 ```
 
 ### Access Database

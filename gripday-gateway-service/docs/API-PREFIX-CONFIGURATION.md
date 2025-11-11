@@ -48,7 +48,7 @@ spring:
     gateway:
       routes:
         - id: auth-service
-          uri: http://auth-service:8081
+          uri: http://auth-service:8080
           predicates:
             - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.auth-service.path}
           filters:

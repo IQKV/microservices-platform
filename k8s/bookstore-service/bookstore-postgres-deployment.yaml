@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     app.kubernetes.io/version: "15.8"
 spec:
   replicas: 1
@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: bookstore-postgres
         app.kubernetes.io/component: database
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
         app.kubernetes.io/version: "15.8"
     spec:
       priorityClassName: infrastructure-priority
@@ -124,7 +124,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   accessModes:
     - ReadWriteOnce
@@ -141,7 +141,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 data:
   01-init-extensions.sql: |
     -- Enable required PostgreSQL extensions

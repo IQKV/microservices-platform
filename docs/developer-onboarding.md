@@ -35,7 +35,7 @@ docker --version && docker-compose --version
 ```bash
 # Clone repository
 git clone <repository-url>
-cd gripday-platform
+cd gripday
 
 # Start infrastructure
 docker compose up -d postgres redis
@@ -63,7 +63,7 @@ chmod +x scripts/validate-platform.sh
 ```
 ┌─────────────────┐    ┌─────────────────┐
 │  Gateway Service │    │   Auth Service  │
-│   (Port 8080)   │◄──►│   (Port 8081)   │
+│   (Port 8080)   │◄──►│   (Port 8080)   │
 └─────────────────┘    └─────────────────┘
          │                       │
          ▼                       ▼
@@ -412,7 +412,7 @@ gripday:
       export-interval: PT30S
 
 server:
-  port: 8081
+  port: 8080
 
 logging:
   level:
@@ -670,8 +670,8 @@ kubectl logs -f deployment/auth-service -n gripday
 
 ```bash
 # Check port availability
-lsof -i :8081
-netstat -tulpn | grep 8081
+lsof -i :8080
+netstat -tulpn | grep 8080
 
 # Check database connectivity
 docker-compose exec postgres psql -U gripday -d gripday_auth -c "SELECT 1;"
@@ -687,7 +687,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local -Dlogging.level.org.gripday
 echo "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." | cut -d. -f2 | base64 -d | jq
 
 # Check token validation
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8081/api/v1/auth/validate
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/auth/validate
 
 # Test authentication flow
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -716,17 +716,17 @@ mvn liquibase:update -Dspring.profiles.active=local
 
 ```bash
 # Health check
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 
 # Configuration properties
-curl http://localhost:8081/actuator/configprops
+curl http://localhost:8080/actuator/configprops
 
 # Environment variables
-curl http://localhost:8081/actuator/env
+curl http://localhost:8080/actuator/env
 
 # Metrics
-curl http://localhost:8081/actuator/metrics
-curl http://localhost:8081/actuator/metrics/auth.login.attempts
+curl http://localhost:8080/actuator/metrics
+curl http://localhost:8080/actuator/metrics/auth.login.attempts
 ```
 
 #### Database Queries
@@ -757,7 +757,7 @@ SELECT tenant_id, COUNT(*) as user_count FROM users GROUP BY tenant_id;
 ### Interactive Tools
 
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **Actuator Endpoints**: http://localhost:8081/actuator
+- **Actuator Endpoints**: http://localhost:8080/actuator
 - **Prometheus Metrics**: http://localhost:9090
 - **Grafana Dashboards**: http://localhost:3000
 

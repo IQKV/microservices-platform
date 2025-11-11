@@ -58,7 +58,7 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8081
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
       JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
     deploy:

@@ -394,13 +394,13 @@ check_endpoint_connectivity() {
     
     case "$service" in
         "auth")
-            check_service_endpoints "auth-service" "gripday-auth$namespace_suffix" "$env" "8081"
+            check_service_endpoints "auth-service" "gripday-auth$namespace_suffix" "$env" "8080"
             ;;
         "gateway")
             check_service_endpoints "gateway-service" "gripday-gateway$namespace_suffix" "$env" "8080"
             ;;
         "all")
-            check_service_endpoints "auth-service" "gripday-auth$namespace_suffix" "$env" "8081"
+            check_service_endpoints "auth-service" "gripday-auth$namespace_suffix" "$env" "8080"
             check_service_endpoints "gateway-service" "gripday-gateway$namespace_suffix" "$env" "8080"
             ;;
     esac

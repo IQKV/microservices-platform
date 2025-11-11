@@ -15,7 +15,7 @@ This directory contains the complete observability stack for the Gripday microse
 - **Purpose**: Metrics collection and monitoring
 - **Port**: 9090
 - **URL**: http://localhost:9090
-- **Scrapes**: Auth service (8081), Gateway service (8080)
+- **Scrapes**: Auth service (8080), Gateway service (8080)
 
 ### Grafana
 
@@ -59,11 +59,11 @@ This directory contains the complete observability stack for the Gripday microse
 
 ## Monitoring Endpoints
 
-### Auth Service (Port 8081)
+### Auth Service (Port 8080)
 
-- Health: http://localhost:8081/actuator/health
-- Metrics: http://localhost:8081/actuator/prometheus
-- Info: http://localhost:8081/actuator/info
+- Health: http://localhost:8080/actuator/health
+- Metrics: http://localhost:8080/actuator/prometheus
+- Info: http://localhost:8080/actuator/info
 
 ### Gateway Service (Port 8080)
 
@@ -148,11 +148,11 @@ This directory contains the complete observability stack for the Gripday microse
 docker compose -f docker-compose.observability.yml ps
 
 # Check service health
-curl http://localhost:8081/actuator/health  # Auth service
+curl http://localhost:8080/actuator/health  # Auth service
 curl http://localhost:8080/actuator/health  # Gateway service
 
 # Check metrics endpoints
-curl http://localhost:8081/actuator/prometheus  # Auth metrics
+curl http://localhost:8080/actuator/prometheus  # Auth metrics
 curl http://localhost:8080/actuator/prometheus  # Gateway metrics
 ```
 

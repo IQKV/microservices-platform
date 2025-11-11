@@ -11,7 +11,7 @@ The gateway service is the central entry point for the Gripday platform, providi
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Ingress       │    │   Gateway       │    │   Auth Service  │
-│   Controller    │───▶│   Service       │───▶│   (Port 8081)   │
+│   Controller    │───▶│   Service       │───▶│   (Port 8080)   │
 └─────────────────┘    │   (Port 8080)   │    └─────────────────┘
                        └─────────────────┘
                               │
@@ -200,7 +200,7 @@ spring:
     gateway:
       routes:
         - id: auth-service
-          uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+          uri: http://auth-service.gripday-auth.svc.cluster.local:8080
           predicates:
             - Path=/api/*/auth/**
           filters:

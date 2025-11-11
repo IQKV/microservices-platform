@@ -3,7 +3,7 @@
 # Global settings
 global:
   environment: local
-  platform: gripday-platform
+  platform: gripday
 
 # Namespace configuration
 namespace:
@@ -248,21 +248,21 @@ configMap:
             routes:
             # Auth Service Routes
             - id: auth-service-api
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/auth/**
               filters:
               - StripPrefix=0
             
             - id: auth-service-users
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/users/**
               filters:
               - StripPrefix=0
             
             - id: auth-service-tenants
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/tenants/**
               filters:
@@ -270,14 +270,14 @@ configMap:
             
             # Bookstore Service Routes
             - id: bookstore-service-api
-              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8082
+              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/bookstore/**
               filters:
               - StripPrefix=0
             
             - id: bookstore-service-public
-              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8082
+              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/bookstore/public/**
               filters:
@@ -450,24 +450,24 @@ networkPolicy:
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-auth-service
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
     # Allow access to bookstore-service
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-bookstore-service
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8080
     # Allow access to Redis
     - to:
         - podSelector:

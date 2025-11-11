@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     app.kubernetes.io/version: "7.4-alpine"
 spec:
   replicas: 1
@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/name: bookstore-redis
         app.kubernetes.io/component: cache
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
         app.kubernetes.io/version: "7.4-alpine"
     spec:
       priorityClassName: infrastructure-priority
@@ -110,7 +110,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   accessModes:
     - ReadWriteOnce
@@ -127,7 +127,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 data:
   redis.conf: |
     # Redis configuration for bookstore service

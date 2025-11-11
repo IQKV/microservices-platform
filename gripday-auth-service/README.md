@@ -33,19 +33,19 @@ mvn liquibase:update
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-The service will be available at `http://localhost:8081`
+The service will be available at `http://localhost:8080`
 
 ### API Documentation
 
-- Swagger UI: `http://localhost:8081/swagger-ui.html`
-- OpenAPI Spec: `http://localhost:8081/v3/api-docs`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI Spec: `http://localhost:8080/v3/api-docs`
 
 ## Authentication Endpoints
 
 ### User Registration
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/signup \
+curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "johndoe",
@@ -78,7 +78,7 @@ curl -X POST http://localhost:8081/api/v1/auth/signup \
 ### User Login
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "johndoe",
@@ -109,7 +109,7 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
 ### Token Refresh
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/refresh \
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -119,14 +119,14 @@ curl -X POST http://localhost:8081/api/v1/auth/refresh \
 ### User Logout
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/logout \
+curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
 ### Logout From All Devices
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/logout-all \
+curl -X POST http://localhost:8080/api/v1/auth/logout-all \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
@@ -139,7 +139,7 @@ Revokes all refresh tokens for the authenticated user and invalidates all active
 Starts the password reset flow. Always returns 200 to avoid user enumeration.
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/forgot-password \
+curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com"
@@ -151,7 +151,7 @@ curl -X POST http://localhost:8081/api/v1/auth/forgot-password \
 Resets the password using a reset token received by email.
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/reset-password \
+curl -X POST http://localhost:8080/api/v1/auth/reset-password \
   -H "Content-Type: application/json" \
   -d '{
     "token": "550e8400-e29b-41d4-a716-446655440000",
@@ -170,7 +170,7 @@ Upon successful reset:
 ### Email Verification
 
 ```bash
-curl "http://localhost:8081/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a716-446655440000"
+curl "http://localhost:8080/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a716-446655440000"
 ```
 
 **Response (200 OK):**
@@ -187,7 +187,7 @@ curl "http://localhost:8081/api/v1/auth/email/verify?token=550e8400-e29b-41d4-a7
 ### Resend Verification Email
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/email/resend \
+curl -X POST http://localhost:8080/api/v1/auth/email/resend \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com"
@@ -210,7 +210,7 @@ curl -X POST http://localhost:8081/api/v1/auth/email/resend \
 ### Check Verification Status
 
 ```bash
-curl "http://localhost:8081/api/v1/auth/email/status?email=john@example.com"
+curl "http://localhost:8080/api/v1/auth/email/status?email=john@example.com"
 ```
 
 **Response (200 OK):**

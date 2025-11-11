@@ -18,7 +18,7 @@ The testing infrastructure follows a modular, scalable architecture that integra
 ├─────────────────────────────────────────────────────────────────┤
 │                    Test Environment                             │
 ├─────────────────────────────────────────────────────────────────┤
-│  Gateway (8080) │ Auth Service (8081) │ Bookstore Service (8082) │
+│  Gateway (8080) │ Auth Service (8080) │ Bookstore Service (8080) │
 ├─────────────────────────────────────────────────────────────────┤
 │     PostgreSQL (Auth)  │  PostgreSQL (Bookstore)  │    Redis    │
 └─────────────────────────────────────────────────────────────────┘
@@ -403,8 +403,8 @@ const environments = {
   local: {
     baseUrl: "http://localhost:8080",
     services: {
-      auth: "http://localhost:8081",
-      bookstore: "http://localhost:8082",
+      auth: "http://localhost:8080",
+      bookstore: "http://localhost:8080",
     },
     databases: {
       auth: "postgresql://localhost:5432/gripday_auth_test",

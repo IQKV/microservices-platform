@@ -37,6 +37,6 @@ echo "Checking service health..."
 docker-compose -f docker-compose${ENVIRONMENT:+.$ENVIRONMENT}.yml ps
 
 echo "Deployment completed for environment: $ENVIRONMENT"
-echo "Service should be available at: http://localhost:8082"
-echo "Health check: http://localhost:8082/actuator/health"
-echo "API documentation: http://localhost:8082/swagger-ui.html"
+echo "Service should be available at: http://localhost:8080"
+echo "Health check: http://localhost:8080/actuator/health"
+echo "API documentation: http://localhost:8080/swagger-ui.html"

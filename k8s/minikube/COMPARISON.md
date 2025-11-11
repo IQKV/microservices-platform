@@ -106,7 +106,7 @@ volumes:
 
 ### 6. Namespaces
 
-**Minikube:** Single namespace `gripday`
+**Minikube:** Single namespace `gripday-dev-env`
 
 ```yaml
 namespace: gripday-dev-env
@@ -232,6 +232,12 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
+  scaleTargetRef:
+  scaleTargetRef:
+
+
+
+
 ```
 
 **Why:** Fixed resources in minikube. Production scales with load.

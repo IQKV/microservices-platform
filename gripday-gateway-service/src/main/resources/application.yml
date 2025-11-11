@@ -51,13 +51,13 @@ gripday:
         strip-in-production: true
       services:
         auth-service:
-          uri: http://localhost:8081
+          uri: http://localhost:8080
           path: /v1/auth/**
           enabled: true
           connect-timeout: 5000
           response-timeout: 30000
         bookstore-service:
-          uri: http://localhost:8082
+          uri: http://localhost:8080
           path: /v1/bookstore/**
           enabled: true
           connect-timeout: 5000
@@ -73,11 +73,11 @@ gripday:
         secret-key: ${JWT_SECRET_KEY:default-secret-key-change-in-production}
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
-        issuer: gripday-platform
+        issuer: gripday
         audience: gripday-services
       authentication:
         enabled: true
-        auth-service-url: http://localhost:8081
+        auth-service-url: http://localhost:8080
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:

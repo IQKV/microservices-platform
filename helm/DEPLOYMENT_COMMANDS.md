@@ -15,13 +15,13 @@ kubectl get priorityclasses
 ### Deploy Everything (Umbrella Chart)
 
 ```bash
-cd helm/gripday-platform
+cd helm/gripday
 
 # Build dependencies
 helm dependency build
 
 # Install complete platform
-helm install gripday . --namespace gripday-platform --create-namespace
+helm install gripday . --namespace gripday --create-namespace
 
 # With custom values
 helm install gripday . -f values-production.yaml --namespace production --create-namespace
@@ -80,12 +80,12 @@ helm uninstall gateway-service -n gripday-gateway
 
 ```bash
 # Using default values
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   --namespace dev \
   --create-namespace
 
 # With debug enabled
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   --namespace dev \
   --create-namespace \
   --debug
@@ -95,7 +95,7 @@ helm install gripday ./helm/gripday-platform \
 
 ```bash
 # Create staging values file first (values-staging.yaml)
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   -f values-staging.yaml \
   --namespace staging \
   --create-namespace
@@ -105,13 +105,13 @@ helm install gripday ./helm/gripday-platform \
 
 ```bash
 # Production deployment
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   -f values-production.yaml \
   --namespace production \
   --create-namespace
 
 # With timeout for large deployments
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   -f values-production.yaml \
   --namespace production \
   --create-namespace \
@@ -127,10 +127,10 @@ helm install gripday ./helm/gripday-platform \
 helm list -A
 
 # Get release status
-helm status gripday -n gripday-platform
+helm status gripday -n gripday
 
 # Get release history
-helm history gripday -n gripday-platform
+helm history gripday -n gripday
 ```
 
 ### Check Kubernetes Resources
@@ -161,12 +161,12 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Port forward auth service
-kubectl port-forward -n gripday-auth svc/auth-service 8081:8081
-curl http://localhost:8081/actuator/health
+kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
+curl http://localhost:8080/actuator/health
 
 # Port forward bookstore service
-kubectl port-forward -n gripday-bookstore svc/bookstore-service 8082:8082
-curl http://localhost:8082/actuator/health
+kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
+curl http://localhost:8080/actuator/health
 ```
 
 ## Update Operations
@@ -180,7 +180,7 @@ helm upgrade auth-service ./helm/auth-service \
   -n gripday-auth
 
 # Upgrade platform
-helm upgrade gripday ./helm/gripday-platform \
+helm upgrade gripday ./helm/gripday \
   -f values-production.yaml \
   -n production
 ```
@@ -194,9 +194,9 @@ helm upgrade auth-service ./helm/auth-service \
   -n gripday-auth
 
 # Update via umbrella chart
-helm upgrade gripday ./helm/gripday-platform \
+helm upgrade gripday ./helm/gripday \
   --set auth-service.image.tag=1.1.0 \
-  -n gripday-platform
+  -n gripday
 ```
 
 ### Rolling Restart
@@ -213,13 +213,13 @@ kubectl rollout status deployment/auth-service -n gripday-auth
 
 ```bash
 # Rollback to previous version
-helm rollback gripday -n gripday-platform
+helm rollback gripday -n gripday
 
 # Rollback to specific revision
-helm rollback gripday 2 -n gripday-platform
+helm rollback gripday 2 -n gripday
 
 # View rollback history
-helm history gripday -n gripday-platform
+helm history gripday -n gripday
 ```
 
 ## Debugging
@@ -302,7 +302,7 @@ kubectl describe hpa bookstore-service-hpa -n gripday-bookstore
 
 ```bash
 # Uninstall complete platform
-helm uninstall gripday -n gripday-platform
+helm uninstall gripday -n gripday
 
 # Uninstall individual services
 helm uninstall auth-service -n gripday-auth
@@ -317,7 +317,7 @@ helm uninstall gateway-service -n gripday-gateway
 kubectl delete namespace gripday-auth
 kubectl delete namespace gripday-bookstore
 kubectl delete namespace gripday-gateway
-kubectl delete namespace gripday-platform
+kubectl delete namespace gripday
 ```
 
 ### Clean Up PVCs
@@ -339,7 +339,7 @@ kubectl delete pvc --all -n gripday-auth
 
 ```bash
 # Get all Helm values
-helm get values gripday -n gripday-platform > backup-values.yaml
+helm get values gripday -n gripday > backup-values.yaml
 
 # Backup all resources
 kubectl get all -n gripday-auth -o yaml > backup-auth.yaml
@@ -355,9 +355,9 @@ kubectl exec -n gripday-auth auth-postgres-<pod> -- \
 
 ```bash
 # Install from backup values
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   -f backup-values.yaml \
-  -n gripday-platform \
+  -n gripday \
   --create-namespace
 ```
 
@@ -367,20 +367,20 @@ helm install gripday ./helm/gripday-platform \
 
 ```bash
 # Deploy only auth and gateway (no bookstore)
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   --set bookstore-service.enabled=false \
-  -n gripday-platform \
+  -n gripday \
   --create-namespace
 ```
 
 ### Override Multiple Values
 
 ```bash
-helm install gripday ./helm/gripday-platform \
+helm install gripday ./helm/gripday \
   --set auth-service.replicaCount=3 \
   --set gateway-service.replicaCount=5 \
   --set bookstore-service.autoscaling.minReplicas=4 \
-  -n gripday-platform \
+  -n gripday \
   --create-namespace
 ```
 
@@ -388,8 +388,8 @@ helm install gripday ./helm/gripday-platform \
 
 ```bash
 # Wait for all pods to be ready
-helm install gripday ./helm/gripday-platform \
-  --namespace gripday-platform \
+helm install gripday ./helm/gripday \
+  --namespace gripday \
   --create-namespace \
   --wait \
   --timeout 10m
@@ -406,7 +406,7 @@ kubectl run test-dns --image=busybox --rm -it -- \
 
 # Test service connectivity
 kubectl run test-curl --image=curlimages/curl --rm -it -- \
-  curl http://auth-service.gripday-auth.svc.cluster.local:8081/actuator/health
+  curl http://auth-service.gripday-auth.svc.cluster.local:8080/actuator/health
 ```
 
 ### Load Testing

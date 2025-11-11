@@ -113,7 +113,7 @@ run_validation() {
     
     # Set environment variables for validation script
     export GATEWAY_URL="http://localhost:8080"
-    export AUTH_URL="http://localhost:8081"
+    export AUTH_URL="http://localhost:8080"
     export PROMETHEUS_URL="http://localhost:9090"
     export GRAFANA_URL="http://localhost:3000"
     

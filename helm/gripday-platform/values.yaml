@@ -3,7 +3,7 @@
 # Global settings applied to all sub-charts
 global:
   environment: local
-  platform: gripday-platform
+  platform: gripday
 
 # Enable/disable individual services
 auth-service:

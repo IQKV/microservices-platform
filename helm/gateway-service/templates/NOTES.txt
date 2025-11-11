@@ -25,8 +25,8 @@ Service Information:
 {{- end }}
 
 The Gateway routes traffic to:
-  - Auth Service: auth-service.gripday-auth.svc.cluster.local:8081
-  - Bookstore Service: bookstore-service.gripday-bookstore.svc.cluster.local:8082
+  - Auth Service: auth-service.gripday-auth.svc.cluster.local:8080
+  - Bookstore Service: bookstore-service.gripday-bookstore.svc.cluster.local:8080
 
 To get the application logs:
   $ kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service

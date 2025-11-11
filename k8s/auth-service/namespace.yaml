@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: local
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
@@ -16,7 +16,7 @@ kind: Namespace
 metadata:
   name: staging-env
   labels:
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
@@ -27,7 +27,7 @@ kind: Namespace
 metadata:
   name: gripday-production-env
   labels:
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted

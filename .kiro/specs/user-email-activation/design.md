@@ -113,7 +113,7 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="7" author="gripday-platform">
+    <changeSet id="7" author="gripday">
         <comment>Create email_verification_tokens table for user email activation</comment>
 
         <createTable tableName="email_verification_tokens">

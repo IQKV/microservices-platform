@@ -28,7 +28,7 @@ chmod +x scripts/validate-platform.sh
 
 # Run with custom URLs
 GATEWAY_URL=http://localhost:8080 \
-AUTH_URL=http://localhost:8081 \
+AUTH_URL=http://localhost:8080 \
 PROMETHEUS_URL=http://localhost:9090 \
 GRAFANA_URL=http://localhost:3000 \
 ./scripts/validate-platform.sh
@@ -154,7 +154,7 @@ chmod +x scripts/validate-kubernetes.sh
 ### Core Service URLs
 
 - `GATEWAY_URL`: Gateway service URL (default: http://localhost:8080)
-- `AUTH_URL`: Auth service URL (default: http://localhost:8081)
+- `AUTH_URL`: Auth service URL (default: http://localhost:8080)
 - `PROMETHEUS_URL`: Prometheus URL (default: http://localhost:9090)
 - `GRAFANA_URL`: Grafana URL (default: http://localhost:3000)
 

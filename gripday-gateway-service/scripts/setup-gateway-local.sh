@@ -125,7 +125,7 @@ wait_for_services() {
 check_auth_service() {
     log_info "Checking auth service availability..."
     
-    local auth_service_url="http://localhost:8081"
+    local auth_service_url="http://localhost:8080"
     
     if curl -f -s "$auth_service_url/actuator/health" &> /dev/null; then
         log_success "Auth service is running and accessible"
@@ -158,7 +158,7 @@ display_setup_info() {
     echo "  - Environment File: $ENV_FILE"
     echo
     log_info "Next Steps:"
-    echo "  1. Ensure auth service is running on port 8081"
+    echo "  1. Ensure auth service is running on port 8080"
     echo "  2. Start the gateway service: mvn spring-boot:run -Dspring.profiles.active=local"
     echo "  3. Access Swagger UI: http://localhost:8080/swagger-ui.html"
     echo "  4. Check health: http://localhost:8080/actuator/health"
@@ -169,7 +169,7 @@ display_setup_info() {
     echo "  - Rebuild: mvn clean package"
     echo
     log_info "Service Dependencies:"
-    echo "  - Auth Service: http://localhost:8081"
+    echo "  - Auth Service: http://localhost:8080"
     echo "  - Redis: localhost:6379"
 }
 

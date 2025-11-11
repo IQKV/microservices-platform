@@ -21,7 +21,7 @@ The platform includes:
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
 │  │   Gateway   │  │    Auth     │  │    Infrastructure   │ │
 │  │   Service   │  │   Service   │  │                     │ │
-│  │   :8080     │  │    :8081    │  │  PostgreSQL :5432   │ │
+│  │   :8080     │  │    :8080    │  │  PostgreSQL :5432   │ │
 │  └─────────────┘  └─────────────┘  │  Redis      :6379   │ │
 │                                    │  Prometheus :9090   │ │
 │                                    │  Grafana    :3000   │ │
@@ -58,7 +58,7 @@ docker-compose logs -f
 ### 3. Access Services
 
 - **Gateway Service:** http://localhost:8080
-- **Auth Service:** http://localhost:8081/actuator/health
+- **Auth Service:** http://localhost:8080/actuator/health
 - **Prometheus:** http://localhost:9090
 - **Grafana:** http://localhost:3000 (admin/admin)
 
@@ -194,7 +194,7 @@ All services include health checks:
 
 ```yaml
 healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+  test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
   interval: 30s
   timeout: 10s
   retries: 3
@@ -241,7 +241,7 @@ docker compose up -d
 
 Services communicate using container names:
 
-- `auth-service:8081`
+- `auth-service:8080`
 - `gateway-service:8080`
 - `postgres-auth:5432`
 - `redis:6379`

@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Default configuration
 DEFAULT_HOST="localhost"
-DEFAULT_PORT="8081"
+DEFAULT_PORT="8080"
 DEFAULT_TIMEOUT="300"
 DEFAULT_INTERVAL="5"
 
@@ -53,8 +53,8 @@ usage() {
     echo
     echo "Examples:"
     echo "  $0                                    # Use all defaults"
-    echo "  $0 auth-service 8081                 # Custom host and port"
-    echo "  $0 localhost 8081 60 2              # All parameters"
+    echo "  $0 auth-service 8080                 # Custom host and port"
+    echo "  $0 localhost 8080 60 2              # All parameters"
     echo
     echo "Environment Variables:"
     echo "  AUTH_SERVICE_HOST - Override default host"

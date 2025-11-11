@@ -40,7 +40,7 @@ The following table lists the configurable parameters of the Auth Service chart 
 | Parameter            | Description      | Default            |
 | -------------------- | ---------------- | ------------------ |
 | `global.environment` | Environment name | `local`            |
-| `global.platform`    | Platform name    | `gripday-platform` |
+| `global.platform`    | Platform name    | `gripday` |
 
 ### Application Parameters
 
@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the Auth Service chart 
 | Parameter                  | Description             | Default     |
 | -------------------------- | ----------------------- | ----------- |
 | `service.type`             | Service type            | `ClusterIP` |
-| `service.port`             | Service port            | `8081`      |
+| `service.port`             | Service port            | `8080`      |
 | `service.headless.enabled` | Create headless service | `true`      |
 
 ### Ingress Parameters

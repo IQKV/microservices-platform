@@ -144,7 +144,7 @@ class StructuredLoggingConfigTest {
     var headers = Map.of("X-Forwarded-For", "192.168.1.1");
 
     // When - Should not throw exceptions
-    requestLogger.logOutgoingRequest("corr-123", "POST", "http://auth-service:8081/api/v1/auth/login", "auth-service", headers);
+    requestLogger.logOutgoingRequest("corr-123", "POST", "http://auth-service:8080/api/v1/auth/login", "auth-service", headers);
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("requestType")).isNull();

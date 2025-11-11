@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   hard:
     # Compute resources (gateway needs more for traffic handling)
@@ -40,7 +40,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   limits:
     # Container limits (gateway needs more resources)

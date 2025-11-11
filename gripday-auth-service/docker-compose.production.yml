@@ -202,7 +202,7 @@ services:
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.ssl=false
     ports:
-      - "${AUTH_SERVICE_PORT:-8081}:8081"
+      - "${AUTH_SERVICE_PORT:-8080}:8080"
       - "${JMX_PORT:-9999}:9999" # JMX monitoring port
     depends_on:
       postgres-auth:
@@ -213,7 +213,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 20s
       retries: 5

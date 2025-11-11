@@ -83,8 +83,8 @@ minikube service bookstore-service -n gripday --url
 
 # Or use port forwarding
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
-kubectl port-forward -n gripday svc/auth-service 8081:8081
-kubectl port-forward -n gripday svc/bookstore-service 8082:8082
+kubectl port-forward -n gripday svc/auth-service 8080:8080
+kubectl port-forward -n gripday svc/bookstore-service 8080:8080
 ```
 
 ### 5. Test the Platform
@@ -273,8 +273,8 @@ kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 ```bash
 # Port forward and test health endpoints
-kubectl port-forward -n gripday svc/auth-service 8081:8081 &
-curl http://localhost:8081/actuator/health
+kubectl port-forward -n gripday svc/auth-service 8080:8080 &
+curl http://localhost:8080/actuator/health
 
 kubectl port-forward -n gripday svc/gateway-service 8080:8080 &
 curl http://localhost:8080/actuator/health

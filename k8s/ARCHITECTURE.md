@@ -36,7 +36,7 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 ┌─────────┐ ┌─────────┐ ┌─────────┐
 │  Auth   │ │Bookstore│ │  Other  │
 │ Service │ │ Service │ │Services │
-│   8081  │ │   8082  │ │   ...   │
+│   8080  │ │   8080  │ │   ...   │
 └────┬────┘ └────┬────┘ └─────────┘
      │           │
      ▼           ▼
@@ -114,12 +114,12 @@ The gateway service routes all external traffic to internal services:
 
 ```yaml
 # Auth Service Routes
-/api/v1/auth/**      → http://auth-service:8081/api/v1/auth/**
-/api/v1/users/**     → http://auth-service:8081/api/v1/users/**
-/api/v1/tenants/**   → http://auth-service:8081/api/v1/tenants/**
+/api/v1/auth/**      → http://auth-service:8080/api/v1/auth/**
+/api/v1/users/**     → http://auth-service:8080/api/v1/users/**
+/api/v1/tenants/**   → http://auth-service:8080/api/v1/tenants/**
 
 # Bookstore Service Routes
-/api/v1/bookstore/** → http://bookstore-service:8082/api/v1/bookstore/**
+/api/v1/bookstore/** → http://bookstore-service:8080/api/v1/bookstore/**
 
 # Gateway Health
 /actuator/**         → http://localhost:8080/actuator/**
@@ -139,7 +139,7 @@ The gateway service routes all external traffic to internal services:
    - Validates JWT (if required)
    - Applies rate limiting
    - Logs request with correlation ID
-   - Routes to: http://bookstore-service.production-env:8082/api/v1/bookstore/books/123
+   - Routes to: http://bookstore-service.production-env:8080/api/v1/bookstore/books/123
 
 4. Bookstore Service:
    - Receives request with user context headers
@@ -163,8 +163,8 @@ The gateway service routes all external traffic to internal services:
 
 **Egress:**
 
-- ✅ To: Auth Service (port 8081)
-- ✅ To: Bookstore Service (port 8082)
+- ✅ To: Auth Service (port 8080)
+- ✅ To: Bookstore Service (port 8080)
 - ✅ To: Redis (rate limiting)
 - ✅ To: DNS
 - ✅ To: Observability services (OTLP, Jaeger)

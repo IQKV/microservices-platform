@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
@@ -21,20 +21,20 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-gateway-service
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8080
 
     # Allow traffic from same namespace (for service-to-service communication)
     - from:
         - podSelector: {}
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8080
 
     # Allow traffic from monitoring (Prometheus)
     - from:
@@ -46,7 +46,7 @@ spec:
               app: prometheus
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8080
 
   egress:
     # Allow DNS resolution
@@ -79,13 +79,13 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-auth-service
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
 
     # Allow access to observability services
     - to:
@@ -115,7 +115,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
@@ -153,7 +153,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:

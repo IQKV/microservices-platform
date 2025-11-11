@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
@@ -43,24 +43,24 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-auth-service
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
     # Allow egress to bookstore service
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-bookstore-service
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8080
     # Allow egress to Redis
     - to:
         - podSelector:
@@ -96,7 +96,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gateway-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:

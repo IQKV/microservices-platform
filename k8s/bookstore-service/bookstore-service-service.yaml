@@ -6,16 +6,16 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8082"
+    prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
 spec:
   type: ClusterIP
   ports:
-    - port: 8082
-      targetPort: 8082
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
@@ -31,13 +31,13 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   type: ClusterIP
   clusterIP: None
   ports:
-    - port: 8082
-      targetPort: 8082
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:

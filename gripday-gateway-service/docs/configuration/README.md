@@ -71,7 +71,7 @@ gripday:
         secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
-        issuer: gripday-platform-staging
+        issuer: gripday-staging
         audience: gripday-services-staging
         algorithm: RS256
       authentication:
@@ -193,9 +193,9 @@ cp .env.example .env.production
 | Variable                                    | Description          | Example                   |
 | ------------------------------------------- | -------------------- | ------------------------- |
 | `GRIPDAY_CACHE_REDIS_HOST`                  | Redis host           | `localhost`               |
-| `GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI`  | Auth service URL     | `http://localhost:8081`   |
+| `GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI`  | Auth service URL     | `http://localhost:8080`   |
 | `GRIPDAY_GATEWAY_SECURITY_JWT_SECRET`       | JWT signing secret   | `your-secure-secret-key`  |
-| `GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL` | Auth service URL     | `http://localhost:8081`   |
+| `GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL` | Auth service URL     | `http://localhost:8080`   |
 | `GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS`      | Allowed CORS origins | `https://app.gripday.com` |
 
 ## Configuration Validation

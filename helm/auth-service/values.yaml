@@ -5,7 +5,7 @@
 # Global settings
 global:
   environment: local
-  platform: gripday-platform
+  platform: gripday
 
 # Namespace configuration
 namespace:
@@ -39,7 +39,7 @@ serviceAccount:
 
 podAnnotations:
   prometheus.io/scrape: "true"
-  prometheus.io/port: "8081"
+  prometheus.io/port: "8080"
   prometheus.io/path: "/actuator/prometheus"
 
 podSecurityContext:
@@ -61,11 +61,11 @@ securityContext:
 
 service:
   type: ClusterIP
-  port: 8081
-  targetPort: 8081
+  port: 8080
+  targetPort: 8080
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8081"
+    prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
   # Create headless service for StatefulSet patterns or service mesh
   headless:
@@ -165,7 +165,7 @@ topologySpreadConstraints:
 livenessProbe:
   httpGet:
     path: /actuator/health/liveness
-    port: 8081
+    port: 8080
   initialDelaySeconds: 60
   periodSeconds: 30
   timeoutSeconds: 10
@@ -175,7 +175,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: /actuator/health/readiness
-    port: 8081
+    port: 8080
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
@@ -185,7 +185,7 @@ readinessProbe:
 startupProbe:
   httpGet:
     path: /actuator/health
-    port: 8081
+    port: 8080
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
@@ -213,7 +213,7 @@ configMap:
   data:
     application.yml: |
       server:
-        port: 8081
+        port: 8080
 
       spring:
         application:
@@ -405,19 +405,19 @@ networkPolicy:
     - from:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday-platform
+              app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-gateway-service
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
     # Allow traffic from same namespace
     - from:
         - podSelector: {}
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
     # Allow traffic from monitoring
     - from:
         - namespaceSelector:
@@ -428,7 +428,7 @@ networkPolicy:
               app: prometheus
       ports:
         - protocol: TCP
-          port: 8081
+          port: 8080
   egress:
     # Allow access to PostgreSQL
     - to:

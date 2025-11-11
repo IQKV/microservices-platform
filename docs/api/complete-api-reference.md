@@ -5,7 +5,7 @@ This document provides API documentation for all Gripday platform endpoints with
 ## Base URLs
 
 - **Gateway Service**: `http://localhost:8080` (Production: `https://api.gripday.com`)
-- **Auth Service**: `http://localhost:8081` (Internal service, accessed via Gateway)
+- **Auth Service**: `http://localhost:8080` (Internal service, accessed via Gateway)
 
 ## Authentication
 
@@ -854,16 +854,16 @@ A Postman collection is available with:
 - Variable management for tokens and tenant IDs
 - Test scripts for response validation
 
-Download: [Gripday Platform Postman Collection](postman/gripday-platform.postman_collection.json)
+Download: [Gripday Platform Postman Collection](postman/gripday.postman_collection.json)
 
 ## OpenAPI Specifications
 
 Interactive API documentation is available via Swagger UI:
 
 - **Gateway Service**: http://localhost:8080/swagger-ui.html
-- **Auth Service**: http://localhost:8081/swagger-ui.html
+- **Auth Service**: http://localhost:8080/swagger-ui.html
 
 Download OpenAPI specifications:
 
 - **Gateway Service**: http://localhost:8080/v3/api-docs
-- **Auth Service**: http://localhost:8081/v3/api-docs
+- **Auth Service**: http://localhost:8080/v3/api-docs

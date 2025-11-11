@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
   annotations:
     # NGINX Ingress Controller annotations
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -60,7 +60,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
           # Protected API endpoints (authentication required)
           - path: /api/v1/bookstore(/|$)(.*)
@@ -69,7 +69,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
           # Health and monitoring endpoints
           - path: /bookstore/actuator(/|$)(.*)
@@ -78,7 +78,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
           # API documentation
           - path: /bookstore/swagger-ui(/|$)(.*)
@@ -87,7 +87,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
           - path: /bookstore/api-docs(/|$)(.*)
             pathType: ImplementationSpecific
@@ -95,7 +95,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
   # TLS configuration (uncomment for HTTPS)
   # tls:

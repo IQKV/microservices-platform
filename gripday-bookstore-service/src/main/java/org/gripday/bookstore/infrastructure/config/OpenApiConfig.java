@@ -20,7 +20,7 @@ public class OpenApiConfig {
   @Value("${spring.application.name:bookstore-service}")
   private String applicationName;
 
-  @Value("${server.port:8082}")
+  @Value("${server.port:8080}")
   private String serverPort;
 
   @Bean

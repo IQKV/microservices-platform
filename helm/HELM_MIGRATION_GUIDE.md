@@ -29,7 +29,7 @@ This document provides guidance on migrating from raw Kubernetes manifests to He
    - Network policies, resource quotas
    - Configurable via values.yaml
 
-4. **gripday-platform/** - Umbrella chart for complete platform
+4. **gripday/** - Umbrella chart for complete platform
    - Manages all three services
    - Centralized configuration
    - Dependency management
@@ -68,7 +68,7 @@ helm/
 │   └── ...
 ├── gateway-service/
 │   └── ...
-└── gripday-platform/
+└── gripday/
     └── ...
 ```
 
@@ -130,7 +130,7 @@ helm install auth-service ./auth-service -f values-production.yaml
 **Umbrella chart manages dependencies**:
 
 ```yaml
-# gripday-platform/Chart.yaml
+# gripday/Chart.yaml
 dependencies:
   - name: auth-service
     version: "1.0.0"
@@ -159,7 +159,7 @@ Keep existing k8s deployments, deploy Helm charts to different namespaces:
 
 ```bash
 # Deploy Helm charts with different namespace
-helm install gripday-helm ./helm/gripday-platform \
+helm install gripday-helm ./helm/gripday \
   --set auth-service.namespace.name=gripday-auth-helm \
   --set bookstore-service.namespace.name=gripday-bookstore-helm \
   --set gateway-service.namespace.name=gripday-gateway-helm
@@ -188,7 +188,7 @@ kubectl delete -f k8s/gateway-service/
 3. **Install Helm charts**:
 
 ```bash
-helm install gripday ./helm/gripday-platform
+helm install gripday ./helm/gripday
 ```
 
 ### Step 3: Verify Migration
@@ -248,10 +248,10 @@ helm upgrade --install auth-service ./helm/auth-service \
 
 ```bash
 # Single command deployment
-helm install gripday ./helm/gripday-platform
+helm install gripday ./helm/gripday
 
 # Easy upgrades
-helm upgrade gripday ./helm/gripday-platform
+helm upgrade gripday ./helm/gripday
 
 # Simple rollbacks
 helm rollback gripday
@@ -355,7 +355,7 @@ helm template test ./helm/auth-service
 ### Issue: Chart dependencies not found
 
 ```bash
-cd helm/gripday-platform
+cd helm/gripday
 helm dependency build
 helm dependency update
 ```

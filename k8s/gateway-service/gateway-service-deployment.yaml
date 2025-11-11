@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     app.kubernetes.io/version: "1.0.0"
 spec:
   replicas: 3
@@ -24,7 +24,7 @@ spec:
       labels:
         app.kubernetes.io/name: gripday-gateway-service
         app.kubernetes.io/component: gateway
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
         app.kubernetes.io/version: "1.0.0"
       annotations:
         prometheus.io/scrape: "true"
@@ -199,7 +199,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 automountServiceAccountToken: false
 ---
 apiVersion: policy/v1
@@ -210,7 +210,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   minAvailable: 2
   selector:

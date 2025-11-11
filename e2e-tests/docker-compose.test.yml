@@ -86,7 +86,7 @@ services:
       LOGGING_LEVEL_ORG_GRIPDAY: DEBUG
       LOGGING_LEVEL_ROOT: INFO
     ports:
-      - "8091:8081"
+      - "8091:8080"
     depends_on:
       postgres-auth-test:
         condition: service_healthy
@@ -95,7 +95,7 @@ services:
     networks:
       - gripday-test-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -119,7 +119,7 @@ services:
       LOGGING_LEVEL_ORG_GRIPDAY: DEBUG
       LOGGING_LEVEL_ROOT: INFO
     ports:
-      - "8092:8082"
+      - "8092:8080"
     depends_on:
       postgres-bookstore-test:
         condition: service_healthy
@@ -128,7 +128,7 @@ services:
     networks:
       - gripday-test-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -145,8 +145,8 @@ services:
       SPRING_PROFILES_ACTIVE: test
       SPRING_DATA_REDIS_HOST: redis-test
       SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service-test:8081
-      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service-test:8082
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service-test:8080
+      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service-test:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 1000
       LOGGING_LEVEL_ORG_GRIPDAY: DEBUG

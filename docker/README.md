@@ -38,7 +38,7 @@ This directory contains Docker configurations for the Gripday microservices plat
 ## Service URLs
 
 - **Gateway Service:** http://localhost:8080
-- **Auth Service:** http://localhost:8081
+- **Auth Service:** http://localhost:8080
 - **Prometheus:** http://localhost:9090
 - **Grafana:** http://localhost:3000 (admin/admin)
 
@@ -76,7 +76,7 @@ docker compose up -d
 
 All services include health checks:
 
-- **Auth Service:** `curl http://localhost:8081/actuator/health`
+- **Auth Service:** `curl http://localhost:8080/actuator/health`
 - **Gateway Service:** `curl http://localhost:8080/actuator/health`
 - **PostgreSQL:** `pg_isready -U gripday_user -d gripday_auth`
 - **Redis:** `redis-cli ping`

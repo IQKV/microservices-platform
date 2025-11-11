@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: auth-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   replicas: 1
   selector:
@@ -18,7 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: auth-redis
         app.kubernetes.io/component: cache
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
     spec:
       priorityClassName: infrastructure-priority
       securityContext:
@@ -103,7 +103,7 @@ metadata:
   labels:
     app.kubernetes.io/name: auth-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   accessModes:
     - ReadWriteOnce
@@ -120,7 +120,7 @@ metadata:
   labels:
     app.kubernetes.io/name: auth-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 data:
   redis.conf: |
     # Redis configuration for auth service

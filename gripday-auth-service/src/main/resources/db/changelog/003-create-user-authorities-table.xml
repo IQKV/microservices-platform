@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="3" author="gripday-platform">
+    <changeSet id="3" author="gripday">
         <comment>Create user_authorities junction table for many-to-many relationship</comment>
 
         <createTable tableName="user_authorities">

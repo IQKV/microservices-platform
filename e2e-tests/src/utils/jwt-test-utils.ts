@@ -210,7 +210,7 @@ export class JwtTestUtils {
       iat: now,
       exp: now + 3600, // 1 hour
       iss: 'gripday-auth-service',
-      aud: 'gripday-platform',
+      aud: 'gripday',
       jti: 'test-jwt-id',
       ...payload
     };

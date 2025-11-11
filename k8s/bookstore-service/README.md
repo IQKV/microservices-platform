@@ -25,7 +25,7 @@ The bookstore service provides book catalog management, inventory tracking, and 
 
 ### Core Service
 
-- **bookstore-service**: Main Spring Boot application (port 8082)
+- **bookstore-service**: Main Spring Boot application (port 8080)
 - **bookstore-postgres**: PostgreSQL 15.8 database for persistent storage
 - **bookstore-redis**: Redis 7.4 for caching and session management
 
@@ -140,7 +140,7 @@ OTEL_SERVICE_NAME=gripday-bookstore-service
 
 ### Service Ports
 
-- **Bookstore Service**: 8082 (HTTP)
+- **Bookstore Service**: 8080 (HTTP)
 - **PostgreSQL**: 5432
 - **Redis**: 6379
 
@@ -264,7 +264,7 @@ kubectl get all -n gripday-bookstore
 kubectl logs -f deployment/bookstore-service -n gripday-bookstore
 
 # Port forward for local access
-kubectl port-forward service/bookstore-service 8082:8082 -n gripday-bookstore
+kubectl port-forward service/bookstore-service 8080:8080 -n gripday-bookstore
 
 # Scale manually
 kubectl scale deployment bookstore-service --replicas=3 -n gripday-bookstore
@@ -356,12 +356,12 @@ The bookstore service integrates with the gateway service for:
 ```bash
 # Run integration tests
 kubectl apply -f ../test-pod.yaml
-kubectl exec -it test-pod -- curl http://bookstore-service:8082/actuator/health
+kubectl exec -it test-pod -- curl http://bookstore-service:8080/actuator/health
 
 # Load testing
 kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 # Inside the pod:
-# while true; do wget -q -O- http://bookstore-service:8082/api/v1/bookstore/public/books; sleep 1; done
+# while true; do wget -q -O- http://bookstore-service:8080/api/v1/bookstore/public/books; sleep 1; done
 ```
 
 ## Maintenance

@@ -6,16 +6,16 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8081"
+    prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
 spec:
   type: ClusterIP
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
@@ -30,13 +30,13 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   type: ClusterIP
   clusterIP: None
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
@@ -51,17 +51,17 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8081"
+    prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
 spec:
   type: ClusterIP
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:
@@ -77,17 +77,17 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "8081"
+    prometheus.io/port: "8080"
     prometheus.io/path: "/actuator/prometheus"
 spec:
   type: ClusterIP
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
       protocol: TCP
       name: http
   selector:

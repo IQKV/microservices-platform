@@ -4,7 +4,7 @@ This document provides documentation for the Gripday Auth Service REST API endpo
 
 ## Base URL
 
-- Local Development: `http://localhost:8081`
+- Local Development: `http://localhost:8080`
 - Staging: `https://auth.gripday.website`
 - Production: `https://auth.gripday.com`
 
@@ -432,7 +432,7 @@ X-RateLimit-Reset: 1642248060
 
 Interactive API documentation is available at:
 
-- Local: `http://localhost:8081/swagger-ui.html`
+- Local: `http://localhost:8080/swagger-ui.html`
 - Staging: `https://auth.gripday.website/swagger-ui.html`
 - Production: `https://auth.gripday.com/swagger-ui.html`
 
@@ -450,7 +450,7 @@ Download OpenAPI specification:
 1. **Register new user:**
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/signup \
+curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -465,7 +465,7 @@ curl -X POST http://localhost:8081/api/v1/auth/signup \
 2. **Login and get tokens:**
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -476,23 +476,23 @@ curl -X POST http://localhost:8081/api/v1/auth/login \
 3. **Use access token:**
 
 ```bash
-TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"TestPass123!"}' | jq -r '.accessToken')
 
 curl -H "Authorization: Bearer $TOKEN" \
      -H "X-Tenant-ID: default" \
-     http://localhost:8081/api/v1/users/me
+     http://localhost:8080/api/v1/users/me
 ```
 
 4. **Refresh token:**
 
 ```bash
-REFRESH_TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
+REFRESH_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","password":"TestPass123!"}' | jq -r '.refreshToken')
 
-curl -X POST http://localhost:8081/api/v1/auth/refresh \
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d "{\"refreshToken\":\"$REFRESH_TOKEN\"}"
 ```
@@ -500,6 +500,6 @@ curl -X POST http://localhost:8081/api/v1/auth/refresh \
 5. **Logout:**
 
 ```bash
-curl -X POST http://localhost:8081/api/v1/auth/logout \
+curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```

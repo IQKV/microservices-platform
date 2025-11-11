@@ -2,7 +2,7 @@
 # This configuration is optimized for development with debug logging and relaxed security
 
 server:
-  port: 8081
+  port: 8080
 
 spring:
   # Database Configuration - Local PostgreSQL

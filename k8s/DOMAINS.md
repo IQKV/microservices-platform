@@ -21,8 +21,8 @@ This document provides a clear mapping of all domains and their purposes across 
 
 | Service           | Port    | Access Method                                |
 | ----------------- | ------- | -------------------------------------------- |
-| Auth Service      | 8081    | `https://api.gripday.com/api/v1/auth/*`      |
-| Bookstore Service | 8082    | `https://api.gripday.com/api/v1/bookstore/*` |
+| Auth Service      | 8080    | `https://api.gripday.com/api/v1/auth/*`      |
+| Bookstore Service | 8080    | `https://api.gripday.com/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.com/api/v1/*`           |
 
 ## Staging Domains (`*.gripday.website`)
@@ -44,8 +44,8 @@ This document provides a clear mapping of all domains and their purposes across 
 
 | Service           | Port    | Access Method                                    |
 | ----------------- | ------- | ------------------------------------------------ |
-| Auth Service      | 8081    | `https://api.gripday.website/api/v1/auth/*`      |
-| Bookstore Service | 8082    | `https://api.gripday.website/api/v1/bookstore/*` |
+| Auth Service      | 8080    | `https://api.gripday.website/api/v1/auth/*`      |
+| Bookstore Service | 8080    | `https://api.gripday.website/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.website/api/v1/*`           |
 
 ## Local Development Domains
@@ -53,9 +53,9 @@ This document provides a clear mapping of all domains and their purposes across 
 | Domain                     | Purpose                    | Service           | Port      |
 | -------------------------- | -------------------------- | ----------------- | --------- |
 | **localhost**              | Main Application           | React/Vue App     | 3000/5173 |
-| **auth.gripday.site**      | Auth Service (Direct)      | Auth Service      | 8081      |
+| **auth.gripday.site**      | Auth Service (Direct)      | Auth Service      | 8080      |
 | **api.gripday.site**       | API Gateway                | Gateway Service   | 8080      |
-| **bookstore.gripday.site** | Bookstore Service (Direct) | Bookstore Service | 8082      |
+| **bookstore.gripday.site** | Bookstore Service (Direct) | Bookstore Service | 8080      |
 
 > **Note**: In local development, backend services have direct ingress for debugging purposes only.
 
@@ -89,7 +89,7 @@ This document provides a clear mapping of all domains and their purposes across 
                   ┌──────────┐          ┌──────────┐
                   │  Auth    │          │Bookstore │
                   │ Service  │          │ Service  │
-                  │  8081    │          │  8082    │
+                  │  8080    │          │  8080    │
                   └──────────┘          └──────────┘
                   (NO Ingress)          (NO Ingress)
 ```
@@ -174,10 +174,10 @@ https://auth.gripday.com/oauth/google/callback
 **Routes**:
 
 ```yaml
-/api/v1/auth/**       → Auth Service (8081)
-/api/v1/users/**      → Auth Service (8081)
-/api/v1/tenants/**    → Auth Service (8081)
-/api/v1/bookstore/**  → Bookstore Service (8082)
+/api/v1/auth/**       → Auth Service (8080)
+/api/v1/users/**      → Auth Service (8080)
+/api/v1/tenants/**    → Auth Service (8080)
+/api/v1/bookstore/**  → Bookstore Service (8080)
 /actuator/**          → Gateway health endpoints
 ```
 

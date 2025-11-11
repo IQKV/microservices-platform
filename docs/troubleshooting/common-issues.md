@@ -33,16 +33,16 @@ docker-compose restart postgres
 2. **Port Already in Use:**
 
 ```bash
-# Check what's using port 8081
-lsof -i :8081
-netstat -tulpn | grep 8081
+# Check what's using port 8080
+lsof -i :8080
+netstat -tulpn | grep 8080
 
 # Kill process using the port
 kill -9 <PID>
 
 # Or change port in application.yml
 server:
-  port: 8082
+  port: 8080
 ```
 
 3. **Liquibase Migration Failures:**
@@ -74,7 +74,7 @@ mvn liquibase:update
 
 ```bash
 # Verify Auth Service is running
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 
 # Check network connectivity
 docker-compose exec gateway-service ping auth-service
@@ -118,7 +118,7 @@ docker-compose restart redis
 echo "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." | cut -d. -f1 | base64 -d
 
 # Check token expiration
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8081/api/v1/auth/validate
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/auth/validate
 ```
 
 2. **JWT Secret Configuration:**
@@ -154,7 +154,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 
 ```bash
 # Check if user already exists
-curl -X GET "http://localhost:8081/api/v1/users/search?username=testuser" \
+curl -X GET "http://localhost:8080/api/v1/users/search?username=testuser" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 
 # Use different username or email
@@ -255,8 +255,8 @@ docker-compose exec redis redis-cli monitor
 
 ```bash
 # Check JVM metrics
-curl http://localhost:8081/actuator/metrics/jvm.memory.used
-curl http://localhost:8081/actuator/metrics/jvm.gc.pause
+curl http://localhost:8080/actuator/metrics/jvm.memory.used
+curl http://localhost:8080/actuator/metrics/jvm.gc.pause
 
 # Adjust JVM settings if needed
 JAVA_OPTS="-Xmx1g -Xms512m" docker compose up auth-service
@@ -316,7 +316,7 @@ gripday:
 
 ```bash
 # Check Prometheus endpoints
-curl http://localhost:8081/actuator/prometheus
+curl http://localhost:8080/actuator/prometheus
 curl http://localhost:8080/actuator/prometheus
 
 # Verify Prometheus is scraping
@@ -327,7 +327,7 @@ curl http://localhost:9090/api/v1/targets
 
 ```bash
 # Check tracing configuration
-curl http://localhost:8081/actuator/configprops | jq '.["management.tracing"]'
+curl http://localhost:8080/actuator/configprops | jq '.["management.tracing"]'
 
 # Verify trace export
 docker-compose logs auth-service | grep -i "trace"
@@ -347,7 +347,7 @@ docker-compose logs auth-service | grep -i "trace"
 
 ```bash
 # Verify logging configuration
-curl http://localhost:8081/actuator/loggers
+curl http://localhost:8080/actuator/loggers
 
 # Check log format
 docker-compose logs auth-service | head -5
@@ -515,7 +515,7 @@ kubectl get services -n gripday
 kubectl describe service auth-service -n gripday
 
 # Test service connectivity
-kubectl exec -it gateway-service-xxx -n gripday -- curl http://auth-service:8081/actuator/health
+kubectl exec -it gateway-service-xxx -n gripday -- curl http://auth-service:8080/actuator/health
 ```
 
 2. **DNS Resolution:**
@@ -535,32 +535,32 @@ kubectl logs coredns-xxx -n kube-system
 
 ```bash
 # Service health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/health
 
 # Database connectivity
-curl http://localhost:8081/actuator/health/db
+curl http://localhost:8080/actuator/health/db
 
 # Redis connectivity
-curl http://localhost:8081/actuator/health/redis
+curl http://localhost:8080/actuator/health/redis
 
 # Detailed health information
-curl http://localhost:8081/actuator/health?show-details=always
+curl http://localhost:8080/actuator/health?show-details=always
 ```
 
 ### Metrics and Monitoring
 
 ```bash
 # Application metrics
-curl http://localhost:8081/actuator/metrics
+curl http://localhost:8080/actuator/metrics
 curl http://localhost:8080/actuator/metrics
 
 # JVM metrics
-curl http://localhost:8081/actuator/metrics/jvm.memory.used
-curl http://localhost:8081/actuator/metrics/jvm.threads.live
+curl http://localhost:8080/actuator/metrics/jvm.memory.used
+curl http://localhost:8080/actuator/metrics/jvm.threads.live
 
 # Custom metrics
-curl http://localhost:8081/actuator/metrics/auth.login.attempts
+curl http://localhost:8080/actuator/metrics/auth.login.attempts
 curl http://localhost:8080/actuator/metrics/gateway.requests
 ```
 
@@ -568,15 +568,15 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 
 ```bash
 # View configuration properties
-curl http://localhost:8081/actuator/configprops
+curl http://localhost:8080/actuator/configprops
 curl http://localhost:8080/actuator/configprops
 
 # Environment variables
-curl http://localhost:8081/actuator/env
+curl http://localhost:8080/actuator/env
 curl http://localhost:8080/actuator/env
 
 # Active profiles
-curl http://localhost:8081/actuator/info
+curl http://localhost:8080/actuator/info
 ```
 
 ## Getting Additional Help

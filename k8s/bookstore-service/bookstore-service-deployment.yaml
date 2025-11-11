@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     app.kubernetes.io/version: "1.0.0"
 spec:
   replicas: 2
@@ -24,11 +24,11 @@ spec:
       labels:
         app.kubernetes.io/name: gripday-bookstore-service
         app.kubernetes.io/component: bookstore
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
         app.kubernetes.io/version: "1.0.0"
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8082"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
     spec:
       serviceAccountName: bookstore-service-sa
@@ -45,7 +45,7 @@ spec:
           image: gripday/bookstore-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8082
+            - containerPort: 8080
               name: http
               protocol: TCP
           env:
@@ -120,7 +120,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8082
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
@@ -130,7 +130,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8082
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -140,7 +140,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8082
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -211,7 +211,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 automountServiceAccountToken: false
 ---
 apiVersion: policy/v1
@@ -222,7 +222,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   minAvailable: 1
   selector:

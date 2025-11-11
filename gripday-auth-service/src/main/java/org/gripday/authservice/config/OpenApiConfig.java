@@ -71,7 +71,7 @@ import org.springframework.context.annotation.Configuration;
             description = "Staging Server"
         ),
         @Server(
-            url = "http://localhost:8081",
+            url = "http://localhost:8080",
             description = "Local Development Server"
         )
     },

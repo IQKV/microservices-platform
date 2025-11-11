@@ -48,7 +48,7 @@ spring:
           issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/auth/realms/gripday}
 
 server:
-  port: 8082
+  port: 8080
   servlet:
     context-path: /
   error:

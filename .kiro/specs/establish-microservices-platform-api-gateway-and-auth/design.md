@@ -31,7 +31,7 @@ The platform follows reactive programming principles, implements security throug
 
 ### Multi-Module Maven Project Structure
 
-**Parent POM Configuration (gripday-platform/pom.xml):**
+**Parent POM Configuration (gripday/pom.xml):**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -42,7 +42,7 @@ The platform follows reactive programming principles, implements security throug
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.gripday</groupId>
-    <artifactId>gripday-platform</artifactId>
+    <artifactId>gripday</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -362,7 +362,7 @@ The platform follows reactive programming principles, implements security throug
 
     <parent>
         <groupId>org.gripday</groupId>
-        <artifactId>gripday-platform</artifactId>
+        <artifactId>gripday</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
@@ -514,7 +514,7 @@ The platform follows reactive programming principles, implements security throug
 
     <parent>
         <groupId>org.gripday</groupId>
-        <artifactId>gripday-platform</artifactId>
+        <artifactId>gripday</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
@@ -633,7 +633,7 @@ The platform follows reactive programming principles, implements security throug
 **Standard Maven Directory Layout:**
 
 ```
-gripday-platform/                    # Parent project root
+gripday/                    # Parent project root
 ├── pom.xml                         # Parent POM
 ├── README.md                       # Platform documentation
 ├── docker-compose.yml             # Platform-wide services
@@ -729,11 +729,11 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
-EXPOSE 8081
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8081/actuator/health || exit 1
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 # Run application
 ENTRYPOINT ["java", "-jar", "app.jar"]
@@ -4300,7 +4300,7 @@ services:
       - gripday-network
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - GRIPDAY_AUTH_SERVICE_URL=http://auth-service:8081
+      - GRIPDAY_AUTH_SERVICE_URL=http://auth-service:8080
       - GRIPDAY_CACHE_REDIS_HOST=gateway-redis
     depends_on:
       - auth-service
@@ -4319,11 +4319,11 @@ gripday:
   gateway:
     routes:
       auth-service:
-        uri: http://auth-service:8081
+        uri: http://auth-service:8080
         predicates:
           - Path=/api/*/auth/**
       future-service:
-        uri: http://future-service:8082
+        uri: http://future-service:8080
         predicates:
           - Path=/api/*/future/**
 ```
@@ -4352,7 +4352,7 @@ spec:
         - name: auth-service
           image: gripday/auth-service:latest
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "production"
@@ -4368,8 +4368,8 @@ spec:
   selector:
     app: auth-service
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
   type: ClusterIP
 ```
 
@@ -4381,11 +4381,11 @@ gripday:
   gateway:
     routes:
       auth-service:
-        uri: http://auth-service.default.svc.cluster.local:8081
+        uri: http://auth-service.default.svc.cluster.local:8080
         predicates:
           - Path=/api/*/auth/**
       future-service:
-        uri: http://future-service.default.svc.cluster.local:8082
+        uri: http://future-service.default.svc.cluster.local:8080
         predicates:
           - Path=/api/*/future/**
 ```
@@ -5290,7 +5290,7 @@ CREATE TABLE authorities (
 
 3. **Verify:**
    ```bash
-   curl http://localhost:8081/actuator/health
+   curl http://localhost:8080/actuator/health
    ```
 
 ## Configuration
@@ -5364,7 +5364,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/auth
+          issuer-uri: http://localhost:8080/auth
 
 logging:
   level:
@@ -5784,9 +5784,9 @@ echo "Waiting for gateway service to be ready..."
 ./scripts/wait-for-gateway-service.sh
 
 echo "Local environment setup complete!"
-echo "Auth Service: http://localhost:8081"
+echo "Auth Service: http://localhost:8080"
 echo "Gateway Service: http://localhost:8080"
-echo "Swagger UI: http://localhost:8081/swagger-ui.html"
+echo "Swagger UI: http://localhost:8080/swagger-ui.html"
 echo "Prometheus: http://localhost:9090"
 echo "Grafana: http://localhost:3000"
 ```
@@ -5805,8 +5805,8 @@ docker compose up -d
 cd ..
 
 echo "Auth service started successfully!"
-echo "Service URL: http://localhost:8081"
-echo "Health check: http://localhost:8081/actuator/health"
+echo "Service URL: http://localhost:8080"
+echo "Health check: http://localhost:8080/actuator/health"
 ```
 
 ```bash
@@ -6018,7 +6018,7 @@ done
 echo "Gateway Redis is ready!"
 
 # Check Auth Service
-check_service "Auth Service" "http://localhost:8081"
+check_service "Auth Service" "http://localhost:8080"
 
 # Check Gateway Service
 check_service "Gateway Service" "http://localhost:8080"
@@ -6635,7 +6635,7 @@ services:
   auth-service:
     build: .
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - AUTH_DATABASE_URL=jdbc:postgresql://auth-postgresql:5432/gripday_auth_db
@@ -6706,7 +6706,7 @@ services:
       - GATEWAY_REDIS_HOST=gateway-redis
       - GATEWAY_REDIS_PORT=6379
       - GATEWAY_REDIS_DATABASE=1
-      - AUTH_SERVICE_URL=http://host.docker.internal:8081
+      - AUTH_SERVICE_URL=http://host.docker.internal:8080
     depends_on:
       - gateway-postgresql
       - gateway-redis
@@ -7664,7 +7664,7 @@ postman/
     },
     {
       "key": "auth_url",
-      "value": "http://localhost:8081",
+      "value": "http://localhost:8080",
       "enabled": true
     },
     {
@@ -8110,8 +8110,8 @@ cd gripday-auth-service
 
 ### API Documentation
 
-- **Swagger UI**: http://localhost:8081/swagger-ui.html
-- **OpenAPI Spec**: http://localhost:8081/v3/api-docs
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI Spec**: http://localhost:8080/v3/api-docs
 - **Postman Collections**: [docs/api/postman/](docs/api/postman/)
 
 ### Architecture
@@ -8159,7 +8159,7 @@ curl -H "Authorization: Bearer <jwt-token>" \
 
 ## Base URLs
 
-- **Local**: http://localhost:8081
+- **Local**: http://localhost:8080
 - **Staging**: https://staging-auth.gripday.com
 - **Production**: https://auth.gripday.com
 

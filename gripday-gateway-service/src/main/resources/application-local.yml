@@ -74,7 +74,7 @@ gripday:
         strip-count: 0  # Don't strip in local development
       services:
         auth-service:
-          uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI:http://localhost:8081}
+          uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI:http://localhost:8080}
           path: /v1/auth/**
           enabled: true
           connect-timeout: 10000  # Extended for development
@@ -90,12 +90,12 @@ gripday:
         secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET:local-development-secret-key-not-for-production-use}
         access-token-expiry: PT30M  # Extended for development
         refresh-token-expiry: P30D  # Extended for development
-        issuer: gripday-platform-local
+        issuer: gripday-local
         audience: gripday-services-local
         algorithm: HS256
       authentication:
         enabled: true
-        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL:http://localhost:8081}
+        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL:http://localhost:8080}
         token-validation-timeout: PT10S  # Extended for development
         enable-user-context-propagation: true
       public-paths:
@@ -156,7 +156,7 @@ gripday:
         - http://localhost:3000
         - http://localhost:5173
         - http://localhost:8080
-        - http://localhost:8081
+        - http://localhost:8080
         - http://127.0.0.1:3000
         - http://127.0.0.1:5173
       allowed-methods:

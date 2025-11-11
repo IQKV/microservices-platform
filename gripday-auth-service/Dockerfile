@@ -49,11 +49,11 @@ COPY --from=builder --chown=appuser:appuser /app/target/dependency/application/ 
 USER appuser
 
 # Expose application port
-EXPOSE 8081
+EXPOSE 8080
 
 # Health check with improved configuration
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD curl -f http://localhost:8081/actuator/health/readiness || exit 1
+    CMD curl -f http://localhost:8080/actuator/health/readiness || exit 1
 
 # JVM optimization for auth service workloads
 ENV JAVA_OPTS="-XX:+UseContainerSupport \

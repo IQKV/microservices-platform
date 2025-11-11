@@ -10,8 +10,8 @@ echo "🚀 Starting Platform Integration Verification..."
 
 # Configuration
 GATEWAY_URL="http://localhost:8080"
-AUTH_URL="http://localhost:8081"
-BOOKSTORE_URL="http://localhost:8082"
+AUTH_URL="http://localhost:8080"
+BOOKSTORE_URL="http://localhost:8080"
 PROMETHEUS_URL="http://localhost:9090"
 GRAFANA_URL="http://localhost:3000"
 

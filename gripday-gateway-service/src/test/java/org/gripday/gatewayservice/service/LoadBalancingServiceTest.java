@@ -25,8 +25,8 @@ class LoadBalancingServiceTest {
     // Given
     var serviceName = "test-service";
     var instances = List.of(
-        URI.create("http://localhost:8081"),
-        URI.create("http://localhost:8082")
+        URI.create("http://localhost:8080"),
+        URI.create("http://localhost:8080")
     );
     loadBalancingService.registerServiceInstances(serviceName, instances);
 
@@ -36,9 +36,9 @@ class LoadBalancingServiceTest {
     var thirdInstance = loadBalancingService.getNextServiceInstance(serviceName);
 
     // Then
-    assertThat(firstInstance).isEqualTo(URI.create("http://localhost:8081"));
-    assertThat(secondInstance).isEqualTo(URI.create("http://localhost:8082"));
-    assertThat(thirdInstance).isEqualTo(URI.create("http://localhost:8081")); // Round-robin back to first
+    assertThat(firstInstance).isEqualTo(URI.create("http://localhost:8080"));
+    assertThat(secondInstance).isEqualTo(URI.create("http://localhost:8080"));
+    assertThat(thirdInstance).isEqualTo(URI.create("http://localhost:8080")); // Round-robin back to first
   }
 
   @Test
@@ -58,34 +58,34 @@ class LoadBalancingServiceTest {
     // Given
     var serviceName = "test-service";
     var instances = List.of(
-        URI.create("http://localhost:8081"),
-        URI.create("http://localhost:8082")
+        URI.create("http://localhost:8080"),
+        URI.create("http://localhost:8080")
     );
     loadBalancingService.registerServiceInstances(serviceName, instances);
 
     // Mark first instance as unhealthy
-    loadBalancingService.markInstanceUnhealthy(serviceName, URI.create("http://localhost:8081"));
+    loadBalancingService.markInstanceUnhealthy(serviceName, URI.create("http://localhost:8080"));
 
     // When
     var firstInstance = loadBalancingService.getNextServiceInstance(serviceName);
     var secondInstance = loadBalancingService.getNextServiceInstance(serviceName);
 
     // Then
-    assertThat(firstInstance).isEqualTo(URI.create("http://localhost:8082"));
-    assertThat(secondInstance).isEqualTo(URI.create("http://localhost:8082"));
+    assertThat(firstInstance).isEqualTo(URI.create("http://localhost:8080"));
+    assertThat(secondInstance).isEqualTo(URI.create("http://localhost:8080"));
   }
 
   @Test
   void shouldRegisterServiceInstancesSuccessfully() {
     // Given
     var serviceName = "auth-service";
-    var instances = List.of(URI.create("http://localhost:8081"));
+    var instances = List.of(URI.create("http://localhost:8080"));
 
     // When
     loadBalancingService.registerServiceInstances(serviceName, instances);
     var selectedInstance = loadBalancingService.getNextServiceInstance(serviceName);
 
     // Then
-    assertThat(selectedInstance).isEqualTo(URI.create("http://localhost:8081"));
+    assertThat(selectedInstance).isEqualTo(URI.create("http://localhost:8080"));
   }
 }

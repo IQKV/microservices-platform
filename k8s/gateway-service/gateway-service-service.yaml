@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8080"
@@ -30,7 +30,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   type: ClusterIP
   clusterIP: None
@@ -51,7 +51,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
   annotations:
     prometheus.io/scrape: "true"
@@ -77,7 +77,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
   annotations:
     prometheus.io/scrape: "true"

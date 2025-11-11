@@ -28,8 +28,8 @@ data:
   REDIS_PORT: "6379"
 
   # Service URLs
-  AUTH_SERVICE_URL: "http://auth-service:8081"
-  BOOKSTORE_SERVICE_URL: "http://bookstore-service:8082"
+  AUTH_SERVICE_URL: "http://auth-service:8080"
+  BOOKSTORE_SERVICE_URL: "http://bookstore-service:8080"
 
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "local"
@@ -355,7 +355,7 @@ spec:
           image: gripday/auth-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
               name: http
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -408,21 +408,21 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8081
+              port: 8080
             initialDelaySeconds: 90
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8081
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 12
@@ -438,8 +438,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8081
-      targetPort: 8081
+    - port: 8080
+      targetPort: 8080
       nodePort: 30081
       name: http
   selector:
@@ -496,7 +496,7 @@ spec:
           image: gripday/bookstore-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8082
+            - containerPort: 8080
               name: http
           env:
             - name: SPRING_PROFILES_ACTIVE
@@ -530,7 +530,7 @@ spec:
                   name: gripday-config
                   key: REDIS_PORT
             - name: JWT_ISSUER_URI
-              value: "http://auth-service:8081"
+              value: "http://auth-service:8080"
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:
@@ -546,21 +546,21 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8082
+              port: 8080
             initialDelaySeconds: 90
             periodSeconds: 30
             timeoutSeconds: 10
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8082
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8082
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 12
@@ -576,8 +576,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8082
-      targetPort: 8082
+    - port: 8080
+      targetPort: 8080
       nodePort: 30082
       name: http
   selector:
@@ -612,7 +612,7 @@ spec:
             - -c
             - |
               echo "Waiting for backend services..."
-              until nc -z auth-service 8081 && nc -z bookstore-service 8082 && nc -z redis 6379; do
+              until nc -z auth-service 8080 && nc -z bookstore-service 8080 && nc -z redis 6379; do
                 echo "Waiting for services to be ready..."
                 sleep 3
               done

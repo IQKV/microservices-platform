@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 data:
   application.yml: |
     server:
@@ -23,28 +23,28 @@ data:
           routes:
           # ===== Auth Service Routes =====
           - id: auth-service-api
-            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/auth/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-users
-            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/users/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-tenants
-            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/tenants/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-actuator
-            uri: http://auth-service.gripday-auth.svc.cluster.local:8081
+            uri: http://auth-service.gripday-auth.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/auth/actuator/**
             filters:
@@ -52,21 +52,21 @@ data:
           
           # ===== Bookstore Service Routes =====
           - id: bookstore-service-api
-            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8082
+            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/**
             filters:
             - StripPrefix=0
           
           - id: bookstore-service-public
-            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8082
+            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/public/**
             filters:
             - StripPrefix=0
           
           - id: bookstore-service-actuator
-            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8082
+            uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/actuator/**
             filters:
@@ -172,7 +172,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
 data:
   application-staging.yml: |
@@ -188,21 +188,21 @@ data:
           routes:
           # ===== Auth Service Routes =====
           - id: auth-service-api
-            uri: http://auth-service-staging.staging-env.svc.cluster.local:8081
+            uri: http://auth-service-staging.staging-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/auth/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-users
-            uri: http://auth-service-staging.staging-env.svc.cluster.local:8081
+            uri: http://auth-service-staging.staging-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/users/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-tenants
-            uri: http://auth-service-staging.staging-env.svc.cluster.local:8081
+            uri: http://auth-service-staging.staging-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/tenants/**
             filters:
@@ -210,14 +210,14 @@ data:
           
           # ===== Bookstore Service Routes =====
           - id: bookstore-service-api
-            uri: http://bookstore-service.staging-env.svc.cluster.local:8082
+            uri: http://bookstore-service.staging-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/**
             filters:
             - StripPrefix=0
           
           - id: bookstore-service-public
-            uri: http://bookstore-service.staging-env.svc.cluster.local:8082
+            uri: http://bookstore-service.staging-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/public/**
             filters:
@@ -255,7 +255,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
 data:
   application-production.yml: |
@@ -271,21 +271,21 @@ data:
           routes:
           # ===== Auth Service Routes =====
           - id: auth-service-api
-            uri: http://auth-service-production.production-env.svc.cluster.local:8081
+            uri: http://auth-service-production.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/auth/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-users
-            uri: http://auth-service-production.production-env.svc.cluster.local:8081
+            uri: http://auth-service-production.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/users/**
             filters:
             - StripPrefix=0
           
           - id: auth-service-tenants
-            uri: http://auth-service-production.production-env.svc.cluster.local:8081
+            uri: http://auth-service-production.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/tenants/**
             filters:
@@ -293,14 +293,14 @@ data:
           
           # ===== Bookstore Service Routes =====
           - id: bookstore-service-api
-            uri: http://bookstore-service.production-env.svc.cluster.local:8082
+            uri: http://bookstore-service.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/**
             filters:
             - StripPrefix=0
           
           - id: bookstore-service-public
-            uri: http://bookstore-service.production-env.svc.cluster.local:8082
+            uri: http://bookstore-service.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/bookstore/public/**
             filters:

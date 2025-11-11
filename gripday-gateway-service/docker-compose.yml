@@ -34,7 +34,7 @@ services:
     image: wiremock/wiremock:3-alpine
     container_name: gripday-mock-auth-service-local
     ports:
-      - "8082:8080"
+      - "8080:8080"
     volumes:
       - ./scripts/wiremock:/home/wiremock:ro
     networks:

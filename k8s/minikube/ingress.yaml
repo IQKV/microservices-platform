@@ -67,7 +67,7 @@ spec:
               service:
                 name: auth-service
                 port:
-                  number: 8081
+                  number: 8080
 
 ---
 # Bookstore Service Ingress (Optional - Direct Access for Debugging)
@@ -98,7 +98,7 @@ spec:
               service:
                 name: bookstore-service
                 port:
-                  number: 8082
+                  number: 8080
 
 ---
 # NOTES:

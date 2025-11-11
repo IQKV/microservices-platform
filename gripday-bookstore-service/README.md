@@ -41,9 +41,9 @@ A Spring Boot 3.5.6 microservice for book catalog and inventory management, buil
    ```
 
 3. **Access the application:**
-   - API: http://localhost:8082
-   - Health Check: http://localhost:8082/actuator/health
-   - Swagger UI: http://localhost:8082/swagger-ui.html
+   - API: http://localhost:8080
+   - Health Check: http://localhost:8080/actuator/health
+   - Swagger UI: http://localhost:8080/swagger-ui.html
 
 ### Docker Development
 

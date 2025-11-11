@@ -107,7 +107,7 @@ MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
-SERVER_PORT=8081
+SERVER_PORT=8080
 
 # Database
 GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
@@ -150,7 +150,7 @@ GRIPDAY_DATABASE_LIQUIBASE_ENABLED=true
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
-SERVER_PORT=8081
+SERVER_PORT=8080
 
 # Database
 GRIPDAY_DATABASE_URL=jdbc:postgresql://postgres-staging:5432/gripday_auth
@@ -193,7 +193,7 @@ OTEL_TRACES_SAMPLER_ARG=0.5
 # Service Configuration
 GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
-SERVER_PORT=8081
+SERVER_PORT=8080
 
 # Database
 GRIPDAY_DATABASE_URL=${DATABASE_URL}
@@ -248,8 +248,8 @@ GRIPDAY_GATEWAY_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
 # Gateway Routes
-GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8081
-GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://localhost:8081
+GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8080
+GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://localhost:8080
 GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_PREDICATES=Path=/api/v1/auth/**
 
 # Redis
@@ -294,8 +294,8 @@ GRIPDAY_GATEWAY_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
 # Gateway Routes
-GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://auth-service-staging:8081
-GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://auth-service-staging:8081
+GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://auth-service-staging:8080
+GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://auth-service-staging:8080
 
 # Redis
 GRIPDAY_CACHE_REDIS_HOST=redis-staging
@@ -428,7 +428,7 @@ gripday:
     isolation-enabled: ${GRIPDAY_TENANT_ISOLATION_ENABLED:true}
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
@@ -481,7 +481,7 @@ gripday:
     service:
       name: gripday-gateway-service
       version: 1.0.0
-    auth-service-url: ${GRIPDAY_GATEWAY_AUTH_SERVICE_URL:http://localhost:8081}
+    auth-service-url: ${GRIPDAY_GATEWAY_AUTH_SERVICE_URL:http://localhost:8080}
     rate-limiting:
       default-requests-per-minute: ${GRIPDAY_GATEWAY_RATE_LIMITING_DEFAULT_REQUESTS_PER_MINUTE:100}
       burst-capacity: ${GRIPDAY_GATEWAY_RATE_LIMITING_BURST_CAPACITY:20}
@@ -497,7 +497,7 @@ gripday:
       allow-credentials: ${GRIPDAY_GATEWAY_CORS_ALLOW_CREDENTIALS:true}
     routes:
       auth-service:
-        uri: ${GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI:http://localhost:8081}
+        uri: ${GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI:http://localhost:8080}
         predicates: ${GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_PREDICATES:Path=/api/v1/auth/**}
   cache:
     redis:
@@ -607,7 +607,7 @@ GRIPDAY_AUTH_PASSWORD_REQUIRE_SPECIAL_CHAR=true
 mvn spring-boot:run -Dspring-boot.run.profiles=local -Dspring.config.on-not-found=fail
 
 # Test configuration loading
-curl http://localhost:8081/actuator/configprops
+curl http://localhost:8080/actuator/configprops
 curl http://localhost:8080/actuator/configprops
 ```
 
@@ -619,7 +619,7 @@ export GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/test_db
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 # Verify configuration
-curl http://localhost:8081/actuator/env
+curl http://localhost:8080/actuator/env
 ```
 
 This configuration provides a foundation for all deployment environments while maintaining security best practices and operational flexibility.

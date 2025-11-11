@@ -6,11 +6,11 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 data:
   application.yml: |
     server:
-      port: 8082
+      port: 8080
 
     spring:
       application:
@@ -149,12 +149,12 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
 data:
   application-staging.yml: |
     server:
-      port: 8082
+      port: 8080
 
     spring:
       profiles:
@@ -191,12 +191,12 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
 data:
   application-production.yml: |
     server:
-      port: 8082
+      port: 8080
 
     spring:
       profiles:

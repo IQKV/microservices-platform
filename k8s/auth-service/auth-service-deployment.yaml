@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     app.kubernetes.io/version: "1.0.0"
 spec:
   replicas: 2
@@ -24,11 +24,11 @@ spec:
       labels:
         app.kubernetes.io/name: gripday-auth-service
         app.kubernetes.io/component: authentication
-        app.kubernetes.io/part-of: gripday-platform
+        app.kubernetes.io/part-of: gripday
         app.kubernetes.io/version: "1.0.0"
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8081"
+        prometheus.io/port: "8080"
         prometheus.io/path: "/actuator/prometheus"
     spec:
       serviceAccountName: auth-service-sa
@@ -45,7 +45,7 @@ spec:
           image: gripday/auth-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
               name: http
               protocol: TCP
           env:
@@ -134,7 +134,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 8081
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 10
@@ -144,7 +144,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
-              port: 8081
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -154,7 +154,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: 8081
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -227,7 +227,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 automountServiceAccountToken: false
 ---
 apiVersion: policy/v1
@@ -238,7 +238,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   minAvailable: 1
   selector:

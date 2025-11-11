@@ -23,8 +23,8 @@ docker compose up -d redis
 2. **Ensure Auth Service is running:**
 
 ```bash
-# Auth service should be available at http://localhost:8081
-curl http://localhost:8081/actuator/health
+# Auth service should be available at http://localhost:8080
+curl http://localhost:8080/actuator/health
 ```
 
 3. **Start the gateway:**
@@ -158,7 +158,7 @@ GRIPDAY_CACHE_REDIS_HOST=localhost
 GRIPDAY_CACHE_REDIS_PORT=6379
 
 # Auth Service
-GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8081
+GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8080
 
 # Rate Limiting
 GRIPDAY_GATEWAY_RATE_LIMITING_DEFAULT_REQUESTS_PER_MINUTE=100
@@ -182,7 +182,7 @@ gripday:
   gateway:
     routes:
       - id: auth-service
-        uri: http://localhost:8081
+        uri: http://localhost:8080
         predicates:
           - Path=/api/v1/auth/**
         filters:
@@ -293,7 +293,7 @@ gripday:
   gateway:
     routes:
       - id: new-service
-        uri: http://localhost:8082
+        uri: http://localhost:8080
         predicates:
           - Path=/api/v1/newservice/**
         filters:
@@ -308,7 +308,7 @@ services:
   new-service:
     image: gripday/new-service:latest
     ports:
-      - "8082:8082"
+      - "8080:8080"
     networks:
       - gripday-network
 ```

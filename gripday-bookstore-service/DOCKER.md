@@ -122,13 +122,13 @@ gripday-bookstore-service/
 | `DB_NAME`        | Database name    | bookstore_db |
 | `REDIS_PORT`     | Redis port       | 6379         |
 | `REDIS_PASSWORD` | Redis password   | (empty)      |
-| `SERVER_PORT`    | Application port | 8082         |
+| `SERVER_PORT`    | Application port | 8080         |
 
 ## Health Checks
 
 All environments include health checks:
 
-- **Endpoint**: `http://localhost:8082/actuator/health`
+- **Endpoint**: `http://localhost:8080/actuator/health`
 - **Interval**: 30 seconds
 - **Timeout**: 10 seconds
 - **Retries**: 3 attempts
@@ -199,7 +199,7 @@ All environments include health checks:
    docker-compose logs bookstore-service
 
    # Check health
-   curl http://localhost:8082/actuator/health
+   curl http://localhost:8080/actuator/health
    ```
 
 2. **Database connection issues**

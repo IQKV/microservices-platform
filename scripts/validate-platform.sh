@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Configuration
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8080}"
-AUTH_URL="${AUTH_URL:-http://localhost:8081}"
+AUTH_URL="${AUTH_URL:-http://localhost:8080}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://localhost:9090}"
 GRAFANA_URL="${GRAFANA_URL:-http://localhost:3000}"
 

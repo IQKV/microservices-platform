@@ -75,7 +75,7 @@ Developer → Multiple Access Methods:
          ▼          ▼          ▼
     ┌────────┐ ┌────────┐ ┌─────────┐
     │Gateway │ │  Auth  │ │Bookstore│
-    │  8080  │ │  8081  │ │  8082   │
+    │  8080  │ │  8080  │ │  8080   │
     └────┬───┘ └────────┘ └─────────┘
          │
          │ Internal K8s Network
@@ -85,7 +85,7 @@ Developer → Multiple Access Methods:
     ▼          ▼
  ┌─────┐   ┌─────┐
  │Auth │   │Book │
- │8081 │   │8082 │
+ │8080 │   │8080 │
  └─────┘   └─────┘
 ```
 
@@ -183,7 +183,7 @@ curl http://$MINIKUBE_IP:30082/api/v1/bookstore/books
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 # Forward auth service
-kubectl port-forward -n gripday svc/auth-service 8081:8081
+kubectl port-forward -n gripday svc/auth-service 8080:8080
 ```
 
 **Usage:**
@@ -191,7 +191,7 @@ kubectl port-forward -n gripday svc/auth-service 8081:8081
 ```bash
 # Access on localhost
 curl http://localhost:8080/api/v1/auth/login
-curl http://localhost:8081/api/v1/auth/login
+curl http://localhost:8080/api/v1/auth/login
 ```
 
 **Benefits:**
@@ -229,8 +229,8 @@ curl http://api.gripday.site/api/v1/auth/login
 # Use direct service ingress OR port forward
 curl http://auth.gripday.site/actuator/health
 # OR
-kubectl port-forward -n gripday svc/auth-service 8081:8081
-curl http://localhost:8081/actuator/health
+kubectl port-forward -n gripday svc/auth-service 8080:8080
+curl http://localhost:8080/actuator/health
 ```
 
 ## Configuration Files
@@ -317,7 +317,7 @@ kubectl logs -n gripday deployment/gateway-service
 kubectl logs -n gripday deployment/auth-service
 
 # Test internal connectivity
-kubectl exec -n gripday deployment/gateway-service -- curl http://auth-service:8081/actuator/health
+kubectl exec -n gripday deployment/gateway-service -- curl http://auth-service:8080/actuator/health
 ```
 
 ### Gateway Not Routing

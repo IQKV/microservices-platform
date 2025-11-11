@@ -23,7 +23,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-ui
     app.kubernetes.io/component: frontend
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: staging
   annotations:
     # NGINX configuration
@@ -81,7 +81,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gripday-auth-ui
     app.kubernetes.io/component: frontend
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
     environment: production
   annotations:
     # NGINX configuration

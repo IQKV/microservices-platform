@@ -80,7 +80,7 @@ services:
       GRIPDAY_AUTH_JWT_EXPIRATION: 900
       GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
     ports:
-      - "8081:8081"
+      - "8080:8080"
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -89,7 +89,7 @@ services:
     networks:
       - gripday-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -111,7 +111,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       JWT_ISSUER_URI: http://gateway-service:8080/auth/realms/gripday
     ports:
-      - "8082:8082"
+      - "8080:8080"
     depends_on:
       postgres-bookstore:
         condition: service_healthy
@@ -120,7 +120,7 @@ services:
     networks:
       - gripday-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -137,8 +137,8 @@ services:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8081
-      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8082
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8080
+      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:

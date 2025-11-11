@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   type: ClusterIP
   ports:
@@ -27,7 +27,7 @@ metadata:
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday-platform
+    app.kubernetes.io/part-of: gripday
 spec:
   type: ClusterIP
   clusterIP: None

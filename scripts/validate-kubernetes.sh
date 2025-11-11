@@ -136,7 +136,7 @@ get_service_urls() {
         if [ -z "$AUTH_URL" ] || [ "$AUTH_URL" = "null" ]; then
             AUTH_URL=$($KUBECTL_CMD get service auth-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         fi
-        AUTH_URL="http://$AUTH_URL:8081"
+        AUTH_URL="http://$AUTH_URL:8080"
     elif [ "$auth_service_type" = "NodePort" ]; then
         local node_ip=$($KUBECTL_CMD get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
         if [ -z "$node_ip" ]; then
@@ -147,9 +147,9 @@ get_service_urls() {
     else
         # Use port-forward for ClusterIP
         log "INFO" "Using port-forward for auth service access"
-        $KUBECTL_CMD port-forward service/auth-service 8081:8081 -n "$NAMESPACE" &
+        $KUBECTL_CMD port-forward service/auth-service 8080:8080 -n "$NAMESPACE" &
         AUTH_PORT_FORWARD_PID=$!
-        AUTH_URL="http://localhost:8081"
+        AUTH_URL="http://localhost:8080"
         sleep 5
     fi
     

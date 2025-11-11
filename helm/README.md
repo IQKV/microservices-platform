@@ -6,7 +6,7 @@ This directory contains Helm charts for deploying the Gripday microservices plat
 
 ```
 helm/
-├── gripday-platform/        # Umbrella chart (deploys all services)
+├── gripday/        # Umbrella chart (deploys all services)
 ├── auth-service/            # Authentication & Authorization service
 ├── bookstore-service/       # Bookstore business domain service
 ├── gateway-service/         # API Gateway (Spring Cloud Gateway)
@@ -20,9 +20,9 @@ helm/
 Deploy all services using the umbrella chart:
 
 ```bash
-cd gripday-platform
+cd gripday
 helm dependency build
-helm install gripday ./gripday-platform --namespace gripday-platform --create-namespace
+helm install gripday ./gripday --namespace gripday --create-namespace
 ```
 
 ### Option 2: Deploy Individual Services
@@ -51,7 +51,7 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 
 **Components**:
 
-- Spring Boot application (port 8081)
+- Spring Boot application (port 8080)
 - PostgreSQL database
 - Redis cache
 - Network policies
@@ -80,7 +80,7 @@ helm install auth-service ./auth-service -n gripday-auth --create-namespace
 
 **Components**:
 
-- Spring Boot application (port 8082)
+- Spring Boot application (port 8080)
 - PostgreSQL database
 - Redis cache
 - Horizontal Pod Autoscaler
@@ -146,12 +146,12 @@ helm install gateway-service ./gateway-service -n gripday-gateway --create-names
 **Installation**:
 
 ```bash
-cd gripday-platform
+cd gripday
 helm dependency build
-helm install gripday . --namespace gripday-platform --create-namespace
+helm install gripday . --namespace gripday --create-namespace
 ```
 
-**Configuration**: See [gripday-platform/README.md](./gripday-platform/README.md)
+**Configuration**: See [gripday/README.md](./gripday/README.md)
 
 ## 🔧 Prerequisites
 
@@ -192,10 +192,10 @@ kubectl get pods -n gripday-gateway
 kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 
 # Auth service
-kubectl port-forward -n gripday-auth svc/auth-service 8081:8081
+kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
 
 # Bookstore service
-kubectl port-forward -n gripday-bookstore svc/bookstore-service 8082:8082
+kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
 ```
 
 ### View Logs
@@ -218,7 +218,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 helm upgrade auth-service ./auth-service -n gripday-auth
 
 # Upgrade entire platform
-helm upgrade gripday ./gripday-platform -n gripday-platform
+helm upgrade gripday ./gripday -n gripday
 ```
 
 ### Uninstall Services
@@ -228,7 +228,7 @@ helm upgrade gripday ./gripday-platform -n gripday-platform
 helm uninstall auth-service -n gripday-auth
 
 # Uninstall entire platform
-helm uninstall gripday -n gripday-platform
+helm uninstall gripday -n gripday
 
 # Clean up namespaces
 kubectl delete namespace gripday-auth gripday-bookstore gripday-gateway
@@ -239,7 +239,7 @@ kubectl delete namespace gripday-auth gripday-bookstore gripday-gateway
 ### Local/Development
 
 ```bash
-helm install gripday ./gripday-platform \
+helm install gripday ./gripday \
   --set global.environment=local \
   --namespace dev \
   --create-namespace
@@ -248,8 +248,8 @@ helm install gripday ./gripday-platform \
 ### Staging
 
 ```bash
-helm install gripday ./gripday-platform \
-  -f gripday-platform/values-staging.yaml \
+helm install gripday ./gripday \
+  -f gripday/values-staging.yaml \
   --namespace staging \
   --create-namespace
 ```
@@ -257,8 +257,8 @@ helm install gripday ./gripday-platform \
 ### Production
 
 ```bash
-helm install gripday ./gripday-platform \
-  -f gripday-platform/values-production.yaml \
+helm install gripday ./gripday \
+  -f gripday/values-production.yaml \
   --namespace production \
   --create-namespace
 ```
@@ -300,19 +300,19 @@ curl http://localhost:8080/actuator/prometheus
 helm lint ./auth-service
 helm lint ./bookstore-service
 helm lint ./gateway-service
-helm lint ./gripday-platform
+helm lint ./gripday
 ```
 
 ### Dry Run
 
 ```bash
-helm install gripday ./gripday-platform --dry-run --debug
+helm install gripday ./gripday --dry-run --debug
 ```
 
 ### Template Output
 
 ```bash
-helm template gripday ./gripday-platform > output.yaml
+helm template gripday ./gripday > output.yaml
 ```
 
 ## 🆘 Troubleshooting

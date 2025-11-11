@@ -88,7 +88,7 @@ gripday:
         secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
-        issuer: gripday-platform
+        issuer: gripday
         audience: gripday-services
         algorithm: HS256
       authentication:

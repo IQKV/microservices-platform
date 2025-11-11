@@ -367,7 +367,7 @@ test.describe('JWT Token Lifecycle Tests', () => {
       
       expect(payload).toBeDefined();
       expect(payload!.iss).toBe('gripday-auth-service');
-      expect(payload!.aud).toBe('gripday-platform');
+      expect(payload!.aud).toBe('gripday');
     });
 
     test('should include unique JWT ID for each token', async () => {
