@@ -397,7 +397,7 @@ Content-Type: application/json
 ## Error Codes Reference
 
 | Code                         | HTTP Status | Description                     |
-| ---------------------------- | ----------- | ------------------------------- |
+|------------------------------|-------------|---------------------------------|
 | VALIDATION_ERROR             | 400         | Request validation failed       |
 | AUTH_INVALID_CREDENTIALS     | 401         | Invalid username/password       |
 | AUTH_INVALID_TOKEN           | 401         | Invalid or expired JWT token    |
