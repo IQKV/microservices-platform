@@ -114,11 +114,10 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <configuration>
                         <excludes>
-                           <exclude>**/dto/*.class</exclude>
-                           <exclude>**/config/*.class</exclude>
-                           <exclude>**/infrastructure/**.class</exclude>
-                           <exclude>**/presentation/**.class</exclude>
-                           <exclude>**/domain/**.class</exclude>
+                           <exclude>**/config/**</exclude>
+                           <exclude>**/infrastructure/**</exclude>
+                           <exclude>**/presentation/**</exclude>
+                           <exclude>**/domain/**</exclude>
                         </excludes>
                     </configuration>
                     <executions>
