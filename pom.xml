@@ -47,7 +47,7 @@
                                 <rules>
                                     <!-- Require Maven 3.9.0+ -->
                                     <requireMavenVersion>
-                                        <version>[3.9.0,)</version>
+                                        <version>[3.8.7,3.9.0,)</version>
                                     </requireMavenVersion>
                                     
                                     <!-- Require Java 21 -->
