@@ -22,7 +22,7 @@ public record UserContext(
     if (this.roles == null) {
       return false;
     }
-    for (String role : roles) {
+    for (final String role : roles) {
       if (this.roles.contains(role)) {
         return true;
       }

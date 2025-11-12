@@ -40,7 +40,7 @@ public class CacheWarmupService {
       warmupFilterOptions();
 
       logger.info("Cache warmup completed successfully");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Cache warmup failed", e);
     }
   }
@@ -53,7 +53,7 @@ public class CacheWarmupService {
     try {
       warmupPopularBooks();
       warmupFilterOptions();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Scheduled cache warmup failed", e);
     }
   }
@@ -125,7 +125,7 @@ public class CacheWarmupService {
     try {
       bookService.findBookById(bookId);
       logger.debug("Warmed up cache for book ID: {}", bookId);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Failed to warm up cache for book ID: {}", bookId, e);
     }
   }

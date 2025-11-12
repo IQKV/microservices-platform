@@ -123,7 +123,7 @@ public class InventoryService {
 
     var results = new ArrayList<InventoryDto>();
 
-    for (var request : requests) {
+    for (final var request : requests) {
       try {
         var inventory = inventoryRepository.findByBookId(request.bookId())
             .orElseThrow(() -> new BookNotFoundException(request.bookId()));
@@ -149,7 +149,7 @@ public class InventoryService {
         var updatedInventory = inventoryRepository.save(inventory);
         results.add(convertToDto(updatedInventory));
 
-      } catch (Exception e) {
+      } catch (final Exception e) {
         logger.error("Failed to update inventory for book ID: {}", request.bookId(), e);
         // Continue with other updates
       }

@@ -28,7 +28,7 @@ public class UserContextExtractor {
     try {
       var jwt = jwtDecoder.decode(jwtToken);
       return extractFromJwt(jwt);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to decode JWT token", e);
       throw new IllegalArgumentException("Invalid JWT token", e);
     }
@@ -71,7 +71,7 @@ public class UserContextExtractor {
     } else if (userIdClaim instanceof String str) {
       try {
         return Long.parseLong(str);
-      } catch (NumberFormatException e) {
+      } catch (final NumberFormatException e) {
         logger.warn("Could not parse userId from string: {}", str);
         return null;
       }
@@ -116,7 +116,7 @@ public class UserContextExtractor {
             .map(Object::toString)
             .collect(Collectors.toSet());
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Error extracting roles from claims", e);
     }
 
@@ -140,7 +140,7 @@ public class UserContextExtractor {
             .map(Object::toString)
             .collect(Collectors.toSet());
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Error extracting permissions from claims", e);
     }
 

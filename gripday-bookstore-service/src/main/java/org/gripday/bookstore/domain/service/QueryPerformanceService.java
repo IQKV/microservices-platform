@@ -38,7 +38,7 @@ public class QueryPerformanceService {
         // Log performance warnings
         checkPerformanceThresholds(metrics);
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Failed to collect performance metrics", e);
     }
   }
@@ -116,7 +116,7 @@ public class QueryPerformanceService {
       var statistics = sessionFactory.getStatistics();
       statistics.clear();
       logger.info("Hibernate statistics reset");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to reset statistics", e);
     }
   }
@@ -148,7 +148,7 @@ public class QueryPerformanceService {
         status.put("status", "UNKNOWN");
         status.put("reason", "No metrics available");
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       status.put("status", "ERROR");
       status.put("error", e.getMessage());
     }

@@ -154,7 +154,7 @@ public class BookstoreMetrics {
   private double getTotalBooks() {
     try {
       return bookRepository.count();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return -1; // Indicate error state
     }
   }
@@ -162,7 +162,7 @@ public class BookstoreMetrics {
   private double getAvailableBooks() {
     try {
       return bookRepository.countByAvailableTrue();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return -1; // Indicate error state
     }
   }
@@ -170,7 +170,7 @@ public class BookstoreMetrics {
   private double getTotalInventoryQuantity() {
     try {
       return inventoryRepository.sumTotalQuantity();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return -1; // Indicate error state
     }
   }
@@ -192,7 +192,7 @@ public class BookstoreMetrics {
 
       updateLowStockCount(lowStockCount);
       updateOutOfStockCount(outOfStockCount);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log error but don't fail the application
       updateLowStockCount(-1);
       updateOutOfStockCount(-1);

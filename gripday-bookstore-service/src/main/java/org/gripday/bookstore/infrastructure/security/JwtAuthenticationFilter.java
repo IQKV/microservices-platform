@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           logger.debug("User context extracted for user: {} with roles: {}",
               userContext.username(), userContext.roles());
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
           logger.warn("Failed to extract user context from JWT", e);
           // Continue without user context for public endpoints
         }
