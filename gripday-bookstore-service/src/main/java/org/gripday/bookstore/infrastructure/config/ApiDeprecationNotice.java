@@ -52,10 +52,8 @@ public class ApiDeprecationNotice {
    * Get migration information for deprecated versions
    */
   public String getMigrationInfo(String deprecatedVersion) {
-    // Avoid unused return value warning by directly returning the switch result
-    return switch (deprecatedVersion) {
-      // Future deprecation cases can be added here
-      default -> "Please migrate to the latest version for continued support.";
-    };
+    // Future deprecation cases can be added here based on version
+    // For now, return default migration message
+    return "Please migrate to the latest version for continued support.";
   }
 }
