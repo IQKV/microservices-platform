@@ -20,7 +20,6 @@ import org.gripday.bookstore.infrastructure.repository.CategoryRepository;
 import org.gripday.bookstore.infrastructure.security.AuditLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -82,7 +81,6 @@ public class BookService {
         .map(this::convertToDto);
   }
 
-  @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
