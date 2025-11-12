@@ -1,12 +1,6 @@
 package org.gripday.authservice.config;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.time.Duration;
-import java.util.UUID;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -22,7 +16,6 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,7 +23,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Configuration for observability features including OpenTelemetry, metrics, and logging. Provides correlation ID generation, MDC management, and custom metrics with environment-specific
@@ -103,14 +95,6 @@ public class ObservabilityConfig {
   }
 
   /**
-   * Filter to add correlation ID and trace information to MDC for structured logging.
-   */
-  @Bean
-  public CorrelationIdFilter correlationIdFilter() {
-    return new CorrelationIdFilter();
-  }
-
-  /**
    * Custom metrics for authentication service monitoring.
    */
   @Bean
@@ -124,56 +108,6 @@ public class ObservabilityConfig {
   private String getActiveProfile() {
     var activeProfiles = environment.getActiveProfiles();
     return activeProfiles.length > 0 ? activeProfiles[0] : "default";
-  }
-
-  /**
-   * Filter that adds correlation ID and trace information to MDC.
-   */
-  public static class CorrelationIdFilter extends OncePerRequestFilter {
-
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-    private static final String REQUEST_ID_HEADER = "X-Request-ID";
-    private static final String TENANT_ID_HEADER = "X-Tenant-ID";
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain) throws ServletException, IOException {
-
-      try {
-        // Generate or extract correlation ID
-        var correlationId = getOrGenerateCorrelationId(request);
-        var requestId = getOrGenerateRequestId(request);
-        var tenantId = request.getHeader(TENANT_ID_HEADER);
-
-        // Add to MDC for logging
-        MDC.put("correlationId", correlationId);
-        MDC.put("requestId", requestId);
-        if (tenantId != null) {
-          MDC.put("tenantId", tenantId);
-        }
-
-        // Add to response headers
-        response.setHeader(CORRELATION_ID_HEADER, correlationId);
-        response.setHeader(REQUEST_ID_HEADER, requestId);
-
-        filterChain.doFilter(request, response);
-
-      } finally {
-        // Clean up MDC
-        MDC.clear();
-      }
-    }
-
-    private String getOrGenerateCorrelationId(HttpServletRequest request) {
-      var correlationId = request.getHeader(CORRELATION_ID_HEADER);
-      return correlationId != null ? correlationId : UUID.randomUUID().toString();
-    }
-
-    private String getOrGenerateRequestId(HttpServletRequest request) {
-      var requestId = request.getHeader(REQUEST_ID_HEADER);
-      return requestId != null ? requestId : "req-" + System.currentTimeMillis();
-    }
   }
 
   /**

@@ -155,10 +155,10 @@ class ObservabilityConfigTest {
   @Test
   void shouldCreateCorrelationIdFilter() {
     // Given & When
-    var filter = new ObservabilityConfig.CorrelationIdFilter();
+    var filter = new CorrelationIdFilter();
 
     // Then
     assertThat(filter).isNotNull();
-    assertThat(filter).isInstanceOf(ObservabilityConfig.CorrelationIdFilter.class);
+    assertThat(filter).isInstanceOf(CorrelationIdFilter.class);
   }
 }
