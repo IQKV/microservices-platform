@@ -86,7 +86,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       byte[] body = objectMapper.writeValueAsBytes(pd);
       var buffer = response.bufferFactory().wrap(body);
       return response.writeWith(Mono.just(buffer));
-    } catch (Exception writeEx) {
+    } catch (final Exception writeEx) {
       var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
           "  \"title\": \"" + pd.getTitle() + "\",\n" +
           "  \"status\": " + pd.getStatus() + ",\n" +

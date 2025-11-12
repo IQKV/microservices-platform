@@ -58,7 +58,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     try {
       var secretKeyBytes = gatewayProperties.security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
       return Keys.hmacShaKeyFor(secretKeyBytes);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new IllegalStateException("Failed to initialize JWT secret key", e);
     }
   }
@@ -108,7 +108,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
       return chain.filter(modifiedExchange);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("JWT authentication failed for path: {}", path, e);
       return handleAuthenticationError(exchange, "Invalid authentication token");
     } finally {
@@ -259,7 +259,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
       byte[] body = objectMapper.writeValueAsBytes(pd);
       var buffer = response.bufferFactory().wrap(body);
       return response.writeWith(Mono.just(buffer));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
           "  \"title\": \"" + pd.getTitle() + "\",\n" +
           "  \"status\": " + pd.getStatus() + ",\n" +

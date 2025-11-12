@@ -95,7 +95,7 @@ class ApiVersionRoutingFilterTest {
     var version = "v1";
 
     // When & Then
-    for (var path : paths) {
+    for (final var path : paths) {
       var transformedPath = routingFilter.transformPathForVersion(path, version);
       assertThat(transformedPath).isEqualTo(path);
     }
@@ -142,7 +142,7 @@ class ApiVersionRoutingFilterTest {
     };
 
     // When & Then
-    for (var testCase : testCases) {
+    for (final var testCase : testCases) {
       var originalPath = testCase[0];
       var version = testCase[1];
       var expectedPath = testCase[2];
@@ -175,7 +175,7 @@ class ApiVersionRoutingFilterTest {
     var version = "v1";
 
     // When & Then
-    for (var path : workflowPaths) {
+    for (final var path : workflowPaths) {
       var transformedPath = routingFilter.transformPathForVersion(path, version);
       assertThat(transformedPath).startsWith("/api/v1/");
       assertThat(transformedPath).contains(path.substring("/api/".length()));

@@ -136,7 +136,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
     }
 
     // Check for pattern matches
-    for (var entry : policies.endpoints().entrySet()) {
+    for (final var entry : policies.endpoints().entrySet()) {
       var pattern = entry.getKey();
       if (pathMatches(path, pattern)) {
         return entry.getValue();
@@ -237,7 +237,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
       byte[] body = objectMapper.writeValueAsBytes(pd);
       var buffer = response.bufferFactory().wrap(body);
       return response.writeWith(Mono.just(buffer));
-    } catch (Exception e) {
+    } catch (final Exception e) {
       var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
           "  \"title\": \"" + pd.getTitle() + "\",\n" +
           "  \"status\": " + pd.getStatus() + ",\n" +
