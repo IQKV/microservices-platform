@@ -21,7 +21,7 @@ public abstract class TenantAwareEntity {
   }
 
   // Constructor with tenant ID
-  protected TenantAwareEntity(String tenantId) {
+  protected TenantAwareEntity(final String tenantId) {
     this.tenantId = tenantId;
   }
 

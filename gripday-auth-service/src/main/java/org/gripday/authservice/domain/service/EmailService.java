@@ -76,12 +76,12 @@ public class EmailService implements EmailOperations {
       logger.info("Verification email sent successfully to user: {} ({})",
           user.getUsername(), user.getEmail());
 
-    } catch (MessagingException e) {
+    } catch (final MessagingException e) {
       metricsService.recordEmailSendFailed();
       logger.error("Failed to create verification email for user: {} ({})",
           user.getUsername(), user.getEmail(), e);
       throw new EmailServiceException("Failed to create verification email", e);
-    } catch (MailException e) {
+    } catch (final MailException e) {
       metricsService.recordEmailSendFailed();
       logger.error("Failed to send verification email to user: {} ({})",
           user.getUsername(), user.getEmail(), e);

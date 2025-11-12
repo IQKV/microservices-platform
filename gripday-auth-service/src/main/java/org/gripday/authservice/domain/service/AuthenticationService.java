@@ -229,7 +229,7 @@ public class AuthenticationService {
 
       return new TokenResponse(accessToken, refreshToken, expiresIn, userContext, sessionId);
 
-    } catch (AuthenticationException | AccountLockedException | EmailVerificationRequiredException e) {
+    } catch (final AuthenticationException | AccountLockedException | EmailVerificationRequiredException e) {
       throw e;
     } catch (final Exception e) {
       securityAuditService.logFailedAuthentication(
@@ -338,7 +338,7 @@ public class AuthenticationService {
           userContext
       );
 
-    } catch (JwtException e) {
+    } catch (final JwtException e) {
       throw new AuthenticationException("Invalid or expired refresh token", e);
     } catch (final Exception e) {
       throw new AuthenticationException("Token refresh failed", e);
