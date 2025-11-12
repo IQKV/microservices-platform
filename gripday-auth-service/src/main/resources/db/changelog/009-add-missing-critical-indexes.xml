@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="9.1" author="gripday">
+        <comment>Add missing critical index for unverified users query optimization</comment>
+
+        <createIndex indexName="idx_users_tenant_email_verified" tableName="users">
+            <column name="tenant_id"/>
+            <column name="email_verified"/>
+            <column name="enabled"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_users_tenant_email_verified" tableName="users"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9.2" author="gripday">
+        <comment>Add missing critical indexes for email verification token queries</comment>
+
+        <!-- Index for finding unused tokens by user -->
+        <createIndex indexName="idx_email_verification_user_used" tableName="email_verification_tokens">
+            <column name="user_id"/>
+            <column name="used"/>
+        </createIndex>
+
+        <!-- Composite index for token validation with expiration check -->
+        <createIndex indexName="idx_email_verification_token_used" tableName="email_verification_tokens">
+            <column name="token"/>
+            <column name="used"/>
+            <column name="expires_at"/>
+        </createIndex>
+
+        <!-- Composite index for multi-tenant token management -->
+        <createIndex indexName="idx_email_verification_tenant_user_used" tableName="email_verification_tokens">
+            <column name="tenant_id"/>
+            <column name="user_id"/>
+            <column name="used"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <!-- Index for rate limiting queries -->
+        <createIndex indexName="idx_email_verification_user_created" tableName="email_verification_tokens">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="created_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_email_verification_user_used" tableName="email_verification_tokens"/>
+            <dropIndex indexName="idx_email_verification_token_used" tableName="email_verification_tokens"/>
+            <dropIndex indexName="idx_email_verification_tenant_user_used" tableName="email_verification_tokens"/>
+            <dropIndex indexName="idx_email_verification_user_created" tableName="email_verification_tokens"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9.3" author="gripday">
+        <comment>Add missing critical indexes for user audit log queries</comment>
+
+        <!-- Composite index for user-specific audit queries in multi-tenant context -->
+        <createIndex indexName="idx_user_audit_log_user_tenant_created" tableName="user_audit_log">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_user_audit_log_user_tenant_created" tableName="user_audit_log"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9.4" author="gripday" dbms="postgresql">
+        <comment>Add partial index for failed login attempts (PostgreSQL only)</comment>
+
+        <!-- Partial index for efficient failed login tracking and account lockout detection -->
+        <sql>
+            CREATE INDEX idx_user_audit_log_login_failures
+            ON user_audit_log(user_id, tenant_id, action, created_at DESC)
+            WHERE action = 'LOGIN_FAILURE';
+        </sql>
+
+        <rollback>
+            <sql>DROP INDEX IF EXISTS idx_user_audit_log_login_failures;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9.5" author="gripday" dbms="!postgresql">
+        <comment>Add regular index for failed login attempts (non-PostgreSQL databases)</comment>
+
+        <!-- Regular composite index for databases that don't support partial indexes -->
+        <createIndex indexName="idx_user_audit_log_login_failures" tableName="user_audit_log">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="action"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_user_audit_log_login_failures" tableName="user_audit_log"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9.6" author="gripday">
+        <comment>Add missing critical index for organization queries</comment>
+
+        <!-- Composite index for enabled organization queries by tenant -->
+        <createIndex indexName="idx_organizations_tenant_enabled" tableName="organizations">
+            <column name="tenant_id"/>
+            <column name="enabled"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_organizations_tenant_enabled" tableName="organizations"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

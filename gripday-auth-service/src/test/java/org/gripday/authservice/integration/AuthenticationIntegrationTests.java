@@ -46,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
     "gripday.cache.redis.enabled=false"
 })
 @Transactional
-class AuthenticationIntegrationTest {
+class AuthenticationIntegrationTests {
 
   @Autowired
   private WebApplicationContext webApplicationContext;

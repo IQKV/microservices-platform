@@ -52,7 +52,7 @@ import org.springframework.web.context.WebApplicationContext;
     "spring.mail.port=1025"
 })
 @Transactional
-class EmailVerificationIntegrationTest {
+class EmailVerificationIntegrationTests {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
