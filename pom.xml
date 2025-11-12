@@ -118,6 +118,8 @@
                            <exclude>**/infrastructure/**</exclude>
                            <exclude>**/presentation/**</exclude>
                            <exclude>**/domain/**</exclude>
+                           <exclude>**/security/**</exclude>
+                           <exclude>**/filter/**</exclude>
                            <exclude>**/*Application.class</exclude>
                         </excludes>
                     </configuration>
