@@ -45,7 +45,6 @@ steps:
       - mvn -version
       - pnpm install && pnpm lint
       - mvn clean verify -Dstyle.color=always -Dmaven.javadoc.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
-      - mvn install -Dstyle.color=always -Dmaven.javadoc.skip=true -DskipTests -Dmaven.test.skip=true --file shared/pom.xml -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
 
   - name: static-analysis-gate
     depends_on:
