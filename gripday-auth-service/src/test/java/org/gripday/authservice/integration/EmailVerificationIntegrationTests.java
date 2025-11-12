@@ -40,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Integration tests for email verification endpoints focusing on core functionality. Tests complete email verification flows with valid tokens and multi-tenant isolation.
  */
-@SpringBootTest(classes = AuthServiceApplication.class)
+@SpringBootTest(classes = {AuthServiceApplication.class, org.gripday.authservice.config.TestDataSourceConfig.class})
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
