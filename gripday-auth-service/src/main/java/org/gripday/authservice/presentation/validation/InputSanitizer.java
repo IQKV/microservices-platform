@@ -76,7 +76,7 @@ public class InputSanitizer {
       return email;
     }
 
-    var sanitized = email.trim().toLowerCase();
+    var sanitized = email.trim().toLowerCase(java.util.Locale.ROOT);
 
     // HTML encode
     sanitized = HtmlUtils.htmlEscape(sanitized);
@@ -112,7 +112,7 @@ public class InputSanitizer {
       return false;
     }
 
-    return SQL_INJECTION_PATTERN.matcher(input.toLowerCase()).find();
+    return SQL_INJECTION_PATTERN.matcher(input.toLowerCase(java.util.Locale.ROOT)).find();
   }
 
   /**
@@ -123,7 +123,7 @@ public class InputSanitizer {
       return true;
     }
 
-    var lowerInput = input.toLowerCase();
+    var lowerInput = input.toLowerCase(java.util.Locale.ROOT);
 
     return !SCRIPT_PATTERN.matcher(lowerInput).find()
         && !JAVASCRIPT_PATTERN.matcher(lowerInput).find()

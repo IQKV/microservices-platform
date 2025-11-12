@@ -54,7 +54,7 @@ public record LoginRequest(
   // Compact constructor for input sanitization
   public LoginRequest {
     // Trim inputs and normalize email case
-    username = username != null ? username.trim().toLowerCase() : null;
+    username = username != null ? username.trim().toLowerCase(java.util.Locale.ROOT) : null;
     // Note: Don't trim password as it might be intentionally padded
   }
 }

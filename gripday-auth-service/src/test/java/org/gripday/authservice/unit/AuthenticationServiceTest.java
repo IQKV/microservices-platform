@@ -478,7 +478,8 @@ class AuthenticationServiceTest {
       idField.setAccessible(true);
       idField.set(user, id);
     } catch (Exception e) {
-      // Ignore for test purposes
+      // Log exception for debugging test failures
+      System.err.println("Failed to set user ID via reflection: " + e.getMessage());
     }
 
     return user;

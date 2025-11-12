@@ -30,7 +30,7 @@ public class UsernameValidator implements ConstraintValidator<ValidUsername, Str
       return false;
     }
 
-    var trimmedUsername = username.trim().toLowerCase();
+    var trimmedUsername = username.trim().toLowerCase(java.util.Locale.ROOT);
 
     // Check pattern match
     if (!USERNAME_PATTERN.matcher(username).matches()) {

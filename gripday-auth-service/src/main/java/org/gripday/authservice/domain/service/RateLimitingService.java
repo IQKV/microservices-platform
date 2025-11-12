@@ -39,6 +39,11 @@ public class RateLimitingService {
       // Count current requests in the window
       var currentCount = redisTemplate.opsForZSet().count(key, windowStart, currentTime);
 
+      // Null check for count result
+      if (currentCount == null) {
+        return true; // Fail open if Redis returns null
+      }
+
       if (currentCount >= MAX_ATTEMPTS_PER_MINUTE) {
         return false;
       }
@@ -68,6 +73,12 @@ public class RateLimitingService {
 
     try {
       var currentCount = redisTemplate.opsForZSet().count(key, windowStart, currentTime);
+      
+      // Null check for count result
+      if (currentCount == null) {
+        return MAX_ATTEMPTS_PER_MINUTE;
+      }
+      
       return Math.max(0, MAX_ATTEMPTS_PER_MINUTE - currentCount.intValue());
     } catch (Exception e) {
       return MAX_ATTEMPTS_PER_MINUTE;
@@ -86,7 +97,8 @@ public class RateLimitingService {
       // Get the oldest request in the current window
       var oldestRequests = redisTemplate.opsForZSet().rangeByScore(key, windowStart, currentTime, 0, 1);
 
-      if (oldestRequests.isEmpty()) {
+      // Null check for rangeByScore result
+      if (oldestRequests == null || oldestRequests.isEmpty()) {
         return Duration.ZERO;
       }
 

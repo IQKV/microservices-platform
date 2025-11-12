@@ -89,7 +89,7 @@ class AuthenticationIntegrationTest {
     );
 
     // When & Then
-    var result = mockMvc.perform(post("/api/v1/auth/signup")
+    mockMvc.perform(post("/api/v1/auth/signup")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(signupRequest)))
         .andExpect(status().isCreated())
@@ -99,8 +99,7 @@ class AuthenticationIntegrationTest {
         .andExpect(jsonPath("$.firstName").value("John"))
         .andExpect(jsonPath("$.lastName").value("Doe"))
         .andExpect(jsonPath("$.emailVerified").value(false))
-        .andExpect(jsonPath("$.message").value("User registered successfully. Please verify your email."))
-        .andReturn();
+        .andExpect(jsonPath("$.message").value("User registered successfully. Please verify your email."));
 
     // Verify user was created in database
     var savedUser = userRepository.findByUsername("newuser");
@@ -113,7 +112,7 @@ class AuthenticationIntegrationTest {
   @Test
   void login_WithValidCredentials_ShouldReturn200WithToken() throws Exception {
     // Given - Create a test user
-    var testUser = createTestUser("testuser", "test@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("testuser", "test@example.com", "ValidPass123!", "tenant-1");
 
     var loginRequest = new LoginRequest("testuser", "ValidPass123!", false);
 
@@ -148,7 +147,7 @@ class AuthenticationIntegrationTest {
   @Test
   void login_WithEmailAsUsername_ShouldReturn200WithToken() throws Exception {
     // Given - Create a test user
-    var testUser = createTestUser("emailuser", "email@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("emailuser", "email@example.com", "ValidPass123!", "tenant-1");
 
     var loginRequest = new LoginRequest("email@example.com", "ValidPass123!", false);
 
@@ -165,7 +164,7 @@ class AuthenticationIntegrationTest {
   @Test
   void login_WithRememberMe_ShouldReturnLongerExpiry() throws Exception {
     // Given - Create a test user
-    var testUser = createTestUser("rememberuser", "remember@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("rememberuser", "remember@example.com", "ValidPass123!", "tenant-1");
 
     var loginRequest = new LoginRequest("rememberuser", "ValidPass123!", true);
 
@@ -181,7 +180,7 @@ class AuthenticationIntegrationTest {
   @Test
   void refreshToken_WithValidRefreshToken_ShouldReturn200WithNewToken() throws Exception {
     // Given - Create user and get initial tokens
-    var testUser = createTestUser("refreshuser", "refresh@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("refreshuser", "refresh@example.com", "ValidPass123!", "tenant-1");
 
     // First, login to get refresh token
     var loginRequest = new LoginRequest("refreshuser", "ValidPass123!", false);
@@ -212,7 +211,7 @@ class AuthenticationIntegrationTest {
   @Test
   void logout_WithValidToken_ShouldReturn200() throws Exception {
     // Given - Create user and login
-    var testUser = createTestUser("logoutuser", "logout@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("logoutuser", "logout@example.com", "ValidPass123!", "tenant-1");
 
     var loginRequest = new LoginRequest("logoutuser", "ValidPass123!", false);
     var loginResult = mockMvc.perform(post("/api/v1/auth/login")
@@ -235,8 +234,8 @@ class AuthenticationIntegrationTest {
   @Test
   void authenticationFlow_WithTenantIsolation_ShouldMaintainSeparation() throws Exception {
     // Given - Create users in different tenants with same username
-    var user1 = createTestUser("sameuser", "user1@example.com", "ValidPass123!", "tenant-1");
-    var user2 = createTestUser("sameuser2", "user2@example.com", "ValidPass123!", "tenant-2");
+    createTestUser("sameuser", "user1@example.com", "ValidPass123!", "tenant-1");
+    createTestUser("sameuser2", "user2@example.com", "ValidPass123!", "tenant-2");
 
     // When - Login as user from tenant-1
     var loginRequest1 = new LoginRequest("sameuser", "ValidPass123!", false);

@@ -105,7 +105,7 @@ public record SignupRequest(
 
     // Trim all string inputs to prevent whitespace issues
     username = username != null ? username.trim() : null;
-    email = email != null ? email.trim().toLowerCase() : null;
+    email = email != null ? email.trim().toLowerCase(java.util.Locale.ROOT) : null;
     firstName = firstName != null ? firstName.trim() : null;
     lastName = lastName != null ? lastName.trim() : null;
     tenantId = tenantId.trim();

@@ -256,8 +256,8 @@ class UserManagementIntegrationTest {
   @Test
   void userManagement_WithTenantIsolation_ShouldOnlyAccessSameTenant() throws Exception {
     // Given - Create users in different tenants
-    var tenant1User = createTestUser("tenant1user", "tenant1@example.com", "tenant-1", Set.of("USER"));
-    var tenant2User = createTestUser("tenant2user", "tenant2@example.com", "tenant-2", Set.of("USER"));
+    createTestUser("tenant1user", "tenant1@example.com", "tenant-1", Set.of("USER"));
+    createTestUser("tenant2user", "tenant2@example.com", "tenant-2", Set.of("USER"));
 
     // When - Admin from tenant-1 tries to access users
     var result = mockMvc.perform(get("/api/v1/users")
@@ -383,15 +383,15 @@ class UserManagementIntegrationTest {
 
   private void createTestUsersAndTokens() throws Exception {
     // Create admin user
-    var adminUser = createTestUser("admin", "admin@example.com", "tenant-1", Set.of("ADMIN"));
+    createTestUser("admin", "admin@example.com", "tenant-1", Set.of("ADMIN"));
     adminToken = getTokenForUser("admin", "ValidPass123!");
 
     // Create super admin user
-    var superAdminUser = createTestUser("superadmin", "superadmin@example.com", "tenant-1", Set.of("SUPER_ADMIN"));
+    createTestUser("superadmin", "superadmin@example.com", "tenant-1", Set.of("SUPER_ADMIN"));
     superAdminToken = getTokenForUser("superadmin", "ValidPass123!");
 
     // Create regular user
-    var regularUser = createTestUser("testuser", "testuser@example.com", "tenant-1", Set.of("USER"));
+    createTestUser("testuser", "testuser@example.com", "tenant-1", Set.of("USER"));
     userToken = getTokenForUser("testuser", "ValidPass123!");
   }
 

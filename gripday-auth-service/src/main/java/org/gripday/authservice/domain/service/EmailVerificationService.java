@@ -152,7 +152,7 @@ public class EmailVerificationService {
 
     // Activate user account
     user.setEmailVerified(true);
-    var verifiedUser = userRepository.save(user);
+    userRepository.save(user);
 
     // Record successful verification
     metricsService.recordVerificationSuccess();

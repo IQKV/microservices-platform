@@ -239,7 +239,7 @@ public class GlobalExceptionHandler {
    * Determine authentication error code using switch expression.
    */
   private String determineAuthErrorCode(String message) {
-    return switch (message.toLowerCase()) {
+    return switch (message.toLowerCase(java.util.Locale.ROOT)) {
       case String msg when msg.contains("invalid username") || msg.contains("invalid password") -> "AUTH_INVALID_CREDENTIALS";
       case String msg when msg.contains("account is disabled") -> "AUTH_ACCOUNT_DISABLED";
       case String msg when msg.contains("account is locked") -> "AUTH_ACCOUNT_LOCKED";
@@ -254,7 +254,7 @@ public class GlobalExceptionHandler {
    * Determine registration error code using switch expression.
    */
   private String determineRegistrationErrorCode(String message) {
-    return switch (message.toLowerCase()) {
+    return switch (message.toLowerCase(java.util.Locale.ROOT)) {
       case String msg when msg.contains("username already exists") || msg.contains("email already exists") -> "USER_ALREADY_EXISTS";
       case String msg when msg.contains("invalid email") -> "VALIDATION_INVALID_EMAIL";
       case String msg when msg.contains("password") -> "VALIDATION_INVALID_PASSWORD";
@@ -268,7 +268,7 @@ public class GlobalExceptionHandler {
    * Determine user management error code using switch expression.
    */
   private String determineUserManagementErrorCode(String message) {
-    return switch (message.toLowerCase()) {
+    return switch (message.toLowerCase(java.util.Locale.ROOT)) {
       case String msg when msg.contains("username already exists") || msg.contains("email already exists") -> "USER_ALREADY_EXISTS";
       case String msg when msg.contains("user not found") -> "USER_NOT_FOUND";
       case String msg when msg.contains("cannot delete your own account") -> "USER_SELF_DELETE_FORBIDDEN";
@@ -281,7 +281,7 @@ public class GlobalExceptionHandler {
    * Determine email verification error code using switch expression.
    */
   private String determineEmailVerificationErrorCode(String message) {
-    return switch (message.toLowerCase()) {
+    return switch (message.toLowerCase(java.util.Locale.ROOT)) {
       case String msg when msg.contains("invalid") && msg.contains("token") -> "EMAIL_VERIFICATION_TOKEN_INVALID";
       case String msg when msg.contains("expired") && msg.contains("token") -> "EMAIL_VERIFICATION_TOKEN_EXPIRED";
       case String msg when msg.contains("already verified") -> "EMAIL_ALREADY_VERIFIED";

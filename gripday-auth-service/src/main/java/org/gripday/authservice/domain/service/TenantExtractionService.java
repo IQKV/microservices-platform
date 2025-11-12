@@ -127,7 +127,7 @@ public class TenantExtractionService {
 
     if (host != null && !host.trim().isEmpty()) {
       // Extract subdomain using pattern matching
-      var hostLower = host.toLowerCase().trim();
+      var hostLower = host.toLowerCase(java.util.Locale.ROOT).trim();
 
       // Skip localhost and IP addresses
       if (hostLower.startsWith("localhost")

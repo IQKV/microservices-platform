@@ -30,8 +30,8 @@ public class AccountLockoutService {
    * Record a failed login attempt for a user. Returns true if the account should be locked.
    */
   public boolean recordFailedAttempt(String username) {
-    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase();
-    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase();
+    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
+    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       // Check if account is already locked
@@ -41,6 +41,11 @@ public class AccountLockoutService {
 
       // Increment failed attempts counter
       var failedAttempts = redisTemplate.opsForValue().increment(failedAttemptsKey);
+
+      // Null check for increment result
+      if (failedAttempts == null) {
+        return false;
+      }
 
       // Set expiration for failed attempts counter
       redisTemplate.expire(failedAttemptsKey, FAILED_ATTEMPTS_WINDOW.toSeconds(), TimeUnit.SECONDS);
@@ -71,7 +76,7 @@ public class AccountLockoutService {
    * Check if an account is currently locked.
    */
   public boolean isAccountLocked(String username) {
-    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase();
+    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       var lockoutExpiryStr = redisTemplate.opsForValue().get(lockoutKey);
@@ -101,7 +106,7 @@ public class AccountLockoutService {
    * Clear failed attempts for a user (called on successful login).
    */
   public void clearFailedAttempts(String username) {
-    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase();
+    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       redisTemplate.delete(failedAttemptsKey);
@@ -114,7 +119,7 @@ public class AccountLockoutService {
    * Get the number of failed attempts for a user.
    */
   public int getFailedAttempts(String username) {
-    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase();
+    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       var failedAttemptsStr = redisTemplate.opsForValue().get(failedAttemptsKey);
@@ -128,7 +133,7 @@ public class AccountLockoutService {
    * Get remaining time until account unlock.
    */
   public Duration getTimeUntilUnlock(String username) {
-    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase();
+    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       var lockoutExpiryStr = redisTemplate.opsForValue().get(lockoutKey);
@@ -152,8 +157,8 @@ public class AccountLockoutService {
    * Manually unlock an account (for admin purposes).
    */
   public void unlockAccount(String username) {
-    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase();
-    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase();
+    var failedAttemptsKey = FAILED_ATTEMPTS_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
+    var lockoutKey = LOCKOUT_PREFIX + username.toLowerCase(java.util.Locale.ROOT);
 
     try {
       redisTemplate.delete(failedAttemptsKey);

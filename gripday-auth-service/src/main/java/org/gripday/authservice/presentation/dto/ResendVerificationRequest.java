@@ -34,6 +34,6 @@ public record ResendVerificationRequest(
   // Compact constructor for input sanitization
   public ResendVerificationRequest {
     // Trim and normalize email case
-    email = email != null ? email.trim().toLowerCase() : null;
+    email = email != null ? email.trim().toLowerCase(java.util.Locale.ROOT) : null;
   }
 }
