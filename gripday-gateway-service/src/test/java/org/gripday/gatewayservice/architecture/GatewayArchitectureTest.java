@@ -156,32 +156,5 @@ class GatewayArchitectureTest {
               "org.springframework.cloud.gateway.."
           );
 
-  /**
-   * Validates that no circular dependencies exist between gateway components. Ensures clean separation of concerns and maintainable architecture.
-   */
-  @Test
-  void should_not_have_circular_dependencies() {
-    var classes = new ClassFileImporter().importPackages("org.gripday.gatewayservice");
 
-    // Verify no cycles between major component groups
-    classes.that(resideInAPackage("..config.."));
-    classes.that(resideInAPackage("..filter.."));
-    classes.that(resideInAPackage("..security.."));
-    classes.that(resideInAPackage("..service.."));
-
-    // Additional validation can be added here for specific circular dependency checks
-    // This test serves as a placeholder for more complex cycle detection if needed
-  }
-
-  /**
-   * Ensures proper dependency direction in gateway architecture. Validates that components depend on appropriate abstractions.
-   */
-  @Test
-  void should_have_proper_dependency_direction() {
-    new ClassFileImporter().importPackages("org.gripday.gatewayservice");
-
-    // Validate that filters don't depend on configuration details inappropriately
-    // Validate that services are properly abstracted
-    // Additional architectural validations can be added here
-  }
 }

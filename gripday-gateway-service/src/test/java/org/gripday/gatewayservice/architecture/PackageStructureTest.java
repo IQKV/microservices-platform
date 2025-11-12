@@ -180,35 +180,5 @@ class PackageStructureTest {
     assertThat(unexpectedPackages).isEmpty();
   }
 
-  /**
-   * Validates that three-tier architecture packages are properly structured. Ensures consistency with platform-wide architectural standards.
-   */
-  @Test
-  void should_support_three_tier_architecture_if_present() {
-    var classes = new ClassFileImporter().importPackages("org.gripday.gatewayservice");
 
-    // Check if three-tier packages exist
-    var presentationClasses = classes.that(resideInAPackage("..presentation.."));
-    var domainClasses = classes.that(resideInAPackage("..domain.."));
-    var infrastructureClasses = classes.that(resideInAPackage("..infrastructure.."));
-
-    // If three-tier packages exist, validate their structure
-    if (!presentationClasses.isEmpty()) {
-      // Presentation layer should contain web controllers
-      classes.that(resideInAPackage("..presentation.web.."));
-      // Web classes should exist if presentation layer exists
-    }
-
-    if (!domainClasses.isEmpty()) {
-      // Domain layer should contain services
-      classes.that(resideInAPackage("..domain.service.."));
-      // Service classes should exist if domain layer exists
-    }
-
-    if (!infrastructureClasses.isEmpty()) {
-      // Infrastructure layer should contain repositories
-      classes.that(resideInAPackage("..infrastructure.repository.."));
-      // Repository classes should exist if infrastructure layer exists
-    }
-  }
 }
