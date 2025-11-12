@@ -320,10 +320,10 @@ This index optimization initiative addresses critical performance gaps in the au
 
 ## Approval & Sign-off
 
-- [ ] Technical Review: ********\_\_\_******** Date: ****\_\_\_****
-- [ ] Security Review: ********\_\_\_******** Date: ****\_\_\_****
-- [ ] Performance Review: ********\_\_\_******** Date: ****\_\_\_****
-- [ ] Production Deployment: ********\_\_\_******** Date: ****\_\_\_****
+- [ ] Technical Review: **\*\*\*\***\_\_\_**\*\*\*\*** Date: \***\*\_\_\_\*\***
+- [ ] Security Review: **\*\*\*\***\_\_\_**\*\*\*\*** Date: \***\*\_\_\_\*\***
+- [ ] Performance Review: **\*\*\*\***\_\_\_**\*\*\*\*** Date: \***\*\_\_\_\*\***
+- [ ] Production Deployment: **\*\*\*\***\_\_\_**\*\*\*\*** Date: \***\*\_\_\_\*\***
 
 ---
 
