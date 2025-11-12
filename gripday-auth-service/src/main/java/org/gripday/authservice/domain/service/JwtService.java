@@ -85,7 +85,7 @@ public class JwtService {
       }
 
       return jwt;
-    } catch (JwtException e) {
+    } catch (final JwtException e) {
       throw new JwtException("Invalid or expired token", e);
     }
   }
@@ -128,7 +128,7 @@ public class JwtService {
           redisTemplate.opsForValue().set(blacklistKey, "true", ttl, TimeUnit.SECONDS);
         }
       }
-    } catch (JwtException e) {
+    } catch (final JwtException e) {
       // Token is already invalid, no need to blacklist
     }
   }
@@ -174,7 +174,7 @@ public class JwtService {
     try {
       var revokedAt = Instant.ofEpochSecond(Long.parseLong(revokedAtStr));
       return tokenIssuedAt.isBefore(revokedAt);
-    } catch (NumberFormatException e) {
+    } catch (final NumberFormatException e) {
       return false;
     }
   }
@@ -238,7 +238,7 @@ public class JwtService {
       case String s -> {
         try {
           yield Long.parseLong(s);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
           yield null;
         }
       }

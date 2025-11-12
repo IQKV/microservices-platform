@@ -362,7 +362,7 @@ public class AuthenticationResource {
         var userId = Long.parseLong(subject);
         authenticationService.logoutFromAllDevices(userId);
         return ResponseEntity.noContent().build();
-      } catch (NumberFormatException ex) {
+      } catch (final NumberFormatException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
       }
     }
@@ -448,7 +448,7 @@ public class AuthenticationResource {
           user
       );
       return ResponseEntity.ok(response);
-    } catch (Exception ex) {
+    } catch (final Exception ex) {
       var response = new ValidateTokenResponse(false, null, null, null, null, null);
       return ResponseEntity.ok(response);
     }

@@ -187,7 +187,7 @@ public class SecurityAuditService {
       // Save to database
       auditLogRepository.save(auditLog);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Don't let audit logging failures break the main flow
       logger.error("Failed to save security audit log: {}", e.getMessage(), e);
     }

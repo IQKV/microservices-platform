@@ -258,7 +258,7 @@ public class OrganizationManagementService {
 
       logger.info("Organization management audit: {} - {} by user {} in tenant {}",
           action, details, currentUser.username(), currentUser.tenantId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to log audit event: {}", e.getMessage(), e);
     }
   }

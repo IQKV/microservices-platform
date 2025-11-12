@@ -121,7 +121,7 @@ public class UserRegistrationService {
     // Generate verification token and send verification email
     try {
       emailVerificationService.generateVerificationToken(savedUser);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Failed to send verification email to user: {} ({})",
           savedUser.getUsername(), savedUser.getEmail(), e);
       // Don't fail registration if email sending fails

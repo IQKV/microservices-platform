@@ -100,7 +100,7 @@ class EmailVerificationMetricsServiceTest {
     // Simulate some work
     try {
       Thread.sleep(10);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
     }
 
@@ -120,7 +120,7 @@ class EmailVerificationMetricsServiceTest {
     // Simulate some work
     try {
       Thread.sleep(10);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       Thread.currentThread().interrupt();
     }
 

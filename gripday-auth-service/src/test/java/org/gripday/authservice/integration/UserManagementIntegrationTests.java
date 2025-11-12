@@ -400,7 +400,7 @@ class UserManagementIntegrationTests {
     var user = new User(username, email, hashedPassword, "Test", "User", tenantId);
 
     // Add authorities
-    for (var roleName : roleNames) {
+    for (final var roleName : roleNames) {
       var authority = authorityRepository.findByName(roleName).orElseThrow();
       user.addAuthority(authority);
     }

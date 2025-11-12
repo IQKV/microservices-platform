@@ -59,7 +59,7 @@ class RedisConfigTest {
       redisTemplate.delete(TEST_TENANT_ID + ":" + TEST_KEY);
       redisTemplate.delete("session:" + TEST_KEY);
       redisTemplate.delete("user-sessions:123");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log cleanup errors for debugging
       System.err.println("Error during test cleanup: " + e.getMessage());
     }

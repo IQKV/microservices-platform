@@ -437,7 +437,7 @@ public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
 
       if (sessions != null && !sessions.isEmpty()) {
         // Delete all individual sessions
-        for (var session : sessions) {
+        for (final var session : sessions) {
           var sessionKey = SESSION_KEY_PREFIX + session;
           redisTemplate.delete(sessionKey);
         }

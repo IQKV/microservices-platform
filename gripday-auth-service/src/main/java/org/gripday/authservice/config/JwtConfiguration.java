@@ -36,7 +36,7 @@ public class JwtConfiguration {
       var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
       keyPairGenerator.initialize(2048);
       return keyPairGenerator.generateKeyPair();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new IllegalStateException("Failed to generate RSA key pair", e);
     }
   }

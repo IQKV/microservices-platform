@@ -476,7 +476,7 @@ class EmailVerificationServiceTest {
       var idField = User.class.getDeclaredField("id");
       idField.setAccessible(true);
       idField.set(user, id);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log exception for debugging test failures
       System.err.println("Failed to set user ID via reflection: " + e.getMessage());
     }

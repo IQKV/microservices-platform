@@ -86,7 +86,7 @@ public class EmailService implements EmailOperations {
       logger.error("Failed to send verification email to user: {} ({})",
           user.getUsername(), user.getEmail(), e);
       throw new EmailServiceException("Failed to send verification email", e);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       metricsService.recordEmailSendFailed();
       logger.error("Unexpected error sending verification email to user: {} ({})",
           user.getUsername(), user.getEmail(), e);
@@ -141,7 +141,7 @@ public class EmailService implements EmailOperations {
       helper.setText(htmlContent, true);
 
       mailSender.send(mimeMessage);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new EmailServiceException("Failed to send password reset email", e);
     }
   }

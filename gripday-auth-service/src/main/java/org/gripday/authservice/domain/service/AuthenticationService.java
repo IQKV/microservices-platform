@@ -117,9 +117,9 @@ public class AuthenticationService {
       // Audit
       securityAuditService.logTokenEvent(user.getUsername(), "password_reset_completed", clientIp, "system");
       meterRegistry.counter("auth.password_reset.completed").increment();
-    } catch (AuthenticationException e) {
+    } catch (final AuthenticationException e) {
       throw e;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new AuthenticationException("Password reset failed", e);
     } finally {
       MDC.remove("correlationId");
@@ -231,7 +231,7 @@ public class AuthenticationService {
 
     } catch (AuthenticationException | AccountLockedException | EmailVerificationRequiredException e) {
       throw e;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       securityAuditService.logFailedAuthentication(
           request.username(), "System error: " + e.getMessage(), ipAddress, userAgent);
       throw new AuthenticationException("Authentication failed", e);
@@ -280,7 +280,7 @@ public class AuthenticationService {
 
       // Audit
       securityAuditService.logTokenEvent(user.getUsername(), "password_reset_initiated", ipAddress, userAgent);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Intentionally do not leak errors to caller; log and return
       System.err.println("Error initiating password reset: " + e.getMessage());
     } finally {
@@ -340,7 +340,7 @@ public class AuthenticationService {
 
     } catch (JwtException e) {
       throw new AuthenticationException("Invalid or expired refresh token", e);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new AuthenticationException("Token refresh failed", e);
     } finally {
       MDC.remove("correlationId");
@@ -368,13 +368,13 @@ public class AuthenticationService {
           var jwt = jwtService.validateToken(accessToken);
           var userId = jwt.getSubject();
           sessionService.removeUserSession(userId, sessionId);
-        } catch (Exception e) {
+        } catch (final Exception e) {
           // Log but don't fail logout if we can't extract user ID
           System.err.println("Could not extract user ID for session cleanup: " + e.getMessage());
         }
       }
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log error but don't throw exception for logout
       System.err.println("Error during logout: " + e.getMessage());
     } finally {
@@ -400,7 +400,7 @@ public class AuthenticationService {
           user.getUsername(), "logout_from_all_devices", "system", "system"
       ));
       meterRegistry.counter("auth.logout.all").increment();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error during logout from all devices: " + e.getMessage());
     } finally {
       MDC.remove("correlationId");
@@ -428,7 +428,7 @@ public class AuthenticationService {
       ));
 
       meterRegistry.counter("auth.logout.all_devices").increment();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error during logout from all devices: " + e.getMessage());
     } finally {
       MDC.remove("correlationId");
@@ -451,7 +451,7 @@ public class AuthenticationService {
         return true;
       }
       return false;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error validating session: " + e.getMessage());
       return false;
     }
@@ -464,7 +464,7 @@ public class AuthenticationService {
   public java.util.Set<Object> getUserActiveSessions(Long userId) {
     try {
       return sessionService.getUserSessions(userId.toString());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error getting user sessions: " + e.getMessage());
       return java.util.Set.of();
     }

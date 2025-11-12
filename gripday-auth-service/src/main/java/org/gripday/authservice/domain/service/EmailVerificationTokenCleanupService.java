@@ -53,7 +53,7 @@ public class EmailVerificationTokenCleanupService {
       logger.info("Cleanup completed successfully. Deleted {} expired verification tokens older than {}",
           deletedCount, cutoffTime);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error during scheduled cleanup of expired verification tokens", e);
       // Don't rethrow - we don't want to break the scheduler
     } finally {
@@ -90,7 +90,7 @@ public class EmailVerificationTokenCleanupService {
 
       return deletedCount;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error during manual cleanup of expired verification tokens", e);
       throw new RuntimeException("Failed to perform manual cleanup", e);
     } finally {
@@ -109,7 +109,7 @@ public class EmailVerificationTokenCleanupService {
       var cutoffTime = LocalDateTime.now().minusHours(48);
       return tokenRepository.countByExpiresAtBefore(cutoffTime);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error counting expired verification tokens", e);
       return 0;
     }

@@ -65,7 +65,7 @@ public class AccountLockoutService {
 
       return false;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // If Redis is unavailable, don't lock accounts (fail open for availability)
       System.err.println("Account lockout error: " + e.getMessage());
       return false;
@@ -96,7 +96,7 @@ public class AccountLockoutService {
 
       return true;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // If Redis is unavailable, assume account is not locked
       return false;
     }
@@ -110,7 +110,7 @@ public class AccountLockoutService {
 
     try {
       redisTemplate.delete(failedAttemptsKey);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error clearing failed attempts: " + e.getMessage());
     }
   }
@@ -124,7 +124,7 @@ public class AccountLockoutService {
     try {
       var failedAttemptsStr = redisTemplate.opsForValue().get(failedAttemptsKey);
       return failedAttemptsStr != null ? Integer.parseInt(failedAttemptsStr) : 0;
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return 0;
     }
   }
@@ -148,7 +148,7 @@ public class AccountLockoutService {
 
       return Duration.ofMillis(Math.max(0, remainingTime));
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return Duration.ZERO;
     }
   }
@@ -163,7 +163,7 @@ public class AccountLockoutService {
     try {
       redisTemplate.delete(failedAttemptsKey);
       redisTemplate.delete(lockoutKey);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       System.err.println("Error unlocking account: " + e.getMessage());
     }
   }

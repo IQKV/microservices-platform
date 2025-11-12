@@ -76,7 +76,7 @@ public abstract class TenantAwareEntity {
    * @param tenantId the tenant ID to check against
    * @return true if entity belongs to specified tenant, false otherwise
    */
-  public boolean belongsToTenant(String tenantId) {
+  public boolean belongsToTenant(final String tenantId) {
     return tenantId != null && tenantId.equals(this.tenantId);
   }
 }

@@ -77,7 +77,7 @@ public class TenantManagementResource {
       logger.info("Successfully created tenant: {}", tenantResponse.tenantId());
       return ResponseEntity.status(HttpStatus.CREATED).body(tenantResponse);
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       logger.warn("Failed to create tenant {}: {}", request.tenantId(), e.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
@@ -107,7 +107,7 @@ public class TenantManagementResource {
       var tenantResponse = tenantManagementService.getTenant(tenantId);
       return ResponseEntity.ok(tenantResponse);
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       logger.warn("Tenant not found: {}", tenantId);
       return ResponseEntity.notFound().build();
     }
@@ -166,7 +166,7 @@ public class TenantManagementResource {
       logger.info("Successfully updated tenant: {}", tenantId);
       return ResponseEntity.ok(tenantResponse);
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       logger.warn("Failed to update tenant {}: {}", tenantId, e.getMessage());
 
       // Determine appropriate status code based on error message
@@ -210,7 +210,7 @@ public class TenantManagementResource {
       logger.info("Successfully updated tenant {} enabled status to: {}", tenantId, enabled);
       return ResponseEntity.ok(tenantResponse);
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       logger.warn("Tenant not found: {}", tenantId);
       return ResponseEntity.notFound().build();
     }
@@ -244,11 +244,11 @@ public class TenantManagementResource {
       logger.warn("Successfully deleted tenant: {}", tenantId);
       return ResponseEntity.noContent().build();
 
-    } catch (IllegalArgumentException e) {
+    } catch (final IllegalArgumentException e) {
       logger.warn("Tenant not found: {}", tenantId);
       return ResponseEntity.notFound().build();
 
-    } catch (IllegalStateException e) {
+    } catch (final IllegalStateException e) {
       logger.warn("Cannot delete tenant {}: {}", tenantId, e.getMessage());
       return ResponseEntity.badRequest().build();
     }

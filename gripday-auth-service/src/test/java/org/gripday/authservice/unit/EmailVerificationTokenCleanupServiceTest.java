@@ -131,7 +131,7 @@ class EmailVerificationTokenCleanupServiceTest {
     // When & Then
     try {
       cleanupService.performManualCleanup();
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       assertThat(e.getMessage()).isEqualTo("Failed to perform manual cleanup");
       assertThat(e.getCause()).isInstanceOf(RuntimeException.class);
       assertThat(e.getCause().getMessage()).isEqualTo("Database error");

@@ -75,7 +75,7 @@ public class HealthCheckConfig {
               .withDetail("status", "Query failed")
               .build();
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         return Health.down()
             .withDetail("database", "PostgreSQL")
             .withDetail("status", "Connection failed")
@@ -121,7 +121,7 @@ public class HealthCheckConfig {
               .withDetail("status", "Unavailable")
               .build();
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         return Health.down()
             .withDetail("redis", "Connection failed")
             .withDetail("status", "Unavailable")
@@ -154,7 +154,7 @@ public class HealthCheckConfig {
               .withDetail("status", "JWT secret not configured")
               .build();
         }
-      } catch (Exception e) {
+      } catch (final Exception e) {
         return Health.down()
             .withDetail("jwtService", "Error")
             .withDetail("status", "JWT service check failed")

@@ -56,7 +56,7 @@ public class RateLimitingService {
 
       return true;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // If Redis is unavailable, allow the request (fail open)
       System.err.println("Rate limiting error: " + e.getMessage());
       return true;
@@ -80,7 +80,7 @@ public class RateLimitingService {
       }
       
       return Math.max(0, MAX_ATTEMPTS_PER_MINUTE - currentCount.intValue());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return MAX_ATTEMPTS_PER_MINUTE;
     }
   }
@@ -108,7 +108,7 @@ public class RateLimitingService {
 
       return Duration.ofMillis(Math.max(0, timeUntilReset));
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       return Duration.ZERO;
     }
   }

@@ -84,7 +84,7 @@ public class EmailVerificationService {
       emailService.sendVerificationEmail(user, token);
       logger.info("Verification email sent successfully to user: {} ({})",
           user.getUsername(), user.getEmail());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to send verification email to user: {} ({})",
           user.getUsername(), user.getEmail(), e);
       // Mark token as used since email failed to send
@@ -221,7 +221,7 @@ public class EmailVerificationService {
         logger.info("Cleaned up {} expired verification tokens older than {} hours",
             deletedCount, CLEANUP_EXPIRY_HOURS);
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to cleanup expired verification tokens", e);
     }
   }
