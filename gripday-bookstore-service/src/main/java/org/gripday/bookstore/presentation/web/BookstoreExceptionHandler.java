@@ -149,10 +149,13 @@ public class BookstoreExceptionHandler {
 
     logger.warn("Type mismatch: {}", ex.getMessage());
 
+    var requiredType = ex.getRequiredType();
+    var expectedType = requiredType != null ? requiredType.getSimpleName() : "unknown";
+
     var fieldError = new FieldErrorEntry(
         ex.getName(),
         ex.getValue(),
-        "Invalid value type. Expected: " + ex.getRequiredType().getSimpleName()
+        "Invalid value type. Expected: " + expectedType
     );
 
     var problem = baseProblem(HttpStatus.BAD_REQUEST,

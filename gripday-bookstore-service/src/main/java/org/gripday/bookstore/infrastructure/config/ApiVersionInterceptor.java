@@ -36,8 +36,8 @@ public class ApiVersionInterceptor implements HandlerInterceptor {
 
     // Check for deprecated versions and add warning
     if (deprecationNotice.isVersionDeprecated(requestedVersion)) {
-      var migrationInfo = deprecationNotice.getMigrationInfo(requestedVersion);
       // For future use when versions become deprecated
+      // var migrationInfo = deprecationNotice.getMigrationInfo(requestedVersion);
       // deprecationNotice.addDeprecationHeaders(response, requestedVersion, null, null, migrationInfo);
       logger.warn("Deprecated API version {} requested for path: {}", requestedVersion, request.getRequestURI());
     } else {
