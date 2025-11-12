@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
@@ -219,7 +220,7 @@ public class BookstoreExceptionHandler {
   private ProblemDetail baseProblem(HttpStatus status, String title, String detail, HttpServletRequest request, String code) {
     var problem = ProblemDetail.forStatusAndDetail(status, detail);
     problem.setTitle(title);
-    problem.setType(URI.create("urn:problem:" + code.toLowerCase()));
+    problem.setType(URI.create("urn:problem:" + code.toLowerCase(Locale.ROOT)));
     problem.setInstance(URI.create(request.getRequestURI()));
     problem.setProperty("code", code);
     problem.setProperty("method", request.getMethod());

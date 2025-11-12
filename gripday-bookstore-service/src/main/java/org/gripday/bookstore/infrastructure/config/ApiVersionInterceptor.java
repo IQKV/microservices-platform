@@ -2,6 +2,7 @@ package org.gripday.bookstore.infrastructure.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class ApiVersionInterceptor implements HandlerInterceptor {
 
   private String normalizeVersion(String version) {
     // Remove 'v' prefix if present and normalize
-    var normalized = version.toLowerCase().replaceFirst("^v", "");
+    var normalized = version.toLowerCase(Locale.ROOT).replaceFirst("^v", "");
 
     // Validate version format (should be numeric)
     if (normalized.matches("\\d+")) {
