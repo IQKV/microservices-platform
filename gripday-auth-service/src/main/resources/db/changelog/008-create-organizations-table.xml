@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="8" author="gripday">
+        <comment>Create organizations table with OneToOne relationship to users</comment>
+
+        <createTable tableName="organizations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="industry" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="website" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="phone" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="organizations"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9" author="gripday">
+        <comment>Add organization_id column to users table for OneToOne relationship</comment>
+
+        <addColumn tableName="users">
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+                baseTableName="users"
+                baseColumnNames="organization_id"
+                constraintName="fk_users_organization"
+                referencedTableName="organizations"
+                referencedColumnNames="id"
+                onDelete="SET NULL"
+                onUpdate="CASCADE"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="users" constraintName="fk_users_organization"/>
+            <dropColumn tableName="users" columnName="organization_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="10" author="gripday">
+        <comment>Add indexes for organizations table</comment>
+
+        <createIndex indexName="idx_organizations_tenant_id" tableName="organizations">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_organizations_name" tableName="organizations">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex indexName="idx_organizations_enabled" tableName="organizations">
+            <column name="enabled"/>
+        </createIndex>
+
+        <createIndex indexName="idx_users_organization_id" tableName="users">
+            <column name="organization_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_organizations_tenant_id" tableName="organizations"/>
+            <dropIndex indexName="idx_organizations_name" tableName="organizations"/>
+            <dropIndex indexName="idx_organizations_enabled" tableName="organizations"/>
+            <dropIndex indexName="idx_users_organization_id" tableName="users"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

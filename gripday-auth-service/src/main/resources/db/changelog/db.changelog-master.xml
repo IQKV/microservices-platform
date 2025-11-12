@@ -15,5 +15,6 @@
     <include file="db/changelog/005-add-indexes.xml"/>
     <include file="db/changelog/006-create-tenants-table.xml"/>
     <include file="db/changelog/007-create-email-verification-tokens-table.xml"/>
+    <include file="db/changelog/008-create-organizations-table.xml"/>
 
 </databaseChangeLog>

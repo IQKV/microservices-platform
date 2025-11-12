@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -67,6 +68,10 @@ public class User extends TenantAwareEntity {
       inverseJoinColumns = @JoinColumn(name = "authority_id")
   )
   private Set<Authority> authorities = new HashSet<>();
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "organization_id")
+  private Organization organization;
 
   // Default constructor for JPA
   protected User() {
@@ -159,6 +164,14 @@ public class User extends TenantAwareEntity {
 
   public void setAuthorities(Set<Authority> authorities) {
     this.authorities = authorities;
+  }
+
+  public Organization getOrganization() {
+    return organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
   }
 
   // Utility methods using Java 21 features
