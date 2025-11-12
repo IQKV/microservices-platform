@@ -147,8 +147,6 @@ class PackageStructureTest {
     // Verify expected packages exist and contain appropriate classes
     var configClasses = classes.that(resideInAPackage("..config.."));
     var filterClasses = classes.that(resideInAPackage("..filter.."));
-    var securityClasses = classes.that(resideInAPackage("..security.."));
-    var serviceClasses = classes.that(resideInAPackage("..service.."));
 
     // Validate that each package contains appropriate components
     assertThat(configClasses).isNotEmpty();
@@ -197,19 +195,19 @@ class PackageStructureTest {
     // If three-tier packages exist, validate their structure
     if (!presentationClasses.isEmpty()) {
       // Presentation layer should contain web controllers
-      var webClasses = classes.that(resideInAPackage("..presentation.web.."));
+      classes.that(resideInAPackage("..presentation.web.."));
       // Web classes should exist if presentation layer exists
     }
 
     if (!domainClasses.isEmpty()) {
       // Domain layer should contain services
-      var serviceClasses = classes.that(resideInAPackage("..domain.service.."));
+      classes.that(resideInAPackage("..domain.service.."));
       // Service classes should exist if domain layer exists
     }
 
     if (!infrastructureClasses.isEmpty()) {
       // Infrastructure layer should contain repositories
-      var repositoryClasses = classes.that(resideInAPackage("..infrastructure.repository.."));
+      classes.that(resideInAPackage("..infrastructure.repository.."));
       // Repository classes should exist if infrastructure layer exists
     }
   }

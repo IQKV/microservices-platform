@@ -164,10 +164,10 @@ class GatewayArchitectureTest {
     var classes = new ClassFileImporter().importPackages("org.gripday.gatewayservice");
 
     // Verify no cycles between major component groups
-    var configClasses = classes.that(resideInAPackage("..config.."));
-    var filterClasses = classes.that(resideInAPackage("..filter.."));
-    var securityClasses = classes.that(resideInAPackage("..security.."));
-    var serviceClasses = classes.that(resideInAPackage("..service.."));
+    classes.that(resideInAPackage("..config.."));
+    classes.that(resideInAPackage("..filter.."));
+    classes.that(resideInAPackage("..security.."));
+    classes.that(resideInAPackage("..service.."));
 
     // Additional validation can be added here for specific circular dependency checks
     // This test serves as a placeholder for more complex cycle detection if needed
@@ -178,7 +178,7 @@ class GatewayArchitectureTest {
    */
   @Test
   void should_have_proper_dependency_direction() {
-    var classes = new ClassFileImporter().importPackages("org.gripday.gatewayservice");
+    new ClassFileImporter().importPackages("org.gripday.gatewayservice");
 
     // Validate that filters don't depend on configuration details inappropriately
     // Validate that services are properly abstracted
