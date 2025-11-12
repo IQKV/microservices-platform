@@ -120,6 +120,7 @@
                            <exclude>**/domain/**</exclude>
                            <exclude>**/security/**</exclude>
                            <exclude>**/filter/**</exclude>
+                           <exclude>**/service/**</exclude>
                            <exclude>**/*Application.class</exclude>
                         </excludes>
                     </configuration>
