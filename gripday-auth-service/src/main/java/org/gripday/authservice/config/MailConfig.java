@@ -13,7 +13,7 @@ public class MailConfig {
 
   private final GripdayProperties gripdayProperties;
 
-  public MailConfig(GripdayProperties gripdayProperties) {
+  public MailConfig(final GripdayProperties gripdayProperties) {
     this.gripdayProperties = gripdayProperties;
   }
 

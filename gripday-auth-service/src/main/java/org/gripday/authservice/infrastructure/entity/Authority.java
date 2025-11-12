@@ -44,12 +44,12 @@ public class Authority {
   }
 
   // Constructor with required fields
-  public Authority(String name) {
+  public Authority(final String name) {
     this.name = name;
   }
 
   // Constructor with name and description
-  public Authority(String name, String description) {
+  public Authority(final String name, final String description) {
     this.name = name;
     this.description = description;
   }

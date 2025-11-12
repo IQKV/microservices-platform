@@ -23,7 +23,7 @@ public class EmailVerificationMetricsService {
   private final Timer cleanupTimer;
   private final AtomicLong expiredTokensGauge;
 
-  public EmailVerificationMetricsService(MeterRegistry meterRegistry) {
+  public EmailVerificationMetricsService(final MeterRegistry meterRegistry) {
     // Email sending metrics
     this.emailsSentCounter = Counter.builder("gripday_auth_email_verification_sent_total")
         .description("Total number of verification emails sent")

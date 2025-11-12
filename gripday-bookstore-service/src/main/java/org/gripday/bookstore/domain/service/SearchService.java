@@ -24,7 +24,7 @@ public class SearchService {
 
   private final BookRepository bookRepository;
 
-  public SearchService(BookRepository bookRepository) {
+  public SearchService(final BookRepository bookRepository) {
     this.bookRepository = bookRepository;
   }
 

@@ -34,7 +34,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
   private final CircuitBreakerRegistry circuitBreakerRegistry;
   private final ObjectMapper objectMapper;
 
-  public CircuitBreakerFilter(GatewayProperties gatewayProperties, CircuitBreakerRegistry circuitBreakerRegistry, ObjectMapper objectMapper) {
+  public CircuitBreakerFilter(final GatewayProperties gatewayProperties, final CircuitBreakerRegistry circuitBreakerRegistry, final ObjectMapper objectMapper) {
     this.gatewayProperties = gatewayProperties;
     this.circuitBreakerRegistry = circuitBreakerRegistry;
     this.objectMapper = objectMapper;

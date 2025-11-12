@@ -21,7 +21,7 @@ public class CacheWarmupService {
   private final BookService bookService;
   private final CacheManager cacheManager;
 
-  public CacheWarmupService(SearchService searchService, BookService bookService, CacheManager cacheManager) {
+  public CacheWarmupService(final SearchService searchService, final BookService bookService, final CacheManager cacheManager) {
     this.searchService = searchService;
     this.bookService = bookService;
     this.cacheManager = cacheManager;

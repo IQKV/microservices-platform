@@ -25,7 +25,7 @@ public class SecurityConfig {
   private final JwtDecoder jwtDecoder;
   private final RateLimitingFilter rateLimitingFilter;
 
-  public SecurityConfig(JwtDecoder jwtDecoder, RateLimitingFilter rateLimitingFilter) {
+  public SecurityConfig(final JwtDecoder jwtDecoder, final RateLimitingFilter rateLimitingFilter) {
     this.jwtDecoder = jwtDecoder;
     this.rateLimitingFilter = rateLimitingFilter;
   }

@@ -33,7 +33,7 @@ public class EmailVerificationResource {
 
   private final EmailVerificationService emailVerificationService;
 
-  public EmailVerificationResource(EmailVerificationService emailVerificationService) {
+  public EmailVerificationResource(final EmailVerificationService emailVerificationService) {
     this.emailVerificationService = emailVerificationService;
   }
 

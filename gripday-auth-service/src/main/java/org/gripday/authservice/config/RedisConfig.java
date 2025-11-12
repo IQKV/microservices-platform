@@ -31,7 +31,7 @@ public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
 
   private final GripdayProperties gripdayProperties;
 
-  public RedisConfig(GripdayProperties gripdayProperties) {
+  public RedisConfig(final GripdayProperties gripdayProperties) {
     this.gripdayProperties = gripdayProperties;
   }
 
@@ -238,7 +238,7 @@ public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
     private final RedisTemplate<String, Object> redisTemplate;
     private final CacheManager sessionCacheManager;
 
-    public TenantAwareRedisService(RedisTemplate<String, Object> redisTemplate, CacheManager sessionCacheManager) {
+    public TenantAwareRedisService(final RedisTemplate<String, Object> redisTemplate, final CacheManager sessionCacheManager) {
       this.redisTemplate = redisTemplate;
       this.sessionCacheManager = sessionCacheManager;
     }
@@ -358,7 +358,7 @@ public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
     private static final String SESSION_KEY_PREFIX = "session:";
     private static final String USER_SESSION_PREFIX = "user-sessions:";
 
-    public TenantAwareSessionService(RedisTemplate<String, Object> redisTemplate) {
+    public TenantAwareSessionService(final RedisTemplate<String, Object> redisTemplate) {
       this.redisTemplate = redisTemplate;
     }
 

@@ -20,7 +20,7 @@ public class UserContextMdcFilter extends OncePerRequestFilter {
 
   private final UserContextExtractor userContextExtractor;
 
-  public UserContextMdcFilter(UserContextExtractor userContextExtractor) {
+  public UserContextMdcFilter(final UserContextExtractor userContextExtractor) {
     this.userContextExtractor = userContextExtractor;
   }
 

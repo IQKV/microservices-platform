@@ -2,11 +2,11 @@ package org.gripday.bookstore.domain.exception;
 
 public class UnauthorizedOperationException extends RuntimeException {
 
-  public UnauthorizedOperationException(String operation) {
+  public UnauthorizedOperationException(final String operation) {
     super("Unauthorized to perform operation: " + operation);
   }
 
-  public UnauthorizedOperationException(String operation, String requiredRole) {
+  public UnauthorizedOperationException(final String operation, final String requiredRole) {
     super("Unauthorized to perform operation: " + operation + ". Required role: " + requiredRole);
   }
 }

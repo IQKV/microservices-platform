@@ -2,11 +2,11 @@ package org.gripday.bookstore.domain.exception;
 
 public class CategoryNotFoundException extends RuntimeException {
 
-  public CategoryNotFoundException(Long categoryId) {
+  public CategoryNotFoundException(final Long categoryId) {
     super("Category not found with ID: " + categoryId);
   }
 
-  public CategoryNotFoundException(String message) {
+  public CategoryNotFoundException(final String message) {
     super(message);
   }
 

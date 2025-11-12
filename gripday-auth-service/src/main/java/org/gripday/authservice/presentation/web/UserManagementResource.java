@@ -48,7 +48,7 @@ public class UserManagementResource {
   private final UserManagementService userManagementService;
   private final JwtService jwtService;
 
-  public UserManagementResource(UserManagementService userManagementService, final JwtService jwtService) {
+  public UserManagementResource(final UserManagementService userManagementService, final JwtService jwtService) {
     this.userManagementService = userManagementService;
     this.jwtService = jwtService;
   }

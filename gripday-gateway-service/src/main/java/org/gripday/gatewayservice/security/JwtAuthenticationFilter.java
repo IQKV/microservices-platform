@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
  * Reactive JWT authentication filter for token validation with tenant extraction. Handles JWT token validation, user context extraction, and tenant context establishment.
  */
 @Component
-public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   private final SecretKey jwtSecretKey;
   private final ObjectMapper objectMapper;
 
-  public JwtAuthenticationFilter(GatewayProperties gatewayProperties, ObjectMapper objectMapper) {
+  public JwtAuthenticationFilter(final GatewayProperties gatewayProperties, final ObjectMapper objectMapper) {
     this.gatewayProperties = gatewayProperties;
     this.objectMapper = objectMapper;
     this.jwtSecretKey = initializeSecretKey(gatewayProperties);

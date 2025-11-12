@@ -31,7 +31,7 @@ public class TenantManagementService {
   private final TenantRepository tenantRepository;
   private final UserRepository userRepository;
 
-  public TenantManagementService(TenantRepository tenantRepository, UserRepository userRepository) {
+  public TenantManagementService(final TenantRepository tenantRepository, final UserRepository userRepository) {
     this.tenantRepository = tenantRepository;
     this.userRepository = userRepository;
   }

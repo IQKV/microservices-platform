@@ -19,7 +19,7 @@ public class ApiVersionInterceptor implements HandlerInterceptor {
 
   private final ApiDeprecationNotice deprecationNotice;
 
-  public ApiVersionInterceptor(ApiDeprecationNotice deprecationNotice) {
+  public ApiVersionInterceptor(final ApiDeprecationNotice deprecationNotice) {
     this.deprecationNotice = deprecationNotice;
   }
 

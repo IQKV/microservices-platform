@@ -43,7 +43,7 @@ public class InventoryResource {
 
   private final InventoryService inventoryService;
 
-  public InventoryResource(InventoryService inventoryService) {
+  public InventoryResource(final InventoryService inventoryService) {
     this.inventoryService = inventoryService;
   }
 

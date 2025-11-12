@@ -90,7 +90,7 @@ public class LoadBalancingService {
     private boolean healthy;
     private Instant lastHealthCheck;
 
-    public ServiceInstance(URI uri, boolean healthy, Instant lastHealthCheck) {
+    public ServiceInstance(final URI uri, final boolean healthy, final Instant lastHealthCheck) {
       this.uri = uri;
       this.healthy = healthy;
       this.lastHealthCheck = lastHealthCheck;

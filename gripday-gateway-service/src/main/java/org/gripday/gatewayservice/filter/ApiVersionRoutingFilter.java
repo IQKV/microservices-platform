@@ -17,7 +17,7 @@ public class ApiVersionRoutingFilter implements GlobalFilter, Ordered {
 
   private final ApiVersionExtractor versionExtractor;
 
-  public ApiVersionRoutingFilter(ApiVersionExtractor versionExtractor) {
+  public ApiVersionRoutingFilter(final ApiVersionExtractor versionExtractor) {
     this.versionExtractor = versionExtractor;
   }
 

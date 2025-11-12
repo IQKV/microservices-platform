@@ -46,7 +46,7 @@ public class ObservabilityConfig {
   private final GripdayObservabilityProperties observabilityProperties;
   private final Environment environment;
 
-  public ObservabilityConfig(GripdayObservabilityProperties observabilityProperties, Environment environment) {
+  public ObservabilityConfig(final GripdayObservabilityProperties observabilityProperties, final Environment environment) {
     this.observabilityProperties = observabilityProperties;
     this.environment = environment;
   }
@@ -188,7 +188,7 @@ public class ObservabilityConfig {
     private final Timer redisOperationTimer;
     private final MeterRegistry meterRegistry;
 
-    public AuthServiceMetrics(MeterRegistry meterRegistry) {
+    public AuthServiceMetrics(final MeterRegistry meterRegistry) {
       this.meterRegistry = meterRegistry;
       this.authenticationTimer = Timer.builder("gripday.auth.authentication.duration")
           .description("Time taken for user authentication")

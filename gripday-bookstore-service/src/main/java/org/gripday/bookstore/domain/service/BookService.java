@@ -39,8 +39,8 @@ public class BookService {
   private final AuditLogger auditLogger;
   private final BookstoreMetrics bookstoreMetrics;
 
-  public BookService(BookRepository bookRepository, CategoryRepository categoryRepository,
-      AuditLogger auditLogger, BookstoreMetrics bookstoreMetrics) {
+  public BookService(final BookRepository bookRepository, final CategoryRepository categoryRepository,
+      final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
     this.bookRepository = bookRepository;
     this.categoryRepository = categoryRepository;
     this.auditLogger = auditLogger;

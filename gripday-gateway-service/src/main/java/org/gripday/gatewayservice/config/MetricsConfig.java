@@ -18,7 +18,7 @@ public class MetricsConfig {
   private final GripdayGatewayObservabilityProperties observabilityProperties;
   private final Environment environment;
 
-  public MetricsConfig(GripdayGatewayObservabilityProperties observabilityProperties, Environment environment) {
+  public MetricsConfig(final GripdayGatewayObservabilityProperties observabilityProperties, final Environment environment) {
     this.observabilityProperties = observabilityProperties;
     this.environment = environment;
   }

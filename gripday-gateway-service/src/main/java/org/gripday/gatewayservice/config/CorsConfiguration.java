@@ -13,7 +13,7 @@ public class CorsConfiguration {
 
   private final GatewayProperties gatewayProperties;
 
-  public CorsConfiguration(GatewayProperties gatewayProperties) {
+  public CorsConfiguration(final GatewayProperties gatewayProperties) {
     this.gatewayProperties = gatewayProperties;
   }
 

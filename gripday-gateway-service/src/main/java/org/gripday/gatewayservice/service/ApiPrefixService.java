@@ -12,7 +12,7 @@ public class ApiPrefixService {
 
   private final GatewayProperties gatewayProperties;
 
-  public ApiPrefixService(GatewayProperties gatewayProperties) {
+  public ApiPrefixService(final GatewayProperties gatewayProperties) {
     this.gatewayProperties = gatewayProperties;
   }
 

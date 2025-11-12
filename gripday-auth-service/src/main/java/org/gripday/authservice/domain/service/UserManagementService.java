@@ -43,10 +43,10 @@ public class UserManagementService {
   private final PasswordEncoder passwordEncoder;
 
   public UserManagementService(
-      UserRepository userRepository,
-      AuthorityRepository authorityRepository,
-      UserAuditLogRepository auditLogRepository,
-      PasswordEncoder passwordEncoder) {
+      final UserRepository userRepository,
+      final AuthorityRepository authorityRepository,
+      final UserAuditLogRepository auditLogRepository,
+      final PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
     this.auditLogRepository = auditLogRepository;
@@ -379,11 +379,11 @@ public class UserManagementService {
    */
   public static class UserManagementException extends RuntimeException {
 
-    public UserManagementException(String message) {
+    public UserManagementException(final String message) {
       super(message);
     }
 
-    public UserManagementException(String message, Throwable cause) {
+    public UserManagementException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }

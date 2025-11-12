@@ -19,7 +19,7 @@ public class ApiPrefixConfigurationLogger {
   private final ApiPrefixService apiPrefixService;
   private final GatewayProperties gatewayProperties;
 
-  public ApiPrefixConfigurationLogger(ApiPrefixService apiPrefixService, GatewayProperties gatewayProperties) {
+  public ApiPrefixConfigurationLogger(final ApiPrefixService apiPrefixService, final GatewayProperties gatewayProperties) {
     this.apiPrefixService = apiPrefixService;
     this.gatewayProperties = gatewayProperties;
   }

@@ -17,7 +17,7 @@ public class LoadBalancingFilter extends AbstractGatewayFilterFactory<LoadBalanc
 
   private final LoadBalancingService loadBalancingService;
 
-  public LoadBalancingFilter(LoadBalancingService loadBalancingService) {
+  public LoadBalancingFilter(final LoadBalancingService loadBalancingService) {
     super(Config.class);
     this.loadBalancingService = loadBalancingService;
   }

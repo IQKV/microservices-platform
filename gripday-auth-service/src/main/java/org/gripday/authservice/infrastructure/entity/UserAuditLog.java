@@ -54,21 +54,21 @@ public class UserAuditLog extends TenantAwareEntity {
   }
 
   // Constructor with required fields
-  public UserAuditLog(String action, String tenantId) {
+  public UserAuditLog(final String action, final String tenantId) {
     super(tenantId);
     this.action = action;
   }
 
   // Constructor with user context
-  public UserAuditLog(Long userId, String action, String tenantId) {
+  public UserAuditLog(final Long userId, final String action, final String tenantId) {
     super(tenantId);
     this.userId = userId;
     this.action = action;
   }
 
   // Full constructor
-  public UserAuditLog(Long userId, String action, String details,
-      String ipAddress, String userAgent, String tenantId) {
+  public UserAuditLog(final Long userId, final String action, final String details,
+      final String ipAddress, final String userAgent, final String tenantId) {
     super(tenantId);
     this.userId = userId;
     this.action = action;

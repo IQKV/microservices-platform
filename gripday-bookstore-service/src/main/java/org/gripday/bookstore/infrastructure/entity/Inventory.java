@@ -46,13 +46,13 @@ public class Inventory {
   }
 
   // Constructor with required fields
-  public Inventory(Book book, int quantity) {
+  public Inventory(final Book book, final int quantity) {
     this.book = book;
     this.quantity = quantity;
   }
 
   // Constructor with all fields
-  public Inventory(Book book, int quantity, int lowStockThreshold) {
+  public Inventory(final Book book, final int quantity, final int lowStockThreshold) {
     this.book = book;
     this.quantity = quantity;
     this.lowStockThreshold = lowStockThreshold;

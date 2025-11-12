@@ -45,7 +45,7 @@ public class TenantManagementResource {
 
   private final TenantManagementService tenantManagementService;
 
-  public TenantManagementResource(TenantManagementService tenantManagementService) {
+  public TenantManagementResource(final TenantManagementService tenantManagementService) {
     this.tenantManagementService = tenantManagementService;
   }
 

@@ -73,8 +73,8 @@ public class User extends TenantAwareEntity {
   }
 
   // Constructor with required fields using Java 21 features
-  public User(String username, String email, String passwordHash,
-      String firstName, String lastName, String tenantId) {
+  public User(final String username, final String email, final String passwordHash,
+      final String firstName, final String lastName, final String tenantId) {
     super(tenantId);
     this.username = username;
     this.email = email;

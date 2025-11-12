@@ -20,7 +20,7 @@ public class UserContextExtractor {
 
   private final JwtDecoder jwtDecoder;
 
-  public UserContextExtractor(JwtDecoder jwtDecoder) {
+  public UserContextExtractor(final JwtDecoder jwtDecoder) {
     this.jwtDecoder = jwtDecoder;
   }
 

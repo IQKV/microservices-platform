@@ -29,7 +29,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
   private final ObjectMapper objectMapper;
 
-  public GlobalExceptionHandler(ObjectMapper objectMapper) {
+  public GlobalExceptionHandler(final ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 

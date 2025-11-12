@@ -27,7 +27,7 @@ public class TenantExtractionFilter extends OncePerRequestFilter {
 
   private final TenantExtractionService tenantExtractionService;
 
-  public TenantExtractionFilter(TenantExtractionService tenantExtractionService) {
+  public TenantExtractionFilter(final TenantExtractionService tenantExtractionService) {
     this.tenantExtractionService = tenantExtractionService;
   }
 

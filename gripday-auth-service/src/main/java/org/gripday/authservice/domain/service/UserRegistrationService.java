@@ -29,12 +29,12 @@ public class UserRegistrationService {
   private final InputSanitizer inputSanitizer;
   private final EmailVerificationService emailVerificationService;
 
-  public UserRegistrationService(UserRepository userRepository,
-      AuthorityRepository authorityRepository,
-      PasswordEncoder passwordEncoder,
-      SecurityAuditService securityAuditService,
-      InputSanitizer inputSanitizer,
-      EmailVerificationService emailVerificationService) {
+  public UserRegistrationService(final UserRepository userRepository,
+      final AuthorityRepository authorityRepository,
+      final PasswordEncoder passwordEncoder,
+      final SecurityAuditService securityAuditService,
+      final InputSanitizer inputSanitizer,
+      final EmailVerificationService emailVerificationService) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
     this.passwordEncoder = passwordEncoder;
@@ -161,11 +161,11 @@ public class UserRegistrationService {
    */
   public static class UserRegistrationException extends RuntimeException {
 
-    public UserRegistrationException(String message) {
+    public UserRegistrationException(final String message) {
       super(message);
     }
 
-    public UserRegistrationException(String message, Throwable cause) {
+    public UserRegistrationException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }

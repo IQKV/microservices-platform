@@ -38,10 +38,10 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
   private final TenantQuotaMonitoringService quotaMonitoringService;
   private final ObjectMapper objectMapper;
 
-  public TenantRateLimitingFilter(GatewayProperties gatewayProperties,
-      ReactiveStringRedisTemplate redisTemplate,
-      TenantQuotaMonitoringService quotaMonitoringService,
-      ObjectMapper objectMapper) {
+  public TenantRateLimitingFilter(final GatewayProperties gatewayProperties,
+      final ReactiveStringRedisTemplate redisTemplate,
+      final TenantQuotaMonitoringService quotaMonitoringService,
+      final ObjectMapper objectMapper) {
     this.gatewayProperties = gatewayProperties;
     this.redisTemplate = redisTemplate;
     this.quotaMonitoringService = quotaMonitoringService;

@@ -2,11 +2,11 @@ package org.gripday.bookstore.domain.exception;
 
 public class BookNotFoundException extends RuntimeException {
 
-  public BookNotFoundException(Long bookId) {
+  public BookNotFoundException(final Long bookId) {
     super("Book not found with ID: " + bookId);
   }
 
-  public BookNotFoundException(String message) {
+  public BookNotFoundException(final String message) {
     super(message);
   }
 

@@ -41,16 +41,16 @@ public class AuthenticationService {
   private final EmailService emailService;
   private final MeterRegistry meterRegistry;
 
-  public AuthenticationService(UserRepository userRepository,
-      PasswordEncoder passwordEncoder,
-      JwtService jwtService,
-      AccountLockoutService accountLockoutService,
-      SecurityAuditService securityAuditService,
-      InputSanitizer inputSanitizer,
-      TenantAwareSessionService sessionService,
-      TenantAwareRedisService redisService,
-      EmailService emailService,
-      MeterRegistry meterRegistry) {
+  public AuthenticationService(final UserRepository userRepository,
+      final PasswordEncoder passwordEncoder,
+      final JwtService jwtService,
+      final AccountLockoutService accountLockoutService,
+      final SecurityAuditService securityAuditService,
+      final InputSanitizer inputSanitizer,
+      final TenantAwareSessionService sessionService,
+      final TenantAwareRedisService redisService,
+      final EmailService emailService,
+      final MeterRegistry meterRegistry) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -563,11 +563,11 @@ public class AuthenticationService {
    */
   public static class AuthenticationException extends RuntimeException {
 
-    public AuthenticationException(String message) {
+    public AuthenticationException(final String message) {
       super(message);
     }
 
-    public AuthenticationException(String message, Throwable cause) {
+    public AuthenticationException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -577,7 +577,7 @@ public class AuthenticationService {
    */
   public static class AccountLockedException extends RuntimeException {
 
-    public AccountLockedException(String message) {
+    public AccountLockedException(final String message) {
       super(message);
     }
   }
@@ -587,7 +587,7 @@ public class AuthenticationService {
    */
   public static class EmailVerificationRequiredException extends RuntimeException {
 
-    public EmailVerificationRequiredException(String message) {
+    public EmailVerificationRequiredException(final String message) {
       super(message);
     }
   }

@@ -53,12 +53,12 @@ public record TokenResponse(
 ) {
 
   // Compact constructor with default token type
-  public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user) {
+  public TokenResponse(final String accessToken, final String refreshToken, final long expiresIn, final UserContext user) {
     this(accessToken, refreshToken, "Bearer", expiresIn, user, null);
   }
 
   // Constructor with session ID
-  public TokenResponse(String accessToken, String refreshToken, long expiresIn, UserContext user, String sessionId) {
+  public TokenResponse(final String accessToken, final String refreshToken, final long expiresIn, final UserContext user, final String sessionId) {
     this(accessToken, refreshToken, "Bearer", expiresIn, user, sessionId);
   }
 }

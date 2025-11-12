@@ -8,7 +8,7 @@ public class MetricsScheduler {
 
   private final BookstoreMetrics bookstoreMetrics;
 
-  public MetricsScheduler(BookstoreMetrics bookstoreMetrics) {
+  public MetricsScheduler(final BookstoreMetrics bookstoreMetrics) {
     this.bookstoreMetrics = bookstoreMetrics;
   }
 

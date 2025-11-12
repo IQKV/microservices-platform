@@ -22,8 +22,8 @@ public class ServiceRegistryInitializer {
   private final GatewayProperties gatewayProperties;
 
   public ServiceRegistryInitializer(
-      LoadBalancingService loadBalancingService,
-      GatewayProperties gatewayProperties
+      final LoadBalancingService loadBalancingService,
+      final GatewayProperties gatewayProperties
   ) {
     this.loadBalancingService = loadBalancingService;
     this.gatewayProperties = gatewayProperties;

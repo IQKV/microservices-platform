@@ -24,7 +24,7 @@ public class TenantExtractionService {
 
   private final TenantManagementService tenantManagementService;
 
-  public TenantExtractionService(TenantManagementService tenantManagementService) {
+  public TenantExtractionService(final TenantManagementService tenantManagementService) {
     this.tenantManagementService = tenantManagementService;
   }
 

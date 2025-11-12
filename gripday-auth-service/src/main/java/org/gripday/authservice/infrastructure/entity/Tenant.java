@@ -66,13 +66,13 @@ public class Tenant {
   }
 
   // Constructor with required fields using Java 21 features
-  public Tenant(String tenantId, String name) {
+  public Tenant(final String tenantId, final String name) {
     this.tenantId = tenantId;
     this.name = name;
   }
 
   // Constructor with common fields
-  public Tenant(String tenantId, String name, String description, String createdBy) {
+  public Tenant(final String tenantId, final String name, final String description, final String createdBy) {
     this.tenantId = tenantId;
     this.name = name;
     this.description = description;

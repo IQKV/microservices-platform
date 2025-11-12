@@ -19,7 +19,7 @@ public class SecurityConfiguration {
 
   private final GatewayProperties gatewayProperties;
 
-  public SecurityConfiguration(GatewayProperties gatewayProperties) {
+  public SecurityConfiguration(final GatewayProperties gatewayProperties) {
     this.gatewayProperties = gatewayProperties;
   }
 

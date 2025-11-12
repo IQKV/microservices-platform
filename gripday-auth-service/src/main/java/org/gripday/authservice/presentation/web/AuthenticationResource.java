@@ -48,9 +48,9 @@ public class AuthenticationResource {
   private final JwtService jwtService;
 
   public AuthenticationResource(
-      AuthenticationService authenticationService,
-      UserRegistrationService userRegistrationService,
-      JwtService jwtService) {
+      final AuthenticationService authenticationService,
+      final UserRegistrationService userRegistrationService,
+      final JwtService jwtService) {
     this.authenticationService = authenticationService;
     this.userRegistrationService = userRegistrationService;
     this.jwtService = jwtService;

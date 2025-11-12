@@ -22,7 +22,7 @@ public class SecurityAuditService {
 
   private final UserAuditLogRepository auditLogRepository;
 
-  public SecurityAuditService(UserAuditLogRepository auditLogRepository) {
+  public SecurityAuditService(final UserAuditLogRepository auditLogRepository) {
     this.auditLogRepository = auditLogRepository;
   }
 

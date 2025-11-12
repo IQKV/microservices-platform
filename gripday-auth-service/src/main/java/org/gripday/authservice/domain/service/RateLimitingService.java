@@ -20,7 +20,7 @@ public class RateLimitingService {
   private static final Duration RATE_LIMIT_WINDOW = Duration.ofMinutes(1);
   private static final String RATE_LIMIT_PREFIX = "rate_limit:";
 
-  public RateLimitingService(RedisTemplate<String, String> redisTemplate) {
+  public RateLimitingService(final RedisTemplate<String, String> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }
 

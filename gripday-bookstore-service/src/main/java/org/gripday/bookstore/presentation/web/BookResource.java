@@ -48,7 +48,7 @@ public class BookResource {
   private final BookService bookService;
   private final SearchService searchService;
 
-  public BookResource(BookService bookService, SearchService searchService) {
+  public BookResource(final BookService bookService, final SearchService searchService) {
     this.bookService = bookService;
     this.searchService = searchService;
   }

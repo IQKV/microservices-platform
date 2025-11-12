@@ -2,12 +2,12 @@ package org.gripday.bookstore.domain.exception;
 
 public class InsufficientInventoryException extends RuntimeException {
 
-  public InsufficientInventoryException(Long bookId, int requested, int available) {
+  public InsufficientInventoryException(final Long bookId, final int requested, final int available) {
     super("Insufficient inventory for book ID: " + bookId +
         ". Requested: " + requested + ", Available: " + available);
   }
 
-  public InsufficientInventoryException(String message) {
+  public InsufficientInventoryException(final String message) {
     super(message);
   }
 }

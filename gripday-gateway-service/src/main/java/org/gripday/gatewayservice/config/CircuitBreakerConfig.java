@@ -20,7 +20,7 @@ public class CircuitBreakerConfig {
 
   private final GatewayProperties gatewayProperties;
 
-  public CircuitBreakerConfig(GatewayProperties gatewayProperties) {
+  public CircuitBreakerConfig(final GatewayProperties gatewayProperties) {
     this.gatewayProperties = gatewayProperties;
   }
 

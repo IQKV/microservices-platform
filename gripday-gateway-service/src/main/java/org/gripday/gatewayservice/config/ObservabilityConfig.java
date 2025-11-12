@@ -45,7 +45,7 @@ public class ObservabilityConfig {
   private final GripdayGatewayObservabilityProperties observabilityProperties;
   private final Environment environment;
 
-  public ObservabilityConfig(GripdayGatewayObservabilityProperties observabilityProperties, Environment environment) {
+  public ObservabilityConfig(final GripdayGatewayObservabilityProperties observabilityProperties, final Environment environment) {
     this.observabilityProperties = observabilityProperties;
     this.environment = environment;
   }
@@ -197,7 +197,7 @@ public class ObservabilityConfig {
     private final Timer rateLimitTimer;
     private final MeterRegistry meterRegistry;
 
-    public GatewayServiceMetrics(MeterRegistry meterRegistry) {
+    public GatewayServiceMetrics(final MeterRegistry meterRegistry) {
       this.meterRegistry = meterRegistry;
       this.requestTimer = Timer.builder("gripday.gateway.request.duration")
           .description("Time taken for gateway request processing")

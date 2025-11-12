@@ -20,7 +20,7 @@ public class QueryPerformanceService {
   private final EntityManagerFactory entityManagerFactory;
   private volatile Map<String, Object> lastPerformanceMetrics = new HashMap<>();
 
-  public QueryPerformanceService(EntityManagerFactory entityManagerFactory) {
+  public QueryPerformanceService(final EntityManagerFactory entityManagerFactory) {
     this.entityManagerFactory = entityManagerFactory;
   }
 

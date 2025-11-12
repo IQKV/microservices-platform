@@ -35,10 +35,10 @@ public class EmailVerificationService {
   private final EmailVerificationMetricsService metricsService;
 
   public EmailVerificationService(
-      EmailVerificationTokenRepository tokenRepository,
-      UserRepository userRepository,
-      EmailOperations emailService,
-      EmailVerificationMetricsService metricsService) {
+      final EmailVerificationTokenRepository tokenRepository,
+      final UserRepository userRepository,
+      final EmailOperations emailService,
+      final EmailVerificationMetricsService metricsService) {
     this.tokenRepository = tokenRepository;
     this.userRepository = userRepository;
     this.emailService = emailService;
@@ -303,11 +303,11 @@ public class EmailVerificationService {
    */
   public static class EmailVerificationException extends RuntimeException {
 
-    public EmailVerificationException(String message) {
+    public EmailVerificationException(final String message) {
       super(message);
     }
 
-    public EmailVerificationException(String message, Throwable cause) {
+    public EmailVerificationException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }

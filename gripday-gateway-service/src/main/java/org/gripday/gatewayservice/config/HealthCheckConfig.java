@@ -50,7 +50,7 @@ public class HealthCheckConfig {
 
     private final ReactiveRedisConnectionFactory redisConnectionFactory;
 
-    public ReactiveRedisHealthIndicator(ReactiveRedisConnectionFactory redisConnectionFactory) {
+    public ReactiveRedisHealthIndicator(final ReactiveRedisConnectionFactory redisConnectionFactory) {
       this.redisConnectionFactory = redisConnectionFactory;
     }
 
@@ -99,7 +99,7 @@ public class HealthCheckConfig {
     private final WebClient webClient;
     private final String authServiceUrl;
 
-    public AuthServiceHealthIndicator(WebClient.Builder webClientBuilder, GripdayProperties gripdayProperties) {
+    public AuthServiceHealthIndicator(final WebClient.Builder webClientBuilder, final GripdayProperties gripdayProperties) {
       this.authServiceUrl = gripdayProperties.gateway().security().authentication().authServiceUrl();
       this.webClient = webClientBuilder.build();
     }

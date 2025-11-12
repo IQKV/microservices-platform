@@ -20,10 +20,10 @@ public class GatewayConfig {
   private final LoadBalancingFilter loadBalancingFilter;
 
   public GatewayConfig(
-      GatewayProperties gatewayProperties,
-      RequestTransformationFilter requestTransformationFilter,
-      ResponseTransformationFilter responseTransformationFilter,
-      LoadBalancingFilter loadBalancingFilter
+      final GatewayProperties gatewayProperties,
+      final RequestTransformationFilter requestTransformationFilter,
+      final ResponseTransformationFilter responseTransformationFilter,
+      final LoadBalancingFilter loadBalancingFilter
   ) {
     this.gatewayProperties = gatewayProperties;
     this.requestTransformationFilter = requestTransformationFilter;

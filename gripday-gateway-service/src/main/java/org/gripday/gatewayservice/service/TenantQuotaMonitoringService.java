@@ -24,7 +24,7 @@ public class TenantQuotaMonitoringService {
   private final ReactiveStringRedisTemplate redisTemplate;
   private final Map<String, TenantUsageStats> tenantUsageCache = new ConcurrentHashMap<>();
 
-  public TenantQuotaMonitoringService(GatewayProperties gatewayProperties, ReactiveStringRedisTemplate redisTemplate) {
+  public TenantQuotaMonitoringService(final GatewayProperties gatewayProperties, final ReactiveStringRedisTemplate redisTemplate) {
     this.gatewayProperties = gatewayProperties;
     this.redisTemplate = redisTemplate;
   }
@@ -124,7 +124,7 @@ public class TenantQuotaMonitoringService {
     private long rateLimitedRequests;
     private final Map<String, Long> endpointCounts = new ConcurrentHashMap<>();
 
-    public TenantUsageStats(String tenantId) {
+    public TenantUsageStats(final String tenantId) {
       this.tenantId = tenantId;
       this.startTime = Instant.now();
     }

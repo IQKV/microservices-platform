@@ -61,7 +61,7 @@ public class Book {
   }
 
   // Constructor with required fields
-  public Book(String title, String author, String isbn, BigDecimal price) {
+  public Book(final String title, final String author, final String isbn, final BigDecimal price) {
     this.title = title;
     this.author = author;
     this.isbn = isbn;

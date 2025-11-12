@@ -22,7 +22,7 @@ public class AccountLockoutService {
   private static final String FAILED_ATTEMPTS_PREFIX = "failed_attempts:";
   private static final String LOCKOUT_PREFIX = "lockout:";
 
-  public AccountLockoutService(RedisTemplate<String, String> redisTemplate) {
+  public AccountLockoutService(final RedisTemplate<String, String> redisTemplate) {
     this.redisTemplate = redisTemplate;
   }
 

@@ -18,8 +18,8 @@ public class SecurityConfiguration {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final CorsConfiguration corsConfiguration;
 
-  public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
-      CorsConfiguration corsConfiguration) {
+  public SecurityConfiguration(final JwtAuthenticationFilter jwtAuthenticationFilter,
+      final CorsConfiguration corsConfiguration) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.corsConfiguration = corsConfiguration;
   }

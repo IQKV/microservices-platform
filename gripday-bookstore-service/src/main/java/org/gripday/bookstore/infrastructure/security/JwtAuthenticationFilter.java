@@ -22,7 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final UserContextExtractor userContextExtractor;
 
-  public JwtAuthenticationFilter(UserContextExtractor userContextExtractor) {
+  public JwtAuthenticationFilter(final UserContextExtractor userContextExtractor) {
     this.userContextExtractor = userContextExtractor;
   }
 

@@ -43,7 +43,7 @@ public class EmailVerificationToken extends TenantAwareEntity {
   }
 
   // Constructor with required fields using Java 21 features
-  public EmailVerificationToken(String token, Long userId, LocalDateTime expiresAt, String tenantId) {
+  public EmailVerificationToken(final String token, final Long userId, final LocalDateTime expiresAt, final String tenantId) {
     super(tenantId);
     this.token = token;
     this.userId = userId;

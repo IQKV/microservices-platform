@@ -14,7 +14,7 @@ public class ApiVersioningConfig implements WebMvcConfigurer {
 
   private final ApiVersionInterceptor apiVersionInterceptor;
 
-  public ApiVersioningConfig(ApiVersionInterceptor apiVersionInterceptor) {
+  public ApiVersioningConfig(final ApiVersionInterceptor apiVersionInterceptor) {
     this.apiVersionInterceptor = apiVersionInterceptor;
   }
 

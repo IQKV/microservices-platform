@@ -31,9 +31,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
       "/api/v1/auth/refresh"
   );
 
-  public RateLimitingFilter(RateLimitingService rateLimitingService,
-      SecurityAuditService securityAuditService,
-      ObjectMapper objectMapper) {
+  public RateLimitingFilter(final RateLimitingService rateLimitingService,
+      final SecurityAuditService securityAuditService,
+      final ObjectMapper objectMapper) {
     this.rateLimitingService = rateLimitingService;
     this.securityAuditService = securityAuditService;
     this.objectMapper = objectMapper;

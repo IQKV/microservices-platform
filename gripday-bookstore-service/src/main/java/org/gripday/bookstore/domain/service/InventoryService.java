@@ -34,8 +34,8 @@ public class InventoryService {
   private final AuditLogger auditLogger;
   private final BookstoreMetrics bookstoreMetrics;
 
-  public InventoryService(InventoryRepository inventoryRepository, BookRepository bookRepository,
-      AuditLogger auditLogger, BookstoreMetrics bookstoreMetrics) {
+  public InventoryService(final InventoryRepository inventoryRepository, final BookRepository bookRepository,
+      final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
     this.inventoryRepository = inventoryRepository;
     this.bookRepository = bookRepository;
     this.auditLogger = auditLogger;

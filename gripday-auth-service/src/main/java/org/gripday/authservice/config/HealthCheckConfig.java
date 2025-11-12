@@ -48,7 +48,7 @@ public class HealthCheckConfig {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public DatabaseHealthIndicator(DataSource dataSource) {
+    public DatabaseHealthIndicator(final DataSource dataSource) {
       this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -92,7 +92,7 @@ public class HealthCheckConfig {
 
     private final RedisConnectionFactory redisConnectionFactory;
 
-    public RedisHealthIndicator(RedisConnectionFactory redisConnectionFactory) {
+    public RedisHealthIndicator(final RedisConnectionFactory redisConnectionFactory) {
       this.redisConnectionFactory = redisConnectionFactory;
     }
 

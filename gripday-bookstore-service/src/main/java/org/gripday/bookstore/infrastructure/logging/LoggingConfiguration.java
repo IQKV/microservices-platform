@@ -21,7 +21,7 @@ public class LoggingConfiguration {
   @Value("${spring.profiles.active:local}")
   private String activeProfile;
 
-  public LoggingConfiguration(Environment environment) {
+  public LoggingConfiguration(final Environment environment) {
     this.environment = environment;
   }
 

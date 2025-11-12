@@ -29,8 +29,8 @@ public class JwtService {
   private final JwtConfiguration jwtConfiguration;
   private final RedisTemplate<String, String> redisTemplate;
 
-  public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder,
-      JwtConfiguration jwtConfiguration, RedisTemplate<String, String> redisTemplate) {
+  public JwtService(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
+      final JwtConfiguration jwtConfiguration, final RedisTemplate<String, String> redisTemplate) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
     this.jwtConfiguration = jwtConfiguration;

@@ -27,10 +27,10 @@ public class EmailService implements EmailOperations {
   private final GripdayProperties gripdayProperties;
   private final EmailVerificationMetricsService metricsService;
 
-  public EmailService(JavaMailSender mailSender,
-      TemplateEngine templateEngine,
-      GripdayProperties gripdayProperties,
-      EmailVerificationMetricsService metricsService) {
+  public EmailService(final JavaMailSender mailSender,
+      final TemplateEngine templateEngine,
+      final GripdayProperties gripdayProperties,
+      final EmailVerificationMetricsService metricsService) {
     this.mailSender = mailSender;
     this.templateEngine = templateEngine;
     this.gripdayProperties = gripdayProperties;
@@ -160,11 +160,11 @@ public class EmailService implements EmailOperations {
    */
   public static class EmailServiceException extends RuntimeException {
 
-    public EmailServiceException(String message) {
+    public EmailServiceException(final String message) {
       super(message);
     }
 
-    public EmailServiceException(String message, Throwable cause) {
+    public EmailServiceException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
