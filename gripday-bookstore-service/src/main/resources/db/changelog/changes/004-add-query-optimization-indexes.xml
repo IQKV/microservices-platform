@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="008-add-repository-query-indexes" author="bookstore-service">
+        <comment>Add indexes for specific repository query patterns identified in BookRepository, CategoryRepository, and InventoryRepository</comment>
+
+        <!-- Index for findByNameIgnoreCase in CategoryRepository -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_categories_name_lower ON categories (LOWER(name));
+        </sql>
+
+        <!-- Index for findByNameContainingIgnoreCase in CategoryRepository -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_categories_name_trgm ON categories
+                USING gin(name gin_trgm_ops);
+        </sql>
+
+        <!-- Composite index for category with available books count -->
+        <createIndex tableName="books" indexName="idx_books_category_available">
+            <column name="category_id"/>
+            <column name="available"/>
+            <column name="id"/>
+        </createIndex>
+
+        <!-- Index for findRecentCategories query -->
+        <createIndex tableName="categories" indexName="idx_categories_created_at">
+            <column name="created_at" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="009-add-inventory-join-indexes" author="bookstore-service">
+        <comment>Add indexes for inventory-book join queries and availability checks</comment>
+
+        <!-- Composite index for inventory availability calculations (quantity - reservedQuantity) -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_inventory_available_calc ON inventory ((quantity - reserved_quantity))
+                WHERE (quantity - reserved_quantity) > 0;
+        </sql>
+
+        <!-- Index for findRecentlyUpdatedInventory query -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_inventory_updated_at_desc ON inventory (updated_at DESC)
+                WHERE updated_at IS NOT NULL;
+        </sql>
+
+        <!-- Index for findByBookIds bulk operations -->
+        <createIndex tableName="inventory" indexName="idx_inventory_book_id_quantity">
+            <column name="book_id"/>
+            <column name="quantity"/>
+            <column name="reserved_quantity"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="010-add-book-search-optimization-indexes" author="bookstore-service">
+        <comment>Add indexes for complex book search queries with multiple filters</comment>
+
+        <!-- Composite index for price range with category filtering -->
+        <createIndex tableName="books" indexName="idx_books_price_category_available">
+            <column name="price"/>
+            <column name="category_id"/>
+            <column name="available"/>
+        </createIndex>
+
+        <!-- Index for findRecentBooks query (available books ordered by creation) -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_recent_available ON books (created_at DESC, id)
+                WHERE available = true;
+        </sql>
+
+        <!-- Index for findBooksInStock query (books with inventory > 0) -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_in_stock ON books (id, title, author, price, category_id)
+                WHERE available = true AND EXISTS (
+                    SELECT 1 FROM inventory i WHERE i.book_id = books.id AND i.quantity > 0
+                );
+        </sql>
+
+        <!-- Composite index for title search with availability -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_title_available_lower ON books (LOWER(title), available, id)
+                WHERE available = true;
+        </sql>
+
+        <!-- Composite index for author search with availability -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_author_available_lower ON books (LOWER(author), available, id)
+                WHERE available = true;
+        </sql>
+    </changeSet>
+
+    <changeSet id="011-add-category-inventory-join-indexes" author="bookstore-service">
+        <comment>Add indexes for category-based inventory queries</comment>
+
+        <!-- Composite index for low stock by category query -->
+        <createIndex tableName="books" indexName="idx_books_category_id_available_id">
+            <column name="category_id"/>
+            <column name="available"/>
+            <column name="id"/>
+        </createIndex>
+
+        <!-- Index for inventory with category filtering through books -->
+        <createIndex tableName="inventory" indexName="idx_inventory_quantity_threshold_book">
+            <column name="quantity"/>
+            <column name="low_stock_threshold"/>
+            <column name="book_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="012-add-isbn-lookup-optimization" author="bookstore-service">
+        <comment>Optimize ISBN lookups which are unique and frequently used</comment>
+
+        <!-- Covering index for ISBN lookups (already unique, but add covering columns) -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_isbn_covering ON books (isbn, id, title, author, price, available)
+                WHERE isbn IS NOT NULL;
+        </sql>
+
+        <!-- Index for inventory lookup by book ISBN -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_inventory_book_isbn ON inventory (book_id)
+                INCLUDE (quantity, reserved_quantity, low_stock_threshold);
+        </sql>
+    </changeSet>
+
+    <changeSet id="013-add-statistics-query-indexes" author="bookstore-service">
+        <comment>Add indexes for count and sum aggregation queries</comment>
+
+        <!-- Partial index for available books count -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_books_available_count ON books (available)
+                WHERE available = true;
+        </sql>
+
+        <!-- Partial index for inventory with reservations -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_inventory_reserved_count ON inventory (reserved_quantity)
+                WHERE reserved_quantity > 0;
+        </sql>
+
+        <!-- Index for total inventory calculations -->
+        <sql dbms="postgresql">
+            CREATE INDEX idx_inventory_quantity_sum ON inventory (quantity)
+                WHERE quantity > 0;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

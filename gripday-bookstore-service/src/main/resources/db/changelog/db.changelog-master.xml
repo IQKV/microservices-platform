@@ -14,4 +14,7 @@
     <!-- Performance optimization indexes -->
     <include file="db/changelog/changes/003-add-performance-indexes.xml"/>
 
+    <!-- Query-specific optimization indexes -->
+    <include file="db/changelog/changes/004-add-query-optimization-indexes.xml"/>
+
 </databaseChangeLog>
