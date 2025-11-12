@@ -72,7 +72,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, message);
     pd.setTitle(status.getReasonPhrase());
     pd.setInstance(URI.create(request.getPath().value()));
-    pd.setType(URI.create("/problems/" + errorCode.toLowerCase()));
+    pd.setType(URI.create("/problems/" + errorCode.toLowerCase(java.util.Locale.ROOT)));
     pd.setProperty("code", errorCode);
     pd.setProperty("timestamp", Instant.now().toString());
     if (correlationId != null) {

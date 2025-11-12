@@ -190,7 +190,7 @@ public class StructuredLoggingConfig {
         MDC.put("path", path);
 
         if (headers != null && !headers.isEmpty()) {
-          headers.forEach((key, value) -> MDC.put("header_" + key.toLowerCase(), value));
+          headers.forEach((key, value) -> MDC.put("header_" + key.toLowerCase(java.util.Locale.ROOT), value));
         }
 
         requestLogger.info("Incoming request: {} {} with {} headers", method, path,
@@ -206,7 +206,7 @@ public class StructuredLoggingConfig {
         MDC.remove("path");
 
         if (headers != null) {
-          headers.keySet().forEach(key -> MDC.remove("header_" + key.toLowerCase()));
+          headers.keySet().forEach(key -> MDC.remove("header_" + key.toLowerCase(java.util.Locale.ROOT)));
         }
       }
     }

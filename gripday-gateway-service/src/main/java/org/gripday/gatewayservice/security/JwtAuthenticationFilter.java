@@ -51,8 +51,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   public JwtAuthenticationFilter(GatewayProperties gatewayProperties, ObjectMapper objectMapper) {
     this.gatewayProperties = gatewayProperties;
     this.objectMapper = objectMapper;
-    var secretKeyBytes = gatewayProperties.security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
-    this.jwtSecretKey = Keys.hmacShaKeyFor(secretKeyBytes);
+    this.jwtSecretKey = initializeSecretKey(gatewayProperties);
+  }
+
+  private static SecretKey initializeSecretKey(GatewayProperties gatewayProperties) {
+    try {
+      var secretKeyBytes = gatewayProperties.security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
+      return Keys.hmacShaKeyFor(secretKeyBytes);
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to initialize JWT secret key", e);
+    }
   }
 
   @Override
