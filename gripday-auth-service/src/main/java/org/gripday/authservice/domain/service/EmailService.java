@@ -50,13 +50,13 @@ public class EmailService implements EmailOperations {
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
       var emailConfig = gripdayProperties.email();
-      var verificationConfig = emailConfig.verification();
+      var senderConfig = emailConfig.sender();
 
       // Determine user's locale
       var userLocale = getUserLocale(user);
 
       // Set email properties with localized subject
-      helper.setFrom(verificationConfig.fromEmail(), verificationConfig.fromName());
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
       helper.setTo(user.getEmail());
       helper.setSubject(messageService.getMessage("email.verification.subject", userLocale));
 
@@ -67,7 +67,7 @@ public class EmailService implements EmailOperations {
       var context = new Context(userLocale);
       context.setVariable("user", user);
       context.setVariable("verificationUrl", verificationUrl);
-      context.setVariable("fromName", verificationConfig.fromName());
+      context.setVariable("fromName", senderConfig.fromName());
       context.setVariable("greeting", messageService.getMessage("email.verification.greeting", new Object[]{user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.verification.body", userLocale));
       context.setVariable("buttonText", messageService.getMessage("email.verification.button", userLocale));
@@ -112,8 +112,8 @@ public class EmailService implements EmailOperations {
 
   @Override
   public String buildVerificationUrl(String token) {
-    var verificationConfig = gripdayProperties.email().verification();
-    var baseUrl = verificationConfig.baseUrl();
+    var senderConfig = gripdayProperties.email().sender();
+    var baseUrl = senderConfig.baseUrl();
 
     // Ensure base URL doesn't end with slash
     var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
@@ -129,14 +129,14 @@ public class EmailService implements EmailOperations {
       var mimeMessage = mailSender.createMimeMessage();
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-      // Use verification fromEmail settings for outbound emails
+      // Use sender settings for outbound emails
       var emailConfig = gripdayProperties.email();
-      var verificationConfig = emailConfig.verification();
+      var senderConfig = emailConfig.sender();
 
       // Determine user's locale
       var userLocale = getUserLocale(user);
 
-      helper.setFrom(verificationConfig.fromEmail(), verificationConfig.fromName());
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
       helper.setTo(user.getEmail());
       helper.setSubject(messageService.getMessage("email.password.reset.subject", userLocale));
 
@@ -146,7 +146,7 @@ public class EmailService implements EmailOperations {
       var context = new Context(userLocale);
       context.setVariable("user", user);
       context.setVariable("resetUrl", resetUrl);
-      context.setVariable("fromName", verificationConfig.fromName());
+      context.setVariable("fromName", senderConfig.fromName());
       context.setVariable("greeting", messageService.getMessage("email.password.reset.greeting", new Object[]{user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.password.reset.body", userLocale));
       context.setVariable("buttonText", messageService.getMessage("email.password.reset.button", userLocale));
@@ -198,7 +198,7 @@ public class EmailService implements EmailOperations {
    * Build password reset URL based on base URL configuration.
    */
   public String buildPasswordResetUrl(String token) {
-    var baseUrl = gripdayProperties.email().verification().baseUrl();
+    var baseUrl = gripdayProperties.email().sender().baseUrl();
     var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
     return cleanBaseUrl + "/reset-password?token=" + token;
   }
@@ -212,13 +212,13 @@ public class EmailService implements EmailOperations {
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
       var emailConfig = gripdayProperties.email();
-      var verificationConfig = emailConfig.verification();
+      var senderConfig = emailConfig.sender();
 
       // Determine user's locale
       var userLocale = getUserLocale(user);
 
       // Set email properties with localized subject
-      helper.setFrom(verificationConfig.fromEmail(), verificationConfig.fromName());
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
       helper.setTo(user.getEmail());
       helper.setSubject(messageService.getMessage("email.registration.confirmed.subject", userLocale));
 
@@ -229,7 +229,7 @@ public class EmailService implements EmailOperations {
       var context = new Context(userLocale);
       context.setVariable("user", user);
       context.setVariable("dashboardUrl", dashboardUrl);
-      context.setVariable("fromName", verificationConfig.fromName());
+      context.setVariable("fromName", senderConfig.fromName());
       context.setVariable("greeting", messageService.getMessage("email.registration.confirmed.greeting", new Object[]{user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.registration.confirmed.body", userLocale));
       context.setVariable("nextSteps", messageService.getMessage("email.registration.confirmed.next.steps", userLocale));
@@ -279,7 +279,7 @@ public class EmailService implements EmailOperations {
    * Build dashboard URL based on base URL configuration.
    */
   private String buildDashboardUrl() {
-    var baseUrl = gripdayProperties.email().verification().baseUrl();
+    var baseUrl = gripdayProperties.email().sender().baseUrl();
     var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
     return cleanBaseUrl + "/dashboard";
   }

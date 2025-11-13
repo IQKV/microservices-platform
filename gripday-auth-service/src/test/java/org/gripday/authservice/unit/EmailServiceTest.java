@@ -47,14 +47,18 @@ class EmailServiceTest {
     var smtpConfig = new GripdayProperties.Email.Smtp(
         "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
     );
+    var senderConfig = new GripdayProperties.Email.Sender(
+        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com"
+    );
     var verificationConfig = new GripdayProperties.Email.Verification(
-        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", java.time.Duration.ofHours(24), 3
+        java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/user-registration/email-verification.html",
-        "Reset your password", "email/password-reset.html"
+        "Reset your password", "email/password-reset/initiate.html",
+        "Welcome to Gripday", "email/user-registration/email-confirmed.html"
     );
-    var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
+    var emailConfig = new GripdayProperties.Email(smtpConfig, senderConfig, verificationConfig, templatesConfig);
 
     // Mock other required configs
     var database = mock(GripdayProperties.Database.class);
@@ -86,14 +90,18 @@ class EmailServiceTest {
     var smtpConfig = new GripdayProperties.Email.Smtp(
         "localhost", 587, "test@example.com", "password", true, true, java.time.Duration.ofSeconds(30)
     );
+    var senderConfig = new GripdayProperties.Email.Sender(
+        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/"
+    );
     var verificationConfig = new GripdayProperties.Email.Verification(
-        "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", java.time.Duration.ofHours(24), 3
+        java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/user-registration/email-verification.html",
-        "Reset your password", "email/password-reset.html"
+        "Reset your password", "email/password-reset/initiate.html",
+        "Welcome to Gripday", "email/user-registration/email-confirmed.html"
     );
-    var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
+    var emailConfig = new GripdayProperties.Email(smtpConfig, senderConfig, verificationConfig, templatesConfig);
 
     var database = mock(GripdayProperties.Database.class);
     var auth = mock(GripdayProperties.Auth.class);

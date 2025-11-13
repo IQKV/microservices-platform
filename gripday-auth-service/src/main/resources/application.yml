@@ -111,17 +111,18 @@ gripday:
       auth: true
       starttls: true
       timeout: PT30S
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:noreply@gripday.com}
+      from-name: ${EMAIL_FROM_NAME:Gripday Platform}
+      base-url: ${APP_BASE_URL:https://app.gripday.com}
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
-      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
-      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H  # 24 hours
       rate-limit: 3  # emails per hour per user
     templates:
       verification-subject: "Verify your Gripday account"
       verification-template: "email/user-registration/email-verification.html"
       password-reset-subject: "Reset your Gripday password"
-      password-reset-template: "email/password-reset.html"
+      password-reset-template: "email/password-reset/initiate.html"
       registration-confirmed-subject: "Welcome to Gripday - Email Verified!"
       registration-confirmed-template: "email/user-registration/email-confirmed.html"
   observability:

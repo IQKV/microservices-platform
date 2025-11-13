@@ -157,6 +157,7 @@ public record GripdayProperties(
    */
   public record Email(
       @Valid @NotNull Smtp smtp,
+      @Valid @NotNull Sender sender,
       @Valid @NotNull Verification verification,
       @Valid @NotNull Template templates
   ) {
@@ -173,10 +174,15 @@ public record GripdayProperties(
 
     }
 
-    public record Verification(
+    public record Sender(
         @NotBlank String fromEmail,
         @NotBlank String fromName,
-        @NotBlank String baseUrl,
+        @NotBlank String baseUrl
+    ) {
+
+    }
+
+    public record Verification(
         @NotNull Duration tokenExpiry,
         @Min(1) @Max(10) int rateLimit
     ) {

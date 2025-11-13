@@ -206,6 +206,129 @@
       "description": "JWT signing algorithm (HS256 or RS256)",
       "sourceType": "org.gripday.authservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
       "defaultValue": "HS256"
+    },
+    {
+      "name": "gripday.email.smtp.host",
+      "type": "java.lang.String",
+      "description": "SMTP server host for sending emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp"
+    },
+    {
+      "name": "gripday.email.smtp.port",
+      "type": "java.lang.Integer",
+      "description": "SMTP server port (1-65535)",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp",
+      "defaultValue": 587
+    },
+    {
+      "name": "gripday.email.smtp.username",
+      "type": "java.lang.String",
+      "description": "SMTP authentication username",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp"
+    },
+    {
+      "name": "gripday.email.smtp.password",
+      "type": "java.lang.String",
+      "description": "SMTP authentication password",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp"
+    },
+    {
+      "name": "gripday.email.smtp.auth",
+      "type": "java.lang.Boolean",
+      "description": "Enable SMTP authentication",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.email.smtp.starttls",
+      "type": "java.lang.Boolean",
+      "description": "Enable STARTTLS for secure connection",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp",
+      "defaultValue": true
+    },
+    {
+      "name": "gripday.email.smtp.timeout",
+      "type": "java.time.Duration",
+      "description": "SMTP connection timeout",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Smtp",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "gripday.email.sender.from-email",
+      "type": "java.lang.String",
+      "description": "Email address used as sender for all outbound emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Sender",
+      "defaultValue": "noreply@gripday.com"
+    },
+    {
+      "name": "gripday.email.sender.from-name",
+      "type": "java.lang.String",
+      "description": "Display name used as sender for all outbound emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Sender",
+      "defaultValue": "Gripday Platform"
+    },
+    {
+      "name": "gripday.email.sender.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL for application links in emails (verification, password reset, dashboard)",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Sender",
+      "defaultValue": "https://app.gripday.com"
+    },
+    {
+      "name": "gripday.email.verification.token-expiry",
+      "type": "java.time.Duration",
+      "description": "Email verification token expiration duration",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Verification",
+      "defaultValue": "24h"
+    },
+    {
+      "name": "gripday.email.verification.rate-limit",
+      "type": "java.lang.Integer",
+      "description": "Maximum verification emails per hour per user (1-10)",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Verification",
+      "defaultValue": 3
+    },
+    {
+      "name": "gripday.email.templates.verification-subject",
+      "type": "java.lang.String",
+      "description": "Subject line for email verification emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "Verify your Gripday account"
+    },
+    {
+      "name": "gripday.email.templates.verification-template",
+      "type": "java.lang.String",
+      "description": "Thymeleaf template path for email verification emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "email/user-registration/email-verification.html"
+    },
+    {
+      "name": "gripday.email.templates.password-reset-subject",
+      "type": "java.lang.String",
+      "description": "Subject line for password reset emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "Reset your Gripday password"
+    },
+    {
+      "name": "gripday.email.templates.password-reset-template",
+      "type": "java.lang.String",
+      "description": "Thymeleaf template path for password reset emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "email/password-reset/initiate.html"
+    },
+    {
+      "name": "gripday.email.templates.registration-confirmed-subject",
+      "type": "java.lang.String",
+      "description": "Subject line for registration confirmation welcome emails sent after successful email verification",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "Welcome to Gripday - Email Verified!"
+    },
+    {
+      "name": "gripday.email.templates.registration-confirmed-template",
+      "type": "java.lang.String",
+      "description": "Thymeleaf template path for registration confirmation welcome emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "email/user-registration/email-confirmed.html"
     }
   ],
   "hints": [
@@ -232,6 +355,67 @@
         {
           "value": "RS256",
           "description": "RSA SHA-256 algorithm (asymmetric)"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.smtp.host",
+      "values": [
+        {
+          "value": "localhost",
+          "description": "Local SMTP server (e.g., MailHog for development)"
+        },
+        {
+          "value": "smtp.gmail.com",
+          "description": "Gmail SMTP server"
+        },
+        {
+          "value": "smtp.sendgrid.net",
+          "description": "SendGrid SMTP server"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.smtp.port",
+      "values": [
+        {
+          "value": 1025,
+          "description": "MailHog default port for local development"
+        },
+        {
+          "value": 587,
+          "description": "Standard SMTP port with STARTTLS"
+        },
+        {
+          "value": 465,
+          "description": "SMTP over SSL/TLS"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.templates.verification-template",
+      "values": [
+        {
+          "value": "email/user-registration/email-verification.html",
+          "description": "Default email verification template"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.templates.password-reset-template",
+      "values": [
+        {
+          "value": "email/password-reset/initiate.html",
+          "description": "Default password reset template"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.templates.registration-confirmed-template",
+      "values": [
+        {
+          "value": "email/user-registration/email-confirmed.html",
+          "description": "Default registration confirmation welcome email template"
         }
       ]
     }

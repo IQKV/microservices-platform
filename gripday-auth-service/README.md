@@ -248,13 +248,13 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=noreply@gripday.com
 SMTP_PASSWORD=your-app-password
-VERIFICATION_FROM_EMAIL=noreply@gripday.com
-VERIFICATION_FROM_NAME=Gripday Platform
-VERIFICATION_BASE_URL=https://app.gripday.com
+EMAIL_FROM_EMAIL=noreply@gripday.com
+EMAIL_FROM_NAME=Gripday Platform
+APP_BASE_URL=https://app.gripday.com
 
 # Password Reset Email Templates (optional overrides)
 GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_SUBJECT="Reset your Gripday password"
-GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_TEMPLATE="email/password-reset.html"
+GRIPDAY_EMAIL_TEMPLATES_PASSWORD_RESET_TEMPLATE="email/password-reset/initiate.html"
 
 # Multi-tenant
 GRIPDAY_TENANT_DEFAULT_ID=default
@@ -366,7 +366,7 @@ gripday:
       rate-limit: 3
     templates:
       password-reset-subject: "Reset your Gripday password"
-      password-reset-template: "email/password-reset.html"
+      password-reset-template: "email/password-reset/initiate.html"
 ```
 
 ### Security Features

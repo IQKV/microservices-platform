@@ -111,17 +111,18 @@ gripday:
       auth: false  # Disabled for local MailHog
       starttls: false  # Disabled for local development
       timeout: PT30S
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:noreply@gripday.local}
+      from-name: ${EMAIL_FROM_NAME:Gripday Platform (Local)}
+      base-url: ${APP_BASE_URL:http://localhost:3000}
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.local}
-      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform (Local)}
-      base-url: ${VERIFICATION_BASE_URL:http://localhost:3000}
       token-expiry: PT24H
       rate-limit: 10  # More lenient for development
     templates:
       verification-subject: "[LOCAL] Verify your Gripday account"
       verification-template: "email/user-registration/email-verification.html"
       password-reset-subject: "[LOCAL] Reset your Gripday password"
-      password-reset-template: "email/password-reset.html"
+      password-reset-template: "email/password-reset/initiate.html"
       registration-confirmed-subject: "[LOCAL] Welcome to Gripday - Email Verified!"
       registration-confirmed-template: "email/user-registration/email-confirmed.html"
     security:
