@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -44,19 +44,19 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   private static final String X_USER_ROLES_HEADER = "X-User-Roles";
   private static final String X_CORRELATION_ID_HEADER = "X-Correlation-ID";
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
   private final SecretKey jwtSecretKey;
   private final ObjectMapper objectMapper;
 
-  public JwtAuthenticationFilter(final GatewayProperties gatewayProperties, final ObjectMapper objectMapper) {
-    this.gatewayProperties = gatewayProperties;
+  public JwtAuthenticationFilter(final GripdayProperties gripdayProperties, final ObjectMapper objectMapper) {
+    this.gripdayProperties = gripdayProperties;
     this.objectMapper = objectMapper;
-    this.jwtSecretKey = initializeSecretKey(gatewayProperties);
+    this.jwtSecretKey = initializeSecretKey(gripdayProperties);
   }
 
-  private static SecretKey initializeSecretKey(GatewayProperties gatewayProperties) {
+  private static SecretKey initializeSecretKey(GripdayProperties gripdayProperties) {
     try {
-      var secretKeyBytes = gatewayProperties.security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
+      var secretKeyBytes = gripdayProperties.gateway().security().jwt().secretKey().getBytes(StandardCharsets.UTF_8);
       return Keys.hmacShaKeyFor(secretKeyBytes);
     } catch (final Exception e) {
       throw new IllegalStateException("Failed to initialize JWT secret key", e);
@@ -124,7 +124,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   }
 
   private boolean isPublicPath(String path) {
-    return gatewayProperties.security().publicPaths().stream()
+    return gripdayProperties.gateway().security().publicPaths().stream()
         .anyMatch(publicPath -> {
           if (publicPath.endsWith("/**")) {
             var prefix = publicPath.substring(0, publicPath.length() - 3);
@@ -145,8 +145,8 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   private Claims validateAndParseToken(String token) {
     return Jwts.parser()
         .verifyWith(jwtSecretKey)
-        .requireIssuer(gatewayProperties.security().jwt().issuer())
-        .requireAudience(gatewayProperties.security().jwt().audience())
+        .requireIssuer(gripdayProperties.gateway().security().jwt().issuer())
+        .requireAudience(gripdayProperties.gateway().security().jwt().audience())
         .build()
         .parseSignedClaims(token)
         .getPayload();

@@ -17,10 +17,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
-  public SecurityConfiguration(final GatewayProperties gatewayProperties) {
-    this.gatewayProperties = gatewayProperties;
+  public SecurityConfiguration(final GripdayProperties gripdayProperties) {
+    this.gripdayProperties = gripdayProperties;
   }
 
   @Bean
@@ -30,7 +30,7 @@ public class SecurityConfiguration {
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .authorizeExchange(exchanges -> exchanges
             // Public paths - no authentication required
-            .pathMatchers(gatewayProperties.security().publicPaths().toArray(new String[0]))
+            .pathMatchers(gripdayProperties.gateway().security().publicPaths().toArray(new String[0]))
             .permitAll()
             // Health and actuator endpoints
             .pathMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info")
@@ -47,7 +47,7 @@ public class SecurityConfiguration {
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
-    var corsConfig = gatewayProperties.cors();
+    var corsConfig = gripdayProperties.gateway().cors();
     var configuration = new CorsConfiguration();
 
     if (corsConfig.enabled()) {
@@ -55,7 +55,7 @@ public class SecurityConfiguration {
       configuration.setAllowedMethods(corsConfig.allowedMethods());
       configuration.setAllowedHeaders(corsConfig.allowedHeaders());
       configuration.setAllowCredentials(corsConfig.allowCredentials());
-      configuration.setMaxAge(corsConfig.maxAge());
+      configuration.setMaxAge((long) corsConfig.maxAge());
     }
 
     var source = new UrlBasedCorsConfigurationSource();

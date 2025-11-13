@@ -47,7 +47,7 @@
     },
     {
       "name": "gripday.observability",
-      "type": "org.gripday.gatewayservice.config.GripdayGatewayObservabilityProperties",
+      "type": "org.gripday.gatewayservice.config.GripdayProperties$ObservabilityProperties",
       "description": "Observability configuration for tracing, metrics, and logging in reactive applications"
     }
   ],

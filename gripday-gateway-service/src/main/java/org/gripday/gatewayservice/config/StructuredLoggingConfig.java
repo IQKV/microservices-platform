@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * Configuration for structured logging utilities and helpers in the gateway service. Provides consistent logging patterns for reactive applications and request/response correlation.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 public class StructuredLoggingConfig {
 
   /**

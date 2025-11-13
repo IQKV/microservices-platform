@@ -19,14 +19,14 @@ public class ServiceRegistryInitializer {
   private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryInitializer.class);
 
   private final LoadBalancingService loadBalancingService;
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
   public ServiceRegistryInitializer(
       final LoadBalancingService loadBalancingService,
-      final GatewayProperties gatewayProperties
+      final GripdayProperties gripdayProperties
   ) {
     this.loadBalancingService = loadBalancingService;
-    this.gatewayProperties = gatewayProperties;
+    this.gripdayProperties = gripdayProperties;
   }
 
   /**
@@ -36,12 +36,16 @@ public class ServiceRegistryInitializer {
   public void initializeServiceInstances() {
     logger.info("Initializing service instances for load balancing");
 
-    // Register auth service instances
-    var authServiceConfig = gatewayProperties.routing().services().authService();
-    if (authServiceConfig.enabled()) {
-      var authInstances = List.of(URI.create(authServiceConfig.uri()));
-      loadBalancingService.registerServiceInstances("auth-service", authInstances);
-      logger.info("Registered auth service instances: {}", authInstances);
+    // Register service instances from configuration
+    var services = gripdayProperties.gateway().routing().services();
+    if (services != null) {
+      services.forEach((serviceName, serviceConfig) -> {
+        if (serviceConfig.enabled()) {
+          var instances = List.of(URI.create(serviceConfig.uri()));
+          loadBalancingService.registerServiceInstances(serviceName, instances);
+          logger.info("Registered {} instances: {}", serviceName, instances);
+        }
+      });
     }
 
     // In a real implementation, this would discover services from:

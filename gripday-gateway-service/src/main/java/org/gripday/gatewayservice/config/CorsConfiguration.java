@@ -11,10 +11,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfiguration {
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
-  public CorsConfiguration(final GatewayProperties gatewayProperties) {
-    this.gatewayProperties = gatewayProperties;
+  public CorsConfiguration(final GripdayProperties gripdayProperties) {
+    this.gripdayProperties = gripdayProperties;
   }
 
   /**
@@ -23,7 +23,7 @@ public class CorsConfiguration {
   @Bean
   public CorsWebFilter corsWebFilter() {
     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-    var corsProperties = gatewayProperties.cors();
+    var corsProperties = gripdayProperties.gateway().cors();
 
     // Configure allowed origins
     if (corsProperties.allowedOrigins() != null && !corsProperties.allowedOrigins().isEmpty()) {
@@ -59,7 +59,7 @@ public class CorsConfiguration {
     corsConfig.setAllowCredentials(corsProperties.allowCredentials());
 
     // Configure max age
-    corsConfig.setMaxAge(corsProperties.maxAge());
+    corsConfig.setMaxAge((long) corsProperties.maxAge());
 
     // Expose headers that clients might need
     corsConfig.addExposedHeader("X-Correlation-ID");

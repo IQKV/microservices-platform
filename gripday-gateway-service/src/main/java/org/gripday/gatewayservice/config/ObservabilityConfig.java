@@ -36,17 +36,17 @@ import reactor.core.publisher.Mono;
  * settings.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 @AutoConfiguration(before = ObservationAutoConfiguration.class)
 public class ObservabilityConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityConfig.class);
 
-  private final GripdayGatewayObservabilityProperties observabilityProperties;
+  private final GripdayProperties gripdayProperties;
   private final Environment environment;
 
-  public ObservabilityConfig(final GripdayGatewayObservabilityProperties observabilityProperties, final Environment environment) {
-    this.observabilityProperties = observabilityProperties;
+  public ObservabilityConfig(final GripdayProperties gripdayProperties, final Environment environment) {
+    this.gripdayProperties = gripdayProperties;
     this.environment = environment;
   }
 
@@ -56,7 +56,7 @@ public class ObservabilityConfig {
   @Bean
   @ConditionalOnProperty(name = "gripday.observability.tracing.enabled", havingValue = "true", matchIfMissing = true)
   public OpenTelemetry openTelemetry() {
-    var tracingProps = observabilityProperties.tracing();
+    var tracingProps = gripdayProperties.observability().tracing();
 
     // Create resource with service information
     var resource = Resource.getDefault()

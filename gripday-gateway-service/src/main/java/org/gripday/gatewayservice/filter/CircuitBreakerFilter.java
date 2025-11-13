@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -30,19 +30,19 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(CircuitBreakerFilter.class);
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
   private final CircuitBreakerRegistry circuitBreakerRegistry;
   private final ObjectMapper objectMapper;
 
-  public CircuitBreakerFilter(final GatewayProperties gatewayProperties, final CircuitBreakerRegistry circuitBreakerRegistry, final ObjectMapper objectMapper) {
-    this.gatewayProperties = gatewayProperties;
+  public CircuitBreakerFilter(final GripdayProperties gripdayProperties, final CircuitBreakerRegistry circuitBreakerRegistry, final ObjectMapper objectMapper) {
+    this.gripdayProperties = gripdayProperties;
     this.circuitBreakerRegistry = circuitBreakerRegistry;
     this.objectMapper = objectMapper;
   }
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    if (!gatewayProperties.circuitBreaker().enabled()) {
+    if (!gripdayProperties.gateway().circuitBreaker().enabled()) {
       return chain.filter(exchange);
     }
 
@@ -106,7 +106,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
     response.getHeaders().add("X-Circuit-Breaker-State", circuitBreaker.getState().toString());
 
     if (isCircuitOpen) {
-      var waitDuration = gatewayProperties.circuitBreaker().waitDurationInOpenState();
+      var waitDuration = gripdayProperties.gateway().circuitBreaker().waitDurationInOpenState();
       response.getHeaders().add("Retry-After", String.valueOf(waitDuration.getSeconds()));
     }
 
@@ -121,7 +121,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
     pd.setProperty("timestamp", Instant.now().toString());
     pd.setProperty("circuitBreaker", circuitBreakerName);
     if (isCircuitOpen) {
-      var retryAfter = gatewayProperties.circuitBreaker().waitDurationInOpenState().getSeconds();
+      var retryAfter = gripdayProperties.gateway().circuitBreaker().waitDurationInOpenState().getSeconds();
       pd.setProperty("retryAfter", retryAfter);
     }
     if (correlationId != null) {

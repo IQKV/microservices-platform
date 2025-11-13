@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -20,12 +20,12 @@ public class TenantQuotaMonitoringService {
 
   private static final Logger logger = LoggerFactory.getLogger(TenantQuotaMonitoringService.class);
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
   private final ReactiveStringRedisTemplate redisTemplate;
   private final Map<String, TenantUsageStats> tenantUsageCache = new ConcurrentHashMap<>();
 
-  public TenantQuotaMonitoringService(final GatewayProperties gatewayProperties, final ReactiveStringRedisTemplate redisTemplate) {
-    this.gatewayProperties = gatewayProperties;
+  public TenantQuotaMonitoringService(final GripdayProperties gripdayProperties, final ReactiveStringRedisTemplate redisTemplate) {
+    this.gripdayProperties = gripdayProperties;
     this.redisTemplate = redisTemplate;
   }
 
@@ -33,7 +33,7 @@ public class TenantQuotaMonitoringService {
    * Records a request for tenant quota monitoring.
    */
   public Mono<Void> recordTenantRequest(String tenantId, String endpoint, boolean rateLimited) {
-    if (!gatewayProperties.rateLimiting().tenantQuotas().enabled()) {
+    if (!gripdayProperties.gateway().rateLimiting().tenantQuotas().enabled()) {
       return Mono.empty();
     }
 
@@ -96,7 +96,7 @@ public class TenantQuotaMonitoringService {
   }
 
   private Mono<Long> getCurrentTenantUsage(String tenantId) {
-    var keyPrefix = gatewayProperties.rateLimiting().redis().keyPrefix();
+    var keyPrefix = gripdayProperties.gateway().rateLimiting().redis().keyPrefix();
     var tenantKey = String.format("%s:tenant:%s:*", keyPrefix, tenantId);
 
     // Get current usage from Redis sliding window
@@ -109,7 +109,7 @@ public class TenantQuotaMonitoringService {
   }
 
   private int getTenantQuota(String tenantId) {
-    var tenantQuotas = gatewayProperties.rateLimiting().tenantQuotas();
+    var tenantQuotas = gripdayProperties.gateway().rateLimiting().tenantQuotas();
     return tenantQuotas.tenantSpecificQuotas().getOrDefault(tenantId, tenantQuotas.defaultTenantRequestsPerMinute());
   }
 

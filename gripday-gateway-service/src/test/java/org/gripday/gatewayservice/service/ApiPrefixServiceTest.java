@@ -3,7 +3,7 @@ package org.gripday.gatewayservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,21 +16,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ApiPrefixServiceTest {
 
   @Mock(lenient = true)
-  private GatewayProperties gatewayProperties;
+  private GripdayProperties gripdayProperties;
 
   @Mock(lenient = true)
-  private GatewayProperties.Routing routing;
+  private GripdayProperties.GatewayProperties gatewayProperties;
 
   @Mock(lenient = true)
-  private GatewayProperties.Routing.ApiPrefix apiPrefix;
+  private GripdayProperties.GatewayProperties.RoutingProperties routing;
+
+  @Mock(lenient = true)
+  private GripdayProperties.GatewayProperties.RoutingProperties.ApiPrefixProperties apiPrefix;
 
   private ApiPrefixService apiPrefixService;
 
   @BeforeEach
   void setUp() {
+    when(gripdayProperties.gateway()).thenReturn(gatewayProperties);
     when(gatewayProperties.routing()).thenReturn(routing);
     when(routing.apiPrefix()).thenReturn(apiPrefix);
-    apiPrefixService = new ApiPrefixService(gatewayProperties);
+    apiPrefixService = new ApiPrefixService(gripdayProperties);
   }
 
   @Test

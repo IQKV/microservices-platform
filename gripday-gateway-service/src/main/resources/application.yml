@@ -42,6 +42,22 @@ spring:
 
 # Gripday Gateway Configuration
 gripday:
+  cache:
+    redis:
+      host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "gripday:gateway"
+      default-ttl: PT1H
+      enable-statistics: false
+  
   gateway:
     routing:
       # API prefix configuration - allows stripping /api prefix when deployed on api.gripday.com
@@ -193,12 +209,16 @@ gripday:
       sampling-rate: 1.0
       endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
       timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
     metrics:
       enabled: true
       path: /actuator/prometheus
       prefix: gripday_gateway
       include-host-tag: true
       include-application-tag: true
+      include-environment-tag: true
+      custom-tags: {}
       enabled-metrics:
         - gateway.requests
         - gateway.response.time
@@ -206,6 +226,7 @@ gripday:
         - gateway.rate.limit
     logging:
       level: INFO
+      format: console
       enable-request-logging: true
       enable-response-logging: false
       enable-correlation-id: true

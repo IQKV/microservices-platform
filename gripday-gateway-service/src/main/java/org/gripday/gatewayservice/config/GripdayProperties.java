@@ -70,10 +70,23 @@ public record GripdayProperties(
   ) {
 
     public record RoutingProperties(
+        @Valid @NotNull ApiPrefixProperties apiPrefix,
         Map<String, ServiceProperties> services,
         boolean enableServiceDiscovery,
         @Valid @NotNull LoadBalancingProperties loadBalancing
     ) {
+
+      /**
+       * API prefix configuration for environment-specific routing.
+       * Allows configuring /api prefix in development/staging and clean URLs in production.
+       */
+      public record ApiPrefixProperties(
+          boolean enabled,
+          @NotBlank String prefix,
+          int stripCount
+      ) {
+
+      }
 
       public record ServiceProperties(
           @NotBlank String uri,

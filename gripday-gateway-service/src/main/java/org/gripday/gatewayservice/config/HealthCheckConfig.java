@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
  * Configuration for custom health checks in the gateway service. Provides reactive health indicators for Redis, downstream services, and gateway-specific components.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayGatewayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 public class HealthCheckConfig {
 
   /**

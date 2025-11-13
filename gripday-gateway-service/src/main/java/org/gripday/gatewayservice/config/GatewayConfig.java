@@ -14,18 +14,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
   private final RequestTransformationFilter requestTransformationFilter;
   private final ResponseTransformationFilter responseTransformationFilter;
   private final LoadBalancingFilter loadBalancingFilter;
 
   public GatewayConfig(
-      final GatewayProperties gatewayProperties,
+      final GripdayProperties gripdayProperties,
       final RequestTransformationFilter requestTransformationFilter,
       final ResponseTransformationFilter responseTransformationFilter,
       final LoadBalancingFilter loadBalancingFilter
   ) {
-    this.gatewayProperties = gatewayProperties;
+    this.gripdayProperties = gripdayProperties;
     this.requestTransformationFilter = requestTransformationFilter;
     this.responseTransformationFilter = responseTransformationFilter;
     this.loadBalancingFilter = loadBalancingFilter;
@@ -37,7 +37,8 @@ public class GatewayConfig {
    */
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-    var authServiceConfig = gatewayProperties.routing().services().authService();
+    var services = gripdayProperties.gateway().routing().services();
+    var authServiceConfig = services.get("auth-service");
 
     return builder.routes()
         // Auth service routes with transformation and load balancing
@@ -75,8 +76,8 @@ public class GatewayConfig {
   private LoadBalancingFilter.Config createLoadBalancingConfig(String serviceName) {
     var config = new LoadBalancingFilter.Config();
     config.setServiceName(serviceName);
-    config.setEnableLoadBalancing(gatewayProperties.routing().loadBalancing().enableHealthCheck());
-    config.setStrategy(gatewayProperties.routing().loadBalancing().strategy());
+    config.setEnableLoadBalancing(gripdayProperties.gateway().routing().loadBalancing().enableHealthCheck());
+    config.setStrategy(gripdayProperties.gateway().routing().loadBalancing().strategy());
     return config;
   }
 }

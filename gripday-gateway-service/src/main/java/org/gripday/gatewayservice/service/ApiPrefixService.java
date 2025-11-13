@@ -1,6 +1,6 @@
 package org.gripday.gatewayservice.service;
 
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiPrefixService {
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
-  public ApiPrefixService(final GatewayProperties gatewayProperties) {
-    this.gatewayProperties = gatewayProperties;
+  public ApiPrefixService(final GripdayProperties gripdayProperties) {
+    this.gripdayProperties = gripdayProperties;
   }
 
   /**
@@ -22,7 +22,7 @@ public class ApiPrefixService {
    * @return the API prefix (e.g., "/api" or empty string)
    */
   public String getPrefix() {
-    return gatewayProperties.routing().apiPrefix().prefix();
+    return gripdayProperties.gateway().routing().apiPrefix().prefix();
   }
 
   /**
@@ -31,7 +31,7 @@ public class ApiPrefixService {
    * @return number of path segments to strip
    */
   public int getStripCount() {
-    return gatewayProperties.routing().apiPrefix().stripCount();
+    return gripdayProperties.gateway().routing().apiPrefix().stripCount();
   }
 
   /**
@@ -40,7 +40,7 @@ public class ApiPrefixService {
    * @return true if enabled, false otherwise
    */
   public boolean isEnabled() {
-    return gatewayProperties.routing().apiPrefix().enabled();
+    return gripdayProperties.gateway().routing().apiPrefix().enabled();
   }
 
   /**

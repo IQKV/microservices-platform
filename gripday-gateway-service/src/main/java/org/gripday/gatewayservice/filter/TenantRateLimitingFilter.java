@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gripday.gatewayservice.config.GatewayProperties;
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.gripday.gatewayservice.service.TenantQuotaMonitoringService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +33,16 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
 
   private static final String TENANT_CONTEXT_ATTRIBUTE = "tenantContext";
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
   private final ReactiveStringRedisTemplate redisTemplate;
   private final TenantQuotaMonitoringService quotaMonitoringService;
   private final ObjectMapper objectMapper;
 
-  public TenantRateLimitingFilter(final GatewayProperties gatewayProperties,
+  public TenantRateLimitingFilter(final GripdayProperties gripdayProperties,
       final ReactiveStringRedisTemplate redisTemplate,
       final TenantQuotaMonitoringService quotaMonitoringService,
       final ObjectMapper objectMapper) {
-    this.gatewayProperties = gatewayProperties;
+    this.gripdayProperties = gripdayProperties;
     this.redisTemplate = redisTemplate;
     this.quotaMonitoringService = quotaMonitoringService;
     this.objectMapper = objectMapper;
@@ -50,7 +50,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    if (!gatewayProperties.rateLimiting().enabled()) {
+    if (!gripdayProperties.gateway().rateLimiting().enabled()) {
       return chain.filter(exchange);
     }
 
@@ -84,7 +84,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
           }
 
           // Check tenant-specific rate limit if enabled
-          if (rateLimitPolicy.enableTenantQuotas() && gatewayProperties.rateLimiting().tenantQuotas().enabled()) {
+          if (rateLimitPolicy.enableTenantQuotas() && gripdayProperties.gateway().rateLimiting().tenantQuotas().enabled()) {
             var tenantQuota = getTenantQuota(tenantId);
             return checkRateLimit(tenantKey, tenantQuota, tenantQuota * 2) // Allow burst of 2x quota
                 .flatMap(tenantAllowed -> {
@@ -126,8 +126,8 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
     return remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : "unknown";
   }
 
-  private GatewayProperties.RateLimiting.EndpointPolicy determineRateLimitPolicy(String path) {
-    var policies = gatewayProperties.rateLimiting().policies();
+  private GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties determineRateLimitPolicy(String path) {
+    var policies = gripdayProperties.gateway().rateLimiting().policies();
 
     // Check for exact path match first
     var exactMatch = policies.endpoints().get(path);
@@ -144,7 +144,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
     }
 
     // Return default policy
-    return new GatewayProperties.RateLimiting.EndpointPolicy(
+    return new GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties(
         policies.defaultRequestsPerMinute(),
         policies.defaultBurstCapacity(),
         false
@@ -160,12 +160,12 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
   }
 
   private String createGlobalRateLimitKey(String clientIp, String path) {
-    var keyPrefix = gatewayProperties.rateLimiting().redis().keyPrefix();
+    var keyPrefix = gripdayProperties.gateway().rateLimiting().redis().keyPrefix();
     return String.format("%s:global:%s:%s", keyPrefix, clientIp, sanitizePath(path));
   }
 
   private String createTenantRateLimitKey(String tenantId, String path) {
-    var keyPrefix = gatewayProperties.rateLimiting().redis().keyPrefix();
+    var keyPrefix = gripdayProperties.gateway().rateLimiting().redis().keyPrefix();
     return String.format("%s:tenant:%s:%s", keyPrefix, tenantId, sanitizePath(path));
   }
 
@@ -174,7 +174,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
   }
 
   private int getTenantQuota(String tenantId) {
-    var tenantQuotas = gatewayProperties.rateLimiting().tenantQuotas();
+    var tenantQuotas = gripdayProperties.gateway().rateLimiting().tenantQuotas();
     return tenantQuotas.tenantSpecificQuotas().getOrDefault(tenantId, tenantQuotas.defaultTenantRequestsPerMinute());
   }
 

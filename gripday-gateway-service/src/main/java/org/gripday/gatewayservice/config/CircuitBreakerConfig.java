@@ -18,15 +18,15 @@ public class CircuitBreakerConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(CircuitBreakerConfig.class);
 
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
-  public CircuitBreakerConfig(final GatewayProperties gatewayProperties) {
-    this.gatewayProperties = gatewayProperties;
+  public CircuitBreakerConfig(final GripdayProperties gripdayProperties) {
+    this.gripdayProperties = gripdayProperties;
   }
 
   @Bean
   public Customizer<ReactiveResilience4JCircuitBreakerFactory> defaultCustomizer() {
-    var cbConfig = gatewayProperties.circuitBreaker();
+    var cbConfig = gripdayProperties.gateway().circuitBreaker();
 
     return factory -> {
       if (cbConfig.enabled()) {
@@ -59,7 +59,7 @@ public class CircuitBreakerConfig {
   }
 
   private io.github.resilience4j.circuitbreaker.CircuitBreakerConfig createCircuitBreakerConfig() {
-    var cbConfig = gatewayProperties.circuitBreaker();
+    var cbConfig = gripdayProperties.gateway().circuitBreaker();
 
     return io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.custom()
         .failureRateThreshold(cbConfig.failureRateThreshold())

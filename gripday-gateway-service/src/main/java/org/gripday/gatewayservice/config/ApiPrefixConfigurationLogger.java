@@ -17,11 +17,11 @@ public class ApiPrefixConfigurationLogger {
   private static final Logger logger = LoggerFactory.getLogger(ApiPrefixConfigurationLogger.class);
 
   private final ApiPrefixService apiPrefixService;
-  private final GatewayProperties gatewayProperties;
+  private final GripdayProperties gripdayProperties;
 
-  public ApiPrefixConfigurationLogger(final ApiPrefixService apiPrefixService, final GatewayProperties gatewayProperties) {
+  public ApiPrefixConfigurationLogger(final ApiPrefixService apiPrefixService, final GripdayProperties gripdayProperties) {
     this.apiPrefixService = apiPrefixService;
-    this.gatewayProperties = gatewayProperties;
+    this.gripdayProperties = gripdayProperties;
   }
 
   @EventListener(ApplicationReadyEvent.class)
@@ -60,14 +60,18 @@ public class ApiPrefixConfigurationLogger {
   private void logServiceRoutes() {
     logger.info("Configured Service Routes:");
     
-    var authService = gatewayProperties.routing().services().authService();
-    if (authService.enabled()) {
-      var fullPath = apiPrefixService.buildFullPath(authService.path());
-      logger.info("  Auth Service:");
-      logger.info("    URI: {}", authService.uri());
-      logger.info("    Path Pattern: {}", fullPath);
-      logger.info("    Connect Timeout: {}ms", authService.connectTimeout());
-      logger.info("    Response Timeout: {}ms", authService.responseTimeout());
+    var services = gripdayProperties.gateway().routing().services();
+    if (services != null && !services.isEmpty()) {
+      services.forEach((serviceName, serviceConfig) -> {
+        if (serviceConfig.enabled()) {
+          var fullPath = apiPrefixService.buildFullPath(serviceConfig.path());
+          logger.info("  {}:", serviceName);
+          logger.info("    URI: {}", serviceConfig.uri());
+          logger.info("    Path Pattern: {}", fullPath);
+          logger.info("    Connect Timeout: {}ms", serviceConfig.connectTimeout());
+          logger.info("    Response Timeout: {}ms", serviceConfig.responseTimeout());
+        }
+      });
     }
   }
 }
