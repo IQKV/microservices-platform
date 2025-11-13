@@ -131,6 +131,25 @@ class EmailServiceTest {
     
     // Recreate email service with mocked metrics
     var messageService = mock(org.gripday.authservice.infrastructure.i18n.MessageService.class);
+    
+    // Mock MessageService to return localized strings
+    when(messageService.getMessage(eq("email.verification.subject"), any(java.util.Locale.class)))
+        .thenReturn("Verify your Gripday account");
+    when(messageService.getMessage(eq("email.verification.greeting"), any(Object[].class), any(java.util.Locale.class)))
+        .thenReturn("Hello Test");
+    when(messageService.getMessage(eq("email.verification.body"), any(java.util.Locale.class)))
+        .thenReturn("Thank you for registering with Gripday.");
+    when(messageService.getMessage(eq("email.verification.button"), any(java.util.Locale.class)))
+        .thenReturn("Verify Email");
+    when(messageService.getMessage(eq("email.verification.link.text"), any(java.util.Locale.class)))
+        .thenReturn("Or copy and paste this link in your browser:");
+    when(messageService.getMessage(eq("email.verification.footer"), any(java.util.Locale.class)))
+        .thenReturn("If you did not create an account, please ignore this email.");
+    when(messageService.getMessage(eq("email.verification.regards"), any(java.util.Locale.class)))
+        .thenReturn("Best regards,");
+    when(messageService.getMessage(eq("email.verification.team"), any(java.util.Locale.class)))
+        .thenReturn("The Gripday Team");
+    
     emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService, messageService);
 
     when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
