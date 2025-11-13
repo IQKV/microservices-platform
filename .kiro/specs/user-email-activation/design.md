@@ -256,10 +256,11 @@ gripday:
       password: ${SMTP_PASSWORD:}
       auth: true
       starttls: true
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:noreply@gripday.com}
+      from-name: ${EMAIL_FROM_NAME:Gripday Platform}
+      base-url: ${APP_BASE_URL:https://app.gripday.com}
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
-      from-name: ${VERIFICATION_FROM_NAME:Gripday Platform}
-      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H
       rate-limit: 3 # emails per hour per user
     templates:
@@ -276,9 +277,10 @@ SMTP_PORT=587
 SMTP_USERNAME=noreply@gripday.com
 SMTP_PASSWORD=app-specific-password
 
-# Email Settings
-VERIFICATION_FROM_EMAIL=noreply@gripday.com
-VERIFICATION_BASE_URL=https://app.gripday.com
+# Email Sender Settings
+EMAIL_FROM_EMAIL=noreply@gripday.com
+EMAIL_FROM_NAME=Gripday Platform
+APP_BASE_URL=https://app.gripday.com
 ```
 
 ## Security Considerations

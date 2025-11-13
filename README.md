@@ -269,9 +269,11 @@ gripday:
       port: ${SMTP_PORT:587}
       username: ${SMTP_USERNAME}
       password: ${SMTP_PASSWORD}
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:noreply@gripday.com}
+      from-name: ${EMAIL_FROM_NAME:Gripday Platform}
+      base-url: ${APP_BASE_URL:https://app.gripday.com}
     verification:
-      from-email: ${VERIFICATION_FROM_EMAIL:noreply@gripday.com}
-      base-url: ${VERIFICATION_BASE_URL:https://app.gripday.com}
       token-expiry: PT24H
       rate-limit: 3
   database:
@@ -299,10 +301,10 @@ SMTP_PORT=587
 SMTP_USERNAME=noreply@gripday.com
 SMTP_PASSWORD=your-app-password
 
-# Email Verification
-VERIFICATION_FROM_EMAIL=noreply@gripday.com
-VERIFICATION_FROM_NAME=Gripday Platform
-VERIFICATION_BASE_URL=https://app.gripday.com
+# Email Sender Configuration
+EMAIL_FROM_EMAIL=noreply@gripday.com
+EMAIL_FROM_NAME=Gripday Platform
+APP_BASE_URL=https://app.gripday.com
 ```
 
 See [Environment Variables Guide](docs/configuration/environment-variables.md) for complete configuration options.
