@@ -7,6 +7,14 @@ spring:
   profiles:
     active: local
   
+  # Internationalization Configuration
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
   # JPA Configuration
   jpa:
     hibernate:

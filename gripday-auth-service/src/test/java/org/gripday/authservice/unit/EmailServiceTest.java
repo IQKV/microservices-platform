@@ -64,7 +64,8 @@ class EmailServiceTest {
 
     gripdayProperties = new GripdayProperties(database, cache, auth, emailConfig, observability);
     var metricsService = mock(EmailVerificationMetricsService.class);
-    emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService);
+    var messageService = mock(org.gripday.authservice.infrastructure.i18n.MessageService.class);
+    emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService, messageService);
   }
 
   @Test
@@ -101,7 +102,8 @@ class EmailServiceTest {
 
     var properties = new GripdayProperties(database, cache, auth, emailConfig, observability);
     var metricsService = mock(EmailVerificationMetricsService.class);
-    var service = new EmailService(mailSender, templateEngine, properties, metricsService);
+    var messageService = mock(org.gripday.authservice.infrastructure.i18n.MessageService.class);
+    var service = new EmailService(mailSender, templateEngine, properties, metricsService, messageService);
 
     var token = "test-token-123";
 
@@ -128,7 +130,8 @@ class EmailServiceTest {
     when(metricsService.getEmailSendTimer()).thenReturn(emailTimer);
     
     // Recreate email service with mocked metrics
-    emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService);
+    var messageService = mock(org.gripday.authservice.infrastructure.i18n.MessageService.class);
+    emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService, messageService);
 
     when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
     when(templateEngine.process(eq("email/verification.html"), any(Context.class)))

@@ -17,5 +17,6 @@
     <include file="db/changelog/007-create-email-verification-tokens-table.xml"/>
     <include file="db/changelog/008-create-organizations-table.xml"/>
     <include file="db/changelog/009-add-missing-critical-indexes.xml"/>
+    <include file="db/changelog/010-add-user-preferred-locale.xml"/>
 
 </databaseChangeLog>

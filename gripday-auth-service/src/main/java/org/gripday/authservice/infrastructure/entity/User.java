@@ -52,6 +52,9 @@ public class User extends TenantAwareEntity {
   @Column(name = "email_verified", nullable = false)
   private Boolean emailVerified = false;
 
+  @Column(name = "preferred_locale", length = 10)
+  private String preferredLocale = "en";
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -147,6 +150,14 @@ public class User extends TenantAwareEntity {
 
   public void setEmailVerified(Boolean emailVerified) {
     this.emailVerified = emailVerified;
+  }
+
+  public String getPreferredLocale() {
+    return preferredLocale;
+  }
+
+  public void setPreferredLocale(String preferredLocale) {
+    this.preferredLocale = preferredLocale;
   }
 
   public LocalDateTime getCreatedAt() {

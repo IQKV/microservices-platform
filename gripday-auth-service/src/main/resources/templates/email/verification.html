@@ -112,35 +112,24 @@
   </div>
 
   <div class="content">
-    <p>Hello <strong th:text="${user.firstName}">User</strong>,</p>
+    <p th:text="${greeting}">Hello User,</p>
 
-    <p>Welcome to Gripday! To complete your account setup and start using our platform, please verify your email address by clicking the button below:</p>
+    <p th:text="${body}">Welcome to Gripday! To complete your account setup and start using our platform, please verify your email address by clicking the button below:</p>
 
     <div class="button-container">
-      <a th:href="${verificationUrl}" class="verify-button">Verify Email Address</a>
+      <a th:href="${verificationUrl}" class="verify-button" th:text="${buttonText}">Verify Email Address</a>
     </div>
 
-    <div class="security-note">
-      <strong>Security Note:</strong> This verification link will expire in 24 hours for your security. If you didn't create an account with Gripday, please ignore this email.
-    </div>
+    <p th:text="${footer}" class="security-note">If you didn't create an account with Gripday, please ignore this email.</p>
 
-    <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
+    <p th:text="${linkText}">If the button above doesn't work, you can copy and paste the following link into your browser:</p>
 
     <div class="alternative-link">
       <a th:href="${verificationUrl}" th:text="${verificationUrl}">Verification Link</a>
     </div>
 
-    <p>Once your email is verified, you'll be able to:</p>
-    <ul>
-      <li>Access your Gripday dashboard</li>
-      <li>Manage your account settings</li>
-      <li>Receive important updates and notifications</li>
-    </ul>
-
-    <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
-
-    <p>Best regards,<br>
-      <span th:text="${fromName}">The Gripday Team</span></p>
+    <p th:text="${regards}">Best regards,</p>
+    <p><span th:text="${team}">The Gripday Team</span></p>
   </div>
 
   <div class="footer">
