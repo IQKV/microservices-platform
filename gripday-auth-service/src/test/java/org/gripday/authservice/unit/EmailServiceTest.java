@@ -56,6 +56,7 @@ class EmailServiceTest {
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/user-registration/email-verification.html",
         "Reset your password", "email/password-reset/initiate.html",
+        "Password Reset Confirmed", "email/password-reset/confirmed.html",
         "Welcome to Gripday", "email/user-registration/email-confirmed.html"
     );
     var emailConfig = new GripdayProperties.Email(smtpConfig, senderConfig, verificationConfig, templatesConfig);
@@ -99,6 +100,7 @@ class EmailServiceTest {
     var templatesConfig = new GripdayProperties.Email.Template(
         "Verify your Gripday account", "email/user-registration/email-verification.html",
         "Reset your password", "email/password-reset/initiate.html",
+        "Password Reset Confirmed", "email/password-reset/confirmed.html",
         "Welcome to Gripday", "email/user-registration/email-confirmed.html"
     );
     var emailConfig = new GripdayProperties.Email(smtpConfig, senderConfig, verificationConfig, templatesConfig);

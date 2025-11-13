@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gripday.authservice.domain.service.AuthenticationService;
 import org.gripday.authservice.domain.service.JwtService;
+import org.gripday.authservice.domain.service.PasswordResetService;
 import org.gripday.authservice.domain.service.UserRegistrationService;
 import org.gripday.authservice.presentation.dto.ForgotPasswordRequest;
 import org.gripday.authservice.presentation.dto.LoginRequest;
@@ -45,14 +46,17 @@ public class AuthenticationResource {
 
   private final AuthenticationService authenticationService;
   private final UserRegistrationService userRegistrationService;
+  private final PasswordResetService passwordResetService;
   private final JwtService jwtService;
 
   public AuthenticationResource(
       final AuthenticationService authenticationService,
       final UserRegistrationService userRegistrationService,
+      final PasswordResetService passwordResetService,
       final JwtService jwtService) {
     this.authenticationService = authenticationService;
     this.userRegistrationService = userRegistrationService;
+    this.passwordResetService = passwordResetService;
     this.jwtService = jwtService;
   }
 
@@ -339,7 +343,7 @@ public class AuthenticationResource {
       @Valid @RequestBody ResetPasswordRequest request,
       HttpServletRequest httpRequest) {
     var clientIp = getClientIpAddress(httpRequest);
-    authenticationService.resetPassword(request.token(), request.newPassword(), clientIp);
+    passwordResetService.resetPassword(request.token(), request.newPassword(), clientIp);
     return ResponseEntity.noContent().build();
   }
 
@@ -489,7 +493,7 @@ public class AuthenticationResource {
       HttpServletRequest httpRequest) {
     var ipAddress = getClientIpAddress(httpRequest);
     var userAgent = httpRequest.getHeader("User-Agent");
-    authenticationService.initiatePasswordReset(request.email(), ipAddress, userAgent);
+    passwordResetService.initiatePasswordReset(request.email(), ipAddress, userAgent);
     return ResponseEntity.accepted().build();
   }
 

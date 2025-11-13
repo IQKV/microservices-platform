@@ -20,11 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.gripday.authservice.config.RedisConfig.TenantAwareRedisService;
 import org.gripday.authservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.authservice.domain.service.AccountLockoutService;
 import org.gripday.authservice.domain.service.AuthenticationService;
-import org.gripday.authservice.domain.service.EmailService;
 import org.gripday.authservice.domain.service.JwtService;
 import org.gripday.authservice.domain.service.SecurityAuditService;
 import org.gripday.authservice.infrastructure.entity.Authority;
@@ -69,12 +67,6 @@ class AuthenticationServiceTest {
   private TenantAwareSessionService sessionService;
 
   @Mock
-  private TenantAwareRedisService redisService;
-
-  @Mock
-  private EmailService emailService;
-
-  @Mock
   private MeterRegistry meterRegistry;
 
   private AuthenticationService authenticationService;
@@ -84,8 +76,7 @@ class AuthenticationServiceTest {
   void setUp() {
     authenticationService = new AuthenticationService(
         userRepository, passwordEncoder, jwtService, accountLockoutService,
-        securityAuditService, inputSanitizer, sessionService, redisService,
-        emailService, meterRegistry
+        securityAuditService, inputSanitizer, sessionService, meterRegistry
     );
 
     testUser = createTestUser(1L, "testuser", "test@example.com", "tenant-1");
