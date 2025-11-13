@@ -139,7 +139,7 @@ Revokes all refresh tokens for the authenticated user and invalidates all active
 Starts the password reset flow. Always returns 200 to avoid user enumeration.
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
+curl -X POST http://localhost:8080/api/v1/password/forgot \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com"
@@ -151,7 +151,7 @@ curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
 Resets the password using a reset token received by email.
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/reset-password \
+curl -X POST http://localhost:8080/api/v1/password/reset \
   -H "Content-Type: application/json" \
   -d '{
     "token": "550e8400-e29b-41d4-a716-446655440000",
@@ -379,9 +379,9 @@ gripday:
 
 ### Password Reset Flow
 
-1. User requests password reset via `POST /api/v1/auth/forgot-password`.
+1. User requests password reset via `POST /api/v1/password/forgot`.
 2. System generates a single-use reset token (30-minute default TTL) and sends an email with a reset link.
-3. User submits `POST /api/v1/auth/reset-password` with token and new password.
+3. User submits `POST /api/v1/password/reset` with token and new password.
 4. Service updates password, revokes all refresh tokens, and invalidates sessions.
 
 ### Monitoring

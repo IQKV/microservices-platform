@@ -260,8 +260,8 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 - `POST /api/v1/auth/login` - User authentication
 - `POST /api/v1/auth/refresh` - Token refresh
 - `POST /api/v1/auth/logout` - User logout
-- `POST /api/v1/auth/forgot-password` - Password reset request
-- `POST /api/v1/auth/reset-password` - Password reset confirmation
+- `POST /api/v1/password/forgot` - Password reset request
+- `POST /api/v1/password/reset` - Password reset confirmation
 
 ### User Management Endpoints (Admin Only)
 

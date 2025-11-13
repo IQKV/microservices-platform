@@ -420,6 +420,83 @@ class AuthenticationServiceTest {
     assertNotNull(result.timestamp());
   }
 
+  @Test
+  void changePassword_WithValidCurrentPassword_ShouldSucceed() {
+    // Given
+    var userId = 1L;
+    var currentPassword = "oldPassword123";
+    var newPassword = "newPassword456";
+    var clientIp = "192.168.1.1";
+
+    // Mock input sanitization
+    when(inputSanitizer.sanitizeInput(currentPassword)).thenReturn(currentPassword);
+    when(inputSanitizer.sanitizeInput(newPassword)).thenReturn(newPassword);
+
+    // Mock user lookup
+    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+    // Mock password verification - current password matches
+    when(passwordEncoder.matches(currentPassword, testUser.getPasswordHash())).thenReturn(true);
+
+    // Mock password verification - new password is different
+    when(passwordEncoder.matches(newPassword, testUser.getPasswordHash())).thenReturn(false);
+
+    // Mock password encoding
+    when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+    // Mock user save
+    when(userRepository.save(testUser)).thenReturn(testUser);
+
+    // Mock JWT service
+    doNothing().when(jwtService).revokeAllRefreshTokensForUser("1");
+
+    // Mock session service
+    doNothing().when(sessionService).invalidateAllUserSessions("1");
+
+    // Mock metrics
+    var counter = org.mockito.Mockito.mock(io.micrometer.core.instrument.Counter.class);
+    when(meterRegistry.counter("auth.password.changed")).thenReturn(counter);
+
+    // When
+    assertDoesNotThrow(() -> authenticationService.changePassword(userId, currentPassword, newPassword, clientIp));
+
+    // Then
+    verify(userRepository).save(testUser);
+    verify(jwtService).revokeAllRefreshTokensForUser("1");
+    verify(sessionService).invalidateAllUserSessions("1");
+    verify(securityAuditService).logTokenEvent("testuser", "password_changed", clientIp, "web");
+  }
+
+  @Test
+  void changePassword_WithInvalidCurrentPassword_ShouldThrowException() {
+    // Given
+    var userId = 1L;
+    var currentPassword = "wrongPassword";
+    var newPassword = "newPassword456";
+    var clientIp = "192.168.1.1";
+
+    // Mock input sanitization
+    when(inputSanitizer.sanitizeInput(currentPassword)).thenReturn(currentPassword);
+    when(inputSanitizer.sanitizeInput(newPassword)).thenReturn(newPassword);
+
+    // Mock user lookup
+    when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+    // Mock password verification - current password does not match
+    when(passwordEncoder.matches(currentPassword, testUser.getPasswordHash())).thenReturn(false);
+
+    // When & Then
+    var exception = assertThrows(AuthenticationService.AuthenticationException.class, () -> {
+      authenticationService.changePassword(userId, currentPassword, newPassword, clientIp);
+    });
+
+    assertEquals("Current password is incorrect", exception.getMessage());
+
+    // Verify security audit was logged
+    verify(securityAuditService).logFailedAuthentication(
+        "testuser", "Invalid current password during password change", clientIp, "web");
+  }
+
   private void setupSuccessfulAuthenticationMocks() {
     // Ensure user has verified email
     testUser.setEmailVerified(true);

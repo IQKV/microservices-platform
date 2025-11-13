@@ -14,12 +14,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gripday.authservice.domain.service.AuthenticationService;
 import org.gripday.authservice.domain.service.JwtService;
-import org.gripday.authservice.domain.service.PasswordResetService;
 import org.gripday.authservice.domain.service.UserRegistrationService;
-import org.gripday.authservice.presentation.dto.ForgotPasswordRequest;
 import org.gripday.authservice.presentation.dto.LoginRequest;
 import org.gripday.authservice.presentation.dto.RefreshTokenRequest;
-import org.gripday.authservice.presentation.dto.ResetPasswordRequest;
 import org.gripday.authservice.presentation.dto.SignupRequest;
 import org.gripday.authservice.presentation.dto.TokenResponse;
 import org.gripday.authservice.presentation.dto.UserRegistrationResponse;
@@ -46,17 +43,14 @@ public class AuthenticationResource {
 
   private final AuthenticationService authenticationService;
   private final UserRegistrationService userRegistrationService;
-  private final PasswordResetService passwordResetService;
   private final JwtService jwtService;
 
   public AuthenticationResource(
       final AuthenticationService authenticationService,
       final UserRegistrationService userRegistrationService,
-      final PasswordResetService passwordResetService,
       final JwtService jwtService) {
     this.authenticationService = authenticationService;
     this.userRegistrationService = userRegistrationService;
-    this.passwordResetService = passwordResetService;
     this.jwtService = jwtService;
   }
 
@@ -320,33 +314,6 @@ public class AuthenticationResource {
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("/reset-password")
-  @Operation(
-      summary = "Reset password",
-      description = "Reset user password using a valid reset token.",
-      tags = {"Authentication"}
-  )
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "204", description = "Password has been reset successfully"),
-      @ApiResponse(responseCode = "400", description = "Invalid input or token", ref = "#/components/responses/BadRequest")
-  })
-  @Timed(value = "auth.endpoint", extraTags = {"endpoint", "reset-password"})
-  public ResponseEntity<Void> resetPassword(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "Reset password request containing token and new password",
-          required = true,
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = ResetPasswordRequest.class)
-          )
-      )
-      @Valid @RequestBody ResetPasswordRequest request,
-      HttpServletRequest httpRequest) {
-    var clientIp = getClientIpAddress(httpRequest);
-    passwordResetService.resetPassword(request.token(), request.newPassword(), clientIp);
-    return ResponseEntity.noContent().build();
-  }
-
   @PostMapping("/logout-all")
   @SecurityRequirement(name = "bearerAuth")
   @Operation(
@@ -467,34 +434,6 @@ public class AuthenticationResource {
   @GetMapping("/health")
   public ResponseEntity<HealthResponse> health() {
     return ResponseEntity.ok(new HealthResponse("UP", "Authentication service is running"));
-  }
-
-  @PostMapping("/forgot-password")
-  @Operation(
-      summary = "Initiate password reset",
-      description = "Start the password reset flow by sending a reset email if the account exists.",
-      tags = {"Authentication"}
-  )
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "202", description = "If the email exists, a password reset email will be sent"),
-      @ApiResponse(responseCode = "400", description = "Invalid input", ref = "#/components/responses/BadRequest")
-  })
-  @Timed(value = "auth.endpoint", extraTags = {"endpoint", "forgot-password"})
-  public ResponseEntity<Void> forgotPassword(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "Forgot password request containing user email",
-          required = true,
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = ForgotPasswordRequest.class)
-          )
-      )
-      @Valid @RequestBody ForgotPasswordRequest request,
-      HttpServletRequest httpRequest) {
-    var ipAddress = getClientIpAddress(httpRequest);
-    var userAgent = httpRequest.getHeader("User-Agent");
-    passwordResetService.initiatePasswordReset(request.email(), ipAddress, userAgent);
-    return ResponseEntity.accepted().build();
   }
 
   /**

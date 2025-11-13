@@ -2,12 +2,12 @@
 
 ```bash
 # Initiate password reset (always returns 200)
-curl -X POST http://localhost:8080/api/v1/auth/forgot-password \
+curl -X POST http://localhost:8080/api/v1/password/forgot \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com"}'
 
 # Reset password using token from email
-curl -X POST http://localhost:8080/api/v1/auth/reset-password \
+curl -X POST http://localhost:8080/api/v1/password/reset \
   -H "Content-Type: application/json" \
   -d '{"token":"<reset-token>","newPassword":"NewSecurePass123!"}'
 ```
@@ -132,8 +132,8 @@ Centralized authentication and user management service providing JWT-based authe
 - `GET /api/v1/auth/email/verify` - Email address verification
 - `POST /api/v1/auth/email/resend` - Resend verification email
 - `GET /api/v1/auth/email/status` - Check email verification status
-- `POST /api/v1/auth/forgot-password` - Initiate password reset (non-enumerating)
-- `POST /api/v1/auth/reset-password` - Complete password reset with token
+- `POST /api/v1/password/forgot` - Initiate password reset (non-enumerating)
+- `POST /api/v1/password/reset` - Complete password reset with token
 
 **Documentation:**
 

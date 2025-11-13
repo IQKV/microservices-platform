@@ -186,7 +186,7 @@ export const API_ENDPOINTS = {
     logout: '/api/v1/auth/logout',
     verify: '/api/v1/auth/verify',
     profile: '/api/v1/auth/profile',
-    changePassword: '/api/v1/auth/change-password'
+    changePassword: '/api/v1/auth/password/change'
   },
   
   users: {

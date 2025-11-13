@@ -174,6 +174,67 @@ public class AuthenticationService {
   }
 
   /**
+   * Change password for an authenticated user. Validates current password before updating.
+   * Revokes all refresh tokens and sessions after password change for security.
+   */
+  public void changePassword(Long userId, String currentPassword, String newPassword, String clientIp) {
+    var correlationId = generateCorrelationId();
+    MDC.put("correlationId", correlationId);
+    try {
+      // Sanitize inputs
+      var sanitizedCurrentPassword = inputSanitizer.sanitizeInput(currentPassword);
+      var sanitizedNewPassword = inputSanitizer.sanitizeInput(newPassword);
+
+      // Find user
+      var userOpt = userRepository.findById(userId);
+      if (userOpt.isEmpty()) {
+        throw new AuthenticationException("User not found");
+      }
+
+      var user = userOpt.get();
+
+      // Verify current password
+      if (!passwordEncoder.matches(sanitizedCurrentPassword, user.getPasswordHash())) {
+        securityAuditService.logFailedAuthentication(
+            user.getUsername(), "Invalid current password during password change", clientIp, "web");
+        throw new AuthenticationException("Current password is incorrect");
+      }
+
+      // Validate new password requirements (length >= 8)
+      if (sanitizedNewPassword == null || sanitizedNewPassword.length() < 8) {
+        throw new AuthenticationException("New password does not meet minimum requirements");
+      }
+
+      // Ensure new password is different from current
+      if (passwordEncoder.matches(sanitizedNewPassword, user.getPasswordHash())) {
+        throw new AuthenticationException("New password must be different from current password");
+      }
+
+      // Update password
+      user.setPasswordHash(passwordEncoder.encode(sanitizedNewPassword));
+      userRepository.save(user);
+
+      // Revoke all refresh tokens for the user
+      jwtService.revokeAllRefreshTokensForUser(String.valueOf(userId));
+
+      // Invalidate all sessions for the user
+      sessionService.invalidateAllUserSessions(String.valueOf(userId));
+
+      // Audit
+      securityAuditService.logTokenEvent(user.getUsername(), "password_changed", clientIp, "web");
+      meterRegistry.counter("auth.password.changed").increment();
+
+      logger.info("Password changed successfully for user: {} ({})", user.getUsername(), user.getEmail());
+    } catch (final AuthenticationException e) {
+      throw e;
+    } catch (final Exception e) {
+      throw new AuthenticationException("Password change failed", e);
+    } finally {
+      MDC.remove("correlationId");
+    }
+  }
+
+  /**
    * Refresh JWT access token using refresh token.
    */
   public TokenResponse refreshToken(RefreshTokenRequest request) {
