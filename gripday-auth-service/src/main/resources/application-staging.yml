@@ -123,6 +123,8 @@ gripday:
       verification-template: "email/user-registration/email-verification.html"
       password-reset-subject: "[STAGING] Reset your Gripday password"
       password-reset-template: "email/password-reset/initiate.html"
+      password-reset-confirmed-subject: "[STAGING] Password Reset Successful - Gripday"
+      password-reset-confirmed-template: "email/password-reset/confirmed.html"
       registration-confirmed-subject: "[STAGING] Welcome to Gripday - Email Verified!"
       registration-confirmed-template: "email/user-registration/email-confirmed.html"
     security:

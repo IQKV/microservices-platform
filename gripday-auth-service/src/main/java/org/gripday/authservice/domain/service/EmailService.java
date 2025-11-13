@@ -284,6 +284,89 @@ public class EmailService implements EmailOperations {
     return cleanBaseUrl + "/dashboard";
   }
 
+  @Override
+  public void sendPasswordResetConfirmedEmail(User user) {
+    var timerSample = metricsService.startEmailSendTimer();
+
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = gripdayProperties.email();
+      var senderConfig = emailConfig.sender();
+
+      // Determine user's locale
+      var userLocale = getUserLocale(user);
+
+      // Set email properties with localized subject
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(user.getEmail());
+      helper.setSubject(messageService.getMessage("email.password.reset.confirmed.subject", userLocale));
+
+      // Build login URL
+      var loginUrl = buildLoginUrl();
+
+      // Create template context with localized messages
+      var context = new Context(userLocale);
+      context.setVariable("user", user);
+      context.setVariable("loginUrl", loginUrl);
+      context.setVariable("fromName", senderConfig.fromName());
+      context.setVariable("greeting", messageService.getMessage("email.password.reset.confirmed.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("title", messageService.getMessage("email.password.reset.confirmed.title", userLocale));
+      context.setVariable("body", messageService.getMessage("email.password.reset.confirmed.body", userLocale));
+      context.setVariable("confirmation", messageService.getMessage("email.password.reset.confirmed.confirmation", userLocale));
+      context.setVariable("securityTitle", messageService.getMessage("email.password.reset.confirmed.security.title", userLocale));
+      context.setVariable("securityTip1", messageService.getMessage("email.password.reset.confirmed.security.tip1", userLocale));
+      context.setVariable("securityTip2", messageService.getMessage("email.password.reset.confirmed.security.tip2", userLocale));
+      context.setVariable("securityTip3", messageService.getMessage("email.password.reset.confirmed.security.tip3", userLocale));
+      context.setVariable("buttonText", messageService.getMessage("email.password.reset.confirmed.button", userLocale));
+      context.setVariable("footer", messageService.getMessage("email.password.reset.confirmed.footer", userLocale));
+      context.setVariable("regards", messageService.getMessage("email.password.reset.confirmed.regards", userLocale));
+      context.setVariable("team", messageService.getMessage("email.password.reset.confirmed.team", userLocale));
+
+      // Process HTML template
+      var templatesConfig = emailConfig.templates();
+      var htmlContent = templateEngine.process(templatesConfig.passwordResetConfirmedTemplate(), context);
+      helper.setText(htmlContent, true);
+
+      // Send email
+      mailSender.send(mimeMessage);
+
+      // Record successful send
+      metricsService.recordEmailSent();
+
+      logger.info("Password reset confirmed email sent successfully to user: {} ({}) with locale: {}",
+          user.getUsername(), user.getEmail(), userLocale);
+
+    } catch (final MessagingException e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Failed to create password reset confirmed email for user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Failed to create password reset confirmed email", e);
+    } catch (final MailException e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Failed to send password reset confirmed email to user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Failed to send password reset confirmed email", e);
+    } catch (final Exception e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Unexpected error sending password reset confirmed email to user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Unexpected error sending password reset confirmed email", e);
+    } finally {
+      timerSample.stop(metricsService.getEmailSendTimer());
+    }
+  }
+
+  /**
+   * Build login URL based on base URL configuration.
+   */
+  private String buildLoginUrl() {
+    var baseUrl = gripdayProperties.email().sender().baseUrl();
+    var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+    return cleanBaseUrl + "/login";
+  }
+
   /**
    * Custom exception for email service errors.
    */

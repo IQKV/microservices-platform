@@ -15,6 +15,8 @@ import org.gripday.authservice.presentation.dto.RefreshTokenRequest;
 import org.gripday.authservice.presentation.dto.TokenResponse;
 import org.gripday.authservice.presentation.dto.UserContext;
 import org.gripday.authservice.presentation.validation.InputSanitizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AuthenticationService {
+
+  private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -113,6 +117,17 @@ public class AuthenticationService {
 
       // Also delete the last-token mapping if present
       redisService.delete("password-reset:user:" + user.getId());
+
+      // Send password reset confirmation email
+      try {
+        emailService.sendPasswordResetConfirmedEmail(user);
+        logger.info("Password reset confirmation email sent successfully to user: {} ({})",
+            user.getUsername(), user.getEmail());
+      } catch (final Exception e) {
+        // Log error but don't fail the password reset process
+        logger.error("Failed to send password reset confirmation email to user: {} ({}), but password reset was successful",
+            user.getUsername(), user.getEmail(), e);
+      }
 
       // Audit
       securityAuditService.logTokenEvent(user.getUsername(), "password_reset_completed", clientIp, "system");

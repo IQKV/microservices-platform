@@ -29,4 +29,11 @@ public interface EmailOperations {
    * @param user The user whose email was verified
    */
   void sendRegistrationConfirmedEmail(User user);
+
+  /**
+   * Send confirmation email after successful password reset.
+   *
+   * @param user The user whose password was reset
+   */
+  void sendPasswordResetConfirmedEmail(User user);
 }

@@ -317,6 +317,20 @@
       "defaultValue": "email/password-reset/initiate.html"
     },
     {
+      "name": "gripday.email.templates.password-reset-confirmed-subject",
+      "type": "java.lang.String",
+      "description": "Subject line for password reset confirmation emails sent after successful password change",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "Password Reset Successful - Gripday"
+    },
+    {
+      "name": "gripday.email.templates.password-reset-confirmed-template",
+      "type": "java.lang.String",
+      "description": "Thymeleaf template path for password reset confirmation emails",
+      "sourceType": "org.gripday.authservice.config.GripdayProperties$Email$Template",
+      "defaultValue": "email/password-reset/confirmed.html"
+    },
+    {
       "name": "gripday.email.templates.registration-confirmed-subject",
       "type": "java.lang.String",
       "description": "Subject line for registration confirmation welcome emails sent after successful email verification",
@@ -407,6 +421,15 @@
         {
           "value": "email/password-reset/initiate.html",
           "description": "Default password reset template"
+        }
+      ]
+    },
+    {
+      "name": "gripday.email.templates.password-reset-confirmed-template",
+      "values": [
+        {
+          "value": "email/password-reset/confirmed.html",
+          "description": "Default password reset confirmation email template"
         }
       ]
     },
