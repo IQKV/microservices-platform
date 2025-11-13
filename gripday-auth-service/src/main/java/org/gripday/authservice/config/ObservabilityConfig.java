@@ -29,17 +29,17 @@ import org.springframework.core.env.Environment;
  * settings.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 @AutoConfiguration(before = ObservationAutoConfiguration.class)
 public class ObservabilityConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(ObservabilityConfig.class);
 
-  private final GripdayObservabilityProperties observabilityProperties;
+  private final GripdayProperties.Observability observabilityProperties;
   private final Environment environment;
 
-  public ObservabilityConfig(final GripdayObservabilityProperties observabilityProperties, final Environment environment) {
-    this.observabilityProperties = observabilityProperties;
+  public ObservabilityConfig(final GripdayProperties gripdayProperties, final Environment environment) {
+    this.observabilityProperties = gripdayProperties.observability();
     this.environment = environment;
   }
 

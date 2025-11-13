@@ -12,14 +12,14 @@ import org.springframework.core.env.Environment;
  * Configuration for Prometheus metrics collection and customization. Provides environment-specific metric tags and filtering.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 public class MetricsConfiguration {
 
-  private final GripdayObservabilityProperties observabilityProperties;
+  private final GripdayProperties.Observability observabilityProperties;
   private final Environment environment;
 
-  public MetricsConfiguration(final GripdayObservabilityProperties observabilityProperties, final Environment environment) {
-    this.observabilityProperties = observabilityProperties;
+  public MetricsConfiguration(final GripdayProperties gripdayProperties, final Environment environment) {
+    this.observabilityProperties = gripdayProperties.observability();
     this.environment = environment;
   }
 

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * Configuration for structured logging utilities and helpers. Provides consistent logging patterns and correlation ID management.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 public class StructuredLoggingConfig {
 
   /**

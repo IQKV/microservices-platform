@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * Configuration for custom health checks in the authentication service. Provides health indicators for database, Redis, and service-specific components.
  */
 @Configuration
-@EnableConfigurationProperties(GripdayObservabilityProperties.class)
+@EnableConfigurationProperties(GripdayProperties.class)
 public class HealthCheckConfig {
 
   /**
