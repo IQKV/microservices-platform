@@ -187,7 +187,9 @@ public record GripdayProperties(
         @NotBlank String verificationSubject,
         @NotBlank String verificationTemplate,
         @NotBlank String passwordResetSubject,
-        @NotBlank String passwordResetTemplate
+        @NotBlank String passwordResetTemplate,
+        @NotBlank String registrationConfirmedSubject,
+        @NotBlank String registrationConfirmedTemplate
     ) {
 
     }

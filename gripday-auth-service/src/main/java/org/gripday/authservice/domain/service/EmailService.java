@@ -203,6 +203,87 @@ public class EmailService implements EmailOperations {
     return cleanBaseUrl + "/reset-password?token=" + token;
   }
 
+  @Override
+  public void sendRegistrationConfirmedEmail(User user) {
+    var timerSample = metricsService.startEmailSendTimer();
+
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = gripdayProperties.email();
+      var verificationConfig = emailConfig.verification();
+
+      // Determine user's locale
+      var userLocale = getUserLocale(user);
+
+      // Set email properties with localized subject
+      helper.setFrom(verificationConfig.fromEmail(), verificationConfig.fromName());
+      helper.setTo(user.getEmail());
+      helper.setSubject(messageService.getMessage("email.registration.confirmed.subject", userLocale));
+
+      // Build dashboard URL
+      var dashboardUrl = buildDashboardUrl();
+
+      // Create template context with localized messages
+      var context = new Context(userLocale);
+      context.setVariable("user", user);
+      context.setVariable("dashboardUrl", dashboardUrl);
+      context.setVariable("fromName", verificationConfig.fromName());
+      context.setVariable("greeting", messageService.getMessage("email.registration.confirmed.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("body", messageService.getMessage("email.registration.confirmed.body", userLocale));
+      context.setVariable("nextSteps", messageService.getMessage("email.registration.confirmed.next.steps", userLocale));
+      context.setVariable("step1", messageService.getMessage("email.registration.confirmed.step1", userLocale));
+      context.setVariable("step2", messageService.getMessage("email.registration.confirmed.step2", userLocale));
+      context.setVariable("step3", messageService.getMessage("email.registration.confirmed.step3", userLocale));
+      context.setVariable("buttonText", messageService.getMessage("email.registration.confirmed.button", userLocale));
+      context.setVariable("footer", messageService.getMessage("email.registration.confirmed.footer", userLocale));
+      context.setVariable("regards", messageService.getMessage("email.registration.confirmed.regards", userLocale));
+      context.setVariable("team", messageService.getMessage("email.registration.confirmed.team", userLocale));
+
+      // Process HTML template
+      var templatesConfig = emailConfig.templates();
+      var htmlContent = templateEngine.process(templatesConfig.registrationConfirmedTemplate(), context);
+      helper.setText(htmlContent, true);
+
+      // Send email
+      mailSender.send(mimeMessage);
+
+      // Record successful send
+      metricsService.recordEmailSent();
+
+      logger.info("Registration confirmed email sent successfully to user: {} ({}) with locale: {}",
+          user.getUsername(), user.getEmail(), userLocale);
+
+    } catch (final MessagingException e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Failed to create registration confirmed email for user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Failed to create registration confirmed email", e);
+    } catch (final MailException e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Failed to send registration confirmed email to user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Failed to send registration confirmed email", e);
+    } catch (final Exception e) {
+      metricsService.recordEmailSendFailed();
+      logger.error("Unexpected error sending registration confirmed email to user: {} ({})",
+          user.getUsername(), user.getEmail(), e);
+      throw new EmailServiceException("Unexpected error sending registration confirmed email", e);
+    } finally {
+      timerSample.stop(metricsService.getEmailSendTimer());
+    }
+  }
+
+  /**
+   * Build dashboard URL based on base URL configuration.
+   */
+  private String buildDashboardUrl() {
+    var baseUrl = gripdayProperties.email().verification().baseUrl();
+    var cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+    return cleanBaseUrl + "/dashboard";
+  }
+
   /**
    * Custom exception for email service errors.
    */

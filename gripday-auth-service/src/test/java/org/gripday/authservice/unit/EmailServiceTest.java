@@ -51,7 +51,7 @@ class EmailServiceTest {
         "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com", java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
-        "Verify your Gripday account", "email/verification.html",
+        "Verify your Gripday account", "email/user-registration/email-verification.html",
         "Reset your password", "email/password-reset.html"
     );
     var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
@@ -90,7 +90,7 @@ class EmailServiceTest {
         "noreply@gripday.com", "Gripday Platform", "https://app.gripday.com/", java.time.Duration.ofHours(24), 3
     );
     var templatesConfig = new GripdayProperties.Email.Template(
-        "Verify your Gripday account", "email/verification.html",
+        "Verify your Gripday account", "email/user-registration/email-verification.html",
         "Reset your password", "email/password-reset.html"
     );
     var emailConfig = new GripdayProperties.Email(smtpConfig, verificationConfig, templatesConfig);
@@ -153,7 +153,7 @@ class EmailServiceTest {
     emailService = new EmailService(mailSender, templateEngine, gripdayProperties, metricsService, messageService);
 
     when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-    when(templateEngine.process(eq("email/verification.html"), any(Context.class)))
+    when(templateEngine.process(eq("email/user-registration/email-verification.html"), any(Context.class)))
         .thenReturn("<html><body>Test email content</body></html>");
 
     // When
@@ -162,6 +162,6 @@ class EmailServiceTest {
     // Then
     verify(mailSender).createMimeMessage();
     verify(mailSender).send(mimeMessage);
-    verify(templateEngine).process(eq("email/verification.html"), any(Context.class));
+    verify(templateEngine).process(eq("email/user-registration/email-verification.html"), any(Context.class));
   }
 }

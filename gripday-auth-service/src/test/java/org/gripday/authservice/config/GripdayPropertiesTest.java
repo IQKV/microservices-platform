@@ -44,6 +44,6 @@ class GripdayPropertiesTest {
 
     assertThat(email.templates()).isNotNull();
     assertThat(email.templates().verificationSubject()).isEqualTo("Verify your Gripday account");
-    assertThat(email.templates().verificationTemplate()).isEqualTo("email/verification.html");
+    assertThat(email.templates().verificationTemplate()).isEqualTo("email/user-registration/email-verification.html");
   }
 }

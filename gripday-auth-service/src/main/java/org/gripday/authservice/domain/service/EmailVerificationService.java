@@ -160,6 +160,17 @@ public class EmailVerificationService {
     logger.info("Email verification successful for user: {} ({})",
         user.getUsername(), user.getEmail());
 
+    // Send welcome email after successful verification
+    try {
+      emailService.sendRegistrationConfirmedEmail(user);
+      logger.info("Welcome email sent successfully to user: {} ({})",
+          user.getUsername(), user.getEmail());
+    } catch (final Exception e) {
+      // Log error but don't fail the verification process
+      logger.error("Failed to send welcome email to user: {} ({}), but verification was successful",
+          user.getUsername(), user.getEmail(), e);
+    }
+
     return new EmailVerificationResponse(
         true,
         "Email verified successfully",

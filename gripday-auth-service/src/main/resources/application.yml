@@ -119,9 +119,11 @@ gripday:
       rate-limit: 3  # emails per hour per user
     templates:
       verification-subject: "Verify your Gripday account"
-      verification-template: "email/verification.html"
+      verification-template: "email/user-registration/email-verification.html"
       password-reset-subject: "Reset your Gripday password"
       password-reset-template: "email/password-reset.html"
+      registration-confirmed-subject: "Welcome to Gripday - Email Verified!"
+      registration-confirmed-template: "email/user-registration/email-confirmed.html"
   observability:
     tracing:
       enabled: true

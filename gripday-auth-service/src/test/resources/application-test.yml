@@ -110,7 +110,7 @@ gripday:
       rate-limit: 3
     templates:
       verification-subject: "Verify your Gripday account"
-      verification-template: "email/verification.html"
+      verification-template: "email/user-registration/email-verification.html"
       password-reset-subject: "Reset your Gripday password"
       password-reset-template: "email/password-reset.html"
 

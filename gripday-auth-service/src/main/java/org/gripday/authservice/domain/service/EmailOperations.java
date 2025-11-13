@@ -22,4 +22,11 @@ public interface EmailOperations {
    * @return The complete verification URL
    */
   String buildVerificationUrl(String token);
+
+  /**
+   * Send welcome email after successful email verification.
+   *
+   * @param user The user whose email was verified
+   */
+  void sendRegistrationConfirmedEmail(User user);
 }
