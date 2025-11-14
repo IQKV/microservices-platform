@@ -68,7 +68,7 @@ export interface EnvironmentVariables {
   GATEWAY_URL?: string;
   USER_SERVICE_URL?: string;
   BOOKSTORE_SERVICE_URL?: string;
-  DATABASE_AUTH_URL?: string;
+  DATABASE_USER_URL?: string;
   DATABASE_BOOKSTORE_URL?: string;
   REDIS_URL?: string;
   TEST_TIMEOUT?: string;

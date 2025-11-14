@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Configuration
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8080}"
-AUTH_URL="${AUTH_URL:-http://localhost:8080}"
+USER_URL="${USER_URL:-http://localhost:8080}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://localhost:9090}"
 GRAFANA_URL="${GRAFANA_URL:-http://localhost:3000}"
 
@@ -78,7 +78,7 @@ test_health_endpoints() {
     log "INFO" "Testing service health endpoints..."
     
     # Test User Service health
-    if curl -s -f "$AUTH_URL/actuator/health" | jq -e '.status == "UP"' > /dev/null; then
+    if curl -s -f "$USER_URL/actuator/health" | jq -e '.status == "UP"' > /dev/null; then
         log "SUCCESS" "User Service health check passed"
     else
         log "ERROR" "User Service health check failed"
@@ -338,7 +338,7 @@ test_observability_stack() {
     fi
     
     # Test service metrics endpoints
-    if curl -s -f "$AUTH_URL/actuator/prometheus" > /dev/null 2>&1; then
+    if curl -s -f "$USER_URL/actuator/prometheus" > /dev/null 2>&1; then
         log "SUCCESS" "User Service metrics endpoint accessible"
     else
         log "ERROR" "User Service metrics endpoint not accessible"
@@ -413,12 +413,12 @@ test_rate_limiting() {
 run_platform_validation() {
     log "INFO" "Starting platform validation..."
     log "INFO" "Gateway URL: $GATEWAY_URL"
-    log "INFO" "Auth URL: $AUTH_URL"
+    log "INFO" "Auth URL: $USER_URL"
     log "INFO" "Prometheus URL: $PROMETHEUS_URL"
     log "INFO" "Grafana URL: $GRAFANA_URL"
     
     # Wait for services to be ready
-    wait_for_service "User Service" "$AUTH_URL" || return 1
+    wait_for_service "User Service" "$USER_URL" || return 1
     wait_for_service "Gateway Service" "$GATEWAY_URL" || return 1
     
     # Run validation tests

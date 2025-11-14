@@ -206,14 +206,14 @@ Write-Host ""
 Write-Header "Service Access Information"
 
 $GATEWAY_URL = "http://${MINIKUBE_IP}:30080"
-$AUTH_URL = "http://${MINIKUBE_IP}:30081"
+$USER_URL = "http://${MINIKUBE_IP}:30081"
 $BOOKSTORE_URL = "http://${MINIKUBE_IP}:30082"
 
 Write-Host ""
 Write-Host "Gateway Service:   " -NoNewline -ForegroundColor Green
 Write-Host $GATEWAY_URL
 Write-Host "User Service:      " -NoNewline -ForegroundColor Green
-Write-Host $AUTH_URL
+Write-Host $USER_URL
 Write-Host "Bookstore Service: " -NoNewline -ForegroundColor Green
 Write-Host $BOOKSTORE_URL
 Write-Host ""
@@ -242,7 +242,7 @@ function Test-Health {
 }
 
 Test-Health -Name "Gateway" -Url $GATEWAY_URL
-Test-Health -Name "Auth" -Url $AUTH_URL
+Test-Health -Name "Auth" -Url $USER_URL
 Test-Health -Name "Bookstore" -Url $BOOKSTORE_URL
 
 # Show example commands

@@ -96,7 +96,7 @@ ingress:
       more_set_headers "X-XSS-Protection: 1; mode=block";
       more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
   hosts:
-    - host: auth.gripday.site
+    - host: user.gripday.site
       paths:
         - path: /
           pathType: Prefix

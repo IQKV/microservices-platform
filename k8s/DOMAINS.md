@@ -53,7 +53,7 @@ This document provides a clear mapping of all domains and their purposes across 
 | Domain                     | Purpose                    | Service           | Port      |
 | -------------------------- | -------------------------- | ----------------- | --------- |
 | **localhost**              | Main Application           | React/Vue App     | 3000/5173 |
-| **auth.gripday.site**      | User Service (Direct)      | User Service      | 8080      |
+| **user.gripday.site**      | User Service (Direct)      | User Service      | 8080      |
 | **api.gripday.site**       | API Gateway                | Gateway Service   | 8080      |
 | **bookstore.gripday.site** | Bookstore Service (Direct) | Bookstore Service | 8080      |
 

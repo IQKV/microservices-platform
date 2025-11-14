@@ -183,7 +183,7 @@ if minikube addons list | grep -q "ingress.*enabled"; then
     print_info "Applying ingress configuration..."
     if kubectl apply -f ingress.yaml; then
         print_status "Ingress configuration applied"
-        print_info "Add to /etc/hosts: $(minikube ip) api.gripday.site auth.gripday.site bookstore.gripday.site"
+        print_info "Add to /etc/hosts: $(minikube ip) api.gripday.site user.gripday.site bookstore.gripday.site"
     else
         print_warning "Failed to apply ingress (not critical for minikube)"
     fi
@@ -222,24 +222,24 @@ echo ""
 print_header "Service Access Information"
 
 GATEWAY_URL="http://${MINIKUBE_IP}:30080"
-AUTH_URL="http://${MINIKUBE_IP}:30081"
+USER_URL="http://${MINIKUBE_IP}:30081"
 BOOKSTORE_URL="http://${MINIKUBE_IP}:30082"
 
 echo ""
 echo -e "${CYAN}=== NodePort Access (Direct) ===${NC}"
 echo -e "${GREEN}Gateway Service:${NC}   $GATEWAY_URL"
-echo -e "${GREEN}User Service:${NC}      $AUTH_URL"
+echo -e "${GREEN}User Service:${NC}      $USER_URL"
 echo -e "${GREEN}Bookstore Service:${NC} $BOOKSTORE_URL"
 echo ""
 
 if minikube addons list | grep -q "ingress.*enabled"; then
     echo -e "${CYAN}=== Ingress Access (Production-like) ===${NC}"
     echo -e "${GREEN}API Gateway:${NC}       http://api.gripday.site"
-    echo -e "${GREEN}User Service:${NC}      http://auth.gripday.site (debugging)"
+    echo -e "${GREEN}User Service:${NC}      http://user.gripday.site (debugging)"
     echo -e "${GREEN}Bookstore Service:${NC} http://bookstore.gripday.site (debugging)"
     echo ""
     echo -e "${YELLOW}Note:${NC} Add these to /etc/hosts:"
-    echo -e "      ${MINIKUBE_IP} api.gripday.site auth.gripday.site bookstore.gripday.site"
+    echo -e "      ${MINIKUBE_IP} api.gripday.site user.gripday.site bookstore.gripday.site"
     echo ""
 fi
 
@@ -262,7 +262,7 @@ test_health() {
 }
 
 test_health "Gateway" "$GATEWAY_URL"
-test_health "Auth" "$AUTH_URL"
+test_health "Auth" "$USER_URL"
 test_health "Bookstore" "$BOOKSTORE_URL"
 
 # Show example commands
@@ -282,7 +282,7 @@ ${GREEN}2. Via Ingress (Production-like):${NC}
      -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!","firstName":"Test","lastName":"User"}'
 
 ${GREEN}3. Direct Service Access (Debugging):${NC}
-   curl http://auth.gripday.site/actuator/health
+   curl http://user.gripday.site/actuator/health
 
 ${GREEN}4. View Gateway Routes:${NC}
    curl $GATEWAY_URL/actuator/gateway/routes | jq

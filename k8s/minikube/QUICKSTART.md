@@ -64,13 +64,13 @@ minikube addons enable ingress
 MINIKUBE_IP=$(minikube ip)
 
 # 3. Add to /etc/hosts (Linux/Mac):
-sudo echo "$MINIKUBE_IP api.gripday.site auth.gripday.site" >> /etc/hosts
+sudo echo "$MINIKUBE_IP api.gripday.site user.gripday.site" >> /etc/hosts
 
 # Windows: Add to C:\Windows\System32\drivers\etc\hosts
 
 # 4. Access via domain names:
 echo "API Gateway: http://api.gripday.site"
-echo "Auth (debug): http://auth.gripday.site"
+echo "Auth (debug): http://user.gripday.site"
 ```
 
 #### Option C: Port Forward (Debugging)
@@ -108,7 +108,7 @@ curl -X POST http://api.gripday.site/api/v1/auth/signup \
   -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!"}'
 
 # Direct to user service (debugging only - doesn't exist in production!)
-curl http://auth.gripday.site/actuator/health
+curl http://user.gripday.site/actuator/health
 ```
 
 ## 📊 Monitor Deployment

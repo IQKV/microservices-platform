@@ -23,7 +23,7 @@ Minikube deployment supports **3 access patterns**:
    - Great for rapid development
 
 3. **Direct Service Ingress** (Debugging Only)
-   - Domain-based direct access: `auth.gripday.site`
+   - Domain-based direct access: `user.gripday.site`
    - Bypasses gateway for debugging
    - **Does NOT exist in production!**
 

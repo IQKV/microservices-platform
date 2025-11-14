@@ -132,32 +132,32 @@ get_service_urls() {
     fi
     
     if [ "$auth_service_type" = "LoadBalancer" ]; then
-        AUTH_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-        if [ -z "$AUTH_URL" ] || [ "$AUTH_URL" = "null" ]; then
-            AUTH_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        USER_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        if [ -z "$USER_URL" ] || [ "$USER_URL" = "null" ]; then
+            USER_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         fi
-        AUTH_URL="http://$AUTH_URL:8080"
+        USER_URL="http://$USER_URL:8080"
     elif [ "$auth_service_type" = "NodePort" ]; then
         local node_ip=$($KUBECTL_CMD get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}')
         if [ -z "$node_ip" ]; then
             node_ip=$($KUBECTL_CMD get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
         fi
         local node_port=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].nodePort}')
-        AUTH_URL="http://$node_ip:$node_port"
+        USER_URL="http://$node_ip:$node_port"
     else
         # Use port-forward for ClusterIP
         log "INFO" "Using port-forward for user service access"
         $KUBECTL_CMD port-forward service/user-service 8080:8080 -n "$NAMESPACE" &
         AUTH_PORT_FORWARD_PID=$!
-        AUTH_URL="http://localhost:8080"
+        USER_URL="http://localhost:8080"
         sleep 5
     fi
     
     log "INFO" "Gateway URL: $GATEWAY_URL"
-    log "INFO" "Auth URL: $AUTH_URL"
+    log "INFO" "Auth URL: $USER_URL"
     
     export GATEWAY_URL
-    export AUTH_URL
+    export USER_URL
 }
 
 # Check pod health and logs

@@ -10,7 +10,7 @@ echo "🚀 Starting Platform Integration Verification..."
 
 # Configuration
 GATEWAY_URL="http://localhost:8080"
-AUTH_URL="http://localhost:8080"
+USER_URL="http://localhost:8080"
 BOOKSTORE_URL="http://localhost:8080"
 PROMETHEUS_URL="http://localhost:9090"
 GRAFANA_URL="http://localhost:3000"
@@ -55,9 +55,9 @@ test_gateway_routing() {
     # Test user service routing through gateway
     log_info "Testing user service routing through gateway..."
     if curl -f -s "$GATEWAY_URL/api/v1/auth/health" > /dev/null; then
-        log_info "✅ Auth service routing works"
+        log_info "✅ User service routing works"
     else
-        log_warn "⚠️  Auth service routing may not be configured"
+        log_warn "⚠️  User service routing may not be configured"
     fi
     
     # Test bookstore service routing through gateway
@@ -129,7 +129,7 @@ test_observability_integration() {
     fi
     
     # Test service metrics endpoints
-    for service in "user-service:$AUTH_URL" "bookstore-service:$BOOKSTORE_URL"; do
+    for service in "user-service:$USER_URL" "bookstore-service:$BOOKSTORE_URL"; do
         IFS=':' read -r service_name service_url <<< "$service"
         if curl -f -s "$service_url/actuator/prometheus" > /dev/null; then
             log_info "✅ $service_name metrics endpoint works"
@@ -191,7 +191,7 @@ main() {
         services_healthy=false
     fi
     
-    if ! check_service_health "User Service" "$AUTH_URL"; then
+    if ! check_service_health "User Service" "$USER_URL"; then
         services_healthy=false
     fi
     

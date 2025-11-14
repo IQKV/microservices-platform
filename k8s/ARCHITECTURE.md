@@ -95,7 +95,7 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 
 In local development, **all services have direct ingress** for easier debugging:
 
-- Auth: `http://auth.gripday.site`
+- Auth: `http://user.gripday.site`
 - Bookstore: `http://localhost/api/v1/bookstore/*`
 - Gateway: `http://api.gripday.site`
 

@@ -5,7 +5,7 @@
 #
 # Enable ingress addon: minikube addons enable ingress
 # Add to /etc/hosts:
-#   $(minikube ip) api.gripday.site app.gripday.site auth.gripday.site
+#   $(minikube ip) api.gripday.site app.gripday.site user.gripday.site
 #
 ---
 # Gateway Service Ingress (Main API Entry Point)
@@ -58,7 +58,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: auth.gripday.site
+    - host: user.gripday.site
       http:
         paths:
           - path: /
@@ -111,7 +111,7 @@ spec:
 #    - This mirrors production/staging architecture
 #
 # 2. DIRECT ACCESS (Development/Debugging):
-#    - http://auth.gripday.site/api/v1/auth/login   → User Service (direct)
+#    - http://user.gripday.site/api/v1/auth/login   → User Service (direct)
 #    - http://bookstore.gripday.site/api/v1/books   → Bookstore Service (direct)
 #    - This bypasses the gateway for easier debugging
 #

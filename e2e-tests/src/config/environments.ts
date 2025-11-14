@@ -251,8 +251,8 @@ function applyEnvironmentOverrides(config: TestEnvironmentConfig, envVars: Envir
   }
 
   // Apply database URL overrides
-  if (envVars.DATABASE_AUTH_URL) {
-    overriddenConfig.databases.auth.url = envVars.DATABASE_AUTH_URL;
+  if (envVars.DATABASE_USER_URL) {
+    overriddenConfig.databases.auth.url = envVars.DATABASE_USER_URL;
   }
   if (envVars.DATABASE_BOOKSTORE_URL) {
     overriddenConfig.databases.bookstore.url = envVars.DATABASE_BOOKSTORE_URL;

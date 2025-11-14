@@ -47,7 +47,7 @@ Developer → Multiple Access Methods:
 
 ### 3. **Direct Service Ingress** 🐛 Debugging Only
 
-- **URL**: `http://auth.gripday.site`
+- **URL**: `http://user.gripday.site`
 - **Purpose**: Debug backend services directly
 - **Requires**: Ingress addon, /etc/hosts
 - **Note**: Does NOT exist in production!
@@ -74,7 +74,7 @@ Developer → Multiple Access Methods:
          │          │          │
          ▼          ▼          ▼
     ┌────────┐ ┌────────┐ ┌─────────┐
-    │Gateway │ │  Auth  │ │Bookstore│
+    │Gateway │ │  User  │ │Bookstore│
     │  8080  │ │  8080  │ │  8080   │
     └────┬───┘ └────────┘ └─────────┘
          │
@@ -84,7 +84,7 @@ Developer → Multiple Access Methods:
     │          │
     ▼          ▼
  ┌─────┐   ┌─────┐
- │Auth │   │Book │
+ │User │   │Book │
  │8080 │   │8080 │
  └─────┘   └─────┘
 ```
@@ -105,7 +105,7 @@ minikube ip
 # Add to /etc/hosts (Linux/Mac)
 sudo nano /etc/hosts
 # Add line:
-192.168.49.2 api.gripday.site auth.gripday.site bookstore.gripday.site
+192.168.49.2 api.gripday.site user.gripday.site bookstore.gripday.site
 
 # Or Windows: C:\Windows\System32\drivers\etc\hosts
 ```
@@ -116,8 +116,8 @@ sudo nano /etc/hosts
 # Via Gateway (production-like)
 curl http://api.gripday.site/api/v1/auth/login
 
-# Direct to Auth (debugging only)
-curl http://auth.gripday.site/api/v1/auth/login
+# Direct to User (debugging only)
+curl http://user.gripday.site/api/v1/auth/login
 
 # Direct to Bookstore (debugging only)
 curl http://bookstore.gripday.site/api/v1/bookstore/books
@@ -227,7 +227,7 @@ curl http://api.gripday.site/api/v1/auth/login
 
 ```bash
 # Use direct service ingress OR port forward
-curl http://auth.gripday.site/actuator/health
+curl http://user.gripday.site/actuator/health
 # OR
 kubectl port-forward -n gripday svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
@@ -339,7 +339,7 @@ curl http://$(minikube ip):30081/actuator/health
 | -------------------- | ------------------------------------------------------------------ |
 | Quick API test       | NodePort: `http://$(minikube ip):30080`                            |
 | Test production flow | Ingress: `http://api.gripday.site`                                 |
-| Debug user service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`           |
+| Debug user service   | Direct: `http://user.gripday.site` OR NodePort: `:30081`           |
 | Debug bookstore      | Direct: `http://bookstore.gripday.site` OR NodePort: `:30082`      |
 | Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes`         |
 | View logs            | `kubectl logs -n gripday deployment/<service-name>`                |

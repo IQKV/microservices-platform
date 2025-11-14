@@ -178,10 +178,10 @@ OTEL_SERVICE_NAME=gripday-user-service
 #### Local Environment
 
 ```
-http://auth.gripday.site/api/v1/auth/*     → Authentication API
-http://auth.gripday.site/api/v1/users/*    → User Management API
-http://auth.gripday.site/swagger-ui/*      → Swagger UI
-http://auth.gripday.site/actuator/*        → Health/metrics
+http://user.gripday.site/api/v1/auth/*     → Authentication API
+http://user.gripday.site/api/v1/users/*    → User Management API
+http://user.gripday.site/swagger-ui/*      → Swagger UI
+http://user.gripday.site/actuator/*        → Health/metrics
 ```
 
 #### Staging Environment
@@ -347,7 +347,7 @@ kubectl describe configmap user-service-config -n gripday-user
 
 ```bash
 # Test user registration
-curl -X POST http://auth.gripday.site/api/v1/auth/signup \
+curl -X POST http://user.gripday.site/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -358,7 +358,7 @@ curl -X POST http://auth.gripday.site/api/v1/auth/signup \
   }'
 
 # Test user login
-curl -X POST http://auth.gripday.site/api/v1/auth/login \
+curl -X POST http://user.gripday.site/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -368,7 +368,7 @@ curl -X POST http://auth.gripday.site/api/v1/auth/login \
 # Test token validation
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
-     http://auth.gripday.site/api/v1/users/me
+     http://user.gripday.site/api/v1/users/me
 ```
 
 ## Integration
@@ -418,17 +418,17 @@ The user service integrates with the gateway service for:
 
    ```bash
    # Add to /etc/hosts (Linux/Mac) or C:\Windows\System32\drivers\etc\hosts (Windows)
-   echo "$(minikube ip) auth.gripday.site" >> /etc/hosts
+   echo "$(minikube ip) user.gripday.site" >> /etc/hosts
    ```
 
 4. **Access services**
 
    ```bash
    # Test health endpoint
-   curl http://auth.gripday.site/actuator/health
+   curl http://user.gripday.site/actuator/health
 
    # Access Swagger UI
-   open http://auth.gripday.site/swagger-ui.html
+   open http://user.gripday.site/swagger-ui.html
    ```
 
 ### Testing
