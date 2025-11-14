@@ -32,7 +32,7 @@ public class HealthCheckConfig {
   @Bean
   public ReactiveHealthIndicator authServiceHealthIndicator(WebClient.Builder webClientBuilder,
       GripdayProperties gripdayProperties) {
-    return new AuthServiceHealthIndicator(webClientBuilder, gripdayProperties);
+    return new UserServiceHealthIndicator(webClientBuilder, gripdayProperties);
   }
 
   /**
@@ -94,12 +94,12 @@ public class HealthCheckConfig {
   /**
    * Auth service health indicator implementation.
    */
-  public static class AuthServiceHealthIndicator implements ReactiveHealthIndicator {
+  public static class UserServiceHealthIndicator implements ReactiveHealthIndicator {
 
     private final WebClient webClient;
     private final String authServiceUrl;
 
-    public AuthServiceHealthIndicator(final WebClient.Builder webClientBuilder, final GripdayProperties gripdayProperties) {
+    public UserServiceHealthIndicator(final WebClient.Builder webClientBuilder, final GripdayProperties gripdayProperties) {
       this.authServiceUrl = gripdayProperties.gateway().security().authentication().authServiceUrl();
       this.webClient = webClientBuilder.build();
     }

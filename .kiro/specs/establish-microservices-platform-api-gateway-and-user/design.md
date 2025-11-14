@@ -620,11 +620,11 @@ gripday/                    # Parent project root
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/
-│   │   │   │   └── org/gripday/authservice/
+│   │   │   │   └── org/gripday/userservice/
 │   │   │   │       ├── presentation/
 │   │   │   │       ├── domain/
 │   │   │   │       ├── infrastructure/
-│   │   │   │       └── AuthServiceApplication.java
+│   │   │   │       └── UserServiceApplication.java
 │   │   │   └── resources/
 │   │   │       ├── application.yml
 │   │   │       ├── application-local.yml
@@ -634,7 +634,7 @@ gripday/                    # Parent project root
 │   │   │           └── db.changelog-master.xml
 │   │   └── test/
 │   │       ├── java/
-│   │       │   └── org/gripday/authservice/
+│   │       │   └── org/gripday/userservice/
 │   │       │       ├── architecture/
 │   │       │       ├── integration/
 │   │       │       └── unit/
@@ -1247,14 +1247,14 @@ org.gripday.{servicename}/        # Service-specific Package
 
 **User Service Application:**
 ```java
-package org.gripday.authservice;
+package org.gripday.userservice;
 
 @SpringBootApplication
 @EnableJpaRepositories
 @EnableScheduling
-public class AuthServiceApplication {
+public class UserServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AuthServiceApplication.class, args);
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 }
 ````
@@ -1341,12 +1341,12 @@ class ModularityTests {
 
   @Test
   void verifyModularity() {
-    ApplicationModules.of(AuthServiceApplication.class).verify();
+    ApplicationModules.of(UserServiceApplication.class).verify();
   }
 
   @Test
   void writeDocumentation() throws IOException {
-    new Documenter(ApplicationModules.of(AuthServiceApplication.class)).writeModulesAsPlantUml().writeIndividualModulesAsPlantUml();
+    new Documenter(ApplicationModules.of(UserServiceApplication.class)).writeModulesAsPlantUml().writeIndividualModulesAsPlantUml();
   }
 }
 ```
@@ -1452,7 +1452,7 @@ Response (200 OK):
 **User Service Controllers:**
 
 ```java
-package org.gripday.authservice.presentation.web;
+package org.gripday.userservice.presentation.web;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -1637,7 +1637,7 @@ public class MonitoringResource {
 **Package Organization:**
 
 ```
-org.gripday.authservice/
+org.gripday.userservice/
 ├── presentation/
 │   └── web/
 │       └── controller/
@@ -3002,7 +3002,7 @@ npm run dev  # Starts on http://localhost:5173
 **Package Structure:**
 ```
 
-org.gripday.authservice/
+org.gripday.userservice/
 ├── presentation/ # Presentation Layer
 │ ├── controller/ # REST controllers
 │ ├── dto/ # Data transfer objects
@@ -3018,7 +3018,7 @@ org.gripday.authservice/
 │ ├── entity/ # JPA entities
 │ ├── cache/ # Caching logic
 │ └── integration/ # External integrations
-└── AuthServiceApplication.java # Main application class
+└── UserServiceApplication.java # Main application class
 
 ````
 
@@ -3061,11 +3061,11 @@ org.gripday.authservice/
 
 **Simple CORS Setup for Direct API Access:**
 ```java
-package org.gripday.authservice.config;
+package org.gripday.userservice.config;
 
 @Configuration
 @EnableWebSecurity
-public class AuthServiceCorsConfiguration {
+public class UserServiceCorsConfiguration {
 
     @Bean
     public CorsConfigurationSource authCorsConfigurationSource() {
@@ -3109,7 +3109,7 @@ public class AuthServiceCorsConfiguration {
 **Key Interfaces:**
 ```java
 // Centralized authentication controller with API versioning
-package org.gripday.authservice.presentation.controller;
+package org.gripday.userservice.presentation.controller;
 
 @RestController
 @RequestMapping("/api")
@@ -3135,7 +3135,7 @@ public class AuthController {
 }
 
 // Authorization controller for cross-service permissions
-package org.gripday.authservice.presentation.controller;
+package org.gripday.userservice.presentation.controller;
 
 @RestController
 public class AuthorizationController {
@@ -3145,7 +3145,7 @@ public class AuthorizationController {
 }
 
 // Centralized user service for all microservices
-package org.gripday.authservice.domain.service;
+package org.gripday.userservice.domain.service;
 
 @Service
 public interface UserService {
@@ -3160,7 +3160,7 @@ public interface UserService {
 }
 
 // User Service user context utilities (self-contained)
-package org.gripday.authservice.domain.service;
+package org.gripday.userservice.domain.service;
 
 @Component
 public class AuthUserContextExtractor {
@@ -3175,7 +3175,7 @@ public class AuthUserContextExtractor {
 }
 
 // User Service user context data transfer object
-package org.gripday.authservice.presentation.dto;
+package org.gripday.userservice.presentation.dto;
 
 public class UserContext {
     private Long userId;
@@ -3259,8 +3259,8 @@ public interface UserManagementService {
 ```mermaid
 graph TB
     subgraph "User Service"
-        AuthService[User Service] --> AuthDB[(Auth PostgreSQL)]
-        AuthService --> AuthRedis[(Auth Redis)]
+        UserService[User Service] --> AuthDB[(Auth PostgreSQL)]
+        UserService --> AuthRedis[(Auth Redis)]
     end
 
     subgraph "Gateway Service"
@@ -3273,7 +3273,7 @@ graph TB
         FutureService --> FutureCache[(Service-Specific Cache)]
     end
 
-    AuthService -.->|JWT Validation| GatewayService
+    UserService -.->|JWT Validation| GatewayService
     GatewayService -.->|Route Requests| FutureService
 ```
 
@@ -3324,7 +3324,7 @@ graph TB
 @Component
 public class UserContextService {
 
-  private final AuthServiceClient authServiceClient;
+  private final UserServiceClient authServiceClient;
 
   public UserContext validateAndEnrichToken(String jwt) {
     // Call User Service API, not database
@@ -3627,7 +3627,7 @@ spring:
 - Enhanced entity graphs and fetch strategies
 
 ```java
-package org.gripday.authservice.infrastructure.entity;
+package org.gripday.userservice.infrastructure.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -3902,9 +3902,9 @@ public class CircuitBreakerState {
 ### Spring Data JPA Repositories with Hibernate 6.x
 
 ```java
-package org.gripday.authservice.infrastructure.repository;
+package org.gripday.userservice.infrastructure.repository;
 
-import org.gripday.authservice.infrastructure.entity.User;
+import org.gripday.userservice.infrastructure.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -3975,7 +3975,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 ### Hibernate 6.x Configuration
 
 ```java
-package org.gripday.authservice.infrastructure.config;
+package org.gripday.userservice.infrastructure.config;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
@@ -4051,7 +4051,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int updateEnabledStatusBatch(@Param("enabled") boolean enabled, @Param("ids") List<Long> ids);
 
     // Projection with records (Java 14+)
-    @Query("SELECT new org.gripday.authservice.dto.UserSummary(u.id, u.username, u.email) FROM User u WHERE u.enabled = true")
+    @Query("SELECT new org.gripday.userservice.dto.UserSummary(u.id, u.username, u.email) FROM User u WHERE u.enabled = true")
     List<UserSummary> findUserSummaries();
 
     // Stream processing for large datasets
@@ -4689,7 +4689,7 @@ logging:
 **Spring Boot Configuration Properties:**
 
 ```java
-package org.gripday.authservice.config;
+package org.gripday.userservice.config;
 
 @ConfigurationProperties(prefix = "gripday.auth")
 @Validated
@@ -6373,7 +6373,7 @@ public class CorrelationIdGatewayFilterFactory extends AbstractGatewayFilterFact
 **Correlation ID Filter for User Service:**
 
 ```java
-package org.gripday.authservice.infrastructure.filter;
+package org.gripday.userservice.infrastructure.filter;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -6413,7 +6413,7 @@ public class CorrelationIdFilter implements Filter {
 **Authentication Audit Logger:**
 
 ```java
-package org.gripday.authservice.domain.service;
+package org.gripday.userservice.domain.service;
 
 @Component
 public class SecurityAuditLogger {
@@ -6448,7 +6448,7 @@ public class SecurityAuditLogger {
 **Request Logging Configuration:**
 
 ```java
-package org.gripday.authservice.config;
+package org.gripday.userservice.config;
 
 @Configuration
 public class RequestLoggingConfiguration {

@@ -184,7 +184,7 @@
         <logger name="com.zaxxer.hikari" level="ERROR"/>
 
         <!-- Security logger for audit events -->
-        <logger name="org.gripday.authservice.security" level="INFO" additivity="false">
+        <logger name="org.gripday.userservice.security" level="INFO" additivity="false">
             <appender-ref ref="SECURITY"/>
         </logger>
 

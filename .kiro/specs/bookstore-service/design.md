@@ -40,7 +40,7 @@ graph TB
     subgraph "User Service"
         AuthResource[Authentication Resource]
         UserResource[User Management Resource]
-        AuthService[User Service]
+        UserService[User Service]
         UserService[User Service]
     end
 

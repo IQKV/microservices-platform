@@ -28,7 +28,7 @@ test.describe('Gateway and Services - Health Checks', () => {
   });
 
   test('GET /api/v1/auth/health should report UP', async () => {
-    const res = await client.checkAuthServiceHealth();
+    const res = await client.checkUserServiceHealth();
     expect(res.status).toBe('UP');
   });
 

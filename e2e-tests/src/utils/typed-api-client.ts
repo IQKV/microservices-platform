@@ -541,7 +541,7 @@ export class TypedApiClient {
   /**
    * Check Auth service health
    */
-  async checkAuthServiceHealth(): Promise<HealthCheckResponse> {
+  async checkUserServiceHealth(): Promise<HealthCheckResponse> {
     const response = await this.apiClient.request<HealthCheckResponse>({
       method: 'GET',
       url: '/api/v1/auth/health'

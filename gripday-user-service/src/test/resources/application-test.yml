@@ -151,7 +151,7 @@ gripday:
 
 logging:
   level:
-    org.gripday.authservice: DEBUG
+    org.gripday.userservice: DEBUG
     org.springframework.security: WARN
     org.hibernate.SQL: DEBUG
     liquibase: WARN

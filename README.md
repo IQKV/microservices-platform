@@ -211,7 +211,7 @@ org.gripday.{servicename}/
 
 **Implemented Services:**
 
-- `org.gripday.authservice` - Authentication and user management
+- `org.gripday.userservice` - Authentication and user management
 - `org.gripday.gatewayservice` - API gateway and routing
 - `org.gripday.bookstoreservice` - Book catalog and inventory management
 

@@ -342,7 +342,7 @@ class AuthenticationIntegrationTest {
 #### Architectural Testing
 
 ```java
-@AnalyzeClasses(packages = "org.gripday.authservice")
+@AnalyzeClasses(packages = "org.gripday.userservice")
 class ArchitectureTest {
 
   @ArchTest

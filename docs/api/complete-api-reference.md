@@ -802,7 +802,7 @@ const profile = await client.auth.getProfile();
 
 ```java
 import com.gripday.client.GripdayClient;
-import com.gripday.client.auth.AuthService;
+import com.gripday.client.auth.UserService;
 
 GripdayClient client = GripdayClient.builder()
     .baseUrl("http://localhost:8080")

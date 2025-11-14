@@ -134,7 +134,7 @@ const errors = ValidationUtils.getValidationErrors(data, schema);
 ### Health Checks
 
 - `checkGatewayHealth()` - Check Gateway service health
-- `checkAuthServiceHealth()` - Check Auth service health
+- `checkUserServiceHealth()` - Check Auth service health
 - `checkBookstoreServiceHealth()` - Check Bookstore service health
 
 ## Error Handling
