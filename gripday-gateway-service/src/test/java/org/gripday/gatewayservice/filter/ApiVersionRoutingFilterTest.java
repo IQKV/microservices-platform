@@ -186,13 +186,13 @@ class ApiVersionRoutingFilterTest {
   @DisplayName("Should support version routing for different API versions")
   void shouldSupportVersionRoutingForDifferentApiVersions() {
     // Given
-    var basePath = "/api/users";
+    var basePath = "/api/admin/users";
 
     // When & Then
     var v1Path = routingFilter.transformPathForVersion(basePath, "v1");
     var v2Path = routingFilter.transformPathForVersion(basePath, "v2");
 
     assertThat(v1Path).isEqualTo("/api/v1/admin/users");
-    assertThat(v2Path).isEqualTo("/api/v2/users");
+    assertThat(v2Path).isEqualTo("/api/v2/admin/users");
   }
 }
