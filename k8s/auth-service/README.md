@@ -95,7 +95,7 @@ kubectl apply -f auth-service-service.yaml
 kubectl apply -f auth-service-ingress.yaml
 
 # 6. Verify deployment
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth --timeout=300s
 ```
 
 ## Configuration
@@ -126,7 +126,7 @@ GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED=false
 
 # Observability
 OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-OTEL_SERVICE_NAME=gripday-auth-service
+OTEL_SERVICE_NAME=gripday-user-service
 ```
 
 ### Resource Requirements
@@ -293,8 +293,8 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 1. **Pod not starting**
 
    ```bash
-   kubectl describe pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth
-   kubectl logs -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth
+   kubectl describe pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth
+   kubectl logs -l app.kubernetes.io/name=gripday-user-service -n gripday-auth
    ```
 
 2. **Database connection issues**

@@ -28,7 +28,7 @@ Service Information:
 {{- end }}
 
 To get the application logs:
-  $ kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-auth-service
+  $ kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-user-service
 
 To access the application directly using port-forward:
   $ kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "auth-service.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}

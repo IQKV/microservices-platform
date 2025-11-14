@@ -99,12 +99,20 @@ gripday:
         token-validation-timeout: PT10S  # Extended for development
         enable-user-context-propagation: true
       public-paths:
+        # Authentication endpoints
         - /api/v1/auth/login
         - /api/v1/auth/signup
         - /api/v1/auth/refresh
+        - /api/v1/auth/validate
+        - /api/v1/auth/health
+        # Email verification endpoints
         - /api/v1/auth/email/verify
         - /api/v1/auth/email/resend
         - /api/v1/auth/email/status
+        # Password management endpoints (public)
+        - /api/v1/password/forgot
+        - /api/v1/password/reset
+        # Actuator and documentation endpoints
         - /actuator/health
         - /actuator/info
         - /swagger-ui/**
@@ -134,6 +142,30 @@ gripday:
           "/api/v1/auth/email/verify":
             requests-per-minute: 20
             burst-capacity: 30
+            enable-tenant-quotas: false
+          "/api/v1/password/forgot":
+            requests-per-minute: 6
+            burst-capacity: 10
+            enable-tenant-quotas: false
+          "/api/v1/password/reset":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+          "/api/v1/password/change":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: false
+          "/api/v1/users/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/organizations/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/admin/tenants/**":
+            requests-per-minute: 100
+            burst-capacity: 150
             enable-tenant-quotas: false
       tenant-quotas:
         enabled: false  # Disabled for development

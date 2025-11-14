@@ -44,7 +44,7 @@ This directory contains the complete observability stack for the Gripday microse
 
    ```bash
    # Terminal 1 - Auth Service
-   cd gripday-auth-service
+   cd gripday-user-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
 
    # Terminal 2 - Gateway Service
@@ -117,7 +117,7 @@ This directory contains the complete observability stack for the Gripday microse
 - `timestamp`: ISO 8601 timestamp in UTC
 - `level`: Log level (DEBUG, INFO, WARN, ERROR)
 - `message`: Log message
-- `service`: Service name (gripday-auth-service, gripday-gateway-service)
+- `service`: Service name (gripday-user-service, gripday-gateway-service)
 - `correlationId`: Request correlation ID
 - `traceId`: OpenTelemetry trace ID
 - `spanId`: OpenTelemetry span ID

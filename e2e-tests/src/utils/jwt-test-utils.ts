@@ -209,7 +209,7 @@ export class JwtTestUtils {
       permissions: ['READ'],
       iat: now,
       exp: now + 3600, // 1 hour
-      iss: 'gripday-auth-service',
+      iss: 'gripday-user-service',
       aud: 'gripday',
       jti: 'test-jwt-id',
       ...payload

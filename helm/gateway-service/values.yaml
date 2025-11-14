@@ -338,7 +338,7 @@ configMap:
           auth:
             jwt:
               secret: ${GRIPDAY_AUTH_JWT_SECRET}
-              issuer: gripday-auth-service
+              issuer: gripday-user-service
           rate-limiting:
             enabled: true
             default-requests-per-minute: 60
@@ -453,7 +453,7 @@ networkPolicy:
               app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-auth-service
+              app.kubernetes.io/name: gripday-user-service
       ports:
         - protocol: TCP
           port: 8080

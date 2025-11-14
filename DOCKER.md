@@ -71,7 +71,7 @@ docker-compose logs -f
 | `docker-compose.yml`                         | Base configuration   | Local development      |
 | `docker-compose.staging.yml`                 | Staging overrides    | Staging deployment     |
 | `docker-compose.production.yml`              | Production overrides | Production deployment  |
-| `gripday-auth-service/docker-compose.yml`    | Auth service only    | Individual development |
+| `gripday-user-service/docker-compose.yml`    | Auth service only    | Individual development |
 | `gripday-gateway-service/docker-compose.yml` | Gateway service only | Individual development |
 
 ### Environment Files
@@ -206,7 +206,7 @@ healthcheck:
 ### Auth Service Only
 
 ```bash
-cd gripday-auth-service
+cd gripday-user-service
 docker compose up -d
 ```
 
@@ -456,7 +456,7 @@ docker system prune -a
 
 ```bash
 # Build images
-docker build -t gripday/auth-service:${VERSION} -f gripday-auth-service/Dockerfile .
+docker build -t gripday/auth-service:${VERSION} -f gripday-user-service/Dockerfile .
 
 # Push to registry
 docker push gripday/auth-service:${VERSION}

@@ -4,13 +4,13 @@ metadata:
   name: auth-service-network-policy
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: gripday-auth-service
+      app.kubernetes.io/name: gripday-user-service
       app.kubernetes.io/component: authentication
   policyTypes:
     - Ingress
@@ -115,7 +115,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-auth-service
+              app.kubernetes.io/name: gripday-user-service
               app.kubernetes.io/component: authentication
       ports:
         - protocol: TCP
@@ -160,7 +160,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-auth-service
+              app.kubernetes.io/name: gripday-user-service
               app.kubernetes.io/component: authentication
       ports:
         - protocol: TCP

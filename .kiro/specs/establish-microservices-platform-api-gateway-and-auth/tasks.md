@@ -5,14 +5,14 @@
 - [x] 1. Set up Maven multi-module project structure
   - Create parent POM (gripday/pom.xml) with Maven enforcer plugin and Java 21 configuration
   - Configure Spring Boot 3.5.6 and Spring Cloud 2025.0.0 dependencies
-  - Create isolated module structure for gripday-auth-service and gripday-gateway-service
+  - Create isolated module structure for gripday-user-service and gripday-gateway-service
   - Set up Maven compiler plugin with Java 21 features (var, records, pattern matching, text blocks)
   - Configure Maven Surefire plugins for testing
   - Add ArchUnit and Spring Modulith dependencies for architectural testing
   - Create Maven wrapper (mvnw) for consistent build environment
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 25.1, 25.2, 25.3, 25.4, 25.5_
 
-- [x] 2. Implement gripday-auth-service core functionality
+- [x] 2. Implement gripday-user-service core functionality
   - [x] 2.1 Create Spring Boot application with three-tier architecture and YAML configuration
     - Set up main application class with Spring Boot annotations
     - Create three-tier package structure (presentation.web, domain.service, infrastructure.repository)
@@ -479,16 +479,16 @@ The following features can be implemented after the core MVP is complete:
 
 - [x] 10. Create individual Docker containerization and deployment for each microservice
   - [x] 10.1 Create individual Dockerfiles for each microservice
-    - Write optimized Dockerfile for auth service with multi-stage builds in gripday-auth-service directory
+    - Write optimized Dockerfile for auth service with multi-stage builds in gripday-user-service directory
     - Create Dockerfile for gateway service with reactive optimizations in gripday-gateway-service directory
     - Configure production-ready Docker images with security best practices for each service
     - Implement service-specific build optimizations and dependency management
     - _Requirements: 2.1, 2.2_
 
   - [x] 10.2 Set up individual Docker Compose configurations for auth service
-    - Create gripday-auth-service/docker-compose.yml for local development with PostgreSQL and Redis
-    - Create gripday-auth-service/docker-compose.staging.yml for staging environment deployment
-    - Create gripday-auth-service/docker-compose.production.yml for production deployment
+    - Create gripday-user-service/docker-compose.yml for local development with PostgreSQL and Redis
+    - Create gripday-user-service/docker-compose.staging.yml for staging environment deployment
+    - Create gripday-user-service/docker-compose.production.yml for production deployment
     - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
     - _Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_
 
@@ -497,7 +497,7 @@ The following features can be implemented after the core MVP is complete:
     - Create gripday-gateway-service/docker-compose.staging.yml for staging environment deployment
     - Create gripday-gateway-service/docker-compose.production.yml for production deployment
     - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
-    - \_Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_eate gripday-auth-service/docker-compose.production.yml for production environment deployment
+    - \_Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_eate gripday-user-service/docker-compose.production.yml for production environment deployment
     - Configure service-specific PostgreSQL and Redis containers with proper data persistence
     - Set up auth service networking, dependencies, and health checks
     - Configure environment-specific resource limits and scaling options for auth service

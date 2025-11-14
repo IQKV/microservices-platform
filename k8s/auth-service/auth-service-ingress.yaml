@@ -4,7 +4,7 @@ metadata:
   name: auth-service-ingress
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
   annotations:

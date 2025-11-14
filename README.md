@@ -67,12 +67,12 @@ docker compose up -d postgres redis
 mvn clean package
 
 # Run database migrations
-cd gripday-auth-service
+cd gripday-user-service
 mvn liquibase:update -Dspring.profiles.active=local
 cd ..
 
 # Start services (in separate terminals)
-cd gripday-auth-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
+cd gripday-user-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
 cd gripday-gateway-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
 cd gripday-bookstore-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
@@ -137,7 +137,7 @@ Centralized authentication and user management service providing JWT-based authe
 
 **Documentation:**
 
-- [Auth Service README](gripday-auth-service/README.md)
+- [Auth Service README](gripday-user-service/README.md)
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ### Gateway Service (Port 8080)
@@ -534,7 +534,7 @@ spring:
 ### API Documentation
 
 - [Complete API Reference](docs/api/complete-api-reference.md) - Comprehensive endpoint documentation
-- [Authentication API](gripday-auth-service/docs/api/authentication.md) - Auth service specific endpoints
+- [Authentication API](gripday-user-service/docs/api/authentication.md) - Auth service specific endpoints
 - Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8080/swagger-ui.html)
 
 ### Deployment and Operations
@@ -545,7 +545,7 @@ spring:
 
 ### Service Documentation
 
-- [Auth Service README](gripday-auth-service/README.md) - Authentication service details
+- [Auth Service README](gripday-user-service/README.md) - Authentication service details
 - [Gateway Service README](gripday-gateway-service/README.md) - API gateway service details
 - [Bookstore Service README](gripday-bookstore-service/README.md) - Example business service implementation
 

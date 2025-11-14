@@ -4,7 +4,7 @@ metadata:
   name: auth-service-quota
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
 spec:
@@ -38,7 +38,7 @@ metadata:
   name: auth-service-limits
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
 spec:

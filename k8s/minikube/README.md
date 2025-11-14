@@ -55,7 +55,7 @@ eval $(minikube docker-env)
 
 # Build all service images (from project root)
 cd ../..
-docker build -t gripday/auth-service:latest -f gripday-auth-service/Dockerfile .
+docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
 docker build -t gripday/gateway-service:latest -f gripday-gateway-service/Dockerfile .
 docker build -t gripday/bookstore-service:latest -f gripday-bookstore-service/Dockerfile .
 ```
@@ -323,7 +323,7 @@ Edit your application code in the respective service directories.
 
 ```bash
 eval $(minikube docker-env)
-docker build -t gripday/auth-service:latest -f gripday-auth-service/Dockerfile .
+docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
 ```
 
 ### 3. Restart Deployments

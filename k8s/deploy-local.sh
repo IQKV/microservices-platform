@@ -167,7 +167,7 @@ build_images() {
     # Build auth service
     print_status "Building auth service image..."
     if [[ "$DRY_RUN" == "false" ]]; then
-        cd gripday-auth-service
+        cd gripday-user-service
         docker build -t gripday/auth-service:latest .
         cd ..
     else
@@ -320,7 +320,7 @@ verify_deployment() {
     
     # Wait for auth service to be ready
     print_status "Waiting for auth service to be ready..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-auth --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth --timeout=300s
     
     # Wait for gateway service to be ready
     print_status "Waiting for gateway service to be ready..."

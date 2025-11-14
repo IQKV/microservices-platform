@@ -87,7 +87,7 @@ The platform follows reactive programming principles, implements security throug
     </properties>
 
     <modules>
-        <module>gripday-auth-service</module>
+        <module>gripday-user-service</module>
         <module>gripday-gateway-service</module>
     </modules>
 
@@ -323,7 +323,7 @@ The platform follows reactive programming principles, implements security throug
 
 ### Service-Specific Maven Configuration
 
-**Auth Service POM (gripday-auth-service/pom.xml):**
+**Auth Service POM (gripday-user-service/pom.xml):**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -339,7 +339,7 @@ The platform follows reactive programming principles, implements security throug
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gripday-auth-service</artifactId>
+    <artifactId>gripday-user-service</artifactId>
     <packaging>jar</packaging>
 
     <name>Gripday Auth Service</name>
@@ -613,7 +613,7 @@ gripday/                    # Parent project root
 ├── .gitignore                      # Git ignore rules
 ├── checkstyle.xml                  # Code style configuration
 │
-├── gripday-auth-service/           # Auth service module
+├── gripday-user-service/           # Auth service module
 │   ├── pom.xml                     # Service-specific POM
 │   ├── Dockerfile                  # Container configuration
 │   ├── docker-compose.yml         # Service-specific compose
@@ -693,7 +693,7 @@ RUN addgroup -g 1001 -S appuser && \
 WORKDIR /app
 
 # Copy Maven-built JAR
-COPY target/gripday-auth-service-*.jar app.jar
+COPY target/gripday-user-service-*.jar app.jar
 
 # Change ownership
 RUN chown -R appuser:appuser /app
@@ -737,7 +737,7 @@ mvn clean compile -Pcode-quality
 mvn clean test jacoco:report
 
 # Build specific service
-mvn clean package -pl gripday-auth-service
+mvn clean package -pl gripday-user-service
 
 # Skip tests for faster builds (development only)
 mvn package -DskipTests
@@ -2977,7 +2977,7 @@ fetch("/api/v1/auth/login", {
 ```bash
 # 1. Start backend services
 cd gripday-gateway-service && docker compose up -d
-cd ../gripday-auth-service && docker compose up -d
+cd ../gripday-user-service && docker compose up -d
 
 # 2. Start Vite development server
 cd ../frontend
@@ -2997,7 +2997,7 @@ npm run dev  # Starts on http://localhost:5173
 
 ```
 
-### Auth Service (gripday-auth-service)
+### Auth Service (gripday-user-service)
 
 **Package Structure:**
 ```
@@ -4252,8 +4252,8 @@ TTL: Session timeout duration
 version: "3.8"
 services:
   auth-service:
-    build: ./gripday-auth-service
-    container_name: gripday-auth-service
+    build: ./gripday-user-service
+    container_name: gripday-user-service
     networks:
       - gripday-network
     environment:
@@ -5600,7 +5600,7 @@ gripday:
     </properties>
 
     <modules>
-        <module>gripday-auth-service</module>
+        <module>gripday-user-service</module>
         <module>gripday-gateway-service</module>
     </modules>
 
@@ -5738,7 +5738,7 @@ cd ..
 
 # Start auth service
 echo "Starting auth service..."
-cd gripday-auth-service
+cd gripday-user-service
 docker compose up -d
 cd ..
 
@@ -5773,7 +5773,7 @@ echo "Grafana: http://localhost:3000"
 set -euo pipefail
 
 echo "Starting auth service..."
-cd gripday-auth-service
+cd gripday-user-service
 docker compose up -d
 cd ..
 
@@ -5832,7 +5832,7 @@ done
 
 # Build Docker images for each service
 echo "Building auth service Docker image..."
-cd gripday-auth-service
+cd gripday-user-service
 ./mvnw clean package -DskipTests
 docker build -t gripday/auth-service:$VERSION .
 cd ..
@@ -5845,7 +5845,7 @@ cd ..
 
 # Deploy auth service first
 echo "Deploying auth service..."
-cd gripday-auth-service
+cd gripday-user-service
 export VERSION=$VERSION
 docker compose -f docker-compose.staging.yml up -d
 cd ..
@@ -5867,7 +5867,7 @@ echo "Waiting for gateway service to be ready..."
 
 echo "Staging deployment complete!"
 echo "Auth Service Status:"
-cd gripday-auth-service && docker compose -f docker-compose.staging.yml ps && cd ..
+cd gripday-user-service && docker compose -f docker-compose.staging.yml ps && cd ..
 echo "Gateway Service Status:"
 cd gripday-gateway-service && docker compose -f docker-compose.staging.yml ps && cd ..
 ```
@@ -5915,7 +5915,7 @@ fi
 # Build and tag production images
 echo "Building production Docker images..."
 ./mvnw clean package -Pproduction
-docker build -t gripday/auth-service:$RELEASE_VERSION ./gripday-auth-service
+docker build -t gripday/auth-service:$RELEASE_VERSION ./gripday-user-service
 docker build -t gripday/gateway-service:$RELEASE_VERSION ./gripday-gateway-service
 
 # Tag as latest for production
@@ -6516,7 +6516,7 @@ scrape_configs:
           - localhost
         labels:
           job: auth-service
-          service: gripday-auth-service
+          service: gripday-user-service
           environment: ${ENVIRONMENT}
           __path__: /app/logs/auth-service*.log
     pipeline_stages:
@@ -6579,7 +6579,7 @@ Each microservice has its own Docker Compose configuration and Dockerfile to ens
 **Auth Service Structure:**
 
 ```
-gripday-auth-service/
+gripday-user-service/
 ├── Dockerfile
 ├── docker-compose.yml          # Local development
 ├── docker-compose.staging.yml  # Staging environment
@@ -8041,7 +8041,7 @@ gripday-{service-name}/
 
 ### Service README Template
 
-**gripday-auth-service/README.md:**
+**gripday-user-service/README.md:**
 
 ````markdown
 # Gripday Auth Service
@@ -8062,7 +8062,7 @@ Centralized authentication and authorization service providing JWT-based securit
 ```bash
 # Clone and setup
 git clone <repository-url>
-cd gripday-auth-service
+cd gripday-user-service
 
 # Start dependencies
 ./scripts/start-dependencies.sh

@@ -63,7 +63,7 @@ GRIPDAY_CACHE_REDIS_LETTUCE_POOL_MIN_IDLE=0
 GRIPDAY_AUTH_JWT_SECRET=your_secret_key_minimum_256_bits_for_security
 GRIPDAY_AUTH_JWT_ACCESS_TOKEN_EXPIRY=PT15M
 GRIPDAY_AUTH_JWT_REFRESH_TOKEN_EXPIRY=P7D
-GRIPDAY_AUTH_JWT_ISSUER=gripday-auth-service
+GRIPDAY_AUTH_JWT_ISSUER=gripday-user-service
 GRIPDAY_AUTH_JWT_ALGORITHM=RS256
 
 # JWT Key Pair (for RS256)
@@ -87,7 +87,7 @@ GRIPDAY_TENANT_CACHE_NAMESPACE_ENABLED=true
 ```bash
 # OpenTelemetry
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-OTEL_SERVICE_NAME=gripday-auth-service
+OTEL_SERVICE_NAME=gripday-user-service
 OTEL_TRACES_SAMPLER=traceidratio
 OTEL_TRACES_SAMPLER_ARG=0.1
 OTEL_METRICS_EXPORTER=prometheus
@@ -105,7 +105,7 @@ MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
 
 ```bash
 # Service Configuration
-GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
+GRIPDAY_AUTH_SERVICE_NAME=gripday-user-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
@@ -148,7 +148,7 @@ GRIPDAY_DATABASE_LIQUIBASE_ENABLED=true
 
 ```bash
 # Service Configuration
-GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
+GRIPDAY_AUTH_SERVICE_NAME=gripday-user-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
@@ -183,7 +183,7 @@ LOGGING_LEVEL_ROOT=INFO
 LOGGING_PATTERN_FILE=%d{ISO8601} [%thread] %-5level [%logger{36}] [%X{correlationId}] - %msg%n
 
 # Observability
-OTEL_SERVICE_NAME=gripday-auth-service
+OTEL_SERVICE_NAME=gripday-user-service
 OTEL_TRACES_SAMPLER_ARG=0.5
 ```
 
@@ -191,7 +191,7 @@ OTEL_TRACES_SAMPLER_ARG=0.5
 
 ```bash
 # Service Configuration
-GRIPDAY_AUTH_SERVICE_NAME=gripday-auth-service
+GRIPDAY_AUTH_SERVICE_NAME=gripday-user-service
 GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
@@ -232,7 +232,7 @@ LOGGING_LEVEL_ROOT=WARN
 LOGGING_CONFIG=classpath:logback-spring.xml
 
 # Observability
-OTEL_SERVICE_NAME=gripday-auth-service
+OTEL_SERVICE_NAME=gripday-user-service
 OTEL_TRACES_SAMPLER_ARG=1.0
 MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
 ```
@@ -388,13 +388,13 @@ MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,gateway
 gripday:
   auth:
     service:
-      name: gripday-auth-service
+      name: gripday-user-service
       version: 1.0.0
     jwt:
       secret: ${GRIPDAY_AUTH_JWT_SECRET:dev_secret_key_change_in_production_minimum_256_bits}
       access-token-expiry: ${GRIPDAY_AUTH_JWT_ACCESS_TOKEN_EXPIRY:PT15M}
       refresh-token-expiry: ${GRIPDAY_AUTH_JWT_REFRESH_TOKEN_EXPIRY:P7D}
-      issuer: ${GRIPDAY_AUTH_JWT_ISSUER:gripday-auth-service}
+      issuer: ${GRIPDAY_AUTH_JWT_ISSUER:gripday-user-service}
       algorithm: ${GRIPDAY_AUTH_JWT_ALGORITHM:HS256}
     rate-limiting:
       login-attempts-per-minute: ${GRIPDAY_AUTH_RATE_LIMITING_LOGIN_ATTEMPTS_PER_MINUTE:5}

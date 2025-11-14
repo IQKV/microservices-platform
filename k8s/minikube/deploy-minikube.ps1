@@ -119,7 +119,7 @@ if ($Build) {
     
     # Build Auth Service
     Write-Info "Building Auth Service..."
-    docker build -t gripday/auth-service:latest -f gripday-auth-service/Dockerfile .
+    docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Auth Service image built"
     } else {

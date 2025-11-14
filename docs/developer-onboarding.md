@@ -42,7 +42,7 @@ docker compose up -d postgres redis
 
 # Build and start services
 mvn clean package
-cd gripday-auth-service && mvn spring-boot:run -Dspring-boot.run.profiles=local &
+cd gripday-user-service && mvn spring-boot:run -Dspring-boot.run.profiles=local &
 cd ../gripday-gateway-service && mvn spring-boot:run -Dspring-boot.run.profiles=local &
 ```
 
@@ -628,7 +628,7 @@ public class AuthenticationMetrics {
 docker compose up -d postgres redis
 
 # Run services in development mode
-cd gripday-auth-service
+cd gripday-user-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 cd ../gripday-gateway-service
@@ -699,7 +699,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 
 ```bash
 # Check migrations
-cd gripday-auth-service
+cd gripday-user-service
 mvn liquibase:status -Dspring.profiles.active=local
 
 # Run migrations manually
@@ -751,7 +751,7 @@ SELECT tenant_id, COUNT(*) as user_count FROM users GROUP BY tenant_id;
 
 - [Complete API Reference](docs/api/complete-api-reference.md)
 - [Troubleshooting Guide](docs/troubleshooting/common-issues.md)
-- [Auth Service README](gripday-auth-service/README.md)
+- [Auth Service README](gripday-user-service/README.md)
 - [Gateway Service README](gripday-gateway-service/README.md)
 
 ### Interactive Tools

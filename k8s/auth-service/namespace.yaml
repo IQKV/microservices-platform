@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: gripday-auth
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
     environment: local

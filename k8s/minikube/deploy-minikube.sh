@@ -136,7 +136,7 @@ if [ "$BUILD_IMAGES" = true ]; then
     
     # Build Auth Service
     print_info "Building Auth Service..."
-    if docker build -t gripday/auth-service:latest -f gripday-auth-service/Dockerfile . ; then
+    if docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile . ; then
         print_status "Auth Service image built"
     else
         print_error "Failed to build Auth Service image"

@@ -40,12 +40,12 @@ scrape_configs:
           source: output
 
   # Gripday Auth Service logs
-  - job_name: gripday-auth-service
+  - job_name: gripday-user-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: gripday-auth-service
+          job: gripday-user-service
           service: auth
           __path__: /var/log/gripday/auth-service/*.log
     pipeline_stages:

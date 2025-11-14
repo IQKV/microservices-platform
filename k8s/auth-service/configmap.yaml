@@ -4,7 +4,7 @@ metadata:
   name: auth-service-config
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
 data:
@@ -14,7 +14,7 @@ data:
 
     spring:
       application:
-        name: gripday-auth-service
+        name: gripday-user-service
       profiles:
         active: local
       
@@ -103,7 +103,7 @@ data:
         jwt:
           access-token-expiry: PT15M  # 15 minutes
           refresh-token-expiry: P7D   # 7 days
-          issuer: gripday-auth-service
+          issuer: gripday-user-service
       observability:
         tracing:
           enabled: true
@@ -133,7 +133,7 @@ metadata:
   name: auth-service-config-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
     environment: staging
@@ -171,7 +171,7 @@ metadata:
   name: auth-service-config-production
   namespace: gripday-production-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
     environment: production

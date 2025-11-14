@@ -161,7 +161,7 @@ kubectl get pods -n gripday-auth
 ### View logs
 
 ```bash
-kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-auth-service
+kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-user-service
 ```
 
 ### Check service endpoints

@@ -205,7 +205,7 @@ kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
 kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-service
 
 # Auth service logs
-kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-auth-service
+kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-user-service
 
 # Bookstore service logs
 kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service

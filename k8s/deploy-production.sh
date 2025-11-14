@@ -382,7 +382,7 @@ verify_production_deployment() {
     
     # Wait for all pods to be ready
     print_status "Waiting for auth service pods to be ready..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n gripday-production-env --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-production-env --timeout=300s
     
     print_status "Waiting for gateway service pods to be ready..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n gripday-production-env --timeout=300s
@@ -394,7 +394,7 @@ verify_production_deployment() {
     print_status "Performing health checks..."
     
     # Check auth service health
-    local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-auth-service -n gripday-production-env -o jsonpath='{.items[*].status.phase}')
+    local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-user-service -n gripday-production-env -o jsonpath='{.items[*].status.phase}')
     if [[ "$auth_health" =~ "Running" ]]; then
         print_status "✓ Auth service health check passed"
     else

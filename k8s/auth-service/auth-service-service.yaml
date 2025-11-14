@@ -4,7 +4,7 @@ metadata:
   name: auth-service
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
   annotations:
@@ -19,7 +19,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
 ---
 apiVersion: v1
@@ -28,7 +28,7 @@ metadata:
   name: auth-service-headless
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
 spec:
@@ -40,7 +40,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
 ---
 apiVersion: v1
@@ -49,7 +49,7 @@ metadata:
   name: auth-service-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
     environment: staging
@@ -65,7 +65,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     environment: staging
 ---
@@ -75,7 +75,7 @@ metadata:
   name: auth-service-production
   namespace: gripday-production-env
   labels:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     app.kubernetes.io/part-of: gripday
     environment: production
@@ -91,6 +91,6 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: gripday-auth-service
+    app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication
     environment: production

@@ -469,7 +469,7 @@ test.describe('Authentication Flow Tests', () => {
       // Verify token security properties
       const tokenClaims = JwtTestUtils.getTokenClaims(authResponse.tokens.accessToken);
       expect(tokenClaims).toBeDefined();
-      expect(tokenClaims!.issuer).toBe('gripday-auth-service');
+      expect(tokenClaims!.issuer).toBe('gripday-user-service');
       expect(tokenClaims!.subject).toBeDefined();
       expect(tokenClaims!.expiresAt).toBeDefined();
       

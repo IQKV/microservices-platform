@@ -49,7 +49,7 @@ fi
 
 # Validate service-specific configurations
 echo "📋 Validating auth service configuration..."
-if docker-compose -f gripday-auth-service/docker-compose.yml config > /dev/null 2>&1; then
+if docker-compose -f gripday-user-service/docker-compose.yml config > /dev/null 2>&1; then
     echo "✅ Auth service configuration is valid"
 else
     echo "❌ Auth service configuration has errors"
@@ -87,7 +87,7 @@ done
 # Check Dockerfiles
 echo "🐳 Checking Dockerfiles..."
 dockerfiles=(
-    "gripday-auth-service/Dockerfile"
+    "gripday-user-service/Dockerfile"
     "gripday-gateway-service/Dockerfile"
 )
 

@@ -67,7 +67,7 @@ steps:
     commands:
       - mvn org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies -Dmdep.prependGroupId=true -Dstyle.color=always -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
       - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar '-Dsonar.java.libraries=target/dependency/*.jar' '-Dsonar.java.test.libraries=target/classes,target/dependency/*.jar' -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300 -Dsonar.host.url=$SONAR_HOST -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dsonar.projectName=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dstyle.color=always -Dmaven.javadoc.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
-      - pmd check --minimum-priority High -d ./gripday-auth-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
+      - pmd check --minimum-priority High -d ./gripday-user-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
       - pmd check --minimum-priority High -d ./gripday-gateway-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
       - mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.4.0:check -s /drone/maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD  -Dspotbugs.xmlOutput=true -Dspotbugs.failOnError=true -Dspotbugs.excludeFilterFile=/drone/spotbugs-exclude.xml -Dspotbugs.includeTests=true -Dstyle.color=always
 
@@ -244,19 +244,19 @@ steps:
       - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/JDK.dockerfile
       - mvn package -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
 
-  - name: build-container-with-feature-for-gripday-auth-service
+  - name: build-container-with-feature-for-gripday-user-service
     depends_on:
       - package-jar
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-auth-service/
+      context: ./gripday-user-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-auth-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-user-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -271,7 +271,7 @@ steps:
 
   - name: build-container-with-feature-for-gripday-gateway-service
     depends_on:
-      - build-container-with-feature-for-gripday-auth-service
+      - build-container-with-feature-for-gripday-user-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
@@ -294,19 +294,19 @@ steps:
         include:
           - "feature/*"
 
-  - name: build-container-release-gripday-auth-service
+  - name: build-container-release-gripday-user-service
     depends_on:
       - package-jar
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-auth-service/
+      context: ./gripday-user-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-auth-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-user-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -320,7 +320,7 @@ steps:
 
   - name: build-container-release-gripday-gateway-service
     depends_on:
-      - build-container-release-gripday-auth-service
+      - build-container-release-gripday-user-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile

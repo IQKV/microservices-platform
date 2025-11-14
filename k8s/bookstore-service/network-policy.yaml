@@ -82,7 +82,7 @@ spec:
               app.kubernetes.io/part-of: gripday
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-auth-service
+              app.kubernetes.io/name: gripday-user-service
       ports:
         - protocol: TCP
           port: 8080

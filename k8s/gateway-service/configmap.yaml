@@ -129,7 +129,7 @@ data:
         auth:
           jwt:
             secret: ${GRIPDAY_AUTH_JWT_SECRET}
-            issuer: gripday-auth-service
+            issuer: gripday-user-service
         rate-limiting:
           enabled: true
           default-requests-per-minute: 60

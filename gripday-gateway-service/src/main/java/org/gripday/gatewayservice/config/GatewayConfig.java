@@ -41,9 +41,10 @@ public class GatewayConfig {
     var authServiceConfig = services.get("auth-service");
 
     return builder.routes()
-        // Auth service routes with transformation and load balancing
+        // Auth service routes - all authentication, user, organization, and tenant management endpoints
         .route("auth-service", r -> r
-            .path("/api/v1/auth/**")
+            .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**", 
+                  "/api/v1/organizations/**", "/api/v1/admin/**")
             .filters(f -> f
                 .filter(requestTransformationFilter.apply(new RequestTransformationFilter.Config()))
                 .filter(responseTransformationFilter.apply(new ResponseTransformationFilter.Config()))

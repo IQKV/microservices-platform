@@ -84,7 +84,7 @@ wait_for_services() {
         local all_healthy=true
         
         # Check auth service
-        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps gripday-auth-service | grep -q "Up (healthy)"; then
+        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps gripday-user-service | grep -q "Up (healthy)"; then
             all_healthy=false
         fi
         
@@ -133,7 +133,7 @@ show_logs() {
     
     echo
     echo "=== Auth Service Logs ==="
-    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 gripday-auth-service
+    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 gripday-user-service
     
     echo
     echo "=== Gateway Service Logs ==="

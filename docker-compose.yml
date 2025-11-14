@@ -67,8 +67,8 @@ services:
   auth-service:
     build:
       context: .
-      dockerfile: gripday-auth-service/Dockerfile
-    container_name: gripday-auth-service
+      dockerfile: gripday-user-service/Dockerfile
+    container_name: gripday-user-service
     environment:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth

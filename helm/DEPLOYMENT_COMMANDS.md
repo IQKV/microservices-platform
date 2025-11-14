@@ -249,7 +249,7 @@ kubectl logs -f -n gripday-gateway \
 
 # Auth service logs
 kubectl logs -f -n gripday-auth \
-  -l app.kubernetes.io/name=gripday-auth-service
+  -l app.kubernetes.io/name=gripday-user-service
 
 # Bookstore service logs
 kubectl logs -f -n gripday-bookstore \

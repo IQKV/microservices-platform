@@ -21,7 +21,7 @@ echo "📦 Building Maven projects..."
 echo "🐳 Building Docker images..."
 
 echo "  📦 Building Auth Service..."
-docker build -f gripday-auth-service/Dockerfile -t gripday/auth-service:latest .
+docker build -f gripday-user-service/Dockerfile -t gripday/auth-service:latest .
 
 echo "  📦 Building Gateway Service..."
 docker build -f gripday-gateway-service/Dockerfile -t gripday/gateway-service:latest .

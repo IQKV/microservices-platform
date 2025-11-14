@@ -323,7 +323,7 @@ kubectl get pods -n gripday -w
 ## 🔗 Related Documentation
 
 - **Main Project:** [../../README.md](../../README.md)
-- **Auth Service:** [../../gripday-auth-service/README.md](../../gripday-auth-service/README.md)
+- **Auth Service:** [../../gripday-user-service/README.md](../../gripday-user-service/README.md)
 - **Gateway Service:** [../../gripday-gateway-service/README.md](../../gripday-gateway-service/README.md)
 - **Bookstore Service:** [../../gripday-bookstore-service/README.md](../../gripday-bookstore-service/README.md)
 - **Production K8s:** [../auth-service/README.md](../auth-service/README.md)

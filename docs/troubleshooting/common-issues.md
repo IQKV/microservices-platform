@@ -49,7 +49,7 @@ server:
 
 ```bash
 # Check migration status
-cd gripday-auth-service
+cd gripday-user-service
 mvn liquibase:status -Dspring.profiles.active=local
 
 # Clear locks if stuck

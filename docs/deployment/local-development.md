@@ -54,14 +54,14 @@ docker-compose ps
 mvn clean package
 
 # Or build individual services
-mvn clean package -pl gripday-auth-service
+mvn clean package -pl gripday-user-service
 mvn clean package -pl gripday-gateway-service
 ```
 
 ### 4. Run Database Migrations
 
 ```bash
-cd gripday-auth-service
+cd gripday-user-service
 mvn liquibase:update -Dspring.profiles.active=local
 cd ..
 ```
@@ -70,7 +70,7 @@ cd ..
 
 ```bash
 # Terminal 1 - Auth Service
-cd gripday-auth-service
+cd gripday-user-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 # Terminal 2 - Gateway Service
@@ -121,7 +121,7 @@ docker-compose down -v
 
 ```bash
 # Auth service only
-cd gripday-auth-service
+cd gripday-user-service
 docker compose up -d
 
 # Gateway service only
@@ -270,7 +270,7 @@ GRANT ALL PRIVILEGES ON DATABASE gripday_gateway TO gripday;
 **Run migrations manually:**
 
 ```bash
-cd gripday-auth-service
+cd gripday-user-service
 
 # Update to latest version
 mvn liquibase:update -Dspring.profiles.active=local
@@ -285,7 +285,7 @@ mvn liquibase:rollback -Dliquibase.rollbackCount=1 -Dspring.profiles.active=loca
 **Migration files location:**
 
 ```
-gripday-auth-service/src/main/resources/db/changelog/
+gripday-user-service/src/main/resources/db/changelog/
 ├── db.changelog-master.xml
 ├── V1__Create_users_table.xml
 ├── V2__Create_authorities_table.xml

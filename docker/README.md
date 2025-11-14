@@ -61,7 +61,7 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 ### Auth Service Only
 
 ```bash
-cd gripday-auth-service
+cd gripday-user-service
 docker compose up -d
 ```
 

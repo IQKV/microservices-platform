@@ -149,7 +149,7 @@ affinity:
               - key: app.kubernetes.io/name
                 operator: In
                 values:
-                  - gripday-auth-service
+                  - gripday-user-service
           topologyKey: kubernetes.io/hostname
 
 # Topology spread constraints
@@ -217,7 +217,7 @@ configMap:
 
       spring:
         application:
-          name: gripday-auth-service
+          name: gripday-user-service
         profiles:
           active: local
         
@@ -306,7 +306,7 @@ configMap:
           jwt:
             access-token-expiry: PT15M  # 15 minutes
             refresh-token-expiry: P7D   # 7 days
-            issuer: gripday-auth-service
+            issuer: gripday-user-service
         observability:
           tracing:
             enabled: true
@@ -349,9 +349,9 @@ env:
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-auth-service"
+    value: "gripday-user-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-auth-service,service.version=1.0.0,deployment.environment=local"
+    value: "service.name=gripday-user-service,service.version=1.0.0,deployment.environment=local"
   - name: JAVA_OPTS
     value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
@@ -584,7 +584,7 @@ postgresql:
       - from:
           - podSelector:
               matchLabels:
-                app.kubernetes.io/name: gripday-auth-service
+                app.kubernetes.io/name: gripday-user-service
                 app.kubernetes.io/component: authentication
         ports:
           - protocol: TCP
@@ -650,7 +650,7 @@ redis:
       - from:
           - podSelector:
               matchLabels:
-                app.kubernetes.io/name: gripday-auth-service
+                app.kubernetes.io/name: gripday-user-service
                 app.kubernetes.io/component: authentication
         ports:
           - protocol: TCP

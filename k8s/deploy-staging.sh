@@ -301,7 +301,7 @@ verify_staging_deployment() {
     
     # Wait for services to be ready
     print_status "Waiting for auth service to be ready in staging..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-auth-service -n staging-env --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n staging-env --timeout=300s
     
     print_status "Waiting for gateway service to be ready in staging..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n staging-env --timeout=300s
