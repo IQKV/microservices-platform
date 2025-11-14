@@ -1,6 +1,7 @@
 # Gateway Service Authentication Fixes
 
 ## Overview
+
 Fixed three critical issues in the gateway service authentication and configuration implementation to ensure consistent use of GripdayProperties and eliminate duplicate JWT validation logic.
 
 ## Changes Made
@@ -9,18 +10,21 @@ Fixed three critical issues in the gateway service authentication and configurat
 
 **Problem**: The SecurityConfiguration was using Spring Security's OAuth2 Resource Server with JWK validation, which conflicted with the custom JwtAuthenticationFilter that uses HMAC-based JWT validation.
 
-**Solution**: 
+**Solution**:
+
 - Removed the OAuth2 Resource Server configuration entirely
 - Changed `.anyExchange().authenticated()` to `.anyExchange().permitAll()`
 - Authentication is now exclusively handled by `JwtAuthenticationFilter` (order -100)
 - SecurityConfiguration now only handles CORS and path-based authorization rules
 
-**Rationale**: 
+**Rationale**:
+
 - The system uses HMAC (HS256) with shared secret keys, not RSA with JWK
 - JwtAuthenticationFilter provides comprehensive authentication with user/tenant context extraction
 - Single authentication mechanism eliminates confusion and potential conflicts
 
 **Before**:
+
 ```java
 .oauth2ResourceServer(oauth2 -> oauth2
     .jwt(jwt -> jwt.jwkSetUri("http://localhost:8080/.well-known/jwks.json"))
@@ -28,6 +32,7 @@ Fixed three critical issues in the gateway service authentication and configurat
 ```
 
 **After**:
+
 ```java
 // JWT authentication handled by JwtAuthenticationFilter
 .anyExchange().permitAll()
@@ -38,12 +43,14 @@ Fixed three critical issues in the gateway service authentication and configurat
 **Problem**: RequestTransformationFilter had hardcoded configuration defaults instead of reading from GripdayProperties.
 
 **Solution**:
+
 - Injected `GripdayProperties` into the filter constructor
 - All configuration now read from `gripdayProperties.gateway().transformation().request()`
 - Respects enabled/disabled flags for each transformation feature
 - Uses configured headers to remove and additional headers from properties
 
 **Configuration Respected**:
+
 - `enabled` - Master switch for request transformation
 - `enableHeaderEnrichment` - Controls service identification headers
 - `enableUserContextPropagation` - Controls X-User-ID header
@@ -52,13 +59,17 @@ Fixed three critical issues in the gateway service authentication and configurat
 - `additionalHeaders` - Map of custom headers to add
 
 **Before**:
+
 ```java
-private boolean enableHeaderEnrichment = true;  // Hardcoded
+private boolean enableHeaderEnrichment = true; // Hardcoded
+
 private boolean enableUserContextPropagation = true;
+
 private boolean enableTenantContextPropagation = true;
 ```
 
 **After**:
+
 ```java
 var transformationConfig = gripdayProperties.gateway().transformation().request();
 if (!transformationConfig.enabled()) {
@@ -70,6 +81,7 @@ if (!transformationConfig.enabled()) {
 ### 3. Documentation Updates
 
 **Added**:
+
 - Clarified that JWT authentication uses HMAC (HS256) with shared secrets
 - Documented that JwtAuthenticationFilter is the single source of authentication
 - Added comments explaining SecurityConfiguration's reduced scope
@@ -106,7 +118,7 @@ gripday:
         - /api/v1/auth/login
         - /api/v1/auth/signup
         # ... etc
-    
+
     transformation:
       request:
         enabled: true
@@ -125,6 +137,7 @@ gripday:
 When authentication succeeds, the following headers are added:
 
 **From JwtAuthenticationFilter**:
+
 - `X-Correlation-ID` - Request correlation ID
 - `X-User-ID` - Authenticated user ID
 - `X-Username` - Authenticated username
@@ -132,6 +145,7 @@ When authentication succeeds, the following headers are added:
 - `X-Tenant-ID` - Tenant identifier (if present)
 
 **From RequestTransformationFilter** (if enabled):
+
 - `X-Gateway-Service` - "gripday-gateway"
 - `X-Request-Source` - "gateway"
 - `X-Request-Timestamp` - Request timestamp in milliseconds
@@ -151,17 +165,20 @@ When authentication succeeds, the following headers are added:
 ### 4. API Prefix Property Name Alignment
 
 **Problem**: Inconsistent property naming between YAML configuration and Java record.
+
 - Base `application.yml` used `strip-in-production: true` (boolean)
 - Profile-specific configs used `strip-count: 0` (integer)
 - Java record defined `stripCount` (integer)
 
 **Solution**:
+
 - Standardized on `strip-count` (kebab-case in YAML, maps to `stripCount` in Java)
 - Removed the confusing `strip-in-production` boolean property
 - Added validation: `@Min(0) @Max(5)` to prevent invalid strip counts
 - Enhanced documentation with usage examples
 
 **Configuration**:
+
 ```yaml
 gripday:
   gateway:
@@ -169,10 +186,11 @@ gripday:
       api-prefix:
         enabled: true
         prefix: /api
-        strip-count: 0  # 0 = no stripping, 1 = strip first segment, etc.
+        strip-count: 0 # 0 = no stripping, 1 = strip first segment, etc.
 ```
 
 **Usage Examples**:
+
 - **Development/Staging**: `prefix: /api`, `strip-count: 0` → URLs like `/api/v1/users` forwarded as-is
 - **Production**: `prefix: ""`, `strip-count: 0` → No prefix (deployed on api.gripday.com)
 - **Strip Mode**: `prefix: /api`, `strip-count: 1` → `/api/v1/users` forwarded as `/v1/users`
@@ -182,12 +200,14 @@ gripday:
 **Problem**: The `enableUserContextPropagation` setting in GripdayProperties was not being respected by JwtAuthenticationFilter.
 
 **Solution**:
+
 - Added conditional check in `propagateContextHeaders()` method
 - User context headers (X-User-ID, X-Username, X-User-Roles) only added when enabled
 - Added debug logging to track when propagation is enabled/disabled
 - Correlation ID and Tenant ID still propagated regardless (different concerns)
 
 **Before**:
+
 ```java
 // Always propagated user context headers
 if (userContext.userId() != null) {
@@ -196,6 +216,7 @@ if (userContext.userId() != null) {
 ```
 
 **After**:
+
 ```java
 // Respects configuration setting
 if (gripdayProperties.gateway().security().authentication().enableUserContextPropagation()) {
@@ -210,6 +231,7 @@ if (gripdayProperties.gateway().security().authentication().enableUserContextPro
 ```
 
 **Use Cases**:
+
 - **Enabled (default)**: Downstream services receive full user context for authorization
 - **Disabled**: Privacy-focused scenarios where user identity shouldn't be propagated
 - **Note**: JWT token is still validated; this only controls header propagation
@@ -219,9 +241,11 @@ if (gripdayProperties.gateway().security().authentication().enableUserContextPro
 ### Configuration Changes Required
 
 **Action Required**: Update `application.yml` base configuration:
+
 - Replace `strip-in-production: true` with `strip-count: 0`
 
 **Before**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -230,6 +254,7 @@ api-prefix:
 ```
 
 **After**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -240,6 +265,7 @@ api-prefix:
 ### Behavior Changes
 
 The system behavior remains largely the same, but now:
+
 - Uses a single, consistent authentication mechanism (JwtAuthenticationFilter only)
 - All configuration comes from GripdayProperties (no hardcoded values)
 - User context propagation can be controlled via configuration

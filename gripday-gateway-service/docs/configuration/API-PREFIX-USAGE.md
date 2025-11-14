@@ -3,6 +3,7 @@
 ## Overview
 
 The API prefix feature allows environment-specific URL routing strategies. This is useful when:
+
 - Development/staging environments use `/api` prefix for clarity
 - Production deploys on `api.gripday.com` subdomain (no prefix needed)
 - You need to strip path segments before forwarding to downstream services
@@ -14,9 +15,9 @@ gripday:
   gateway:
     routing:
       api-prefix:
-        enabled: true          # Enable/disable API prefix handling
-        prefix: /api           # The prefix to use (can be empty string)
-        strip-count: 0         # Number of path segments to strip (0-5)
+        enabled: true # Enable/disable API prefix handling
+        prefix: /api # The prefix to use (can be empty string)
+        strip-count: 0 # Number of path segments to strip (0-5)
 ```
 
 ## Common Scenarios
@@ -26,6 +27,7 @@ gripday:
 **Use Case**: Keep `/api` prefix visible in URLs for clarity during development.
 
 **Configuration**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -34,6 +36,7 @@ api-prefix:
 ```
 
 **Behavior**:
+
 - Client requests: `http://localhost:8080/api/v1/users`
 - Forwarded to service: `http://user-service:8080/api/v1/users`
 - No path modification
@@ -43,6 +46,7 @@ api-prefix:
 **Use Case**: Deploy on `api.gripday.com` subdomain, no `/api` prefix needed.
 
 **Configuration**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -51,6 +55,7 @@ api-prefix:
 ```
 
 **Behavior**:
+
 - Client requests: `https://api.gripday.com/v1/users`
 - Forwarded to service: `http://user-service:8080/v1/users`
 - No path modification
@@ -60,6 +65,7 @@ api-prefix:
 **Use Case**: Accept `/api/v1/users` but forward as `/v1/users` to downstream services.
 
 **Configuration**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -68,6 +74,7 @@ api-prefix:
 ```
 
 **Behavior**:
+
 - Client requests: `http://localhost:8080/api/v1/users`
 - Forwarded to service: `http://user-service:8080/v1/users`
 - First path segment (`/api`) stripped
@@ -77,6 +84,7 @@ api-prefix:
 **Use Case**: Bypass all API prefix handling.
 
 **Configuration**:
+
 ```yaml
 api-prefix:
   enabled: false
@@ -85,6 +93,7 @@ api-prefix:
 ```
 
 **Behavior**:
+
 - All requests forwarded as-is
 - No prefix handling or stripping
 
@@ -92,37 +101,40 @@ api-prefix:
 
 The `strip-count` property removes path segments from the beginning of the path:
 
-| Original Path | strip-count | Forwarded Path |
-|--------------|-------------|----------------|
-| `/api/v1/users` | 0 | `/api/v1/users` |
-| `/api/v1/users` | 1 | `/v1/users` |
-| `/api/v1/users` | 2 | `/users` |
-| `/api/gateway/v1/users` | 2 | `/v1/users` |
+| Original Path           | strip-count | Forwarded Path  |
+| ----------------------- | ----------- | --------------- |
+| `/api/v1/users`         | 0           | `/api/v1/users` |
+| `/api/v1/users`         | 1           | `/v1/users`     |
+| `/api/v1/users`         | 2           | `/users`        |
+| `/api/gateway/v1/users` | 2           | `/v1/users`     |
 
 ## Environment-Specific Configuration
 
 ### Local Development (application-local.yml)
+
 ```yaml
 api-prefix:
   enabled: true
   prefix: /api
-  strip-count: 0  # Keep full path for debugging
+  strip-count: 0 # Keep full path for debugging
 ```
 
 ### Staging (application-staging.yml)
+
 ```yaml
 api-prefix:
   enabled: true
   prefix: /api
-  strip-count: 0  # Keep full path for testing
+  strip-count: 0 # Keep full path for testing
 ```
 
 ### Production (application-production.yml)
+
 ```yaml
 api-prefix:
   enabled: true
-  prefix: ""      # No prefix on api.gripday.com
-  strip-count: 0  # No stripping needed
+  prefix: "" # No prefix on api.gripday.com
+  strip-count: 0 # No stripping needed
 ```
 
 ## Integration with Spring Cloud Gateway
@@ -155,15 +167,16 @@ Access API prefix configuration in Java code:
 ```java
 @Component
 public class MyService {
+
   private final GripdayProperties gripdayProperties;
-  
+
   public MyService(GripdayProperties gripdayProperties) {
     this.gripdayProperties = gripdayProperties;
   }
-  
+
   public void example() {
     var apiPrefix = gripdayProperties.gateway().routing().apiPrefix();
-    
+
     if (apiPrefix.enabled()) {
       String prefix = apiPrefix.prefix();
       int stripCount = apiPrefix.stripCount();
@@ -180,6 +193,7 @@ public class MyService {
 **Symptom**: 404 errors for valid endpoints
 
 **Solution**: Ensure the `prefix` in route predicates matches your configuration:
+
 ```yaml
 predicates:
   - Path=${gripday.gateway.routing.api-prefix.prefix}/v1/auth/**
@@ -190,6 +204,7 @@ predicates:
 **Symptom**: Downstream service receives unexpected path
 
 **Solution**: Verify `strip-count` matches the number of segments to remove:
+
 ```yaml
 filters:
   - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count}
@@ -199,7 +214,8 @@ filters:
 
 **Symptom**: Default values used instead of configured values
 
-**Solution**: 
+**Solution**:
+
 1. Verify `@ConfigurationPropertiesScan` is present in main application class
 2. Check YAML indentation (must be exact)
 3. Ensure property names use kebab-case: `strip-count` not `stripCount`

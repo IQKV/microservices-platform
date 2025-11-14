@@ -10,7 +10,8 @@ This document summarizes all fixes applied to the gateway-service implementation
 
 **Issue**: Conflicting authentication mechanisms (OAuth2 Resource Server + custom JwtAuthenticationFilter)
 
-**Fix**: 
+**Fix**:
+
 - Removed OAuth2 Resource Server configuration
 - Changed authorization to `.anyExchange().permitAll()`
 - Authentication now exclusively handled by `JwtAuthenticationFilter`
@@ -24,6 +25,7 @@ This document summarizes all fixes applied to the gateway-service implementation
 **Issue**: Hardcoded configuration defaults instead of reading from properties
 
 **Fix**:
+
 - Injected `GripdayProperties` into filter constructor
 - All settings read from `gripdayProperties.gateway().transformation().request()`
 - Respects all configuration flags (enabled, enableHeaderEnrichment, etc.)
@@ -35,11 +37,13 @@ This document summarizes all fixes applied to the gateway-service implementation
 ### ✅ 3. API Prefix Property Name Alignment
 
 **Issue**: Inconsistent property naming
+
 - Base config: `strip-in-production: true` (boolean)
 - Profile configs: `strip-count: 0` (integer)
 - Java record: `stripCount` (integer)
 
 **Fix**:
+
 - Standardized on `strip-count` across all YAML files
 - Added validation: `@Min(0) @Max(5)` on stripCount
 - Enhanced documentation with usage examples
@@ -53,6 +57,7 @@ This document summarizes all fixes applied to the gateway-service implementation
 **Issue**: `enableUserContextPropagation` setting not respected in JwtAuthenticationFilter
 
 **Fix**:
+
 - Added conditional check in `propagateContextHeaders()` method
 - User context headers only added when setting is enabled
 - Added debug logging for tracking
@@ -64,6 +69,7 @@ This document summarizes all fixes applied to the gateway-service implementation
 ### ✅ 5. Enhanced Documentation
 
 **Created/Updated**:
+
 - `AUTHENTICATION-FIXES.md` - Complete authentication flow documentation
 - `API-PREFIX-USAGE.md` - Comprehensive API prefix configuration guide
 - `VALIDATION-FIXES-SUMMARY.md` - This summary document
@@ -112,6 +118,7 @@ This document summarizes all fixes applied to the gateway-service implementation
 **File**: `src/main/resources/application.yml`
 
 **Before**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -120,6 +127,7 @@ api-prefix:
 ```
 
 **After**:
+
 ```yaml
 api-prefix:
   enabled: true
@@ -140,21 +148,21 @@ The complete, validated authentication flow:
 ```
 1. CorrelationIdFilter (order -300)
    ↓ Generates/propagates correlation IDs
-   
+
 2. TenantExtractionFilter (order -200)
    ↓ Extracts tenant context from headers/subdomain/JWT
-   
+
 3. JwtAuthenticationFilter (order -100)
    ↓ Validates JWT (HMAC HS256)
    ↓ Extracts user context
    ↓ Propagates headers (if enabled)
-   
+
 4. TenantRateLimitingFilter (order -50)
    ↓ Applies rate limits
-   
+
 5. RequestTransformationFilter (via route)
    ↓ Enriches headers based on GripdayProperties
-   
+
 6. Route to downstream service
 ```
 
@@ -163,15 +171,18 @@ The complete, validated authentication flow:
 ## Headers Propagated (When Enabled)
 
 ### Always Propagated
+
 - `X-Correlation-ID` - Request correlation ID
 - `X-Tenant-ID` - Tenant identifier (if present)
 
 ### Conditionally Propagated (when `enableUserContextPropagation: true`)
+
 - `X-User-ID` - Authenticated user ID
 - `X-Username` - Authenticated username
 - `X-User-Roles` - Comma-separated list of user roles
 
 ### From RequestTransformationFilter (when `enabled: true`)
+
 - `X-Gateway-Service` - "gripday-gateway"
 - `X-Request-Source` - "gateway"
 - `X-Request-Timestamp` - Request timestamp
@@ -190,8 +201,8 @@ gripday:
       api-prefix:
         enabled: true
         prefix: /api
-        strip-count: 0  # 0-5, number of path segments to strip
-    
+        strip-count: 0 # 0-5, number of path segments to strip
+
     security:
       jwt:
         secret-key: ${JWT_SECRET_KEY}
@@ -201,11 +212,11 @@ gripday:
       authentication:
         enabled: true
         user-service-url: http://localhost:8080
-        enable-user-context-propagation: true  # NEW: Controls header propagation
+        enable-user-context-propagation: true # NEW: Controls header propagation
       public-paths:
         - /api/v1/auth/login
         # ... etc
-    
+
     transformation:
       request:
         enabled: true
@@ -224,6 +235,7 @@ gripday:
 ## Testing Checklist
 
 ### Authentication Tests
+
 - [ ] Valid JWT token allows access to protected endpoints
 - [ ] Invalid JWT token returns 401 Unauthorized
 - [ ] Expired JWT token returns 401 Unauthorized
@@ -232,12 +244,14 @@ gripday:
 - [ ] User context headers absent when disabled
 
 ### API Prefix Tests
+
 - [ ] Routes match with configured prefix
 - [ ] Strip count correctly removes path segments
 - [ ] Empty prefix works in production config
 - [ ] Disabled prefix bypasses all handling
 
 ### Request Transformation Tests
+
 - [ ] Headers enriched when enabled
 - [ ] Headers not enriched when disabled
 - [ ] Sensitive headers removed
@@ -245,6 +259,7 @@ gripday:
 - [ ] Tenant context propagated correctly
 
 ### Integration Tests
+
 - [ ] End-to-end authentication flow works
 - [ ] Downstream services receive correct headers
 - [ ] Rate limiting works with tenant context
@@ -267,11 +282,13 @@ All changes have minimal performance impact:
 ## Security Considerations
 
 ### Improved Security
+
 - Single authentication mechanism reduces attack surface
 - Configuration-controlled header propagation prevents information leakage
 - Validated strip-count prevents path traversal issues
 
 ### No Security Regressions
+
 - JWT validation remains unchanged (HMAC HS256)
 - Public paths still properly configured
 - CORS policies unchanged
@@ -294,12 +311,14 @@ All changes are backward compatible except for the `strip-in-production` → `st
 ## Next Steps
 
 ### Recommended
+
 1. Run full test suite to validate changes
 2. Deploy to staging environment for integration testing
 3. Monitor logs for "User context propagation" messages
 4. Verify downstream services receive expected headers
 
 ### Optional Enhancements
+
 1. Add integration tests for user context propagation
 2. Create metrics for authentication success/failure rates
 3. Add configuration validation on startup
@@ -321,6 +340,7 @@ For questions or issues related to these changes:
 ## Conclusion
 
 All validation issues have been resolved:
+
 - ✅ Single, consistent authentication mechanism
 - ✅ All configuration driven by GripdayProperties
 - ✅ No hardcoded values in implementations
