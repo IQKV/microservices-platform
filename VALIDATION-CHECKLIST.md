@@ -3,6 +3,7 @@
 ## Pre-Deployment Validation
 
 ### ✅ Code Changes
+
 - [x] Gateway route configuration updated to include all user-service paths
 - [x] Public paths configuration updated with password management endpoints
 - [x] Rate limiting configuration added for all new endpoints
@@ -10,6 +11,7 @@
 - [x] No compilation errors or diagnostics
 
 ### ✅ Configuration Files Modified
+
 - [x] `GatewayConfig.java` - Route paths expanded
 - [x] `application.yml` - Public paths and rate limits updated
 - [x] `application-local.yml` - Development configuration updated
@@ -21,6 +23,7 @@
 ### 1. Public Endpoints (No Auth) ✓
 
 #### Authentication
+
 ```bash
 # Should return 201 Created
 curl -X POST http://localhost:8080/api/v1/auth/signup \
@@ -39,6 +42,7 @@ curl -X POST http://localhost:8080/api/v1/auth/validate \
 ```
 
 #### Email Verification
+
 ```bash
 # Should return 200 OK or 400 Bad Request (depending on token validity)
 curl -X GET "http://localhost:8080/api/v1/auth/email/verify?token=test-token"
@@ -53,6 +57,7 @@ curl -X GET "http://localhost:8080/api/v1/auth/email/status?email=test@test.com"
 ```
 
 #### Password Management (NEW - CRITICAL)
+
 ```bash
 # Should return 202 Accepted
 curl -X POST http://localhost:8080/api/v1/password/forgot \
@@ -72,6 +77,7 @@ curl -X POST http://localhost:8080/api/v1/password/reset \
 ### 2. Authenticated Endpoints (JWT Required) ✓
 
 #### User Profile (NEW - CRITICAL)
+
 ```bash
 # Should return 200 OK with user context
 curl -X GET http://localhost:8080/api/v1/users/me \
@@ -79,6 +85,7 @@ curl -X GET http://localhost:8080/api/v1/users/me \
 ```
 
 #### Password Change (NEW - CRITICAL)
+
 ```bash
 # Should return 204 No Content or 400 Bad Request
 curl -X POST http://localhost:8080/api/v1/password/change \
@@ -88,6 +95,7 @@ curl -X POST http://localhost:8080/api/v1/password/change \
 ```
 
 #### Session Management
+
 ```bash
 # Should return 204 No Content
 curl -X POST http://localhost:8080/api/v1/auth/logout \
@@ -105,6 +113,7 @@ curl -X POST http://localhost:8080/api/v1/auth/logout-all \
 ### 3. Admin Endpoints (ADMIN/SUPER_ADMIN Role) ✓
 
 #### User Management (NEW - CRITICAL)
+
 ```bash
 # Should return 200 OK with paginated users or 403 Forbidden
 curl -X GET http://localhost:8080/api/v1/users \
@@ -122,6 +131,7 @@ curl -X POST http://localhost:8080/api/v1/users \
 ```
 
 #### Organization Management (NEW - CRITICAL)
+
 ```bash
 # Should return 200 OK with paginated organizations or 403 Forbidden
 curl -X GET http://localhost:8080/api/v1/organizations \
@@ -139,6 +149,7 @@ curl -X GET http://localhost:8080/api/v1/organizations/1 \
 ### 4. Super Admin Endpoints (SUPER_ADMIN Role) ✓
 
 #### Tenant Management (NEW - CRITICAL)
+
 ```bash
 # Should return 200 OK with tenant list or 403 Forbidden
 curl -X GET http://localhost:8080/api/v1/admin/tenants \
@@ -160,6 +171,7 @@ curl -X GET http://localhost:8080/api/v1/admin/tenants/statistics \
 ### 5. Rate Limiting Validation ✓
 
 #### Test Password Reset Rate Limit (3 req/min in production)
+
 ```bash
 # Run this 5 times quickly - should get 429 after 3rd request
 for i in {1..5}; do
@@ -175,6 +187,7 @@ done
 **Expected**: First 3-5 requests succeed, subsequent requests return 429 Too Many Requests
 
 #### Test Login Rate Limit (10 req/min in production)
+
 ```bash
 # Run this 15 times quickly - should get 429 after 10th request
 for i in {1..15}; do
@@ -194,6 +207,7 @@ done
 ### 6. Security Validation ✓
 
 #### Verify Protected Endpoints Require Auth
+
 ```bash
 # Should return 401 Unauthorized (not 404)
 curl -X GET http://localhost:8080/api/v1/users/me
@@ -208,6 +222,7 @@ curl -X GET http://localhost:8080/api/v1/organizations
 **Expected**: All return 401 Unauthorized, not 404 Not Found
 
 #### Verify Public Endpoints Don't Require Auth
+
 ```bash
 # Should NOT return 401 (may return 400 or 404 depending on data)
 curl -X POST http://localhost:8080/api/v1/password/forgot \
@@ -223,6 +238,7 @@ curl -X POST http://localhost:8080/api/v1/auth/validate \
 **Expected**: No 401 responses for public endpoints
 
 #### Verify Role Enforcement
+
 ```bash
 # Regular user token should get 403 Forbidden (not 404)
 curl -X GET http://localhost:8080/api/v1/users \
@@ -240,6 +256,7 @@ curl -X GET http://localhost:8080/api/v1/admin/tenants \
 ### 7. Error Response Validation ✓
 
 #### Verify Consistent Error Format
+
 ```bash
 # Should return structured error response
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -248,6 +265,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 **Expected Response Structure**:
+
 ```json
 {
   "error": {
@@ -267,18 +285,21 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ## Monitoring Checklist
 
 ### Gateway Logs
+
 - [ ] No 404 errors for user-service endpoints
 - [ ] Proper routing to user-service for all paths
 - [ ] Rate limiting triggers correctly
 - [ ] JWT validation working correctly
 
 ### User Service Logs
+
 - [ ] Receiving requests from gateway
 - [ ] User context propagation working
 - [ ] Tenant context propagation working
 - [ ] No unexpected errors
 
 ### Redis
+
 - [ ] Rate limiting keys being created
 - [ ] Keys expiring correctly
 - [ ] No connection errors
@@ -288,6 +309,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ## Rollback Criteria
 
 Rollback if:
+
 - [ ] Any critical endpoint returns 404 (should be routed)
 - [ ] Public endpoints require authentication incorrectly
 - [ ] Protected endpoints don't require authentication
@@ -300,6 +322,7 @@ Rollback if:
 ## Success Criteria
 
 ✅ All 7 endpoint groups accessible through gateway:
+
 1. Authentication endpoints
 2. Email verification endpoints
 3. Password management endpoints
@@ -309,12 +332,14 @@ Rollback if:
 7. Tenant management endpoints
 
 ✅ Security properly configured:
+
 - Public endpoints accessible without auth
 - Protected endpoints require JWT
 - Admin endpoints enforce role requirements
 - Rate limiting active on all endpoints
 
 ✅ No breaking changes:
+
 - Existing functionality still works
 - No new errors in logs
 - Performance not degraded
@@ -332,7 +357,7 @@ Rollback if:
 - [ ] Logs reviewed - no issues
 - [ ] Ready for production deployment
 
-**Tested by**: _________________  
-**Date**: _________________  
-**Environment**: _________________  
-**Notes**: _________________
+**Tested by**: ********\_********  
+**Date**: ********\_********  
+**Environment**: ********\_********  
+**Notes**: ********\_********

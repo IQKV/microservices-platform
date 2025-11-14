@@ -3,9 +3,11 @@
 ## Changes Applied
 
 ### ✅ Fixed Gateway Route Configuration
+
 **File**: `gripday-gateway-service/src/main/java/org/gripday/gatewayservice/config/GatewayConfig.java`
 
 **Before**:
+
 ```java
 .route("user-service", r -> r
     .path("/api/v1/auth/**")  // Only routed auth endpoints
@@ -14,9 +16,10 @@
 ```
 
 **After**:
+
 ```java
 .route("user-service", r -> r
-    .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**", 
+    .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**",
           "/api/v1/organizations/**", "/api/v1/admin/**")
     ...
 )
@@ -27,11 +30,14 @@
 ---
 
 ### ✅ Updated Public Paths Configuration
-**Files**: 
+
+**Files**:
+
 - `gripday-gateway-service/src/main/resources/application.yml`
 - `gripday-gateway-service/src/main/resources/application-local.yml`
 
 **Added Public Paths**:
+
 - `/api/v1/auth/validate` - Token validation endpoint
 - `/api/v1/auth/health` - Auth service health check
 - `/api/v1/password/forgot` - Password reset initiation
@@ -43,7 +49,9 @@
 ---
 
 ### ✅ Added Rate Limiting for New Endpoints
-**Files**: 
+
+**Files**:
+
 - `gripday-gateway-service/src/main/resources/application.yml` (Production)
 - `gripday-gateway-service/src/main/resources/application-local.yml` (Development)
 
@@ -76,6 +84,7 @@
 ### ✅ Now Accessible Through Gateway
 
 #### 1. Authentication Endpoints
+
 - ✅ POST `/api/v1/auth/signup`
 - ✅ POST `/api/v1/auth/login`
 - ✅ POST `/api/v1/auth/refresh`
@@ -85,19 +94,23 @@
 - ✅ GET `/api/v1/auth/health`
 
 #### 2. Email Verification Endpoints
+
 - ✅ GET `/api/v1/auth/email/verify`
 - ✅ POST `/api/v1/auth/email/resend`
 - ✅ GET `/api/v1/auth/email/status`
 
 #### 3. Password Management Endpoints (NEWLY ROUTED)
+
 - ✅ POST `/api/v1/password/forgot`
 - ✅ POST `/api/v1/password/reset`
 - ✅ POST `/api/v1/password/change`
 
 #### 4. User Profile Endpoints (NEWLY ROUTED)
+
 - ✅ GET `/api/v1/users/me`
 
 #### 5. User Management Endpoints (NEWLY ROUTED)
+
 - ✅ GET `/api/v1/users`
 - ✅ GET `/api/v1/users/{id}`
 - ✅ POST `/api/v1/users`
@@ -105,6 +118,7 @@
 - ✅ DELETE `/api/v1/users/{id}`
 
 #### 6. Organization Management Endpoints (NEWLY ROUTED)
+
 - ✅ GET `/api/v1/organizations`
 - ✅ GET `/api/v1/organizations/{id}`
 - ✅ POST `/api/v1/organizations`
@@ -112,6 +126,7 @@
 - ✅ DELETE `/api/v1/organizations/{id}`
 
 #### 7. Tenant Management Endpoints (NEWLY ROUTED)
+
 - ✅ GET `/api/v1/admin/tenants`
 - ✅ GET `/api/v1/admin/tenants/{tenantId}`
 - ✅ POST `/api/v1/admin/tenants`
@@ -125,6 +140,7 @@
 ## Testing Recommendations
 
 ### 1. Public Endpoints (No Auth Required)
+
 ```bash
 # Test password reset flow
 curl -X POST http://localhost:8080/api/v1/password/forgot \
@@ -138,6 +154,7 @@ curl -X POST http://localhost:8080/api/v1/auth/validate \
 ```
 
 ### 2. Authenticated Endpoints
+
 ```bash
 # Test user profile
 curl -X GET http://localhost:8080/api/v1/users/me \
@@ -151,6 +168,7 @@ curl -X POST http://localhost:8080/api/v1/password/change \
 ```
 
 ### 3. Admin Endpoints (ADMIN/SUPER_ADMIN Role)
+
 ```bash
 # Test user management
 curl -X GET http://localhost:8080/api/v1/users \
@@ -162,6 +180,7 @@ curl -X GET http://localhost:8080/api/v1/organizations \
 ```
 
 ### 4. Super Admin Endpoints (SUPER_ADMIN Role)
+
 ```bash
 # Test tenant management
 curl -X GET http://localhost:8080/api/v1/admin/tenants \
@@ -173,6 +192,7 @@ curl -X GET http://localhost:8080/api/v1/admin/tenants/statistics \
 ```
 
 ### 5. Rate Limiting Verification
+
 ```bash
 # Test password reset rate limiting (should block after 3 requests in production)
 for i in {1..5}; do
@@ -188,12 +208,14 @@ done
 ## Security Considerations
 
 ### ✅ Properly Configured
+
 1. **Public Endpoints**: Only authentication, email verification, and password reset initiation/completion are public
 2. **Protected Endpoints**: User profile, management, and admin endpoints require authentication
 3. **Role-Based Access**: Admin and super admin endpoints enforce role requirements
 4. **Rate Limiting**: All endpoints have appropriate rate limits to prevent abuse
 
 ### ⚠️ Important Notes
+
 1. **Password Reset Flow**: `/forgot` and `/reset` are public (as intended), but have strict rate limits
 2. **User Management**: Requires ADMIN or SUPER_ADMIN role
 3. **Tenant Management**: Requires SUPER_ADMIN role only
@@ -227,6 +249,7 @@ done
 ## Rollback Instructions
 
 If issues arise, revert these commits:
+
 ```bash
 git checkout HEAD~1 -- gripday-gateway-service/src/main/java/org/gripday/gatewayservice/config/GatewayConfig.java
 git checkout HEAD~1 -- gripday-gateway-service/src/main/resources/application.yml
@@ -234,6 +257,7 @@ git checkout HEAD~1 -- gripday-gateway-service/src/main/resources/application-lo
 ```
 
 Or restore the original single-path route:
+
 ```java
 .route("user-service", r -> r
     .path("/api/v1/auth/**")
