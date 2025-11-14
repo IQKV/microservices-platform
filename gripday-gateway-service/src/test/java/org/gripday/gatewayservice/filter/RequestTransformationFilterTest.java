@@ -5,6 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -20,12 +25,44 @@ class RequestTransformationFilterTest {
 
   private RequestTransformationFilter filter;
   private GatewayFilterChain chain;
+  private GripdayProperties gripdayProperties;
 
   @BeforeEach
   void setUp() {
-    filter = new RequestTransformationFilter();
+    gripdayProperties = createTestGripdayProperties();
+    filter = new RequestTransformationFilter(gripdayProperties);
     chain = mock(GatewayFilterChain.class);
     when(chain.filter(any())).thenReturn(Mono.empty());
+  }
+
+  private GripdayProperties createTestGripdayProperties() {
+    var cacheProperties = new GripdayProperties.CacheProperties(
+        new GripdayProperties.CacheProperties.RedisProperties(
+            "localhost", 6379, null, 0, Duration.ofSeconds(5),
+            new GripdayProperties.CacheProperties.RedisProperties.PoolProperties(10, 5, 2, Duration.ofSeconds(2)),
+            "gripday:cache:", Duration.ofMinutes(30), false
+        )
+    );
+
+    var requestTransformation = new GripdayProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
+        true, true, true, true, List.of(), Map.of()
+    );
+
+    var responseTransformation = new GripdayProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
+        true, true, true, true, List.of()
+    );
+
+    var transformation = new GripdayProperties.GatewayProperties.TransformationProperties(
+        requestTransformation, responseTransformation
+    );
+
+    var gatewayProperties = new GripdayProperties.GatewayProperties(
+        null, null, null, null, null, transformation
+    );
+
+    var observabilityProperties = new GripdayProperties.ObservabilityProperties(null, null, null);
+
+    return new GripdayProperties(cacheProperties, gatewayProperties, observabilityProperties);
   }
 
   @Test
@@ -44,7 +81,7 @@ class RequestTransformationFilterTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(config.isEnableHeaderEnrichment()).isTrue();
+    assertThat(gripdayProperties.gateway().transformation().request().enableHeaderEnrichment()).isTrue();
 
     // Cleanup
     MDC.clear();
@@ -68,8 +105,8 @@ class RequestTransformationFilterTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(config.isEnableTenantContextPropagation()).isTrue();
-    assertThat(config.isEnableUserContextPropagation()).isTrue();
+    assertThat(gripdayProperties.gateway().transformation().request().enableTenantContextPropagation()).isTrue();
+    assertThat(gripdayProperties.gateway().transformation().request().enableUserContextPropagation()).isTrue();
 
     // Cleanup
     MDC.clear();
@@ -88,6 +125,6 @@ class RequestTransformationFilterTest {
 
     // Then
     assertThat(result).isNotNull();
-    assertThat(config.isEnableHeaderEnrichment()).isTrue();
+    assertThat(gripdayProperties.gateway().transformation().request().enableHeaderEnrichment()).isTrue();
   }
 }

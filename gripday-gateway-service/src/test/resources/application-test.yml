@@ -1,4 +1,16 @@
+server:
+  port: 0  # Random port for tests
+
 spring:
+  application:
+    name: gripday-gateway-service-test
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      database: 15  # Use separate database for tests
+      timeout: 2000ms
   cloud:
     gateway:
       routes:
@@ -7,6 +19,177 @@ spring:
           predicates:
             - Path=/api/v1/auth/**
 
+# Gripday Gateway Test Configuration
+gripday:
+  cache:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      database: 15
+      timeout: PT2S
+      pool:
+        max-active: 4
+        max-idle: 2
+        min-idle: 1
+        max-wait: PT1S
+      key-prefix: "gripday:gateway:test"
+      default-ttl: PT5M
+      enable-statistics: false
+
+  gateway:
+    routing:
+      api-prefix:
+        enabled: true
+        prefix: /api
+        strip-count: 0
+      services:
+        user-service:
+          uri: http://localhost:8080
+          path: /v1/auth/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 10000
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: false
+        health-check-interval: PT30S
+
+    security:
+      jwt:
+        secret-key: test-secret-key-for-unit-tests-only
+        access-token-expiry: PT15M
+        refresh-token-expiry: P7D
+        issuer: gripday-test
+        audience: gripday-services-test
+        algorithm: HS256
+      authentication:
+        enabled: true
+        user-service-url: http://localhost:8080
+        token-validation-timeout: PT5S
+        enable-user-context-propagation: true
+      public-paths:
+        - /api/v1/auth/login
+        - /api/v1/auth/signup
+        - /api/v1/auth/refresh
+        - /actuator/health
+
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "gripday:gateway:rate-limit:test"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 100
+        default-burst-capacity: 200
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 20
+            burst-capacity: 40
+            enable-tenant-quotas: false
+      tenant-quotas:
+        enabled: false
+        default-tenant-requests-per-minute: 1000
+        tenant-specific-quotas: {}
+
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 50
+      slow-call-duration-threshold: PT2S
+      minimum-number-of-calls: 5
+      wait-duration-in-open-state: PT10S
+      sliding-window-size: 50
+      sliding-window-type: COUNT_BASED
+
+    cors:
+      enabled: true
+      allowed-origins:
+        - http://localhost:3000
+        - http://localhost:5173
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - "*"
+      allow-credentials: true
+      max-age: 3600
+
+    transformation:
+      request:
+        enabled: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
+          - Authorization-Internal
+        additional-headers:
+          X-Gateway-Version: "1.0.0-test"
+      response:
+        enabled: true
+        enable-security-headers: true
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
+          - X-Internal-Service
+
+  observability:
+    tracing:
+      enabled: false  # Disabled for unit tests
+      service-name: ${spring.application.name}
+      sampling-rate: 0.0
+      endpoint: http://localhost:4317
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: false  # Disabled for unit tests
+      path: /actuator/prometheus
+      prefix: gripday_gateway_test
+      include-host-tag: false
+      include-application-tag: false
+      include-environment-tag: false
+      custom-tags: {}
+      enabled-metrics: []
+    logging:
+      level: DEBUG
+      format: console
+      enable-request-logging: true
+      enable-response-logging: true
+      enable-correlation-id: true
+      include-trace-id: false
+      include-span-id: false
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+
+# Logging Configuration
 logging:
   level:
     org.gripday: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
+    reactor.netty: WARN
+
+# Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: false
+  tracing:
+    sampling:
+      probability: 0.0
