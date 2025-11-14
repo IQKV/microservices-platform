@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: auth-redis-netpol
+  name: user-redis-netpol
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.redis.labels" . | nindent 4 }}

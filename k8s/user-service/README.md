@@ -26,8 +26,8 @@ The auth service provides centralized authentication, authorization, and user ma
 ### Core Service
 
 - **user-service**: Main Spring Boot application (port 8080)
-- **auth-postgres**: PostgreSQL 15.8 database for user data and authentication
-- **auth-redis**: Redis 7.4 for session management and caching
+- **user-postgres**: PostgreSQL 15.8 database for user data and authentication
+- **user-redis**: Redis 7.4 for session management and caching
 
 ### Kubernetes Resources
 
@@ -60,10 +60,10 @@ kubectl apply -f .
 kubectl apply -f namespace.yaml
 kubectl apply -f configmap.yaml
 kubectl apply -f secret.yaml
-kubectl apply -f auth-postgres-deployment.yaml
-kubectl apply -f auth-postgres-service.yaml
-kubectl apply -f auth-redis-deployment.yaml
-kubectl apply -f auth-redis-service.yaml
+kubectl apply -f user-postgres-deployment.yaml
+kubectl apply -f user-postgres-service.yaml
+kubectl apply -f user-redis-deployment.yaml
+kubectl apply -f user-redis-service.yaml
 kubectl apply -f user-service-deployment.yaml
 kubectl apply -f user-service-service.yaml
 kubectl apply -f user-service-ingress.yaml
@@ -80,14 +80,14 @@ kubectl apply -f configmap.yaml
 kubectl apply -f secret.yaml
 
 # 3. Deploy databases
-kubectl apply -f auth-postgres-deployment.yaml
-kubectl apply -f auth-postgres-service.yaml
-kubectl apply -f auth-redis-deployment.yaml
-kubectl apply -f auth-redis-service.yaml
+kubectl apply -f user-postgres-deployment.yaml
+kubectl apply -f user-postgres-service.yaml
+kubectl apply -f user-redis-deployment.yaml
+kubectl apply -f user-redis-service.yaml
 
 # 4. Wait for databases to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-postgres -n gripday-auth --timeout=300s
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-redis -n gripday-auth --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-auth --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-auth --timeout=300s
 
 # 5. Deploy application
 kubectl apply -f user-service-deployment.yaml
@@ -106,12 +106,12 @@ The service uses the following key environment variables:
 
 ```bash
 # Database Configuration
-GRIPDAY_DATABASE_URL=jdbc:postgresql://auth-postgres:5432/gripday_auth_local
+GRIPDAY_DATABASE_URL=jdbc:postgresql://user-postgres:5432/gripday_auth_local
 GRIPDAY_DATABASE_USERNAME=auth_user
 GRIPDAY_DATABASE_PASSWORD=auth_pass
 
 # Redis Configuration
-GRIPDAY_CACHE_REDIS_HOST=auth-redis
+GRIPDAY_CACHE_REDIS_HOST=user-redis
 GRIPDAY_CACHE_REDIS_PORT=6379
 GRIPDAY_CACHE_REDIS_DATABASE=0
 GRIPDAY_CACHE_REDIS_PASSWORD=redis_pass
@@ -300,13 +300,13 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 2. **Database connection issues**
 
    ```bash
-   kubectl exec -it deployment/auth-postgres -n gripday-auth -- psql -U auth_user -d gripday_auth_local
+   kubectl exec -it deployment/user-postgres -n gripday-auth -- psql -U auth_user -d gripday_auth_local
    ```
 
 3. **Redis connection issues**
 
    ```bash
-   kubectl exec -it deployment/auth-redis -n gripday-auth -- redis-cli ping
+   kubectl exec -it deployment/user-redis -n gripday-auth -- redis-cli ping
    ```
 
 4. **JWT token validation issues**
@@ -438,10 +438,10 @@ The auth service integrates with the gateway service for:
 kubectl exec -it deployment/user-service -n gripday-auth -- curl localhost:8080/actuator/health
 
 # Test database connectivity
-kubectl exec -it deployment/auth-postgres -n gripday-auth -- pg_isready -U auth_user
+kubectl exec -it deployment/user-postgres -n gripday-auth -- pg_isready -U auth_user
 
 # Test Redis connectivity
-kubectl exec -it deployment/auth-redis -n gripday-auth -- redis-cli ping
+kubectl exec -it deployment/user-redis -n gripday-auth -- redis-cli ping
 
 # Load testing
 kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh

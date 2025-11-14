@@ -441,10 +441,10 @@ The following features can be implemented after the core MVP is complete:
     - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
     - Implement Docker Compose override files for different deployment scenarios per service
     - Add environment variable injection and validation for individual containerized deployments
-    - Create POSIX shell scripts for individual service environment setup (setup-auth-local.sh, setup-gateway-local.sh)
+    - Create POSIX shell scripts for individual service environment setup (setup-user-local.sh, setup-gateway-local.sh)
     - Implement service-specific health check scripts (wait-for-user-service.sh, wait-for-gateway-service.sh) for POSIX systems
-    - Create environment variable loading and validation scripts per service (load-auth-env.sh, load-gateway-env.sh)
-    - Implement Maven build scripts (build-auth.sh, build-gateway.sh) with service-specific configurations
+    - Create environment variable loading and validation scripts per service (load-user-env.sh, load-gateway-env.sh)
+    - Implement Maven build scripts (build-user.sh, build-gateway.sh) with service-specific configurations
     - Add deployment automation scripts for individual services in Unix/Mac environments
     - Create database setup and migration scripts specific to auth service for POSIX systems
     - _Requirements: 16.1, 16.2, 16.3, 2.6_
@@ -578,8 +578,8 @@ The following features can be implemented after the core MVP is complete:
   - [x] 12.1 Create Kubernetes manifests for auth service
     - Create user-service-deployment.yaml with container specifications and environment variables
     - Create user-service-service.yaml for internal service discovery
-    - Create auth-postgres-deployment.yaml and auth-postgres-service.yaml for database
-    - Create auth-redis-deployment.yaml and auth-redis-service.yaml for caching
+    - Create user-postgres-deployment.yaml and user-postgres-service.yaml for database
+    - Create user-redis-deployment.yaml and user-redis-service.yaml for caching
     - Configure Kubernetes ConfigMaps for environment-specific configuration
     - Add Kubernetes Secrets for sensitive data (database passwords, JWT secrets)
     - Create user-service-ingress.yaml for external access if needed

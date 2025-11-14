@@ -123,4 +123,4 @@ docker-compose ps
 - `prometheus.yml` - Prometheus scraping configuration
 - `loki-config.yml` - Loki log aggregation configuration
 - `promtail-config.yml` - Promtail log collection configuration
-- `init-auth.sql` - PostgreSQL initialization script
+- `init-user.sql` - PostgreSQL initialization script

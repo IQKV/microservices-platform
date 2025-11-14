@@ -66,7 +66,7 @@ check_kubernetes() {
 wait_for_deployments() {
     log "INFO" "Waiting for deployments to be ready..."
     
-    local deployments=("user-service" "gateway-service" "auth-postgres" "auth-redis" "gateway-redis")
+    local deployments=("user-service" "gateway-service" "user-postgres" "user-redis" "gateway-redis")
     local max_attempts=$((VALIDATION_TIMEOUT / 10))
     
     for deployment in "${deployments[@]}"; do
@@ -211,11 +211,11 @@ show_logs() {
     
     echo
     echo "=== Auth PostgreSQL Logs ==="
-    $KUBECTL_CMD logs -l app=auth-postgres --tail=10 -n "$NAMESPACE"
+    $KUBECTL_CMD logs -l app=user-postgres --tail=10 -n "$NAMESPACE"
     
     echo
     echo "=== Redis Logs ==="
-    $KUBECTL_CMD logs -l app=auth-redis --tail=10 -n "$NAMESPACE"
+    $KUBECTL_CMD logs -l app=user-redis --tail=10 -n "$NAMESPACE"
     $KUBECTL_CMD logs -l app=gateway-redis --tail=10 -n "$NAMESPACE"
 }
 

@@ -21,10 +21,10 @@ Service Information:
   - Port: {{ .Values.service.port }}
 
 {{- if .Values.postgresql.enabled }}
-  - PostgreSQL: auth-postgres:{{ .Values.postgresql.service.port }}
+  - PostgreSQL: user-postgres:{{ .Values.postgresql.service.port }}
 {{- end }}
 {{- if .Values.redis.enabled }}
-  - Redis: auth-redis:{{ .Values.redis.service.port }}
+  - Redis: user-redis:{{ .Values.redis.service.port }}
 {{- end }}
 
 To get the application logs:

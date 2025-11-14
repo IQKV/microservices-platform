@@ -66,7 +66,7 @@ PostgreSQL labels
 */}}
 {{- define "user-service.postgresql.labels" -}}
 helm.sh/chart: {{ include "user-service.chart" . }}
-app.kubernetes.io/name: auth-postgres
+app.kubernetes.io/name: user-postgres
 app.kubernetes.io/component: database
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -77,7 +77,7 @@ app.kubernetes.io/part-of: {{ .Values.global.platform }}
 PostgreSQL selector labels
 */}}
 {{- define "user-service.postgresql.selectorLabels" -}}
-app.kubernetes.io/name: auth-postgres
+app.kubernetes.io/name: user-postgres
 app.kubernetes.io/component: database
 {{- end }}
 
@@ -86,7 +86,7 @@ Redis labels
 */}}
 {{- define "user-service.redis.labels" -}}
 helm.sh/chart: {{ include "user-service.chart" . }}
-app.kubernetes.io/name: auth-redis
+app.kubernetes.io/name: user-redis
 app.kubernetes.io/component: cache
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -97,6 +97,6 @@ app.kubernetes.io/part-of: {{ .Values.global.platform }}
 Redis selector labels
 */}}
 {{- define "user-service.redis.selectorLabels" -}}
-app.kubernetes.io/name: auth-redis
+app.kubernetes.io/name: user-redis
 app.kubernetes.io/component: cache
 {{- end }}

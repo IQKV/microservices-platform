@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database for User Service - Production Environment
   postgres-auth:
     image: postgres:15-alpine
-    container_name: gripday-auth-postgres-production
+    container_name: gripday-user-postgres-production
     environment:
       POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_auth}
       POSTGRES_USER: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
@@ -15,8 +15,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_auth_data_production:/var/lib/postgresql/data
-      - ./scripts/init-auth-db.sql:/docker-entrypoint-initdb.d/01-init-auth-db.sql:ro
-      - ./scripts/init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
+      - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
+      - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
       - ./scripts/postgres-production.conf:/etc/postgresql/postgresql.conf:ro
     networks:
       - auth-network-production
@@ -74,7 +74,7 @@ services:
   # Redis for User Service - Production Environment
   redis-auth:
     image: redis:7-alpine
-    container_name: gripday-auth-redis-production
+    container_name: gripday-user-redis-production
     environment:
       REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
     ports:

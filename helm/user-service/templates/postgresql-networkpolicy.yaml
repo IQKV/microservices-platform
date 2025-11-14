@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: auth-postgres-netpol
+  name: user-postgres-netpol
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.postgresql.labels" . | nindent 4 }}

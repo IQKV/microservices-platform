@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
+      - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
     networks:
       - gripday-network
     healthcheck:

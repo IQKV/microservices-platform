@@ -4258,11 +4258,11 @@ services:
       - gripday-network
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - GRIPDAY_DATABASE_HOST=auth-postgres
-      - GRIPDAY_CACHE_REDIS_HOST=auth-redis
+      - GRIPDAY_DATABASE_HOST=user-postgres
+      - GRIPDAY_CACHE_REDIS_HOST=user-redis
     depends_on:
-      - auth-postgres
-      - auth-redis
+      - user-postgres
+      - user-redis
 
   gateway-service:
     build: ./gripday-gateway-service
@@ -4330,7 +4330,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: "production"
             - name: GRIPDAY_DATABASE_HOST
-              value: "auth-postgres-service"
+              value: "user-postgres-service"
 
 ---
 apiVersion: v1
@@ -6592,7 +6592,7 @@ gripday-user-service/
 ```yaml
 version: "3.8"
 services:
-  auth-postgresql:
+  user-postgresql:
     image: postgres:15
     environment:
       POSTGRES_DB: gripday_auth_db
@@ -6611,11 +6611,11 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - AUTH_DATABASE_URL=jdbc:postgresql://auth-postgresql:5432/gripday_auth_db
+      - AUTH_DATABASE_URL=jdbc:postgresql://user-postgresql:5432/gripday_auth_db
       - AUTH_DATABASE_USERNAME=gripday_auth
       - AUTH_DATABASE_PASSWORD=gripday_auth
     depends_on:
-      - auth-postgresql
+      - user-postgresql
     volumes:
       - ./logs:/app/logs
     networks:

@@ -350,7 +350,7 @@ kubectl logs <pod-name> -n <namespace> --previous
 kubectl exec -it <postgres-pod> -n <namespace> -- psql -U gripday_user -d <database>
 
 # Check service DNS
-kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup auth-postgres.gripday-auth.svc.cluster.local
+kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup user-postgres.gripday-auth.svc.cluster.local
 ```
 
 ## 📚 Additional Resources

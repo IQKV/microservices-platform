@@ -55,7 +55,7 @@ spec:
 
             # Database Configuration
             - name: GRIPDAY_DATABASE_URL
-              value: "jdbc:postgresql://auth-postgres:5432/gripday_auth_local"
+              value: "jdbc:postgresql://user-postgres:5432/gripday_auth_local"
             - name: GRIPDAY_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -69,7 +69,7 @@ spec:
 
             # Redis Configuration
             - name: GRIPDAY_CACHE_REDIS_HOST
-              value: "auth-redis"
+              value: "user-redis"
             - name: GRIPDAY_CACHE_REDIS_PORT
               value: "6379"
             - name: GRIPDAY_CACHE_REDIS_PASSWORD

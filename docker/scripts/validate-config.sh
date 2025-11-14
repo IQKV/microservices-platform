@@ -67,7 +67,7 @@ fi
 # Check if required files exist
 echo "📁 Checking required configuration files..."
 required_files=(
-    "docker/postgres/init-auth.sql"
+    "docker/postgres/init-user.sql"
     "docker/prometheus/prometheus.yml"
     "docker/loki/loki-config.yml"
     "docker/promtail/promtail-config.yml"

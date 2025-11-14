@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database for User Service - Local Development
   postgres-auth:
     image: postgres:15-alpine
-    container_name: gripday-auth-postgres-local
+    container_name: gripday-user-postgres-local
     environment:
       POSTGRES_DB: gripday_auth
       POSTGRES_USER: gripday_user
@@ -15,8 +15,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
-      - ./scripts/init-auth-db.sql:/docker-entrypoint-initdb.d/01-init-auth-db.sql:ro
-      - ./scripts/init-auth-schema.sql:/docker-entrypoint-initdb.d/02-init-auth-schema.sql:ro
+      - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
+      - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
     networks:
       - auth-network
     healthcheck:
@@ -46,12 +46,12 @@ services:
   # Redis for User Service - Local Development
   redis-auth:
     image: redis:7-alpine
-    container_name: gripday-auth-redis-local
+    container_name: gripday-user-redis-local
     ports:
       - "6379:6379"
     volumes:
       - redis_auth_data:/data
-      - ./scripts/redis-auth.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./scripts/redis-user.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network
     healthcheck:

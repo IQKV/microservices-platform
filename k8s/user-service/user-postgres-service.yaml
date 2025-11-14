@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-postgres
+  name: user-postgres
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
 spec:
@@ -15,16 +15,16 @@ spec:
       protocol: TCP
       name: postgres
   selector:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-postgres-staging
+  name: user-postgres-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
     environment: staging
@@ -36,17 +36,17 @@ spec:
       protocol: TCP
       name: postgres
   selector:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     environment: staging
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-postgres-production
+  name: user-postgres-production
   namespace: gripday-production-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
     environment: production
@@ -58,6 +58,6 @@ spec:
       protocol: TCP
       name: postgres
   selector:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     environment: production

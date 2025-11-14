@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-postgres
+  name: user-postgres
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: auth-postgres
+      app.kubernetes.io/name: user-postgres
       app.kubernetes.io/component: database
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: auth-postgres
+        app.kubernetes.io/name: user-postgres
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: gripday
     spec:
@@ -96,7 +96,7 @@ spec:
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
-            claimName: auth-postgres-pvc
+            claimName: user-postgres-pvc
         - name: postgres-init
           configMap:
             name: postgres-init-config
@@ -104,10 +104,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-postgres-pvc
+  name: user-postgres-pvc
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
 spec:
@@ -124,7 +124,7 @@ metadata:
   name: postgres-init-config
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
 data:

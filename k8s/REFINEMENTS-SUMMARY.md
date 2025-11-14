@@ -29,8 +29,8 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 
 **Files Modified:**
 
-- `user-service/auth-postgres-deployment.yaml`
-- `user-service/auth-redis-deployment.yaml`
+- `user-service/user-postgres-deployment.yaml`
+- `user-service/user-redis-deployment.yaml`
 - `bookstore-service/bookstore-postgres-deployment.yaml`
 - `bookstore-service/bookstore-redis-deployment.yaml`
 - `gateway-service/gateway-redis-deployment.yaml`
@@ -50,7 +50,7 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 - `user-service/user-service-deployment.yaml`
 - `bookstore-service/bookstore-service-deployment.yaml`
 - `gateway-service/gateway-service-deployment.yaml`
-- `user-service/auth-redis-deployment.yaml`
+- `user-service/user-redis-deployment.yaml`
 - `gateway-service/gateway-redis-deployment.yaml`
 
 ### 2. High Availability Improvements
@@ -273,8 +273,8 @@ kubectl apply -f k8s/gateway-service/resource-quota.yaml
 # See SECRETS-MANAGEMENT.md
 
 # 5. Apply infrastructure (databases, redis)
-kubectl apply -f k8s/user-service/auth-postgres-deployment.yaml
-kubectl apply -f k8s/user-service/auth-redis-deployment.yaml
+kubectl apply -f k8s/user-service/user-postgres-deployment.yaml
+kubectl apply -f k8s/user-service/user-redis-deployment.yaml
 kubectl apply -f k8s/bookstore-service/bookstore-postgres-deployment.yaml
 kubectl apply -f k8s/bookstore-service/bookstore-redis-deployment.yaml
 kubectl apply -f k8s/gateway-service/gateway-redis-deployment.yaml

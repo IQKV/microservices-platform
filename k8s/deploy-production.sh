@@ -220,7 +220,7 @@ backup_databases() {
         
         # Backup auth database
         print_status "Backing up auth database..."
-        kubectl exec -n gripday-production-env deployment/auth-postgres -- \
+        kubectl exec -n gripday-production-env deployment/user-postgres -- \
             pg_dump -U gripday_user_prod gripday_auth_production > "$backup_dir/auth_db_backup.sql"
         
         print_status "Database backup completed: $backup_dir"
@@ -310,12 +310,12 @@ deploy_production_infrastructure() {
     
     # Note: In production, databases might be managed externally
     # This is a simplified example
-    local postgres_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/auth-postgres-deployment.yaml)
+    local postgres_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/user-postgres-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_prod" | kubectl apply -f -
     fi
     
-    local redis_auth_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/auth-redis-deployment.yaml)
+    local redis_auth_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/user-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_auth_prod" | kubectl apply -f -
     fi

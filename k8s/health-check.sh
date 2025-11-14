@@ -296,8 +296,8 @@ check_service_pods() {
     # Check database pods (for auth service)
     if [[ "$service" == "auth" ]]; then
         # Check PostgreSQL
-        if kubectl get deployment "auth-postgres" -n "$namespace" &>/dev/null; then
-            local postgres_ready=$(kubectl get deployment "auth-postgres" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+        if kubectl get deployment "user-postgres" -n "$namespace" &>/dev/null; then
+            local postgres_ready=$(kubectl get deployment "user-postgres" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
             if [[ "$postgres_ready" -gt 0 ]]; then
                 record_result "$service PostgreSQL ($env)" "PASS" "PostgreSQL pod ready"
             else
@@ -308,8 +308,8 @@ check_service_pods() {
         fi
         
         # Check Redis
-        if kubectl get deployment "auth-redis" -n "$namespace" &>/dev/null; then
-            local redis_ready=$(kubectl get deployment "auth-redis" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+        if kubectl get deployment "user-redis" -n "$namespace" &>/dev/null; then
+            local redis_ready=$(kubectl get deployment "user-redis" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
             if [[ "$redis_ready" -gt 0 ]]; then
                 record_result "$service Redis ($env)" "PASS" "Redis pod ready"
             else

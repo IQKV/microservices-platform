@@ -335,9 +335,9 @@ env:
   - name: SPRING_PROFILES_ACTIVE
     value: "local"
   - name: GRIPDAY_DATABASE_URL
-    value: "jdbc:postgresql://auth-postgres:5432/gripday_auth_local"
+    value: "jdbc:postgresql://user-postgres:5432/gripday_auth_local"
   - name: GRIPDAY_CACHE_REDIS_HOST
-    value: "auth-redis"
+    value: "user-redis"
   - name: GRIPDAY_CACHE_REDIS_PORT
     value: "6379"
   - name: GRIPDAY_CACHE_REDIS_DATABASE
@@ -434,7 +434,7 @@ networkPolicy:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: auth-postgres
+              app.kubernetes.io/name: user-postgres
               app.kubernetes.io/component: database
       ports:
         - protocol: TCP
@@ -443,7 +443,7 @@ networkPolicy:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: auth-redis
+              app.kubernetes.io/name: user-redis
               app.kubernetes.io/component: cache
       ports:
         - protocol: TCP

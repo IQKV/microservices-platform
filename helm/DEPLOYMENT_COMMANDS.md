@@ -347,7 +347,7 @@ kubectl get all -n gripday-bookstore -o yaml > backup-bookstore.yaml
 kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 
 # Backup databases
-kubectl exec -n gripday-auth auth-postgres-<pod> -- \
+kubectl exec -n gripday-auth user-postgres-<pod> -- \
   pg_dump -U gripday_user gripday_auth_local > backup-auth-db.sql
 ```
 

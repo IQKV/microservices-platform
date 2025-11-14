@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-redis
+  name: user-redis
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/name: user-redis
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: gripday
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: auth-redis
+      app.kubernetes.io/name: user-redis
       app.kubernetes.io/component: cache
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: auth-redis
+        app.kubernetes.io/name: user-redis
         app.kubernetes.io/component: cache
         app.kubernetes.io/part-of: gripday
     spec:
@@ -90,7 +90,7 @@ spec:
       volumes:
         - name: redis-storage
           persistentVolumeClaim:
-            claimName: auth-redis-pvc
+            claimName: user-redis-pvc
         - name: redis-config
           configMap:
             name: redis-config
@@ -98,10 +98,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-redis-pvc
+  name: user-redis-pvc
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/name: user-redis
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: gripday
 spec:
@@ -118,7 +118,7 @@ metadata:
   name: redis-config
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/name: user-redis
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: gripday
 data:

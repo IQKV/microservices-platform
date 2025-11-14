@@ -53,7 +53,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: auth-postgres
+              app.kubernetes.io/name: user-postgres
               app.kubernetes.io/component: database
       ports:
         - protocol: TCP
@@ -63,7 +63,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: auth-redis
+              app.kubernetes.io/name: user-redis
               app.kubernetes.io/component: cache
       ports:
         - protocol: TCP
@@ -95,16 +95,16 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: auth-postgres-network-policy
+  name: user-postgres-network-policy
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
     app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: auth-postgres
+      app.kubernetes.io/name: user-postgres
       app.kubernetes.io/component: database
   policyTypes:
     - Ingress
@@ -140,16 +140,16 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: auth-redis-network-policy
+  name: user-redis-network-policy
   namespace: gripday-dev-env
   labels:
-    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/name: user-redis
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: gripday
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: auth-redis
+      app.kubernetes.io/name: user-redis
       app.kubernetes.io/component: cache
   policyTypes:
     - Ingress

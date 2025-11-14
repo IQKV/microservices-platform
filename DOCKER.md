@@ -92,7 +92,7 @@ docker/
 ├── loki/
 │   └── loki-config.yml
 ├── postgres/
-│   └── init-auth.sql
+│   └── init-user.sql
 ├── prometheus/
 │   └── prometheus.yml
 ├── promtail/

@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-redis
+  name: user-redis
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.redis.labels" . | nindent 4 }}
@@ -90,7 +90,7 @@ spec:
       - name: redis-storage
         {{- if .Values.redis.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: auth-redis-pvc
+          claimName: user-redis-pvc
         {{- else }}
         emptyDir: {}
         {{- end }}
@@ -99,7 +99,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-redis-pvc
+  name: user-redis-pvc
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.redis.labels" . | nindent 4 }}

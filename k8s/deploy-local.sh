@@ -222,20 +222,20 @@ deploy_auth_service() {
     execute_kubectl "apply -f user-service/secret.yaml"
     
     # Deploy PostgreSQL
-    execute_kubectl "apply -f user-service/auth-postgres-deployment.yaml"
-    execute_kubectl "apply -f user-service/auth-postgres-service.yaml"
+    execute_kubectl "apply -f user-service/user-postgres-deployment.yaml"
+    execute_kubectl "apply -f user-service/user-postgres-service.yaml"
     
     # Deploy Redis
-    execute_kubectl "apply -f user-service/auth-redis-deployment.yaml"
-    execute_kubectl "apply -f user-service/auth-redis-service.yaml"
+    execute_kubectl "apply -f user-service/user-redis-deployment.yaml"
+    execute_kubectl "apply -f user-service/user-redis-service.yaml"
     
     # Wait for databases to be ready
     if [[ "$DRY_RUN" == "false" ]]; then
         print_status "Waiting for PostgreSQL to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-postgres -n gripday-auth --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-auth --timeout=300s
         
         print_status "Waiting for Redis to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-redis -n gripday-auth --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-auth --timeout=300s
     fi
     
     # Deploy auth service

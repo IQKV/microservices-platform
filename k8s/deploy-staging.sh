@@ -190,14 +190,14 @@ deploy_auth_service_staging() {
     execute_kubectl "apply -f user-service/secret.yaml"
     
     # Deploy PostgreSQL for staging
-    local postgres_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/auth-postgres-deployment.yaml)
+    local postgres_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/user-postgres-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_staging" | kubectl apply -f -
     else
         print_warning "[DRY-RUN] Would deploy PostgreSQL to staging"
     fi
     
-    local postgres_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/auth-postgres-service.yaml)
+    local postgres_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/user-postgres-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$postgres_svc_staging" | kubectl apply -f -
     else
@@ -205,14 +205,14 @@ deploy_auth_service_staging() {
     fi
     
     # Deploy Redis for staging
-    local redis_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/auth-redis-deployment.yaml)
+    local redis_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/user-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_staging" | kubectl apply -f -
     else
         print_warning "[DRY-RUN] Would deploy Redis to staging"
     fi
     
-    local redis_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/auth-redis-service.yaml)
+    local redis_svc_staging=$(sed 's/namespace: gripday-dev-env$/namespace: staging-env/g' user-service/user-redis-service.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
         echo "$redis_svc_staging" | kubectl apply -f -
     else
@@ -222,8 +222,8 @@ deploy_auth_service_staging() {
     # Wait for databases to be ready
     if [[ "$DRY_RUN" == "false" ]]; then
         print_status "Waiting for staging databases to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-postgres -n staging-env --timeout=300s
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=auth-redis -n staging-env --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n staging-env --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n staging-env --timeout=300s
     fi
     
     # Deploy auth service with updated image

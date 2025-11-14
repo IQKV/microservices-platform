@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-postgres
+  name: user-postgres
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.postgresql.labels" . | nindent 4 }}
@@ -94,7 +94,7 @@ spec:
       - name: postgres-storage
         {{- if .Values.postgresql.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: auth-postgres-pvc
+          claimName: user-postgres-pvc
         {{- else }}
         emptyDir: {}
         {{- end }}
@@ -108,7 +108,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: auth-postgres-pvc
+  name: user-postgres-pvc
   namespace: {{ .Values.namespace.name }}
   labels:
     {{- include "user-service.postgresql.labels" . | nindent 4 }}
