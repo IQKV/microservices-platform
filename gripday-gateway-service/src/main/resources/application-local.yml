@@ -74,7 +74,7 @@ gripday:
         strip-count: 0  # Don't strip in local development
       services:
         user-service:
-          uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI:http://localhost:8080}
+          uri: ${GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI:http://localhost:8080}
           path: /v1/auth/**
           enabled: true
           connect-timeout: 10000  # Extended for development
@@ -95,7 +95,7 @@ gripday:
         algorithm: HS256
       authentication:
         enabled: true
-        user-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL:http://localhost:8080}
+        user-service-url: ${GRIPDAY_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
         token-validation-timeout: PT10S  # Extended for development
         enable-user-context-propagation: true
       public-paths:

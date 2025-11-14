@@ -285,7 +285,7 @@ gripday:
 # Gateway Service
 gripday:
   gateway:
-    user-service-url: ${AUTH_SERVICE_URL:http://localhost:8080}
+    user-service-url: ${USER_SERVICE_URL:http://localhost:8080}
     rate-limiting:
       default-requests-per-minute: 100
     circuit-breaker:

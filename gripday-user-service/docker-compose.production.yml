@@ -202,7 +202,7 @@ services:
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.ssl=false
     ports:
-      - "${AUTH_SERVICE_PORT:-8080}:8080"
+      - "${USER_SERVICE_PORT:-8080}:8080"
       - "${JMX_PORT:-9999}:9999" # JMX monitoring port
     depends_on:
       postgres-user:

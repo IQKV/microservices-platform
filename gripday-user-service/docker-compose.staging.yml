@@ -170,7 +170,7 @@ services:
         -Dlogging.level.org.gripday=INFO
         -Dlogging.config=classpath:logback-spring.xml
     ports:
-      - "${AUTH_SERVICE_PORT:-8080}:8080"
+      - "${USER_SERVICE_PORT:-8080}:8080"
     depends_on:
       postgres-user:
         condition: service_healthy

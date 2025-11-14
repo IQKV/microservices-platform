@@ -68,7 +68,7 @@ services:
       GRIPDAY_CACHE_REDIS_DATABASE: 0
 
       # Gateway Configuration
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://mock-user-service:8080
+      GRIPDAY_GATEWAY_USER_SERVICE_URL: http://mock-user-service:8080
       GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173"
       GRIPDAY_GATEWAY_CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
       GRIPDAY_GATEWAY_CORS_ALLOWED_HEADERS: "*"

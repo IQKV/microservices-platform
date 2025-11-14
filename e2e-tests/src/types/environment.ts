@@ -66,7 +66,7 @@ export interface EnvironmentVariables {
   TEST_ENV?: string;
   BASE_URL?: string;
   GATEWAY_URL?: string;
-  AUTH_SERVICE_URL?: string;
+  USER_SERVICE_URL?: string;
   BOOKSTORE_SERVICE_URL?: string;
   DATABASE_AUTH_URL?: string;
   DATABASE_BOOKSTORE_URL?: string;

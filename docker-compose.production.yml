@@ -98,7 +98,7 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: production
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://user-service:8080
+      GRIPDAY_GATEWAY_USER_SERVICE_URL: http://user-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 500
       JAVA_OPTS: >
         -XX:+UseContainerSupport

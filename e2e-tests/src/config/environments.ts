@@ -13,11 +13,11 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'http://localhost:8090',
     services: {
       gateway: 'http://localhost:8090',
-      auth: 'http://localhost:8091',
+      user: 'http://localhost:8091',
       bookstore: 'http://localhost:8092'
     },
     databases: {
-      auth: {
+      user: {
         host: 'localhost',
         port: 5434,
         database: 'gripday_user_test',
@@ -243,8 +243,8 @@ function applyEnvironmentOverrides(config: TestEnvironmentConfig, envVars: Envir
   if (envVars.GATEWAY_URL) {
     overriddenConfig.services.gateway = envVars.GATEWAY_URL;
   }
-  if (envVars.AUTH_SERVICE_URL) {
-    overriddenConfig.services.auth = envVars.AUTH_SERVICE_URL;
+  if (envVars.USER_SERVICE_URL) {
+    overriddenConfig.services.auth = envVars.USER_SERVICE_URL;
   }
   if (envVars.BOOKSTORE_SERVICE_URL) {
     overriddenConfig.services.bookstore = envVars.BOOKSTORE_SERVICE_URL;

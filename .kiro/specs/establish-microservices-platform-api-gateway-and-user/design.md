@@ -4273,7 +4273,7 @@ services:
       - gripday-network
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - GRIPDAY_AUTH_SERVICE_URL=http://user-service:8080
+      - GRIPDAY_USER_SERVICE_URL=http://user-service:8080
       - GRIPDAY_CACHE_REDIS_HOST=gateway-redis
     depends_on:
       - user-service
@@ -6679,7 +6679,7 @@ services:
       - GATEWAY_REDIS_HOST=gateway-redis
       - GATEWAY_REDIS_PORT=6379
       - GATEWAY_REDIS_DATABASE=1
-      - AUTH_SERVICE_URL=http://host.docker.internal:8080
+      - USER_SERVICE_URL=http://host.docker.internal:8080
     depends_on:
       - gateway-postgresql
       - gateway-redis

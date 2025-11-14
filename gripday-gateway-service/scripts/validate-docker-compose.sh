@@ -82,7 +82,7 @@ validate_env_file() {
         "SPRING_PROFILES_ACTIVE"
         "GRIPDAY_CACHE_REDIS_HOST"
         "GRIPDAY_CACHE_REDIS_PORT"
-        "GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI"
+        "GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI"
     )
     
     local missing_vars=()

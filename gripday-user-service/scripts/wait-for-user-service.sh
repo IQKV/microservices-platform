@@ -57,8 +57,8 @@ usage() {
     echo "  $0 localhost 8080 60 2              # All parameters"
     echo
     echo "Environment Variables:"
-    echo "  AUTH_SERVICE_HOST - Override default host"
-    echo "  AUTH_SERVICE_PORT - Override default port"
+    echo "  USER_SERVICE_HOST - Override default host"
+    echo "  USER_SERVICE_PORT - Override default port"
 }
 
 # Check if help is requested
@@ -68,8 +68,8 @@ if [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
 fi
 
 # Override with environment variables if set
-HOST="${AUTH_SERVICE_HOST:-$HOST}"
-PORT="${AUTH_SERVICE_PORT:-$PORT}"
+HOST="${USER_SERVICE_HOST:-$HOST}"
+PORT="${USER_SERVICE_PORT:-$PORT}"
 
 # Validate parameters
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
