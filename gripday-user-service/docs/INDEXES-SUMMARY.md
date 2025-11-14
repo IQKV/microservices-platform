@@ -2,7 +2,7 @@
 
 ## Summary
 
-Added **8 critical missing indexes** to optimize query performance across the auth service.
+Added **8 critical missing indexes** to optimize query performance across the user service.
 
 ## New Indexes
 

@@ -182,7 +182,7 @@ curl http://$MINIKUBE_IP:30082/api/v1/bookstore/books
 # Forward gateway service
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
-# Forward auth service
+# Forward user service
 kubectl port-forward -n gripday svc/user-service 8080:8080
 ```
 
@@ -339,7 +339,7 @@ curl http://$(minikube ip):30081/actuator/health
 | -------------------- | ------------------------------------------------------------------ |
 | Quick API test       | NodePort: `http://$(minikube ip):30080`                            |
 | Test production flow | Ingress: `http://api.gripday.site`                                 |
-| Debug auth service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`           |
+| Debug user service   | Direct: `http://auth.gripday.site` OR NodePort: `:30081`           |
 | Debug bookstore      | Direct: `http://bookstore.gripday.site` OR NodePort: `:30082`      |
 | Check gateway routes | `curl http://$(minikube ip):30080/actuator/gateway/routes`         |
 | View logs            | `kubectl logs -n gripday deployment/<service-name>`                |

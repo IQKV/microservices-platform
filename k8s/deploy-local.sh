@@ -164,14 +164,14 @@ build_images() {
     # Use minikube's Docker daemon
     eval $(minikube docker-env)
     
-    # Build auth service
-    print_status "Building auth service image..."
+    # Build user service
+    print_status "Building user service image..."
     if [[ "$DRY_RUN" == "false" ]]; then
         cd gripday-user-service
         docker build -t gripday/user-service:latest .
         cd ..
     else
-        print_warning "[DRY-RUN] Would build auth service image"
+        print_warning "[DRY-RUN] Would build user service image"
     fi
     
     # Build gateway service
@@ -213,9 +213,9 @@ setup_namespaces() {
     print_status "Namespaces created successfully"
 }
 
-# Function to deploy auth service
+# Function to deploy user service
 deploy_auth_service() {
-    print_status "Deploying auth service..."
+    print_status "Deploying user service..."
     
     # Apply configs and secrets
     execute_kubectl "apply -f user-service/configmap.yaml"
@@ -238,7 +238,7 @@ deploy_auth_service() {
         kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-user --timeout=300s
     fi
     
-    # Deploy auth service
+    # Deploy user service
     execute_kubectl "apply -f user-service/user-service-deployment.yaml"
     execute_kubectl "apply -f user-service/user-service-service.yaml"
     execute_kubectl "apply -f user-service/user-service-ingress.yaml"
@@ -318,8 +318,8 @@ verify_deployment() {
     
     print_status "Verifying deployment..."
     
-    # Wait for auth service to be ready
-    print_status "Waiting for auth service to be ready..."
+    # Wait for user service to be ready
+    print_status "Waiting for user service to be ready..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-user --timeout=300s
     
     # Wait for gateway service to be ready

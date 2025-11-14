@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides instructions for implementing the 8 critical missing indexes identified in the auth service database schema analysis.
+This guide provides instructions for implementing the 8 critical missing indexes identified in the user service database schema analysis.
 
 ## Files Created
 

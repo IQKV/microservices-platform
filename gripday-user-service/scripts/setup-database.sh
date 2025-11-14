@@ -285,7 +285,7 @@ main() {
     
     echo
     log_info "Next Steps:"
-    echo "  1. Start the auth service: mvn spring-boot:run -Dspring.profiles.active=$ENVIRONMENT"
+    echo "  1. Start the user service: mvn spring-boot:run -Dspring.profiles.active=$ENVIRONMENT"
     echo "  2. Verify database tables were created"
     echo "  3. Check application logs for any database-related issues"
 }

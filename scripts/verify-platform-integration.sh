@@ -52,8 +52,8 @@ check_service_health() {
 test_gateway_routing() {
     log_info "Testing Gateway Service routing..."
     
-    # Test auth service routing through gateway
-    log_info "Testing auth service routing through gateway..."
+    # Test user service routing through gateway
+    log_info "Testing user service routing through gateway..."
     if curl -f -s "$GATEWAY_URL/api/v1/auth/health" > /dev/null; then
         log_info "✅ Auth service routing works"
     else

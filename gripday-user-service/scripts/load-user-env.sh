@@ -50,7 +50,7 @@ usage() {
     echo "  $0 production # Load production environment"
     echo
     echo "This script loads environment variables from .env.[ENVIRONMENT] file"
-    echo "and validates required variables for the auth service."
+    echo "and validates required variables for the user service."
 }
 
 # Check if help is requested
@@ -245,7 +245,7 @@ main() {
     log_info "To use these environment variables in your current shell:"
     echo "  source $0 $ENVIRONMENT"
     echo
-    log_info "To start the auth service with this environment:"
+    log_info "To start the user service with this environment:"
     echo "  mvn spring-boot:run -Dspring.profiles.active=$ENVIRONMENT"
 }
 

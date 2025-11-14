@@ -160,7 +160,7 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 # Check health
 curl http://localhost:8080/actuator/health
 
-# Port forward auth service
+# Port forward user service
 kubectl port-forward -n gripday-user svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 
@@ -188,7 +188,7 @@ helm upgrade gripday ./helm/gripday \
 ### Update Image Tag
 
 ```bash
-# Update auth service image
+# Update user service image
 helm upgrade user-service ./helm/user-service \
   --set image.tag=1.1.0 \
   -n gripday-user

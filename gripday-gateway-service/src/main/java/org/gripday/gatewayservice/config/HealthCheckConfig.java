@@ -27,7 +27,7 @@ public class HealthCheckConfig {
   }
 
   /**
-   * Custom reactive health indicator for auth service connectivity.
+   * Custom reactive health indicator for user service connectivity.
    */
   @Bean
   public ReactiveHealthIndicator authServiceHealthIndicator(WebClient.Builder webClientBuilder,

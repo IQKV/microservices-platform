@@ -39,7 +39,7 @@ spec:
         - protocol: TCP
           port: 8080
   egress:
-    # Allow egress to auth service
+    # Allow egress to user service
     - to:
         - namespaceSelector:
             matchLabels:

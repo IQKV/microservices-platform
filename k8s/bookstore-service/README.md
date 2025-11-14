@@ -173,7 +173,7 @@ The deployment includes network policies that:
 
 - Allow ingress from gateway service and ingress controller
 - Allow egress to PostgreSQL and Redis
-- Allow egress to auth service for JWT validation
+- Allow egress to user service for JWT validation
 - Allow egress to observability services
 - Deny all other traffic
 
@@ -195,7 +195,7 @@ The deployment includes network policies that:
 
 ### Secrets Management
 
-- **JWT secrets**: Shared with auth service
+- **JWT secrets**: Shared with user service
 - **Database credentials**: Environment-specific
 - **Redis passwords**: Optional for local, required for staging/production
 

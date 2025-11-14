@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Setup script for Gripday User Service - Local Development Environment
-# This script sets up the local development environment for the auth service
+# This script sets up the local development environment for the user service
 
 set -euo pipefail
 
@@ -144,7 +144,7 @@ wait_for_services() {
 
 # Build the application
 build_application() {
-    log_info "Building auth service application..."
+    log_info "Building user service application..."
     
     cd "$PROJECT_DIR"
     
@@ -178,7 +178,7 @@ display_setup_info() {
     echo "  - Environment File: $ENV_FILE"
     echo
     log_info "Next Steps:"
-    echo "  1. Start the auth service: mvn spring-boot:run -Dspring.profiles.active=local"
+    echo "  1. Start the user service: mvn spring-boot:run -Dspring.profiles.active=local"
     echo "  2. Access Swagger UI: http://localhost:8080/swagger-ui.html"
     echo "  3. Check health: http://localhost:8080/actuator/health"
     echo

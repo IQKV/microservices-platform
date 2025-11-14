@@ -332,7 +332,7 @@ deploy_production_infrastructure() {
 deploy_production_services() {
     print_status "Deploying production services with rolling updates..."
     
-    # Deploy auth service
+    # Deploy user service
     if [[ "$DRY_RUN" == "false" ]]; then
         execute_kubectl "apply -f /tmp/user-service-deployment-production.yaml"
         
@@ -381,7 +381,7 @@ verify_production_deployment() {
     print_status "Verifying production deployment health..."
     
     # Wait for all pods to be ready
-    print_status "Waiting for auth service pods to be ready..."
+    print_status "Waiting for user service pods to be ready..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-production-env --timeout=300s
     
     print_status "Waiting for gateway service pods to be ready..."
@@ -393,7 +393,7 @@ verify_production_deployment() {
     # Perform health checks
     print_status "Performing health checks..."
     
-    # Check auth service health
+    # Check user service health
     local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-user-service -n gripday-production-env -o jsonpath='{.items[*].status.phase}')
     if [[ "$auth_health" =~ "Running" ]]; then
         print_status "✓ User service health check passed"

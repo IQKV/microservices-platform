@@ -231,14 +231,14 @@ check_pod_health() {
     print_status "Checking pod health for $service in $env environment..."
     
     case "$service" in
-        "auth")
-            check_service_pods "auth" "gripday-user$namespace_suffix" "$env"
+        "user")
+            check_service_pods "user" "gripday-user$namespace_suffix" "$env"
             ;;
         "gateway")
             check_service_pods "gateway" "gripday-gateway$namespace_suffix" "$env"
             ;;
         "all")
-            check_service_pods "auth" "gripday-user$namespace_suffix" "$env"
+            check_service_pods "user" "gripday-user$namespace_suffix" "$env"
             check_service_pods "gateway" "gripday-gateway$namespace_suffix" "$env"
             ;;
     esac
@@ -259,7 +259,7 @@ check_service_pods() {
     # Check main service deployment
     local deployment_name=""
     case "$service" in
-        "auth")
+        "user")
             deployment_name="user-service"
             ;;
         "gateway")
@@ -293,8 +293,8 @@ check_service_pods() {
         record_result "$service Service Deployment ($env)" "FAIL" "Deployment $deployment_name not found"
     fi
     
-    # Check database pods (for auth service)
-    if [[ "$service" == "auth" ]]; then
+    # Check database pods (for user service)
+    if [[ "$service" == "user" ]]; then
         # Check PostgreSQL
         if kubectl get deployment "user-postgres" -n "$namespace" &>/dev/null; then
             local postgres_ready=$(kubectl get deployment "user-postgres" -n "$namespace" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
@@ -345,7 +345,7 @@ check_service_health() {
     print_status "Checking service health for $service in $env environment..."
     
     case "$service" in
-        "auth")
+        "user")
             check_k8s_service "user-service" "gripday-user$namespace_suffix" "$env"
             ;;
         "gateway")
@@ -393,7 +393,7 @@ check_endpoint_connectivity() {
     print_status "Checking endpoint connectivity for $service in $env environment..."
     
     case "$service" in
-        "auth")
+        "user")
             check_service_endpoints "user-service" "gripday-user$namespace_suffix" "$env" "8080"
             ;;
         "gateway")

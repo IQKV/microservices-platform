@@ -228,7 +228,7 @@ export class TestDataSeeder {
   }
 
   /**
-   * Seeds basic test data for auth service
+   * Seeds basic test data for user service
    */
   async seedAuthData(tenantId?: string): Promise<void> {
     const client = await this.connectionManager.getClient('auth');
@@ -330,7 +330,7 @@ export class TestDataCleanup {
   }
 
   /**
-   * Cleans up auth service test data
+   * Cleans up user service test data
    */
   async cleanupAuthData(relationships: TestDataRelationships): Promise<void> {
     const client = await this.connectionManager.getClient('auth');

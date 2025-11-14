@@ -55,7 +55,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health/readiness || exit 1
 
-# JVM optimization for auth service workloads
+# JVM optimization for user service workloads
 ENV JAVA_OPTS="-XX:+UseContainerSupport \
     -XX:MaxRAMPercentage=75.0 \
     -XX:+UseG1GC \

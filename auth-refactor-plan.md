@@ -8,7 +8,7 @@
 - **Token storage**:
   - Both configs define `tokenStorage.accessTokenKey` and `refreshTokenKey`; App’s `logoutAndRedirect` clears localStorage tokens. This implies frontend-managed tokens, not a gateway cookie session.
 - **Endpoints layout**:
-  - Both configs expect `/api/v1/auth/*` endpoints, suggesting the Auth app talks to an API. It’s unclear if the gateway (api.gripday.com) is the single BFF or the auth service exposes public endpoints directly.
+  - Both configs expect `/api/v1/auth/*` endpoints, suggesting the Auth app talks to an API. It’s unclear if the gateway (api.gripday.com) is the single BFF or the user service exposes public endpoints directly.
 
 # Proposed target architecture
 
@@ -18,7 +18,7 @@
   - Proxy/aggregate downstream services. Use mTLS or signed service JWT for s2s auth.
 - **User Service (internal)**:
   - Pure API and identity domain logic (password, email verify, reset, MFA).
-  - Gateway calls it; users never call auth service directly. All Set-Cookie done at gateway for `.gripday.com`.
+  - Gateway calls it; users never call user service directly. All Set-Cookie done at gateway for `.gripday.com`.
 - **React Apps**:
   - App (app.gripday.com) performs `GET api.gripday.com/me` on load to decide redirects.
   - Auth (auth.gripday.com) is UI only; it submits to gateway endpoints. On success, gateway sets session cookies, then UI redirects to `returnTo`.
@@ -29,7 +29,7 @@
 - **Redirect param**: Use `returnTo` with strict allowlist and same-site path validation to avoid open redirect.
 - **Domain defaults**: Replace iqkv.com defaults with gripday.com, load from env at build/runtime.
 - **CORS/CSRF**: With cookie-based auth, configure SameSite=Lax, CSRF tokens or double-submit for non-GET.
-- **Auth UI calling patterns**: Ensure auth UI calls gateway only (not auth service) to receive cookies.
+- **Auth UI calling patterns**: Ensure auth UI calls gateway only (not user service) to receive cookies.
 - **Observability + error contract**: Standardize problem+json errors and tracing across gateway and services.
 
 # Detailed action plan
@@ -117,12 +117,12 @@
 
 # Next steps I can take now
 
-- **Verify presence of gateway and auth service code** and map endpoints to confirm where to implement cookie session and `/me`.
+- **Verify presence of gateway and user service code** and map endpoints to confirm where to implement cookie session and `/me`.
 - **Patch both React configs** to use gripday domains and `returnTo`, and refactor App/Auth guards accordingly.
 
 Would you like me to:
 
-- Audit the repo further to locate the gateway/auth service code and current routes?
+- Audit the repo further to locate the gateway/user service code and current routes?
 - Start implementing the React-side changes (config defaults, returnTo, guards) behind env flags to avoid breaking current flows?
 
-Summary: Produced a concrete, security-focused plan to move to a proper BFF with cookie sessions, standardized redirect/guard behavior across apps, and actionable code changes to align both React apps and backend gateway/auth services with app.gripday.com, auth.gripday.com, and api.gripday.com. The discovery task remains in progress; ready to proceed with audits or React updates.
+Summary: Produced a concrete, security-focused plan to move to a proper BFF with cookie sessions, standardized redirect/guard behavior across apps, and actionable code changes to align both React apps and backend gateway/user services with app.gripday.com, auth.gripday.com, and api.gripday.com. The discovery task remains in progress; ready to proceed with audits or React updates.

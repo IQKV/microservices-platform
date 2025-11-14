@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Comprehensive analysis of the auth service database schema identified **8 critical missing indexes** that will significantly improve query performance, particularly for:
+Comprehensive analysis of the user service database schema identified **8 critical missing indexes** that will significantly improve query performance, particularly for:
 
 - Email verification workflows (70-80% faster)
 - Account security and lockout detection (90% faster)
@@ -307,7 +307,7 @@ DROP INDEX IF EXISTS idx_organizations_tenant_enabled;
 
 ## Conclusion
 
-This index optimization initiative addresses critical performance gaps in the auth service database schema. The proposed changes are:
+This index optimization initiative addresses critical performance gaps in the user service database schema. The proposed changes are:
 
 - ✅ **Low Risk**: No breaking changes, full rollback support
 - ✅ **High Impact**: 45-90% performance improvements

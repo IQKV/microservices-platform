@@ -93,7 +93,7 @@ export function validateEnvironmentConfig(config: TestEnvironmentConfig): Valida
   if (!config.services.auth) {
     errors.push('User service URL is required');
   } else if (!isValidUrl(config.services.auth)) {
-    errors.push(`Invalid auth service URL format: ${config.services.auth}`);
+    errors.push(`Invalid user service URL format: ${config.services.auth}`);
   }
 
   if (!config.services.bookstore) {

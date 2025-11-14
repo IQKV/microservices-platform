@@ -80,7 +80,7 @@ kubectl get ingress -A
 ### Install Individual Services
 
 ```bash
-# Install only auth service
+# Install only user service
 helm install gripday . --set bookstore-service.enabled=false --set gateway-service.enabled=false
 
 # Install without gateway
@@ -264,7 +264,7 @@ Network policies are enabled by default for security:
 # Scale gateway
 kubectl scale deployment gateway-service -n gripday-gateway --replicas=5
 
-# Scale auth service
+# Scale user service
 kubectl scale deployment user-service -n gripday-user --replicas=3
 ```
 

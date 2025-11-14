@@ -129,7 +129,7 @@ apply_configs() {
     
     print_status "Applying ConfigMaps and Secrets for $env environment..."
     
-    # Apply auth service configs
+    # Apply user service configs
     execute_kubectl "$ACTION -f user-service/configmap.yaml"
     execute_kubectl "$ACTION -f user-service/secret.yaml"
     
@@ -165,7 +165,7 @@ verify_configs() {
     fi
     
     if [[ "$DRY_RUN" == "false" && "$ACTION" == "apply" ]]; then
-        # Verify auth service configs
+        # Verify user service configs
         if kubectl get configmap user-service-config -n "$auth_namespace" &>/dev/null; then
             print_status "✓ User service ConfigMap exists in $auth_namespace"
         else

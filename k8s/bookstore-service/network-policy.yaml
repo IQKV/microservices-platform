@@ -75,7 +75,7 @@ spec:
         - protocol: TCP
           port: 6379
 
-    # Allow access to auth service for JWT validation
+    # Allow access to user service for JWT validation
     - to:
         - namespaceSelector:
             matchLabels:

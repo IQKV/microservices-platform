@@ -50,7 +50,7 @@ The gateway service is the central entry point for the Gripday platform, providi
 3. **Storage Class**: Available storage class for Redis persistent volumes
 4. **Docker Images**: Built gateway service image
 5. **Cert Manager**: For TLS certificates in staging/production
-6. **User Service**: Running auth service for JWT validation
+6. **User Service**: Running user service for JWT validation
 
 ### Quick Deployment
 
@@ -113,7 +113,7 @@ GRIPDAY_CACHE_REDIS_PORT=6379
 GRIPDAY_CACHE_REDIS_DATABASE=1
 GRIPDAY_CACHE_REDIS_PASSWORD=redis_pass
 
-# JWT Configuration (must match auth service)
+# JWT Configuration (must match user service)
 GRIPDAY_AUTH_JWT_SECRET=<shared-jwt-secret>
 
 # Observability
@@ -228,7 +228,7 @@ spring:
 
 ### Authentication & Authorization
 
-- **JWT validation**: Validates tokens from auth service
+- **JWT validation**: Validates tokens from user service
 - **User context propagation**: Extracts user information from JWT
 - **Tenant context**: Multi-tenant request routing
 - **Protected routes**: Automatic authentication for protected endpoints
@@ -438,7 +438,7 @@ kubectl get networkpolicy -n gripday-gateway
 # Test gateway health
 curl http://api.gripday.site/actuator/health
 
-# Test auth service routing
+# Test user service routing
 curl -X POST http://api.gripday.site/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
@@ -492,7 +492,7 @@ done
    minikube addons enable ingress
    ```
 
-2. **Deploy auth service first**
+2. **Deploy user service first**
 
    ```bash
    kubectl apply -f ../user-service/

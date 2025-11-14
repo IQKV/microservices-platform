@@ -107,7 +107,7 @@ curl -X POST http://api.gripday.site/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{"username":"testuser","email":"test@example.com","password":"TestPass123!"}'
 
-# Direct to auth service (debugging only - doesn't exist in production!)
+# Direct to user service (debugging only - doesn't exist in production!)
 curl http://auth.gripday.site/actuator/health
 ```
 
@@ -191,7 +191,7 @@ kubectl exec -it deployment/redis -n gripday -- redis-cli
 # Scale gateway to 2 replicas
 kubectl scale deployment/gateway-service --replicas=2 -n gripday
 
-# Scale auth service to 2 replicas
+# Scale user service to 2 replicas
 kubectl scale deployment/user-service --replicas=2 -n gripday
 ```
 

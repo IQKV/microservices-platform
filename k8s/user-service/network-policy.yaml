@@ -111,7 +111,7 @@ spec:
     - Egress
 
   ingress:
-    # Allow ingress from auth service only
+    # Allow ingress from user service only
     - from:
         - podSelector:
             matchLabels:
@@ -156,7 +156,7 @@ spec:
     - Egress
 
   ingress:
-    # Allow ingress from auth service only
+    # Allow ingress from user service only
     - from:
         - podSelector:
             matchLabels:

@@ -158,9 +158,9 @@ validate_environment_config() {
         log_warning "Spring profile ($SPRING_PROFILES_ACTIVE) does not match environment ($ENVIRONMENT)"
     fi
     
-    # Validate auth service URL format
+    # Validate user service URL format
     if [[ ! "$GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI" =~ ^https?:// ]]; then
-        log_error "Invalid auth service URL format: $GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI"
+        log_error "Invalid user service URL format: $GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI"
         log_error "Expected format: http://host:port or https://host:port"
         exit 1
     fi

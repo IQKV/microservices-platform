@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Health check script for Gripday User Service
-# Waits for the auth service to be healthy and ready to accept requests
+# Waits for the user service to be healthy and ready to accept requests
 
 set -euo pipefail
 
@@ -100,7 +100,7 @@ fi
 
 # Wait for service to be healthy
 wait_for_health() {
-    log_info "Waiting for auth service at $HOST:$PORT to be healthy..."
+    log_info "Waiting for user service at $HOST:$PORT to be healthy..."
     log_info "Health check URL: $HEALTH_URL"
     log_info "Timeout: ${TIMEOUT}s, Check interval: ${INTERVAL}s"
     

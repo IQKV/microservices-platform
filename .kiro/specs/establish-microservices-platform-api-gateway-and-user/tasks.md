@@ -171,12 +171,12 @@
     - Configure reactive web stack dependencies and basic routing
     - Create application-local.yml, application-staging.yml, application-production.yml with gripday. prefix
     - Implement GatewayProperties configuration class with @ConfigurationProperties(prefix = "gripday.gateway")
-    - Set up basic service routing to auth service
+    - Set up basic service routing to user service
     - _Requirements: 6.1, 6.2, 24.1, 24.2, 24.3, 24.4, 24.5_
 
   - [x] 4.2 Implement JWT authentication filter with multi-tenant support and user context propagation
     - Create reactive JWT authentication filter for token validation with tenant extraction
-    - Integrate with auth service for token validation and tenant context resolution
+    - Integrate with user service for token validation and tenant context resolution
     - Implement tenant extraction from JWT tokens, custom headers (X-Tenant-ID), and subdomain routing
     - Create TenantExtractionFilter for early tenant context establishment in filter chain
     - Implement user context and tenant context propagation to downstream services via headers
@@ -238,7 +238,7 @@
 ## Phase 3: Containerization and Deployment
 
 - [x] 7. Create Docker containerization
-  - Write optimized Dockerfiles for auth service and gateway service
+  - Write optimized Dockerfiles for user service and gateway service
   - Create Docker Compose configurations for local development
   - Set up PostgreSQL and Redis containers with proper networking
   - Configure environment-specific Docker Compose files
@@ -307,7 +307,7 @@
 - [x] 12. Final platform integration and validation
   - [x] 12.1 Create end-to-end platform validation
     - Implement platform startup validation script
-    - Test complete user authentication flow through gateway to auth service
+    - Test complete user authentication flow through gateway to user service
     - Validate multi-tenant functionality across both services
     - Test JWT token propagation and user context flow
     - Verify observability stack integration and metrics collection
@@ -446,7 +446,7 @@ The following features can be implemented after the core MVP is complete:
     - Create environment variable loading and validation scripts per service (load-user-env.sh, load-gateway-env.sh)
     - Implement Maven build scripts (build-user.sh, build-gateway.sh) with service-specific configurations
     - Add deployment automation scripts for individual services in Unix/Mac environments
-    - Create database setup and migration scripts specific to auth service for POSIX systems
+    - Create database setup and migration scripts specific to user service for POSIX systems
     - _Requirements: 16.1, 16.2, 16.3, 2.6_
 
 - [x] 9. Set up observability with OpenTelemetry
@@ -479,13 +479,13 @@ The following features can be implemented after the core MVP is complete:
 
 - [x] 10. Create individual Docker containerization and deployment for each microservice
   - [x] 10.1 Create individual Dockerfiles for each microservice
-    - Write optimized Dockerfile for auth service with multi-stage builds in gripday-user-service directory
+    - Write optimized Dockerfile for user service with multi-stage builds in gripday-user-service directory
     - Create Dockerfile for gateway service with reactive optimizations in gripday-gateway-service directory
     - Configure production-ready Docker images with security best practices for each service
     - Implement service-specific build optimizations and dependency management
     - _Requirements: 2.1, 2.2_
 
-  - [x] 10.2 Set up individual Docker Compose configurations for auth service
+  - [x] 10.2 Set up individual Docker Compose configurations for user service
     - Create gripday-user-service/docker-compose.yml for local development with PostgreSQL and Redis
     - Create gripday-user-service/docker-compose.staging.yml for staging environment deployment
     - Create gripday-user-service/docker-compose.production.yml for production deployment
@@ -499,8 +499,8 @@ The following features can be implemented after the core MVP is complete:
     - Configure individual environment variable files per service (.env.local, .env.staging, .env.production)
     - \_Requirements: 2.2, 2.4, 2.5, 19.1, 19.2_eate gripday-user-service/docker-compose.production.yml for production environment deployment
     - Configure service-specific PostgreSQL and Redis containers with proper data persistence
-    - Set up auth service networking, dependencies, and health checks
-    - Configure environment-specific resource limits and scaling options for auth service
+    - Set up user service networking, dependencies, and health checks
+    - Configure environment-specific resource limits and scaling options for user service
     - Add service-specific environment variable management and configuration
     - _Requirements: 2.2, 2.3, 2.4, 2.5, 2.6, 19.1, 19.2_
 
@@ -522,13 +522,13 @@ The following features can be implemented after the core MVP is complete:
     - _Requirements: 2.5, 7.1, 7.2, 7.4_
 
   - [x] 10.5 Create POSIX automation scripts for individual service deployment
-    - Create scripts/start-user-service.sh and scripts/stop-user-service.sh for auth service management
+    - Create scripts/start-user-service.sh and scripts/stop-user-service.sh for user service management
     - Create scripts/start-gateway-service.sh and scripts/stop-gateway-service.sh for gateway service management
-    - Implement scripts/deploy-auth-staging.sh and scripts/deploy-auth-production.sh for auth service deployment
+    - Implement scripts/deploy-auth-staging.sh and scripts/deploy-auth-production.sh for user service deployment
     - Implement scripts/deploy-gateway-staging.sh and scripts/deploy-gateway-production.sh for gateway service deployment
     - Create scripts/start-platform.sh for orchestrating all services startup
     - Implement container health monitoring and service readiness scripts for individual services
-    - Add database initialization and migration scripts for auth service
+    - Add database initialization and migration scripts for user service
     - _Requirements: 19.3, 19.4, 19.5_
 
   - [x] 10.6 Write simple Docker integration tests and deployment validation for individual services
@@ -575,7 +575,7 @@ The following features can be implemented after the core MVP is complete:
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 21.1, 21.6, 21.7_
 
 - [-] 12. Create Kubernetes deployment configurations
-  - [x] 12.1 Create Kubernetes manifests for auth service
+  - [x] 12.1 Create Kubernetes manifests for user service
     - Create user-service-deployment.yaml with container specifications and environment variables
     - Create user-service-service.yaml for internal service discovery
     - Create user-postgres-deployment.yaml and user-postgres-service.yaml for database

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains comprehensive documentation for the auth service database indexing strategy, including analysis of missing indexes and implementation guidance.
+This directory contains comprehensive documentation for the user service database indexing strategy, including analysis of missing indexes and implementation guidance.
 
 ## Quick Links
 

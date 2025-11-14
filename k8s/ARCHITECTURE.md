@@ -211,7 +211,7 @@ The gateway service routes all external traffic to internal services:
 ### 4. **Simplified Secrets Management**
 
 - TLS certificates only on gateway/UI
-- OAuth2 credentials only in auth service
+- OAuth2 credentials only in user service
 - Database credentials isolated to service level
 
 ## Monitoring and Observability

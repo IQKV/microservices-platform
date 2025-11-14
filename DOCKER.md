@@ -226,7 +226,7 @@ docker compose up -d
 **Includes:**
 
 - Redis cache
-- Mock auth service (WireMock)
+- Mock user service (WireMock)
 - Gateway service
 
 ## Networking

@@ -4,7 +4,7 @@ This directory contains Kubernetes manifests and deployment scripts for the Grip
 
 ## Overview
 
-The auth service provides centralized authentication, authorization, and user management for the entire Gripday platform. It's built with Spring Boot 3.5.6, Java 21, and follows the three-tier architecture pattern with JWT-based authentication.
+The user service provides centralized authentication, authorization, and user management for the entire Gripday platform. It's built with Spring Boot 3.5.6, Java 21, and follows the three-tier architecture pattern with JWT-based authentication.
 
 ## Architecture
 
@@ -46,7 +46,7 @@ The auth service provides centralized authentication, authorization, and user ma
 1. **Kubernetes Cluster**: Running cluster with kubectl access
 2. **Ingress Controller**: NGINX ingress controller installed
 3. **Storage Class**: Available storage class for persistent volumes
-4. **Docker Images**: Built auth service image
+4. **Docker Images**: Built user service image
 5. **Cert Manager**: For TLS certificates in staging/production
 
 ### Quick Deployment
@@ -375,7 +375,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ### Gateway Service Integration
 
-The auth service integrates with the gateway service for:
+The user service integrates with the gateway service for:
 
 - **JWT token validation**: Shared JWT secret for token verification
 - **User context propagation**: Standard JWT claims format
@@ -407,7 +407,7 @@ The auth service integrates with the gateway service for:
    minikube addons enable ingress
    ```
 
-2. **Deploy auth service**
+2. **Deploy user service**
 
    ```bash
    kubectl apply -f namespace.yaml
@@ -474,7 +474,7 @@ kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh
 
 ### Scaling
 
-- **Horizontal scaling**: Add more auth service replicas
+- **Horizontal scaling**: Add more user service replicas
 - **Database scaling**: Consider read replicas for high load
 - **Redis scaling**: Use Redis Cluster for high availability
 - **Load balancing**: Ensure proper load distribution across pods

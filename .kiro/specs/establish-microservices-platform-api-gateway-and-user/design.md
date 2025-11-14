@@ -2,7 +2,7 @@
 
 ## Overview
 
-The microservices platform is designed as an extensible foundation that enables secure, scalable, and observable microservice architectures. Built on Spring Boot 3.5.6 and Spring Cloud 2025.0.0, the platform provides two core services that work together to create a robust foundation for any microservices ecosystem. The auth service acts as the centralized authentication, authorization, and user lifecycle management hub for all connected microservices, ensuring consistent security policies and user management across the entire platform.
+The microservices platform is designed as an extensible foundation that enables secure, scalable, and observable microservice architectures. Built on Spring Boot 3.5.6 and Spring Cloud 2025.0.0, the platform provides two core services that work together to create a robust foundation for any microservices ecosystem. The user service acts as the centralized authentication, authorization, and user lifecycle management hub for all connected microservices, ensuring consistent security policies and user management across the entire platform.
 
 **Extensibility Design Principles:**
 
@@ -5736,14 +5736,14 @@ cd platform-observability
 docker compose up -d
 cd ..
 
-# Start auth service
-echo "Starting auth service..."
+# Start user service
+echo "Starting user service..."
 cd gripday-user-service
 docker compose up -d
 cd ..
 
-# Wait for auth service to be ready
-echo "Waiting for auth service to be ready..."
+# Wait for user service to be ready
+echo "Waiting for user service to be ready..."
 ./scripts/wait-for-user-service.sh
 
 # Start gateway service
@@ -5772,7 +5772,7 @@ echo "Grafana: http://localhost:3000"
 
 set -euo pipefail
 
-echo "Starting auth service..."
+echo "Starting user service..."
 cd gripday-user-service
 docker compose up -d
 cd ..
@@ -5831,7 +5831,7 @@ for var in "${required_vars[@]}"; do
 done
 
 # Build Docker images for each service
-echo "Building auth service Docker image..."
+echo "Building user service Docker image..."
 cd gripday-user-service
 ./mvnw clean package -DskipTests
 docker build -t gripday/user-service:$VERSION .
@@ -5843,15 +5843,15 @@ cd gripday-gateway-service
 docker build -t gripday/gateway-service:$VERSION .
 cd ..
 
-# Deploy auth service first
-echo "Deploying auth service..."
+# Deploy user service first
+echo "Deploying user service..."
 cd gripday-user-service
 export VERSION=$VERSION
 docker compose -f docker-compose.staging.yml up -d
 cd ..
 
-# Wait for auth service to be ready
-echo "Waiting for auth service to be ready..."
+# Wait for user service to be ready
+echo "Waiting for user service to be ready..."
 ./scripts/wait-for-user-service.sh
 
 # Deploy gateway service
@@ -7756,7 +7756,7 @@ postman/
         "url": {
           "raw": "{{auth_url}}/api/{{api_version}}/auth/login",
           "host": ["{{auth_url}}"],
-          "path": ["api", "{{api_version}}", "auth", "login"]
+          "path": ["api", "{{api_version}}", "user", "login"]
         }
       },
       "event": [

@@ -13,7 +13,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Authentication configuration properties with gripday.auth prefix. Handles JWT, security, and OAuth2 configuration for the auth service.
+ * Authentication configuration properties with gripday.auth prefix. Handles JWT, security, and OAuth2 configuration for the user service.
  */
 @ConfigurationProperties(prefix = "gripday.auth")
 @Validated

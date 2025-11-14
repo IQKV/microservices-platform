@@ -146,7 +146,7 @@ get_service_urls() {
         AUTH_URL="http://$node_ip:$node_port"
     else
         # Use port-forward for ClusterIP
-        log "INFO" "Using port-forward for auth service access"
+        log "INFO" "Using port-forward for user service access"
         $KUBECTL_CMD port-forward service/user-service 8080:8080 -n "$NAMESPACE" &
         AUTH_PORT_FORWARD_PID=$!
         AUTH_URL="http://localhost:8080"

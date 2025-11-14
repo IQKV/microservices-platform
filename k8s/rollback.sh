@@ -61,7 +61,7 @@ ACTIONS:
     status                  Show current deployment status
 
 EXAMPLES:
-    $0 -s auth                          # Rollback auth service to previous revision
+    $0 -s auth                          # Rollback user service to previous revision
     $0 -e production -s gateway -r 3    # Rollback gateway to revision 3 in prod
     $0 -a history                       # Show deployment history for all services
     $0 -a status -e staging             # Show deployment status in staging
@@ -194,13 +194,13 @@ show_deployment_history() {
     print_status ""
     
     case "$service" in
-        "auth")
+        "user")
             local namespace="gripday-user$namespace_suffix"
             print_status "User Service History:"
             if [[ "$DRY_RUN" == "false" ]]; then
                 kubectl rollout history deployment/user-service -n "$namespace" || print_warning "No history available"
             else
-                print_warning "[DRY-RUN] Would show auth service history"
+                print_warning "[DRY-RUN] Would show user service history"
             fi
             ;;
         "gateway")
@@ -213,7 +213,7 @@ show_deployment_history() {
             fi
             ;;
         "all")
-            show_deployment_history "auth" "$env"
+            show_deployment_history "user" "$env"
             print_status ""
             show_deployment_history "gateway" "$env"
             ;;
@@ -231,14 +231,14 @@ show_deployment_status() {
     print_status ""
     
     case "$service" in
-        "auth")
+        "user")
             local namespace="gripday-user$namespace_suffix"
             print_status "User Service Status:"
             if [[ "$DRY_RUN" == "false" ]]; then
                 kubectl rollout status deployment/user-service -n "$namespace" --timeout=10s || print_warning "Status check timed out"
                 kubectl get deployment user-service -n "$namespace" -o wide
             else
-                print_warning "[DRY-RUN] Would show auth service status"
+                print_warning "[DRY-RUN] Would show user service status"
             fi
             ;;
         "gateway")
@@ -252,7 +252,7 @@ show_deployment_status() {
             fi
             ;;
         "all")
-            show_deployment_status "auth" "$env"
+            show_deployment_status "user" "$env"
             print_status ""
             show_deployment_status "gateway" "$env"
             ;;
@@ -270,7 +270,7 @@ rollback_service() {
     local deployment=""
     
     case "$service" in
-        "auth")
+        "user")
             namespace="gripday-user$namespace_suffix"
             deployment="user-service"
             ;;
@@ -371,7 +371,7 @@ main() {
         "rollback")
             confirm_production_rollback
             if [[ "$SERVICE" == "all" ]]; then
-                rollback_service "auth" "$ENVIRONMENT" "$REVISION"
+                rollback_service "user" "$ENVIRONMENT" "$REVISION"
                 rollback_service "gateway" "$ENVIRONMENT" "$REVISION"
             else
                 rollback_service "$SERVICE" "$ENVIRONMENT" "$REVISION"

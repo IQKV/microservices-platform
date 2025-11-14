@@ -48,7 +48,7 @@ else
 fi
 
 # Validate service-specific configurations
-echo "📋 Validating auth service configuration..."
+echo "📋 Validating user service configuration..."
 if docker-compose -f gripday-user-service/docker-compose.yml config > /dev/null 2>&1; then
     echo "✅ User service configuration is valid"
 else

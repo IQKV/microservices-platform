@@ -123,7 +123,7 @@ metadata:
     app.kubernetes.io/part-of: gripday
 data:
   redis.conf: |
-    # Redis configuration for auth service
+    # Redis configuration for user service
     maxmemory 256mb
     maxmemory-policy allkeys-lru
     appendonly yes

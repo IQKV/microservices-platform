@@ -15,7 +15,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
- * Enhanced security configuration for the auth service. Configures JWT-based authentication, CSRF protection, and rate limiting.
+ * Enhanced security configuration for the user service. Configures JWT-based authentication, CSRF protection, and rate limiting.
  */
 @Configuration
 @EnableWebSecurity

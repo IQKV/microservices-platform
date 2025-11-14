@@ -249,7 +249,7 @@ configure_autoscaling() {
     print_status "Configuring auto-scaling for $service in $env environment..."
     
     case "$service" in
-        "auth")
+        "user")
             print_status "Applying HPA for user service..."
             # User service typically doesn't need aggressive auto-scaling
             if [[ "$DRY_RUN" == "false" ]]; then

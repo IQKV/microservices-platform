@@ -121,9 +121,9 @@ wait_for_services() {
     fi
 }
 
-# Check auth service availability
+# Check user service availability
 check_auth_service() {
-    log_info "Checking auth service availability..."
+    log_info "Checking user service availability..."
     
     local auth_service_url="http://localhost:8080"
     
@@ -131,7 +131,7 @@ check_auth_service() {
         log_success "User service is running and accessible"
     else
         log_warning "User service is not running at $auth_service_url"
-        log_info "Please start the auth service first or update the configuration"
+        log_info "Please start the user service first or update the configuration"
     fi
 }
 
@@ -158,7 +158,7 @@ display_setup_info() {
     echo "  - Environment File: $ENV_FILE"
     echo
     log_info "Next Steps:"
-    echo "  1. Ensure auth service is running on port 8080"
+    echo "  1. Ensure user service is running on port 8080"
     echo "  2. Start the gateway service: mvn spring-boot:run -Dspring.profiles.active=local"
     echo "  3. Access Swagger UI: http://localhost:8080/swagger-ui.html"
     echo "  4. Check health: http://localhost:8080/actuator/health"

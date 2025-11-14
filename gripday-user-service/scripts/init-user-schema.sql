@@ -1,5 +1,5 @@
 -- Initialize User Service Schema
--- This script creates the basic schema structure for the auth service
+-- This script creates the basic schema structure for the user service
 -- Note: Liquibase will handle the actual table creation
 
 -- Set the search path

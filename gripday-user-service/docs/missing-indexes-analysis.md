@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Analysis of the auth service entities, repositories, and existing migrations reveals **8 critical missing indexes** that would significantly improve query performance, especially for multi-tenant operations, email verification workflows, and audit log queries.
+Analysis of the user service entities, repositories, and existing migrations reveals **8 critical missing indexes** that would significantly improve query performance, especially for multi-tenant operations, email verification workflows, and audit log queries.
 
 ## Current Index Coverage
 

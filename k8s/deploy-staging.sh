@@ -181,9 +181,9 @@ update_image_tags() {
     fi
 }
 
-# Function to deploy auth service to staging
+# Function to deploy user service to staging
 deploy_auth_service_staging() {
-    print_status "Deploying auth service to staging..."
+    print_status "Deploying user service to staging..."
     
     # Apply staging configs and secrets
     execute_kubectl "apply -f user-service/configmap.yaml"
@@ -226,11 +226,11 @@ deploy_auth_service_staging() {
         kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n staging-env --timeout=300s
     fi
     
-    # Deploy auth service with updated image
+    # Deploy user service with updated image
     if [[ "$DRY_RUN" == "false" ]]; then
         execute_kubectl "apply -f /tmp/user-service-deployment-staging.yaml"
     else
-        print_warning "[DRY-RUN] Would deploy auth service to staging"
+        print_warning "[DRY-RUN] Would deploy user service to staging"
     fi
     
     # Deploy service and ingress
@@ -300,7 +300,7 @@ verify_staging_deployment() {
     print_status "Verifying staging deployment..."
     
     # Wait for services to be ready
-    print_status "Waiting for auth service to be ready in staging..."
+    print_status "Waiting for user service to be ready in staging..."
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n staging-env --timeout=300s
     
     print_status "Waiting for gateway service to be ready in staging..."

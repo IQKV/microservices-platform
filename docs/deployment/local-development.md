@@ -81,7 +81,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 ### 6. Verify Deployment
 
 ```bash
-# Check auth service health
+# Check user service health
 curl http://localhost:8080/actuator/health
 
 # Check gateway service health

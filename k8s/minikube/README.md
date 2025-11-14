@@ -197,7 +197,7 @@ kubectl get pods -n gripday -w
 ### Access Pod Shell
 
 ```bash
-# Access auth service pod
+# Access user service pod
 kubectl exec -it deployment/user-service -n gripday -- sh
 
 # Access PostgreSQL
@@ -210,7 +210,7 @@ kubectl exec -it deployment/postgres-user -n gripday -- psql -U gripday_user -d 
 # Scale gateway service
 kubectl scale deployment/gateway-service --replicas=2 -n gripday
 
-# Scale auth service
+# Scale user service
 kubectl scale deployment/user-service --replicas=2 -n gripday
 ```
 

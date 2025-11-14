@@ -83,7 +83,7 @@ wait_for_services() {
     while [ $attempt -le $max_attempts ]; do
         local all_healthy=true
         
-        # Check auth service
+        # Check user service
         if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps gripday-user-service | grep -q "Up (healthy)"; then
             all_healthy=false
         fi
