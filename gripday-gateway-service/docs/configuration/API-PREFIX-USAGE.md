@@ -101,11 +101,11 @@ api-prefix:
 
 The `strip-count` property removes path segments from the beginning of the path:
 
-| Original Path           | strip-count | Forwarded Path  |
-| ----------------------- | ----------- | --------------- |
+| Original Path                 | strip-count | Forwarded Path        |
+| ----------------------------- | ----------- | --------------------- |
 | `/api/v1/admin/users`         | 0           | `/api/v1/admin/users` |
 | `/api/v1/admin/users`         | 1           | `/v1/admin/users`     |
-| `/api/v1/admin/users`         | 2           | `/users`        |
+| `/api/v1/admin/users`         | 2           | `/users`              |
 | `/api/gateway/v1/admin/users` | 2           | `/v1/admin/users`     |
 
 ## Environment-Specific Configuration
