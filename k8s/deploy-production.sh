@@ -396,9 +396,9 @@ verify_production_deployment() {
     # Check auth service health
     local auth_health=$(kubectl get pods -l app.kubernetes.io/name=gripday-user-service -n gripday-production-env -o jsonpath='{.items[*].status.phase}')
     if [[ "$auth_health" =~ "Running" ]]; then
-        print_status "✓ Auth service health check passed"
+        print_status "✓ User service health check passed"
     else
-        print_error "✗ Auth service health check failed"
+        print_error "✗ User service health check failed"
         return 1
     fi
     

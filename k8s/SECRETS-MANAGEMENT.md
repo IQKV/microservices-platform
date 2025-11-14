@@ -73,13 +73,13 @@ For simpler deployments, use native Kubernetes secrets with strict RBAC:
 # Create secret from file (never commit the file)
 kubectl create secret generic user-service-secrets \
   --from-env-file=.env.production \
-  --namespace=gripday-auth
+  --namespace=gripday-user
 
 # Or from literals
 kubectl create secret generic user-service-secrets \
   --from-literal=GRIPDAY_DATABASE_PASSWORD=$(openssl rand -base64 32) \
   --from-literal=GRIPDAY_AUTH_JWT_SECRET=$(openssl rand -base64 64) \
-  --namespace=gripday-auth
+  --namespace=gripday-user
 ```
 
 ### 4. SOPS (Secrets OPerationS)
@@ -134,7 +134,7 @@ rules:
     resources:
       - group: ""
         resources: ["secrets"]
-    namespaces: ["gripday-auth", "gripday-bookstore", "gripday-gateway"]
+    namespaces: ["gripday-user", "gripday-bookstore", "gripday-gateway"]
 ```
 
 ### 3. RBAC Restrictions
@@ -222,7 +222,7 @@ resources:
          auth:
            kubernetes:
              mountPath: "kubernetes"
-             role: "gripday-auth"
+             role: "gripday-user"
    ```
 
 4. **Create ExternalSecret resources** (see example above)

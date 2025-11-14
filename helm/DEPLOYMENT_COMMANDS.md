@@ -34,14 +34,14 @@ helm install gripday . -f values-production.yaml --namespace production --create
 ```bash
 # Install
 helm install user-service ./helm/user-service \
-  --namespace gripday-auth \
+  --namespace gripday-user \
   --create-namespace
 
 # Upgrade
-helm upgrade user-service ./helm/user-service -n gripday-auth
+helm upgrade user-service ./helm/user-service -n gripday-user
 
 # Uninstall
-helm uninstall user-service -n gripday-auth
+helm uninstall user-service -n gripday-user
 ```
 
 ### Bookstore Service
@@ -140,7 +140,7 @@ helm history gripday -n gripday
 kubectl get pods -A | grep gripday
 
 # Check specific namespace
-kubectl get pods -n gripday-auth
+kubectl get pods -n gripday-user
 kubectl get pods -n gripday-bookstore
 kubectl get pods -n gripday-gateway
 
@@ -161,7 +161,7 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Port forward auth service
-kubectl port-forward -n gripday-auth svc/user-service 8080:8080
+kubectl port-forward -n gripday-user svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Port forward bookstore service
@@ -177,7 +177,7 @@ curl http://localhost:8080/actuator/health
 # Upgrade single service
 helm upgrade user-service ./helm/user-service \
   --set replicaCount=3 \
-  -n gripday-auth
+  -n gripday-user
 
 # Upgrade platform
 helm upgrade gripday ./helm/gripday \
@@ -191,7 +191,7 @@ helm upgrade gripday ./helm/gripday \
 # Update auth service image
 helm upgrade user-service ./helm/user-service \
   --set image.tag=1.1.0 \
-  -n gripday-auth
+  -n gripday-user
 
 # Update via umbrella chart
 helm upgrade gripday ./helm/gripday \
@@ -203,10 +203,10 @@ helm upgrade gripday ./helm/gripday \
 
 ```bash
 # Restart deployment
-kubectl rollout restart deployment/user-service -n gripday-auth
+kubectl rollout restart deployment/user-service -n gripday-user
 
 # Check rollout status
-kubectl rollout status deployment/user-service -n gripday-auth
+kubectl rollout status deployment/user-service -n gripday-user
 ```
 
 ## Rollback Operations
@@ -247,8 +247,8 @@ helm lint ./helm/user-service
 kubectl logs -f -n gripday-gateway \
   -l app.kubernetes.io/name=gripday-gateway-service
 
-# Auth service logs
-kubectl logs -f -n gripday-auth \
+# User service logs
+kubectl logs -f -n gripday-user \
   -l app.kubernetes.io/name=gripday-user-service
 
 # Bookstore service logs
@@ -266,10 +266,10 @@ kubectl logs <pod-name> -n <namespace> --previous
 kubectl describe pod <pod-name> -n <namespace>
 
 # Describe deployment
-kubectl describe deployment user-service -n gripday-auth
+kubectl describe deployment user-service -n gripday-user
 
 # Describe service
-kubectl describe svc user-service -n gripday-auth
+kubectl describe svc user-service -n gripday-user
 ```
 
 ## Scaling
@@ -278,12 +278,12 @@ kubectl describe svc user-service -n gripday-auth
 
 ```bash
 # Scale deployment
-kubectl scale deployment user-service --replicas=5 -n gripday-auth
+kubectl scale deployment user-service --replicas=5 -n gripday-user
 
 # Scale via Helm upgrade
 helm upgrade user-service ./helm/user-service \
   --set replicaCount=5 \
-  -n gripday-auth
+  -n gripday-user
 ```
 
 ### Check HPA
@@ -305,7 +305,7 @@ kubectl describe hpa bookstore-service-hpa -n gripday-bookstore
 helm uninstall gripday -n gripday
 
 # Uninstall individual services
-helm uninstall user-service -n gripday-auth
+helm uninstall user-service -n gripday-user
 helm uninstall bookstore-service -n gripday-bookstore
 helm uninstall gateway-service -n gripday-gateway
 ```
@@ -314,7 +314,7 @@ helm uninstall gateway-service -n gripday-gateway
 
 ```bash
 # Delete namespaces (includes all resources)
-kubectl delete namespace gripday-auth
+kubectl delete namespace gripday-user
 kubectl delete namespace gripday-bookstore
 kubectl delete namespace gripday-gateway
 kubectl delete namespace gripday
@@ -330,7 +330,7 @@ kubectl get pvc -A
 kubectl delete pvc <pvc-name> -n <namespace>
 
 # Delete all PVCs in namespace
-kubectl delete pvc --all -n gripday-auth
+kubectl delete pvc --all -n gripday-user
 ```
 
 ## Backup and Restore
@@ -342,12 +342,12 @@ kubectl delete pvc --all -n gripday-auth
 helm get values gripday -n gripday > backup-values.yaml
 
 # Backup all resources
-kubectl get all -n gripday-auth -o yaml > backup-auth.yaml
+kubectl get all -n gripday-user -o yaml > backup-auth.yaml
 kubectl get all -n gripday-bookstore -o yaml > backup-bookstore.yaml
 kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 
 # Backup databases
-kubectl exec -n gripday-auth user-postgres-<pod> -- \
+kubectl exec -n gripday-user user-postgres-<pod> -- \
   pg_dump -U gripday_user gripday_user_local > backup-user-db.sql
 ```
 
@@ -402,11 +402,11 @@ helm install gripday ./helm/gripday \
 ```bash
 # Test DNS resolution
 kubectl run test-dns --image=busybox --rm -it -- \
-  nslookup user-service.gripday-auth.svc.cluster.local
+  nslookup user-service.gripday-user.svc.cluster.local
 
 # Test service connectivity
 kubectl run test-curl --image=curlimages/curl --rm -it -- \
-  curl http://user-service.gripday-auth.svc.cluster.local:8080/actuator/health
+  curl http://user-service.gripday-user.svc.cluster.local:8080/actuator/health
 ```
 
 ### Load Testing

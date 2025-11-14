@@ -61,7 +61,7 @@ ACTIONS:
     auto                    Enable/configure auto-scaling
 
 EXAMPLES:
-    $0 -s auth -r 3                    # Scale auth service to 3 replicas
+    $0 -s user -r 3                    # Scale user service to 3 replicas
     $0 -e production -s gateway -r 10  # Scale gateway to 10 replicas in prod
     $0 -a status                       # Show scaling status for all services
     $0 -a auto -s gateway              # Configure auto-scaling for gateway
@@ -170,7 +170,7 @@ scale_service() {
     local deployment=""
     
     case "$service" in
-        "auth")
+        "user")
             deployment="user-service"
             ;;
         "gateway")
@@ -202,14 +202,14 @@ show_scaling_status() {
     print_status "Scaling status for $env environment:"
     print_status ""
     
-    if [[ "$service" == "all" || "$service" == "auth" ]]; then
-        local auth_namespace="$namespace"
-        print_status "User Service ($auth_namespace):"
+    if [[ "$service" == "all" || "$service" == "user" ]]; then
+        local user_namespace="$namespace"
+        print_status "User Service ($user_namespace):"
         if [[ "$DRY_RUN" == "false" ]]; then
-            kubectl get deployment user-service -n "$auth_namespace" -o wide 2>/dev/null || print_warning "Auth service not found"
-            kubectl get hpa -n "$auth_namespace" 2>/dev/null || print_debug "No HPA configured for auth service"
+            kubectl get deployment user-service -n "$user_namespace" -o wide 2>/dev/null || print_warning "User service not found"
+            kubectl get hpa -n "$user_namespace" 2>/dev/null || print_debug "No HPA configured for user service"
         else
-            print_warning "[DRY-RUN] Would show auth service status"
+            print_warning "[DRY-RUN] Would show user service status"
         fi
         print_status ""
     fi
@@ -250,12 +250,12 @@ configure_autoscaling() {
     
     case "$service" in
         "auth")
-            print_status "Applying HPA for auth service..."
-            # Auth service typically doesn't need aggressive auto-scaling
+            print_status "Applying HPA for user service..."
+            # User service typically doesn't need aggressive auto-scaling
             if [[ "$DRY_RUN" == "false" ]]; then
                 kubectl autoscale deployment user-service --cpu-percent=70 --min=2 --max=10 -n "$namespace"
             else
-                print_warning "[DRY-RUN] Would configure auth service HPA"
+                print_warning "[DRY-RUN] Would configure user service HPA"
             fi
             ;;
         "gateway")
@@ -267,7 +267,7 @@ configure_autoscaling() {
             execute_kubectl "apply -f bookstore-service/bookstore-service-hpa.yaml"
             ;;
         "all")
-            configure_autoscaling "auth" "$env"
+            configure_autoscaling "user" "$env"
             configure_autoscaling "gateway" "$env"
             configure_autoscaling "bookstore" "$env"
             ;;
@@ -313,7 +313,7 @@ main() {
     case "$ACTION" in
         "scale")
             if [[ "$SERVICE" == "all" ]]; then
-                scale_service "auth" "$REPLICAS" "$ENVIRONMENT"
+                scale_service "user" "$REPLICAS" "$ENVIRONMENT"
                 scale_service "gateway" "$REPLICAS" "$ENVIRONMENT"
                 scale_service "bookstore" "$REPLICAS" "$ENVIRONMENT"
             else

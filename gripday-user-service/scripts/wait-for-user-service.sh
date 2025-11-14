@@ -46,8 +46,8 @@ usage() {
     echo "Usage: $0 [HOST] [PORT] [TIMEOUT] [INTERVAL]"
     echo
     echo "Parameters:"
-    echo "  HOST     - Auth service host (default: $DEFAULT_HOST)"
-    echo "  PORT     - Auth service port (default: $DEFAULT_PORT)"
+    echo "  HOST     - User service host (default: $DEFAULT_HOST)"
+    echo "  PORT     - User service port (default: $DEFAULT_PORT)"
     echo "  TIMEOUT  - Maximum wait time in seconds (default: $DEFAULT_TIMEOUT)"
     echo "  INTERVAL - Check interval in seconds (default: $DEFAULT_INTERVAL)"
     echo
@@ -113,7 +113,7 @@ wait_for_health() {
         
         # Check if service is responding
         if curl -f -s -m 10 "$HEALTH_URL" > /dev/null 2>&1; then
-            log_success "Auth service is responding to health checks"
+            log_success "User service is responding to health checks"
             
             # Check detailed health status
             local health_response
@@ -123,7 +123,7 @@ wait_for_health() {
             status=$(echo "$health_response" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 2>/dev/null || echo "UNKNOWN")
             
             if [ "$status" = "UP" ]; then
-                log_success "Auth service is healthy (status: UP)"
+                log_success "User service is healthy (status: UP)"
                 
                 # Check readiness if endpoint exists
                 if curl -f -s -m 5 "$READY_URL" > /dev/null 2>&1; then
@@ -134,26 +134,26 @@ wait_for_health() {
                     ready_status=$(echo "$ready_response" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 2>/dev/null || echo "UNKNOWN")
                     
                     if [ "$ready_status" = "UP" ]; then
-                        log_success "Auth service is ready to accept requests"
+                        log_success "User service is ready to accept requests"
                         return 0
                     else
-                        log_info "Auth service is healthy but not ready (readiness: $ready_status)"
+                        log_info "User service is healthy but not ready (readiness: $ready_status)"
                     fi
                 else
-                    log_success "Auth service is healthy and ready"
+                    log_success "User service is healthy and ready"
                     return 0
                 fi
             else
-                log_info "Auth service is responding but not healthy (status: $status)"
+                log_info "User service is responding but not healthy (status: $status)"
             fi
         else
-            log_info "Attempt $attempts: Auth service not responding yet..."
+            log_info "Attempt $attempts: User service not responding yet..."
         fi
         
         sleep "$INTERVAL"
     done
     
-    log_error "Timeout reached after ${TIMEOUT}s. Auth service is not healthy."
+    log_error "Timeout reached after ${TIMEOUT}s. User service is not healthy."
     return 1
 }
 
@@ -199,10 +199,10 @@ main() {
     if wait_for_health; then
         echo
         display_service_info
-        log_success "Auth service is healthy and ready!"
+        log_success "User service is healthy and ready!"
         exit 0
     else
-        log_error "Auth service health check failed"
+        log_error "User service health check failed"
         exit 1
     fi
 }

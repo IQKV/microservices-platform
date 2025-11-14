@@ -160,7 +160,7 @@ Keep existing k8s deployments, deploy Helm charts to different namespaces:
 ```bash
 # Deploy Helm charts with different namespace
 helm install gripday-helm ./helm/gripday \
-  --set user-service.namespace.name=gripday-auth-helm \
+  --set user-service.namespace.name=gripday-user-helm \
   --set bookstore-service.namespace.name=gripday-bookstore-helm \
   --set gateway-service.namespace.name=gripday-gateway-helm
 ```
@@ -172,7 +172,7 @@ Test and validate, then migrate traffic.
 1. **Backup current state**:
 
 ```bash
-kubectl get all -n gripday-auth -o yaml > backup-auth.yaml
+kubectl get all -n gripday-user -o yaml > backup-auth.yaml
 kubectl get all -n gripday-bookstore -o yaml > backup-bookstore.yaml
 kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 ```
@@ -220,7 +220,7 @@ kubectl apply -f k8s/user-service/
 
 ```bash
 helm upgrade --install user-service ./helm/user-service \
-  --namespace gripday-auth \
+  --namespace gripday-user \
   --create-namespace
 ```
 

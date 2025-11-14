@@ -534,7 +534,7 @@ spring:
 ### API Documentation
 
 - [Complete API Reference](docs/api/complete-api-reference.md) - Comprehensive endpoint documentation
-- [Authentication API](gripday-user-service/docs/api/authentication.md) - Auth service specific endpoints
+- [Authentication API](gripday-user-service/docs/api/authentication.md) - User service specific endpoints
 - Interactive Swagger UI: [Gateway](http://localhost:8080/swagger-ui.html) | [Auth](http://localhost:8080/swagger-ui.html)
 
 ### Deployment and Operations

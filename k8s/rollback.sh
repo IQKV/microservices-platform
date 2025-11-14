@@ -195,7 +195,7 @@ show_deployment_history() {
     
     case "$service" in
         "auth")
-            local namespace="gripday-auth$namespace_suffix"
+            local namespace="gripday-user$namespace_suffix"
             print_status "User Service History:"
             if [[ "$DRY_RUN" == "false" ]]; then
                 kubectl rollout history deployment/user-service -n "$namespace" || print_warning "No history available"
@@ -232,7 +232,7 @@ show_deployment_status() {
     
     case "$service" in
         "auth")
-            local namespace="gripday-auth$namespace_suffix"
+            local namespace="gripday-user$namespace_suffix"
             print_status "User Service Status:"
             if [[ "$DRY_RUN" == "false" ]]; then
                 kubectl rollout status deployment/user-service -n "$namespace" --timeout=10s || print_warning "Status check timed out"
@@ -271,7 +271,7 @@ rollback_service() {
     
     case "$service" in
         "auth")
-            namespace="gripday-auth$namespace_suffix"
+            namespace="gripday-user$namespace_suffix"
             deployment="user-service"
             ;;
         "gateway")

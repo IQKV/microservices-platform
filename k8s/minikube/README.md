@@ -181,7 +181,7 @@ kubectl get all -n gripday
 # Gateway service logs
 kubectl logs -f deployment/gateway-service -n gripday
 
-# Auth service logs
+# User service logs
 kubectl logs -f deployment/user-service -n gripday
 
 # Bookstore service logs

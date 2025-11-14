@@ -20,7 +20,7 @@ helm install user-service ./user-service
 To install in a specific namespace:
 
 ```bash
-helm install user-service ./user-service --namespace gripday-auth --create-namespace
+helm install user-service ./user-service --namespace gripday-user --create-namespace
 ```
 
 ## Uninstalling the Chart
@@ -28,7 +28,7 @@ helm install user-service ./user-service --namespace gripday-auth --create-names
 To uninstall/delete the `user-service` deployment:
 
 ```bash
-helm uninstall user-service --namespace gripday-auth
+helm uninstall user-service --namespace gripday-user
 ```
 
 ## Configuration
@@ -155,25 +155,25 @@ helm install user-service ./user-service -f values-production.yaml
 ### Check pod status
 
 ```bash
-kubectl get pods -n gripday-auth
+kubectl get pods -n gripday-user
 ```
 
 ### View logs
 
 ```bash
-kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-user-service
+kubectl logs -f -n gripday-user -l app.kubernetes.io/name=gripday-user-service
 ```
 
 ### Check service endpoints
 
 ```bash
-kubectl get endpoints -n gripday-auth
+kubectl get endpoints -n gripday-user
 ```
 
 ### Describe pod for events
 
 ```bash
-kubectl describe pod <pod-name> -n gripday-auth
+kubectl describe pod <pod-name> -n gripday-user
 ```
 
 ## Support

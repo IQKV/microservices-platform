@@ -41,7 +41,7 @@ public class GatewayConfig {
     var authServiceConfig = services.get("user-service");
 
     return builder.routes()
-        // Auth service routes - all authentication, user, organization, and tenant management endpoints
+        // User service routes - all authentication, user, organization, and tenant management endpoints
         .route("user-service", r -> r
             .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**", 
                   "/api/v1/organizations/**", "/api/v1/admin/**")

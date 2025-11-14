@@ -10,7 +10,7 @@ user-service:
   enabled: true
   namespace:
     create: true
-    name: gripday-auth
+    name: gripday-user
   replicaCount: 2
   image:
     tag: "1.0.0"

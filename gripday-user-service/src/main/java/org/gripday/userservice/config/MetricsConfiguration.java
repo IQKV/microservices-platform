@@ -65,7 +65,7 @@ public class MetricsConfiguration {
       }));
 
       // Add service tag
-      registry.config().commonTags("service", "gripday-auth");
+      registry.config().commonTags("service", "gripday-user");
     };
   }
 

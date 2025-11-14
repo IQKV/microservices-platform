@@ -21,7 +21,7 @@ metadata:
   name: auth-ui-ingress-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: gripday-auth-ui
+    app.kubernetes.io/name: gripday-user-ui
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: gripday
     environment: staging
@@ -79,7 +79,7 @@ metadata:
   name: auth-ui-ingress-production
   namespace: gripday-production-env
   labels:
-    app.kubernetes.io/name: gripday-auth-ui
+    app.kubernetes.io/name: gripday-user-ui
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: gripday
     environment: production

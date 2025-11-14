@@ -113,7 +113,7 @@ setup_environment_namespaces() {
     
     print_status "Setting up namespaces for $env environment..."
     
-    # Auth service namespaces
+    # User service namespaces
     if [[ "$env" == "local" ]]; then
         execute_kubectl "apply -f user-service/namespace.yaml"
     else
@@ -138,11 +138,11 @@ verify_namespaces() {
     
     local namespaces=()
     if [[ "$env" == "local" ]]; then
-        namespaces=("gripday-auth" "gripday-gateway")
+        namespaces=("gripday-user" "gripday-gateway")
     elif [[ "$env" == "staging" ]]; then
-        namespaces=("gripday-auth-staging" "gripday-gateway-staging")
+        namespaces=("gripday-user-staging" "gripday-gateway-staging")
     elif [[ "$env" == "production" ]]; then
-        namespaces=("gripday-auth-production" "gripday-gateway-production")
+        namespaces=("gripday-user-production" "gripday-gateway-production")
     fi
     
     for ns in "${namespaces[@]}"; do

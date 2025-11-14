@@ -19,7 +19,7 @@ The platform includes:
 ┌─────────────────────────────────────────────────────────────┐
 │                    Docker Network                           │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │   Gateway   │  │    Auth     │  │    Infrastructure   │ │
+│  │   Gateway   │  │    User     │  │    Infrastructure   │ │
 │  │   Service   │  │   Service   │  │                     │ │
 │  │   :8080     │  │    :8080    │  │  PostgreSQL :5432   │ │
 │  └─────────────┘  └─────────────┘  │  Redis      :6379   │ │
@@ -71,7 +71,7 @@ docker-compose logs -f
 | `docker-compose.yml`                         | Base configuration   | Local development      |
 | `docker-compose.staging.yml`                 | Staging overrides    | Staging deployment     |
 | `docker-compose.production.yml`              | Production overrides | Production deployment  |
-| `gripday-user-service/docker-compose.yml`    | Auth service only    | Individual development |
+| `gripday-user-service/docker-compose.yml`    | User service only    | Individual development |
 | `gripday-gateway-service/docker-compose.yml` | Gateway service only | Individual development |
 
 ### Environment Files
@@ -214,7 +214,7 @@ docker compose up -d
 
 - PostgreSQL database
 - Redis cache
-- Auth service
+- User service
 
 ### Gateway Service Only
 

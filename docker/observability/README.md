@@ -15,7 +15,7 @@ This directory contains the complete observability stack for the Gripday microse
 - **Purpose**: Metrics collection and monitoring
 - **Port**: 9090
 - **URL**: http://localhost:9090
-- **Scrapes**: Auth service (8080), Gateway service (8080)
+- **Scrapes**: User service (8080), Gateway service (8080)
 
 ### Grafana
 
@@ -148,7 +148,7 @@ This directory contains the complete observability stack for the Gripday microse
 docker compose -f docker-compose.observability.yml ps
 
 # Check service health
-curl http://localhost:8080/actuator/health  # Auth service
+curl http://localhost:8080/actuator/health  # User service
 curl http://localhost:8080/actuator/health  # Gateway service
 
 # Check metrics endpoints

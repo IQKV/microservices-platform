@@ -158,7 +158,7 @@ services:
 networks:
   auth-network:
     driver: bridge
-    name: gripday-auth-network-local
+    name: gripday-user-network-local
     ipam:
       config:
         - subnet: 172.20.0.0/16

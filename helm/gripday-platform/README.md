@@ -62,12 +62,12 @@ helm install gripday . --namespace gripday --create-namespace
 
 ```bash
 # Check all pods
-kubectl get pods -n gripday-auth
+kubectl get pods -n gripday-user
 kubectl get pods -n gripday-bookstore
 kubectl get pods -n gripday-gateway
 
 # Check services
-kubectl get svc -n gripday-auth
+kubectl get svc -n gripday-user
 kubectl get svc -n gripday-bookstore
 kubectl get svc -n gripday-gateway
 
@@ -149,7 +149,7 @@ helm upgrade gripday . --set user-service.image.tag=1.1.0
 helm uninstall gripday --namespace gripday
 
 # Clean up namespaces
-kubectl delete namespace gripday-auth
+kubectl delete namespace gripday-user
 kubectl delete namespace gripday-bookstore
 kubectl delete namespace gripday-gateway
 ```
@@ -163,8 +163,8 @@ kubectl delete namespace gripday-gateway
 kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
-# Auth service health
-kubectl port-forward -n gripday-auth svc/user-service 8080:8080
+# User service health
+kubectl port-forward -n gripday-user svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Bookstore service health
@@ -178,8 +178,8 @@ curl http://localhost:8080/actuator/health
 # Gateway logs
 kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-service
 
-# Auth service logs
-kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-user-service
+# User service logs
+kubectl logs -f -n gripday-user -l app.kubernetes.io/name=gripday-user-service
 
 # Bookstore service logs
 kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
@@ -200,7 +200,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 
    ```bash
    # Test DNS resolution
-   kubectl run test-pod --image=busybox --rm -it -- nslookup user-service.gripday-auth.svc.cluster.local
+   kubectl run test-pod --image=busybox --rm -it -- nslookup user-service.gripday-user.svc.cluster.local
    ```
 
 3. **Database connection issues**
@@ -265,7 +265,7 @@ Network policies are enabled by default for security:
 kubectl scale deployment gateway-service -n gripday-gateway --replicas=5
 
 # Scale auth service
-kubectl scale deployment user-service -n gripday-auth --replicas=3
+kubectl scale deployment user-service -n gripday-user --replicas=3
 ```
 
 ### Auto-scaling (HPA)
@@ -287,7 +287,7 @@ kubectl get hpa -A
 
 ```bash
 # Backup auth database
-kubectl exec -n gripday-auth user-postgres-<pod> -- pg_dump -U gripday_user gripday_user_local > auth-backup.sql
+kubectl exec -n gripday-user user-postgres-<pod> -- pg_dump -U gripday_user gripday_user_local > auth-backup.sql
 
 # Backup bookstore database
 kubectl exec -n gripday-bookstore bookstore-postgres-<pod> -- pg_dump -U gripday_user gripday_bookstore_local > bookstore-backup.sql

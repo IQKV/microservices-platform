@@ -106,7 +106,7 @@ Created 4 priority classes and assigned them to workloads:
 
 | Priority Class            | Value     | Assigned To            |
 | ------------------------- | --------- | ---------------------- |
-| `high-priority`           | 1,000,000 | Gateway, Auth services |
+| `high-priority`           | 1,000,000 | Gateway, User services |
 | `infrastructure-priority` | 900,000   | PostgreSQL, Redis      |
 | `medium-priority`         | 500,000   | Bookstore service      |
 | `low-priority`            | 100,000   | Batch jobs (future)    |
@@ -298,24 +298,24 @@ kubectl apply -f k8s/user-service/user-service-ingress.yaml
 
 ```bash
 # Check pod security standards compliance
-kubectl label --dry-run=server --overwrite ns gripday-auth \
+kubectl label --dry-run=server --overwrite ns gripday-user \
   pod-security.kubernetes.io/enforce=restricted
 
 # Verify priority classes
 kubectl get priorityclasses
 
 # Check resource quotas
-kubectl get resourcequota -n gripday-auth
-kubectl describe resourcequota -n gripday-auth
+kubectl get resourcequota -n gripday-user
+kubectl describe resourcequota -n gripday-user
 
 # Verify topology spread
-kubectl get pods -n gripday-auth -o wide
+kubectl get pods -n gripday-user -o wide
 
 # Check security contexts
-kubectl get pod <pod-name> -n gripday-auth -o jsonpath='{.spec.securityContext}'
+kubectl get pod <pod-name> -n gripday-user -o jsonpath='{.spec.securityContext}'
 
 # Verify image tags (no latest)
-kubectl get pods -n gripday-auth -o jsonpath='{.items[*].spec.containers[*].image}'
+kubectl get pods -n gripday-user -o jsonpath='{.items[*].spec.containers[*].image}'
 ```
 
 ## 📊 Before vs After Comparison

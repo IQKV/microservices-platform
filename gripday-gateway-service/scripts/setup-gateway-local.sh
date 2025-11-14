@@ -128,9 +128,9 @@ check_auth_service() {
     local auth_service_url="http://localhost:8080"
     
     if curl -f -s "$auth_service_url/actuator/health" &> /dev/null; then
-        log_success "Auth service is running and accessible"
+        log_success "User service is running and accessible"
     else
-        log_warning "Auth service is not running at $auth_service_url"
+        log_warning "User service is not running at $auth_service_url"
         log_info "Please start the auth service first or update the configuration"
     fi
 }

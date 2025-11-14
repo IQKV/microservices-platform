@@ -10,7 +10,7 @@ global:
 # Namespace configuration
 namespace:
   create: true
-  name: gripday-auth
+  name: gripday-user
   labels:
     app.kubernetes.io/component: authentication
     environment: local

@@ -137,7 +137,7 @@ check_prerequisites() {
         eval $(minikube docker-env)
         
         if ! docker image inspect gripday/user-service:latest &>/dev/null; then
-            print_warning "Auth service image not found, will build..."
+            print_warning "User service image not found, will build..."
         fi
         
         if ! docker image inspect gripday/gateway-service:latest &>/dev/null; then
@@ -232,10 +232,10 @@ deploy_auth_service() {
     # Wait for databases to be ready
     if [[ "$DRY_RUN" == "false" ]]; then
         print_status "Waiting for PostgreSQL to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-auth --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-user --timeout=300s
         
         print_status "Waiting for Redis to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-auth --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-user --timeout=300s
     fi
     
     # Deploy auth service
@@ -243,7 +243,7 @@ deploy_auth_service() {
     execute_kubectl "apply -f user-service/user-service-service.yaml"
     execute_kubectl "apply -f user-service/user-service-ingress.yaml"
     
-    print_status "Auth service deployed successfully"
+    print_status "User service deployed successfully"
 }
 
 # Function to deploy gateway service
@@ -320,7 +320,7 @@ verify_deployment() {
     
     # Wait for auth service to be ready
     print_status "Waiting for auth service to be ready..."
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth --timeout=300s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-user --timeout=300s
     
     # Wait for gateway service to be ready
     print_status "Waiting for gateway service to be ready..."

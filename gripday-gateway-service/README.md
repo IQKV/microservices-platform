@@ -23,7 +23,7 @@ docker compose up -d redis
 2. **Ensure User Service is running:**
 
 ```bash
-# Auth service should be available at http://localhost:8080
+# User service should be available at http://localhost:8080
 curl http://localhost:8080/actuator/health
 ```
 
@@ -56,7 +56,7 @@ This allows clean URLs in production while maintaining clear API identification 
 The gateway automatically routes requests to backend services:
 
 ```bash
-# Auth service routes (no authentication required)
+# User service routes (no authentication required)
 # Local/Staging
 curl http://localhost:8080/api/v1/auth/login
 curl http://localhost:8080/api/v1/auth/signup

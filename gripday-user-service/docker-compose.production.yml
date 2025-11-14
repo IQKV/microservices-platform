@@ -249,7 +249,7 @@ services:
 networks:
   auth-network-production:
     driver: bridge
-    name: gripday-auth-network-production
+    name: gripday-user-network-production
     ipam:
       config:
         - subnet: 172.22.0.0/16

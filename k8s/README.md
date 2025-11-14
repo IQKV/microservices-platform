@@ -11,7 +11,7 @@ k8s/
 │   ├── QUICKSTART.md     # 3-step quick start guide
 │   ├── all-in-one.yaml   # Deploy entire platform
 │   └── deploy-*.sh/ps1   # Automated deployment scripts
-├── user-service/          # Auth service production manifests
+├── user-service/          # User service production manifests
 ├── gateway-service/       # Gateway service production manifests
 ├── bookstore-service/     # Bookstore service production manifests
 └── scripts/              # Deployment automation scripts

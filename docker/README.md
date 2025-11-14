@@ -85,7 +85,7 @@ All services include health checks:
 
 The platform uses named volumes for data persistence:
 
-- `gripday_postgres_auth_data` - Auth service database
+- `gripday_postgres_auth_data` - User service database
 - `gripday_redis_data` - Redis cache data
 - `gripday_prometheus_data` - Prometheus metrics
 - `gripday_grafana_data` - Grafana dashboards

@@ -539,7 +539,7 @@ export class TypedApiClient {
   }
 
   /**
-   * Check Auth service health
+   * Check User service health
    */
   async checkUserServiceHealth(): Promise<HealthCheckResponse> {
     const response = await this.apiClient.request<HealthCheckResponse>({

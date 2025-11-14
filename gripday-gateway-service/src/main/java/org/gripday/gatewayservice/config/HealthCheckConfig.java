@@ -92,7 +92,7 @@ public class HealthCheckConfig {
   }
 
   /**
-   * Auth service health indicator implementation.
+   * User service health indicator implementation.
    */
   public static class UserServiceHealthIndicator implements ReactiveHealthIndicator {
 

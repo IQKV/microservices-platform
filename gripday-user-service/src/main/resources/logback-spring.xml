@@ -146,9 +146,9 @@
 
         <!-- Security Events Appender -->
         <appender name="SECURITY" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>logs/gripday-auth-security.log</file>
+            <file>logs/gripday-user-security.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>logs/gripday-auth-security.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <fileNamePattern>logs/gripday-user-security.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
                 <maxFileSize>100MB</maxFileSize>
                 <maxHistory>365</maxHistory>
                 <totalSizeCap>5GB</totalSizeCap>

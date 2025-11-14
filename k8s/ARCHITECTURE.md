@@ -264,7 +264,7 @@ Network policies allow Prometheus to scrape all services:
 
 ### Local Environment
 
-- **Namespaces**: Separate per service (`gripday-auth`, `gripday-gateway`, `gripday-bookstore`)
+- **Namespaces**: Separate per service (`gripday-user`, `gripday-gateway`, `gripday-bookstore`)
 - **Reason**: Mirrors production-like namespace complexity for testing
 
 ## API Gateway Pattern (BFF) Details

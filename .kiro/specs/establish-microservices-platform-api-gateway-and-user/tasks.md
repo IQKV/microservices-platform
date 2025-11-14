@@ -255,7 +255,7 @@
 
 - [x] 9. Create basic documentation
   - Create README.md files for each service with quick start guides:
-    - Auth service README with authentication endpoint examples
+    - User service README with authentication endpoint examples
     - Gateway service README with routing and security information
     - Include curl examples for signup, login, refresh, and logout endpoints
   - Document API endpoints with essential information:

@@ -150,7 +150,7 @@ verify_configs() {
     
     print_status "Verifying ConfigMaps and Secrets for $env environment..."
     
-    local auth_namespace="gripday-auth"
+    local auth_namespace="gripday-user"
     local gateway_namespace="gripday-gateway"
     local bookstore_namespace="gripday-bookstore"
     
@@ -167,15 +167,15 @@ verify_configs() {
     if [[ "$DRY_RUN" == "false" && "$ACTION" == "apply" ]]; then
         # Verify auth service configs
         if kubectl get configmap user-service-config -n "$auth_namespace" &>/dev/null; then
-            print_status "✓ Auth service ConfigMap exists in $auth_namespace"
+            print_status "✓ User service ConfigMap exists in $auth_namespace"
         else
-            print_error "✗ Auth service ConfigMap not found in $auth_namespace"
+            print_error "✗ User service ConfigMap not found in $auth_namespace"
         fi
         
         if kubectl get secret user-service-secrets -n "$auth_namespace" &>/dev/null; then
-            print_status "✓ Auth service Secret exists in $auth_namespace"
+            print_status "✓ User service Secret exists in $auth_namespace"
         else
-            print_error "✗ Auth service Secret not found in $auth_namespace"
+            print_error "✗ User service Secret not found in $auth_namespace"
         fi
         
         # Verify gateway service configs

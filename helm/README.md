@@ -34,7 +34,7 @@ Deploy services independently:
 kubectl apply -f ../k8s/priority-classes.yaml
 
 # 2. Install User Service
-helm install user-service ./user-service --namespace gripday-auth --create-namespace
+helm install user-service ./user-service --namespace gripday-user --create-namespace
 
 # 3. Install Bookstore Service
 helm install bookstore-service ./bookstore-service --namespace gripday-bookstore --create-namespace
@@ -67,7 +67,7 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 **Installation**:
 
 ```bash
-helm install user-service ./user-service -n gripday-auth --create-namespace
+helm install user-service ./user-service -n gripday-user --create-namespace
 ```
 
 **Configuration**: See [user-service/README.md](./user-service/README.md)
@@ -180,7 +180,7 @@ helm list -A
 ### Check Pod Status
 
 ```bash
-kubectl get pods -n gripday-auth
+kubectl get pods -n gripday-user
 kubectl get pods -n gripday-bookstore
 kubectl get pods -n gripday-gateway
 ```
@@ -191,8 +191,8 @@ kubectl get pods -n gripday-gateway
 # Gateway (main entry point)
 kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 
-# Auth service
-kubectl port-forward -n gripday-auth svc/user-service 8080:8080
+# User service
+kubectl port-forward -n gripday-user svc/user-service 8080:8080
 
 # Bookstore service
 kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
@@ -204,8 +204,8 @@ kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
 # Gateway logs
 kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-service
 
-# Auth service logs
-kubectl logs -f -n gripday-auth -l app.kubernetes.io/name=gripday-user-service
+# User service logs
+kubectl logs -f -n gripday-user -l app.kubernetes.io/name=gripday-user-service
 
 # Bookstore service logs
 kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
@@ -215,7 +215,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 
 ```bash
 # Upgrade individual service
-helm upgrade user-service ./user-service -n gripday-auth
+helm upgrade user-service ./user-service -n gripday-user
 
 # Upgrade entire platform
 helm upgrade gripday ./gripday -n gripday
@@ -225,13 +225,13 @@ helm upgrade gripday ./gripday -n gripday
 
 ```bash
 # Uninstall individual service
-helm uninstall user-service -n gripday-auth
+helm uninstall user-service -n gripday-user
 
 # Uninstall entire platform
 helm uninstall gripday -n gripday
 
 # Clean up namespaces
-kubectl delete namespace gripday-auth gripday-bookstore gripday-gateway
+kubectl delete namespace gripday-user gripday-bookstore gripday-gateway
 ```
 
 ## 🎯 Environment-Specific Deployments
@@ -350,7 +350,7 @@ kubectl logs <pod-name> -n <namespace> --previous
 kubectl exec -it <postgres-pod> -n <namespace> -- psql -U gripday_user -d <database>
 
 # Check service DNS
-kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup user-postgres.gripday-auth.svc.cluster.local
+kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup user-postgres.gripday-user.svc.cluster.local
 ```
 
 ## 📚 Additional Resources

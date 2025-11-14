@@ -613,7 +613,7 @@ gripday/                    # Parent project root
 ├── .gitignore                      # Git ignore rules
 ├── checkstyle.xml                  # Code style configuration
 │
-├── gripday-user-service/           # Auth service module
+├── gripday-user-service/           # User service module
 │   ├── pom.xml                     # Service-specific POM
 │   ├── Dockerfile                  # Container configuration
 │   ├── docker-compose.yml         # Service-specific compose
@@ -1967,7 +1967,7 @@ X-Rate-Limit-Reset: 1640998800
   "error": {
     "code": "SYSTEM_002",
     "message": "Service temporarily unavailable",
-    "details": "Auth service is currently unavailable due to circuit breaker",
+    "details": "User service is currently unavailable due to circuit breaker",
     "timestamp": "2024-01-15T10:30:00Z",
     "path": "/api/v1/auth/validate",
     "method": "POST",
@@ -5777,7 +5777,7 @@ cd gripday-user-service
 docker compose up -d
 cd ..
 
-echo "Auth service started successfully!"
+echo "User service started successfully!"
 echo "Service URL: http://localhost:8080"
 echo "Health check: http://localhost:8080/actuator/health"
 ```

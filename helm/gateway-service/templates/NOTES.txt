@@ -25,7 +25,7 @@ Service Information:
 {{- end }}
 
 The Gateway routes traffic to:
-  - User Service: user-service.gripday-auth.svc.cluster.local:8080
+  - User Service: user-service.gripday-user.svc.cluster.local:8080
   - Bookstore Service: bookstore-service.gripday-bookstore.svc.cluster.local:8080
 
 To get the application logs:

@@ -239,10 +239,10 @@ deploy_auth_service_staging() {
         echo "$auth_svc_staging" | kubectl apply -f -
     fi
     
-    # Auth service is only accessible through gateway in staging/production
+    # User service is only accessible through gateway in staging/production
     # execute_kubectl "apply -f user-service/user-service-ingress.yaml"
     
-    print_status "Auth service deployed to staging successfully"
+    print_status "User service deployed to staging successfully"
 }
 
 # Function to deploy gateway service to staging

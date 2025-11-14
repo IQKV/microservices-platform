@@ -48,7 +48,7 @@ public class JwtConfiguration {
 
     var jwk = new RSAKey.Builder(publicKey)
         .privateKey(privateKey)
-        .keyID("gripday-auth-key")
+        .keyID("gripday-user-key")
         .build();
 
     var jwkSet = new JWKSet(jwk);

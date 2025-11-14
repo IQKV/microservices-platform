@@ -120,7 +120,7 @@ docker-compose down -v
 ### Individual Service Deployment
 
 ```bash
-# Auth service only
+# User service only
 cd gripday-user-service
 docker compose up -d
 
@@ -397,7 +397,7 @@ docker system prune -f
 ### Health Checks
 
 ```bash
-# Auth service health
+# User service health
 curl http://localhost:8080/actuator/health
 
 # Gateway service health

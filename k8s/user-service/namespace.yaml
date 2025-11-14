@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-auth
+  name: gripday-user
   labels:
     app.kubernetes.io/name: gripday-user-service
     app.kubernetes.io/component: authentication

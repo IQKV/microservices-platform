@@ -39,7 +39,7 @@
 **Added Public Paths**:
 
 - `/api/v1/auth/validate` - Token validation endpoint
-- `/api/v1/auth/health` - Auth service health check
+- `/api/v1/auth/health` - User service health check
 - `/api/v1/password/forgot` - Password reset initiation
 - `/api/v1/password/reset` - Password reset completion
 - Legacy paths without `/api` prefix for all above

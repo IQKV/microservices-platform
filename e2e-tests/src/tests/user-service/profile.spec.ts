@@ -4,7 +4,7 @@ import { TypedApiClient } from '../../utils/typed-api-client.js';
 import { AuthTestFramework } from '../../utils/auth-test-framework.js';
 import { getEnvironmentConfig } from '../../config/environments.js';
 
-// Coverage for profile endpoints via Auth service through the Gateway
+// Coverage for profile endpoints via User service through the Gateway
 // - GET /api/v1/users/me
 // - PUT /api/v1/users/me
 

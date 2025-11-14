@@ -200,7 +200,7 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: http://user-service.gripday-auth.svc.cluster.local:8080
+          uri: http://user-service.gripday-user.svc.cluster.local:8080
           predicates:
             - Path=/api/*/auth/**
           filters:

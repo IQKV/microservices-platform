@@ -21,15 +21,15 @@ org.gripday.bookstore/
 ```mermaid
 graph TB
     React[React 19 Frontend] --> Gateway[Gateway Service - BFF]
-    Gateway --> Auth[User Service]
+    Gateway --> User[User Service]
     Gateway --> Bookstore[Bookstore Service]
-    Auth --> AuthDB[(Auth PostgreSQL)]
+    User --> UserDB[(User PostgreSQL)]
     Bookstore --> BookDB[(Bookstore PostgreSQL)]
     Gateway --> Redis[(Redis Cache)]
 
     subgraph "Gateway Service (BFF)"
         Router[API Router]
-        AuthRouter[Auth Router /api/v1/auth/*]
+        UserRouter[User Router /api/v1/auth/*]
         BookRouter[Book Router /api/v1/bookstore/*]
         Security[Security Layer]
         RateLimit[Rate Limiting]
@@ -38,10 +38,8 @@ graph TB
     end
 
     subgraph "User Service"
-        AuthResource[Authentication Resource]
-        UserResource[User Management Resource]
-        UserService[User Service]
-        UserService[User Service]
+        AuthenticationResource[Authentication Resource]
+        UserManagementResource[User Management Resource]
     end
 
     subgraph "Bookstore Service"
@@ -54,7 +52,7 @@ graph TB
     end
 
     Note1[No Direct External Access]
-    Auth -.-> Note1
+    User -.-> Note1
     Bookstore -.-> Note1
 ```
 
@@ -415,7 +413,7 @@ public class BookstoreTestConfiguration {
 public class BookTestDataFactory {
 
   public Book createTestBook() {
-    return Book.builder().title("Test Book").author("Test Author").isbn("978-0123456789").description("A test book for unit testing").price(new BigDecimal("29.99")).available(true).build();
+    return Book.builder().title("Test Book").author("Test Useror").isbn("978-0123456789").description("A test book for unit testing").price(new BigDecimal("29.99")).available(true).build();
   }
 }
 ```
@@ -446,15 +444,15 @@ public class UserContextExtractor {
 }
 ```
 
-### Authorization Enforcement
+### Userorization Enforcement
 
 ```java
-@PreAuthorize("hasRole('ADMIN')")
+@PreUserorize("hasRole('ADMIN')")
 public BookDto createBook(CreateBookRequest request, UserContext userContext) {
   // Implementation
 }
 
-@PreAuthorize("hasRole('ADMIN')")
+@PreUserorize("hasRole('ADMIN')")
 public InventoryDto updateInventory(Long bookId, UpdateInventoryRequest request, UserContext userContext) {
   // Implementation
 }
@@ -577,7 +575,7 @@ public record BookCatalogResponse(List<BookDto> books, PaginationMetadata pagina
 
 public record PaginationMetadata(int currentPage, int totalPages, long totalElements, int pageSize, boolean hasNext, boolean hasPrevious, String nextPageUrl, String previousPageUrl) {}
 
-public record FilterMetadata(List<CategoryFilter> categories, PriceRangeFilter priceRange, List<AuthorFilter> authors, AvailabilityFilter availability) {}
+public record FilterMetadata(List<CategoryFilter> categories, PriceRangeFilter priceRange, List<UserorFilter> authors, AvailabilityFilter availability) {}
 ```
 
 #### React 19 Usage Examples
@@ -596,7 +594,7 @@ const token = loginResponse.token;
 // Bookstore operations through Gateway
 const { data: books, pagination, filters } = await fetch('/api/v1/bookstore/books', {
   headers: {
-    'Authorization': `Bearer ${token}`,
+    'Userorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
   }
 }).then(res => res.json());
@@ -604,14 +602,14 @@ const { data: books, pagination, filters } = await fetch('/api/v1/bookstore/book
 // User management through Gateway (admin only)
 const users = await fetch('/api/v1/auth/users', {
   headers: {
-    'Authorization': `Bearer ${token}`,
+    'Userorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
   }
 }).then(res => res.json());
 
 // Unified React 19 state management structure
 const appState = {
-  auth: { user: {...}, token: '...', isAuthenticated: true },
+  auth: { user: {...}, token: '...', isUserenticated: true },
   bookstore: {
     books: [...],
     pagination: { currentPage: 1, totalPages: 10, hasNext: true },
@@ -631,8 +629,8 @@ public class OpenApiConfiguration {
   public OpenAPI bookstoreOpenAPI() {
     return new OpenAPI()
       .info(new Info().title("Bookstore Service API").description("Book catalog and inventory management service").version("v1.0"))
-      .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-      .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+      .addSecurityItem(new SecurityRequirement().addList("bearerUser"))
+      .components(new Components().addSecuritySchemes("bearerUser", new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
   }
 }
 ```

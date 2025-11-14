@@ -86,8 +86,8 @@ kubectl apply -f user-redis-deployment.yaml
 kubectl apply -f user-redis-service.yaml
 
 # 4. Wait for databases to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-auth --timeout=300s
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-auth --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-postgres -n gripday-user --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=user-redis -n gripday-user --timeout=300s
 
 # 5. Deploy application
 kubectl apply -f user-service-deployment.yaml
@@ -95,7 +95,7 @@ kubectl apply -f user-service-service.yaml
 kubectl apply -f user-service-ingress.yaml
 
 # 6. Verify deployment
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-user --timeout=300s
 ```
 
 ## Configuration
@@ -293,54 +293,54 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 1. **Pod not starting**
 
    ```bash
-   kubectl describe pod -l app.kubernetes.io/name=gripday-user-service -n gripday-auth
-   kubectl logs -l app.kubernetes.io/name=gripday-user-service -n gripday-auth
+   kubectl describe pod -l app.kubernetes.io/name=gripday-user-service -n gripday-user
+   kubectl logs -l app.kubernetes.io/name=gripday-user-service -n gripday-user
    ```
 
 2. **Database connection issues**
 
    ```bash
-   kubectl exec -it deployment/user-postgres -n gripday-auth -- psql -U auth_user -d gripday_user_local
+   kubectl exec -it deployment/user-postgres -n gripday-user -- psql -U auth_user -d gripday_user_local
    ```
 
 3. **Redis connection issues**
 
    ```bash
-   kubectl exec -it deployment/user-redis -n gripday-auth -- redis-cli ping
+   kubectl exec -it deployment/user-redis -n gripday-user -- redis-cli ping
    ```
 
 4. **JWT token validation issues**
 
    ```bash
-   kubectl logs -f deployment/user-service -n gripday-auth | grep JWT
+   kubectl logs -f deployment/user-service -n gripday-user | grep JWT
    ```
 
 5. **Service not accessible**
    ```bash
-   kubectl get ingress -n gripday-auth
-   kubectl describe ingress user-service-ingress -n gripday-auth
+   kubectl get ingress -n gripday-user
+   kubectl describe ingress user-service-ingress -n gripday-user
    ```
 
 ### Useful Commands
 
 ```bash
 # Check all resources
-kubectl get all -n gripday-auth
+kubectl get all -n gripday-user
 
 # View logs
-kubectl logs -f deployment/user-service -n gripday-auth
+kubectl logs -f deployment/user-service -n gripday-user
 
 # Port forward for local access
-kubectl port-forward service/user-service 8080:8080 -n gripday-auth
+kubectl port-forward service/user-service 8080:8080 -n gripday-user
 
 # Scale manually
-kubectl scale deployment user-service --replicas=3 -n gripday-auth
+kubectl scale deployment user-service --replicas=3 -n gripday-user
 
 # Check secrets
-kubectl get secrets -n gripday-auth
+kubectl get secrets -n gripday-user
 
 # View configuration
-kubectl describe configmap user-service-config -n gripday-auth
+kubectl describe configmap user-service-config -n gripday-user
 ```
 
 ### Debug Authentication Flow
@@ -435,13 +435,13 @@ The auth service integrates with the gateway service for:
 
 ```bash
 # Run health checks
-kubectl exec -it deployment/user-service -n gripday-auth -- curl localhost:8080/actuator/health
+kubectl exec -it deployment/user-service -n gripday-user -- curl localhost:8080/actuator/health
 
 # Test database connectivity
-kubectl exec -it deployment/user-postgres -n gripday-auth -- pg_isready -U auth_user
+kubectl exec -it deployment/user-postgres -n gripday-user -- pg_isready -U auth_user
 
 # Test Redis connectivity
-kubectl exec -it deployment/user-redis -n gripday-auth -- redis-cli ping
+kubectl exec -it deployment/user-redis -n gripday-user -- redis-cli ping
 
 # Load testing
 kubectl run load-test --image=busybox --rm -it --restart=Never -- /bin/sh

@@ -205,7 +205,7 @@ check_namespace_health() {
     print_status "Checking namespace health for $env environment..."
     
     # Check auth namespace
-    local auth_namespace="gripday-auth$namespace_suffix"
+    local auth_namespace="gripday-user$namespace_suffix"
     if kubectl get namespace "$auth_namespace" &>/dev/null; then
         record_result "Auth Namespace ($env)" "PASS" "Namespace $auth_namespace exists"
     else
@@ -232,13 +232,13 @@ check_pod_health() {
     
     case "$service" in
         "auth")
-            check_service_pods "auth" "gripday-auth$namespace_suffix" "$env"
+            check_service_pods "auth" "gripday-user$namespace_suffix" "$env"
             ;;
         "gateway")
             check_service_pods "gateway" "gripday-gateway$namespace_suffix" "$env"
             ;;
         "all")
-            check_service_pods "auth" "gripday-auth$namespace_suffix" "$env"
+            check_service_pods "auth" "gripday-user$namespace_suffix" "$env"
             check_service_pods "gateway" "gripday-gateway$namespace_suffix" "$env"
             ;;
     esac
@@ -346,13 +346,13 @@ check_service_health() {
     
     case "$service" in
         "auth")
-            check_k8s_service "user-service" "gripday-auth$namespace_suffix" "$env"
+            check_k8s_service "user-service" "gripday-user$namespace_suffix" "$env"
             ;;
         "gateway")
             check_k8s_service "gateway-service" "gripday-gateway$namespace_suffix" "$env"
             ;;
         "all")
-            check_k8s_service "user-service" "gripday-auth$namespace_suffix" "$env"
+            check_k8s_service "user-service" "gripday-user$namespace_suffix" "$env"
             check_k8s_service "gateway-service" "gripday-gateway$namespace_suffix" "$env"
             ;;
     esac
@@ -394,13 +394,13 @@ check_endpoint_connectivity() {
     
     case "$service" in
         "auth")
-            check_service_endpoints "user-service" "gripday-auth$namespace_suffix" "$env" "8080"
+            check_service_endpoints "user-service" "gripday-user$namespace_suffix" "$env" "8080"
             ;;
         "gateway")
             check_service_endpoints "gateway-service" "gripday-gateway$namespace_suffix" "$env" "8080"
             ;;
         "all")
-            check_service_endpoints "user-service" "gripday-auth$namespace_suffix" "$env" "8080"
+            check_service_endpoints "user-service" "gripday-user$namespace_suffix" "$env" "8080"
             check_service_endpoints "gateway-service" "gripday-gateway$namespace_suffix" "$env" "8080"
             ;;
     esac

@@ -84,7 +84,7 @@
 
 - [ ] 7. Implement service integration testing
   - [ ] 7.1 Create gateway service tests
-    - Test request routing from Gateway to Auth and Bookstore services
+    - Test request routing from Gateway to User and Bookstore services
     - Validate rate limiting functionality and Redis-backed storage
     - Test circuit breaker patterns and fallback responses
     - Verify CORS policy enforcement and cross-origin handling

@@ -211,7 +211,7 @@ services:
 networks:
   auth-network-staging:
     driver: bridge
-    name: gripday-auth-network-staging
+    name: gripday-user-network-staging
     ipam:
       config:
         - subnet: 172.21.0.0/16
