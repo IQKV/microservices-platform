@@ -89,27 +89,13 @@ This document summarizes the updates made to Spring configuration metadata files
 }
 ```
 
-#### 3. Updated Property: `gripday.gateway.security.jwt.secret-key`
+#### 3. Removed Property: `gripday.gateway.security.jwt.secret-key`
 
-**Before:**
-```json
-{
-  "name": "gripday.gateway.security.jwt.secret-key",
-  "type": "java.lang.String",
-  "description": "JWT secret key for HMAC validation"
-}
-```
+**Status:** REMOVED
 
-**After:**
-```json
-{
-  "name": "gripday.gateway.security.jwt.secret-key",
-  "type": "java.lang.String",
-  "description": "JWT secret key for HMAC validation (deprecated - use jwk-set-uri with RS256)"
-}
-```
+**Reason:** No longer needed with RSA256. The Gateway now fetches public keys from the JWK endpoint instead of using a shared secret.
 
-**Change:** Marked as deprecated to guide users toward the new RSA256 approach.
+**Migration:** Remove `secret-key` from all configuration files and use `jwk-set-uri` instead.
 
 #### 4. Updated Property: `gripday.gateway.security.jwt.issuer`
 
@@ -224,7 +210,7 @@ gripday:
   gateway:
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY}  # No warning
+        secret-key: ${JWT_SECRET_KEY}
         algorithm: HS256
 ```
 
@@ -234,9 +220,9 @@ gripday:
   gateway:
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY}  # ⚠️ Deprecated: use jwk-set-uri with RS256
         algorithm: RS256
         jwk-set-uri: http://localhost:8080/.well-known/jwks.json  # ✓ Autocomplete available
+        # secret-key removed - no longer needed
 ```
 
 ---
@@ -326,19 +312,15 @@ gripday:
         algorithm: RS256
         issuer: gripday-user-service
         jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
+        # secret-key property has been removed
+        # audience is optional
 ```
 
-### Step 2: Remove Deprecated Properties
-
-Remove or comment out:
-- `secret-key` (no longer needed for RS256)
-- `audience` (optional for RS256)
-
-### Step 3: Update Environment Variables
+### Step 2: Update Environment Variables
 
 **Remove:**
 ```bash
-JWT_SECRET_KEY=your-secret-key
+JWT_SECRET_KEY=your-secret-key  # No longer used
 ```
 
 **Add:**
@@ -424,7 +406,7 @@ The configuration metadata has been updated to:
 
 1. ✅ Add `jwk-set-uri` property for JWK endpoint configuration
 2. ✅ Change default algorithm from HS256 to RS256
-3. ✅ Mark `secret-key` as deprecated
+3. ✅ Remove `secret-key` property (no longer supported)
 4. ✅ Update issuer default to match User Service
 5. ✅ Add helpful hints for common configurations
 6. ✅ Document token expiry properties

@@ -86,7 +86,6 @@ gripday:
     
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY:}  # Deprecated - only for backward compatibility
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
         issuer: gripday-user-service

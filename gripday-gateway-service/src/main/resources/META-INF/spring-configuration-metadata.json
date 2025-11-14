@@ -99,11 +99,6 @@
       "defaultValue": 30000
     },
     {
-      "name": "gripday.gateway.security.jwt.secret-key",
-      "type": "java.lang.String",
-      "description": "JWT secret key for HMAC validation (deprecated - use jwk-set-uri with RS256)"
-    },
-    {
       "name": "gripday.gateway.security.jwt.algorithm",
       "type": "java.lang.String",
       "description": "JWT algorithm (HS256 or RS256)",

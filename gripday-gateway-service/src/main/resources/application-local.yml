@@ -87,12 +87,12 @@ gripday:
     
     security:
       jwt:
-        secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET:local-development-secret-key-not-for-production-use}
         access-token-expiry: PT30M  # Extended for development
         refresh-token-expiry: P30D  # Extended for development
-        issuer: gripday-local
-        audience: gripday-services-local
-        algorithm: HS256
+        issuer: gripday-user-service
+        audience: gripday-services
+        algorithm: RS256
+        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
       authentication:
         enabled: true
         user-service-url: ${GRIPDAY_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}

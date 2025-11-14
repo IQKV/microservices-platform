@@ -58,12 +58,12 @@ gripday:
 
     security:
       jwt:
-        secret-key: test-secret-key-for-unit-tests-only
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
-        issuer: gripday-test
-        audience: gripday-services-test
-        algorithm: HS256
+        issuer: gripday-user-service
+        audience: gripday-services
+        algorithm: RS256
+        jwk-set-uri: http://localhost:8080/.well-known/jwks.json
       authentication:
         enabled: true
         user-service-url: http://localhost:8080

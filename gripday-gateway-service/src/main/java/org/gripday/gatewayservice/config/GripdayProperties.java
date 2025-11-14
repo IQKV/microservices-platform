@@ -119,7 +119,6 @@ public record GripdayProperties(
     ) {
 
       public record JwtProperties(
-          String secretKey, // Optional - only needed for HMAC (deprecated)
           @NotNull Duration accessTokenExpiry,
           @NotNull Duration refreshTokenExpiry,
           @NotBlank String issuer,
