@@ -357,7 +357,7 @@ Rollback if:
 - [ ] Logs reviewed - no issues
 - [ ] Ready for production deployment
 
-**Tested by**: ********\_********  
-**Date**: ********\_********  
-**Environment**: ********\_********  
-**Notes**: ********\_********
+**Tested by**: **\*\*\*\***\_**\*\*\*\***  
+**Date**: **\*\*\*\***\_**\*\*\*\***  
+**Environment**: **\*\*\*\***\_**\*\*\*\***  
+**Notes**: **\*\*\*\***\_**\*\*\*\***
