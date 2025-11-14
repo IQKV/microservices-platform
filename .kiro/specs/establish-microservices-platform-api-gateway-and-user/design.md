@@ -2193,7 +2193,7 @@ The platform implements API documentation using SpringDoc OpenAPI, providing int
 public class OpenApiConfig {
 
   @Bean
-  public GroupedOpenApi authServiceApi() {
+  public GroupedOpenApi userServiceApi() {
     return GroupedOpenApi.builder()
       .group("user-service")
       .pathsToMatch("/api/*/auth/**", "/api/*/users/**")
@@ -3324,11 +3324,11 @@ graph TB
 @Component
 public class UserContextService {
 
-  private final UserServiceClient authServiceClient;
+  private final UserServiceClient userServiceClient;
 
   public UserContext validateAndEnrichToken(String jwt) {
     // Call User Service API, not database
-    return authServiceClient.validateToken(jwt);
+    return userServiceClient.validateToken(jwt);
   }
 }
 
@@ -4372,14 +4372,14 @@ gripday:
 public class GatewayRoutesConfig {
 
   @Value("${gripday.gateway.routes.user-service.uri}")
-  private String authServiceUri;
+  private String userServiceUri;
 
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
     return builder
       .routes()
-      .route("user-service", (r) -> r.path("/api/*/auth/**").uri(authServiceUri))
-      .route("user-management", (r) -> r.path("/api/*/users/**").uri(authServiceUri))
+      .route("user-service", (r) -> r.path("/api/*/auth/**").uri(userServiceUri))
+      .route("user-management", (r) -> r.path("/api/*/users/**").uri(userServiceUri))
       .build();
   }
 }

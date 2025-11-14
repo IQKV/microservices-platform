@@ -30,7 +30,7 @@ public class HealthCheckConfig {
    * Custom reactive health indicator for user service connectivity.
    */
   @Bean
-  public ReactiveHealthIndicator authServiceHealthIndicator(WebClient.Builder webClientBuilder,
+  public ReactiveHealthIndicator userServiceHealthIndicator(WebClient.Builder webClientBuilder,
       GripdayProperties gripdayProperties) {
     return new UserServiceHealthIndicator(webClientBuilder, gripdayProperties);
   }
@@ -97,10 +97,10 @@ public class HealthCheckConfig {
   public static class UserServiceHealthIndicator implements ReactiveHealthIndicator {
 
     private final WebClient webClient;
-    private final String authServiceUrl;
+    private final String userServiceUrl;
 
     public UserServiceHealthIndicator(final WebClient.Builder webClientBuilder, final GripdayProperties gripdayProperties) {
-      this.authServiceUrl = gripdayProperties.gateway().security().authentication().authServiceUrl();
+      this.userServiceUrl = gripdayProperties.gateway().security().authentication().userServiceUrl();
       this.webClient = webClientBuilder.build();
     }
 
@@ -109,7 +109,7 @@ public class HealthCheckConfig {
       var startTime = System.currentTimeMillis();
 
       return webClient.get()
-          .uri(authServiceUrl + "/actuator/health")
+          .uri(userServiceUrl + "/actuator/health")
           .retrieve()
           .toBodilessEntity()
           .map(response -> {
@@ -118,24 +118,24 @@ public class HealthCheckConfig {
 
             if (statusCode == 200) {
               return Health.up()
-                  .withDetail("authService", "Available")
+                  .withDetail("userService", "Available")
                   .withDetail("responseTimeMs", responseTime)
                   .withDetail("statusCode", statusCode)
-                  .withDetail("url", authServiceUrl)
+                  .withDetail("url", userServiceUrl)
                   .build();
             } else {
               return Health.down()
-                  .withDetail("authService", "Unhealthy")
+                  .withDetail("userService", "Unhealthy")
                   .withDetail("responseTimeMs", responseTime)
                   .withDetail("statusCode", statusCode)
-                  .withDetail("url", authServiceUrl)
+                  .withDetail("url", userServiceUrl)
                   .build();
             }
           })
           .timeout(Duration.ofSeconds(5))
           .onErrorReturn(Health.down()
-              .withDetail("authService", "Unavailable")
-              .withDetail("url", authServiceUrl)
+              .withDetail("userService", "Unavailable")
+              .withDetail("url", userServiceUrl)
               .withDetail("status", "Connection failed or timeout")
               .build());
     }

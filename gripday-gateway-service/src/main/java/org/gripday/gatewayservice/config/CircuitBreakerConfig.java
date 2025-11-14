@@ -54,7 +54,7 @@ public class CircuitBreakerConfig {
   }
 
   @Bean
-  public CircuitBreaker authServiceCircuitBreaker(CircuitBreakerRegistry registry) {
+  public CircuitBreaker userServiceCircuitBreaker(CircuitBreakerRegistry registry) {
     return registry.circuitBreaker("user-service");
   }
 

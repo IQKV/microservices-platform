@@ -38,7 +38,7 @@ public class GatewayConfig {
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
     var services = gripdayProperties.gateway().routing().services();
-    var authServiceConfig = services.get("user-service");
+    var userServiceConfig = services.get("user-service");
 
     return builder.routes()
         // User service routes - all authentication, user, organization, and tenant management endpoints
@@ -50,7 +50,7 @@ public class GatewayConfig {
                 .filter(responseTransformationFilter.apply(new ResponseTransformationFilter.Config()))
                 .filter(loadBalancingFilter.apply(createLoadBalancingConfig("user-service")))
             )
-            .uri(authServiceConfig.uri())
+            .uri(userServiceConfig.uri())
         )
         // Health check route with minimal transformation
         .route("health-check", r -> r
@@ -58,7 +58,7 @@ public class GatewayConfig {
             .filters(f -> f
                 .filter(responseTransformationFilter.apply(new ResponseTransformationFilter.Config()))
             )
-            .uri(authServiceConfig.uri())
+            .uri(userServiceConfig.uri())
         )
         // Actuator info route with minimal transformation
         .route("actuator-info", r -> r
@@ -66,7 +66,7 @@ public class GatewayConfig {
             .filters(f -> f
                 .filter(responseTransformationFilter.apply(new ResponseTransformationFilter.Config()))
             )
-            .uri(authServiceConfig.uri())
+            .uri(userServiceConfig.uri())
         )
         .build();
   }
