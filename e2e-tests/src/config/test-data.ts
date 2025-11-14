@@ -179,7 +179,7 @@ export const TEST_DATA_CONFIG = {
  * API endpoint paths
  */
 export const API_ENDPOINTS = {
-  auth: {
+  user: {
     register: '/api/v1/auth/register',
     login: '/api/v1/auth/login',
     refresh: '/api/v1/auth/refresh',
@@ -213,7 +213,7 @@ export const API_ENDPOINTS = {
   
   health: {
     gateway: '/actuator/health',
-    auth: '/actuator/health',
+    user: '/actuator/health',
     bookstore: '/actuator/health'
   }
 };

@@ -1,128 +1,289 @@
-- **Hardcoded domains**:
-  - `app.gripday.com/src/app/config/auth-config.ts` and `auth.gripday.com/src/app/config/auth-config.ts` default to iqkv.com domains. Needs alignment to gripday.com.
-- **Redirect flow in App**:
-  - `app.gripday.com/src/processes/auth/lib/navigation.ts` uses `window.location.href = ${config.domains.auth}?redirect=${currentUrl}`.
-  - Uses `redirect` param (not `returnTo`), no allowlist validation.
-- **Auth App routing**:
-  - `auth.gripday.com/src/pages/login.tsx` uses `requireGuest()` guard but no explicit logic shown to redirect back to app when already authenticated.
-- **Token storage**:
-  - Both configs define `tokenStorage.accessTokenKey` and `refreshTokenKey`; App’s `logoutAndRedirect` clears localStorage tokens. This implies frontend-managed tokens, not a gateway cookie session.
-- **Endpoints layout**:
-  - Both configs expect `/api/v1/auth/*` endpoints, suggesting the Auth app talks to an API. It’s unclear if the gateway (api.gripday.com) is the single BFF or the user service exposes public endpoints directly.
+# Authentication Refactor - Completed
 
-# Proposed target architecture
+The Gripday platform has been successfully refactored from a separate `gripday-auth-service` to an integrated `gripday-user-service` with comprehensive authentication capabilities.
 
-- **Gateway (api.gripday.com) as BFF**:
-  - Terminate user sessions using secure, httpOnly cookies on `.gripday.com`.
-  - Expose `POST /auth/login`, `POST /auth/signup`, `POST /auth/refresh`, `POST /auth/logout`, `GET /me`.
-  - Proxy/aggregate downstream services. Use mTLS or signed service JWT for s2s auth.
-- **User Service (internal)**:
-  - Pure API and identity domain logic (password, email verify, reset, MFA).
-  - Gateway calls it; users never call user service directly. All Set-Cookie done at gateway for `.gripday.com`.
-- **React Apps**:
-  - App (app.gripday.com) performs `GET api.gripday.com/me` on load to decide redirects.
-  - Auth (auth.gripday.com) is UI only; it submits to gateway endpoints. On success, gateway sets session cookies, then UI redirects to `returnTo`.
+## Overview
 
-# Gaps/Risks to address
+The platform now consists of:
 
-- **LocalStorage tokens**: Vulnerable to XSS, inconsistent with BFF model. Migrate to httpOnly cookie session at `.gripday.com`.
-- **Redirect param**: Use `returnTo` with strict allowlist and same-site path validation to avoid open redirect.
-- **Domain defaults**: Replace iqkv.com defaults with gripday.com, load from env at build/runtime.
-- **CORS/CSRF**: With cookie-based auth, configure SameSite=Lax, CSRF tokens or double-submit for non-GET.
-- **Auth UI calling patterns**: Ensure auth UI calls gateway only (not user service) to receive cookies.
-- **Observability + error contract**: Standardize problem+json errors and tracing across gateway and services.
+- **User Service** - Centralized authentication, authorization, and user management
+- **Gateway Service** - Intelligent API gateway with routing, rate limiting, and circuit breaker functionality
+- **Bookstore Service** - Example business microservice demonstrating platform integration
 
-# Detailed action plan
+All services follow a three-tier architecture pattern with strict layer separation enforced by ArchUnit tests.
 
-- **Gateway BFF (api.gripday.com)**
-  - **Session model**
-    - Implement gateway-managed session: short-lived access cookie + refresh cookie (httpOnly, Secure, SameSite=Lax, Domain=.gripday.com).
-    - Rotate refresh tokens, detect reuse.
-  - **Endpoints**
-    - `POST /auth/login`, `POST /auth/signup`, `POST /auth/refresh`, `POST /auth/logout`, `GET /me`.
-    - Normalize to problem+json error shape.
-  - **Proxying**
-    - `/api/*` proxies to services with s2s auth (mTLS or signed JWT). Propagate user identity via `X-User-Id` or JWT claims.
-  - **Security**
-    - CSRF: set CSRF cookie and require header on state-changing requests.
-    - CORS: only allow `https://app.gripday.com` and `https://auth.gripday.com` where needed; prefer same-site requests from Auth UI to gateway.
-    - Headers: HSTS, CSP (nonce/strict-dynamic), Referrer-Policy, Permissions-Policy.
+## Implemented Architecture
 
-- **User Service**
-  - Keep internal endpoints: login, signup, forgot/reset password, email verify/resend, optional MFA.
-  - Rate-limiting + bot protection for login/signup/forgot.
-  - Emit events for audit and analytics.
-  - No cookies set; return tokens only to gateway.
+### User Service
 
-- **App (app.gripday.com)**
-  - **Config**
-    - Switch defaults to `auth.gripday.com` and `app.gripday.com`.
-  - **Auth guard**
-    - On app bootstrap (router loader or top-level effect), call `GET https://api.gripday.com/me` with credentials; if 401, redirect to `https://auth.gripday.com/login?returnTo=<encoded current URL>`.
-  - **Logout**
-    - Call `POST https://api.gripday.com/auth/logout` with credentials, then hard redirect to `https://auth.gripday.com/login`.
-  - **Remove localStorage tokens**
-    - Stop reading/writing access/refresh tokens in the app. Rely on cookies.
+- **Authentication Endpoints**: `/api/v1/auth/*` for signup, login, refresh, logout, email verification
+- **User Management**: `/api/v1/users/*` for CRUD operations (admin-only)
+- **JWT Token Generation**: RS256/HS256 with configurable expiry
+- **Email Verification**: Token-based email verification with HTML templates
+- **Password Management**: Forgot/reset password flows with secure tokens
+- **Multi-Tenant Support**: Tenant context propagation via headers and JWT claims
 
-- **Auth (auth.gripday.com)**
-  - **Config**
-    - Update domain defaults to gripday.com. Use `returnTo` parameter consistently.
-  - **Guest/Authed guards**
-    - On mount, call `GET https://api.gripday.com/me` with credentials; if authenticated, redirect to `returnTo` if present (allowlisted), otherwise `https://app.gripday.com/`.
-  - **Flows**
-    - All form submissions to `https://api.gripday.com/auth/*` with `credentials: include`. If success, gateway sets cookies; then redirect to `returnTo`.
-  - **ReturnTo validation**
-    - Only allow returnTo URLs within `https://app.gripday.com` (and optionally `https://auth.gripday.com` specific paths). Fall back to `/`.
+### Gateway Service
 
-- **Shared FE SDK (@gripday/auth-client)**
-  - Functions: `getSession`, `login`, `signup`, `logout`, `requireAuthGuard`, `redirectToAuth`, `resolveReturnTo`.
-  - Centralize environment config and domain endpoints.
-  - Types for user/session.
+- **Intelligent Routing**: Routes requests to appropriate microservices
+- **JWT Authentication**: Validates JWT tokens for protected endpoints
+- **Rate Limiting**: Redis-backed distributed rate limiting per tenant
+- **Circuit Breaker**: Resilience4j patterns for fault tolerance
+- **CORS Handling**: Configurable CORS for frontend applications
 
-- **Dev/Local**
-  - mkcert or local proxy for HTTPS subdomains: `app.local.gripday.com`, `auth.local.gripday.com`, `api.local.gripday.com` with hosts entries.
-  - Docker compose for gateway+auth; seeded test user.
-  - Playwright E2E to verify redirect/guard flows, refresh, logout, returnTo allowlist.
+## Key Features Implemented
 
-- **CI/CD**
-  - Secrets in vault; per-environment domain config.
-  - Preview deploys with temporary subdomains and smoke tests.
-  - SAST/DAST on auth endpoints and CSP reports.
+### Security
 
-# Concrete code changes to schedule
+- **JWT-based Authentication**: Stateless tokens with configurable algorithms (RS256/HS256)
+- **Email Verification**: Required email verification before login
+- **Password Security**: Strong password requirements with validation
+- **Account Lockout**: Automatic lockout after failed login attempts
+- **Rate Limiting**: Per-tenant rate limiting on authentication endpoints
+- **Audit Logging**: Security audit logs for authentication events
 
-- **Replace iqkv.com defaults**
-  - In both `auth-config.ts` files, set defaults to:
-    - `DEFAULT_AUTH_DOMAIN = "https://auth.gripday.com"`
-    - `DEFAULT_APP_DOMAIN = "https://app.gripday.com"`
-- **Rename and standardize redirect param**
-  - In `app.gripday.com/src/processes/auth/lib/navigation.ts`: switch to `?returnTo=`.
-  - Add allowlist validation utility in shared SDK. Ensure Auth app reads `returnTo`.
-- **Remove localStorage token usage**
-  - Update `logoutAndRedirect` to call gateway `/auth/logout` and stop clearing token keys (eventually remove `tokenStorage` from config).
-- **Network calls**
-  - Ensure all fetch/XHR include `credentials: 'include'` when calling `api.gripday.com`.
-- **Add `/me` checks**
-  - App: route loader or top-level effect to call `/me`.
-  - Auth: top-level effect to redirect if already authenticated.
+### Multi-Tenant Architecture
 
-# Acceptance criteria
+- **Tenant Isolation**: Complete data isolation per tenant at database level
+- **Tenant Context**: Propagated via `X-Tenant-ID` header and JWT claims
+- **Tenant-Specific Rate Limits**: Independent rate limiting per tenant
+- **Subdomain Support**: Optional subdomain-based tenant identification
 
-- Visiting `app.gripday.com/protected` unauthenticated redirects to `auth.gripday.com/login?returnTo=https%3A%2F%2Fapp.gripday.com%2Fprotected`.
-- Successful login sets gateway cookies and redirects back to `app.gripday.com/protected`.
-- Visiting `auth.gripday.com/login` while authenticated immediately redirects to the returnTo/app root.
-- `logout` clears cookies at `.gripday.com` and redirects to `auth.gripday.com/login`.
-- LocalStorage contains no access/refresh tokens.
-- E2E suite passes for the above scenarios.
+## Implementation Details
 
-# Next steps I can take now
+### User Service Endpoints
 
-- **Verify presence of gateway and user service code** and map endpoints to confirm where to implement cookie session and `/me`.
-- **Patch both React configs** to use gripday domains and `returnTo`, and refactor App/Auth guards accordingly.
+**Authentication:**
 
-Would you like me to:
+- `POST /api/v1/auth/signup` - User registration with email verification
+- `POST /api/v1/auth/login` - User authentication (requires verified email)
+- `POST /api/v1/auth/refresh` - Token refresh
+- `POST /api/v1/auth/logout` - User logout
+- `POST /api/v1/auth/logout-all` - Logout from all devices
+- `GET /api/v1/auth/profile` - Get current user profile
 
-- Audit the repo further to locate the gateway/user service code and current routes?
-- Start implementing the React-side changes (config defaults, returnTo, guards) behind env flags to avoid breaking current flows?
+**Email Verification:**
 
-Summary: Produced a concrete, security-focused plan to move to a proper BFF with cookie sessions, standardized redirect/guard behavior across apps, and actionable code changes to align both React apps and backend gateway/user services with app.gripday.com, auth.gripday.com, and api.gripday.com. The discovery task remains in progress; ready to proceed with audits or React updates.
+- `GET /api/v1/auth/email/verify` - Verify email with token
+- `POST /api/v1/auth/email/resend` - Resend verification email
+- `GET /api/v1/auth/email/status` - Check verification status
+
+**Password Management:**
+
+- `POST /api/v1/password/forgot` - Initiate password reset
+- `POST /api/v1/password/reset` - Complete password reset
+
+**User Management (Admin):**
+
+- `GET /api/v1/users` - List users with pagination
+- `GET /api/v1/users/{id}` - Get user by ID
+- `PUT /api/v1/users/{id}` - Update user
+- `DELETE /api/v1/users/{id}` - Delete user
+- `POST /api/v1/users/{id}/authorities` - Assign role
+- `DELETE /api/v1/users/{id}/authorities/{role}` - Remove role
+
+### Gateway Service Features
+
+**Routing:**
+
+- Intelligent routing to User Service and other microservices
+- Path-based routing with `/api/v1/auth/**` pattern
+- Health check aggregation
+
+**Security:**
+
+- JWT token validation for protected routes
+- Tenant context extraction and propagation
+- CORS configuration for frontend applications
+
+**Resilience:**
+
+- Redis-backed rate limiting per tenant
+- Circuit breaker patterns with Resilience4j
+- Fallback responses for service failures
+
+**Observability:**
+
+- Request/response logging with correlation IDs
+- Prometheus metrics for gateway operations
+- Distributed tracing with OpenTelemetry
+
+## Configuration
+
+### Environment Variables
+
+**User Service:**
+
+```bash
+# JWT Configuration
+GRIPDAY_AUTH_JWT_SECRET=your-256-bit-secret-key
+GRIPDAY_AUTH_JWT_ACCESS_TOKEN_EXPIRY=PT15M
+GRIPDAY_AUTH_JWT_REFRESH_TOKEN_EXPIRY=P7D
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=noreply@gripday.com
+SMTP_PASSWORD=your-app-password
+EMAIL_FROM_EMAIL=noreply@gripday.com
+EMAIL_FROM_NAME=Gripday Platform
+APP_BASE_URL=https://app.gripday.com
+
+# Database
+GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user
+GRIPDAY_DATABASE_USERNAME=gripday_user
+GRIPDAY_DATABASE_PASSWORD=secure_password
+
+# Redis
+GRIPDAY_CACHE_REDIS_HOST=localhost
+GRIPDAY_CACHE_REDIS_PORT=6379
+```
+
+**Gateway Service:**
+
+```bash
+# Service URLs
+GRIPDAY_GATEWAY_USER_SERVICE_URL=http://user-service:8080
+
+# Rate Limiting
+GRIPDAY_GATEWAY_RATE_LIMITING_DEFAULT_REQUESTS_PER_MINUTE=100
+
+# CORS
+GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# Circuit Breaker
+GRIPDAY_GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD=50
+```
+
+## Testing and Validation
+
+### Validation Scripts
+
+The platform includes comprehensive validation scripts:
+
+```bash
+# Run complete platform validation
+./scripts/validate-platform.sh
+
+# Validate Docker Compose deployment
+./scripts/validate-docker-compose.sh
+
+# Verify platform integration
+./scripts/verify-platform-integration.sh
+```
+
+### Test Coverage
+
+**Authentication Flow:**
+
+- User registration with email verification
+- Email verification token validation
+- User login with verified email requirement
+- JWT token generation and validation
+- Token refresh functionality
+- User logout and token invalidation
+
+**Multi-Tenant:**
+
+- Tenant-specific user registration
+- Cross-tenant access prevention
+- Tenant context propagation
+- Tenant isolation verification
+
+**Security:**
+
+- Rate limiting enforcement
+- Account lockout after failed attempts
+- Password strength validation
+- JWT token expiration handling
+
+## Deployment
+
+### Local Development
+
+```bash
+# Start infrastructure
+docker compose up -d postgres redis
+
+# Run services
+cd gripday-user-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
+cd gripday-gateway-service && mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+### Docker Compose
+
+```bash
+# Start all services
+docker compose up -d
+
+# View logs
+docker-compose logs -f user-service gateway-service
+```
+
+### Kubernetes
+
+```bash
+# Deploy to cluster
+kubectl apply -f k8s/
+
+# Check status
+kubectl get pods -n gripday
+```
+
+## Documentation
+
+- [User Service README](gripday-user-service/README.md)
+- [Gateway Service README](gripday-gateway-service/README.md)
+- [Complete API Reference](docs/api/complete-api-reference.md)
+- [Developer Onboarding](docs/developer-onboarding.md)
+- [Troubleshooting Guide](docs/troubleshooting/common-issues.md)
+
+## API Examples
+
+### User Registration
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -H "X-Tenant-ID: default" \
+  -d '{
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "SecurePass123!",
+    "firstName": "John",
+    "lastName": "Doe"
+  }'
+```
+
+### User Login
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -H "X-Tenant-ID: default" \
+  -d '{
+    "username": "johndoe",
+    "password": "SecurePass123!"
+  }'
+```
+
+### Access Protected Resource
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+     -H "X-Tenant-ID: default" \
+     http://localhost:8080/api/v1/auth/profile
+```
+
+## Migration Notes
+
+The refactor from `gripday-auth-service` to `gripday-user-service` included:
+
+1. **Service Consolidation**: Authentication logic integrated into User Service
+2. **Enhanced Features**: Added email verification, password reset, and comprehensive user management
+3. **Multi-Tenant Support**: Complete tenant isolation at all layers
+4. **Improved Security**: Account lockout, rate limiting, and audit logging
+5. **Better Observability**: Structured logging, metrics, and distributed tracing
+6. **Three-Tier Architecture**: Enforced architectural boundaries with ArchUnit
+
+All existing authentication flows remain compatible with the new architecture.

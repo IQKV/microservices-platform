@@ -13,7 +13,7 @@ const environments = {
     baseURL: "http://localhost:8080",
     services: {
       gateway: "http://localhost:8080",
-      auth: "http://localhost:8080",
+      user: "http://localhost:8080",
       bookstore: "http://localhost:8080",
     },
     timeout: 30000,
@@ -24,8 +24,8 @@ const environments = {
     baseURL: "https://api.gripday.website",
     services: {
       gateway: "https://api.gripday.website",
-      auth: "https://staging-auth.gripday.com",
-      bookstore: "https://staging-bookstore.gripday.com",
+      user: "https://user.gripday.website",
+      bookstore: "https://bookstore.gripday.website",
     },
     timeout: 60000,
     retries: 2,
@@ -35,7 +35,7 @@ const environments = {
     baseURL: "https://api.gripday.com",
     services: {
       gateway: "https://api.gripday.com",
-      auth: "https://auth.gripday.com",
+      user: "https://user.gripday.com",
       bookstore: "https://bookstore.gripday.com",
     },
     timeout: 90000,

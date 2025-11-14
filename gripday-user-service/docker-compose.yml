@@ -14,7 +14,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_auth_data:/var/lib/postgresql/data
+      - postgres_user_data:/var/lib/postgresql/data
       - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
       - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
     networks:
@@ -164,7 +164,7 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
-  postgres_auth_data:
+  postgres_user_data:
     name: gripday_user_postgres_data_local
     driver: local
   redis_auth_data:

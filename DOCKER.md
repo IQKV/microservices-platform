@@ -250,13 +250,13 @@ Services communicate using container names:
 
 ### Named Volumes
 
-| Volume                       | Purpose       | Persistence |
-| ---------------------------- | ------------- | ----------- |
-| `gripday_postgres_auth_data` | Auth database | Persistent  |
-| `gripday_redis_data`         | Cache data    | Persistent  |
-| `gripday_prometheus_data`    | Metrics       | Persistent  |
-| `gripday_grafana_data`       | Dashboards    | Persistent  |
-| `gripday_loki_data`          | Logs          | Persistent  |
+| Volume                       | Purpose               | Persistence |
+| ---------------------------- | --------------------- | ----------- |
+| `gripday_postgres_user_data` | User Service database | Persistent  |
+| `gripday_redis_data`         | Cache data            | Persistent  |
+| `gripday_prometheus_data`    | Metrics               | Persistent  |
+| `gripday_grafana_data`       | Dashboards            | Persistent  |
+| `gripday_loki_data`          | Logs                  | Persistent  |
 
 ### Volume Commands
 
@@ -268,10 +268,10 @@ docker volume ls | grep gripday
 docker-compose down -v
 
 # Backup volume
-docker run --rm -v gripday_postgres_auth_data:/data -v $(pwd):/backup alpine tar czf /backup/postgres-backup.tar.gz -C /data .
+docker run --rm -v gripday_postgres_user_data:/data -v $(pwd):/backup alpine tar czf /backup/postgres-backup.tar.gz -C /data .
 
 # Restore volume
-docker run --rm -v gripday_postgres_auth_data:/data -v $(pwd):/backup alpine tar xzf /backup/postgres-backup.tar.gz -C /data
+docker run --rm -v gripday_postgres_user_data:/data -v $(pwd):/backup alpine tar xzf /backup/postgres-backup.tar.gz -C /data
 ```
 
 ## Monitoring and Observability

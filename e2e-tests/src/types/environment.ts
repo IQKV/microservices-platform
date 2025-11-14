@@ -21,7 +21,7 @@ export interface RedisConfig {
 
 export interface ServiceEndpoints {
   gateway: string;
-  auth: string;
+  user: string;
   bookstore: string;
 }
 
@@ -48,7 +48,7 @@ export interface TestEnvironmentConfig {
   baseUrl: string;
   services: ServiceEndpoints;
   databases: {
-    auth: DatabaseConfig;
+    user: DatabaseConfig;
     bookstore: DatabaseConfig;
   };
   redis: RedisConfig;

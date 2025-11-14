@@ -6,7 +6,7 @@ This document provides documentation for the Gripday User Service REST API endpo
 
 - Local Development: `http://localhost:8080`
 - Staging: `https://auth.gripday.website`
-- Production: `https://auth.gripday.com`
+- Production: `https://user.gripday.com`
 
 ## API Versioning
 
@@ -434,7 +434,7 @@ Interactive API documentation is available at:
 
 - Local: `http://localhost:8080/swagger-ui.html`
 - Staging: `https://auth.gripday.website/swagger-ui.html`
-- Production: `https://auth.gripday.com/swagger-ui.html`
+- Production: `https://user.gripday.com/swagger-ui.html`
 
 Download OpenAPI specification:
 

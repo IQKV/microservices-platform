@@ -99,7 +99,7 @@ export function buildConnectionUrl(
  * Database schema management utilities
  */
 export const DATABASE_SCHEMAS = {
-  auth: {
+  user: {
     tables: [
       'users',
       'user_authorities',
@@ -137,7 +137,7 @@ export const DATABASE_SCHEMAS = {
  * Test data cleanup queries
  */
 export const CLEANUP_QUERIES = {
-  auth: [
+  user: [
     'DELETE FROM email_verifications WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\'',
     'DELETE FROM password_reset_tokens WHERE user_id IN (SELECT id FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\')',
     'DELETE FROM tenant_users WHERE user_id IN (SELECT id FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\')',
@@ -160,7 +160,7 @@ export const CLEANUP_QUERIES = {
  * Database health check queries
  */
 export const HEALTH_CHECK_QUERIES = {
-  auth: 'SELECT 1 as health_check',
+  user: 'SELECT 1 as health_check',
   bookstore: 'SELECT 1 as health_check'
 } as const;
 

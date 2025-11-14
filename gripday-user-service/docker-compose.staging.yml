@@ -14,7 +14,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_auth_data_staging:/var/lib/postgresql/data
+      - postgres_user_data_staging:/var/lib/postgresql/data
       - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
       - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
       - ./scripts/postgres-staging.conf:/etc/postgresql/postgresql.conf:ro
@@ -219,7 +219,7 @@ networks:
       com.docker.network.bridge.name: br-auth-staging
 
 volumes:
-  postgres_auth_data_staging:
+  postgres_user_data_staging:
     name: gripday_user_postgres_data_staging
     driver: local
     driver_opts:

@@ -14,7 +14,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_auth_data_production:/var/lib/postgresql/data
+      - postgres_user_data_production:/var/lib/postgresql/data
       - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
       - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
       - ./scripts/postgres-production.conf:/etc/postgresql/postgresql.conf:ro
@@ -259,7 +259,7 @@ networks:
       com.docker.network.bridge.enable_ip_masquerade: "true"
 
 volumes:
-  postgres_auth_data_production:
+  postgres_user_data_production:
     name: gripday_user_postgres_data_production
     driver: local
     driver_opts:

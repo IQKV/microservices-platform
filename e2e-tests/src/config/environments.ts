@@ -66,11 +66,11 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'https://api.gripday.website',
     services: {
       gateway: 'https://api.gripday.website',
-      auth: 'https://staging-auth.gripday.com',
-      bookstore: 'https://staging-bookstore.gripday.com'
+      user: 'https://user.gripday.website',
+      bookstore: 'https://bookstore.gripday.website'
     },
     databases: {
-      auth: {
+      user: {
         host: 'staging-postgres-user.gripday.com',
         port: 5432,
         database: 'gripday_user_staging',
@@ -119,11 +119,11 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'https://api.gripday.com',
     services: {
       gateway: 'https://api.gripday.com',
-      auth: 'https://auth.gripday.com',
+      user: 'https://user.gripday.com',
       bookstore: 'https://bookstore.gripday.com'
     },
     databases: {
-      auth: {
+      user: {
         host: 'prod-postgres-user.gripday.com',
         port: 5432,
         database: 'gripday_user_prod',
