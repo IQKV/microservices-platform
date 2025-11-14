@@ -50,7 +50,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_auth_data:/data
+      - redis_user_data:/data
       - ./scripts/redis-user.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network
@@ -167,7 +167,7 @@ volumes:
   postgres_user_data:
     name: gripday_user_postgres_data_local
     driver: local
-  redis_auth_data:
+  redis_user_data:
     name: gripday_user_redis_data_local
     driver: local
   auth_logs:

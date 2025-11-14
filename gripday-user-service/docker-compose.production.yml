@@ -80,7 +80,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
-      - redis_auth_data_production:/data
+      - redis_user_data_production:/data
       - ./scripts/redis-production.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network-production
@@ -266,7 +266,7 @@ volumes:
       type: none
       o: bind
       device: ${DATA_PATH:-/opt/gripday/data}/postgres-production
-  redis_auth_data_production:
+  redis_user_data_production:
     name: gripday_user_redis_data_production
     driver: local
     driver_opts:

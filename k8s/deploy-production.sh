@@ -315,9 +315,9 @@ deploy_production_infrastructure() {
         echo "$postgres_prod" | kubectl apply -f -
     fi
     
-    local redis_auth_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/user-redis-deployment.yaml)
+    local redis_user_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' user-service/user-redis-deployment.yaml)
     if [[ "$DRY_RUN" == "false" ]]; then
-        echo "$redis_auth_prod" | kubectl apply -f -
+        echo "$redis_user_prod" | kubectl apply -f -
     fi
     
     local redis_gateway_prod=$(sed 's/namespace: gripday-dev-env$/namespace: gripday-production-env/g' gateway-service/gateway-redis-deployment.yaml)

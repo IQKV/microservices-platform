@@ -71,7 +71,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
-      - redis_auth_data_staging:/data
+      - redis_user_data_staging:/data
       - ./scripts/redis-staging.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network-staging
@@ -226,7 +226,7 @@ volumes:
       type: none
       o: bind
       device: ${DATA_PATH:-./data}/postgres-staging
-  redis_auth_data_staging:
+  redis_user_data_staging:
     name: gripday_user_redis_data_staging
     driver: local
     driver_opts:
