@@ -210,15 +210,21 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     // Add correlation ID
     builder.header(X_CORRELATION_ID_HEADER, correlationId);
 
-    // Add user context headers
-    if (userContext.userId() != null) {
-      builder.header(X_USER_ID_HEADER, userContext.userId().toString());
-    }
-    if (StringUtils.hasText(userContext.username())) {
-      builder.header(X_USERNAME_HEADER, userContext.username());
-    }
-    if (!userContext.roles().isEmpty()) {
-      builder.header(X_USER_ROLES_HEADER, String.join(",", userContext.roles()));
+    // Add user context headers only if propagation is enabled
+    if (gripdayProperties.gateway().security().authentication().enableUserContextPropagation()) {
+      if (userContext.userId() != null) {
+        builder.header(X_USER_ID_HEADER, userContext.userId().toString());
+      }
+      if (StringUtils.hasText(userContext.username())) {
+        builder.header(X_USERNAME_HEADER, userContext.username());
+      }
+      if (!userContext.roles().isEmpty()) {
+        builder.header(X_USER_ROLES_HEADER, String.join(",", userContext.roles()));
+      }
+      
+      logger.debug("User context propagated for user: {}", userContext.username());
+    } else {
+      logger.debug("User context propagation is disabled");
     }
 
     // Add tenant context headers

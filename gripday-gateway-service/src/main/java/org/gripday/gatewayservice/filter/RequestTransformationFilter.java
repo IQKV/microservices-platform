@@ -1,8 +1,6 @@
 package org.gripday.gatewayservice.filter;
 
-import java.util.List;
-import java.util.Map;
-
+import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -11,19 +9,31 @@ import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFac
 import org.springframework.stereotype.Component;
 
 /**
- * Gateway filter for transforming incoming requests before forwarding to downstream services. Handles header enrichment, user context propagation, and request modification.
+ * Gateway filter for transforming incoming requests before forwarding to downstream services.
+ * Handles header enrichment, user context propagation, and request modification based on
+ * GripdayProperties configuration.
  */
 @Component
 public class RequestTransformationFilter extends AbstractGatewayFilterFactory<RequestTransformationFilter.Config> {
 
   private static final Logger logger = LoggerFactory.getLogger(RequestTransformationFilter.class);
 
-  public RequestTransformationFilter() {
+  private final GripdayProperties gripdayProperties;
+
+  public RequestTransformationFilter(final GripdayProperties gripdayProperties) {
     super(Config.class);
+    this.gripdayProperties = gripdayProperties;
   }
 
   @Override
   public GatewayFilter apply(Config config) {
+    var transformationConfig = gripdayProperties.gateway().transformation().request();
+
+    if (!transformationConfig.enabled()) {
+      logger.debug("Request transformation is disabled");
+      return (exchange, chain) -> chain.filter(exchange);
+    }
+
     return (exchange, chain) -> {
       var request = exchange.getRequest();
       var correlationId = MDC.get("correlationId");
@@ -31,92 +41,49 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
       var userId = MDC.get("userId");
 
       // Build transformed request with enriched headers
-      var transformedRequest = request.mutate()
-          .headers(headers -> {
-            // Add correlation ID for distributed tracing
-            if (correlationId != null) {
-              headers.set("X-Correlation-ID", correlationId);
-            }
+      var requestBuilder = request.mutate();
 
-            // Add tenant context for multi-tenant support
-            if (tenantId != null) {
-              headers.set("X-Tenant-ID", tenantId);
-            }
+      requestBuilder.headers(headers -> {
+        // Add correlation ID for distributed tracing
+        if (correlationId != null && transformationConfig.enableHeaderEnrichment()) {
+          headers.set("X-Correlation-ID", correlationId);
+        }
 
-            // Add user context for authorization
-            if (userId != null) {
-              headers.set("X-User-ID", userId);
-            }
+        // Add tenant context for multi-tenant support
+        if (tenantId != null && transformationConfig.enableTenantContextPropagation()) {
+          headers.set("X-Tenant-ID", tenantId);
+        }
 
-            // Add service identification
-            headers.set("X-Gateway-Service", "gripday-gateway");
-            headers.set("X-Request-Source", "gateway");
+        // Add user context for authorization
+        if (userId != null && transformationConfig.enableUserContextPropagation()) {
+          headers.set("X-User-ID", userId);
+        }
 
-            // Remove sensitive headers that shouldn't be forwarded
-            headers.remove("Authorization-Internal");
-            headers.remove("X-Internal-Token");
+        // Add service identification headers
+        if (transformationConfig.enableHeaderEnrichment()) {
+          headers.set("X-Gateway-Service", "gripday-gateway");
+          headers.set("X-Request-Source", "gateway");
+          headers.set("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()));
+        }
 
-            // Add request timestamp for monitoring
-            headers.set("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()));
+        // Remove sensitive headers that shouldn't be forwarded
+        transformationConfig.headersToRemove().forEach(headers::remove);
 
-            logger.debug("Request headers enriched for path: {}", request.getPath());
-          })
-          .build();
+        // Add additional configured headers
+        transformationConfig.additionalHeaders().forEach(headers::set);
+
+        logger.debug("Request headers enriched for path: {}", request.getPath());
+      });
 
       // Continue with transformed request
-      return chain.filter(exchange.mutate().request(transformedRequest).build());
+      return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
     };
   }
 
   /**
-   * Configuration class for request transformation filter.
+   * Configuration class for request transformation filter. This is kept for Spring Cloud Gateway filter factory compatibility, but actual configuration comes from GripdayProperties.
    */
   public static class Config {
-
-    private boolean enableHeaderEnrichment = true;
-    private boolean enableUserContextPropagation = true;
-    private boolean enableTenantContextPropagation = true;
-    private List<String> headersToRemove = List.of("Authorization-Internal", "X-Internal-Token");
-    private Map<String, String> additionalHeaders = Map.of();
-
-    public boolean isEnableHeaderEnrichment() {
-      return enableHeaderEnrichment;
-    }
-
-    public void setEnableHeaderEnrichment(boolean enableHeaderEnrichment) {
-      this.enableHeaderEnrichment = enableHeaderEnrichment;
-    }
-
-    public boolean isEnableUserContextPropagation() {
-      return enableUserContextPropagation;
-    }
-
-    public void setEnableUserContextPropagation(boolean enableUserContextPropagation) {
-      this.enableUserContextPropagation = enableUserContextPropagation;
-    }
-
-    public boolean isEnableTenantContextPropagation() {
-      return enableTenantContextPropagation;
-    }
-
-    public void setEnableTenantContextPropagation(boolean enableTenantContextPropagation) {
-      this.enableTenantContextPropagation = enableTenantContextPropagation;
-    }
-
-    public List<String> getHeadersToRemove() {
-      return headersToRemove;
-    }
-
-    public void setHeadersToRemove(List<String> headersToRemove) {
-      this.headersToRemove = headersToRemove;
-    }
-
-    public Map<String, String> getAdditionalHeaders() {
-      return additionalHeaders;
-    }
-
-    public void setAdditionalHeaders(Map<String, String> additionalHeaders) {
-      this.additionalHeaders = additionalHeaders;
-    }
+    // Empty config class - configuration is read from GripdayProperties
   }
 }

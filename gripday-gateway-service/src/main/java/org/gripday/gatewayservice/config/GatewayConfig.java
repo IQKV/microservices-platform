@@ -33,7 +33,7 @@ public class GatewayConfig {
 
   /**
    * Configures routes for the gateway service using properties-based configuration. Routes are defined programmatically to allow for dynamic configuration and validation. Includes
-   * request/response transformation and load balancing filters.
+   * request/response transformation and load balancing filters. All filter configurations are driven by GripdayProperties.
    */
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {

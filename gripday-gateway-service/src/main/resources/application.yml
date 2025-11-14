@@ -64,7 +64,7 @@ gripday:
       api-prefix:
         enabled: true
         prefix: /api
-        strip-in-production: true
+        strip-count: 0  # Number of path segments to strip (0 = no stripping, 1 = strip first segment)
       services:
         user-service:
           uri: http://localhost:8080

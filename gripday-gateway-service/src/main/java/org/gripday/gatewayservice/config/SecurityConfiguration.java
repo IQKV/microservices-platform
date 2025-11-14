@@ -11,7 +11,8 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
- * Security configuration for the Gateway Service. Configures CORS, authentication, and authorization policies.
+ * Security configuration for the Gateway Service. Configures CORS and authorization policies.
+ * JWT authentication is handled by JwtAuthenticationFilter using HMAC-based validation.
  */
 @Configuration
 @EnableWebFluxSecurity
@@ -35,16 +36,16 @@ public class SecurityConfiguration {
             // Health and actuator endpoints
             .pathMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info")
             .permitAll()
-            // All other requests require authentication
+            // All other requests require authentication (handled by JwtAuthenticationFilter)
             .anyExchange()
-            .authenticated()
-        )
-        .oauth2ResourceServer(oauth2 -> oauth2
-            .jwt(jwt -> jwt.jwkSetUri("http://localhost:8080/.well-known/jwks.json"))
+            .permitAll() // JwtAuthenticationFilter handles authentication
         )
         .build();
   }
 
+  /**
+   * CORS configuration source using GripdayProperties settings.
+   */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     var corsConfig = gripdayProperties.gateway().cors();
