@@ -115,7 +115,7 @@ gripday:
     metrics:
       enabled: true
       path: /actuator/prometheus
-      prefix: gripday_auth_staging
+      prefix: gripday_user_staging
       include-host-tag: true
       include-application-tag: true
       include-environment-tag: true
@@ -153,7 +153,7 @@ cp .env.example .env.production
 
 | Variable                    | Description               | Example                                         |
 | --------------------------- | ------------------------- | ----------------------------------------------- |
-| `GRIPDAY_DATABASE_URL`      | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/gripday_auth` |
+| `GRIPDAY_DATABASE_URL`      | PostgreSQL connection URL | `jdbc:postgresql://localhost:5432/gripday_user` |
 | `GRIPDAY_DATABASE_USERNAME` | Database username         | `gripday_user`                                  |
 | `GRIPDAY_DATABASE_PASSWORD` | Database password         | `secure_password`                               |
 | `GRIPDAY_CACHE_REDIS_HOST`  | Redis host                | `localhost`                                     |

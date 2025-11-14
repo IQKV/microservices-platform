@@ -129,7 +129,7 @@ gripday:
     metrics:
       enabled: false
       path: /actuator/prometheus
-      prefix: gripday_auth
+      prefix: gripday_user
       include-host-tag: false
       include-application-tag: false
       include-environment-tag: false

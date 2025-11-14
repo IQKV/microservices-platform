@@ -29,7 +29,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.recordEmailSent();
 
     // Then
-    var counter = meterRegistry.get("gripday_auth_email_verification_sent_total").counter();
+    var counter = meterRegistry.get("gripday_user_email_verification_sent_total").counter();
     assertThat(counter.count()).isEqualTo(2.0);
   }
 
@@ -39,7 +39,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.recordEmailSendFailed();
 
     // Then
-    var counter = meterRegistry.get("gripday_auth_email_verification_send_failed_total").counter();
+    var counter = meterRegistry.get("gripday_user_email_verification_send_failed_total").counter();
     assertThat(counter.count()).isEqualTo(1.0);
   }
 
@@ -51,7 +51,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.recordVerificationSuccess();
 
     // Then
-    var counter = meterRegistry.get("gripday_auth_email_verification_success_total").counter();
+    var counter = meterRegistry.get("gripday_user_email_verification_success_total").counter();
     assertThat(counter.count()).isEqualTo(3.0);
   }
 
@@ -61,7 +61,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.recordVerificationFailed();
 
     // Then
-    var counter = meterRegistry.get("gripday_auth_email_verification_failed_total").counter();
+    var counter = meterRegistry.get("gripday_user_email_verification_failed_total").counter();
     assertThat(counter.count()).isEqualTo(1.0);
   }
 
@@ -72,7 +72,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.recordTokensCleanedUp(3);
 
     // Then
-    var counter = meterRegistry.get("gripday_auth_email_verification_tokens_cleaned_total").counter();
+    var counter = meterRegistry.get("gripday_user_email_verification_tokens_cleaned_total").counter();
     assertThat(counter.count()).isEqualTo(8.0);
   }
 
@@ -82,7 +82,7 @@ class EmailVerificationMetricsServiceTest {
     metricsService.updateExpiredTokensCount(10);
 
     // Then
-    var gauge = meterRegistry.get("gripday_auth_email_verification_expired_tokens_current").gauge();
+    var gauge = meterRegistry.get("gripday_user_email_verification_expired_tokens_current").gauge();
     assertThat(gauge.value()).isEqualTo(10.0);
 
     // When updated again
@@ -104,7 +104,7 @@ class EmailVerificationMetricsServiceTest {
       Thread.currentThread().interrupt();
     }
 
-    var timer = meterRegistry.get("gripday_auth_email_send_duration_seconds").timer();
+    var timer = meterRegistry.get("gripday_user_email_send_duration_seconds").timer();
     timerSample.stop(timer);
 
     // Then
@@ -124,7 +124,7 @@ class EmailVerificationMetricsServiceTest {
       Thread.currentThread().interrupt();
     }
 
-    var timer = meterRegistry.get("gripday_auth_email_verification_cleanup_duration_seconds").timer();
+    var timer = meterRegistry.get("gripday_user_email_verification_cleanup_duration_seconds").timer();
     timerSample.stop(timer);
 
     // Then
@@ -152,13 +152,13 @@ class EmailVerificationMetricsServiceTest {
     assertThat(meterRegistry.getMeters()).hasSize(8);
 
     // Verify metric names
-    assertThat(meterRegistry.get("gripday_auth_email_verification_sent_total")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_send_failed_total")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_success_total")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_failed_total")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_tokens_cleaned_total")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_expired_tokens_current")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_send_duration_seconds")).isNotNull();
-    assertThat(meterRegistry.get("gripday_auth_email_verification_cleanup_duration_seconds")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_sent_total")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_send_failed_total")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_success_total")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_failed_total")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_tokens_cleaned_total")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_expired_tokens_current")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_send_duration_seconds")).isNotNull();
+    assertThat(meterRegistry.get("gripday_user_email_verification_cleanup_duration_seconds")).isNotNull();
   }
 }

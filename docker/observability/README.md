@@ -95,12 +95,12 @@ This directory contains the complete observability stack for the Gripday microse
 
 ### User Service Metrics
 
-- `gripday_auth_authentication_duration`: Authentication request duration
-- `gripday_auth_authentication_total`: Total authentication attempts (success/failure)
-- `gripday_auth_registration_duration`: User registration duration
-- `gripday_auth_registration_total`: Total registration attempts
-- `gripday_auth_token_refresh_duration`: Token refresh duration
-- `gripday_auth_token_refresh_total`: Total token refresh attempts
+- `gripday_user_authentication_duration`: Authentication request duration
+- `gripday_user_authentication_total`: Total authentication attempts (success/failure)
+- `gripday_user_registration_duration`: User registration duration
+- `gripday_user_registration_total`: Total registration attempts
+- `gripday_user_token_refresh_duration`: Token refresh duration
+- `gripday_user_token_refresh_total`: Total token refresh attempts
 
 ### Gateway Service Metrics
 

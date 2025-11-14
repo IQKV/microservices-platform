@@ -328,10 +328,10 @@ APP_BASE_URL=https://app.gripday.com
 
 ### Metrics
 
-- `gripday_auth_email_verification_sent_total` - Total verification emails sent
-- `gripday_auth_email_verification_success_total` - Successful verifications
-- `gripday_auth_email_verification_expired_total` - Expired token attempts
-- `gripday_auth_email_send_duration_seconds` - Email sending duration
+- `gripday_user_email_verification_sent_total` - Total verification emails sent
+- `gripday_user_email_verification_success_total` - Successful verifications
+- `gripday_user_email_verification_expired_total` - Expired token attempts
+- `gripday_user_email_send_duration_seconds` - Email sending duration
 
 ### Logging
 

@@ -40,7 +40,7 @@
 
 ### Verification
 
-- [ ] Connect to database: `psql -h localhost -U gripday_auth_user -d gripday_auth_db`
+- [ ] Connect to database: `psql -h localhost -U gripday_user_user -d gripday_user_db`
 - [ ] List all new indexes: `\di+ idx_*`
 - [ ] Verify 8 new indexes created:
   - [ ] `idx_users_tenant_email_verified`
@@ -117,7 +117,7 @@
 
 ### Pre-Deployment Backup
 
-- [ ] Full database backup: `pg_dump -h production-db -U gripday_auth_user gripday_auth_db > backup_$(date +%Y%m%d_%H%M%S).sql`
+- [ ] Full database backup: `pg_dump -h production-db -U gripday_user_user gripday_user_db > backup_$(date +%Y%m%d_%H%M%S).sql`
 - [ ] Verify backup integrity
 - [ ] Store backup in secure location
 - [ ] Document backup location and timestamp
@@ -285,7 +285,7 @@ docker-compose up -d postgres
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # Connect to database
-psql -h localhost -U gripday_auth_user -d gripday_auth_db
+psql -h localhost -U gripday_user_user -d gripday_user_db
 
 # List indexes
 \di+ idx_*

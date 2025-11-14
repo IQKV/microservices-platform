@@ -98,7 +98,7 @@ docker-compose up -d postgres
 ### 3. Verify Indexes
 
 ```bash
-psql -h localhost -U gripday_auth_user -d gripday_auth_db
+psql -h localhost -U gripday_user_user -d gripday_user_db
 ```
 
 ```sql

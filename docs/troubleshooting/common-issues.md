@@ -21,7 +21,7 @@ This guide covers common issues and their solutions when working with the Gripda
 docker-compose ps postgres
 
 # Verify database connectivity
-docker-compose exec postgres psql -U gripday -d gripday_auth -c "SELECT 1;"
+docker-compose exec postgres psql -U gripday -d gripday_user -c "SELECT 1;"
 
 # Check database logs
 docker-compose logs postgres
@@ -213,7 +213,7 @@ echo "$TOKEN" | cut -d. -f2 | base64 -d | jq .tenantId
 
 ```bash
 # Verify tenant_id column in database
-docker-compose exec postgres psql -U gripday -d gripday_auth \
+docker-compose exec postgres psql -U gripday -d gripday_user \
   -c "SELECT username, tenant_id FROM users LIMIT 10;"
 ```
 
@@ -233,11 +233,11 @@ docker-compose exec postgres psql -U gripday -d gripday_auth \
 
 ```bash
 # Check database connections
-docker-compose exec postgres psql -U gripday -d gripday_auth \
+docker-compose exec postgres psql -U gripday -d gripday_user \
   -c "SELECT count(*) FROM pg_stat_activity;"
 
 # Monitor slow queries
-docker-compose exec postgres psql -U gripday -d gripday_auth \
+docker-compose exec postgres psql -U gripday -d gripday_user \
   -c "SELECT query, mean_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
 ```
 
@@ -440,10 +440,10 @@ docker-compose exec postgres ls -la /var/lib/postgresql/data
 
 ```bash
 # Backup database
-docker-compose exec postgres pg_dump -U gripday gripday_auth > backup.sql
+docker-compose exec postgres pg_dump -U gripday gripday_user > backup.sql
 
 # Restore database
-docker-compose exec -T postgres psql -U gripday gripday_auth < backup.sql
+docker-compose exec -T postgres psql -U gripday gripday_user < backup.sql
 ```
 
 ## Kubernetes Deployment Issues

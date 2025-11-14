@@ -27,7 +27,7 @@ All custom configuration properties use the `gripday.` prefix for clear namespac
 
 ```bash
 # PostgreSQL Connection
-GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
+GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user
 GRIPDAY_DATABASE_USERNAME=gripday
 GRIPDAY_DATABASE_PASSWORD=secure_password_123
 GRIPDAY_DATABASE_DRIVER_CLASS_NAME=org.postgresql.Driver
@@ -110,7 +110,7 @@ GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
 # Database
-GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
+GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user
 GRIPDAY_DATABASE_USERNAME=gripday
 GRIPDAY_DATABASE_PASSWORD=dev_password_123
 
@@ -153,7 +153,7 @@ GRIPDAY_AUTH_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
 # Database
-GRIPDAY_DATABASE_URL=jdbc:postgresql://postgres-staging:5432/gripday_auth
+GRIPDAY_DATABASE_URL=jdbc:postgresql://postgres-staging:5432/gripday_user
 GRIPDAY_DATABASE_USERNAME=${DB_USERNAME}
 GRIPDAY_DATABASE_PASSWORD=${DB_PASSWORD}
 
@@ -403,7 +403,7 @@ gripday:
       attempts: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ATTEMPTS:5}
       duration: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION:PT15M}
   database:
-    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_auth}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_user}
     username: ${GRIPDAY_DATABASE_USERNAME:gripday}
     password: ${GRIPDAY_DATABASE_PASSWORD:dev_password_123}
     driver-class-name: ${GRIPDAY_DATABASE_DRIVER_CLASS_NAME:org.postgresql.Driver}

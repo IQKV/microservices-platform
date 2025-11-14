@@ -81,7 +81,7 @@ volumes:
 volumes:
   - name: postgres-data
     persistentVolumeClaim:
-      claimName: postgres-auth-pvc
+      claimName: postgres-user-pvc
 ```
 
 **Why:** Data persistence not needed for local development. Production requires durable storage.
@@ -170,7 +170,7 @@ initContainers:
     command:
       - sh
       - -c
-      - until nc -z postgres-auth 5432; do sleep 2; done
+      - until nc -z postgres-user 5432; do sleep 2; done
 ```
 
 **Production:** Robust readiness checks

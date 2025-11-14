@@ -41,20 +41,20 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-auth
+  name: postgres-user
   namespace: gripday-dev-env
   labels:
-    app: postgres-auth
+    app: postgres-user
     component: database
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-auth
+      app: postgres-user
   template:
     metadata:
       labels:
-        app: postgres-auth
+        app: postgres-user
         component: database
     spec:
       containers:
@@ -64,7 +64,7 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_auth
+              value: gripday_user
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -111,10 +111,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-auth
+  name: postgres-user
   namespace: gripday-dev-env
   labels:
-    app: postgres-auth
+    app: postgres-user
 spec:
   type: NodePort
   ports:
@@ -122,7 +122,7 @@ spec:
       targetPort: 5432
       nodePort: 30432
   selector:
-    app: postgres-auth
+    app: postgres-user
 
 ---
 # PostgreSQL for Bookstore Service

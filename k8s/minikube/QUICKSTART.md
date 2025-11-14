@@ -175,8 +175,8 @@ kubectl port-forward -n gripday svc/bookstore-service 8080:8080
 ### Access Database
 
 ```bash
-# PostgreSQL Auth DB
-kubectl exec -it deployment/postgres-auth -n gripday -- psql -U gripday_user -d gripday_auth
+# PostgreSQL User DB
+kubectl exec -it deployment/postgres-user -n gripday -- psql -U gripday_user -d gripday_user
 
 # PostgreSQL Bookstore DB
 kubectl exec -it deployment/postgres-bookstore -n gripday -- psql -U gripday_user -d gripday_bookstore
@@ -255,7 +255,7 @@ If images aren't available:
 
 ```bash
 # Check PostgreSQL
-kubectl exec -it deployment/postgres-auth -n gripday -- pg_isready -U gripday_user
+kubectl exec -it deployment/postgres-user -n gripday -- pg_isready -U gripday_user
 
 # Check Redis
 kubectl exec -it deployment/redis -n gripday -- redis-cli ping

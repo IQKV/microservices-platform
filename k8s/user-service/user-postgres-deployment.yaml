@@ -36,7 +36,7 @@ spec:
               name: postgres
           env:
             - name: POSTGRES_DB
-              value: "gripday_auth_local"
+              value: "gripday_user_local"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -134,4 +134,4 @@ data:
     CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
     -- Grant necessary permissions
-    GRANT ALL PRIVILEGES ON DATABASE gripday_auth_local TO gripday_user;
+    GRANT ALL PRIVILEGES ON DATABASE gripday_user_local TO gripday_user;

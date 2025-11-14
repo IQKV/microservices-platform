@@ -20,10 +20,10 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
       auth: {
         host: 'localhost',
         port: 5434,
-        database: 'gripday_auth_test',
+        database: 'gripday_user_test',
         username: 'gripday_test_user',
         password: 'gripday_test_password',
-        url: 'postgresql://gripday_test_user:gripday_test_password@localhost:5434/gripday_auth_test'
+        url: 'postgresql://gripday_test_user:gripday_test_password@localhost:5434/gripday_user_test'
       },
       bookstore: {
         host: 'localhost',
@@ -71,12 +71,12 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     },
     databases: {
       auth: {
-        host: 'staging-postgres-auth.gripday.com',
+        host: 'staging-postgres-user.gripday.com',
         port: 5432,
-        database: 'gripday_auth_staging',
+        database: 'gripday_user_staging',
         username: 'gripday_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-auth.gripday.com:5432/gripday_auth_staging`
+        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-user.gripday.com:5432/gripday_user_staging`
       },
       bookstore: {
         host: 'staging-postgres-bookstore.gripday.com',
@@ -124,12 +124,12 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     },
     databases: {
       auth: {
-        host: 'prod-postgres-auth.gripday.com',
+        host: 'prod-postgres-user.gripday.com',
         port: 5432,
-        database: 'gripday_auth_prod',
+        database: 'gripday_user_prod',
         username: 'gripday_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-auth.gripday.com:5432/gripday_auth_prod`
+        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-user.gripday.com:5432/gripday_user_prod`
       },
       bookstore: {
         host: 'prod-postgres-bookstore.gripday.com',

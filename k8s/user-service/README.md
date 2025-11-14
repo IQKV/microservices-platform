@@ -106,7 +106,7 @@ The service uses the following key environment variables:
 
 ```bash
 # Database Configuration
-GRIPDAY_DATABASE_URL=jdbc:postgresql://user-postgres:5432/gripday_auth_local
+GRIPDAY_DATABASE_URL=jdbc:postgresql://user-postgres:5432/gripday_user_local
 GRIPDAY_DATABASE_USERNAME=auth_user
 GRIPDAY_DATABASE_PASSWORD=auth_pass
 
@@ -300,7 +300,7 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 2. **Database connection issues**
 
    ```bash
-   kubectl exec -it deployment/user-postgres -n gripday-auth -- psql -U auth_user -d gripday_auth_local
+   kubectl exec -it deployment/user-postgres -n gripday-auth -- psql -U auth_user -d gripday_user_local
    ```
 
 3. **Redis connection issues**

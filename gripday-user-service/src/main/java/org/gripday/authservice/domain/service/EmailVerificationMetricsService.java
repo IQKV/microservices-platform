@@ -25,40 +25,40 @@ public class EmailVerificationMetricsService {
 
   public EmailVerificationMetricsService(final MeterRegistry meterRegistry) {
     // Email sending metrics
-    this.emailsSentCounter = Counter.builder("gripday_auth_email_verification_sent_total")
+    this.emailsSentCounter = Counter.builder("gripday_user_email_verification_sent_total")
         .description("Total number of verification emails sent")
         .register(meterRegistry);
 
-    this.emailsFailedCounter = Counter.builder("gripday_auth_email_verification_send_failed_total")
+    this.emailsFailedCounter = Counter.builder("gripday_user_email_verification_send_failed_total")
         .description("Total number of failed verification email sends")
         .register(meterRegistry);
 
     // Email verification metrics
-    this.verificationsSuccessfulCounter = Counter.builder("gripday_auth_email_verification_success_total")
+    this.verificationsSuccessfulCounter = Counter.builder("gripday_user_email_verification_success_total")
         .description("Total number of successful email verifications")
         .register(meterRegistry);
 
-    this.verificationsFailedCounter = Counter.builder("gripday_auth_email_verification_failed_total")
+    this.verificationsFailedCounter = Counter.builder("gripday_user_email_verification_failed_total")
         .description("Total number of failed email verification attempts")
         .register(meterRegistry);
 
     // Token cleanup metrics
-    this.tokensCleanedUpCounter = Counter.builder("gripday_auth_email_verification_tokens_cleaned_total")
+    this.tokensCleanedUpCounter = Counter.builder("gripday_user_email_verification_tokens_cleaned_total")
         .description("Total number of expired verification tokens cleaned up")
         .register(meterRegistry);
 
     // Timing metrics
-    this.emailSendTimer = Timer.builder("gripday_auth_email_send_duration_seconds")
+    this.emailSendTimer = Timer.builder("gripday_user_email_send_duration_seconds")
         .description("Time taken to send verification emails")
         .register(meterRegistry);
 
-    this.cleanupTimer = Timer.builder("gripday_auth_email_verification_cleanup_duration_seconds")
+    this.cleanupTimer = Timer.builder("gripday_user_email_verification_cleanup_duration_seconds")
         .description("Time taken to perform token cleanup")
         .register(meterRegistry);
 
     // Gauge for current expired tokens count
     this.expiredTokensGauge = new AtomicLong(0);
-    Gauge.builder("gripday_auth_email_verification_expired_tokens_current", expiredTokensGauge, AtomicLong::get)
+    Gauge.builder("gripday_user_email_verification_expired_tokens_current", expiredTokensGauge, AtomicLong::get)
         .description("Current number of expired verification tokens")
         .register(meterRegistry);
   }

@@ -171,7 +171,7 @@ if (-not $NoWait) {
     Write-Header "Waiting for Pods to be Ready"
     
     Write-Info "Waiting for databases..."
-    kubectl wait --for=condition=ready pod -l app=postgres-auth -n gripday --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=postgres-user -n gripday --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn "Postgres Auth not ready" }
     
     kubectl wait --for=condition=ready pod -l app=postgres-bookstore -n gripday --timeout=300s 2>&1 | Out-Null

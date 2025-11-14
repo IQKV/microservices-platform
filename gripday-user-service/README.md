@@ -230,7 +230,7 @@ curl "http://localhost:8080/api/v1/auth/email/status?email=john@example.com"
 
 ```bash
 # Database
-GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
+GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user
 GRIPDAY_DATABASE_USERNAME=gripday
 GRIPDAY_DATABASE_PASSWORD=password
 

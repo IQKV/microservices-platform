@@ -348,7 +348,7 @@ kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 
 # Backup databases
 kubectl exec -n gripday-auth user-postgres-<pod> -- \
-  pg_dump -U gripday_user gripday_auth_local > backup-auth-db.sql
+  pg_dump -U gripday_user gripday_user_local > backup-user-db.sql
 ```
 
 ### Restore

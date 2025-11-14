@@ -26,10 +26,10 @@ echo "🔨 Building Docker images..."
 docker-compose build --parallel
 
 echo "🏗️  Starting infrastructure services (PostgreSQL, Redis)..."
-docker-compose up -d postgres-auth redis
+docker-compose up -d postgres-user redis
 
 echo "⏳ Waiting for infrastructure services to be healthy..."
-docker-compose exec postgres-auth pg_isready -U gripday_user -d gripday_auth
+docker-compose exec postgres-user pg_isready -U gripday_user -d gripday_user
 docker-compose exec redis redis-cli ping
 
 echo "🚀 Starting application services..."

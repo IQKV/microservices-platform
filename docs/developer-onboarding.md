@@ -311,7 +311,7 @@ void shouldAuthenticateUserSuccessfully() {
 class AuthenticationIntegrationTest {
 
   @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15").withDatabaseName("gripday_auth_test").withUsername("test").withPassword("test");
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15").withDatabaseName("gripday_user_test").withUsername("test").withPassword("test");
 
   @Container
   static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine").withExposedPorts(6379);
@@ -395,7 +395,7 @@ gripday:
       login-attempts-per-minute: 5
       signup-attempts-per-minute: 3
   database:
-    url: jdbc:postgresql://localhost:5432/gripday_auth
+    url: jdbc:postgresql://localhost:5432/gripday_user
     username: ${DB_USERNAME:gripday}
     password: ${DB_PASSWORD:gripday}
   cache:
@@ -674,7 +674,7 @@ lsof -i :8080
 netstat -tulpn | grep 8080
 
 # Check database connectivity
-docker-compose exec postgres psql -U gripday -d gripday_auth -c "SELECT 1;"
+docker-compose exec postgres psql -U gripday -d gripday_user -c "SELECT 1;"
 
 # View detailed logs
 mvn spring-boot:run -Dspring-boot.run.profiles=local -Dlogging.level.org.gripday=DEBUG

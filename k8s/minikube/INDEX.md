@@ -125,8 +125,8 @@ kubectl apply -f infrastructure-only.yaml
 **Access infrastructure:**
 
 ```bash
-# PostgreSQL Auth
-psql -h $(minikube ip) -p 30432 -U gripday_user -d gripday_auth
+# PostgreSQL User
+psql -h $(minikube ip) -p 30432 -U gripday_user -d gripday_user
 
 # PostgreSQL Bookstore
 psql -h $(minikube ip) -p 30433 -U gripday_user -d gripday_bookstore
@@ -291,7 +291,7 @@ kubectl get pods -n gripday -w
 | Gateway Service      | 1        | 100m        | 256Mi          | 30080 |
 | User Service         | 1        | 100m        | 256Mi          | 30081 |
 | Bookstore Service    | 1        | 100m        | 256Mi          | 30082 |
-| PostgreSQL Auth      | 1        | 100m        | 128Mi          | 5432  |
+| PostgreSQL User      | 1        | 100m        | 128Mi          | 5432  |
 | PostgreSQL Bookstore | 1        | 100m        | 128Mi          | 5432  |
 | Redis                | 1        | 50m         | 64Mi           | 6379  |
 
@@ -304,7 +304,7 @@ kubectl get pods -n gripday -w
 
 | Component            | CPU Request | Memory Request | NodePort |
 | -------------------- | ----------- | -------------- | -------- |
-| PostgreSQL Auth      | 100m        | 128Mi          | 30432    |
+| PostgreSQL User      | 100m        | 128Mi          | 30432    |
 | PostgreSQL Bookstore | 100m        | 128Mi          | 30433    |
 | Redis                | 50m         | 64Mi           | 30379    |
 

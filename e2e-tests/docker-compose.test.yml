@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service Testing
-  postgres-auth-test:
+  postgres-user-test:
     image: postgres:15-alpine
-    container_name: gripday-postgres-auth-test
+    container_name: gripday-postgres-user-test
     environment:
-      POSTGRES_DB: gripday_auth_test
+      POSTGRES_DB: gripday_user_test
       POSTGRES_USER: gripday_test_user
       POSTGRES_PASSWORD: gripday_test_password
     ports:
@@ -17,7 +17,7 @@ services:
     networks:
       - gripday-test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_test_user -d gripday_auth_test"]
+      test: ["CMD-SHELL", "pg_isready -U gripday_test_user -d gripday_user_test"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -75,7 +75,7 @@ services:
     container_name: gripday-user-service-test
     environment:
       SPRING_PROFILES_ACTIVE: test
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth-test:5432/gripday_auth_test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user-test:5432/gripday_user_test
       SPRING_DATASOURCE_USERNAME: gripday_test_user
       SPRING_DATASOURCE_PASSWORD: gripday_test_password
       SPRING_DATA_REDIS_HOST: redis-test
@@ -88,7 +88,7 @@ services:
     ports:
       - "8091:8080"
     depends_on:
-      postgres-auth-test:
+      postgres-user-test:
         condition: service_healthy
       redis-test:
         condition: service_healthy

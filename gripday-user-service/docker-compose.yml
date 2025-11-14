@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service - Local Development
-  postgres-auth:
+  postgres-user:
     image: postgres:15-alpine
     container_name: gripday-user-postgres-local
     environment:
-      POSTGRES_DB: gripday_auth
+      POSTGRES_DB: gripday_user
       POSTGRES_USER: gripday_user
       POSTGRES_PASSWORD: gripday_password
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -20,7 +20,7 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_user -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,7 +44,7 @@ services:
       -c max_wal_size=4GB
 
   # Redis for User Service - Local Development
-  redis-auth:
+  redis-user:
     image: redis:7-alpine
     container_name: gripday-user-redis-local
     ports:
@@ -85,7 +85,7 @@ services:
       SPRING_APPLICATION_NAME: gripday-user-service
 
       # Database Configuration
-      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/gripday_user
       GRIPDAY_DATABASE_USERNAME: gripday_user
       GRIPDAY_DATABASE_PASSWORD: gripday_password
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -93,7 +93,7 @@ services:
       GRIPDAY_DATABASE_JPA_SHOW_SQL: true
 
       # Redis Configuration
-      GRIPDAY_CACHE_REDIS_HOST: redis-auth
+      GRIPDAY_CACHE_REDIS_HOST: redis-user
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
@@ -130,9 +130,9 @@ services:
       - "8080:8080"
       - "8091:8091" # Debug port
     depends_on:
-      postgres-auth:
+      postgres-user:
         condition: service_healthy
-      redis-auth:
+      redis-user:
         condition: service_healthy
     networks:
       - auth-network
@@ -165,14 +165,14 @@ networks:
 
 volumes:
   postgres_auth_data:
-    name: gripday_auth_postgres_data_local
+    name: gripday_user_postgres_data_local
     driver: local
   redis_auth_data:
-    name: gripday_auth_redis_data_local
+    name: gripday_user_redis_data_local
     driver: local
   auth_logs:
-    name: gripday_auth_logs_local
+    name: gripday_user_logs_local
     driver: local
   auth_tmp:
-    name: gripday_auth_tmp_local
+    name: gripday_user_tmp_local
     driver: local

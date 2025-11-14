@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service - Staging Environment
-  postgres-auth:
+  postgres-user:
     image: postgres:15-alpine
     container_name: gripday-user-postgres-staging
     environment:
-      POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_auth}
+      POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_user}
       POSTGRES_USER: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       POSTGRES_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
@@ -22,7 +22,7 @@ services:
       - auth-network-staging
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_user} -h localhost"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -32,7 +32,7 @@ services:
       options:
         max-size: "50m"
         max-file: "5"
-        labels: "service=postgres-auth,environment=staging"
+        labels: "service=postgres-user,environment=staging"
     command: >
       postgres
       -c config_file=/etc/postgresql/postgresql.conf
@@ -63,7 +63,7 @@ services:
           memory: 1.5G
 
   # Redis for User Service - Staging Environment
-  redis-auth:
+  redis-user:
     image: redis:7-alpine
     container_name: gripday-user-redis-staging
     environment:
@@ -87,7 +87,7 @@ services:
       options:
         max-size: "50m"
         max-file: "5"
-        labels: "service=redis-auth,environment=staging"
+        labels: "service=redis-user,environment=staging"
     command: >
       redis-server /usr/local/etc/redis/redis.conf
       --requirepass ${GRIPDAY_CACHE_REDIS_PASSWORD}
@@ -124,7 +124,7 @@ services:
       SPRING_APPLICATION_NAME: gripday-user-service
 
       # Database Configuration
-      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/${GRIPDAY_DATABASE_NAME:-gripday_auth}
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/${GRIPDAY_DATABASE_NAME:-gripday_user}
       GRIPDAY_DATABASE_USERNAME: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       GRIPDAY_DATABASE_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -132,7 +132,7 @@ services:
       GRIPDAY_DATABASE_JPA_SHOW_SQL: false
 
       # Redis Configuration
-      GRIPDAY_CACHE_REDIS_HOST: redis-auth
+      GRIPDAY_CACHE_REDIS_HOST: redis-user
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
       GRIPDAY_CACHE_REDIS_TIMEOUT: 3000ms
@@ -172,9 +172,9 @@ services:
     ports:
       - "${AUTH_SERVICE_PORT:-8080}:8080"
     depends_on:
-      postgres-auth:
+      postgres-user:
         condition: service_healthy
-      redis-auth:
+      redis-user:
         condition: service_healthy
     networks:
       - auth-network-staging
@@ -220,22 +220,22 @@ networks:
 
 volumes:
   postgres_auth_data_staging:
-    name: gripday_auth_postgres_data_staging
+    name: gripday_user_postgres_data_staging
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_PATH:-./data}/postgres-staging
   redis_auth_data_staging:
-    name: gripday_auth_redis_data_staging
+    name: gripday_user_redis_data_staging
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_PATH:-./data}/redis-staging
   auth_logs_staging:
-    name: gripday_auth_logs_staging
+    name: gripday_user_logs_staging
     driver: local
   auth_tmp_staging:
-    name: gripday_auth_tmp_staging
+    name: gripday_user_tmp_staging
     driver: local

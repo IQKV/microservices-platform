@@ -12,7 +12,7 @@ CREATE SCHEMA IF NOT EXISTS auth;
 
 -- Set default search path
 ALTER
-DATABASE gripday_auth SET search_path TO auth, public;
+DATABASE gripday_user SET search_path TO auth, public;
 
 -- Create application user with limited privileges (if not exists)
 DO
@@ -27,7 +27,7 @@ $$;
 
 -- Grant necessary permissions
 GRANT CONNECT
-ON DATABASE gripday_auth TO auth_app_user;
+ON DATABASE gripday_user TO auth_app_user;
 GRANT USAGE ON SCHEMA
 auth TO auth_app_user;
 GRANT CREATE

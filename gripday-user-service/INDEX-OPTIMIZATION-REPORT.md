@@ -148,14 +148,14 @@ export SPRING_PROFILES_ACTIVE=staging
 ./mvnw spring-boot:run
 
 # Verify indexes
-psql -h staging-db -U gripday_auth_user -d gripday_auth_db -c "\di+ idx_*"
+psql -h staging-db -U gripday_user_user -d gripday_user_db -c "\di+ idx_*"
 ```
 
 ### Phase 3: Production Deployment
 
 ```bash
 # Backup database
-pg_dump -h production-db -U gripday_auth_user gripday_auth_db > backup.sql
+pg_dump -h production-db -U gripday_user_user gripday_user_db > backup.sql
 
 # Deploy application (migrations run automatically)
 # Monitor logs for successful migration

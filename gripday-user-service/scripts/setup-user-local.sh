@@ -105,7 +105,7 @@ wait_for_services() {
     local max_attempts=30
     
     while [ $attempts -lt $max_attempts ] && [ "$postgres_ready" = false ]; do
-        if docker-compose -f docker-compose.yml exec -T postgres pg_isready -U gripday_user -d gripday_auth_local &> /dev/null; then
+        if docker-compose -f docker-compose.yml exec -T postgres pg_isready -U gripday_user -d gripday_user_local &> /dev/null; then
             postgres_ready=true
             log_success "PostgreSQL is ready"
         else

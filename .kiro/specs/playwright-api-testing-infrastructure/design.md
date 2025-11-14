@@ -407,7 +407,7 @@ const environments = {
       bookstore: "http://localhost:8080",
     },
     databases: {
-      auth: "postgresql://localhost:5432/gripday_auth_test",
+      auth: "postgresql://localhost:5432/gripday_user_test",
       bookstore: "postgresql://localhost:5433/gripday_bookstore_test",
     },
   },

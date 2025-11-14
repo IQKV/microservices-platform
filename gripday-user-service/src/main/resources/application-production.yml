@@ -155,7 +155,7 @@ gripday:
     metrics:
       enabled: true
       path: /actuator/prometheus
-      prefix: gripday_auth
+      prefix: gripday_user
       include-host-tag: true
       include-application-tag: true
       include-environment-tag: true

@@ -243,7 +243,7 @@ Services communicate using container names:
 
 - `user-service:8080`
 - `gateway-service:8080`
-- `postgres-auth:5432`
+- `postgres-user:5432`
 - `redis:6379`
 
 ## Volume Management
@@ -315,13 +315,13 @@ docker system df
 
 ```bash
 # Check PostgreSQL health
-docker-compose exec postgres-auth pg_isready -U gripday_user -d gripday_auth
+docker-compose exec postgres-user pg_isready -U gripday_user -d gripday_user
 
 # View database logs
-docker-compose logs postgres-auth
+docker-compose logs postgres-user
 
 # Connect to database
-docker-compose exec postgres-auth psql -U gripday_user -d gripday_auth
+docker-compose exec postgres-user psql -U gripday_user -d gripday_user
 ```
 
 #### Memory Issues

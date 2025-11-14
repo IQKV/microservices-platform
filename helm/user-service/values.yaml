@@ -317,7 +317,7 @@ configMap:
           metrics:
             enabled: true
             path: /actuator/prometheus
-            prefix: gripday_auth
+            prefix: gripday_user
             include-host-tag: true
             include-application-tag: true
           logging:
@@ -335,7 +335,7 @@ env:
   - name: SPRING_PROFILES_ACTIVE
     value: "local"
   - name: GRIPDAY_DATABASE_URL
-    value: "jdbc:postgresql://user-postgres:5432/gripday_auth_local"
+    value: "jdbc:postgresql://user-postgres:5432/gripday_user_local"
   - name: GRIPDAY_CACHE_REDIS_HOST
     value: "user-redis"
   - name: GRIPDAY_CACHE_REDIS_PORT
@@ -536,7 +536,7 @@ postgresql:
       - ReadWriteOnce
     size: 5Gi
   env:
-    POSTGRES_DB: gripday_auth_local
+    POSTGRES_DB: gripday_user_local
   resources:
     requests:
       memory: "256Mi"
@@ -553,7 +553,7 @@ postgresql:
         CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
         -- Grant necessary permissions
-        GRANT ALL PRIVILEGES ON DATABASE gripday_auth_local TO gripday_user;
+        GRANT ALL PRIVILEGES ON DATABASE gripday_user_local TO gripday_user;
   livenessProbe:
     enabled: true
     command:

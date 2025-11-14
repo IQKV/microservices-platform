@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service
-  postgres-auth:
+  postgres-user:
     image: postgres:15-alpine
-    container_name: gripday-postgres-auth
+    container_name: gripday-postgres-user
     environment:
-      POSTGRES_DB: gripday_auth
+      POSTGRES_DB: gripday_user
       POSTGRES_USER: gripday_user
       POSTGRES_PASSWORD: gripday_password
     ports:
@@ -17,7 +17,7 @@ services:
     networks:
       - gripday-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_auth"]
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_user"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,7 +71,7 @@ services:
     container_name: gripday-user-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/gripday_user
       SPRING_DATASOURCE_USERNAME: gripday_user
       SPRING_DATASOURCE_PASSWORD: gripday_password
       SPRING_DATA_REDIS_HOST: redis
@@ -82,7 +82,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      postgres-auth:
+      postgres-user:
         condition: service_healthy
       redis:
         condition: service_healthy

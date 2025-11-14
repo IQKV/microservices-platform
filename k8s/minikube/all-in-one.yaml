@@ -20,7 +20,7 @@ metadata:
   namespace: gripday-dev-env
 data:
   # Database URLs
-  AUTH_DB_URL: "jdbc:postgresql://postgres-auth:5432/gripday_auth"
+  AUTH_DB_URL: "jdbc:postgresql://postgres-user:5432/gripday_user"
   BOOKSTORE_DB_URL: "jdbc:postgresql://postgres-bookstore:5432/gripday_bookstore"
 
   # Redis
@@ -61,20 +61,20 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-auth
+  name: postgres-user
   namespace: gripday-dev-env
   labels:
-    app: postgres-auth
+    app: postgres-user
     component: database
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-auth
+      app: postgres-user
   template:
     metadata:
       labels:
-        app: postgres-auth
+        app: postgres-user
         component: database
     spec:
       containers:
@@ -84,7 +84,7 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_auth
+              value: gripday_user
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -131,17 +131,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-auth
+  name: postgres-user
   namespace: gripday-dev-env
   labels:
-    app: postgres-auth
+    app: postgres-user
 spec:
   type: ClusterIP
   ports:
     - port: 5432
       targetPort: 5432
   selector:
-    app: postgres-auth
+    app: postgres-user
 
 ---
 # PostgreSQL for Bookstore Service
@@ -333,8 +333,8 @@ spec:
             - -c
             - |
               echo "Waiting for PostgreSQL to be ready..."
-              until nc -z postgres-auth 5432; do
-                echo "Waiting for postgres-auth..."
+              until nc -z postgres-user 5432; do
+                echo "Waiting for postgres-user..."
                 sleep 2
               done
               echo "PostgreSQL is ready!"

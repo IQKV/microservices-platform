@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service - Production Environment
-  postgres-auth:
+  postgres-user:
     image: postgres:15-alpine
     container_name: gripday-user-postgres-production
     environment:
-      POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_auth}
+      POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_user}
       POSTGRES_USER: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       POSTGRES_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
@@ -22,7 +22,7 @@ services:
       - auth-network-production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_auth} -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_user} -h localhost"]
       interval: 30s
       timeout: 15s
       retries: 5
@@ -32,7 +32,7 @@ services:
       options:
         max-size: "100m"
         max-file: "10"
-        labels: "service=postgres-auth,environment=production"
+        labels: "service=postgres-user,environment=production"
     command: >
       postgres
       -c config_file=/etc/postgresql/postgresql.conf
@@ -72,7 +72,7 @@ services:
         window: 300s
 
   # Redis for User Service - Production Environment
-  redis-auth:
+  redis-user:
     image: redis:7-alpine
     container_name: gripday-user-redis-production
     environment:
@@ -96,7 +96,7 @@ services:
       options:
         max-size: "100m"
         max-file: "10"
-        labels: "service=redis-auth,environment=production"
+        labels: "service=redis-user,environment=production"
     command: >
       redis-server /usr/local/etc/redis/redis.conf
       --requirepass ${GRIPDAY_CACHE_REDIS_PASSWORD}
@@ -143,7 +143,7 @@ services:
       SPRING_APPLICATION_NAME: gripday-user-service
 
       # Database Configuration
-      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-auth:5432/${GRIPDAY_DATABASE_NAME:-gripday_auth}
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/${GRIPDAY_DATABASE_NAME:-gripday_user}
       GRIPDAY_DATABASE_USERNAME: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       GRIPDAY_DATABASE_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
       GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -151,7 +151,7 @@ services:
       GRIPDAY_DATABASE_JPA_SHOW_SQL: false
 
       # Redis Configuration
-      GRIPDAY_CACHE_REDIS_HOST: redis-auth
+      GRIPDAY_CACHE_REDIS_HOST: redis-user
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
       GRIPDAY_CACHE_REDIS_TIMEOUT: 5000ms
@@ -205,9 +205,9 @@ services:
       - "${AUTH_SERVICE_PORT:-8080}:8080"
       - "${JMX_PORT:-9999}:9999" # JMX monitoring port
     depends_on:
-      postgres-auth:
+      postgres-user:
         condition: service_healthy
-      redis-auth:
+      redis-user:
         condition: service_healthy
     networks:
       - auth-network-production
@@ -260,26 +260,26 @@ networks:
 
 volumes:
   postgres_auth_data_production:
-    name: gripday_auth_postgres_data_production
+    name: gripday_user_postgres_data_production
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_PATH:-/opt/gripday/data}/postgres-production
   redis_auth_data_production:
-    name: gripday_auth_redis_data_production
+    name: gripday_user_redis_data_production
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${DATA_PATH:-/opt/gripday/data}/redis-production
   auth_logs_production:
-    name: gripday_auth_logs_production
+    name: gripday_user_logs_production
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ${LOGS_PATH:-/opt/gripday/logs}/auth-production
   auth_tmp_production:
-    name: gripday_auth_tmp_production
+    name: gripday_user_tmp_production
     driver: local

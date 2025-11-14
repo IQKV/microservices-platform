@@ -151,7 +151,7 @@ curl -X POST $GATEWAY_URL/api/v1/auth/login \
 
 ### Databases
 
-- **PostgreSQL Auth** - Port 5432 (ClusterIP)
+- **PostgreSQL User** - Port 5432 (ClusterIP)
 - **PostgreSQL Bookstore** - Port 5432 (ClusterIP)
 - **Redis** - Port 6379 (ClusterIP)
 
@@ -201,7 +201,7 @@ kubectl get pods -n gripday -w
 kubectl exec -it deployment/user-service -n gripday -- sh
 
 # Access PostgreSQL
-kubectl exec -it deployment/postgres-auth -n gripday -- psql -U gripday_user -d gripday_auth
+kubectl exec -it deployment/postgres-user -n gripday -- psql -U gripday_user -d gripday_user
 ```
 
 ### Scale Services
@@ -240,7 +240,7 @@ kubectl get events -n gripday --sort-by='.lastTimestamp'
 
 ```bash
 # Check if PostgreSQL is ready
-kubectl exec -it deployment/postgres-auth -n gripday -- pg_isready -U gripday_user
+kubectl exec -it deployment/postgres-user -n gripday -- pg_isready -U gripday_user
 
 # Check Redis
 kubectl exec -it deployment/redis -n gripday -- redis-cli ping

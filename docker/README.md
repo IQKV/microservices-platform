@@ -78,7 +78,7 @@ All services include health checks:
 
 - **User Service:** `curl http://localhost:8080/actuator/health`
 - **Gateway Service:** `curl http://localhost:8080/actuator/health`
-- **PostgreSQL:** `pg_isready -U gripday_user -d gripday_auth`
+- **PostgreSQL:** `pg_isready -U gripday_user -d gripday_user`
 - **Redis:** `redis-cli ping`
 
 ## Volumes

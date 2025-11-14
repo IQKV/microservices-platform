@@ -287,7 +287,7 @@ kubectl get hpa -A
 
 ```bash
 # Backup auth database
-kubectl exec -n gripday-auth user-postgres-<pod> -- pg_dump -U gripday_user gripday_auth_local > auth-backup.sql
+kubectl exec -n gripday-auth user-postgres-<pod> -- pg_dump -U gripday_user gripday_user_local > auth-backup.sql
 
 # Backup bookstore database
 kubectl exec -n gripday-bookstore bookstore-postgres-<pod> -- pg_dump -U gripday_user gripday_bookstore_local > bookstore-backup.sql

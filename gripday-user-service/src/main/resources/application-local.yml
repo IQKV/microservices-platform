@@ -7,7 +7,7 @@ server:
 spring:
   # Database Configuration - Local PostgreSQL
   datasource:
-    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_auth_local}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_user_local}
     username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
     password: ${GRIPDAY_DATABASE_PASSWORD:gripday_password}
     driver-class-name: org.postgresql.Driver
@@ -60,7 +60,7 @@ spring:
 gripday:
   # Database Configuration
   database:
-    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_auth_local}
+    url: ${GRIPDAY_DATABASE_URL:jdbc:postgresql://localhost:5432/gripday_user_local}
     username: ${GRIPDAY_DATABASE_USERNAME:gripday_user}
     password: ${GRIPDAY_DATABASE_PASSWORD:gripday_password}
     pool:
@@ -155,7 +155,7 @@ gripday:
     metrics:
       enabled: true
       path: /actuator/prometheus
-      prefix: gripday_auth_local
+      prefix: gripday_user_local
       include-host-tag: true
       include-application-tag: true
       include-environment-tag: true

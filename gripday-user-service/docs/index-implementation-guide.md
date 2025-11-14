@@ -73,7 +73,7 @@ docker-compose up -d postgres
 
 ```sql
 -- Connect to PostgreSQL
-psql -h localhost -U gripday_auth_user -d gripday_auth_db
+psql -h localhost -U gripday_user_user -d gripday_user_db
 
 -- List all indexes on users table
 \di+ idx_users_*
@@ -154,7 +154,7 @@ grep "009-add-missing-critical-indexes" logs/application.log
 
 ```bash
 # Backup database first
-pg_dump -h production-db -U gripday_auth_user gripday_auth_db > backup_before_indexes.sql
+pg_dump -h production-db -U gripday_user_user gripday_user_db > backup_before_indexes.sql
 
 # Deploy application with new migration
 # Indexes are created automatically on application startup

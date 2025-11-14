@@ -3279,7 +3279,7 @@ graph TB
 
 ### Service-Specific Database Configuration
 
-**User Service Database (gripday_auth_db):**
+**User Service Database (gripday_user_db):**
 
 - **Purpose**: User management, authentication, authorization data
 - **Technology**: PostgreSQL 15+
@@ -4519,7 +4519,7 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/gripday_auth_local
+    url: jdbc:postgresql://localhost:5432/gripday_user_local
     username: ${DB_USERNAME:gripday_user}
     password: ${DB_PASSWORD:gripday_pass}
   jpa:
@@ -4566,7 +4566,7 @@ spring:
   profiles:
     active: staging
   datasource:
-    url: jdbc:postgresql://${DB_HOST:staging-db.gripday.com}:5432/gripday_auth_staging
+    url: jdbc:postgresql://${DB_HOST:staging-db.gripday.com}:5432/gripday_user_staging
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -4620,7 +4620,7 @@ spring:
   profiles:
     active: production
   datasource:
-    url: jdbc:postgresql://${DB_HOST}:5432/gripday_auth_production
+    url: jdbc:postgresql://${DB_HOST}:5432/gripday_user_production
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -5273,9 +5273,9 @@ Create `application-local.yml`:
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/gripday_auth_db
-    username: gripday_auth
-    password: gripday_auth
+    url: jdbc:postgresql://localhost:5432/gripday_user_db
+    username: gripday_user
+    password: gripday_user
   data:
     redis:
       host: localhost
@@ -5314,9 +5314,9 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/gripday_auth_db
-    username: gripday_auth
-    password: gripday_auth
+    url: jdbc:postgresql://localhost:5432/gripday_user_db
+    username: gripday_user
+    password: gripday_user
     hikari:
       maximum-pool-size: 5
       minimum-idle: 2
@@ -5402,8 +5402,8 @@ spring:
   profiles:
     active: staging
   datasource:
-    url: ${AUTH_DATABASE_URL:jdbc:postgresql://staging-auth-db:5432/gripday_auth_staging}
-    username: ${AUTH_DATABASE_USERNAME:gripday_auth}
+    url: ${AUTH_DATABASE_URL:jdbc:postgresql://staging-user-db:5432/gripday_user_staging}
+    username: ${AUTH_DATABASE_USERNAME:gripday_user}
     password: ${AUTH_DATABASE_PASSWORD}
     hikari:
       maximum-pool-size: 20
@@ -5636,9 +5636,9 @@ gripday:
 ```bash
 # user-service/.env.local
 SPRING_PROFILES_ACTIVE=local
-AUTH_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth_db
-AUTH_DATABASE_USERNAME=gripday_auth
-AUTH_DATABASE_PASSWORD=gripday_auth
+AUTH_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user_db
+AUTH_DATABASE_USERNAME=gripday_user
+AUTH_DATABASE_PASSWORD=gripday_user
 JWT_SECRET=local-development-secret-key-change-in-production
 
 # gateway-service/.env.local
@@ -5656,8 +5656,8 @@ GATEWAY_REDIS_DATABASE=1
 ```bash
 # user-service/.env.staging
 SPRING_PROFILES_ACTIVE=staging
-AUTH_DATABASE_URL=jdbc:postgresql://staging-auth-db.internal:5432/gripday_auth_staging
-AUTH_DATABASE_USERNAME=gripday_auth_staging
+AUTH_DATABASE_URL=jdbc:postgresql://staging-user-db.internal:5432/gripday_user_staging
+AUTH_DATABASE_USERNAME=gripday_user_staging
 AUTH_DATABASE_PASSWORD=${STAGING_AUTH_DB_PASSWORD}
 JWT_SECRET=${STAGING_JWT_SECRET}
 JWT_ISSUER_URI=https://staging-auth.gripday.com
@@ -5680,8 +5680,8 @@ TRACING_SAMPLE_RATE=0.1
 ```bash
 # user-service/.env.production
 SPRING_PROFILES_ACTIVE=production
-AUTH_DATABASE_URL=jdbc:postgresql://production-auth-db.internal:5432/gripday_auth_production
-AUTH_DATABASE_USERNAME=gripday_auth_production
+AUTH_DATABASE_URL=jdbc:postgresql://production-user-db.internal:5432/gripday_user_production
+AUTH_DATABASE_USERNAME=gripday_user_production
 AUTH_DATABASE_PASSWORD=${PRODUCTION_AUTH_DB_PASSWORD}
 AUTH_DATABASE_POOL_SIZE=50
 AUTH_DATABASE_POOL_MIN_IDLE=10
@@ -6595,9 +6595,9 @@ services:
   user-postgresql:
     image: postgres:15
     environment:
-      POSTGRES_DB: gripday_auth_db
-      POSTGRES_USER: gripday_auth
-      POSTGRES_PASSWORD: gripday_auth
+      POSTGRES_DB: gripday_user_db
+      POSTGRES_USER: gripday_user
+      POSTGRES_PASSWORD: gripday_user
     ports:
       - "5432:5432"
     volumes:
@@ -6611,9 +6611,9 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - AUTH_DATABASE_URL=jdbc:postgresql://user-postgresql:5432/gripday_auth_db
-      - AUTH_DATABASE_USERNAME=gripday_auth
-      - AUTH_DATABASE_PASSWORD=gripday_auth
+      - AUTH_DATABASE_URL=jdbc:postgresql://user-postgresql:5432/gripday_user_db
+      - AUTH_DATABASE_USERNAME=gripday_user
+      - AUTH_DATABASE_PASSWORD=gripday_user
     depends_on:
       - user-postgresql
     volumes:

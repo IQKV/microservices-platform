@@ -412,7 +412,7 @@
       "type": "java.lang.String",
       "description": "Metrics name prefix",
       "sourceType": "org.gripday.authservice.config.GripdayProperties$Observability$Metrics",
-      "defaultValue": "gripday_auth"
+      "defaultValue": "gripday_user"
     },
     {
       "name": "gripday.observability.metrics.include-host-tag",
@@ -532,7 +532,7 @@
       "name": "gripday.database.url",
       "values": [
         {
-          "value": "jdbc:postgresql://localhost:5432/gripday_auth",
+          "value": "jdbc:postgresql://localhost:5432/gripday_user",
           "description": "PostgreSQL database URL for local development"
         },
         {

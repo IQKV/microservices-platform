@@ -55,7 +55,7 @@ spec:
 
             # Database Configuration
             - name: GRIPDAY_DATABASE_URL
-              value: "jdbc:postgresql://user-postgres:5432/gripday_auth_local"
+              value: "jdbc:postgresql://user-postgres:5432/gripday_user_local"
             - name: GRIPDAY_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:

@@ -175,7 +175,7 @@ CORS_ALLOWED_HEADERS=*
 
 ```bash
 # Database
-GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth
+GRIPDAY_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_user
 GRIPDAY_DATABASE_USERNAME=gripday
 GRIPDAY_DATABASE_PASSWORD=dev_password_123
 
@@ -256,12 +256,12 @@ services:
 
 ```sql
 -- Connect as postgres user
-CREATE DATABASE gripday_auth;
+CREATE DATABASE gripday_user;
 CREATE DATABASE gripday_gateway;
 
 -- Create application user
 CREATE USER gripday WITH PASSWORD 'dev_password_123';
-GRANT ALL PRIVILEGES ON DATABASE gripday_auth TO gripday;
+GRANT ALL PRIVILEGES ON DATABASE gripday_user TO gripday;
 GRANT ALL PRIVILEGES ON DATABASE gripday_gateway TO gripday;
 ```
 
@@ -463,7 +463,7 @@ docker-compose ps postgres
 docker-compose logs postgres
 
 # Test connection
-psql -h localhost -U gripday -d gripday_auth
+psql -h localhost -U gripday -d gripday_user
 ```
 
 **Redis Connection Failed:**

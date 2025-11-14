@@ -221,7 +221,7 @@ backup_databases() {
         # Backup auth database
         print_status "Backing up auth database..."
         kubectl exec -n gripday-production-env deployment/user-postgres -- \
-            pg_dump -U gripday_user_prod gripday_auth_production > "$backup_dir/auth_db_backup.sql"
+            pg_dump -U gripday_user_prod gripday_user_production > "$backup_dir/auth_db_backup.sql"
         
         print_status "Database backup completed: $backup_dir"
         print_status "Please ensure backups are stored in a secure location"

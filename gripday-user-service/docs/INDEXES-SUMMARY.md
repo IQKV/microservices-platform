@@ -66,7 +66,7 @@ docker-compose up -d postgres
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # Verify indexes
-psql -h localhost -U gripday_auth_user -d gripday_auth_db -c "\di+ idx_*"
+psql -h localhost -U gripday_user_user -d gripday_user_db -c "\di+ idx_*"
 ```
 
 ## Optimized Query Patterns

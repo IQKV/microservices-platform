@@ -2,9 +2,9 @@ version: "3.8"
 
 services:
   # PostgreSQL Database for User Service - Staging
-  postgres-auth:
+  postgres-user:
     environment:
-      POSTGRES_DB: gripday_auth_staging
+      POSTGRES_DB: gripday_user_staging
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -34,7 +34,7 @@ services:
   user-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth_staging
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/gripday_user_staging
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       GRIPDAY_AUTH_JWT_SECRET: ${JWT_SECRET}

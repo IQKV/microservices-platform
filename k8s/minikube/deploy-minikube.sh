@@ -197,7 +197,7 @@ if [ "$WAIT_FOR_READY" = true ]; then
     print_header "Waiting for Pods to be Ready"
     
     print_info "Waiting for databases..."
-    kubectl wait --for=condition=ready pod -l app=postgres-auth -n gripday --timeout=300s || print_warning "Postgres Auth not ready"
+    kubectl wait --for=condition=ready pod -l app=postgres-user -n gripday --timeout=300s || print_warning "Postgres Auth not ready"
     kubectl wait --for=condition=ready pod -l app=postgres-bookstore -n gripday --timeout=300s || print_warning "Postgres Bookstore not ready"
     kubectl wait --for=condition=ready pod -l app=redis -n gripday --timeout=300s || print_warning "Redis not ready"
     
