@@ -441,8 +441,8 @@ export class AuthTestFramework {
     userResults: Array<{ endpoint: string; hasAccess: boolean; statusCode?: number }>;
   }> {
     const adminEndpoints = [
-      '/api/v1/users',
-      '/api/v1/users/1',
+      '/api/v1/admin/users',
+      '/api/v1/admin/users/1',
       '/api/v1/tenants'
     ];
 

@@ -6,11 +6,11 @@ import { getEnvironmentConfig } from '../../config/environments.js';
 
 // Admin Users CRUD (conditional on RBAC)
 // Endpoints:
-// - GET /api/v1/users
-// - POST /api/v1/users
-// - GET /api/v1/users/{id}
-// - PUT /api/v1/users/{id}
-// - DELETE /api/v1/users/{id}
+// - GET /api/v1/admin/users
+// - POST /api/v1/admin/users
+// - GET /api/v1/admin/users/{id}
+// - PUT /api/v1/admin/users/{id}
+// - DELETE /api/v1/admin/users/{id}
 
 test.describe('User Service - Admin Users CRUD (Conditional)', () => {
   const env = getEnvironmentConfig();

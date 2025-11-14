@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web;
+package org.gripday.userservice.presentation.web.admin;
 
 import jakarta.validation.Valid;
 
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for user management operations with admin-only access. Implements role-based access control and tenant isolation.
  */
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/admin/users")
 @Tag(name = "User Management", description = "Admin-only user management operations with tenant isolation")
 @SecurityRequirement(name = "bearerAuth")
 public class UserManagementResource {

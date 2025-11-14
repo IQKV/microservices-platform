@@ -58,7 +58,7 @@ class RequestTransformationFilterTest {
     MDC.put("tenantId", tenantId);
     MDC.put("userId", userId);
 
-    var request = MockServerHttpRequest.get("/api/v1/users").build();
+    var request = MockServerHttpRequest.get("/api/v1/admin/users").build();
     var exchange = MockServerWebExchange.from(request);
     var config = new RequestTransformationFilter.Config();
 

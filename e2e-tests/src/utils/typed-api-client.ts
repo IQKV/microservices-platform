@@ -213,7 +213,7 @@ export class TypedApiClient {
   async getUsers(params?: UserSearchParams): Promise<PaginatedResponse<UserResponse>> {
     const response = await this.apiClient.request<PaginatedResponse<UserResponse>>({
       method: 'GET',
-      url: '/api/v1/users',
+      url: '/api/v1/admin/users',
       params: params as Record<string, string | number | boolean>
     });
 
@@ -226,7 +226,7 @@ export class TypedApiClient {
   async getUserById(userId: number): Promise<UserResponse> {
     const response = await this.apiClient.request<UserResponse>({
       method: 'GET',
-      url: `/api/v1/users/${userId}`
+      url: `/api/v1/admin/users/${userId}`
     });
 
     return ValidationUtils.validateUserData(response.data);
@@ -240,7 +240,7 @@ export class TypedApiClient {
     
     const response = await this.apiClient.request<UserResponse>({
       method: 'POST',
-      url: '/api/v1/users',
+      url: '/api/v1/admin/users',
       data: userData
     });
 
@@ -255,7 +255,7 @@ export class TypedApiClient {
     
     const response = await this.apiClient.request<UserResponse>({
       method: 'PUT',
-      url: `/api/v1/users/${userId}`,
+      url: `/api/v1/admin/users/${userId}`,
       data: userData
     });
 
@@ -268,7 +268,7 @@ export class TypedApiClient {
   async deleteUser(userId: number): Promise<void> {
     await this.apiClient.request({
       method: 'DELETE',
-      url: `/api/v1/users/${userId}`
+      url: `/api/v1/admin/users/${userId}`
     });
   }
 
@@ -278,7 +278,7 @@ export class TypedApiClient {
   async setUserEnabled(userId: number, enabled: boolean): Promise<UserResponse> {
     const response = await this.apiClient.request<UserResponse>({
       method: 'PATCH',
-      url: `/api/v1/users/${userId}/enabled`,
+      url: `/api/v1/admin/users/${userId}/enabled`,
       data: { enabled }
     });
 

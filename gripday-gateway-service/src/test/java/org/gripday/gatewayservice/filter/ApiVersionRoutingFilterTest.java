@@ -120,7 +120,7 @@ class ApiVersionRoutingFilterTest {
   @DisplayName("Should validate supported API versions correctly")
   void shouldValidateSupportedApiVersionsCorrectly() {
     // Given
-    var request = MockServerHttpRequest.get("/api/v1/users").build();
+    var request = MockServerHttpRequest.get("/api/v1/admin/users").build();
     when(versionExtractor.extractVersion(request)).thenReturn("v1");
     when(versionExtractor.isSupportedVersion("v1")).thenReturn(true);
 
@@ -192,7 +192,7 @@ class ApiVersionRoutingFilterTest {
     var v1Path = routingFilter.transformPathForVersion(basePath, "v1");
     var v2Path = routingFilter.transformPathForVersion(basePath, "v2");
 
-    assertThat(v1Path).isEqualTo("/api/v1/users");
+    assertThat(v1Path).isEqualTo("/api/v1/admin/users");
     assertThat(v2Path).isEqualTo("/api/v2/users");
   }
 }

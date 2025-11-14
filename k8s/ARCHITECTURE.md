@@ -115,7 +115,7 @@ The gateway service routes all external traffic to internal services:
 ```yaml
 # User Service Routes
 /api/v1/auth/**      → http://user-service:8080/api/v1/auth/**
-/api/v1/users/**     → http://user-service:8080/api/v1/users/**
+/api/v1/admin/users/**     → http://user-service:8080/api/v1/admin/users/**
 /api/v1/tenants/**   → http://user-service:8080/api/v1/tenants/**
 
 # Bookstore Service Routes

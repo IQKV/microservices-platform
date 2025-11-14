@@ -86,7 +86,7 @@ class UserManagementIntegrationTests {
   @Test
   void getAllUsers_WithAdminToken_ShouldReturn200WithUsers() throws Exception {
     // When & Then
-    mockMvc.perform(get("/api/v1/users")
+    mockMvc.perform(get("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +98,7 @@ class UserManagementIntegrationTests {
   @Test
   void getAllUsers_WithRegularUserToken_ShouldReturn403() throws Exception {
     // When & Then
-    mockMvc.perform(get("/api/v1/users")
+    mockMvc.perform(get("/api/v1/admin/users")
             .header("Authorization", "Bearer " + userToken))
         .andExpect(status().isForbidden());
   }
@@ -118,7 +118,7 @@ class UserManagementIntegrationTests {
     );
 
     // When & Then
-    mockMvc.perform(post("/api/v1/users")
+    mockMvc.perform(post("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
@@ -153,7 +153,7 @@ class UserManagementIntegrationTests {
     );
 
     // When & Then
-    mockMvc.perform(post("/api/v1/users")
+    mockMvc.perform(post("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
@@ -175,7 +175,7 @@ class UserManagementIntegrationTests {
     );
 
     // When & Then
-    mockMvc.perform(post("/api/v1/users")
+    mockMvc.perform(post("/api/v1/admin/users")
             .header("Authorization", "Bearer " + superAdminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
@@ -195,7 +195,7 @@ class UserManagementIntegrationTests {
     var testUser = userRepository.findByUsername("testuser").orElseThrow();
 
     // When & Then
-    mockMvc.perform(get("/api/v1/users/{id}", testUser.getId())
+    mockMvc.perform(get("/api/v1/admin/users/{id}", testUser.getId())
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.username").value("testuser"))
@@ -220,7 +220,7 @@ class UserManagementIntegrationTests {
     );
 
     // When & Then
-    mockMvc.perform(put("/api/v1/users/{id}", testUser.getId())
+    mockMvc.perform(put("/api/v1/admin/users/{id}", testUser.getId())
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updateRequest)))
@@ -244,7 +244,7 @@ class UserManagementIntegrationTests {
     var userToDelete = createTestUser("deleteuser", "delete@example.com", "tenant-1", Set.of("USER"));
 
     // When & Then
-    mockMvc.perform(delete("/api/v1/users/{id}", userToDelete.getId())
+    mockMvc.perform(delete("/api/v1/admin/users/{id}", userToDelete.getId())
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isNoContent());
 
@@ -260,7 +260,7 @@ class UserManagementIntegrationTests {
     createTestUser("tenant2user", "tenant2@example.com", "tenant-2", Set.of("USER"));
 
     // When - Admin from tenant-1 tries to access users
-    var result = mockMvc.perform(get("/api/v1/users")
+    var result = mockMvc.perform(get("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isOk())
         .andReturn();
@@ -295,7 +295,7 @@ class UserManagementIntegrationTests {
     );
 
     // When & Then
-    mockMvc.perform(post("/api/v1/users")
+    mockMvc.perform(post("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
@@ -322,7 +322,7 @@ class UserManagementIntegrationTests {
         Set.of("USER")
     );
 
-    var createResult = mockMvc.perform(post("/api/v1/users")
+    var createResult = mockMvc.perform(post("/api/v1/admin/users")
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(createRequest)))
@@ -335,7 +335,7 @@ class UserManagementIntegrationTests {
     );
 
     // Step 2: Read user
-    mockMvc.perform(get("/api/v1/users/{id}", createdUser.id())
+    mockMvc.perform(get("/api/v1/admin/users/{id}", createdUser.id())
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.username").value("cruduser"));
@@ -352,7 +352,7 @@ class UserManagementIntegrationTests {
         Set.of("USER", "ADMIN")
     );
 
-    mockMvc.perform(put("/api/v1/users/{id}", createdUser.id())
+    mockMvc.perform(put("/api/v1/admin/users/{id}", createdUser.id())
             .header("Authorization", "Bearer " + adminToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updateRequest)))
@@ -360,7 +360,7 @@ class UserManagementIntegrationTests {
         .andExpect(jsonPath("$.email").value("updated-crud@example.com"));
 
     // Step 4: Delete user
-    mockMvc.perform(delete("/api/v1/users/{id}", createdUser.id())
+    mockMvc.perform(delete("/api/v1/admin/users/{id}", createdUser.id())
             .header("Authorization", "Bearer " + adminToken))
         .andExpect(status().isNoContent());
 

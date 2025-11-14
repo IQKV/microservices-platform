@@ -76,7 +76,7 @@ private static final String FIND_USERS_QUERY = """
 
 ### API Versioning Strategy
 
-- Support URL path-based versioning (`/api/v1/users`, `/api/v2/users`)
+- Support URL path-based versioning (`/api/v1/admin/users`, `/api/v2/users`)
 - Support header-based versioning with Accept and API-Version headers
 - Maintain backward compatibility for at least 2 previous major versions
 - Provide clear deprecation warnings and migration guidance
@@ -187,7 +187,7 @@ public record UserContext(
     "message": "Request validation failed",
     "details": "One or more fields contain invalid values",
     "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/users",
+    "path": "/api/v1/admin/users",
     "method": "POST",
     "correlationId": "abc123-def456-ghi789",
     "requestId": "req-001-2024",

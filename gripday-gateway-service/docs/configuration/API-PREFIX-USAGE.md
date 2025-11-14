@@ -37,8 +37,8 @@ api-prefix:
 
 **Behavior**:
 
-- Client requests: `http://localhost:8080/api/v1/users`
-- Forwarded to service: `http://user-service:8080/api/v1/users`
+- Client requests: `http://localhost:8080/api/v1/admin/users`
+- Forwarded to service: `http://user-service:8080/api/v1/admin/users`
 - No path modification
 
 ### Scenario 2: Production without Prefix
@@ -56,13 +56,13 @@ api-prefix:
 
 **Behavior**:
 
-- Client requests: `https://api.gripday.com/v1/users`
-- Forwarded to service: `http://user-service:8080/v1/users`
+- Client requests: `https://api.gripday.com/v1/admin/users`
+- Forwarded to service: `http://user-service:8080/v1/admin/users`
 - No path modification
 
 ### Scenario 3: Strip Prefix Before Forwarding
 
-**Use Case**: Accept `/api/v1/users` but forward as `/v1/users` to downstream services.
+**Use Case**: Accept `/api/v1/admin/users` but forward as `/v1/admin/users` to downstream services.
 
 **Configuration**:
 
@@ -75,8 +75,8 @@ api-prefix:
 
 **Behavior**:
 
-- Client requests: `http://localhost:8080/api/v1/users`
-- Forwarded to service: `http://user-service:8080/v1/users`
+- Client requests: `http://localhost:8080/api/v1/admin/users`
+- Forwarded to service: `http://user-service:8080/v1/admin/users`
 - First path segment (`/api`) stripped
 
 ### Scenario 4: Disabled API Prefix
@@ -103,10 +103,10 @@ The `strip-count` property removes path segments from the beginning of the path:
 
 | Original Path           | strip-count | Forwarded Path  |
 | ----------------------- | ----------- | --------------- |
-| `/api/v1/users`         | 0           | `/api/v1/users` |
-| `/api/v1/users`         | 1           | `/v1/users`     |
-| `/api/v1/users`         | 2           | `/users`        |
-| `/api/gateway/v1/users` | 2           | `/v1/users`     |
+| `/api/v1/admin/users`         | 0           | `/api/v1/admin/users` |
+| `/api/v1/admin/users`         | 1           | `/v1/admin/users`     |
+| `/api/v1/admin/users`         | 2           | `/users`        |
+| `/api/gateway/v1/admin/users` | 2           | `/v1/admin/users`     |
 
 ## Environment-Specific Configuration
 

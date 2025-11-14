@@ -179,7 +179,7 @@ OTEL_SERVICE_NAME=gripday-user-service
 
 ```
 http://user.gripday.site/api/v1/auth/*     → Authentication API
-http://user.gripday.site/api/v1/users/*    → User Management API
+http://user.gripday.site/api/v1/admin/users/*    → User Management API
 http://user.gripday.site/swagger-ui/*      → Swagger UI
 http://user.gripday.site/actuator/*        → Health/metrics
 ```
@@ -188,14 +188,14 @@ http://user.gripday.site/actuator/*        → Health/metrics
 
 ```
 https://auth.gripday.website/api/v1/auth/*  → Authentication API
-https://auth.gripday.website/api/v1/users/* → User Management API
+https://auth.gripday.website/api/v1/admin/users/* → User Management API
 ```
 
 #### Production Environment
 
 ```
 https://auth.gripday.com/api/v1/auth/*  → Authentication API
-https://auth.gripday.com/api/v1/users/* → User Management API
+https://auth.gripday.com/api/v1/admin/users/* → User Management API
 ```
 
 ## Security
@@ -265,12 +265,12 @@ https://auth.gripday.com/api/v1/users/* → User Management API
 
 ### User Management Endpoints (Admin Only)
 
-- `GET /api/v1/users` - List users with pagination
-- `GET /api/v1/users/{id}` - Get user details
-- `POST /api/v1/users` - Create user (admin only)
-- `PUT /api/v1/users/{id}` - Update user (admin only)
-- `DELETE /api/v1/users/{id}` - Delete user (admin only)
-- `PUT /api/v1/users/{id}/roles` - Update user roles (admin only)
+- `GET /api/v1/admin/users` - List users with pagination
+- `GET /api/v1/admin/users/{id}` - Get user details
+- `POST /api/v1/admin/users` - Create user (admin only)
+- `PUT /api/v1/admin/users/{id}` - Update user (admin only)
+- `DELETE /api/v1/admin/users/{id}` - Delete user (admin only)
+- `PUT /api/v1/admin/users/{id}/roles` - Update user roles (admin only)
 
 ### Tenant Management Endpoints (Admin Only)
 

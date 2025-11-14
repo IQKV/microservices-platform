@@ -175,7 +175,7 @@ https://auth.gripday.com/oauth/google/callback
 
 ```yaml
 /api/v1/auth/**       → User Service (8080)
-/api/v1/users/**      → User Service (8080)
+/api/v1/admin/users/**      → User Service (8080)
 /api/v1/tenants/**    → User Service (8080)
 /api/v1/bookstore/**  → Bookstore Service (8080)
 /actuator/**          → Gateway health endpoints

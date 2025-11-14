@@ -19,7 +19,7 @@ public class ApiVersionExtractor {
   private static final Pattern ACCEPT_VERSION_PATTERN = Pattern.compile("application/vnd\\.gripday\\.(v\\d+)\\+json");
 
   /**
-   * Extract API version from the request using multiple strategies: 1. URL path-based versioning (/api/v1/users) 2. API-Version header 3. Accept header with vendor media type 4. Default to
+   * Extract API version from the request using multiple strategies: 1. URL path-based versioning (/api/v1/admin/users) 2. API-Version header 3. Accept header with vendor media type 4. Default to
    * v1 if no version found
    */
   public String extractVersion(ServerHttpRequest request) {
@@ -46,7 +46,7 @@ public class ApiVersionExtractor {
   }
 
   /**
-   * Extract version from URL path like /api/v1/users -> v1
+   * Extract version from URL path like /api/v1/admin/users -> v1
    */
   public String extractVersionFromPath(String path) {
     if (!StringUtils.hasText(path)) {

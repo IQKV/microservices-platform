@@ -249,7 +249,7 @@ This document outlines the requirements for a multi-module Maven project impleme
 
 #### Acceptance Criteria
 
-1. THE API_Versioning SHALL support URL path-based versioning (e.g., /v1/users, /v2/users)
+1. THE API_Versioning SHALL support URL path-based versioning (e.g., /v1/admin/users, /v2/users)
 2. THE API_Versioning SHALL support header-based versioning with Accept and API-Version headers
 3. THE Version_Strategy SHALL implement semantic versioning (major.minor.patch) for all APIs
 4. THE Backward_Compatibility SHALL maintain support for at least 2 previous major versions

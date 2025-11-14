@@ -190,10 +190,10 @@ export const API_ENDPOINTS = {
   },
   
   users: {
-    base: '/api/v1/users',
-    byId: (id: string) => `/api/v1/users/${id}`,
-    search: '/api/v1/users/search',
-    roles: (id: string) => `/api/v1/users/${id}/roles`
+    base: '/api/v1/admin/users',
+    byId: (id: string) => `/api/v1/admin/users/${id}`,
+    search: '/api/v1/admin/users/search',
+    roles: (id: string) => `/api/v1/admin/users/${id}/roles`
   },
   
   tenants: {

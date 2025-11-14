@@ -115,8 +115,8 @@ services:
 
 - `/api/v1/auth/**` - Authentication endpoints
 - `/api/v1/password/**` - Password management
-- `/api/v1/users/**` - User management
-- `/api/v1/organizations/**` - Organization management
+- `/api/v1/admin/users/**` - User management
+- `/api/v1/admin/organizations/**` - Organization management
 - `/api/v1/admin/**` - Admin endpoints
 
 **Configuration**:

@@ -134,31 +134,31 @@ export class RbacTestHelpers {
 
     // Admin endpoints
     {
-      endpoint: '/api/v1/users',
+      endpoint: '/api/v1/admin/users',
       method: 'GET',
       requiredRoles: ['ADMIN'],
       description: 'List all users'
     },
     {
-      endpoint: '/api/v1/users',
+      endpoint: '/api/v1/admin/users',
       method: 'POST',
       requiredRoles: ['ADMIN'],
       description: 'Create new user'
     },
     {
-      endpoint: '/api/v1/users/{id}',
+      endpoint: '/api/v1/admin/users/{id}',
       method: 'GET',
       requiredRoles: ['ADMIN'],
       description: 'Get user by ID'
     },
     {
-      endpoint: '/api/v1/users/{id}',
+      endpoint: '/api/v1/admin/users/{id}',
       method: 'PUT',
       requiredRoles: ['ADMIN'],
       description: 'Update user'
     },
     {
-      endpoint: '/api/v1/users/{id}',
+      endpoint: '/api/v1/admin/users/{id}',
       method: 'DELETE',
       requiredRoles: ['ADMIN'],
       description: 'Delete user'

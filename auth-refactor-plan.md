@@ -17,7 +17,7 @@ All services follow a three-tier architecture pattern with strict layer separati
 ### User Service
 
 - **Authentication Endpoints**: `/api/v1/auth/*` for signup, login, refresh, logout, email verification
-- **User Management**: `/api/v1/users/*` for CRUD operations (admin-only)
+- **User Management**: `/api/v1/admin/users/*` for CRUD operations (admin-only)
 - **JWT Token Generation**: RS256/HS256 with configurable expiry
 - **Email Verification**: Token-based email verification with HTML templates
 - **Password Management**: Forgot/reset password flows with secure tokens
@@ -75,12 +75,12 @@ All services follow a three-tier architecture pattern with strict layer separati
 
 **User Management (Admin):**
 
-- `GET /api/v1/users` - List users with pagination
-- `GET /api/v1/users/{id}` - Get user by ID
-- `PUT /api/v1/users/{id}` - Update user
-- `DELETE /api/v1/users/{id}` - Delete user
-- `POST /api/v1/users/{id}/authorities` - Assign role
-- `DELETE /api/v1/users/{id}/authorities/{role}` - Remove role
+- `GET /api/v1/admin/users` - List users with pagination
+- `GET /api/v1/admin/users/{id}` - Get user by ID
+- `PUT /api/v1/admin/users/{id}` - Update user
+- `DELETE /api/v1/admin/users/{id}` - Delete user
+- `POST /api/v1/admin/users/{id}/authorities` - Assign role
+- `DELETE /api/v1/admin/users/{id}/authorities/{role}` - Remove role
 
 ### Gateway Service Features
 

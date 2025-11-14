@@ -155,11 +155,11 @@ gripday:
             requests-per-minute: 20
             burst-capacity: 30
             enable-tenant-quotas: false
-          "/api/v1/users/**":
+          "/api/v1/admin/users/**":
             requests-per-minute: 200
             burst-capacity: 300
             enable-tenant-quotas: false
-          "/api/v1/organizations/**":
+          "/api/v1/admin/organizations/**":
             requests-per-minute: 200
             burst-capacity: 300
             enable-tenant-quotas: false

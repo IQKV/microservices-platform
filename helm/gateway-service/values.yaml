@@ -257,7 +257,7 @@ configMap:
             - id: user-service-users
               uri: http://user-service.gripday-user.svc.cluster.local:8080
               predicates:
-              - Path=/api/v1/users/**
+              - Path=/api/v1/admin/users/**
               filters:
               - StripPrefix=0
             

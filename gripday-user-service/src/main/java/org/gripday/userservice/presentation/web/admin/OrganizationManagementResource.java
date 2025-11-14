@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web;
+package org.gripday.userservice.presentation.web.admin;
 
 import jakarta.validation.Valid;
 
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for organization management operations with admin-only access.
  */
 @RestController
-@RequestMapping("/api/v1/organizations")
+@RequestMapping("/api/v1/admin/organizations")
 @Tag(name = "Organization Management", description = "Admin-only organization management operations with tenant isolation")
 @SecurityRequirement(name = "bearerAuth")
 public class OrganizationManagementResource {

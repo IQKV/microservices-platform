@@ -66,7 +66,7 @@ curl https://api.gripday.com/v1/auth/login
 curl https://api.gripday.com/v1/auth/signup
 
 # Protected routes (JWT token required)
-curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users
+curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/admin/users
 ```
 
 ### Authentication Flow
@@ -87,7 +87,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```bash
 curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
      -H "X-Tenant-ID: default" \
-     http://localhost:8080/api/v1/users
+     http://localhost:8080/api/v1/admin/users
 ```
 
 ### Multi-Tenant Support
@@ -99,7 +99,7 @@ The gateway supports tenant isolation through multiple methods:
 ```bash
 curl -H "Authorization: Bearer <token>" \
      -H "X-Tenant-ID: tenant-123" \
-     http://localhost:8080/api/v1/users
+     http://localhost:8080/api/v1/admin/users
 ```
 
 **Subdomain-based routing:**
@@ -107,7 +107,7 @@ curl -H "Authorization: Bearer <token>" \
 ```bash
 # Routes to tenant-123 context
 curl -H "Authorization: Bearer <token>" \
-     http://tenant-123.localhost:8080/api/v1/users
+     http://tenant-123.localhost:8080/api/v1/admin/users
 ```
 
 ### Rate Limiting

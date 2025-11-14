@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web;
+package org.gripday.userservice.presentation.web.admin;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,6 +21,7 @@ import org.gripday.userservice.presentation.dto.CreateOrganizationRequest;
 import org.gripday.userservice.presentation.dto.OrganizationDto;
 import org.gripday.userservice.presentation.dto.UpdateOrganizationRequest;
 import org.gripday.userservice.presentation.dto.UserContext;
+import org.gripday.userservice.presentation.web.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ class OrganizationManagementResourceTest {
     var page = new PageImpl<>(List.of(testOrganizationDto), PageRequest.of(0, 20), 1);
     when(organizationManagementService.getAllOrganizations(any(), any())).thenReturn(page);
 
-    mockMvc.perform(get("/api/v1/organizations")
+    mockMvc.perform(get("/api/v1/admin/organizations")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content[0].name").value("Test Org"));
@@ -104,7 +105,7 @@ class OrganizationManagementResourceTest {
   void getOrganizationById_Success() throws Exception {
     when(organizationManagementService.getOrganizationById(eq(1L), any())).thenReturn(testOrganizationDto);
 
-    mockMvc.perform(get("/api/v1/organizations/1")
+    mockMvc.perform(get("/api/v1/admin/organizations/1")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("Test Org"));
@@ -128,7 +129,7 @@ class OrganizationManagementResourceTest {
 
     when(organizationManagementService.createOrganization(any(), any())).thenReturn(testOrganizationDto);
 
-    mockMvc.perform(post("/api/v1/organizations")
+    mockMvc.perform(post("/api/v1/admin/organizations")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -153,7 +154,7 @@ class OrganizationManagementResourceTest {
 
     when(organizationManagementService.updateOrganization(eq(1L), any(), any())).thenReturn(testOrganizationDto);
 
-    mockMvc.perform(put("/api/v1/organizations/1")
+    mockMvc.perform(put("/api/v1/admin/organizations/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -165,7 +166,7 @@ class OrganizationManagementResourceTest {
   void deleteOrganization_Success() throws Exception {
     doNothing().when(organizationManagementService).deleteOrganization(eq(1L), any());
 
-    mockMvc.perform(delete("/api/v1/organizations/1")
+    mockMvc.perform(delete("/api/v1/admin/organizations/1")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
   }

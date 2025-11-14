@@ -148,9 +148,9 @@ test.describe('Role-Based Access Control Tests', () => {
 
     test('should restrict admin endpoints from regular users', async () => {
       const adminEndpoints = [
-        { endpoint: '/api/v1/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
-        { endpoint: '/api/v1/users/1', method: 'GET' as const, requiredRoles: ['ADMIN'] },
-        { endpoint: '/api/v1/users', method: 'POST' as const, requiredRoles: ['ADMIN'] }
+        { endpoint: '/api/v1/admin/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
+        { endpoint: '/api/v1/admin/users/1', method: 'GET' as const, requiredRoles: ['ADMIN'] },
+        { endpoint: '/api/v1/admin/users', method: 'POST' as const, requiredRoles: ['ADMIN'] }
       ];
 
       const results = await rbacHelpers.testUserAccess(regularUser, adminEndpoints);
@@ -165,8 +165,8 @@ test.describe('Role-Based Access Control Tests', () => {
 
     test('should allow admin access to admin endpoints', async () => {
       const adminEndpoints = [
-        { endpoint: '/api/v1/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
-        { endpoint: '/api/v1/users/1', method: 'GET' as const, requiredRoles: ['ADMIN'] }
+        { endpoint: '/api/v1/admin/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
+        { endpoint: '/api/v1/admin/users/1', method: 'GET' as const, requiredRoles: ['ADMIN'] }
       ];
 
       const results = await rbacHelpers.testUserAccess(adminUser, adminEndpoints);
@@ -238,8 +238,8 @@ test.describe('Role-Based Access Control Tests', () => {
       });
 
       const privilegedEndpoints = [
-        { endpoint: '/api/v1/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
-        { endpoint: '/api/v1/users', method: 'POST' as const, requiredRoles: ['ADMIN'] },
+        { endpoint: '/api/v1/admin/users', method: 'GET' as const, requiredRoles: ['ADMIN'] },
+        { endpoint: '/api/v1/admin/users', method: 'POST' as const, requiredRoles: ['ADMIN'] },
         { endpoint: '/api/v1/tenants', method: 'GET' as const, requiredRoles: ['SUPER_ADMIN'] }
       ];
 

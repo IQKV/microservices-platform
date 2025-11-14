@@ -360,7 +360,7 @@ metrics:
 All requests are proxied to backend services:
 
 - `/api/v1/auth/**` → User Service
-- `/api/v1/users/**` → User Service (User Management)
+- `/api/v1/admin/users/**` → User Service (User Management)
 - `/api/v1/tenants/**` → User Service (Tenant Management)
 
 ### Headers Added by Gateway

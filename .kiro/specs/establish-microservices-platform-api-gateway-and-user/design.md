@@ -1425,7 +1425,7 @@ Response (200 OK):
 
 ### User Management Endpoints
 
-**Base URL:** `/api/v1/users` (Admin-only endpoints)
+**Base URL:** `/api/v1/admin/users` (Admin-only endpoints)
 
 | Method | Endpoint | Description            | Request Body        | Response        | Status Codes       |
 | ------ | -------- | ---------------------- | ------------------- | --------------- | ------------------ |
@@ -1517,7 +1517,7 @@ public class AuthenticationResource {
 }
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/admin/users")
 @Tag(name = "User Management", description = "User CRUD operations")
 @SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
@@ -1670,37 +1670,37 @@ The platform implements RESTful API design with consistent HTTP method usage:
 **GET - Retrieve Resources**
 
 ```http
-GET /api/v1/users          # List all users
-GET /api/v1/users/{id}     # Get specific user
-GET /api/v1/users/search?q=john  # Search users
+GET /api/v1/admin/users          # List all users
+GET /api/v1/admin/users/{id}     # Get specific user
+GET /api/v1/admin/users/search?q=john  # Search users
 ```
 
 **POST - Create Resources**
 
 ```http
-POST /api/v1/users         # Create new user
+POST /api/v1/admin/users         # Create new user
 POST /api/v1/auth/login    # Authenticate user
-POST /api/v1/users/bulk    # Bulk create users
+POST /api/v1/admin/users/bulk    # Bulk create users
 ```
 
 **PUT - Full Resource Update**
 
 ```http
-PUT /api/v1/users/{id}     # Replace entire user resource
+PUT /api/v1/admin/users/{id}     # Replace entire user resource
 ```
 
 **PATCH - Partial Resource Update**
 
 ```http
-PATCH /api/v1/users/{id}   # Update specific user fields
-PATCH /api/v1/users/{id}/status  # Update user status only
+PATCH /api/v1/admin/users/{id}   # Update specific user fields
+PATCH /api/v1/admin/users/{id}/status  # Update user status only
 ```
 
 **DELETE - Remove Resources**
 
 ```http
-DELETE /api/v1/users/{id}  # Delete specific user
-DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
+DELETE /api/v1/admin/users/{id}  # Delete specific user
+DELETE /api/v1/admin/users/{id}/roles/{roleId}  # Remove role from user
 ```
 
 ### HTTP Status Code Standards
@@ -1741,7 +1741,7 @@ DELETE /api/v1/users/{id}/roles/{roleId}  # Remove role from user
     "message": "Request validation failed",
     "details": "One or more fields contain invalid values",
     "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/users",
+    "path": "/api/v1/admin/users",
     "method": "POST",
     "correlationId": "abc123-def456-ghi789",
     "requestId": "req-001-2024",
@@ -1946,7 +1946,7 @@ X-Rate-Limit-Reset: 1640998800
     "message": "Rate limit exceeded",
     "details": "Maximum 100 requests per minute exceeded",
     "timestamp": "2024-01-15T10:30:00Z",
-    "path": "/api/v1/users",
+    "path": "/api/v1/admin/users",
     "method": "GET",
     "correlationId": "abc123-def456-ghi789",
     "requestId": "req-001-2024",
@@ -1992,7 +1992,7 @@ The platform implements a API versioning strategy to ensure backward compatibili
 ```
 /api/v1/auth/login
 /api/v2/auth/login
-/api/v1/users
+/api/v1/admin/users
 /api/v2/users
 ```
 
@@ -2594,7 +2594,7 @@ class OpenApiContractTest {
     OpenAPI openAPI = new OpenAPIV3Parser().readContents(response.getBody(), null, new ParseOptions()).getOpenAPI();
 
     // Verify all expected endpoints are documented
-    assertThat(openAPI.getPaths()).containsKeys("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/users", "/api/v1/users/{id}");
+    assertThat(openAPI.getPaths()).containsKeys("/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/admin/users", "/api/v1/admin/users/{id}");
   }
 }
 ```
@@ -3203,11 +3203,11 @@ public interface UserLifecycleService {
 public class UserManagementController {
 
     // Version 1 endpoints
-    @GetMapping("/v1/users")
-    @PostMapping("/v1/users")
-    @GetMapping("/v1/users/{id}")
-    @PutMapping("/v1/users/{id}")
-    @DeleteMapping("/v1/users/{id}")
+    @GetMapping("/v1/admin/users")
+    @PostMapping("/v1/admin/users")
+    @GetMapping("/v1/admin/users/{id}")
+    @PutMapping("/v1/admin/users/{id}")
+    @DeleteMapping("/v1/admin/users/{id}")
 
     // Version 2 endpoints with enhanced features
     @GetMapping("/v2/users")
@@ -4123,7 +4123,7 @@ USER          | ✗ Access Denied            | None         | None       | None 
 ```java
 @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/admin/users")
 public class UserManagementController {
 
   @PreAuthorize("hasRole('SUPER_ADMIN') or (hasRole('ADMIN') and @userSecurityService.canManageUser(authentication, #userId))")
@@ -5010,7 +5010,7 @@ class UserControllerIntegrationTest {
     var request = new CreateUserRequest("jane.doe", "jane@example.com", "password123");
 
     // When
-    var response = restTemplate.postForEntity("/api/v1/users", request, UserDto.class);
+    var response = restTemplate.postForEntity("/api/v1/admin/users", request, UserDto.class);
 
     // Then
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -5116,8 +5116,8 @@ docker compose up -d postgres redis
 
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/register` - User registration
-- `GET /api/v1/users` - List users (admin only)
-- `GET /api/v1/users/{id}` - Get user details
+- `GET /api/v1/admin/users` - List users (admin only)
+- `GET /api/v1/admin/users/{id}` - Get user details
 
 ## Configuration
 
@@ -8127,7 +8127,7 @@ All protected endpoints require JWT Bearer token authentication:
 ```bash
 curl -H "Authorization: Bearer <jwt-token>" \
      -H "Content-Type: application/json" \
-     https://api.gripday.com/api/v1/users
+     https://api.gripday.com/api/v1/admin/users
 ````
 
 ## Base URLs

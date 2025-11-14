@@ -154,7 +154,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 
 ```bash
 # Check if user already exists
-curl -X GET "http://localhost:8080/api/v1/users/search?username=testuser" \
+curl -X GET "http://localhost:8080/api/v1/admin/users/search?username=testuser" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 
 # Use different username or email

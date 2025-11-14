@@ -191,9 +191,9 @@ gripday:
 
 **Usage Examples**:
 
-- **Development/Staging**: `prefix: /api`, `strip-count: 0` → URLs like `/api/v1/users` forwarded as-is
+- **Development/Staging**: `prefix: /api`, `strip-count: 0` → URLs like `/api/v1/admin/users` forwarded as-is
 - **Production**: `prefix: ""`, `strip-count: 0` → No prefix (deployed on api.gripday.com)
-- **Strip Mode**: `prefix: /api`, `strip-count: 1` → `/api/v1/users` forwarded as `/v1/users`
+- **Strip Mode**: `prefix: /api`, `strip-count: 1` → `/api/v1/admin/users` forwarded as `/v1/admin/users`
 
 ### 5. User Context Propagation Validation
 

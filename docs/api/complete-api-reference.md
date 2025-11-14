@@ -300,14 +300,14 @@ curl -X GET http://localhost:8080/api/v1/auth/profile \
 
 ### User Management Endpoints (Admin Only)
 
-#### GET /api/v1/users
+#### GET /api/v1/admin/users
 
 List users with pagination and filtering (Admin/Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,desc&search=john" \
+curl -X GET "http://localhost:8080/api/v1/admin/users?page=0&size=20&sort=createdAt,desc&search=john" \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default"
 ```
@@ -365,14 +365,14 @@ curl -X GET "http://localhost:8080/api/v1/users?page=0&size=20&sort=createdAt,de
 }
 ```
 
-#### GET /api/v1/users/{userId}
+#### GET /api/v1/admin/users/{userId}
 
 Get specific user by ID (Admin/Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/users/123 \
+curl -X GET http://localhost:8080/api/v1/admin/users/123 \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default"
 ```
@@ -398,14 +398,14 @@ curl -X GET http://localhost:8080/api/v1/users/123 \
 }
 ```
 
-#### PUT /api/v1/users/{userId}
+#### PUT /api/v1/admin/users/{userId}
 
 Update user information (Admin/Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X PUT http://localhost:8080/api/v1/users/123 \
+curl -X PUT http://localhost:8080/api/v1/admin/users/123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default" \
@@ -446,14 +446,14 @@ curl -X PUT http://localhost:8080/api/v1/users/123 \
 }
 ```
 
-#### DELETE /api/v1/users/{userId}
+#### DELETE /api/v1/admin/users/{userId}
 
 Delete user account (Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/users/123 \
+curl -X DELETE http://localhost:8080/api/v1/admin/users/123 \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default"
 ```
@@ -464,14 +464,14 @@ curl -X DELETE http://localhost:8080/api/v1/users/123 \
 (Empty response body)
 ```
 
-#### POST /api/v1/users/{userId}/authorities
+#### POST /api/v1/admin/users/{userId}/authorities
 
 Assign authority/role to user (Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/users/123/authorities \
+curl -X POST http://localhost:8080/api/v1/admin/users/123/authorities \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default" \
@@ -499,14 +499,14 @@ curl -X POST http://localhost:8080/api/v1/users/123/authorities \
 }
 ```
 
-#### DELETE /api/v1/users/{userId}/authorities/{authorityName}
+#### DELETE /api/v1/admin/users/{userId}/authorities/{authorityName}
 
 Remove authority/role from user (Super Admin only).
 
 **Request:**
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/users/123/authorities/ADMIN \
+curl -X DELETE http://localhost:8080/api/v1/admin/users/123/authorities/ADMIN \
   -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "X-Tenant-ID: default"
 ```
@@ -625,7 +625,7 @@ curl -X GET http://localhost:8080/actuator/metrics/gateway.requests
     },
     {
       "tag": "uri",
-      "values": ["/api/v1/auth/login", "/api/v1/auth/signup", "/api/v1/users"]
+      "values": ["/api/v1/auth/login", "/api/v1/auth/signup", "/api/v1/admin/users"]
     }
   ]
 }
@@ -746,7 +746,7 @@ Tenants can be identified through multiple methods:
 1. **Header-based** (Recommended):
 
 ```bash
-curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
+curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/admin/users
 ```
 
 2. **JWT token claims** (Automatic):
@@ -763,7 +763,7 @@ curl -H "X-Tenant-ID: tenant-123" http://localhost:8080/api/v1/users
 3. **Subdomain-based** (When configured):
 
 ```bash
-curl http://tenant-123.api.gripday.com/api/v1/users
+curl http://tenant-123.api.gripday.com/api/v1/admin/users
 ```
 
 ### Tenant Isolation

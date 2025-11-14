@@ -119,7 +119,7 @@ git checkout -b feature/user-profile-management
 ```java
 // Controller (presentation/web)
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/admin/users")
 @Validated
 public class UserManagementResource {
 
