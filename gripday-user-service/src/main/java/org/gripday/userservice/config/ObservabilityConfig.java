@@ -98,7 +98,7 @@ public class ObservabilityConfig {
    * Custom metrics for authentication service monitoring.
    */
   @Bean
-  public UserServiceMetrics authServiceMetrics(MeterRegistry meterRegistry) {
+  public UserServiceMetrics userServiceMetrics(MeterRegistry meterRegistry) {
     return new UserServiceMetrics(meterRegistry);
   }
 

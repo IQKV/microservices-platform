@@ -126,7 +126,7 @@ public record GripdayProperties(
 
       public record AuthenticationProperties(
           boolean enabled,
-          @NotBlank String authServiceUrl,
+          @NotBlank String userServiceUrl,
           @NotNull Duration tokenValidationTimeout,
           boolean enableUserContextPropagation
       ) {
