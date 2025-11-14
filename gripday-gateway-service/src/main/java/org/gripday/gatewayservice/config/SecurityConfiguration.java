@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
@@ -12,7 +14,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 /**
  * Security configuration for the Gateway Service. Configures CORS and authorization policies.
- * JWT authentication is handled by JwtAuthenticationFilter using HMAC-based validation.
+ * JWT authentication uses RSA256 validation via JWK endpoint from User Service.
  */
 @Configuration
 @EnableWebFluxSecurity
@@ -36,11 +38,21 @@ public class SecurityConfiguration {
             // Health and actuator endpoints
             .pathMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info")
             .permitAll()
-            // All other requests require authentication (handled by JwtAuthenticationFilter)
+            // All other requests require authentication
             .anyExchange()
-            .permitAll() // JwtAuthenticationFilter handles authentication
+            .authenticated()
+        )
+        // Use OAuth2 Resource Server with JWK Set
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
         )
         .build();
+  }
+
+  @Bean
+  public ReactiveJwtDecoder jwtDecoder() {
+    var jwkSetUri = gripdayProperties.gateway().security().jwt().jwkSetUri();
+    return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
   }
 
   /**

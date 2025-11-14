@@ -119,12 +119,13 @@ public record GripdayProperties(
     ) {
 
       public record JwtProperties(
-          @NotBlank String secretKey,
+          String secretKey, // Optional - only needed for HMAC (deprecated)
           @NotNull Duration accessTokenExpiry,
           @NotNull Duration refreshTokenExpiry,
           @NotBlank String issuer,
-          @NotBlank String audience,
-          @Pattern(regexp = "HS256|RS256") String algorithm
+          String audience, // Optional
+          @Pattern(regexp = "HS256|RS256") String algorithm,
+          @NotBlank String jwkSetUri // Required for RSA validation
       ) {
 
       }

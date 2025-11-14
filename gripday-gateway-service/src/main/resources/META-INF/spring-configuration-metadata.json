@@ -101,25 +101,42 @@
     {
       "name": "gripday.gateway.security.jwt.secret-key",
       "type": "java.lang.String",
-      "description": "JWT secret key for HMAC validation"
+      "description": "JWT secret key for HMAC validation (deprecated - use jwk-set-uri with RS256)"
     },
     {
       "name": "gripday.gateway.security.jwt.algorithm",
       "type": "java.lang.String",
       "description": "JWT algorithm (HS256 or RS256)",
-      "defaultValue": "HS256"
+      "defaultValue": "RS256"
     },
     {
       "name": "gripday.gateway.security.jwt.issuer",
       "type": "java.lang.String",
-      "description": "JWT issuer",
-      "defaultValue": "gripday"
+      "description": "JWT issuer (must match User Service issuer)",
+      "defaultValue": "gripday-user-service"
     },
     {
       "name": "gripday.gateway.security.jwt.audience",
       "type": "java.lang.String",
-      "description": "JWT audience",
-      "defaultValue": "gripday-services"
+      "description": "JWT audience (optional for RS256)"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.jwk-set-uri",
+      "type": "java.lang.String",
+      "description": "JWK Set URI for fetching public keys (required for RS256)",
+      "defaultValue": "http://localhost:8080/.well-known/jwks.json"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.access-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Access token expiration duration",
+      "defaultValue": "PT15M"
+    },
+    {
+      "name": "gripday.gateway.security.jwt.refresh-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Refresh token expiration duration",
+      "defaultValue": "P7D"
     },
     {
       "name": "gripday.gateway.security.authentication.enabled",
@@ -202,8 +219,16 @@
     {
       "name": "gripday.gateway.security.jwt.algorithm",
       "values": [
-        {"value": "HS256", "description": "HMAC SHA-256 (symmetric)"},
-        {"value": "RS256", "description": "RSA SHA-256 (asymmetric)"}
+        {"value": "RS256", "description": "RSA SHA-256 (asymmetric) - Recommended"},
+        {"value": "HS256", "description": "HMAC SHA-256 (symmetric) - Deprecated"}
+      ]
+    },
+    {
+      "name": "gripday.gateway.security.jwt.jwk-set-uri",
+      "values": [
+        {"value": "http://localhost:8080/.well-known/jwks.json", "description": "Local User Service JWK endpoint"},
+        {"value": "http://user-service:8080/.well-known/jwks.json", "description": "Docker/Kubernetes User Service JWK endpoint"},
+        {"value": "https://api.gripday.com/.well-known/jwks.json", "description": "Production User Service JWK endpoint"}
       ]
     },
     {

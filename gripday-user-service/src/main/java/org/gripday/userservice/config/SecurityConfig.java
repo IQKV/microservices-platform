@@ -54,6 +54,8 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/password/forgot", "/api/v1/password/reset").permitAll()
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            // JWK endpoint must be public for downstream services
+            .requestMatchers("/.well-known/jwks.json").permitAll()
             // Protected endpoints
             .requestMatchers("/api/v1/auth/refresh", "/api/v1/auth/logout").authenticated()
             .requestMatchers("/api/v1/admin/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

@@ -86,17 +86,21 @@ gripday:
     
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY:default-secret-key-change-in-production}
+        secret-key: ${JWT_SECRET_KEY:}  # Deprecated - only for backward compatibility
         access-token-expiry: PT15M
         refresh-token-expiry: P7D
-        issuer: gripday
+        issuer: gripday-user-service
         audience: gripday-services
+        algorithm: RS256
+        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
       authentication:
         enabled: true
         user-service-url: http://localhost:8080
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:
+        # JWK endpoint for public key distribution
+        - /.well-known/jwks.json
         # Authentication endpoints
         - /api/v1/auth/login
         - /api/v1/auth/signup

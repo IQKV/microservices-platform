@@ -1,16 +1,10 @@
 package org.gripday.userservice.config;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.gripday.userservice.domain.service.JwtKeyManagementService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +14,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 /**
- * JWT configuration for token generation and validation. Uses RSA256 algorithm for secure token signing.
+ * JWT configuration for token generation and validation. 
+ * Uses RSA256 algorithm with key rotation support.
  */
 @Configuration
 @ConfigurationProperties(prefix = "gripday.auth.jwt")
@@ -30,29 +25,15 @@ public class JwtConfiguration {
   private Duration refreshTokenExpiry = Duration.ofDays(7);
   private String issuer = "gripday-user-service";
 
-  @Bean
-  public KeyPair keyPair() {
-    try {
-      var keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-      keyPairGenerator.initialize(2048);
-      return keyPairGenerator.generateKeyPair();
-    } catch (final Exception e) {
-      throw new IllegalStateException("Failed to generate RSA key pair", e);
-    }
+  private final JwtKeyManagementService keyManagementService;
+
+  public JwtConfiguration(final JwtKeyManagementService keyManagementService) {
+    this.keyManagementService = keyManagementService;
   }
 
   @Bean
-  public JWKSource<SecurityContext> jwkSource(KeyPair keyPair) {
-    var publicKey = (RSAPublicKey) keyPair.getPublic();
-    var privateKey = (RSAPrivateKey) keyPair.getPrivate();
-
-    var jwk = new RSAKey.Builder(publicKey)
-        .privateKey(privateKey)
-        .keyID("gripday-user-key")
-        .build();
-
-    var jwkSet = new JWKSet(jwk);
-    return new ImmutableJWKSet<>(jwkSet);
+  public JWKSource<SecurityContext> jwkSource() {
+    return (jwkSelector, context) -> jwkSelector.select(keyManagementService.getJwkSet());
   }
 
   @Bean
@@ -61,9 +42,9 @@ public class JwtConfiguration {
   }
 
   @Bean
-  public JwtDecoder jwtDecoder(KeyPair keyPair) {
-    var publicKey = (RSAPublicKey) keyPair.getPublic();
-    return NimbusJwtDecoder.withPublicKey(publicKey).build();
+  public JwtDecoder jwtDecoder() {
+    // Use JWK Set for validation (supports multiple keys during rotation)
+    return NimbusJwtDecoder.withJwkSetUri("http://localhost:8080/.well-known/jwks.json").build();
   }
 
   // Getters and setters for configuration properties
