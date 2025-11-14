@@ -55,7 +55,7 @@ public class CircuitBreakerConfig {
 
   @Bean
   public CircuitBreaker authServiceCircuitBreaker(CircuitBreakerRegistry registry) {
-    return registry.circuitBreaker("auth-service");
+    return registry.circuitBreaker("user-service");
   }
 
   private io.github.resilience4j.circuitbreaker.CircuitBreakerConfig createCircuitBreakerConfig() {

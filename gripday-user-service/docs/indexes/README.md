@@ -1,4 +1,4 @@
-# Auth Service Database Indexes Documentation
+# User Service Database Indexes Documentation
 
 ## Overview
 
@@ -277,7 +277,7 @@ DROP INDEX IF EXISTS idx_organizations_tenant_enabled;
 
 ### Internal Documentation
 
-- [Auth Service README](../../README.md)
+- [User Service README](../../README.md)
 - [Database Configuration](../configuration/database.md)
 - [Developer Onboarding](../developer-onboarding.md)
 

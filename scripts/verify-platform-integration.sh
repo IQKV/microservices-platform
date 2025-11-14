@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Platform Integration Verification Script
-# This script verifies the integration between Gateway Service, Auth Service, 
+# This script verifies the integration between Gateway Service, User Service, 
 # Bookstore Service, and the observability stack
 
 set -e
@@ -129,7 +129,7 @@ test_observability_integration() {
     fi
     
     # Test service metrics endpoints
-    for service in "auth-service:$AUTH_URL" "bookstore-service:$BOOKSTORE_URL"; do
+    for service in "user-service:$AUTH_URL" "bookstore-service:$BOOKSTORE_URL"; do
         IFS=':' read -r service_name service_url <<< "$service"
         if curl -f -s "$service_url/actuator/prometheus" > /dev/null; then
             log_info "✅ $service_name metrics endpoint works"
@@ -191,7 +191,7 @@ main() {
         services_healthy=false
     fi
     
-    if ! check_service_health "Auth Service" "$AUTH_URL"; then
+    if ! check_service_health "User Service" "$AUTH_URL"; then
         services_healthy=false
     fi
     

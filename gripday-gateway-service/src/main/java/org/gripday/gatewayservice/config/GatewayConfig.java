@@ -38,17 +38,17 @@ public class GatewayConfig {
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
     var services = gripdayProperties.gateway().routing().services();
-    var authServiceConfig = services.get("auth-service");
+    var authServiceConfig = services.get("user-service");
 
     return builder.routes()
         // Auth service routes - all authentication, user, organization, and tenant management endpoints
-        .route("auth-service", r -> r
+        .route("user-service", r -> r
             .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**", 
                   "/api/v1/organizations/**", "/api/v1/admin/**")
             .filters(f -> f
                 .filter(requestTransformationFilter.apply(new RequestTransformationFilter.Config()))
                 .filter(responseTransformationFilter.apply(new ResponseTransformationFilter.Config()))
-                .filter(loadBalancingFilter.apply(createLoadBalancingConfig("auth-service")))
+                .filter(loadBalancingFilter.apply(createLoadBalancingConfig("user-service")))
             )
             .uri(authServiceConfig.uri())
         )

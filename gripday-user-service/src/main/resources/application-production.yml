@@ -161,7 +161,7 @@ gripday:
       include-environment-tag: true
       custom-tags:
         environment: production
-        service: auth-service
+        service: user-service
     logging:
       level: WARN
       format: json  # JSON format for production

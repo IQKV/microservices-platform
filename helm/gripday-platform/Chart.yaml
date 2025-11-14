@@ -14,10 +14,10 @@ home: https://gripday.site
 sources:
   - https://github.com/gripday/platform
 dependencies:
-  - name: auth-service
+  - name: user-service
     version: "1.0.0"
-    repository: "file://../auth-service"
-    condition: auth-service.enabled
+    repository: "file://../user-service"
+    condition: user-service.enabled
   - name: bookstore-service
     version: "1.0.0"
     repository: "file://../bookstore-service"

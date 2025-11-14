@@ -69,7 +69,7 @@ cd ..
 ### 5. Start Services
 
 ```bash
-# Terminal 1 - Auth Service
+# Terminal 1 - User Service
 cd gripday-user-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
@@ -171,7 +171,7 @@ CORS_ALLOWED_HEADERS=*
 
 ### Service-Specific Environment Files
 
-**Auth Service (.env.local):**
+**User Service (.env.local):**
 
 ```bash
 # Database
@@ -424,7 +424,7 @@ curl http://localhost:8080/actuator/metrics/gateway.requests
 
 ```bash
 # View application logs
-docker-compose logs -f auth-service
+docker-compose logs -f user-service
 docker-compose logs -f gateway-service
 
 # View infrastructure logs
@@ -432,7 +432,7 @@ docker-compose logs -f postgres
 docker-compose logs -f redis
 
 # Follow logs with grep
-docker-compose logs -f auth-service | grep ERROR
+docker-compose logs -f user-service | grep ERROR
 ```
 
 ## Troubleshooting
@@ -504,7 +504,7 @@ export MAVEN_OPTS="-Xmx2g -Xms1g -XX:+UseG1GC"
 
 ```yaml
 services:
-  auth-service:
+  user-service:
     deploy:
       resources:
         limits:

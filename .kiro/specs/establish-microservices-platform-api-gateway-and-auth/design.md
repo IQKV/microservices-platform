@@ -323,7 +323,7 @@ The platform follows reactive programming principles, implements security throug
 
 ### Service-Specific Maven Configuration
 
-**Auth Service POM (gripday-user-service/pom.xml):**
+**User Service POM (gripday-user-service/pom.xml):**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -342,7 +342,7 @@ The platform follows reactive programming principles, implements security throug
     <artifactId>gripday-user-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>Gripday Auth Service</name>
+    <name>Gripday User Service</name>
     <description>Centralized authentication and user management service</description>
 
     <dependencies>
@@ -682,7 +682,7 @@ gripday/                    # Parent project root
 **Dockerfile Integration with Maven:**
 
 ```dockerfile
-# Auth Service Dockerfile
+# User Service Dockerfile
 FROM eclipse-temurin:21-jre-alpine
 
 # Create application user
@@ -821,7 +821,7 @@ mvn package -DskipTests
 ```mermaid
 graph TB
     Client[Client Applications] --> Gateway[Gateway Service]
-    Gateway --> Auth[Auth Service]
+    Gateway --> Auth[User Service]
     Gateway --> Future[Future Microservices]
 
     Gateway --> GatewayRedis[(Gateway Redis)]
@@ -845,7 +845,7 @@ graph TB
 sequenceDiagram
     participant C as Client
     participant G as Gateway Service
-    participant A as Auth Service
+    participant A as User Service
     participant R as Redis
     participant M as Target Microservice
 
@@ -1222,17 +1222,17 @@ Each microservice follows a strict three-tier architecture pattern:
 
 ````
 org.gripday.{servicename}/        # Service-specific Package
-├── presentation/                 # Presentation Layer (Auth Service)
+├── presentation/                 # Presentation Layer (User Service)
 │   ├── web/                      # REST controllers with Resource suffix
 │   ├── dto/                      # Data transfer objects
 │   ├── validation/               # Input validation
 │   └── exception/                # Exception handlers
-├── domain/                       # Domain Layer (Auth Service)
+├── domain/                       # Domain Layer (User Service)
 │   ├── service/                  # Domain services
 │   ├── model/                    # Domain models
 │   ├── security/                 # Security logic
 │   └── config/                   # Domain configuration
-├── infrastructure/               # Data Access Layer (Auth Service)
+├── infrastructure/               # Data Access Layer (User Service)
 │   ├── repository/               # Data repositories
 │   ├── entity/                   # JPA entities
 │   ├── cache/                    # Caching logic
@@ -1245,7 +1245,7 @@ org.gripday.{servicename}/        # Service-specific Package
 
 **Example Main Application Classes:**
 
-**Auth Service Application:**
+**User Service Application:**
 ```java
 package org.gripday.authservice;
 
@@ -1449,7 +1449,7 @@ Response (200 OK):
 
 **Example REST Controller Implementation:**
 
-**Auth Service Controllers:**
+**User Service Controllers:**
 
 ```java
 package org.gripday.authservice.presentation.web;
@@ -2195,10 +2195,10 @@ public class OpenApiConfig {
   @Bean
   public GroupedOpenApi authServiceApi() {
     return GroupedOpenApi.builder()
-      .group("auth-service")
+      .group("user-service")
       .pathsToMatch("/api/*/auth/**", "/api/*/users/**")
       .addOpenApiCustomizer((openApi) -> {
-        openApi.info(new Info().title("Auth Service API").version("1.0.0").description("Authentication and user management service"));
+        openApi.info(new Info().title("User Service API").version("1.0.0").description("Authentication and user management service"));
       })
       .build();
   }
@@ -2523,12 +2523,12 @@ public class DocumentationController {
       .services(
         List.of(
           ServiceDocumentation.builder()
-            .name("auth-service")
+            .name("user-service")
             .title("Authentication Service")
             .version("1.0.0")
             .description("User authentication and management")
-            .swaggerUrl("/docs/auth-service/swagger-ui.html")
-            .openApiUrl("/docs/auth-service/v3/api-docs")
+            .swaggerUrl("/docs/user-service/swagger-ui.html")
+            .openApiUrl("/docs/user-service/v3/api-docs")
             .build(),
           ServiceDocumentation.builder()
             .name("gateway-service")
@@ -2548,7 +2548,7 @@ public class DocumentationController {
   @Operation(summary = "Download OpenAPI specification", description = "Download OpenAPI specification in JSON or YAML format")
   @GetMapping("/{service}/openapi.{format}")
   public ResponseEntity<String> downloadOpenApiSpec(
-    @Parameter(description = "Service name", example = "auth-service") @PathVariable String service,
+    @Parameter(description = "Service name", example = "user-service") @PathVariable String service,
     @Parameter(description = "Format", schema = @Schema(allowableValues = { "json", "yaml" })) @PathVariable String format
   ) {
     // Implementation to serve OpenAPI specs
@@ -2639,7 +2639,7 @@ org.gripday.gatewayservice/
    - Fallback mechanisms
 
 3. **Security Integration**
-   - JWT token validation with Auth Service
+   - JWT token validation with User Service
    - Role-based access control enforcement
    - Session management with Redis
 
@@ -2997,7 +2997,7 @@ npm run dev  # Starts on http://localhost:5173
 
 ```
 
-### Auth Service (gripday-user-service)
+### User Service (gripday-user-service)
 
 **Package Structure:**
 ```
@@ -3057,7 +3057,7 @@ org.gripday.authservice/
    - Service-to-service authentication
    - CORS and CSRF protection policies
 
-### Auth Service CORS Configuration
+### User Service CORS Configuration
 
 **Simple CORS Setup for Direct API Access:**
 ```java
@@ -3159,7 +3159,7 @@ public interface UserService {
     TokenResponse enrichTokenWithContext(String token, Map<String, Object> customClaims);
 }
 
-// Auth Service user context utilities (self-contained)
+// User Service user context utilities (self-contained)
 package org.gripday.authservice.domain.service;
 
 @Component
@@ -3174,7 +3174,7 @@ public class AuthUserContextExtractor {
     Map<String, Object> getCustomClaims();
 }
 
-// Auth Service user context data transfer object
+// User Service user context data transfer object
 package org.gripday.authservice.presentation.dto;
 
 public class UserContext {
@@ -3258,8 +3258,8 @@ public interface UserManagementService {
 
 ```mermaid
 graph TB
-    subgraph "Auth Service"
-        AuthService[Auth Service] --> AuthDB[(Auth PostgreSQL)]
+    subgraph "User Service"
+        AuthService[User Service] --> AuthDB[(Auth PostgreSQL)]
         AuthService --> AuthRedis[(Auth Redis)]
     end
 
@@ -3279,7 +3279,7 @@ graph TB
 
 ### Service-Specific Database Configuration
 
-**Auth Service Database (gripday_auth_db):**
+**User Service Database (gripday_auth_db):**
 
 - **Purpose**: User management, authentication, authorization data
 - **Technology**: PostgreSQL 15+
@@ -3320,19 +3320,19 @@ graph TB
 **Example Cross-Service Integration:**
 
 ```java
-// Gateway Service - No direct database access to Auth Service
+// Gateway Service - No direct database access to User Service
 @Component
 public class UserContextService {
 
   private final AuthServiceClient authServiceClient;
 
   public UserContext validateAndEnrichToken(String jwt) {
-    // Call Auth Service API, not database
+    // Call User Service API, not database
     return authServiceClient.validateToken(jwt);
   }
 }
 
-// Auth Service - Owns user data exclusively
+// User Service - Owns user data exclusively
 @RestController
 public class AuthValidationController {
 
@@ -3346,7 +3346,7 @@ public class AuthValidationController {
 
 ## Data Models
 
-### Auth Service Database Schema
+### User Service Database Schema
 
 **Liquibase XML Migration Configuration:**
 
@@ -3546,7 +3546,7 @@ spring:
 - Data synchronization handled through event-driven patterns when needed
 - No cascading schema dependencies between services
 
-**Auth Service Database Tables:**
+**User Service Database Tables:**
 
 - **users**: Core user account information with security flags
 - **authorities**: Role and permission definitions
@@ -4182,7 +4182,7 @@ TTL: Session timeout duration
    - HTTP 401 Unauthorized for invalid tokens
    - HTTP 403 Forbidden for insufficient permissions
 
-### Auth Service Error Handling
+### User Service Error Handling
 
 1. **Validation Errors**
    - HTTP 400 Bad Request with detailed field errors
@@ -4201,7 +4201,7 @@ TTL: Session timeout duration
 ### Unit Testing
 
 - **Gateway Service**: Test filters, route configurations, and security components
-- **Auth Service**: Test authentication logic, user management, and JWT operations
+- **User Service**: Test authentication logic, user management, and JWT operations
 - **Coverage Target**: 80% code coverage minimum
 
 ### Architectural Testing
@@ -4214,7 +4214,7 @@ TTL: Session timeout duration
 ### Integration Testing
 
 - **Service-Specific Database Integration**: Test each service's Spring Data JPA repositories with Hibernate 6.x and Liquibase migrations independently
-- **Auth Service Database**: Test user management, authentication, and authorization data operations
+- **User Service Database**: Test user management, authentication, and authorization data operations
 - **Gateway Service Database**: Test route configuration, rate limiting, and circuit breaker state management
 - **Redis Integration**: Test service-specific caching and session management
 - **Cross-Service Communication**: Test API-based communication without shared database dependencies
@@ -4251,7 +4251,7 @@ TTL: Session timeout duration
 # docker-compose.yml
 version: "3.8"
 services:
-  auth-service:
+  user-service:
     build: ./gripday-user-service
     container_name: gripday-user-service
     networks:
@@ -4273,10 +4273,10 @@ services:
       - gripday-network
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - GRIPDAY_AUTH_SERVICE_URL=http://auth-service:8080
+      - GRIPDAY_AUTH_SERVICE_URL=http://user-service:8080
       - GRIPDAY_CACHE_REDIS_HOST=gateway-redis
     depends_on:
-      - auth-service
+      - user-service
       - gateway-redis
 
 networks:
@@ -4291,8 +4291,8 @@ networks:
 gripday:
   gateway:
     routes:
-      auth-service:
-        uri: http://auth-service:8080
+      user-service:
+        uri: http://user-service:8080
         predicates:
           - Path=/api/*/auth/**
       future-service:
@@ -4306,24 +4306,24 @@ gripday:
 **Service Discovery with Kubernetes DNS:**
 
 ```yaml
-# k8s/auth-service-deployment.yaml
+# k8s/user-service-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: user-service
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: auth-service
+      app: user-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: user-service
     spec:
       containers:
-        - name: auth-service
-          image: gripday/auth-service:latest
+        - name: user-service
+          image: gripday/user-service:latest
           ports:
             - containerPort: 8080
           env:
@@ -4336,10 +4336,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: user-service
 spec:
   selector:
-    app: auth-service
+    app: user-service
   ports:
     - port: 8080
       targetPort: 8080
@@ -4353,8 +4353,8 @@ spec:
 gripday:
   gateway:
     routes:
-      auth-service:
-        uri: http://auth-service.default.svc.cluster.local:8080
+      user-service:
+        uri: http://user-service.default.svc.cluster.local:8080
         predicates:
           - Path=/api/*/auth/**
       future-service:
@@ -4371,14 +4371,14 @@ gripday:
 @Configuration
 public class GatewayRoutesConfig {
 
-  @Value("${gripday.gateway.routes.auth-service.uri}")
+  @Value("${gripday.gateway.routes.user-service.uri}")
   private String authServiceUri;
 
   @Bean
   public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
     return builder
       .routes()
-      .route("auth-service", (r) -> r.path("/api/*/auth/**").uri(authServiceUri))
+      .route("user-service", (r) -> r.path("/api/*/auth/**").uri(authServiceUri))
       .route("user-management", (r) -> r.path("/api/*/users/**").uri(authServiceUri))
       .build();
   }
@@ -5097,7 +5097,7 @@ docs/
 **README.md Template:**
 
 ````markdown
-# Auth Service
+# User Service
 
 JWT-based authentication and user management microservice.
 
@@ -5307,9 +5307,9 @@ The platform uses Spring profiles for environment-specific configuration managem
 
 ### Environment-Specific Spring Profiles
 
-**Auth Service Local Development Profile (local)**
+**User Service Local Development Profile (local)**
 ```yaml
-# auth-service/application-local.yml
+# user-service/application-local.yml
 spring:
   profiles:
     active: local
@@ -5394,10 +5394,10 @@ spring:
       timeout: 2000ms
 ```
 
-**Auth Service Staging Environment Profile (staging)**
+**User Service Staging Environment Profile (staging)**
 
 ```yaml
-# auth-service/application-staging.yml
+# user-service/application-staging.yml
 spring:
   profiles:
     active: staging
@@ -5486,10 +5486,10 @@ spring:
       database: 1
 ```
 
-**Auth Service Production Environment Profile (production)**
+**User Service Production Environment Profile (production)**
 
 ````yaml
-# auth-service/application-production.yml
+# user-service/application-production.yml
 spring:
   profiles:
     active: production
@@ -5634,7 +5634,7 @@ gripday:
 **Local Development:**
 
 ```bash
-# auth-service/.env.local
+# user-service/.env.local
 SPRING_PROFILES_ACTIVE=local
 AUTH_DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_auth_db
 AUTH_DATABASE_USERNAME=gripday_auth
@@ -5654,7 +5654,7 @@ GATEWAY_REDIS_DATABASE=1
 **Staging Environment:**
 
 ```bash
-# auth-service/.env.staging
+# user-service/.env.staging
 SPRING_PROFILES_ACTIVE=staging
 AUTH_DATABASE_URL=jdbc:postgresql://staging-auth-db.internal:5432/gripday_auth_staging
 AUTH_DATABASE_USERNAME=gripday_auth_staging
@@ -5678,7 +5678,7 @@ TRACING_SAMPLE_RATE=0.1
 **Production Environment:**
 
 ```bash
-# auth-service/.env.production
+# user-service/.env.production
 SPRING_PROFILES_ACTIVE=production
 AUTH_DATABASE_URL=jdbc:postgresql://production-auth-db.internal:5432/gripday_auth_production
 AUTH_DATABASE_USERNAME=gripday_auth_production
@@ -5744,7 +5744,7 @@ cd ..
 
 # Wait for auth service to be ready
 echo "Waiting for auth service to be ready..."
-./scripts/wait-for-auth-service.sh
+./scripts/wait-for-user-service.sh
 
 # Start gateway service
 echo "Starting gateway service..."
@@ -5757,7 +5757,7 @@ echo "Waiting for gateway service to be ready..."
 ./scripts/wait-for-gateway-service.sh
 
 echo "Local environment setup complete!"
-echo "Auth Service: http://localhost:8080"
+echo "User Service: http://localhost:8080"
 echo "Gateway Service: http://localhost:8080"
 echo "Swagger UI: http://localhost:8080/swagger-ui.html"
 echo "Prometheus: http://localhost:9090"
@@ -5768,7 +5768,7 @@ echo "Grafana: http://localhost:3000"
 
 ```bash
 #!/bin/bash
-# scripts/start-auth-service.sh
+# scripts/start-user-service.sh
 
 set -euo pipefail
 
@@ -5834,7 +5834,7 @@ done
 echo "Building auth service Docker image..."
 cd gripday-user-service
 ./mvnw clean package -DskipTests
-docker build -t gripday/auth-service:$VERSION .
+docker build -t gripday/user-service:$VERSION .
 cd ..
 
 echo "Building gateway service Docker image..."
@@ -5852,7 +5852,7 @@ cd ..
 
 # Wait for auth service to be ready
 echo "Waiting for auth service to be ready..."
-./scripts/wait-for-auth-service.sh
+./scripts/wait-for-user-service.sh
 
 # Deploy gateway service
 echo "Deploying gateway service..."
@@ -5866,7 +5866,7 @@ echo "Waiting for gateway service to be ready..."
 ./scripts/wait-for-gateway-service.sh
 
 echo "Staging deployment complete!"
-echo "Auth Service Status:"
+echo "User Service Status:"
 cd gripday-user-service && docker compose -f docker-compose.staging.yml ps && cd ..
 echo "Gateway Service Status:"
 cd gripday-gateway-service && docker compose -f docker-compose.staging.yml ps && cd ..
@@ -5915,11 +5915,11 @@ fi
 # Build and tag production images
 echo "Building production Docker images..."
 ./mvnw clean package -Pproduction
-docker build -t gripday/auth-service:$RELEASE_VERSION ./gripday-user-service
+docker build -t gripday/user-service:$RELEASE_VERSION ./gripday-user-service
 docker build -t gripday/gateway-service:$RELEASE_VERSION ./gripday-gateway-service
 
 # Tag as latest for production
-docker tag gripday/auth-service:$RELEASE_VERSION gripday/auth-service:latest
+docker tag gripday/user-service:$RELEASE_VERSION gripday/user-service:latest
 docker tag gripday/gateway-service:$RELEASE_VERSION gripday/gateway-service:latest
 
 # Deploy using Docker Compose
@@ -5966,8 +5966,8 @@ check_service() {
     return 1
 }
 
-# Check Auth Service PostgreSQL
-echo "Waiting for Auth Service PostgreSQL..."
+# Check User Service PostgreSQL
+echo "Waiting for User Service PostgreSQL..."
 until pg_isready -h localhost -p 5432; do
     echo "Auth PostgreSQL is unavailable - sleeping"
     sleep 1
@@ -5990,8 +5990,8 @@ until redis-cli -h localhost -p 6380 ping | grep -q PONG; do
 done
 echo "Gateway Redis is ready!"
 
-# Check Auth Service
-check_service "Auth Service" "http://localhost:8080"
+# Check User Service
+check_service "User Service" "http://localhost:8080"
 
 # Check Gateway Service
 check_service "Gateway Service" "http://localhost:8080"
@@ -6161,7 +6161,7 @@ public class GripdayProperties {
 **Local Development Logging Configuration:**
 
 ```yaml
-# auth-service/application-local.yml
+# user-service/application-local.yml
 logging:
   level:
     org.gripday: DEBUG
@@ -6173,7 +6173,7 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{50} - %msg%n"
   file:
-    name: logs/auth-service-local.log
+    name: logs/user-service-local.log
     max-size: 100MB
     max-history: 7
 
@@ -6193,7 +6193,7 @@ logging:
 **Staging Environment Logging Configuration:**
 
 ```yaml
-# auth-service/application-staging.yml
+# user-service/application-staging.yml
 logging:
   level:
     org.gripday: INFO
@@ -6202,7 +6202,7 @@ logging:
     org.hibernate: WARN
   config: classpath:logback-spring.xml
   file:
-    name: logs/auth-service-staging.log
+    name: logs/user-service-staging.log
     max-size: 500MB
     max-history: 30
 
@@ -6220,7 +6220,7 @@ logging:
 **Production Environment Logging Configuration:**
 
 ```yaml
-# auth-service/application-production.yml
+# user-service/application-production.yml
 logging:
   level:
     org.gripday: WARN
@@ -6229,7 +6229,7 @@ logging:
     org.hibernate: ERROR
   config: classpath:logback-spring.xml
   file:
-    name: logs/auth-service-production.log
+    name: logs/user-service-production.log
     max-size: 1GB
     max-history: 90
 
@@ -6370,7 +6370,7 @@ public class CorrelationIdGatewayFilterFactory extends AbstractGatewayFilterFact
 }
 ```
 
-**Correlation ID Filter for Auth Service:**
+**Correlation ID Filter for User Service:**
 
 ```java
 package org.gripday.authservice.infrastructure.filter;
@@ -6510,15 +6510,15 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: auth-service
+  - job_name: user-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: auth-service
+          job: user-service
           service: gripday-user-service
           environment: ${ENVIRONMENT}
-          __path__: /app/logs/auth-service*.log
+          __path__: /app/logs/user-service*.log
     pipeline_stages:
       - json:
           expressions:
@@ -6576,7 +6576,7 @@ scrape_configs:
 
 Each microservice has its own Docker Compose configuration and Dockerfile to ensure independent deployment and scaling. This approach provides better isolation, easier maintenance, and service-specific configuration management.
 
-**Auth Service Structure:**
+**User Service Structure:**
 
 ```
 gripday-user-service/
@@ -6587,7 +6587,7 @@ gripday-user-service/
 └── src/
 ```
 
-**Auth Service Docker Compose (docker-compose.yml):**
+**User Service Docker Compose (docker-compose.yml):**
 
 ```yaml
 version: "3.8"
@@ -6605,7 +6605,7 @@ services:
     networks:
       - auth-network
 
-  auth-service:
+  user-service:
     build: .
     ports:
       - "8080:8080"
@@ -7501,7 +7501,7 @@ This multi-tenant architecture provides:
 Each microservice implements its own user context extraction utilities without shared dependencies:
 
 ```java
-// Auth Service Implementation
+// User Service Implementation
 @Component
 public class AuthUserContextExtractor {
 
@@ -7603,10 +7603,10 @@ public class PostmanCollectionGenerator {
 ```
 postman/
 ├── collections/
-│   ├── auth-service/
-│   │   ├── auth-service-v1.postman_collection.json
-│   │   ├── auth-service-v2.postman_collection.json
-│   │   └── auth-service-admin.postman_collection.json
+│   ├── user-service/
+│   │   ├── user-service-v1.postman_collection.json
+│   │   ├── user-service-v2.postman_collection.json
+│   │   └── user-service-admin.postman_collection.json
 │   ├── gateway-service/
 │   │   ├── gateway-service-v1.postman_collection.json
 │   │   └── gateway-service-routing.postman_collection.json
@@ -8044,7 +8044,7 @@ gripday-{service-name}/
 **gripday-user-service/README.md:**
 
 ````markdown
-# Gripday Auth Service
+# Gripday User Service
 
 Centralized authentication and authorization service providing JWT-based security for the Gripday microservices platform.
 
@@ -8117,10 +8117,10 @@ See [docs/deployment/configuration.md](docs/deployment/configuration.md) for det
 
 **docs/api/README.md:**
 ```markdown
-# Auth Service API Documentation
+# User Service API Documentation
 
 ## Overview
-The Auth Service provides centralized authentication and authorization for the Gripday platform.
+The User Service provides centralized authentication and authorization for the Gripday platform.
 
 ## Authentication
 All protected endpoints require JWT Bearer token authentication:
@@ -8167,10 +8167,10 @@ All errors follow RFC 7807 Problem Details format with correlation IDs for traci
 
 **docs/architecture/README.md:**
 ```markdown
-# Auth Service Architecture
+# User Service Architecture
 
 ## Overview
-The Auth Service implements a three-tier architecture with clear separation of concerns and modern Java 21 features.
+The User Service implements a three-tier architecture with clear separation of concerns and modern Java 21 features.
 
 ## Architectural Layers
 
@@ -8216,7 +8216,7 @@ See [design-decisions.md](design-decisions.md) for detailed rationale.
 **docs/deployment/README.md:**
 
 ````markdown
-# Auth Service Deployment Guide
+# User Service Deployment Guide
 
 ## Overview
 
@@ -8275,7 +8275,7 @@ Common issues and solutions in [troubleshooting.md](troubleshooting.md).
 set -euo pipefail
 
 # Start local development environment
-echo "Starting Gripday Auth Service locally..."
+echo "Starting Gripday User Service locally..."
 
 # Check prerequisites
 command -v java >/dev/null 2>&1 || { echo "Java 21 required"; exit 1; }
@@ -8297,7 +8297,7 @@ export DATABASE_URL=jdbc:postgresql://localhost:5432/gripday_local
 echo "Database migrations will run automatically on application startup..."
 
 # Start application
-echo "Starting Auth Service..."
+echo "Starting User Service..."
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ````
 

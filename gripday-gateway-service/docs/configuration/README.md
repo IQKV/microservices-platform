@@ -54,7 +54,7 @@ gripday:
   gateway:
     routing:
       services:
-        auth-service:
+        user-service:
           uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI}
           path: /api/v1/auth/**
           enabled: true
@@ -76,7 +76,7 @@ gripday:
         algorithm: RS256
       authentication:
         enabled: true
-        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL}
+        user-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL}
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:

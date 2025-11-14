@@ -76,6 +76,6 @@ public class OpenApiConfig {
                     .type(SecurityScheme.Type.HTTP)
                     .scheme("bearer")
                     .bearerFormat("JWT")
-                    .description("JWT token obtained from Auth Service via Gateway Service")));
+                    .description("JWT token obtained from User Service via Gateway Service")));
   }
 }

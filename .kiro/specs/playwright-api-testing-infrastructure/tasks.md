@@ -98,7 +98,7 @@
     - _Requirements: 4.3, 4.5_
 
 - [ ] 8. Build API endpoint tests
-  - [ ] 8.1 Implement Auth Service API tests
+  - [ ] 8.1 Implement User Service API tests
     - Test all authentication endpoints (signup, login, refresh, logout)
     - Validate email verification endpoints and rate limiting
     - Test user management endpoints with RBAC enforcement

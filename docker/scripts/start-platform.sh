@@ -33,7 +33,7 @@ docker-compose exec postgres-auth pg_isready -U gripday_user -d gripday_auth
 docker-compose exec redis redis-cli ping
 
 echo "🚀 Starting application services..."
-docker-compose up -d auth-service gateway-service
+docker-compose up -d user-service gateway-service
 
 echo "📊 Starting observability stack..."
 docker-compose up -d prometheus grafana loki promtail
@@ -42,7 +42,7 @@ echo "✅ Platform started successfully!"
 echo ""
 echo "🌐 Service URLs:"
 echo "   Gateway Service:  http://localhost:8080"
-echo "   Auth Service:     http://localhost:8080"
+echo "   User Service:     http://localhost:8080"
 echo "   Prometheus:       http://localhost:9090"
 echo "   Grafana:          http://localhost:3000 (admin/admin)"
 echo ""

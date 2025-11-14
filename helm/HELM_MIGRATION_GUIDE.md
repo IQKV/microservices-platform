@@ -8,7 +8,7 @@ This document provides guidance on migrating from raw Kubernetes manifests to He
 
 ### Individual Service Charts
 
-1. **auth-service/** - Complete Helm chart for Authentication Service
+1. **user-service/** - Complete Helm chart for Authentication Service
    - Deployment, Service, Ingress
    - PostgreSQL database
    - Redis cache
@@ -42,7 +42,7 @@ This document provides guidance on migrating from raw Kubernetes manifests to He
 
 ```
 k8s/
-├── auth-service/
+├── user-service/
 │   ├── namespace.yaml
 │   ├── deployment.yaml
 │   ├── service.yaml
@@ -59,7 +59,7 @@ k8s/
 
 ```
 helm/
-├── auth-service/
+├── user-service/
 │   ├── Chart.yaml
 │   ├── values.yaml
 │   ├── templates/
@@ -82,15 +82,15 @@ helm/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: user-service
   namespace: gripday-dev-env
 spec:
   replicas: 2
   template:
     spec:
       containers:
-        - name: auth-service
-          image: gripday/auth-service:1.0.0
+        - name: user-service
+          image: gripday/user-service:1.0.0
 ```
 
 **After (Helm template)**:
@@ -99,14 +99,14 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { include "auth-service.fullname" . } }
+  name: { { include "user-service.fullname" . } }
   namespace: { { .Values.namespace.name } }
 spec:
   replicas: { { .Values.replicaCount } }
   template:
     spec:
       containers:
-        - name: auth-service
+        - name: user-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 ```
 
@@ -116,13 +116,13 @@ spec:
 
 ```bash
 # Local
-helm install auth-service ./auth-service
+helm install user-service ./user-service
 
 # Staging
-helm install auth-service ./auth-service -f values-staging.yaml
+helm install user-service ./user-service -f values-staging.yaml
 
 # Production
-helm install auth-service ./auth-service -f values-production.yaml
+helm install user-service ./user-service -f values-production.yaml
 ```
 
 ### 3. Dependency Management
@@ -132,9 +132,9 @@ helm install auth-service ./auth-service -f values-production.yaml
 ```yaml
 # gripday/Chart.yaml
 dependencies:
-  - name: auth-service
+  - name: user-service
     version: "1.0.0"
-    repository: "file://../auth-service"
+    repository: "file://../user-service"
   - name: bookstore-service
     version: "1.0.0"
     repository: "file://../bookstore-service"
@@ -160,7 +160,7 @@ Keep existing k8s deployments, deploy Helm charts to different namespaces:
 ```bash
 # Deploy Helm charts with different namespace
 helm install gripday-helm ./helm/gripday \
-  --set auth-service.namespace.name=gripday-auth-helm \
+  --set user-service.namespace.name=gripday-auth-helm \
   --set bookstore-service.namespace.name=gripday-bookstore-helm \
   --set gateway-service.namespace.name=gripday-gateway-helm
 ```
@@ -180,7 +180,7 @@ kubectl get all -n gripday-gateway -o yaml > backup-gateway.yaml
 2. **Delete existing resources**:
 
 ```bash
-kubectl delete -f k8s/auth-service/
+kubectl delete -f k8s/user-service/
 kubectl delete -f k8s/bookstore-service/
 kubectl delete -f k8s/gateway-service/
 ```
@@ -213,13 +213,13 @@ curl http://localhost:8080/actuator/health
 **Before**:
 
 ```bash
-kubectl apply -f k8s/auth-service/
+kubectl apply -f k8s/user-service/
 ```
 
 **After**:
 
 ```bash
-helm upgrade --install auth-service ./helm/auth-service \
+helm upgrade --install user-service ./helm/user-service \
   --namespace gripday-auth \
   --create-namespace
 ```
@@ -284,7 +284,7 @@ helm rollback gripday
 # values.yaml (defaults)
 replicaCount: 2
 image:
-  repository: gripday/auth-service
+  repository: gripday/user-service
   tag: "1.0.0"
 
 # values-production.yaml (overrides)
@@ -300,7 +300,7 @@ resources:
 
 ```bash
 # Use --set for secrets
-helm install auth-service ./auth-service \
+helm install user-service ./user-service \
   --set secrets.data.GRIPDAY_DATABASE_PASSWORD=$(base64 <<< "real-password")
 
 # Or use external secret management
@@ -321,13 +321,13 @@ Follow semantic versioning:
 
 ```bash
 # Lint chart
-helm lint ./helm/auth-service
+helm lint ./helm/user-service
 
 # Dry run
-helm install test ./helm/auth-service --dry-run --debug
+helm install test ./helm/user-service --dry-run --debug
 
 # Template output
-helm template test ./helm/auth-service > output.yaml
+helm template test ./helm/user-service > output.yaml
 ```
 
 ## Troubleshooting
@@ -346,10 +346,10 @@ helm uninstall <release-name> -n <namespace>
 
 ```bash
 # Debug with --dry-run
-helm install test ./helm/auth-service --dry-run --debug
+helm install test ./helm/user-service --dry-run --debug
 
 # Check rendered templates
-helm template test ./helm/auth-service
+helm template test ./helm/user-service
 ```
 
 ### Issue: Chart dependencies not found
@@ -369,12 +369,12 @@ helm dependency update
 3. **Update README** if needed
 4. **Test changes**:
    ```bash
-   helm lint ./helm/auth-service
-   helm install test ./helm/auth-service --dry-run
+   helm lint ./helm/user-service
+   helm install test ./helm/user-service --dry-run
    ```
 5. **Upgrade deployment**:
    ```bash
-   helm upgrade auth-service ./helm/auth-service
+   helm upgrade user-service ./helm/user-service
    ```
 
 ### Adding New Services

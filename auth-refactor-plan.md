@@ -16,7 +16,7 @@
   - Terminate user sessions using secure, httpOnly cookies on `.gripday.com`.
   - Expose `POST /auth/login`, `POST /auth/signup`, `POST /auth/refresh`, `POST /auth/logout`, `GET /me`.
   - Proxy/aggregate downstream services. Use mTLS or signed service JWT for s2s auth.
-- **Auth Service (internal)**:
+- **User Service (internal)**:
   - Pure API and identity domain logic (password, email verify, reset, MFA).
   - Gateway calls it; users never call auth service directly. All Set-Cookie done at gateway for `.gripday.com`.
 - **React Apps**:
@@ -48,7 +48,7 @@
     - CORS: only allow `https://app.gripday.com` and `https://auth.gripday.com` where needed; prefer same-site requests from Auth UI to gateway.
     - Headers: HSTS, CSP (nonce/strict-dynamic), Referrer-Policy, Permissions-Policy.
 
-- **Auth Service**
+- **User Service**
   - Keep internal endpoints: login, signup, forgot/reset password, email verify/resend, optional MFA.
   - Rate-limiting + bot protection for login/signup/forgot.
   - Emit events for audit and analytics.

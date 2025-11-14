@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Maven build script for Gripday Auth Service
+# Maven build script for Gripday User Service
 # Provides build, test, and package functionality with environment-specific configurations
 
 set -euo pipefail
@@ -276,7 +276,7 @@ display_next_steps() {
         echo "     mvn spring-boot:run -Dspring.profiles.active=$PROFILE"
         echo
         echo "  2. Build Docker image:"
-        echo "     docker build -t gripday/auth-service:$PROFILE ."
+        echo "     docker build -t gripday/user-service:$PROFILE ."
         echo
         echo "  3. Run with Docker Compose:"
         echo "     docker-compose -f docker-compose.$PROFILE.yml up"
@@ -291,7 +291,7 @@ display_next_steps() {
 
 # Main execution
 main() {
-    log_info "Building Gripday Auth Service"
+    log_info "Building Gripday User Service"
     echo
     
     check_prerequisites

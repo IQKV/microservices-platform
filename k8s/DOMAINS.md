@@ -21,7 +21,7 @@ This document provides a clear mapping of all domains and their purposes across 
 
 | Service           | Port    | Access Method                                |
 | ----------------- | ------- | -------------------------------------------- |
-| Auth Service      | 8080    | `https://api.gripday.com/api/v1/auth/*`      |
+| User Service      | 8080    | `https://api.gripday.com/api/v1/auth/*`      |
 | Bookstore Service | 8080    | `https://api.gripday.com/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.com/api/v1/*`           |
 
@@ -44,7 +44,7 @@ This document provides a clear mapping of all domains and their purposes across 
 
 | Service           | Port    | Access Method                                    |
 | ----------------- | ------- | ------------------------------------------------ |
-| Auth Service      | 8080    | `https://api.gripday.website/api/v1/auth/*`      |
+| User Service      | 8080    | `https://api.gripday.website/api/v1/auth/*`      |
 | Bookstore Service | 8080    | `https://api.gripday.website/api/v1/bookstore/*` |
 | Other Services    | Various | `https://api.gripday.website/api/v1/*`           |
 
@@ -53,7 +53,7 @@ This document provides a clear mapping of all domains and their purposes across 
 | Domain                     | Purpose                    | Service           | Port      |
 | -------------------------- | -------------------------- | ----------------- | --------- |
 | **localhost**              | Main Application           | React/Vue App     | 3000/5173 |
-| **auth.gripday.site**      | Auth Service (Direct)      | Auth Service      | 8080      |
+| **auth.gripday.site**      | User Service (Direct)      | User Service      | 8080      |
 | **api.gripday.site**       | API Gateway                | Gateway Service   | 8080      |
 | **bookstore.gripday.site** | Bookstore Service (Direct) | Bookstore Service | 8080      |
 
@@ -174,9 +174,9 @@ https://auth.gripday.com/oauth/google/callback
 **Routes**:
 
 ```yaml
-/api/v1/auth/**       → Auth Service (8080)
-/api/v1/users/**      → Auth Service (8080)
-/api/v1/tenants/**    → Auth Service (8080)
+/api/v1/auth/**       → User Service (8080)
+/api/v1/users/**      → User Service (8080)
+/api/v1/tenants/**    → User Service (8080)
 /api/v1/bookstore/**  → Bookstore Service (8080)
 /actuator/**          → Gateway health endpoints
 ```
@@ -209,7 +209,7 @@ GET https://api.gripday.com/api/v1/bookstore/books
 
 3. User submits credentials
    └─> POST https://api.gripday.com/api/v1/auth/login
-       └─> Gateway routes to Auth Service (internal)
+       └─> Gateway routes to User Service (internal)
            └─> Returns JWT token
 
 4. Auth UI stores token
@@ -342,7 +342,7 @@ curl https://api.gripday.com/actuator/health
 curl https://auth.gripday.com
 
 # Should NOT exist:
-# auth-service-ingress (backend - no direct access)
+# user-service-ingress (backend - no direct access)
 # bookstore-service-ingress (backend - no direct access)
 ```
 

@@ -10,7 +10,7 @@ The gateway service is the central entry point for the Gripday platform, providi
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Ingress       │    │   Gateway       │    │   Auth Service  │
+│   Ingress       │    │   Gateway       │    │   User Service  │
 │   Controller    │───▶│   Service       │───▶│   (Port 8080)   │
 └─────────────────┘    │   (Port 8080)   │    └─────────────────┘
                        └─────────────────┘
@@ -50,7 +50,7 @@ The gateway service is the central entry point for the Gripday platform, providi
 3. **Storage Class**: Available storage class for Redis persistent volumes
 4. **Docker Images**: Built gateway service image
 5. **Cert Manager**: For TLS certificates in staging/production
-6. **Auth Service**: Running auth service for JWT validation
+6. **User Service**: Running auth service for JWT validation
 
 ### Quick Deployment
 
@@ -172,21 +172,21 @@ JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseZGC
 #### Local Environment
 
 ```
-http://api.gripday.site/api/v1/auth/*     → Auth Service
+http://api.gripday.site/api/v1/auth/*     → User Service
 http://api.gripday.site/actuator/*        → Gateway Health/Metrics
 ```
 
 #### Staging Environment
 
 ```
-https://api.gripday.website/api/v1/auth/*  → Auth Service
+https://api.gripday.website/api/v1/auth/*  → User Service
 https://api.gripday.website/actuator/*     → Gateway Health/Metrics
 ```
 
 #### Production Environment
 
 ```
-https://api.gripday.com/api/v1/auth/*  → Auth Service
+https://api.gripday.com/api/v1/auth/*  → User Service
 https://api.gripday.com/actuator/*     → Gateway Health/Metrics
 ```
 
@@ -199,8 +199,8 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth-service
-          uri: http://auth-service.gripday-auth.svc.cluster.local:8080
+        - id: user-service
+          uri: http://user-service.gripday-auth.svc.cluster.local:8080
           predicates:
             - Path=/api/*/auth/**
           filters:
@@ -359,9 +359,9 @@ metrics:
 
 All requests are proxied to backend services:
 
-- `/api/v1/auth/**` → Auth Service
-- `/api/v1/users/**` → Auth Service (User Management)
-- `/api/v1/tenants/**` → Auth Service (Tenant Management)
+- `/api/v1/auth/**` → User Service
+- `/api/v1/users/**` → User Service (User Management)
+- `/api/v1/tenants/**` → User Service (Tenant Management)
 
 ### Headers Added by Gateway
 
@@ -460,7 +460,7 @@ done
 
 ## Integration
 
-### Auth Service Integration
+### User Service Integration
 
 - **JWT validation**: Validates tokens using shared secret
 - **User context**: Extracts user information from JWT tokens
@@ -495,7 +495,7 @@ done
 2. **Deploy auth service first**
 
    ```bash
-   kubectl apply -f ../auth-service/
+   kubectl apply -f ../user-service/
    ```
 
 3. **Deploy gateway service**

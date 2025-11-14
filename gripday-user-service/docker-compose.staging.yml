@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service - Staging Environment
+  # PostgreSQL Database for User Service - Staging Environment
   postgres-auth:
     image: postgres:15-alpine
     container_name: gripday-auth-postgres-staging
@@ -62,7 +62,7 @@ services:
           cpus: "1.0"
           memory: 1.5G
 
-  # Redis for Auth Service - Staging Environment
+  # Redis for User Service - Staging Environment
   redis-auth:
     image: redis:7-alpine
     container_name: gripday-auth-redis-staging
@@ -109,12 +109,12 @@ services:
           cpus: "0.5"
           memory: 768M
 
-  # Auth Service - Staging Environment
-  auth-service:
+  # User Service - Staging Environment
+  user-service:
     build:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
-    image: gripday/auth-service:staging
+    image: gripday/user-service:staging
     container_name: gripday-user-service-staging
     env_file:
       - .env.staging
@@ -190,7 +190,7 @@ services:
       options:
         max-size: "100m"
         max-file: "5"
-        labels: "service=auth-service,environment=staging"
+        labels: "service=user-service,environment=staging"
     volumes:
       - auth_logs_staging:/app/logs
       - auth_tmp_staging:/app/tmp

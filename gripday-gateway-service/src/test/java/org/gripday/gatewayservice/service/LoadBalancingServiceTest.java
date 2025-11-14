@@ -78,7 +78,7 @@ class LoadBalancingServiceTest {
   @Test
   void shouldRegisterServiceInstancesSuccessfully() {
     // Given
-    var serviceName = "auth-service";
+    var serviceName = "user-service";
     var instances = List.of(URI.create("http://localhost:8080"));
 
     // When

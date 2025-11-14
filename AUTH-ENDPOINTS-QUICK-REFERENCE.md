@@ -1,4 +1,4 @@
-# Auth Service Endpoints - Quick Reference
+# User Service Endpoints - Quick Reference
 
 ## Base URL
 - **Local Development**: `http://localhost:8080`

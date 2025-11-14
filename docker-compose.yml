@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service
+  # PostgreSQL Database for User Service
   postgres-auth:
     image: postgres:15-alpine
     container_name: gripday-postgres-auth
@@ -63,8 +63,8 @@ services:
       start_period: 30s
     command: redis-server --appendonly yes
 
-  # Auth Service
-  auth-service:
+  # User Service
+  user-service:
     build:
       context: .
       dockerfile: gripday-user-service/Dockerfile
@@ -137,14 +137,14 @@ services:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8080
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://user-service:8080
       GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:
       - "8080:8080"
     depends_on:
-      auth-service:
+      user-service:
         condition: service_healthy
       bookstore-service:
         condition: service_healthy

@@ -14,7 +14,7 @@
     <artifactId>gripday-user-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>Gripday Auth Service</name>
+    <name>Gripday User Service</name>
     <description>Centralized authentication and user management service</description>
 
     <dependencies>

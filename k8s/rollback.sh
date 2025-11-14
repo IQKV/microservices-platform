@@ -48,7 +48,7 @@ Manage rollback operations for Gripday Platform services
 
 OPTIONS:
     -e, --environment ENV    Environment (local|staging|production) [default: local]
-    -s, --service SERVICE    Service to rollback (auth|gateway|all) [default: all]
+    -s, --service SERVICE    Service to rollback (user|gateway|all) [default: all]
     -r, --revision REV       Revision number to rollback to (optional)
     -a, --action ACTION      Action (rollback|history|status) [default: rollback]
     -d, --dry-run           Show what would be done without executing
@@ -120,7 +120,7 @@ if [[ ! "$ENVIRONMENT" =~ ^(local|staging|production)$ ]]; then
     exit 1
 fi
 
-if [[ ! "$SERVICE" =~ ^(auth|gateway|all)$ ]]; then
+if [[ ! "$SERVICE" =~ ^(user|gateway|all)$ ]]; then
     print_error "Invalid service: $SERVICE"
     exit 1
 fi
@@ -196,9 +196,9 @@ show_deployment_history() {
     case "$service" in
         "auth")
             local namespace="gripday-auth$namespace_suffix"
-            print_status "Auth Service History:"
+            print_status "User Service History:"
             if [[ "$DRY_RUN" == "false" ]]; then
-                kubectl rollout history deployment/auth-service -n "$namespace" || print_warning "No history available"
+                kubectl rollout history deployment/user-service -n "$namespace" || print_warning "No history available"
             else
                 print_warning "[DRY-RUN] Would show auth service history"
             fi
@@ -233,10 +233,10 @@ show_deployment_status() {
     case "$service" in
         "auth")
             local namespace="gripday-auth$namespace_suffix"
-            print_status "Auth Service Status:"
+            print_status "User Service Status:"
             if [[ "$DRY_RUN" == "false" ]]; then
-                kubectl rollout status deployment/auth-service -n "$namespace" --timeout=10s || print_warning "Status check timed out"
-                kubectl get deployment auth-service -n "$namespace" -o wide
+                kubectl rollout status deployment/user-service -n "$namespace" --timeout=10s || print_warning "Status check timed out"
+                kubectl get deployment user-service -n "$namespace" -o wide
             else
                 print_warning "[DRY-RUN] Would show auth service status"
             fi
@@ -272,7 +272,7 @@ rollback_service() {
     case "$service" in
         "auth")
             namespace="gripday-auth$namespace_suffix"
-            deployment="auth-service"
+            deployment="user-service"
             ;;
         "gateway")
             namespace="gripday-gateway$namespace_suffix"

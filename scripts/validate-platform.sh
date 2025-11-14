@@ -77,11 +77,11 @@ wait_for_service() {
 test_health_endpoints() {
     log "INFO" "Testing service health endpoints..."
     
-    # Test Auth Service health
+    # Test User Service health
     if curl -s -f "$AUTH_URL/actuator/health" | jq -e '.status == "UP"' > /dev/null; then
-        log "SUCCESS" "Auth Service health check passed"
+        log "SUCCESS" "User Service health check passed"
     else
-        log "ERROR" "Auth Service health check failed"
+        log "ERROR" "User Service health check failed"
         return 1
     fi
     
@@ -339,9 +339,9 @@ test_observability_stack() {
     
     # Test service metrics endpoints
     if curl -s -f "$AUTH_URL/actuator/prometheus" > /dev/null 2>&1; then
-        log "SUCCESS" "Auth Service metrics endpoint accessible"
+        log "SUCCESS" "User Service metrics endpoint accessible"
     else
-        log "ERROR" "Auth Service metrics endpoint not accessible"
+        log "ERROR" "User Service metrics endpoint not accessible"
         return 1
     fi
     
@@ -418,7 +418,7 @@ run_platform_validation() {
     log "INFO" "Grafana URL: $GRAFANA_URL"
     
     # Wait for services to be ready
-    wait_for_service "Auth Service" "$AUTH_URL" || return 1
+    wait_for_service "User Service" "$AUTH_URL" || return 1
     wait_for_service "Gateway Service" "$GATEWAY_URL" || return 1
     
     # Run validation tests

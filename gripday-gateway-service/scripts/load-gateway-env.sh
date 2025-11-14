@@ -193,8 +193,8 @@ display_configuration_summary() {
     echo "  - Redis Host: $GRIPDAY_CACHE_REDIS_HOST"
     echo "  - Redis Port: ${GRIPDAY_CACHE_REDIS_PORT:-6379}"
     echo "  - Redis Database: ${GRIPDAY_CACHE_REDIS_DATABASE:-0}"
-    echo "  - Auth Service URI: $GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI"
-    echo "  - Auth Service URL: $GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL"
+    echo "  - User Service URI: $GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI"
+    echo "  - User Service URL: $GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL"
     
     # Show CORS origins (truncated for security)
     local cors_origins="$GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS"

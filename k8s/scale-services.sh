@@ -48,7 +48,7 @@ Manage horizontal scaling of Gripday Platform services
 
 OPTIONS:
     -e, --environment ENV    Environment (local|staging|production) [default: local]
-    -s, --service SERVICE    Service to scale (auth|gateway|bookstore|all) [default: all]
+    -s, --service SERVICE    Service to scale (user|gateway|bookstore|all) [default: all]
     -r, --replicas COUNT     Number of replicas to scale to
     -a, --action ACTION      Action (scale|status|auto) [default: scale]
     -d, --dry-run           Show what would be done without executing
@@ -114,7 +114,7 @@ if [[ ! "$ENVIRONMENT" =~ ^(local|staging|production)$ ]]; then
     exit 1
 fi
 
-if [[ ! "$SERVICE" =~ ^(auth|gateway|bookstore|all)$ ]]; then
+if [[ ! "$SERVICE" =~ ^(user|gateway|bookstore|all)$ ]]; then
     print_error "Invalid service: $SERVICE"
     exit 1
 fi
@@ -171,7 +171,7 @@ scale_service() {
     
     case "$service" in
         "auth")
-            deployment="auth-service"
+            deployment="user-service"
             ;;
         "gateway")
             deployment="gateway-service"
@@ -204,9 +204,9 @@ show_scaling_status() {
     
     if [[ "$service" == "all" || "$service" == "auth" ]]; then
         local auth_namespace="$namespace"
-        print_status "Auth Service ($auth_namespace):"
+        print_status "User Service ($auth_namespace):"
         if [[ "$DRY_RUN" == "false" ]]; then
-            kubectl get deployment auth-service -n "$auth_namespace" -o wide 2>/dev/null || print_warning "Auth service not found"
+            kubectl get deployment user-service -n "$auth_namespace" -o wide 2>/dev/null || print_warning "Auth service not found"
             kubectl get hpa -n "$auth_namespace" 2>/dev/null || print_debug "No HPA configured for auth service"
         else
             print_warning "[DRY-RUN] Would show auth service status"
@@ -253,7 +253,7 @@ configure_autoscaling() {
             print_status "Applying HPA for auth service..."
             # Auth service typically doesn't need aggressive auto-scaling
             if [[ "$DRY_RUN" == "false" ]]; then
-                kubectl autoscale deployment auth-service --cpu-percent=70 --min=2 --max=10 -n "$namespace"
+                kubectl autoscale deployment user-service --cpu-percent=70 --min=2 --max=10 -n "$namespace"
             else
                 print_warning "[DRY-RUN] Would configure auth service HPA"
             fi

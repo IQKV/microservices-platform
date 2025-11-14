@@ -1,4 +1,4 @@
--- Initialize Auth Service Database
+-- Initialize User Service Database
 -- This script sets up the basic database configuration for the auth service
 
 -- Create extensions if they don't exist

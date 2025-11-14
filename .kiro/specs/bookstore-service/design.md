@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Bookstore Service is a Spring Boot 3.5.6 microservice that provides book catalog and inventory management capabilities. It follows the established three-tier architecture pattern and integrates seamlessly with the existing Gateway Service and Auth Service. The service uses PostgreSQL for data persistence and implements modern Java 21 features throughout the codebase.
+The Bookstore Service is a Spring Boot 3.5.6 microservice that provides book catalog and inventory management capabilities. It follows the established three-tier architecture pattern and integrates seamlessly with the existing Gateway Service and User Service. The service uses PostgreSQL for data persistence and implements modern Java 21 features throughout the codebase.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ org.gripday.bookstore/
 ```mermaid
 graph TB
     React[React 19 Frontend] --> Gateway[Gateway Service - BFF]
-    Gateway --> Auth[Auth Service]
+    Gateway --> Auth[User Service]
     Gateway --> Bookstore[Bookstore Service]
     Auth --> AuthDB[(Auth PostgreSQL)]
     Bookstore --> BookDB[(Bookstore PostgreSQL)]
@@ -37,10 +37,10 @@ graph TB
         CORS[CORS Handler]
     end
 
-    subgraph "Auth Service"
+    subgraph "User Service"
         AuthResource[Authentication Resource]
         UserResource[User Management Resource]
-        AuthService[Auth Service]
+        AuthService[User Service]
         UserService[User Service]
     end
 
@@ -65,7 +65,7 @@ graph TB
 The Gateway Service acts as the unified entry point for all React 19 frontend applications, providing:
 
 - **Unified API Surface**: Single endpoint for all microservice operations
-  - Authentication: `/api/v1/auth/*` → Auth Service
+  - Authentication: `/api/v1/auth/*` → User Service
   - Bookstore: `/api/v1/bookstore/*` → Bookstore Service
 - **Authentication Handling**: JWT token validation and user context propagation across all services
 - **CORS Management**: React 19 development server support (localhost:5173) and production policies
@@ -511,9 +511,9 @@ spring:
   cloud:
     gateway:
       routes:
-        # Auth Service Routes
+        # User Service Routes
         - id: auth-login
-          uri: lb://auth-service
+          uri: lb://user-service
           predicates:
             - Path=/api/v1/auth/login
           filters:
@@ -523,7 +523,7 @@ spring:
                 redis-rate-limiter.burstCapacity: 10
 
         - id: auth-users
-          uri: lb://auth-service
+          uri: lb://user-service
           predicates:
             - Path=/api/v1/auth/users/**
           filters:

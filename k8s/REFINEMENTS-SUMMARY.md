@@ -16,7 +16,7 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 
 **Files Modified:**
 
-- `auth-service/namespace.yaml`
+- `user-service/namespace.yaml`
 - `bookstore-service/namespace.yaml`
 - `gateway-service/namespace.yaml`
 
@@ -29,8 +29,8 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 
 **Files Modified:**
 
-- `auth-service/auth-postgres-deployment.yaml`
-- `auth-service/auth-redis-deployment.yaml`
+- `user-service/auth-postgres-deployment.yaml`
+- `user-service/auth-redis-deployment.yaml`
 - `bookstore-service/bookstore-postgres-deployment.yaml`
 - `bookstore-service/bookstore-redis-deployment.yaml`
 - `gateway-service/gateway-redis-deployment.yaml`
@@ -39,7 +39,7 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 #### **Image Tags**
 
 - ✅ Replaced `latest` tags with specific versions:
-  - `gripday/auth-service:1.0.0`
+  - `gripday/user-service:1.0.0`
   - `gripday/bookstore-service:1.0.0`
   - `gripday/gateway-service:1.0.0`
   - `redis:7.2-alpine` (standardized across services)
@@ -47,10 +47,10 @@ This document summarizes all refinements made to the Kubernetes manifests accord
 
 **Files Modified:**
 
-- `auth-service/auth-service-deployment.yaml`
+- `user-service/user-service-deployment.yaml`
 - `bookstore-service/bookstore-service-deployment.yaml`
 - `gateway-service/gateway-service-deployment.yaml`
-- `auth-service/auth-redis-deployment.yaml`
+- `user-service/auth-redis-deployment.yaml`
 - `gateway-service/gateway-redis-deployment.yaml`
 
 ### 2. High Availability Improvements
@@ -77,7 +77,7 @@ topologySpreadConstraints:
 
 **Files Modified:**
 
-- `auth-service/auth-service-deployment.yaml`
+- `user-service/user-service-deployment.yaml`
 - `bookstore-service/bookstore-service-deployment.yaml`
 - `gateway-service/gateway-service-deployment.yaml`
 
@@ -123,7 +123,7 @@ Created 4 priority classes and assigned them to workloads:
 
 Created namespace-level resource quotas:
 
-**Auth Service Namespace:**
+**User Service Namespace:**
 
 - CPU: 4 cores (requests), 8 cores (limits)
 - Memory: 8Gi (requests), 16Gi (limits)
@@ -146,7 +146,7 @@ Created namespace-level resource quotas:
 
 **Files Created:**
 
-- `auth-service/resource-quota.yaml`
+- `user-service/resource-quota.yaml`
 - `bookstore-service/resource-quota.yaml`
 - `gateway-service/resource-quota.yaml`
 
@@ -195,7 +195,7 @@ nginx.ingress.kubernetes.io/configuration-snippet: |
 - ✅ Changed `ssl-redirect: "false"` to `ssl-redirect: "true"`
 - ✅ Added `force-ssl-redirect: "true"`
 
-**File Modified:** `auth-service/auth-service-ingress.yaml`
+**File Modified:** `user-service/user-service-ingress.yaml`
 
 ### 5. Documentation
 
@@ -245,7 +245,7 @@ kubectl apply -f k8s/priority-classes.yaml
 Apply resource quotas before deploying workloads:
 
 ```bash
-kubectl apply -f k8s/auth-service/resource-quota.yaml
+kubectl apply -f k8s/user-service/resource-quota.yaml
 kubectl apply -f k8s/bookstore-service/resource-quota.yaml
 kubectl apply -f k8s/gateway-service/resource-quota.yaml
 ```
@@ -259,12 +259,12 @@ To deploy with the new manifests:
 kubectl apply -f k8s/priority-classes.yaml
 
 # 2. Create/update namespaces with Pod Security Standards
-kubectl apply -f k8s/auth-service/namespace.yaml
+kubectl apply -f k8s/user-service/namespace.yaml
 kubectl apply -f k8s/bookstore-service/namespace.yaml
 kubectl apply -f k8s/gateway-service/namespace.yaml
 
 # 3. Apply resource quotas and limit ranges
-kubectl apply -f k8s/auth-service/resource-quota.yaml
+kubectl apply -f k8s/user-service/resource-quota.yaml
 kubectl apply -f k8s/bookstore-service/resource-quota.yaml
 kubectl apply -f k8s/gateway-service/resource-quota.yaml
 
@@ -273,24 +273,24 @@ kubectl apply -f k8s/gateway-service/resource-quota.yaml
 # See SECRETS-MANAGEMENT.md
 
 # 5. Apply infrastructure (databases, redis)
-kubectl apply -f k8s/auth-service/auth-postgres-deployment.yaml
-kubectl apply -f k8s/auth-service/auth-redis-deployment.yaml
+kubectl apply -f k8s/user-service/auth-postgres-deployment.yaml
+kubectl apply -f k8s/user-service/auth-redis-deployment.yaml
 kubectl apply -f k8s/bookstore-service/bookstore-postgres-deployment.yaml
 kubectl apply -f k8s/bookstore-service/bookstore-redis-deployment.yaml
 kubectl apply -f k8s/gateway-service/gateway-redis-deployment.yaml
 
 # 6. Apply network policies
-kubectl apply -f k8s/auth-service/network-policy.yaml
+kubectl apply -f k8s/user-service/network-policy.yaml
 kubectl apply -f k8s/bookstore-service/network-policy.yaml
 kubectl apply -f k8s/gateway-service/network-policy.yaml
 
 # 7. Apply services
-kubectl apply -f k8s/auth-service/auth-service-deployment.yaml
+kubectl apply -f k8s/user-service/user-service-deployment.yaml
 kubectl apply -f k8s/bookstore-service/bookstore-service-deployment.yaml
 kubectl apply -f k8s/gateway-service/gateway-service-deployment.yaml
 
 # 8. Apply ingress
-kubectl apply -f k8s/auth-service/auth-service-ingress.yaml
+kubectl apply -f k8s/user-service/user-service-ingress.yaml
 # ... other ingress resources
 ```
 

@@ -1,4 +1,4 @@
-# Gripday Auth Service
+# Gripday User Service
 
 Centralized authentication and user management microservice providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account
 activation in the Gripday platform.
@@ -267,7 +267,7 @@ GRIPDAY_TENANT_DEFAULT_ID=default
 docker compose up -d
 
 # View logs
-docker-compose logs -f auth-service
+docker-compose logs -f user-service
 
 # Stop services
 docker-compose down
@@ -315,7 +315,7 @@ docker-compose down
 
 ```bash
 # View application logs
-docker-compose logs -f auth-service
+docker-compose logs -f user-service
 
 # View database logs
 docker-compose logs -f postgres
@@ -325,7 +325,7 @@ docker-compose logs -f postgres
 
 ### Overview
 
-The Auth Service includes email verification functionality to ensure users have valid email addresses and enhance account security.
+The User Service includes email verification functionality to ensure users have valid email addresses and enhance account security.
 
 ### Key Features
 

@@ -1,4 +1,4 @@
-# Test configuration for Auth Service
+# Test configuration for User Service
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
@@ -120,7 +120,7 @@ gripday:
   observability:
     tracing:
       enabled: false
-      service-name: test-auth-service
+      service-name: test-user-service
       sampling-rate: 0.0
       endpoint: http://localhost:4318/v1/traces
       timeout: PT10S

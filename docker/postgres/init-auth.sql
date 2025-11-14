@@ -1,4 +1,4 @@
--- Initialize Auth Service Database
+-- Initialize User Service Database
 -- This script runs when the PostgreSQL container starts for the first time
 
 -- Create additional schemas if needed
@@ -27,4 +27,4 @@ $$ language 'plpgsql';
 
 -- Log initialization
 INSERT INTO pg_stat_statements_reset();
-SELECT 'Auth Service Database initialized successfully' AS status;
+SELECT 'User Service Database initialized successfully' AS status;

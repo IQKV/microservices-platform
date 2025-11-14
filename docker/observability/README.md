@@ -43,7 +43,7 @@ This directory contains the complete observability stack for the Gripday microse
 2. **Start the microservices**:
 
    ```bash
-   # Terminal 1 - Auth Service
+   # Terminal 1 - User Service
    cd gripday-user-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
 
@@ -59,7 +59,7 @@ This directory contains the complete observability stack for the Gripday microse
 
 ## Monitoring Endpoints
 
-### Auth Service (Port 8080)
+### User Service (Port 8080)
 
 - Health: http://localhost:8080/actuator/health
 - Metrics: http://localhost:8080/actuator/prometheus
@@ -93,7 +93,7 @@ This directory contains the complete observability stack for the Gripday microse
 
 ## Custom Metrics
 
-### Auth Service Metrics
+### User Service Metrics
 
 - `gripday_auth_authentication_duration`: Authentication request duration
 - `gripday_auth_authentication_total`: Total authentication attempts (success/failure)

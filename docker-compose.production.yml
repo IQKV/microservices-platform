@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service - Production
+  # PostgreSQL Database for User Service - Production
   postgres-auth:
     environment:
       POSTGRES_DB: gripday_auth_production
@@ -56,8 +56,8 @@ services:
       --save 300 10
       --save 60 10000
 
-  # Auth Service - Production
-  auth-service:
+  # User Service - Production
+  user-service:
     environment:
       SPRING_PROFILES_ACTIVE: production
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth_production
@@ -98,7 +98,7 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: production
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8080
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://user-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 500
       JAVA_OPTS: >
         -XX:+UseContainerSupport

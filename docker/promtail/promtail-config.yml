@@ -41,14 +41,14 @@ scrape_configs:
           source: output
 
   # Application logs from services
-  - job_name: auth-service
+  - job_name: user-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: auth-service
-          service: auth-service
-          __path__: /var/log/auth-service/*.log
+          job: user-service
+          service: user-service
+          __path__: /var/log/user-service/*.log
 
   - job_name: gateway-service
     static_configs:

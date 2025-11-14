@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <!-- Master changelog file for Gripday Auth Service database migrations -->
+    <!-- Master changelog file for Gripday User Service database migrations -->
 
     <!-- Database schema migrations -->
     <include file="db/changelog/001-ceate-users-table.xml"/>

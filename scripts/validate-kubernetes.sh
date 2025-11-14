@@ -66,7 +66,7 @@ check_kubernetes() {
 wait_for_deployments() {
     log "INFO" "Waiting for deployments to be ready..."
     
-    local deployments=("auth-service" "gateway-service" "auth-postgres" "auth-redis" "gateway-redis")
+    local deployments=("user-service" "gateway-service" "auth-postgres" "auth-redis" "gateway-redis")
     local max_attempts=$((VALIDATION_TIMEOUT / 10))
     
     for deployment in "${deployments[@]}"; do
@@ -107,7 +107,7 @@ get_service_urls() {
     
     # Try to get LoadBalancer or NodePort URLs
     local gateway_service_type=$($KUBECTL_CMD get service gateway-service -n "$NAMESPACE" -o jsonpath='{.spec.type}')
-    local auth_service_type=$($KUBECTL_CMD get service auth-service -n "$NAMESPACE" -o jsonpath='{.spec.type}')
+    local auth_service_type=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.spec.type}')
     
     if [ "$gateway_service_type" = "LoadBalancer" ]; then
         GATEWAY_URL=$($KUBECTL_CMD get service gateway-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -132,9 +132,9 @@ get_service_urls() {
     fi
     
     if [ "$auth_service_type" = "LoadBalancer" ]; then
-        AUTH_URL=$($KUBECTL_CMD get service auth-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        AUTH_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
         if [ -z "$AUTH_URL" ] || [ "$AUTH_URL" = "null" ]; then
-            AUTH_URL=$($KUBECTL_CMD get service auth-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            AUTH_URL=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         fi
         AUTH_URL="http://$AUTH_URL:8080"
     elif [ "$auth_service_type" = "NodePort" ]; then
@@ -142,12 +142,12 @@ get_service_urls() {
         if [ -z "$node_ip" ]; then
             node_ip=$($KUBECTL_CMD get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
         fi
-        local node_port=$($KUBECTL_CMD get service auth-service -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].nodePort}')
+        local node_port=$($KUBECTL_CMD get service user-service -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].nodePort}')
         AUTH_URL="http://$node_ip:$node_port"
     else
         # Use port-forward for ClusterIP
         log "INFO" "Using port-forward for auth service access"
-        $KUBECTL_CMD port-forward service/auth-service 8080:8080 -n "$NAMESPACE" &
+        $KUBECTL_CMD port-forward service/user-service 8080:8080 -n "$NAMESPACE" &
         AUTH_PORT_FORWARD_PID=$!
         AUTH_URL="http://localhost:8080"
         sleep 5
@@ -202,8 +202,8 @@ show_logs() {
     log "INFO" "Showing recent pod logs..."
     
     echo
-    echo "=== Auth Service Logs ==="
-    $KUBECTL_CMD logs -l app=auth-service --tail=20 -n "$NAMESPACE"
+    echo "=== User Service Logs ==="
+    $KUBECTL_CMD logs -l app=user-service --tail=20 -n "$NAMESPACE"
     
     echo
     echo "=== Gateway Service Logs ==="

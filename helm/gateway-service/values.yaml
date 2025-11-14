@@ -246,23 +246,23 @@ configMap:
         cloud:
           gateway:
             routes:
-            # Auth Service Routes
-            - id: auth-service-api
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
+            # User Service Routes
+            - id: user-service-api
+              uri: http://user-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/auth/**
               filters:
               - StripPrefix=0
             
-            - id: auth-service-users
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
+            - id: user-service-users
+              uri: http://user-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/users/**
               filters:
               - StripPrefix=0
             
-            - id: auth-service-tenants
-              uri: http://auth-service.gripday-auth.svc.cluster.local:8080
+            - id: user-service-tenants
+              uri: http://user-service.gripday-auth.svc.cluster.local:8080
               predicates:
               - Path=/api/v1/tenants/**
               filters:
@@ -446,7 +446,7 @@ networkPolicy:
         - protocol: TCP
           port: 8080
   egress:
-    # Allow access to auth-service
+    # Allow access to user-service
     - to:
         - namespaceSelector:
             matchLabels:

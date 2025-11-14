@@ -1,0 +1,183 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: user-service-network-policy
+  namespace: gripday-dev-env
+  labels:
+    app.kubernetes.io/name: gripday-user-service
+    app.kubernetes.io/component: authentication
+    app.kubernetes.io/part-of: gripday
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gripday-user-service
+      app.kubernetes.io/component: authentication
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Allow traffic from gateway service ONLY
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: gripday
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gripday-gateway-service
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow traffic from same namespace (for service-to-service communication)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow traffic from monitoring (Prometheus)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  egress:
+    # Allow access to PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: auth-postgres
+              app.kubernetes.io/component: database
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow access to Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: auth-redis
+              app.kubernetes.io/component: cache
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # Allow access to observability services
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: observability
+      ports:
+        - protocol: TCP
+          port: 4317 # OTLP gRPC
+        - protocol: TCP
+          port: 14268 # Jaeger
+
+    # Allow HTTPS for external OAuth2 providers
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-postgres-network-policy
+  namespace: gripday-dev-env
+  labels:
+    app.kubernetes.io/name: auth-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: gripday
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-postgres
+      app.kubernetes.io/component: database
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Allow ingress from auth service only
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/component: authentication
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow ingress from monitoring for backup/metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: monitoring
+      ports:
+        - protocol: TCP
+          port: 5432
+
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-redis-network-policy
+  namespace: gripday-dev-env
+  labels:
+    app.kubernetes.io/name: auth-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: gripday
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-redis
+      app.kubernetes.io/component: cache
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Allow ingress from auth service only
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/component: authentication
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow ingress from monitoring for metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: monitoring
+      ports:
+        - protocol: TCP
+          port: 6379
+
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53

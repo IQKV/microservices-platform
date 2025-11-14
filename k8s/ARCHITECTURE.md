@@ -77,7 +77,7 @@ The Gripday platform follows a **microservices architecture** with an **API Gate
 
 #### ❌ **Services WITHOUT Ingress**
 
-1. **Auth Service** - Internal only
+1. **User Service** - Internal only
    - Accessible only via: `https://api.gripday.com/api/v1/auth/*` → Gateway → Auth
    - No direct internet access
    - Network policy: Only accepts traffic from gateway
@@ -113,10 +113,10 @@ This allows developers to:
 The gateway service routes all external traffic to internal services:
 
 ```yaml
-# Auth Service Routes
-/api/v1/auth/**      → http://auth-service:8080/api/v1/auth/**
-/api/v1/users/**     → http://auth-service:8080/api/v1/users/**
-/api/v1/tenants/**   → http://auth-service:8080/api/v1/tenants/**
+# User Service Routes
+/api/v1/auth/**      → http://user-service:8080/api/v1/auth/**
+/api/v1/users/**     → http://user-service:8080/api/v1/users/**
+/api/v1/tenants/**   → http://user-service:8080/api/v1/tenants/**
 
 # Bookstore Service Routes
 /api/v1/bookstore/** → http://bookstore-service:8080/api/v1/bookstore/**
@@ -163,7 +163,7 @@ The gateway service routes all external traffic to internal services:
 
 **Egress:**
 
-- ✅ To: Auth Service (port 8080)
+- ✅ To: User Service (port 8080)
 - ✅ To: Bookstore Service (port 8080)
 - ✅ To: Redis (rate limiting)
 - ✅ To: DNS
@@ -185,7 +185,7 @@ The gateway service routes all external traffic to internal services:
 - ✅ To: Own cache (Redis)
 - ✅ To: DNS
 - ✅ To: Observability services
-- ✅ To: Auth Service (for JWT validation - defense in depth)
+- ✅ To: User Service (for JWT validation - defense in depth)
 
 ## Security Benefits
 
@@ -378,7 +378,7 @@ Check if traffic is being blocked:
 kubectl get networkpolicies -n gripday-production-env
 
 # Describe specific policy
-kubectl describe networkpolicy auth-service-network-policy -n gripday-production-env
+kubectl describe networkpolicy user-service-network-policy -n gripday-production-env
 ```
 
 ### Gateway Routing Issues

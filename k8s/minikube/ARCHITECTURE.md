@@ -154,7 +154,7 @@ MINIKUBE_IP=$(minikube ip)
 # Gateway Service
 curl http://$MINIKUBE_IP:30080/api/v1/auth/login
 
-# Auth Service (direct)
+# User Service (direct)
 curl http://$MINIKUBE_IP:30081/api/v1/auth/login
 
 # Bookstore Service (direct)
@@ -183,7 +183,7 @@ curl http://$MINIKUBE_IP:30082/api/v1/bookstore/books
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 # Forward auth service
-kubectl port-forward -n gripday svc/auth-service 8080:8080
+kubectl port-forward -n gripday svc/user-service 8080:8080
 ```
 
 **Usage:**
@@ -229,7 +229,7 @@ curl http://api.gripday.site/api/v1/auth/login
 # Use direct service ingress OR port forward
 curl http://auth.gripday.site/actuator/health
 # OR
-kubectl port-forward -n gripday svc/auth-service 8080:8080
+kubectl port-forward -n gripday svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 ```
 
@@ -272,7 +272,7 @@ For testing production-like network isolation:
 
 ```bash
 # Apply network policies to minikube
-kubectl apply -f ../auth-service/network-policy.yaml
+kubectl apply -f ../user-service/network-policy.yaml
 kubectl apply -f ../gateway-service/network-policy.yaml
 kubectl apply -f ../bookstore-service/network-policy.yaml
 
@@ -314,10 +314,10 @@ kubectl get svc -n gripday
 
 # Check logs
 kubectl logs -n gripday deployment/gateway-service
-kubectl logs -n gripday deployment/auth-service
+kubectl logs -n gripday deployment/user-service
 
 # Test internal connectivity
-kubectl exec -n gripday deployment/gateway-service -- curl http://auth-service:8080/actuator/health
+kubectl exec -n gripday deployment/gateway-service -- curl http://user-service:8080/actuator/health
 ```
 
 ### Gateway Not Routing

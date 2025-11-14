@@ -62,7 +62,7 @@ chmod +x scripts/validate-platform.sh
 
 ```
 ┌─────────────────┐    ┌─────────────────┐
-│  Gateway Service │    │   Auth Service  │
+│  Gateway Service │    │   User Service  │
 │   (Port 8080)   │◄──►│   (Port 8080)   │
 └─────────────────┘    └─────────────────┘
          │                       │
@@ -645,7 +645,7 @@ docker compose up --build
 docker compose up --scale gateway-service=2
 
 # View logs
-docker-compose logs -f auth-service
+docker-compose logs -f user-service
 ```
 
 ### Kubernetes
@@ -659,7 +659,7 @@ docker-compose logs -f auth-service
 
 # Check deployment status
 kubectl get pods -n gripday
-kubectl logs -f deployment/auth-service -n gripday
+kubectl logs -f deployment/user-service -n gripday
 ```
 
 ## 🔍 Debugging and Troubleshooting
@@ -751,7 +751,7 @@ SELECT tenant_id, COUNT(*) as user_count FROM users GROUP BY tenant_id;
 
 - [Complete API Reference](docs/api/complete-api-reference.md)
 - [Troubleshooting Guide](docs/troubleshooting/common-issues.md)
-- [Auth Service README](gripday-user-service/README.md)
+- [User Service README](gripday-user-service/README.md)
 - [Gateway Service README](gripday-gateway-service/README.md)
 
 ### Interactive Tools

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document outlines the requirements for establishing a Playwright automated testing infrastructure for all existing REST APIs in the Gripday microservices platform. The testing infrastructure will provide end-to-end API testing capabilities across all services (Auth Service, Gateway Service, and Bookstore Service) with support for authentication flows, multi-tenant scenarios, and test reporting.
+This document outlines the requirements for establishing a Playwright automated testing infrastructure for all existing REST APIs in the Gripday microservices platform. The testing infrastructure will provide end-to-end API testing capabilities across all services (User Service, Gateway Service, and Bookstore Service) with support for authentication flows, multi-tenant scenarios, and test reporting.
 
 ## Glossary
 
@@ -23,7 +23,7 @@ This document outlines the requirements for establishing a Playwright automated 
 
 #### Acceptance Criteria
 
-1. THE Playwright_Test_Suite SHALL support testing all REST endpoints in Auth Service, Gateway Service, and Bookstore Service
+1. THE Playwright_Test_Suite SHALL support testing all REST endpoints in User Service, Gateway Service, and Bookstore Service
 2. THE API_Test_Infrastructure SHALL provide TypeScript-based test implementations with type safety
 3. THE Playwright_Test_Suite SHALL execute tests against containerized services in isolated environments
 4. THE API_Test_Infrastructure SHALL include utilities for HTTP request/response validation and assertion helpers

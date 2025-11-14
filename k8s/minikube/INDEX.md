@@ -289,7 +289,7 @@ kubectl get pods -n gripday -w
 | Component            | Replicas | CPU Request | Memory Request | Port  |
 | -------------------- | -------- | ----------- | -------------- | ----- |
 | Gateway Service      | 1        | 100m        | 256Mi          | 30080 |
-| Auth Service         | 1        | 100m        | 256Mi          | 30081 |
+| User Service         | 1        | 100m        | 256Mi          | 30081 |
 | Bookstore Service    | 1        | 100m        | 256Mi          | 30082 |
 | PostgreSQL Auth      | 1        | 100m        | 128Mi          | 5432  |
 | PostgreSQL Bookstore | 1        | 100m        | 128Mi          | 5432  |
@@ -323,10 +323,10 @@ kubectl get pods -n gripday -w
 ## 🔗 Related Documentation
 
 - **Main Project:** [../../README.md](../../README.md)
-- **Auth Service:** [../../gripday-user-service/README.md](../../gripday-user-service/README.md)
+- **User Service:** [../../gripday-user-service/README.md](../../gripday-user-service/README.md)
 - **Gateway Service:** [../../gripday-gateway-service/README.md](../../gripday-gateway-service/README.md)
 - **Bookstore Service:** [../../gripday-bookstore-service/README.md](../../gripday-bookstore-service/README.md)
-- **Production K8s:** [../auth-service/README.md](../auth-service/README.md)
+- **Production K8s:** [../user-service/README.md](../user-service/README.md)
 
 ## 💡 Tips
 

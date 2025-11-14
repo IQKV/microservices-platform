@@ -28,7 +28,7 @@ data:
   REDIS_PORT: "6379"
 
   # Service URLs
-  AUTH_SERVICE_URL: "http://auth-service:8080"
+  AUTH_SERVICE_URL: "http://user-service:8080"
   BOOKSTORE_SERVICE_URL: "http://bookstore-service:8080"
 
   # Spring Profile
@@ -57,7 +57,7 @@ data:
   REDIS_PASSWORD: ""
 
 ---
-# PostgreSQL for Auth Service
+# PostgreSQL for User Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -305,24 +305,24 @@ spec:
     app: redis
 
 ---
-# Auth Service
+# User Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: user-service
   namespace: gripday-dev-env
   labels:
-    app: auth-service
+    app: user-service
     component: microservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-service
+      app: user-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: user-service
         component: microservice
     spec:
       initContainers:
@@ -351,8 +351,8 @@ spec:
               done
               echo "Redis is ready!"
       containers:
-        - name: auth-service
-          image: gripday/auth-service:latest
+        - name: user-service
+          image: gripday/user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -431,10 +431,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: user-service
   namespace: gripday-dev-env
   labels:
-    app: auth-service
+    app: user-service
 spec:
   type: NodePort
   ports:
@@ -443,7 +443,7 @@ spec:
       nodePort: 30081
       name: http
   selector:
-    app: auth-service
+    app: user-service
 
 ---
 # Bookstore Service
@@ -530,7 +530,7 @@ spec:
                   name: gripday-config
                   key: REDIS_PORT
             - name: JWT_ISSUER_URI
-              value: "http://auth-service:8080"
+              value: "http://user-service:8080"
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:
@@ -612,7 +612,7 @@ spec:
             - -c
             - |
               echo "Waiting for backend services..."
-              until nc -z auth-service 8080 && nc -z bookstore-service 8080 && nc -z redis 6379; do
+              until nc -z user-service 8080 && nc -z bookstore-service 8080 && nc -z redis 6379; do
                 echo "Waiting for services to be ready..."
                 sleep 3
               done

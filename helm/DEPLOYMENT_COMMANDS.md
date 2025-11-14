@@ -29,19 +29,19 @@ helm install gripday . -f values-production.yaml --namespace production --create
 
 ## Individual Service Deployments
 
-### Auth Service
+### User Service
 
 ```bash
 # Install
-helm install auth-service ./helm/auth-service \
+helm install user-service ./helm/user-service \
   --namespace gripday-auth \
   --create-namespace
 
 # Upgrade
-helm upgrade auth-service ./helm/auth-service -n gripday-auth
+helm upgrade user-service ./helm/user-service -n gripday-auth
 
 # Uninstall
-helm uninstall auth-service -n gripday-auth
+helm uninstall user-service -n gripday-auth
 ```
 
 ### Bookstore Service
@@ -161,7 +161,7 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Port forward auth service
-kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
+kubectl port-forward -n gripday-auth svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Port forward bookstore service
@@ -175,7 +175,7 @@ curl http://localhost:8080/actuator/health
 
 ```bash
 # Upgrade single service
-helm upgrade auth-service ./helm/auth-service \
+helm upgrade user-service ./helm/user-service \
   --set replicaCount=3 \
   -n gripday-auth
 
@@ -189,13 +189,13 @@ helm upgrade gripday ./helm/gripday \
 
 ```bash
 # Update auth service image
-helm upgrade auth-service ./helm/auth-service \
+helm upgrade user-service ./helm/user-service \
   --set image.tag=1.1.0 \
   -n gripday-auth
 
 # Update via umbrella chart
 helm upgrade gripday ./helm/gripday \
-  --set auth-service.image.tag=1.1.0 \
+  --set user-service.image.tag=1.1.0 \
   -n gripday
 ```
 
@@ -203,10 +203,10 @@ helm upgrade gripday ./helm/gripday \
 
 ```bash
 # Restart deployment
-kubectl rollout restart deployment/auth-service -n gripday-auth
+kubectl rollout restart deployment/user-service -n gripday-auth
 
 # Check rollout status
-kubectl rollout status deployment/auth-service -n gripday-auth
+kubectl rollout status deployment/user-service -n gripday-auth
 ```
 
 ## Rollback Operations
@@ -228,16 +228,16 @@ helm history gripday -n gripday
 
 ```bash
 # Dry run installation
-helm install test ./helm/auth-service \
+helm install test ./helm/user-service \
   --dry-run \
   --debug \
   -n test
 
 # Generate templates
-helm template test ./helm/auth-service > output.yaml
+helm template test ./helm/user-service > output.yaml
 
 # Lint chart
-helm lint ./helm/auth-service
+helm lint ./helm/user-service
 ```
 
 ### View Logs
@@ -266,10 +266,10 @@ kubectl logs <pod-name> -n <namespace> --previous
 kubectl describe pod <pod-name> -n <namespace>
 
 # Describe deployment
-kubectl describe deployment auth-service -n gripday-auth
+kubectl describe deployment user-service -n gripday-auth
 
 # Describe service
-kubectl describe svc auth-service -n gripday-auth
+kubectl describe svc user-service -n gripday-auth
 ```
 
 ## Scaling
@@ -278,10 +278,10 @@ kubectl describe svc auth-service -n gripday-auth
 
 ```bash
 # Scale deployment
-kubectl scale deployment auth-service --replicas=5 -n gripday-auth
+kubectl scale deployment user-service --replicas=5 -n gripday-auth
 
 # Scale via Helm upgrade
-helm upgrade auth-service ./helm/auth-service \
+helm upgrade user-service ./helm/user-service \
   --set replicaCount=5 \
   -n gripday-auth
 ```
@@ -305,7 +305,7 @@ kubectl describe hpa bookstore-service-hpa -n gripday-bookstore
 helm uninstall gripday -n gripday
 
 # Uninstall individual services
-helm uninstall auth-service -n gripday-auth
+helm uninstall user-service -n gripday-auth
 helm uninstall bookstore-service -n gripday-bookstore
 helm uninstall gateway-service -n gripday-gateway
 ```
@@ -377,7 +377,7 @@ helm install gripday ./helm/gripday \
 
 ```bash
 helm install gripday ./helm/gripday \
-  --set auth-service.replicaCount=3 \
+  --set user-service.replicaCount=3 \
   --set gateway-service.replicaCount=5 \
   --set bookstore-service.autoscaling.minReplicas=4 \
   -n gripday \
@@ -402,11 +402,11 @@ helm install gripday ./helm/gripday \
 ```bash
 # Test DNS resolution
 kubectl run test-dns --image=busybox --rm -it -- \
-  nslookup auth-service.gripday-auth.svc.cluster.local
+  nslookup user-service.gripday-auth.svc.cluster.local
 
 # Test service connectivity
 kubectl run test-curl --image=curlimages/curl --rm -it -- \
-  curl http://auth-service.gripday-auth.svc.cluster.local:8080/actuator/health
+  curl http://user-service.gripday-auth.svc.cluster.local:8080/actuator/health
 ```
 
 ### Load Testing

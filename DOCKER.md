@@ -58,7 +58,7 @@ docker-compose logs -f
 ### 3. Access Services
 
 - **Gateway Service:** http://localhost:8080
-- **Auth Service:** http://localhost:8080/actuator/health
+- **User Service:** http://localhost:8080/actuator/health
 - **Prometheus:** http://localhost:9090
 - **Grafana:** http://localhost:3000 (admin/admin)
 
@@ -174,10 +174,10 @@ docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
 
 ```
 Gateway Service
-    ├── Auth Service (health check)
+    ├── User Service (health check)
     └── Redis (health check)
 
-Auth Service
+User Service
     ├── PostgreSQL (health check)
     └── Redis (health check)
 
@@ -203,7 +203,7 @@ healthcheck:
 
 ## Individual Service Development
 
-### Auth Service Only
+### User Service Only
 
 ```bash
 cd gripday-user-service
@@ -241,7 +241,7 @@ docker compose up -d
 
 Services communicate using container names:
 
-- `auth-service:8080`
+- `user-service:8080`
 - `gateway-service:8080`
 - `postgres-auth:5432`
 - `redis:6379`
@@ -456,10 +456,10 @@ docker system prune -a
 
 ```bash
 # Build images
-docker build -t gripday/auth-service:${VERSION} -f gripday-user-service/Dockerfile .
+docker build -t gripday/user-service:${VERSION} -f gripday-user-service/Dockerfile .
 
 # Push to registry
-docker push gripday/auth-service:${VERSION}
+docker push gripday/user-service:${VERSION}
 
 # Deploy with specific version
 docker compose -f docker-compose.production.yml up -d

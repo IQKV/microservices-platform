@@ -3,7 +3,7 @@
     {
       "name": "gripday",
       "type": "org.gripday.authservice.config.GripdayProperties",
-      "description": "Configuration properties for Gripday Auth Service with gripday prefix"
+      "description": "Configuration properties for Gripday User Service with gripday prefix"
     },
     {
       "name": "gripday.database",

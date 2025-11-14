@@ -2,7 +2,7 @@
   "mappings": [
     {
       "id": "auth-health-check",
-      "name": "Auth Service Health Check",
+      "name": "User Service Health Check",
       "request": {
         "method": "GET",
         "urlPath": "/actuator/health"

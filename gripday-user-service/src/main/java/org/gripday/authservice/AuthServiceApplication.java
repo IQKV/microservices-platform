@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Main Spring Boot application class for Gripday Auth Service.
+ * Main Spring Boot application class for Gripday User Service.
  * <p>
  * This service provides centralized authentication, authorization, and user management for the Gripday microservices platform using JWT tokens and Spring Security.
  */

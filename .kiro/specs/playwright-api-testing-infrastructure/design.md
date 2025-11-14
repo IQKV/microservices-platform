@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design outlines a Playwright-based API testing infrastructure for the Gripday microservices platform. The solution provides end-to-end automated testing capabilities for all REST APIs across Auth Service, Gateway Service, and Bookstore Service, with support for authentication flows, multi-tenant scenarios, and reporting.
+This design outlines a Playwright-based API testing infrastructure for the Gripday microservices platform. The solution provides end-to-end automated testing capabilities for all REST APIs across User Service, Gateway Service, and Bookstore Service, with support for authentication flows, multi-tenant scenarios, and reporting.
 
 The testing infrastructure follows a modular, scalable architecture that integrates seamlessly with the existing Docker Compose development environment and CI/CD pipelines.
 
@@ -18,7 +18,7 @@ The testing infrastructure follows a modular, scalable architecture that integra
 ├─────────────────────────────────────────────────────────────────┤
 │                    Test Environment                             │
 ├─────────────────────────────────────────────────────────────────┤
-│  Gateway (8080) │ Auth Service (8080) │ Bookstore Service (8080) │
+│  Gateway (8080) │ User Service (8080) │ Bookstore Service (8080) │
 ├─────────────────────────────────────────────────────────────────┤
 │     PostgreSQL (Auth)  │  PostgreSQL (Bookstore)  │    Redis    │
 └─────────────────────────────────────────────────────────────────┘
@@ -51,7 +51,7 @@ e2e-tests/
 │   │   ├── test-context.ts           # Test context interfaces
 │   │   └── environment.ts            # Environment configuration types
 │   └── tests/
-│       ├── auth-service/
+│       ├── user-service/
 │       │   ├── authentication.spec.ts
 │       │   ├── user-management.spec.ts
 │       │   ├── email-verification.spec.ts
@@ -350,7 +350,7 @@ enum TestErrorType {
 
 ### Phase 2: Core Test Implementation
 
-- Auth Service API tests
+- User Service API tests
 - Gateway Service routing tests
 - Basic integration tests
 - Test data management

@@ -27,7 +27,7 @@ An extensible microservices platform built with Spring Boot 3.5.6, Spring Cloud 
 
 The Gripday platform consists of three services that demonstrate a complete microservices ecosystem:
 
-- **Auth Service** (Port 8080) - Centralized authentication, authorization, and user management with JWT tokens
+- **User Service** (Port 8080) - Centralized authentication, authorization, and user management with JWT tokens
 - **Gateway Service** (Port 8080) - Intelligent API gateway with routing, rate limiting, and circuit breaker functionality
 - **Bookstore Service** (Port 8080) - Example business service for book catalog and inventory management
 
@@ -81,7 +81,7 @@ cd gripday-bookstore-service && mvn spring-boot:run -Dspring-boot.run.profiles=l
 
 ```bash
 # Check service health
-curl http://localhost:8080/actuator/health  # Auth Service
+curl http://localhost:8080/actuator/health  # User Service
 curl http://localhost:8080/actuator/health  # Gateway Service
 curl http://localhost:8080/actuator/health  # Bookstore Service
 
@@ -118,7 +118,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ## Services
 
-### Auth Service (Port 8080)
+### User Service (Port 8080)
 
 Centralized authentication and user management service providing JWT-based authentication, user lifecycle management, role-based access control, and email verification for account activation.
 
@@ -137,7 +137,7 @@ Centralized authentication and user management service providing JWT-based authe
 
 **Documentation:**
 
-- [Auth Service README](gripday-user-service/README.md)
+- [User Service README](gripday-user-service/README.md)
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 ### Gateway Service (Port 8080)
@@ -180,7 +180,7 @@ Example business microservice demonstrating book catalog and inventory managemen
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Gateway Service │    │   Auth Service  │    │ Bookstore Service│
+│  Gateway Service │    │   User Service  │    │ Bookstore Service│
 │   (Port 8080)   │◄──►│   (Port 8080)   │    │   (Port 8080)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
@@ -256,7 +256,7 @@ curl -H "Authorization: Bearer <token>" \
 ### Key Configuration
 
 ```yaml
-# Auth Service
+# User Service
 gripday:
   auth:
     jwt:
@@ -285,7 +285,7 @@ gripday:
 # Gateway Service
 gripday:
   gateway:
-    auth-service-url: ${AUTH_SERVICE_URL:http://localhost:8080}
+    user-service-url: ${AUTH_SERVICE_URL:http://localhost:8080}
     rate-limiting:
       default-requests-per-minute: 100
     circuit-breaker:
@@ -318,7 +318,7 @@ See [Environment Variables Guide](docs/configuration/environment-variables.md) f
 docker compose up -d
 
 # View logs
-docker-compose logs -f auth-service
+docker-compose logs -f user-service
 docker-compose logs -f gateway-service
 docker-compose logs -f bookstore-service
 
@@ -359,7 +359,7 @@ mvn checkstyle:check
 
 ### Interactive Documentation
 
-- Auth Service: `http://localhost:8080/swagger-ui.html`
+- User Service: `http://localhost:8080/swagger-ui.html`
 - Gateway Service: `http://localhost:8080/swagger-ui.html`
 
 ### API Examples
@@ -518,7 +518,7 @@ spring:
 
 ### Service Integration Patterns
 
-- **Authentication**: Validate JWT tokens via Auth Service
+- **Authentication**: Validate JWT tokens via User Service
 - **User Context**: Extract user information from JWT claims
 - **Tenant Context**: Support multi-tenant data isolation
 - **Error Handling**: Consistent error response format
@@ -545,7 +545,7 @@ spring:
 
 ### Service Documentation
 
-- [Auth Service README](gripday-user-service/README.md) - Authentication service details
+- [User Service README](gripday-user-service/README.md) - Authentication service details
 - [Gateway Service README](gripday-gateway-service/README.md) - API gateway service details
 - [Bookstore Service README](gripday-bookstore-service/README.md) - Example business service implementation
 
@@ -566,7 +566,7 @@ See [Troubleshooting Guide](docs/troubleshooting/common-issues.md) for detailed 
 
 ```bash
 # Collect diagnostic information
-curl http://localhost:8080/actuator/info  # Auth Service
+curl http://localhost:8080/actuator/info  # User Service
 curl http://localhost:8080/actuator/info  # Gateway Service
 curl http://localhost:8080/actuator/info  # Bookstore Service
 
@@ -576,7 +576,7 @@ curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/health
 
 # View service logs
-docker-compose logs --tail=50 auth-service
+docker-compose logs --tail=50 user-service
 docker-compose logs --tail=50 gateway-service
 docker-compose logs --tail=50 bookstore-service
 ```

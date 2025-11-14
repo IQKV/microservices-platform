@@ -37,7 +37,7 @@ data:
   DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
 
 ---
-# PostgreSQL for Auth Service
+# PostgreSQL for User Service
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Gripday Auth Service now supports internationalization for emails and API responses. Users receive localized emails based on their preferred locale stored in the database.
+The Gripday User Service now supports internationalization for emails and API responses. Users receive localized emails based on their preferred locale stored in the database.
 
 ## Supported Locales
 

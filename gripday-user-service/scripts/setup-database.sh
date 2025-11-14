@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Database setup and migration script for Gripday Auth Service
+# Database setup and migration script for Gripday User Service
 # Handles database initialization, schema creation, and Liquibase migrations
 
 set -euo pipefail
@@ -267,7 +267,7 @@ display_database_info() {
 
 # Main execution
 main() {
-    log_info "Setting up Gripday Auth Service Database - $ENVIRONMENT Environment"
+    log_info "Setting up Gripday User Service Database - $ENVIRONMENT Environment"
     echo
     
     load_environment

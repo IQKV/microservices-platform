@@ -156,7 +156,7 @@
 
   - [x] 10.2 Verify platform integration
     - Test integration with Gateway Service routing for both bookstore and auth endpoints
-    - Verify JWT authentication flow with Auth Service through Gateway Service BFF
+    - Verify JWT authentication flow with User Service through Gateway Service BFF
     - Confirm unified API access pattern for React 19 frontend integration
     - Confirm observability stack integration (Prometheus, Grafana)
     - _Requirements: 4.1, 4.3, 5.2, 5.3_

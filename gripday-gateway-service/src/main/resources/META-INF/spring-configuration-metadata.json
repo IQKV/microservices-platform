@@ -233,7 +233,7 @@
       "defaultValue": true
     },
     {
-      "name": "gripday.gateway.security.authentication.auth-service-url",
+      "name": "gripday.gateway.security.authentication.user-service-url",
       "type": "java.lang.String",
       "description": "Authentication service URL for token validation",
       "sourceType": "org.gripday.gatewayservice.config.GripdayProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",

@@ -59,7 +59,7 @@ Routes automatically adapt to environment:
 
 ```yaml
 routes:
-  - id: auth-service
+  - id: user-service
     predicates:
       - Path=${gripday.gateway.routing.api-prefix.prefix}/v1/auth/**
 ```

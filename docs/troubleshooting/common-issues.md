@@ -4,7 +4,7 @@ This guide covers common issues and their solutions when working with the Gripda
 
 ## Service Startup Issues
 
-### Auth Service Won't Start
+### User Service Won't Start
 
 **Symptoms:**
 
@@ -64,23 +64,23 @@ mvn liquibase:update
 
 **Symptoms:**
 
-- Gateway service fails to connect to Auth Service
+- Gateway service fails to connect to User Service
 - Redis connection errors
 - Route configuration issues
 
 **Solutions:**
 
-1. **Auth Service Connectivity:**
+1. **User Service Connectivity:**
 
 ```bash
-# Verify Auth Service is running
+# Verify User Service is running
 curl http://localhost:8080/actuator/health
 
 # Check network connectivity
-docker-compose exec gateway-service ping auth-service
+docker-compose exec gateway-service ping user-service
 
 # Verify service discovery
-docker-compose logs gateway-service | grep "auth-service"
+docker-compose logs gateway-service | grep "user-service"
 ```
 
 2. **Redis Connection Issues:**
@@ -125,7 +125,7 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/auth/validat
 
 ```bash
 # Verify JWT secret is set
-docker-compose exec auth-service env | grep JWT_SECRET
+docker-compose exec user-service env | grep JWT_SECRET
 
 # Check if secrets match between services
 docker-compose exec gateway-service env | grep JWT_SECRET
@@ -259,7 +259,7 @@ curl http://localhost:8080/actuator/metrics/jvm.memory.used
 curl http://localhost:8080/actuator/metrics/jvm.gc.pause
 
 # Adjust JVM settings if needed
-JAVA_OPTS="-Xmx1g -Xms512m" docker compose up auth-service
+JAVA_OPTS="-Xmx1g -Xms512m" docker compose up user-service
 ```
 
 ### Rate Limiting Issues
@@ -330,7 +330,7 @@ curl http://localhost:9090/api/v1/targets
 curl http://localhost:8080/actuator/configprops | jq '.["management.tracing"]'
 
 # Verify trace export
-docker-compose logs auth-service | grep -i "trace"
+docker-compose logs user-service | grep -i "trace"
 ```
 
 ### Log Aggregation Issues
@@ -350,7 +350,7 @@ docker-compose logs auth-service | grep -i "trace"
 curl http://localhost:8080/actuator/loggers
 
 # Check log format
-docker-compose logs auth-service | head -5
+docker-compose logs user-service | head -5
 ```
 
 2. **Correlation ID Propagation:**
@@ -379,11 +379,11 @@ docker-compose logs gateway-service | grep -o "correlationId=[^,]*"
 docker-compose ps
 
 # Check container logs
-docker-compose logs auth-service
+docker-compose logs user-service
 docker-compose logs gateway-service
 
 # Inspect container details
-docker inspect gripday_auth-service_1
+docker inspect gripday_user-service_1
 ```
 
 2. **Network Issues:**
@@ -394,8 +394,8 @@ docker network ls
 docker network inspect gripday_default
 
 # Test container connectivity
-docker-compose exec gateway-service ping auth-service
-docker-compose exec auth-service ping postgres
+docker-compose exec gateway-service ping user-service
+docker-compose exec user-service ping postgres
 ```
 
 3. **Resource Constraints:**
@@ -406,7 +406,7 @@ docker stats
 
 # Increase memory limits if needed
 services:
-  auth-service:
+  user-service:
     deploy:
       resources:
         limits:
@@ -463,10 +463,10 @@ docker-compose exec -T postgres psql -U gripday gripday_auth < backup.sql
 ```bash
 # View pod details
 kubectl get pods -n gripday
-kubectl describe pod auth-service-xxx -n gripday
+kubectl describe pod user-service-xxx -n gripday
 
 # Check pod logs
-kubectl logs auth-service-xxx -n gripday
+kubectl logs user-service-xxx -n gripday
 kubectl logs gateway-service-xxx -n gripday
 ```
 
@@ -491,7 +491,7 @@ resources:
 
 ```bash
 # Verify image availability
-kubectl describe pod auth-service-xxx -n gripday | grep -A5 "Events:"
+kubectl describe pod user-service-xxx -n gripday | grep -A5 "Events:"
 
 # Check image pull secrets
 kubectl get secrets -n gripday
@@ -512,17 +512,17 @@ kubectl get secrets -n gripday
 ```bash
 # Verify services
 kubectl get services -n gripday
-kubectl describe service auth-service -n gripday
+kubectl describe service user-service -n gripday
 
 # Test service connectivity
-kubectl exec -it gateway-service-xxx -n gripday -- curl http://auth-service:8080/actuator/health
+kubectl exec -it gateway-service-xxx -n gripday -- curl http://user-service:8080/actuator/health
 ```
 
 2. **DNS Resolution:**
 
 ```bash
 # Test DNS from pod
-kubectl exec -it gateway-service-xxx -n gripday -- nslookup auth-service
+kubectl exec -it gateway-service-xxx -n gripday -- nslookup user-service
 
 # Check CoreDNS
 kubectl get pods -n kube-system | grep coredns
@@ -586,7 +586,7 @@ curl http://localhost:8080/actuator/info
 ```bash
 # Collect all service logs
 mkdir -p logs
-docker-compose logs auth-service > logs/auth-service.log
+docker-compose logs user-service > logs/user-service.log
 docker-compose logs gateway-service > logs/gateway-service.log
 docker-compose logs postgres > logs/postgres.log
 docker-compose logs redis > logs/redis.log

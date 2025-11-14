@@ -55,7 +55,7 @@ eval $(minikube docker-env)
 
 # Build all service images (from project root)
 cd ../..
-docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
+docker build -t gripday/user-service:latest -f gripday-user-service/Dockerfile .
 docker build -t gripday/gateway-service:latest -f gripday-gateway-service/Dockerfile .
 docker build -t gripday/bookstore-service:latest -f gripday-bookstore-service/Dockerfile .
 ```
@@ -78,12 +78,12 @@ kubectl apply -f all-in-one.yaml
 ```bash
 # Get service URLs
 minikube service gateway-service -n gripday --url
-minikube service auth-service -n gripday --url
+minikube service user-service -n gripday --url
 minikube service bookstore-service -n gripday --url
 
 # Or use port forwarding
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
-kubectl port-forward -n gripday svc/auth-service 8080:8080
+kubectl port-forward -n gripday svc/user-service 8080:8080
 kubectl port-forward -n gripday svc/bookstore-service 8080:8080
 ```
 
@@ -123,7 +123,7 @@ curl -X POST $GATEWAY_URL/api/v1/auth/login \
 │  │         Namespace: gripday                   │   │
 │  │                                               │   │
 │  │  ┌────────────────┐  ┌──────────────────┐  │   │
-│  │  │ Gateway Service│  │  Auth Service    │  │   │
+│  │  │ Gateway Service│  │  User Service    │  │   │
 │  │  │  NodePort      │  │  NodePort        │  │   │
 │  │  │  30080         │  │  30081           │  │   │
 │  │  └────────┬───────┘  └─────────┬────────┘  │   │
@@ -146,7 +146,7 @@ curl -X POST $GATEWAY_URL/api/v1/auth/login \
 ### Services
 
 - **Gateway Service** - Port 30080 (NodePort)
-- **Auth Service** - Port 30081 (NodePort)
+- **User Service** - Port 30081 (NodePort)
 - **Bookstore Service** - Port 30082 (NodePort)
 
 ### Databases
@@ -182,7 +182,7 @@ kubectl get all -n gripday
 kubectl logs -f deployment/gateway-service -n gripday
 
 # Auth service logs
-kubectl logs -f deployment/auth-service -n gripday
+kubectl logs -f deployment/user-service -n gripday
 
 # Bookstore service logs
 kubectl logs -f deployment/bookstore-service -n gripday
@@ -198,7 +198,7 @@ kubectl get pods -n gripday -w
 
 ```bash
 # Access auth service pod
-kubectl exec -it deployment/auth-service -n gripday -- sh
+kubectl exec -it deployment/user-service -n gripday -- sh
 
 # Access PostgreSQL
 kubectl exec -it deployment/postgres-auth -n gripday -- psql -U gripday_user -d gripday_auth
@@ -211,7 +211,7 @@ kubectl exec -it deployment/postgres-auth -n gripday -- psql -U gripday_user -d 
 kubectl scale deployment/gateway-service --replicas=2 -n gripday
 
 # Scale auth service
-kubectl scale deployment/auth-service --replicas=2 -n gripday
+kubectl scale deployment/user-service --replicas=2 -n gripday
 ```
 
 ### Delete Everything
@@ -273,7 +273,7 @@ kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
 ```bash
 # Port forward and test health endpoints
-kubectl port-forward -n gripday svc/auth-service 8080:8080 &
+kubectl port-forward -n gripday svc/user-service 8080:8080 &
 curl http://localhost:8080/actuator/health
 
 kubectl port-forward -n gripday svc/gateway-service 8080:8080 &
@@ -308,7 +308,7 @@ Application configuration is stored in ConfigMaps:
 kubectl edit configmap gripday-config -n gripday
 
 # Restart pods to apply changes
-kubectl rollout restart deployment/auth-service -n gripday
+kubectl rollout restart deployment/user-service -n gripday
 kubectl rollout restart deployment/gateway-service -n gripday
 kubectl rollout restart deployment/bookstore-service -n gripday
 ```
@@ -323,19 +323,19 @@ Edit your application code in the respective service directories.
 
 ```bash
 eval $(minikube docker-env)
-docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
+docker build -t gripday/user-service:latest -f gripday-user-service/Dockerfile .
 ```
 
 ### 3. Restart Deployments
 
 ```bash
-kubectl rollout restart deployment/auth-service -n gripday
+kubectl rollout restart deployment/user-service -n gripday
 ```
 
 ### 4. Watch Logs
 
 ```bash
-kubectl logs -f deployment/auth-service -n gripday
+kubectl logs -f deployment/user-service -n gripday
 ```
 
 ## Performance Tips

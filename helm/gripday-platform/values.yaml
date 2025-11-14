@@ -6,7 +6,7 @@ global:
   platform: gripday
 
 # Enable/disable individual services
-auth-service:
+user-service:
   enabled: true
   namespace:
     create: true

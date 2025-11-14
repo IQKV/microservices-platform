@@ -25,11 +25,11 @@ class ObservabilityConfigTest {
     var requestTimer = metrics.startRequestTimer();
     assertThat(requestTimer).isNotNull();
 
-    metrics.recordRequestSuccess(requestTimer, "auth-service");
-    assertThat(meterRegistry.counter("gripday.gateway.request.total", "result", "success", "route", "auth-service").count()).isEqualTo(1.0);
+    metrics.recordRequestSuccess(requestTimer, "user-service");
+    assertThat(meterRegistry.counter("gripday.gateway.request.total", "result", "success", "route", "user-service").count()).isEqualTo(1.0);
 
-    metrics.recordRequestFailure("auth-service", "timeout", 504);
-    assertThat(meterRegistry.counter("gripday.gateway.request.total", "result", "failure", "route", "auth-service", "reason", "timeout", "status", "504").count()).isEqualTo(1.0);
+    metrics.recordRequestFailure("user-service", "timeout", 504);
+    assertThat(meterRegistry.counter("gripday.gateway.request.total", "result", "failure", "route", "user-service", "reason", "timeout", "status", "504").count()).isEqualTo(1.0);
   }
 
   @Test
@@ -74,12 +74,12 @@ class ObservabilityConfigTest {
     var metrics = new ObservabilityConfig.GatewayServiceMetrics(meterRegistry);
 
     // When
-    metrics.recordCircuitBreakerOpen("auth-service");
-    metrics.recordCircuitBreakerClosed("auth-service");
+    metrics.recordCircuitBreakerOpen("user-service");
+    metrics.recordCircuitBreakerClosed("user-service");
 
     // Then
-    assertThat(meterRegistry.counter("gripday.gateway.circuitbreaker.open", "service", "auth-service").count()).isEqualTo(1.0);
-    assertThat(meterRegistry.counter("gripday.gateway.circuitbreaker.closed", "service", "auth-service").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.circuitbreaker.open", "service", "user-service").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.circuitbreaker.closed", "service", "user-service").count()).isEqualTo(1.0);
   }
 
   @Test
@@ -89,10 +89,10 @@ class ObservabilityConfigTest {
     var metrics = new ObservabilityConfig.GatewayServiceMetrics(meterRegistry);
 
     // When
-    metrics.recordRouteLatency("auth-service", 250L);
+    metrics.recordRouteLatency("user-service", 250L);
 
     // Then
-    var timer = meterRegistry.timer("gripday.gateway.route.latency", "route", "auth-service");
+    var timer = meterRegistry.timer("gripday.gateway.route.latency", "route", "user-service");
     assertThat(timer.count()).isEqualTo(1L);
   }
 
@@ -118,12 +118,12 @@ class ObservabilityConfigTest {
     var metrics = new ObservabilityConfig.GatewayServiceMetrics(meterRegistry);
 
     // When
-    metrics.recordTotalRequests("GET", "auth-service");
-    metrics.recordResponseStatus(200, "auth-service");
+    metrics.recordTotalRequests("GET", "user-service");
+    metrics.recordResponseStatus(200, "user-service");
 
     // Then
-    assertThat(meterRegistry.counter("gripday.gateway.requests.total", "method", "GET", "route", "auth-service").count()).isEqualTo(1.0);
-    assertThat(meterRegistry.counter("gripday.gateway.responses.total", "status_code", "200", "status_class", "2xx", "route", "auth-service").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.requests.total", "method", "GET", "route", "user-service").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.responses.total", "status_code", "200", "status_class", "2xx", "route", "user-service").count()).isEqualTo(1.0);
   }
 
   @Test
@@ -180,12 +180,12 @@ class ObservabilityConfigTest {
     var metrics = new ObservabilityConfig.GatewayServiceMetrics(meterRegistry);
 
     // When
-    metrics.recordLoadBalancingDecision("auth-service", "instance-1");
-    metrics.recordHealthCheckResult("auth-service", true);
+    metrics.recordLoadBalancingDecision("user-service", "instance-1");
+    metrics.recordHealthCheckResult("user-service", true);
 
     // Then
-    assertThat(meterRegistry.counter("gripday.gateway.loadbalancing.decisions", "service", "auth-service", "instance", "instance-1").count()).isEqualTo(1.0);
-    assertThat(meterRegistry.counter("gripday.gateway.healthcheck.results", "service", "auth-service", "result", "healthy").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.loadbalancing.decisions", "service", "user-service", "instance", "instance-1").count()).isEqualTo(1.0);
+    assertThat(meterRegistry.counter("gripday.gateway.healthcheck.results", "service", "user-service", "result", "healthy").count()).isEqualTo(1.0);
   }
 
   @Test

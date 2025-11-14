@@ -18,7 +18,7 @@ Use [External Secrets Operator](https://external-secrets.io/) with a secrets man
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: auth-service-secrets
+  name: user-service-secrets
   namespace: gripday-dev-env
 spec:
   refreshInterval: 1h
@@ -26,7 +26,7 @@ spec:
     name: vault-backend
     kind: SecretStore
   target:
-    name: auth-service-secrets
+    name: user-service-secrets
     creationPolicy: Owner
   data:
     - secretKey: GRIPDAY_DATABASE_PASSWORD
@@ -56,13 +56,13 @@ Use [Bitnami Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) for
 kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml
 
 # Create a sealed secret
-kubectl create secret generic auth-service-secrets \
+kubectl create secret generic user-service-secrets \
   --from-literal=GRIPDAY_DATABASE_PASSWORD=mypassword \
   --dry-run=client -o yaml | \
-  kubeseal -o yaml > auth-service-sealed-secret.yaml
+  kubeseal -o yaml > user-service-sealed-secret.yaml
 
 # Commit the sealed secret to Git (safe!)
-git add auth-service-sealed-secret.yaml
+git add user-service-sealed-secret.yaml
 ```
 
 ### 3. Kubernetes Native Secrets with RBAC
@@ -71,12 +71,12 @@ For simpler deployments, use native Kubernetes secrets with strict RBAC:
 
 ```bash
 # Create secret from file (never commit the file)
-kubectl create secret generic auth-service-secrets \
+kubectl create secret generic user-service-secrets \
   --from-env-file=.env.production \
   --namespace=gripday-auth
 
 # Or from literals
-kubectl create secret generic auth-service-secrets \
+kubectl create secret generic user-service-secrets \
   --from-literal=GRIPDAY_DATABASE_PASSWORD=$(openssl rand -base64 32) \
   --from-literal=GRIPDAY_AUTH_JWT_SECRET=$(openssl rand -base64 64) \
   --namespace=gripday-auth
@@ -150,17 +150,17 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    resourceNames: ["auth-service-secrets"]
+    resourceNames: ["user-service-secrets"]
     verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: auth-service-secret-reader
+  name: user-service-secret-reader
   namespace: gripday-dev-env
 subjects:
   - kind: ServiceAccount
-    name: auth-service-sa
+    name: user-service-sa
     namespace: gripday-dev-env
 roleRef:
   kind: Role

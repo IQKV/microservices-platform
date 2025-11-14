@@ -134,8 +134,8 @@ export default defineConfig({
     },
 
     {
-      name: "auth-service",
-      testDir: "./src/tests/auth-service",
+      name: "user-service",
+      testDir: "./src/tests/user-service",
       use: {
         ...devices["Desktop Chrome"],
         headless: true,

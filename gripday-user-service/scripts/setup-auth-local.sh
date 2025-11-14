@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup script for Gripday Auth Service - Local Development Environment
+# Setup script for Gripday User Service - Local Development Environment
 # This script sets up the local development environment for the auth service
 
 set -euo pipefail
@@ -172,7 +172,7 @@ display_setup_info() {
     echo
     log_info "Environment Details:"
     echo "  - Profile: local"
-    echo "  - Auth Service Port: 8080"
+    echo "  - User Service Port: 8080"
     echo "  - PostgreSQL Port: 5432"
     echo "  - Redis Port: 6379"
     echo "  - Environment File: $ENV_FILE"
@@ -190,7 +190,7 @@ display_setup_info() {
 
 # Main execution
 main() {
-    log_info "Setting up Gripday Auth Service - Local Development Environment"
+    log_info "Setting up Gripday User Service - Local Development Environment"
     echo
     
     check_prerequisites

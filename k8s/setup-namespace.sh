@@ -115,9 +115,9 @@ setup_environment_namespaces() {
     
     # Auth service namespaces
     if [[ "$env" == "local" ]]; then
-        execute_kubectl "apply -f auth-service/namespace.yaml"
+        execute_kubectl "apply -f user-service/namespace.yaml"
     else
-        execute_kubectl "apply -f auth-service/namespace.yaml"
+        execute_kubectl "apply -f user-service/namespace.yaml"
     fi
     
     # Gateway service namespaces

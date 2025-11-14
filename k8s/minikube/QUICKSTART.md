@@ -119,7 +119,7 @@ kubectl get pods -n gripday -w
 
 # View logs
 kubectl logs -f deployment/gateway-service -n gripday
-kubectl logs -f deployment/auth-service -n gripday
+kubectl logs -f deployment/user-service -n gripday
 
 # Check all resources
 kubectl get all -n gripday
@@ -165,8 +165,8 @@ If NodePort doesn't work, use port forwarding:
 # Gateway Service
 kubectl port-forward -n gripday svc/gateway-service 8080:8080
 
-# Auth Service
-kubectl port-forward -n gripday svc/auth-service 8080:8080
+# User Service
+kubectl port-forward -n gripday svc/user-service 8080:8080
 
 # Bookstore Service
 kubectl port-forward -n gripday svc/bookstore-service 8080:8080
@@ -192,7 +192,7 @@ kubectl exec -it deployment/redis -n gripday -- redis-cli
 kubectl scale deployment/gateway-service --replicas=2 -n gripday
 
 # Scale auth service to 2 replicas
-kubectl scale deployment/auth-service --replicas=2 -n gripday
+kubectl scale deployment/user-service --replicas=2 -n gripday
 ```
 
 ### View Resource Usage
@@ -246,7 +246,7 @@ If images aren't available:
 
 2. Or pull from a registry (if available):
    ```bash
-   docker pull gripday/auth-service:latest
+   docker pull gripday/user-service:latest
    docker pull gripday/gateway-service:latest
    docker pull gripday/bookstore-service:latest
    ```
@@ -276,7 +276,7 @@ For complete documentation, see [README.md](README.md)
 ## 🎯 What's Deployed?
 
 - **Gateway Service** - API Gateway with routing, rate limiting
-- **Auth Service** - Authentication & user management
+- **User Service** - Authentication & user management
 - **Bookstore Service** - Example business service
 - **PostgreSQL** - Two databases (auth & bookstore)
 - **Redis** - Caching and session storage
@@ -310,7 +310,7 @@ All services are configured with:
 
 4. **Quick restart** after code changes:
    ```bash
-   kubectl rollout restart deployment/auth-service -n gripday
+   kubectl rollout restart deployment/user-service -n gripday
    ```
 
 ## 🆘 Need Help?

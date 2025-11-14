@@ -9,7 +9,7 @@ API Gateway providing intelligent routing, JWT authentication, rate limiting, an
 - Java 21
 - Docker and Docker Compose
 - Redis 7+
-- Auth Service running
+- User Service running
 
 ### Local Development Setup
 
@@ -20,7 +20,7 @@ cd gripday-gateway-service
 docker compose up -d redis
 ```
 
-2. **Ensure Auth Service is running:**
+2. **Ensure User Service is running:**
 
 ```bash
 # Auth service should be available at http://localhost:8080
@@ -71,7 +71,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users
 
 ### Authentication Flow
 
-1. **Obtain JWT token from Auth Service:**
+1. **Obtain JWT token from User Service:**
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -139,7 +139,7 @@ HTTP/1.1 503 Service Unavailable
   "error": {
     "code": "SERVICE_UNAVAILABLE",
     "message": "Service temporarily unavailable",
-    "details": "Circuit breaker is open for auth-service"
+    "details": "Circuit breaker is open for user-service"
   }
 }
 ```
@@ -157,7 +157,7 @@ GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 GRIPDAY_CACHE_REDIS_HOST=localhost
 GRIPDAY_CACHE_REDIS_PORT=6379
 
-# Auth Service
+# User Service
 GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://localhost:8080
 
 # Rate Limiting
@@ -181,7 +181,7 @@ Configure backend service routes in `application-local.yml`:
 gripday:
   gateway:
     routes:
-      - id: auth-service
+      - id: user-service
         uri: http://localhost:8080
         predicates:
           - Path=/api/v1/auth/**
@@ -226,7 +226,7 @@ docker-compose down
 
 - Verify JWT token is valid and not expired
 - Check Authorization header format: `Bearer <token>`
-- Ensure Auth Service is accessible
+- Ensure User Service is accessible
 
 **Rate Limit Exceeded (429)**
 

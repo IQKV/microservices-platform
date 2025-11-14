@@ -132,7 +132,7 @@ show_logs() {
     log "INFO" "Showing service logs..."
     
     echo
-    echo "=== Auth Service Logs ==="
+    echo "=== User Service Logs ==="
     $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 gripday-user-service
     
     echo

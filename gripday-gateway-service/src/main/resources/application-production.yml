@@ -24,17 +24,17 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth-service
-          uri: ${gripday.gateway.routing.services.auth-service.uri}
+        - id: user-service
+          uri: ${gripday.gateway.routing.services.user-service.uri}
           predicates:
-            - Path=${gripday.gateway.routing.services.auth-service.path}
+            - Path=${gripday.gateway.routing.services.user-service.path}
           filters:
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${gripday.gateway.rate-limiting.policies.default-burst-capacity}
         - id: health-check
-          uri: ${gripday.gateway.routing.services.auth-service.uri}
+          uri: ${gripday.gateway.routing.services.user-service.uri}
           predicates:
             - Path=/actuator/health
           filters:
@@ -71,7 +71,7 @@ gripday:
         prefix: ""  # No prefix in production (api.gripday.com already indicates API)
         strip-count: 0  # No stripping needed when prefix is empty
       services:
-        auth-service:
+        user-service:
           uri: ${GRIPDAY_GATEWAY_ROUTING_AUTH_SERVICE_URI}
           path: /v1/auth/**
           enabled: true
@@ -93,7 +93,7 @@ gripday:
         algorithm: HS256
       authentication:
         enabled: true
-        auth-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL}
+        user-service-url: ${GRIPDAY_GATEWAY_SECURITY_AUTH_SERVICE_URL}
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:

@@ -274,8 +274,8 @@ Deploys entire platform in < 5 minutes with full automation.
 
 1. Make code changes
 2. Rebuild image: `eval $(minikube docker-env) && docker build ...`
-3. Restart deployment: `kubectl rollout restart deployment/auth-service -n gripday`
-4. View logs: `kubectl logs -f deployment/auth-service -n gripday`
+3. Restart deployment: `kubectl rollout restart deployment/user-service -n gripday`
+4. View logs: `kubectl logs -f deployment/user-service -n gripday`
 5. Test changes
 6. Iterate
 

@@ -157,7 +157,7 @@ public class HealthCheckConfig {
           return Health.up()
               .withDetail("circuitBreaker", "Enabled")
               .withDetail("status", "Monitoring downstream services")
-              .withDetail("services", "auth-service")
+              .withDetail("services", "user-service")
               .build();
         } else {
           return Health.down()

@@ -57,7 +57,7 @@ class StructuredLoggingConfigTest {
     var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
-    logger.logGatewayRequest("GET", "/api/v1/auth/login", "auth-service", "192.168.1.1", "Mozilla/5.0", "tenant-123");
+    logger.logGatewayRequest("GET", "/api/v1/auth/login", "user-service", "192.168.1.1", "Mozilla/5.0", "tenant-123");
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("event")).isNull();
@@ -72,7 +72,7 @@ class StructuredLoggingConfigTest {
     var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
-    logger.logGatewayResponse("GET", "/api/v1/auth/login", "auth-service", 200, 150L, "success");
+    logger.logGatewayResponse("GET", "/api/v1/auth/login", "user-service", 200, 150L, "success");
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("event")).isNull();
@@ -86,7 +86,7 @@ class StructuredLoggingConfigTest {
     var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
-    logger.logAuthenticationEvent("testuser", "success", null, "auth-service");
+    logger.logAuthenticationEvent("testuser", "success", null, "user-service");
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("event")).isNull();
@@ -114,7 +114,7 @@ class StructuredLoggingConfigTest {
     var logger = new StructuredLoggingConfig.StructuredLogger();
 
     // When - Should not throw exceptions
-    logger.logCircuitBreakerEvent("auth-service", "open", "failure_rate_exceeded");
+    logger.logCircuitBreakerEvent("user-service", "open", "failure_rate_exceeded");
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("event")).isNull();
@@ -144,7 +144,7 @@ class StructuredLoggingConfigTest {
     var headers = Map.of("X-Forwarded-For", "192.168.1.1");
 
     // When - Should not throw exceptions
-    requestLogger.logOutgoingRequest("corr-123", "POST", "http://auth-service:8080/api/v1/auth/login", "auth-service", headers);
+    requestLogger.logOutgoingRequest("corr-123", "POST", "http://user-service:8080/api/v1/auth/login", "user-service", headers);
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("requestType")).isNull();
@@ -173,7 +173,7 @@ class StructuredLoggingConfigTest {
     var performanceLogger = new StructuredLoggingConfig.PerformanceLogger();
 
     // When - Should not throw exceptions
-    performanceLogger.logSlowRequest("GET", "/api/v1/auth/login", "auth-service", 5000L, "downstream_timeout");
+    performanceLogger.logSlowRequest("GET", "/api/v1/auth/login", "user-service", 5000L, "downstream_timeout");
 
     // Then - MDC should be cleaned up after logging
     assertThat(MDC.get("performanceEvent")).isNull();

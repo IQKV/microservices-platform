@@ -161,7 +161,7 @@ gripday:
       include-environment-tag: true
       custom-tags:
         environment: local
-        service: auth-service
+        service: user-service
     logging:
       level: DEBUG  # Verbose logging for development
       format: console  # Human-readable format

@@ -85,7 +85,7 @@ private static final String FIND_USERS_QUERY = """
 
 ### JWT-Based Authentication
 
-- Centralized authentication through Auth Service
+- Centralized authentication through User Service
 - JWT tokens carry user context across all microservices
 - User context propagation via standardized JWT claims
 - Role-based access control (RBAC) enforcement
@@ -230,7 +230,7 @@ public record UserContext(
 - Circuit breaker patterns with Resilience4j
 - CORS handling and request/response transformation
 
-### Auth Service Responsibilities
+### User Service Responsibilities
 
 - Centralized authentication and authorization for all microservices
 - JWT token generation and validation

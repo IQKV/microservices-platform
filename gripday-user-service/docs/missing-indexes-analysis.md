@@ -1,4 +1,4 @@
-# Auth Service - Missing Critical Indexes Analysis
+# User Service - Missing Critical Indexes Analysis
 
 ## Executive Summary
 

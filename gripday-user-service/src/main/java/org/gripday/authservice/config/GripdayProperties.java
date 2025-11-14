@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Configuration properties for Gripday Auth Service. All custom configuration properties use the 'gripday.' prefix for clear namespace separation.
+ * Configuration properties for Gripday User Service. All custom configuration properties use the 'gripday.' prefix for clear namespace separation.
  */
 @ConfigurationProperties(prefix = "gripday")
 @Validated

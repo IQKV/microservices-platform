@@ -1,4 +1,4 @@
-# Auth Service Database Index Coverage Diagram
+# User Service Database Index Coverage Diagram
 
 ## Table-by-Table Index Coverage
 

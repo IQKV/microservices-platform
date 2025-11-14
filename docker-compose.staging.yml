@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service - Staging
+  # PostgreSQL Database for User Service - Staging
   postgres-auth:
     environment:
       POSTGRES_DB: gripday_auth_staging
@@ -30,8 +30,8 @@ services:
           cpus: "0.1"
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
-  # Auth Service - Staging
-  auth-service:
+  # User Service - Staging
+  user-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/gripday_auth_staging
@@ -58,7 +58,7 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://auth-service:8080
+      GRIPDAY_GATEWAY_AUTH_SERVICE_URL: http://user-service:8080
       GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
       JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
     deploy:

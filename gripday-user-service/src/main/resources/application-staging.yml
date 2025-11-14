@@ -161,7 +161,7 @@ gripday:
       include-environment-tag: true
       custom-tags:
         environment: staging
-        service: auth-service
+        service: user-service
     logging:
       level: INFO
       format: json  # JSON format for staging

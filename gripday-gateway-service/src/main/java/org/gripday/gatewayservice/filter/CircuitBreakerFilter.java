@@ -67,7 +67,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
   private String determineCircuitBreakerName(String path) {
     // Map paths to specific circuit breakers
     if (path.startsWith("/api/v1/auth/")) {
-      return "auth-service";
+      return "user-service";
     }
 
     // Default circuit breaker for unknown services

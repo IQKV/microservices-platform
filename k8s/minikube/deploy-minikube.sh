@@ -134,12 +134,12 @@ if [ "$BUILD_IMAGES" = true ]; then
     
     cd "$PROJECT_ROOT"
     
-    # Build Auth Service
-    print_info "Building Auth Service..."
-    if docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile . ; then
-        print_status "Auth Service image built"
+    # Build User Service
+    print_info "Building User Service..."
+    if docker build -t gripday/user-service:latest -f gripday-user-service/Dockerfile . ; then
+        print_status "User Service image built"
     else
-        print_error "Failed to build Auth Service image"
+        print_error "Failed to build User Service image"
         exit 1
     fi
     
@@ -202,7 +202,7 @@ if [ "$WAIT_FOR_READY" = true ]; then
     kubectl wait --for=condition=ready pod -l app=redis -n gripday --timeout=300s || print_warning "Redis not ready"
     
     print_info "Waiting for microservices..."
-    kubectl wait --for=condition=ready pod -l app=auth-service -n gripday --timeout=300s || print_warning "Auth Service not ready"
+    kubectl wait --for=condition=ready pod -l app=user-service -n gripday --timeout=300s || print_warning "User Service not ready"
     kubectl wait --for=condition=ready pod -l app=bookstore-service -n gripday --timeout=300s || print_warning "Bookstore Service not ready"
     kubectl wait --for=condition=ready pod -l app=gateway-service -n gripday --timeout=300s || print_warning "Gateway Service not ready"
     
@@ -228,14 +228,14 @@ BOOKSTORE_URL="http://${MINIKUBE_IP}:30082"
 echo ""
 echo -e "${CYAN}=== NodePort Access (Direct) ===${NC}"
 echo -e "${GREEN}Gateway Service:${NC}   $GATEWAY_URL"
-echo -e "${GREEN}Auth Service:${NC}      $AUTH_URL"
+echo -e "${GREEN}User Service:${NC}      $AUTH_URL"
 echo -e "${GREEN}Bookstore Service:${NC} $BOOKSTORE_URL"
 echo ""
 
 if minikube addons list | grep -q "ingress.*enabled"; then
     echo -e "${CYAN}=== Ingress Access (Production-like) ===${NC}"
     echo -e "${GREEN}API Gateway:${NC}       http://api.gripday.site"
-    echo -e "${GREEN}Auth Service:${NC}      http://auth.gripday.site (debugging)"
+    echo -e "${GREEN}User Service:${NC}      http://auth.gripday.site (debugging)"
     echo -e "${GREEN}Bookstore Service:${NC} http://bookstore.gripday.site (debugging)"
     echo ""
     echo -e "${YELLOW}Note:${NC} Add these to /etc/hosts:"

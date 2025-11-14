@@ -169,7 +169,7 @@ display_setup_info() {
     echo "  - Rebuild: mvn clean package"
     echo
     log_info "Service Dependencies:"
-    echo "  - Auth Service: http://localhost:8080"
+    echo "  - User Service: http://localhost:8080"
     echo "  - Redis: localhost:6379"
 }
 

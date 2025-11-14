@@ -442,7 +442,7 @@ The following features can be implemented after the core MVP is complete:
     - Implement Docker Compose override files for different deployment scenarios per service
     - Add environment variable injection and validation for individual containerized deployments
     - Create POSIX shell scripts for individual service environment setup (setup-auth-local.sh, setup-gateway-local.sh)
-    - Implement service-specific health check scripts (wait-for-auth-service.sh, wait-for-gateway-service.sh) for POSIX systems
+    - Implement service-specific health check scripts (wait-for-user-service.sh, wait-for-gateway-service.sh) for POSIX systems
     - Create environment variable loading and validation scripts per service (load-auth-env.sh, load-gateway-env.sh)
     - Implement Maven build scripts (build-auth.sh, build-gateway.sh) with service-specific configurations
     - Add deployment automation scripts for individual services in Unix/Mac environments
@@ -522,7 +522,7 @@ The following features can be implemented after the core MVP is complete:
     - _Requirements: 2.5, 7.1, 7.2, 7.4_
 
   - [x] 10.5 Create POSIX automation scripts for individual service deployment
-    - Create scripts/start-auth-service.sh and scripts/stop-auth-service.sh for auth service management
+    - Create scripts/start-user-service.sh and scripts/stop-user-service.sh for auth service management
     - Create scripts/start-gateway-service.sh and scripts/stop-gateway-service.sh for gateway service management
     - Implement scripts/deploy-auth-staging.sh and scripts/deploy-auth-production.sh for auth service deployment
     - Implement scripts/deploy-gateway-staging.sh and scripts/deploy-gateway-production.sh for gateway service deployment
@@ -576,13 +576,13 @@ The following features can be implemented after the core MVP is complete:
 
 - [-] 12. Create Kubernetes deployment configurations
   - [x] 12.1 Create Kubernetes manifests for auth service
-    - Create auth-service-deployment.yaml with container specifications and environment variables
-    - Create auth-service-service.yaml for internal service discovery
+    - Create user-service-deployment.yaml with container specifications and environment variables
+    - Create user-service-service.yaml for internal service discovery
     - Create auth-postgres-deployment.yaml and auth-postgres-service.yaml for database
     - Create auth-redis-deployment.yaml and auth-redis-service.yaml for caching
     - Configure Kubernetes ConfigMaps for environment-specific configuration
     - Add Kubernetes Secrets for sensitive data (database passwords, JWT secrets)
-    - Create auth-service-ingress.yaml for external access if needed
+    - Create user-service-ingress.yaml for external access if needed
     - _Requirements: 2.1, 2.2, 8.1, 8.2, 24.1, 24.2_
 
   - [x] 12.2 Create Kubernetes manifests for gateway service

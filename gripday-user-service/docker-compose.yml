@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service - Local Development
+  # PostgreSQL Database for User Service - Local Development
   postgres-auth:
     image: postgres:15-alpine
     container_name: gripday-auth-postgres-local
@@ -43,7 +43,7 @@ services:
       -c min_wal_size=1GB
       -c max_wal_size=4GB
 
-  # Redis for Auth Service - Local Development
+  # Redis for User Service - Local Development
   redis-auth:
     image: redis:7-alpine
     container_name: gripday-auth-redis-local
@@ -71,13 +71,13 @@ services:
       --save 300 10
       --save 60 10000
 
-  # Auth Service - Local Development
-  auth-service:
+  # User Service - Local Development
+  user-service:
     build:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
       target: builder
-    image: gripday/auth-service:local
+    image: gripday/user-service:local
     container_name: gripday-user-service-local
     environment:
       # Spring Configuration

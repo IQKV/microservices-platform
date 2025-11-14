@@ -7,7 +7,7 @@
 
 **Before**:
 ```java
-.route("auth-service", r -> r
+.route("user-service", r -> r
     .path("/api/v1/auth/**")  // Only routed auth endpoints
     ...
 )
@@ -15,14 +15,14 @@
 
 **After**:
 ```java
-.route("auth-service", r -> r
+.route("user-service", r -> r
     .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/users/**", 
           "/api/v1/organizations/**", "/api/v1/admin/**")
     ...
 )
 ```
 
-**Impact**: All 7 auth-service endpoint groups are now accessible through the gateway.
+**Impact**: All 7 user-service endpoint groups are now accessible through the gateway.
 
 ---
 
@@ -235,7 +235,7 @@ git checkout HEAD~1 -- gripday-gateway-service/src/main/resources/application-lo
 
 Or restore the original single-path route:
 ```java
-.route("auth-service", r -> r
+.route("user-service", r -> r
     .path("/api/v1/auth/**")
     ...
 )

@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
     info = @Info(
-        title = "Gripday Auth Service API",
+        title = "Gripday User Service API",
         version = "1.0.0",
         description = """
             Centralized authentication and user management service for the Gripday microservices platform.
@@ -190,7 +190,7 @@ public class OpenApiConfig {
   private OpenApiCustomizer publicApiCustomizer() {
     return openApi -> {
       openApi.info(openApi.getInfo()
-          .title("Gripday Auth Service - Public APIs")
+          .title("Gripday User Service - Public APIs")
           .description("All public-facing APIs for authentication and user management"));
 
       addCommonResponses(openApi);

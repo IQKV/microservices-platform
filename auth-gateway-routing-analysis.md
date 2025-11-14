@@ -1,4 +1,4 @@
-# Auth Service Gateway Routing Analysis
+# User Service Gateway Routing Analysis
 
 ## Executive Summary
 
@@ -8,7 +8,7 @@ The gateway currently only routes `/api/v1/auth/**` paths, but user-service expo
 
 ---
 
-## Auth Service REST Endpoints Inventory
+## User Service REST Endpoints Inventory
 
 ### 1. Authentication Endpoints ✅ ROUTED
 **Base Path**: `/api/v1/auth`  

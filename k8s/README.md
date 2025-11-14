@@ -11,7 +11,7 @@ k8s/
 │   ├── QUICKSTART.md     # 3-step quick start guide
 │   ├── all-in-one.yaml   # Deploy entire platform
 │   └── deploy-*.sh/ps1   # Automated deployment scripts
-├── auth-service/          # Auth service production manifests
+├── user-service/          # Auth service production manifests
 ├── gateway-service/       # Gateway service production manifests
 ├── bookstore-service/     # Bookstore service production manifests
 └── scripts/              # Deployment automation scripts
@@ -51,7 +51,7 @@ cd minikube
 
 ```bash
 # Deploy specific service
-cd auth-service
+cd user-service
 kubectl apply -f .
 
 # Or use deployment scripts
@@ -71,7 +71,7 @@ cd ..
 
 **Read More:**
 
-- [auth-service/README.md](auth-service/README.md)
+- [user-service/README.md](user-service/README.md)
 - [gateway-service/README.md](gateway-service/README.md)
 - [bookstore-service/README.md](bookstore-service/README.md)
 
@@ -136,7 +136,7 @@ cd ..
    ./health-check.sh
    ```
 
-**Complete guide:** [auth-service/README.md](auth-service/README.md)
+**Complete guide:** [user-service/README.md](user-service/README.md)
 
 ## 📊 Comparison
 
@@ -164,7 +164,7 @@ cd ..
 
 ### Service Documentation
 
-- [Auth Service Deployment](auth-service/README.md)
+- [User Service Deployment](user-service/README.md)
 - [Gateway Service Deployment](gateway-service/README.md)
 - [Bookstore Service Deployment](bookstore-service/README.md)
 
@@ -365,7 +365,7 @@ See [minikube/README.md#troubleshooting](minikube/README.md#troubleshooting)
 
 See service-specific READMEs:
 
-- [Auth Service Troubleshooting](auth-service/README.md#troubleshooting)
+- [User Service Troubleshooting](user-service/README.md#troubleshooting)
 - [Gateway Service Troubleshooting](gateway-service/README.md#troubleshooting)
 
 ### Common Issues
@@ -394,7 +394,7 @@ See service-specific READMEs:
 
 ### Production Deployment
 
-1. Review [auth-service/README.md](auth-service/README.md)
+1. Review [user-service/README.md](user-service/README.md)
 2. Set up infrastructure (cluster, storage, ingress)
 3. Configure secrets
 4. Run `./deploy-production.sh`

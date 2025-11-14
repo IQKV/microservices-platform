@@ -21,7 +21,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 import org.springframework.session.web.context.AbstractHttpSessionApplicationInitializer;
 
 /**
- * Redis configuration for Auth Service with tenant-aware caching and session management. Configures Redis connection, serialization, tenant-isolated caching, and session storage.
+ * Redis configuration for User Service with tenant-aware caching and session management. Configures Redis connection, serialization, tenant-isolated caching, and session storage.
  */
 @Configuration
 @EnableCaching

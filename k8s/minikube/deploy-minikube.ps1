@@ -117,13 +117,13 @@ if ($Build) {
     
     Push-Location $PROJECT_ROOT
     
-    # Build Auth Service
-    Write-Info "Building Auth Service..."
-    docker build -t gripday/auth-service:latest -f gripday-user-service/Dockerfile .
+    # Build User Service
+    Write-Info "Building User Service..."
+    docker build -t gripday/user-service:latest -f gripday-user-service/Dockerfile .
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "Auth Service image built"
+        Write-Success "User Service image built"
     } else {
-        Write-Error "Failed to build Auth Service image"
+        Write-Error "Failed to build User Service image"
         Pop-Location
         exit 1
     }
@@ -181,8 +181,8 @@ if (-not $NoWait) {
     if ($LASTEXITCODE -ne 0) { Write-Warn "Redis not ready" }
     
     Write-Info "Waiting for microservices..."
-    kubectl wait --for=condition=ready pod -l app=auth-service -n gripday --timeout=300s 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Warn "Auth Service not ready" }
+    kubectl wait --for=condition=ready pod -l app=user-service -n gripday --timeout=300s 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Warn "User Service not ready" }
     
     kubectl wait --for=condition=ready pod -l app=bookstore-service -n gripday --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Warn "Bookstore Service not ready" }
@@ -212,7 +212,7 @@ $BOOKSTORE_URL = "http://${MINIKUBE_IP}:30082"
 Write-Host ""
 Write-Host "Gateway Service:   " -NoNewline -ForegroundColor Green
 Write-Host $GATEWAY_URL
-Write-Host "Auth Service:      " -NoNewline -ForegroundColor Green
+Write-Host "User Service:      " -NoNewline -ForegroundColor Green
 Write-Host $AUTH_URL
 Write-Host "Bookstore Service: " -NoNewline -ForegroundColor Green
 Write-Host $BOOKSTORE_URL

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Environment variable loading and validation script for Gripday Auth Service
+# Environment variable loading and validation script for Gripday User Service
 # Loads and validates environment variables for different deployment environments
 
 set -euo pipefail
@@ -227,7 +227,7 @@ export_variables() {
 
 # Main execution
 main() {
-    log_info "Loading Gripday Auth Service environment: $ENVIRONMENT"
+    log_info "Loading Gripday User Service environment: $ENVIRONMENT"
     echo
     
     load_environment_file

@@ -99,7 +99,7 @@ MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED=true
 MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
 ```
 
-## Auth Service Configuration
+## User Service Configuration
 
 ### Local Development (.env.local)
 
@@ -294,8 +294,8 @@ GRIPDAY_GATEWAY_SERVICE_VERSION=1.0.0
 SERVER_PORT=8080
 
 # Gateway Routes
-GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://auth-service-staging:8080
-GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://auth-service-staging:8080
+GRIPDAY_GATEWAY_AUTH_SERVICE_URL=http://user-service-staging:8080
+GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI=http://user-service-staging:8080
 
 # Redis
 GRIPDAY_CACHE_REDIS_HOST=redis-staging
@@ -382,7 +382,7 @@ MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,gateway
 
 ## YAML Configuration Examples
 
-### Auth Service - application-local.yml
+### User Service - application-local.yml
 
 ```yaml
 gripday:
@@ -481,7 +481,7 @@ gripday:
     service:
       name: gripday-gateway-service
       version: 1.0.0
-    auth-service-url: ${GRIPDAY_GATEWAY_AUTH_SERVICE_URL:http://localhost:8080}
+    user-service-url: ${GRIPDAY_GATEWAY_AUTH_SERVICE_URL:http://localhost:8080}
     rate-limiting:
       default-requests-per-minute: ${GRIPDAY_GATEWAY_RATE_LIMITING_DEFAULT_REQUESTS_PER_MINUTE:100}
       burst-capacity: ${GRIPDAY_GATEWAY_RATE_LIMITING_BURST_CAPACITY:20}
@@ -496,7 +496,7 @@ gripday:
       allowed-headers: ${GRIPDAY_GATEWAY_CORS_ALLOWED_HEADERS:*}
       allow-credentials: ${GRIPDAY_GATEWAY_CORS_ALLOW_CREDENTIALS:true}
     routes:
-      auth-service:
+      user-service:
         uri: ${GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_URI:http://localhost:8080}
         predicates: ${GRIPDAY_GATEWAY_ROUTES_AUTH_SERVICE_PREDICATES:Path=/api/v1/auth/**}
   cache:
@@ -523,8 +523,8 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth-service
-          uri: ${gripday.gateway.routes.auth-service.uri}
+        - id: user-service
+          uri: ${gripday.gateway.routes.user-service.uri}
           predicates:
             - Path=/api/v1/auth/**
           filters:
@@ -566,7 +566,7 @@ management:
 resilience4j:
   circuitbreaker:
     instances:
-      auth-service:
+      user-service:
         failure-rate-threshold: ${gripday.gateway.circuit-breaker.failure-rate-threshold}
         wait-duration-in-open-state: ${gripday.gateway.circuit-breaker.wait-duration-in-open-state}
         sliding-window-size: ${gripday.gateway.circuit-breaker.sliding-window-size}

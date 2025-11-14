@@ -3,7 +3,7 @@
 ## Pre-Deployment Validation
 
 ### ✅ Code Changes
-- [x] Gateway route configuration updated to include all auth-service paths
+- [x] Gateway route configuration updated to include all user-service paths
 - [x] Public paths configuration updated with password management endpoints
 - [x] Rate limiting configuration added for all new endpoints
 - [x] Local development configuration updated
@@ -267,12 +267,12 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ## Monitoring Checklist
 
 ### Gateway Logs
-- [ ] No 404 errors for auth-service endpoints
-- [ ] Proper routing to auth-service for all paths
+- [ ] No 404 errors for user-service endpoints
+- [ ] Proper routing to user-service for all paths
 - [ ] Rate limiting triggers correctly
 - [ ] JWT validation working correctly
 
-### Auth Service Logs
+### User Service Logs
 - [ ] Receiving requests from gateway
 - [ ] User context propagation working
 - [ ] Tenant context propagation working

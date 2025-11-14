@@ -7,7 +7,7 @@ This directory contains Helm charts for deploying the Gripday microservices plat
 ```
 helm/
 ├── gripday/        # Umbrella chart (deploys all services)
-├── auth-service/            # Authentication & Authorization service
+├── user-service/            # Authentication & Authorization service
 ├── bookstore-service/       # Bookstore business domain service
 ├── gateway-service/         # API Gateway (Spring Cloud Gateway)
 └── README.md               # This file
@@ -33,8 +33,8 @@ Deploy services independently:
 # 1. Install priority classes first
 kubectl apply -f ../k8s/priority-classes.yaml
 
-# 2. Install Auth Service
-helm install auth-service ./auth-service --namespace gripday-auth --create-namespace
+# 2. Install User Service
+helm install user-service ./user-service --namespace gripday-auth --create-namespace
 
 # 3. Install Bookstore Service
 helm install bookstore-service ./bookstore-service --namespace gripday-bookstore --create-namespace
@@ -45,7 +45,7 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 
 ## 📊 Charts Overview
 
-### 1. Auth Service
+### 1. User Service
 
 **Purpose**: Authentication, authorization, user management, and multi-tenancy
 
@@ -67,10 +67,10 @@ helm install gateway-service ./gateway-service --namespace gripday-gateway --cre
 **Installation**:
 
 ```bash
-helm install auth-service ./auth-service -n gripday-auth --create-namespace
+helm install user-service ./user-service -n gripday-auth --create-namespace
 ```
 
-**Configuration**: See [auth-service/README.md](./auth-service/README.md)
+**Configuration**: See [user-service/README.md](./user-service/README.md)
 
 ---
 
@@ -192,7 +192,7 @@ kubectl get pods -n gripday-gateway
 kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 
 # Auth service
-kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
+kubectl port-forward -n gripday-auth svc/user-service 8080:8080
 
 # Bookstore service
 kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
@@ -215,7 +215,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 
 ```bash
 # Upgrade individual service
-helm upgrade auth-service ./auth-service -n gripday-auth
+helm upgrade user-service ./user-service -n gripday-auth
 
 # Upgrade entire platform
 helm upgrade gripday ./gripday -n gripday
@@ -225,7 +225,7 @@ helm upgrade gripday ./gripday -n gripday
 
 ```bash
 # Uninstall individual service
-helm uninstall auth-service -n gripday-auth
+helm uninstall user-service -n gripday-auth
 
 # Uninstall entire platform
 helm uninstall gripday -n gripday
@@ -297,7 +297,7 @@ curl http://localhost:8080/actuator/prometheus
 ### Lint Charts
 
 ```bash
-helm lint ./auth-service
+helm lint ./user-service
 helm lint ./bookstore-service
 helm lint ./gateway-service
 helm lint ./gripday

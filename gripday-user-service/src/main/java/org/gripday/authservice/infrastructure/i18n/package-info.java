@@ -1,5 +1,5 @@
 /**
- * Internationalization (i18n) support for the Gripday Auth Service.
+ * Internationalization (i18n) support for the Gripday User Service.
  * <p>
  * This package provides utilities for multi-language support including:
  * <ul>

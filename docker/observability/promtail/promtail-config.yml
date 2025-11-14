@@ -39,7 +39,7 @@ scrape_configs:
       - output:
           source: output
 
-  # Gripday Auth Service logs
+  # Gripday User Service logs
   - job_name: gripday-user-service
     static_configs:
       - targets:
@@ -47,7 +47,7 @@ scrape_configs:
         labels:
           job: gripday-user-service
           service: auth
-          __path__: /var/log/gripday/auth-service/*.log
+          __path__: /var/log/gripday/user-service/*.log
     pipeline_stages:
       - json:
           expressions:

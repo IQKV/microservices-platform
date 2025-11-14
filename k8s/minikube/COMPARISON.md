@@ -211,7 +211,7 @@ imagePullPolicy: IfNotPresent
 
 ```yaml
 imagePullPolicy: Always
-image: gripday/auth-service:v1.2.3
+image: gripday/user-service:v1.2.3
 ```
 
 **Why:** Minikube uses local images. Production pulls from registry.
@@ -256,7 +256,7 @@ kind: NetworkPolicy
 spec:
   podSelector:
     matchLabels:
-      app: auth-service
+      app: user-service
   ingress:
     - from:
         - podSelector:

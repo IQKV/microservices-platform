@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for Auth Service - Production Environment
+  # PostgreSQL Database for User Service - Production Environment
   postgres-auth:
     image: postgres:15-alpine
     container_name: gripday-auth-postgres-production
@@ -71,7 +71,7 @@ services:
         max_attempts: 5
         window: 300s
 
-  # Redis for Auth Service - Production Environment
+  # Redis for User Service - Production Environment
   redis-auth:
     image: redis:7-alpine
     container_name: gripday-auth-redis-production
@@ -128,12 +128,12 @@ services:
         max_attempts: 5
         window: 300s
 
-  # Auth Service - Production Environment
-  auth-service:
+  # User Service - Production Environment
+  user-service:
     build:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
-    image: gripday/auth-service:production
+    image: gripday/user-service:production
     container_name: gripday-user-service-production
     env_file:
       - .env.production
@@ -223,7 +223,7 @@ services:
       options:
         max-size: "200m"
         max-file: "10"
-        labels: "service=auth-service,environment=production"
+        labels: "service=user-service,environment=production"
     volumes:
       - auth_logs_production:/app/logs
       - auth_tmp_production:/app/tmp

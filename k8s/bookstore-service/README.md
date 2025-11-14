@@ -309,7 +309,7 @@ The bookstore service integrates with the gateway service for:
 - **Rate limiting**: Distributed rate limiting
 - **CORS**: Centralized CORS handling
 
-### Auth Service Integration
+### User Service Integration
 
 - **JWT validation**: Shared JWT secret for token validation
 - **User context**: Extract user information from JWT tokens

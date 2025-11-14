@@ -136,7 +136,7 @@ check_prerequisites() {
         print_status "Checking Docker images..."
         eval $(minikube docker-env)
         
-        if ! docker image inspect gripday/auth-service:latest &>/dev/null; then
+        if ! docker image inspect gripday/user-service:latest &>/dev/null; then
             print_warning "Auth service image not found, will build..."
         fi
         
@@ -168,7 +168,7 @@ build_images() {
     print_status "Building auth service image..."
     if [[ "$DRY_RUN" == "false" ]]; then
         cd gripday-user-service
-        docker build -t gripday/auth-service:latest .
+        docker build -t gripday/user-service:latest .
         cd ..
     else
         print_warning "[DRY-RUN] Would build auth service image"
@@ -206,7 +206,7 @@ setup_namespaces() {
     
     print_status "Setting up namespaces..."
     
-    execute_kubectl "apply -f auth-service/namespace.yaml"
+    execute_kubectl "apply -f user-service/namespace.yaml"
     execute_kubectl "apply -f gateway-service/namespace.yaml"
     execute_kubectl "apply -f bookstore-service/namespace.yaml"
     
@@ -218,16 +218,16 @@ deploy_auth_service() {
     print_status "Deploying auth service..."
     
     # Apply configs and secrets
-    execute_kubectl "apply -f auth-service/configmap.yaml"
-    execute_kubectl "apply -f auth-service/secret.yaml"
+    execute_kubectl "apply -f user-service/configmap.yaml"
+    execute_kubectl "apply -f user-service/secret.yaml"
     
     # Deploy PostgreSQL
-    execute_kubectl "apply -f auth-service/auth-postgres-deployment.yaml"
-    execute_kubectl "apply -f auth-service/auth-postgres-service.yaml"
+    execute_kubectl "apply -f user-service/auth-postgres-deployment.yaml"
+    execute_kubectl "apply -f user-service/auth-postgres-service.yaml"
     
     # Deploy Redis
-    execute_kubectl "apply -f auth-service/auth-redis-deployment.yaml"
-    execute_kubectl "apply -f auth-service/auth-redis-service.yaml"
+    execute_kubectl "apply -f user-service/auth-redis-deployment.yaml"
+    execute_kubectl "apply -f user-service/auth-redis-service.yaml"
     
     # Wait for databases to be ready
     if [[ "$DRY_RUN" == "false" ]]; then
@@ -239,9 +239,9 @@ deploy_auth_service() {
     fi
     
     # Deploy auth service
-    execute_kubectl "apply -f auth-service/auth-service-deployment.yaml"
-    execute_kubectl "apply -f auth-service/auth-service-service.yaml"
-    execute_kubectl "apply -f auth-service/auth-service-ingress.yaml"
+    execute_kubectl "apply -f user-service/user-service-deployment.yaml"
+    execute_kubectl "apply -f user-service/user-service-service.yaml"
+    execute_kubectl "apply -f user-service/user-service-ingress.yaml"
     
     print_status "Auth service deployed successfully"
 }
@@ -338,12 +338,12 @@ verify_deployment() {
     print_status "  $(minikube ip) api.gripday.site"
     print_status ""
     print_status "Access services:"
-    print_status "  Auth Service: http://auth.gripday.site"
+    print_status "  User Service: http://auth.gripday.site"
     print_status "  Gateway Service: http://api.gripday.site"
     print_status "  Bookstore Service: http://localhost/api/v1/bookstore"
     print_status ""
     print_status "Swagger UI:"
-    print_status "  Auth Service: http://auth.gripday.site/swagger-ui.html"
+    print_status "  User Service: http://auth.gripday.site/swagger-ui.html"
     print_status "  Bookstore Service: http://localhost/bookstore/swagger-ui.html"
 }
 

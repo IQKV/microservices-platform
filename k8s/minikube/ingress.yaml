@@ -39,16 +39,16 @@ spec:
                   number: 8080
 
 ---
-# Auth Service Ingress (Optional - Direct Access for Debugging)
+# User Service Ingress (Optional - Direct Access for Debugging)
 # In production, this would NOT exist - all traffic goes through gateway
 # Keep this for local development convenience
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auth-service-ingress
+  name: user-service-ingress
   namespace: gripday-dev-env
   labels:
-    app: auth-service
+    app: user-service
     component: authentication
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -65,7 +65,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: auth-service
+                name: user-service
                 port:
                   number: 8080
 
@@ -106,18 +106,18 @@ spec:
 # This ingress configuration provides TWO ways to access services:
 #
 # 1. PRODUCTION-LIKE (API Gateway Pattern):
-#    - http://api.gripday.site/api/v1/auth/login    → Gateway → Auth Service
+#    - http://api.gripday.site/api/v1/auth/login    → Gateway → User Service
 #    - http://api.gripday.site/api/v1/bookstore/*   → Gateway → Bookstore Service
 #    - This mirrors production/staging architecture
 #
 # 2. DIRECT ACCESS (Development/Debugging):
-#    - http://auth.gripday.site/api/v1/auth/login   → Auth Service (direct)
+#    - http://auth.gripday.site/api/v1/auth/login   → User Service (direct)
 #    - http://bookstore.gripday.site/api/v1/books   → Bookstore Service (direct)
 #    - This bypasses the gateway for easier debugging
 #
 # Additionally, NodePort access is still available:
 #    - http://$(minikube ip):30080                       → Gateway Service
-#    - http://$(minikube ip):30081                       → Auth Service
+#    - http://$(minikube ip):30081                       → User Service
 #    - http://$(minikube ip):30082                       → Bookstore Service
 #
 # For local development, we keep ALL access methods to make debugging easier.

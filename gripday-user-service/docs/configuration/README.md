@@ -1,8 +1,8 @@
-# Auth Service Configuration Guide
+# User Service Configuration Guide
 
 ## Overview
 
-The Gripday Auth Service uses YAML-only configuration with environment-specific profiles and the `gripday.` prefix convention for all custom properties.
+The Gripday User Service uses YAML-only configuration with environment-specific profiles and the `gripday.` prefix convention for all custom properties.
 
 ## Configuration Structure
 
@@ -121,7 +121,7 @@ gripday:
       include-environment-tag: true
       custom-tags:
         environment: staging
-        service: auth-service
+        service: user-service
     logging:
       level: INFO
       format: json
@@ -177,8 +177,8 @@ Set the active profile using:
 export SPRING_PROFILES_ACTIVE=local
 
 # JVM argument
-java -Dspring.profiles.active=staging -jar auth-service.jar
+java -Dspring.profiles.active=staging -jar user-service.jar
 
 # Docker environment
-docker run -e SPRING_PROFILES_ACTIVE=production auth-service
+docker run -e SPRING_PROFILES_ACTIVE=production user-service
 ```

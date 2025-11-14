@@ -6,7 +6,7 @@ API Gateway for Gripday Platform using Spring Cloud Gateway.
 
 - Kubernetes 1.19+
 - Helm 3.0+
-- Auth Service and Bookstore Service deployed
+- User Service and Bookstore Service deployed
 
 ## Installation
 

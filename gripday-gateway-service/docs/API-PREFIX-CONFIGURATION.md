@@ -47,10 +47,10 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth-service
-          uri: http://auth-service:8080
+        - id: user-service
+          uri: http://user-service:8080
           predicates:
-            - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.auth-service.path}
+            - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.user-service.path}
           filters:
             - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
 ```
@@ -64,7 +64,7 @@ gripday:
   gateway:
     routing:
       services:
-        auth-service:
+        user-service:
           path: /v1/auth/** # No /api prefix in path definition
 ```
 

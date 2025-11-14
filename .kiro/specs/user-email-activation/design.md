@@ -14,7 +14,7 @@ User Registration → Generate Verification Token → Send Email → User Clicks
 
 ### Integration Points
 
-- **Auth Service**: Extended with email verification endpoints and services
+- **User Service**: Extended with email verification endpoints and services
 - **Database**: New verification_tokens table with existing users table relationship
 - **Email Service**: New service for sending verification emails (SMTP integration)
 - **Gateway Service**: Routes email verification endpoints (no changes needed)

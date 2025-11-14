@@ -4,7 +4,7 @@ This umbrella chart deploys the complete Gripday Platform microservices architec
 
 ## Services Included
 
-1. **Auth Service** - Authentication and authorization
+1. **User Service** - Authentication and authorization
 2. **Bookstore Service** - Business domain service
 3. **Gateway Service** - API Gateway (Spring Cloud Gateway)
 
@@ -23,7 +23,7 @@ This umbrella chart deploys the complete Gripday Platform microservices architec
         ┏━━━━━━━━━━┻━━━━━━━━━━┓
         ▼                      ▼
 ┌───────────────┐      ┌──────────────────┐
-│ Auth Service  │      │Bookstore Service │
+│ User Service  │      │Bookstore Service │
 │  (Port 8080)  │      │   (Port 8080)    │
 ├───────────────┤      ├──────────────────┤
 │ PostgreSQL    │      │  PostgreSQL      │
@@ -95,7 +95,7 @@ Create a `custom-values.yaml`:
 global:
   environment: production
 
-auth-service:
+user-service:
   replicaCount: 3
   resources:
     requests:
@@ -128,7 +128,7 @@ helm install gripday . -f custom-values.yaml
 
 Each service can be configured independently. See individual service READMEs:
 
-- [Auth Service](../auth-service/README.md)
+- [User Service](../user-service/README.md)
 - [Bookstore Service](../bookstore-service/README.md)
 - [Gateway Service](../gateway-service/README.md)
 
@@ -139,7 +139,7 @@ Each service can be configured independently. See individual service READMEs:
 helm upgrade gripday . -f custom-values.yaml
 
 # Upgrade specific service version
-helm upgrade gripday . --set auth-service.image.tag=1.1.0
+helm upgrade gripday . --set user-service.image.tag=1.1.0
 ```
 
 ## Uninstalling
@@ -164,7 +164,7 @@ kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Auth service health
-kubectl port-forward -n gripday-auth svc/auth-service 8080:8080
+kubectl port-forward -n gripday-auth svc/user-service 8080:8080
 curl http://localhost:8080/actuator/health
 
 # Bookstore service health
@@ -200,7 +200,7 @@ kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore
 
    ```bash
    # Test DNS resolution
-   kubectl run test-pod --image=busybox --rm -it -- nslookup auth-service.gripday-auth.svc.cluster.local
+   kubectl run test-pod --image=busybox --rm -it -- nslookup user-service.gripday-auth.svc.cluster.local
    ```
 
 3. **Database connection issues**
@@ -265,7 +265,7 @@ Network policies are enabled by default for security:
 kubectl scale deployment gateway-service -n gripday-gateway --replicas=5
 
 # Scale auth service
-kubectl scale deployment auth-service -n gripday-auth --replicas=3
+kubectl scale deployment user-service -n gripday-auth --replicas=3
 ```
 
 ### Auto-scaling (HPA)

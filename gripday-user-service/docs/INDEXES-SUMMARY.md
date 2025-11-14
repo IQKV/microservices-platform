@@ -1,4 +1,4 @@
-# Auth Service Database Indexes - Quick Reference
+# User Service Database Indexes - Quick Reference
 
 ## Summary
 

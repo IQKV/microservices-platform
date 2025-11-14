@@ -1,6 +1,6 @@
 # Authentication API Documentation
 
-This document provides documentation for the Gripday Auth Service REST API endpoints.
+This document provides documentation for the Gripday User Service REST API endpoints.
 
 ## Base URL
 

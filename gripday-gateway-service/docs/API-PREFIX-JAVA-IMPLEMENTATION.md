@@ -126,7 +126,7 @@ Example Route Configuration:
   Backend Receives: /api/v1/auth/login (no stripping)
 --------------------------------------------------------------------------------
 Configured Service Routes:
-  Auth Service:
+  User Service:
     URI: http://localhost:8080
     Path Pattern: /api/v1/auth/**
     Connect Timeout: 10000ms
