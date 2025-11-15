@@ -1,5 +1,8 @@
 package org.gripday.gatewayservice.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -14,9 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Dynamic OpenAPI configuration for Gateway Service with automatic aggregation of downstream service documentation.
@@ -101,7 +101,7 @@ public class OpenApiConfig {
 
   private final GripdayProperties properties;
 
-  public OpenApiConfig(GripdayProperties properties) {
+  public OpenApiConfig(final GripdayProperties properties) {
     this.properties = properties;
   }
 

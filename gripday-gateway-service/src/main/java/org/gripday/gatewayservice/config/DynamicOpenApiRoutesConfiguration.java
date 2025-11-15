@@ -20,7 +20,7 @@ public class DynamicOpenApiRoutesConfiguration {
 
   private final GripdayProperties properties;
 
-  public DynamicOpenApiRoutesConfiguration(GripdayProperties properties) {
+  public DynamicOpenApiRoutesConfiguration(final GripdayProperties properties) {
     this.properties = properties;
   }
 
@@ -68,11 +68,12 @@ public class DynamicOpenApiRoutesConfiguration {
       // Create Swagger UI route
       var swaggerUiRouteId = serviceName + "-swagger-ui";
       var swaggerUiPath = "/" + contextPath + "/swagger-ui";
-      
+
+      String finalContextPath = contextPath;
       routeBuilder.route(swaggerUiRouteId, r -> r
           .path(swaggerUiPath + ".html", swaggerUiPath + "/**")
           .filters(f -> f.rewritePath(
-              "/" + contextPath + "/swagger-ui(?<segment>/?.*)",
+              "/" + finalContextPath + "/swagger-ui(?<segment>/?.*)",
               "/swagger-ui${segment}"
           ))
           .uri(serviceUri)
@@ -84,11 +85,12 @@ public class DynamicOpenApiRoutesConfiguration {
       // Create API Docs route
       var apiDocsRouteId = serviceName + "-api-docs";
       var apiDocsPath = "/" + contextPath + "/api-docs";
-      
+
+      String finalContextPath1 = contextPath;
       routeBuilder.route(apiDocsRouteId, r -> r
           .path(apiDocsPath, apiDocsPath + "/**")
           .filters(f -> f.rewritePath(
-              "/" + contextPath + "/api-docs(?<segment>/?.*)",
+              "/" + finalContextPath1 + "/api-docs(?<segment>/?.*)",
               "/api-docs${segment}"
           ))
           .uri(serviceUri)

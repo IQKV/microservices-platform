@@ -20,7 +20,7 @@ public class SpringDocConfiguration {
 
   private final GripdayProperties properties;
 
-  public SpringDocConfiguration(GripdayProperties properties) {
+  public SpringDocConfiguration(final GripdayProperties properties) {
     this.properties = properties;
   }
 
@@ -40,7 +40,7 @@ public class SpringDocConfiguration {
 
       var registeredCount = 0;
 
-      for (var entry : services.entrySet()) {
+      for (final var entry : services.entrySet()) {
         var serviceName = entry.getKey();
         var serviceConfig = entry.getValue();
 
@@ -69,7 +69,7 @@ public class SpringDocConfiguration {
         var displayName = openApiConfig.displayName();
 
         swaggerUiConfig.addGroup(displayName);
-        swaggerUiConfig.addUrl(apiDocsUrl, displayName);
+        swaggerUiConfig.addUrl(apiDocsUrl);
 
         log.info("Registered OpenAPI documentation: {} -> {}", displayName, apiDocsUrl);
         registeredCount++;
