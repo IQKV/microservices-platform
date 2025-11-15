@@ -503,3 +503,151 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```
+## Password Reset
+
+### POST /api/v1/auth/password/forgot
+
+Initiate password reset flow by sending a reset email.
+
+**Request:**
+
+```http
+POST /api/v1/auth/password/forgot
+Content-Type: application/json
+
+{
+  "email": "john@example.com"
+}
+```
+
+**Request Schema:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| email | string | Yes | User's email address |
+
+**Success Response (202 Accepted):**
+
+Always returns 202 Accepted to prevent user enumeration, regardless of whether the email exists.
+
+```http
+HTTP/1.1 202 Accepted
+```
+
+**Security Features:**
+- Non-enumerating response (always 202)
+- Reset token expires in 30 minutes
+- Rate limiting per IP address
+- Audit logging of reset attempts
+
+---
+
+### HEAD /api/v1/auth/password/reset
+
+Validate if a password reset token is valid and not expired.
+
+**Request:**
+
+```http
+HEAD /api/v1/auth/password/reset?token=550e8400-e29b-41d4-a716-446655440000
+```
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | string | Yes | Password reset token from email |
+
+**Success Response (200 OK):**
+
+```http
+HTTP/1.1 200 OK
+```
+
+Token is valid and can be used for password reset.
+
+**Error Response (404 Not Found):**
+
+```http
+HTTP/1.1 404 Not Found
+```
+
+Token is invalid, expired, or doesn't exist.
+
+**Use Case:**
+
+This endpoint is designed for UI applications to validate the reset token before displaying the password reset form. If the token is invalid or expired, the UI can show a 404 error page instead of the reset form.
+
+**Example Usage:**
+
+```javascript
+// Check token validity before showing reset form
+const response = await fetch(`/api/v1/auth/password/reset?token=${token}`, {
+  method: 'HEAD'
+});
+
+if (response.status === 404) {
+  // Show 404 page - invalid or expired token
+  showErrorPage('Invalid or expired reset link');
+} else {
+  // Show password reset form
+  showResetForm(token);
+}
+```
+
+---
+
+### POST /api/v1/auth/password/reset
+
+Complete password reset using a valid reset token.
+
+**Request:**
+
+```http
+POST /api/v1/auth/password/reset
+Content-Type: application/json
+
+{
+  "token": "550e8400-e29b-41d4-a716-446655440000",
+  "newPassword": "NewSecurePass123!"
+}
+```
+
+**Request Schema:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| token | string | Yes | Password reset token from email |
+| newPassword | string | Yes | New password (min 8 chars, must include uppercase, lowercase, number, special char) |
+
+**Success Response (204 No Content):**
+
+```http
+HTTP/1.1 204 No Content
+```
+
+Password has been reset successfully.
+
+**Error Response (400 Bad Request):**
+
+```json
+{
+  "type": "https://problems.gripday.com/password-reset-error",
+  "title": "Password reset failed",
+  "status": 400,
+  "detail": "Invalid or expired reset token",
+  "instance": "/api/v1/auth/password/reset",
+  "code": "AUTH_INVALID_TOKEN",
+  "path": "/api/v1/auth/password/reset",
+  "method": "POST",
+  "correlationId": "abc123-def456-ghi789",
+  "requestId": "req-001-2024"
+}
+```
+
+**Security Actions on Success:**
+- User password is updated
+- All refresh tokens are revoked
+- All active sessions are invalidated
+- Reset token is deleted (single-use)
+- Confirmation email is sent to user
+
+---
+

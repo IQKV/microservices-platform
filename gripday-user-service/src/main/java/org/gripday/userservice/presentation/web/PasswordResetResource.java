@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -75,6 +77,43 @@ public class PasswordResetResource {
     var userAgent = httpRequest.getHeader("User-Agent");
     passwordResetService.initiatePasswordReset(request.email(), ipAddress, userAgent);
     return ResponseEntity.accepted().build();
+  }
+
+  @org.springframework.web.bind.annotation.RequestMapping(value = "/reset", method = RequestMethod.HEAD)
+  @Operation(
+      summary = "Validate password reset token",
+      description = """
+          Check if a password reset token is valid and not expired.
+          
+          ## Features
+          - Lightweight token validation
+          - No side effects (read-only operation)
+          - Useful for UI to show 404 page for invalid tokens
+          
+          ## Response Codes
+          - 200 OK: Token is valid
+          - 404 Not Found: Token is invalid or expired
+          
+          ## Usage
+          Use this endpoint before showing the password reset form to validate
+          the token from the email link. If it returns 404, show an error page.
+          """,
+      tags = {"Password Reset API"}
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Token is valid"),
+      @ApiResponse(responseCode = "404", description = "Token is invalid or expired")
+  })
+  @Timed(value = "password.endpoint", extraTags = {"endpoint", "validate"})
+  public ResponseEntity<Void> validateResetToken(
+      @io.swagger.v3.oas.annotations.Parameter(
+          description = "Password reset token to validate",
+          required = true,
+          example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      )
+      @RequestParam String token) {
+    var isValid = passwordResetService.isResetTokenValid(token);
+    return isValid ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
   }
 
   @PostMapping("/reset")

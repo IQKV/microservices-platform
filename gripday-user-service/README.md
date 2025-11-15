@@ -136,7 +136,7 @@ Revokes all refresh tokens for the authenticated user and invalidates all active
 
 ### Forgot Password (Initiate)
 
-Starts the password reset flow. Always returns 200 to avoid user enumeration.
+Starts the password reset flow. Always returns 202 to avoid user enumeration.
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/password/forgot \
@@ -145,6 +145,18 @@ curl -X POST http://localhost:8080/api/v1/auth/password/forgot \
     "email": "john@example.com"
   }'
 ```
+
+### Validate Reset Token
+
+Check if a reset token is valid before showing the password reset form. Useful for UI to display 404 page for invalid/expired tokens.
+
+```bash
+curl -I "http://localhost:8080/api/v1/auth/password/reset?token=550e8400-e29b-41d4-a716-446655440000"
+```
+
+**Response:**
+- `200 OK` - Token is valid
+- `404 Not Found` - Token is invalid or expired
 
 ### Reset Password (Complete)
 
@@ -381,8 +393,9 @@ gripday:
 
 1. User requests password reset via `POST /api/v1/auth/password/forgot`.
 2. System generates a single-use reset token (30-minute default TTL) and sends an email with a reset link.
-3. User submits `POST /api/v1/auth/password/reset` with token and new password.
-4. Service updates password, revokes all refresh tokens, and invalidates sessions.
+3. UI validates token via `HEAD /api/v1/auth/password/reset?token=xxx` (returns 200 if valid, 404 if invalid/expired).
+4. User submits `POST /api/v1/auth/password/reset` with token and new password.
+5. Service updates password, revokes all refresh tokens, and invalidates sessions.
 
 ### Monitoring
 
