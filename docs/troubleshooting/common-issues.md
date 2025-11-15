@@ -199,7 +199,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 # Always include X-Tenant-ID header
 curl -H "X-Tenant-ID: tenant-123" \
      -H "Authorization: Bearer $TOKEN" \
-     http://localhost:8080/api/v1/users/me
+     http://localhost:8080/api/v1/me
 ```
 
 2. **Check JWT Tenant Claims:**

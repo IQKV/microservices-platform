@@ -450,7 +450,7 @@ curl -X POST http://api.gripday.site/api/v1/auth/login \
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
      -H "X-Tenant-ID: default" \
-     http://api.gripday.site/api/v1/users/me
+     http://api.gripday.site/api/v1/me
 
 # Test rate limiting
 for i in {1..70}; do

@@ -178,8 +178,8 @@ public-paths:
   - /api/v1/auth/email/resend
 
   # Password management
-  - /api/v1/password/forgot
-  - /api/v1/password/reset
+  - /api/v1/auth/password/forgot
+  - /api/v1/auth/password/reset
 
   # Public bookstore endpoints
   - /api/v1/bookstore/books

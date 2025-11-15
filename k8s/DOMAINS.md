@@ -188,7 +188,7 @@ https://auth.gripday.com/oauth/google/callback
 POST https://api.gripday.com/api/v1/auth/login
 
 # Get user profile (called by Main UI)
-GET https://api.gripday.com/api/v1/users/me
+GET https://api.gripday.com/api/v1/me
 
 # List books (called by Main UI)
 GET https://api.gripday.com/api/v1/bookstore/books
@@ -216,7 +216,7 @@ GET https://api.gripday.com/api/v1/bookstore/books
    └─> Redirect back: https://app.gripday.com/dashboard
 
 5. Main app makes authenticated requests
-   └─> GET https://api.gripday.com/api/v1/users/me
+   └─> GET https://api.gripday.com/api/v1/me
        └─> Include Authorization: Bearer <token>
 ```
 

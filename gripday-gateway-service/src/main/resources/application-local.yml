@@ -110,8 +110,8 @@ gripday:
         - /api/v1/auth/email/resend
         - /api/v1/auth/email/status
         # Password management endpoints (public)
-        - /api/v1/password/forgot
-        - /api/v1/password/reset
+        - /api/v1/auth/password/forgot
+        - /api/v1/auth/password/reset
         # Actuator and documentation endpoints
         - /actuator/health
         - /actuator/info
@@ -143,15 +143,15 @@ gripday:
             requests-per-minute: 20
             burst-capacity: 30
             enable-tenant-quotas: false
-          "/api/v1/password/forgot":
+          "/api/v1/auth/password/forgot":
             requests-per-minute: 6
             burst-capacity: 10
             enable-tenant-quotas: false
-          "/api/v1/password/reset":
+          "/api/v1/auth/password/reset":
             requests-per-minute: 10
             burst-capacity: 20
             enable-tenant-quotas: false
-          "/api/v1/password/change":
+          "/api/v1/auth/password/change":
             requests-per-minute: 20
             burst-capacity: 30
             enable-tenant-quotas: false

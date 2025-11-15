@@ -5,8 +5,8 @@ import { AuthTestFramework } from '../../utils/auth-test-framework.js';
 import { getEnvironmentConfig } from '../../config/environments.js';
 
 // Coverage for profile endpoints via User service through the Gateway
-// - GET /api/v1/users/me
-// - PUT /api/v1/users/me
+// - GET /api/v1/me
+// - PUT /api/v1/me
 
 test.describe('User Service - Profile Endpoints', () => {
   const env = getEnvironmentConfig();
@@ -22,7 +22,7 @@ test.describe('User Service - Profile Endpoints', () => {
     await auth.dispose();
   });
 
-  test('GET /api/v1/users/me should return current user after login', async () => {
+  test('GET /api/v1/me should return current user after login', async () => {
     const user = await auth.registerUser({ emailVerified: true });
     await auth.loginTestUser(user);
 
@@ -31,7 +31,7 @@ test.describe('User Service - Profile Endpoints', () => {
     expect(me.email).toBe(user.email);
   });
 
-  test('PUT /api/v1/users/me should update current user fields', async () => {
+  test('PUT /api/v1/me should update current user fields', async () => {
     const user = await auth.registerUser({ emailVerified: true });
     await auth.loginTestUser(user);
 

@@ -324,7 +324,7 @@ https://auth.gripday.com/forgot-password    # Password reset page
 # Backend APIs (through gateway)
 POST https://api.gripday.com/api/v1/auth/login       # Login API
 POST https://api.gripday.com/api/v1/auth/signup      # Signup API
-GET  https://api.gripday.com/api/v1/users/me         # Get user profile
+GET  https://api.gripday.com/api/v1/me         # Get user profile
 GET  https://api.gripday.com/api/v1/bookstore/books  # Bookstore API
 ```
 

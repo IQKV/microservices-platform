@@ -482,7 +482,7 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
 
 curl -H "Authorization: Bearer $TOKEN" \
      -H "X-Tenant-ID: default" \
-     http://localhost:8080/api/v1/users/me
+     http://localhost:8080/api/v1/me
 ```
 
 4. **Refresh token:**

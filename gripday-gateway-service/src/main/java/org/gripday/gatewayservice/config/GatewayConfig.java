@@ -53,7 +53,7 @@ public class GatewayConfig {
     if (userServiceConfig != null && userServiceConfig.enabled()) {
       logger.info("Enabling user-service routes: {}", userServiceConfig.uri());
       routesBuilder.route("user-service", r -> r
-          .path("/api/v1/auth/**", "/api/v1/password/**", "/api/v1/admin/users/**",
+          .path("/api/v1/auth/**", "/api/v1/auth/password/**", "/api/v1/admin/users/**",
               "/api/v1/admin/organizations/**", "/api/v1/admin/**")
           .filters(f -> f
               .filter(requestTransformationFilter.apply(new RequestTransformationFilter.Config()))

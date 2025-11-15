@@ -182,7 +182,7 @@ export class TypedApiClient {
   async getCurrentUser(): Promise<UserResponse> {
     const response = await this.apiClient.request<UserResponse>({
       method: 'GET',
-      url: '/api/v1/users/me'
+      url: '/api/v1/me'
     });
 
     return ValidationUtils.validateUserData(response.data);
@@ -196,7 +196,7 @@ export class TypedApiClient {
     
     const response = await this.apiClient.request<UserResponse>({
       method: 'PUT',
-      url: '/api/v1/users/me',
+      url: '/api/v1/me',
       data: userData
     });
 

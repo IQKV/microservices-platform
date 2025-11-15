@@ -20,7 +20,7 @@ All services follow a three-tier architecture pattern with strict layer separati
 - **User Management**: `/api/v1/admin/users/*` for CRUD operations (admin-only)
 - **JWT Token Generation**: RS256/HS256 with configurable expiry
 - **Email Verification**: Token-based email verification with HTML templates
-- **Password Management**: Forgot/reset password flows with secure tokens
+- **Password Reset API**: Forgot/reset password flows with secure tokens
 - **Multi-Tenant Support**: Tenant context propagation via headers and JWT claims
 
 ### Gateway Service
@@ -68,10 +68,10 @@ All services follow a three-tier architecture pattern with strict layer separati
 - `POST /api/v1/auth/email/resend` - Resend verification email
 - `GET /api/v1/auth/email/status` - Check verification status
 
-**Password Management:**
+**Password Reset API:**
 
-- `POST /api/v1/password/forgot` - Initiate password reset
-- `POST /api/v1/password/reset` - Complete password reset
+- `POST /api/v1/auth/password/forgot` - Initiate password reset
+- `POST /api/v1/auth/password/reset` - Complete password reset
 
 **User Management (Admin):**
 

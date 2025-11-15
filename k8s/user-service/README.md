@@ -260,8 +260,8 @@ https://auth.gripday.com/api/v1/admin/users/* → User Management API
 - `POST /api/v1/auth/login` - User authentication
 - `POST /api/v1/auth/refresh` - Token refresh
 - `POST /api/v1/auth/logout` - User logout
-- `POST /api/v1/password/forgot` - Password reset request
-- `POST /api/v1/password/reset` - Password reset confirmation
+- `POST /api/v1/auth/password/forgot` - Password reset request
+- `POST /api/v1/auth/password/reset` - Password reset confirmation
 
 ### User Management Endpoints (Admin Only)
 
@@ -368,7 +368,7 @@ curl -X POST http://user.gripday.site/api/v1/auth/login \
 # Test token validation
 TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
 curl -H "Authorization: Bearer $TOKEN" \
-     http://user.gripday.site/api/v1/users/me
+     http://user.gripday.site/api/v1/me
 ```
 
 ## Integration
