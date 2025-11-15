@@ -98,9 +98,30 @@ public record GripdayProperties(
           @NotBlank String path,
           boolean enabled,
           @Positive int connectTimeout,
-          @Positive int responseTimeout
+          @Positive int responseTimeout,
+          OpenApiProperties openapi
       ) {
 
+        public record OpenApiProperties(
+            boolean enabled,
+            String displayName,
+            String description,
+            String contextPath
+        ) {
+          
+          public OpenApiProperties {
+            // Default values if not provided
+            if (displayName == null || displayName.isBlank()) {
+              displayName = "Service API";
+            }
+            if (description == null || description.isBlank()) {
+              description = "API documentation";
+            }
+            if (contextPath == null || contextPath.isBlank()) {
+              contextPath = "";
+            }
+          }
+        }
       }
 
       public record LoadBalancingProperties(

@@ -63,12 +63,22 @@ gripday:
           enabled: true
           connect-timeout: 10000  # Extended for development
           response-timeout: 60000  # Extended for development
+          openapi:
+            enabled: true
+            display-name: "User Service APIs"
+            description: "Authentication and user management APIs"
+            context-path: "user-service"
         bookstore-service:
           uri: ${GRIPDAY_GATEWAY_ROUTING_BOOKSTORE_SERVICE_URI:http://localhost:8081}
           path: /v1/bookstore/**
           enabled: true
           connect-timeout: 10000
           response-timeout: 60000
+          openapi:
+            enabled: true
+            display-name: "Bookstore Service APIs"
+            description: "Bookstore management and inventory APIs"
+            context-path: "bookstore-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -118,8 +128,13 @@ gripday:
         # Actuator and documentation endpoints
         - /actuator/health
         - /actuator/info
+        - /api/v1/docs
         - /swagger-ui/**
         - /api-docs/**
+        - /user-service/swagger-ui/**
+        - /user-service/api-docs/**
+        - /bookstore-service/swagger-ui/**
+        - /bookstore-service/api-docs/**
     
     rate-limiting:
       enabled: true
@@ -319,6 +334,9 @@ management:
 springdoc:
   api-docs:
     enabled: true
+    path: /api-docs
   swagger-ui:
     enabled: true
+    path: /swagger-ui.html
     try-it-out-enabled: true
+    urls-primary-name: Gateway APIs

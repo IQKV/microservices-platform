@@ -37,8 +37,23 @@ The gateway will be available at `http://localhost:8080`
 
 ### API Documentation
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI Spec: `http://localhost:8080/v3/api-docs`
+The gateway provides **automatic OpenAPI documentation aggregation** for all configured downstream services:
+
+- **Gateway Swagger UI**: `http://localhost:8080/swagger-ui.html` (all services in one interface)
+- **Documentation Discovery**: `http://localhost:8080/api/v1/docs` (list all available docs)
+- **Service-Specific Docs**: `http://localhost:8080/{service-name}/swagger-ui.html`
+
+#### Quick Example
+
+```bash
+# View all available documentation endpoints
+curl http://localhost:8080/api/v1/docs
+
+# Access User Service documentation through gateway
+open http://localhost:8080/user-service/swagger-ui.html
+```
+
+See [OPENAPI_CONFIGURATION_GUIDE.md](docs/OPENAPI_CONFIGURATION_GUIDE.md) for complete documentation setup guide.
 
 ## Routing and Security
 
@@ -286,29 +301,38 @@ mvn verify
 
 ### Adding New Service Routes
 
-1. **Configure route in application.yml:**
+The gateway uses **configuration-driven routing** - simply add your service to the configuration:
 
 ```yaml
 gripday:
   gateway:
-    routes:
-      - id: new-service
-        uri: http://localhost:8080
-        predicates:
-          - Path=/api/v1/newservice/**
-        filters:
-          - name: JwtAuthenticationFilter
-          - name: RequestRateLimiter
+    routing:
+      services:
+        new-service:
+          uri: http://localhost:8082
+          path: /v1/newservice/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "New Service APIs"
+            description: "Description of new service"
+            context-path: "new-service"
 ```
 
-2. **Update Docker Compose:**
+That's it! The gateway automatically:
 
-```yaml
-services:
-  new-service:
-    image: gripday/new-service:latest
-    ports:
-      - "8080:8080"
-    networks:
-      - gripday-network
-```
+- Creates API routes for your service
+- Generates OpenAPI documentation routes
+- Adds your service to the Swagger UI dropdown
+- Includes it in the documentation discovery endpoint
+
+See [OPENAPI_QUICK_REFERENCE.md](docs/OPENAPI_QUICK_REFERENCE.md) for a quick start guide.
+
+## Documentation
+
+- **[OPENAPI_CONFIGURATION_GUIDE.md](docs/OPENAPI_CONFIGURATION_GUIDE.md)** - Complete OpenAPI setup guide
+- **[OPENAPI_QUICK_REFERENCE.md](docs/OPENAPI_QUICK_REFERENCE.md)** - Quick reference for adding services
+- **[API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)** - API documentation access guide
+- **[ROUTING_SUMMARY.md](docs/ROUTING_SUMMARY.md)** - Complete routing configuration reference
