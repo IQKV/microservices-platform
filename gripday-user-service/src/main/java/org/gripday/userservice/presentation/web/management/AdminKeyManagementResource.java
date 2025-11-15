@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web.admin;
+package org.gripday.userservice.presentation.web.management;
 
 import java.util.Map;
 

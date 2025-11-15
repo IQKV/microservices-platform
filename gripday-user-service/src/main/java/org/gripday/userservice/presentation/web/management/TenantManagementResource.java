@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web.admin;
+package org.gripday.userservice.presentation.web.management;
 
 import jakarta.validation.Valid;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.gripday.userservice.presentation.web.admin;
+package org.gripday.userservice.presentation.web.management;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
