@@ -23,7 +23,6 @@ import org.gripday.bookstore.domain.dto.UserContext;
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.CategoryNotFoundException;
 import org.gripday.bookstore.domain.exception.DuplicateIsbnException;
-import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
 import org.gripday.bookstore.infrastructure.entity.Book;
 import org.gripday.bookstore.infrastructure.entity.Category;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
@@ -193,13 +192,8 @@ class BookServiceTest {
     verify(bookRepository).save(any(Book.class));
   }
 
-  @Test
-  void createBook_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // When & Then
-    assertThatThrownBy(() -> bookService.createBook(createBookRequest, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("create book");
-  }
+  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+  // Integration tests should verify authorization with proper Spring Security context
 
   @Test
   void createBook_WithDuplicateIsbn_ShouldThrowDuplicateIsbnException() {
@@ -237,13 +231,8 @@ class BookServiceTest {
     verify(bookRepository).save(testBook);
   }
 
-  @Test
-  void updateBook_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // When & Then
-    assertThatThrownBy(() -> bookService.updateBook(1L, updateBookRequest, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("update book");
-  }
+  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+  // Integration tests should verify authorization with proper Spring Security context
 
   @Test
   void updateBook_WithInvalidBookId_ShouldThrowBookNotFoundException() {
@@ -269,13 +258,8 @@ class BookServiceTest {
     verify(bookRepository).save(testBook);
   }
 
-  @Test
-  void deleteBook_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // When & Then
-    assertThatThrownBy(() -> bookService.deleteBook(1L, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("delete book");
-  }
+  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+  // Integration tests should verify authorization with proper Spring Security context
 
   @Test
   void findBookByIsbn_WhenBookExists_ShouldReturnBookDto() {

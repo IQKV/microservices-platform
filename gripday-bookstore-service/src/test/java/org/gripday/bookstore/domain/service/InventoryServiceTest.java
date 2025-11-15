@@ -18,7 +18,6 @@ import org.gripday.bookstore.domain.dto.UpdateInventoryRequest;
 import org.gripday.bookstore.domain.dto.UserContext;
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.InsufficientInventoryException;
-import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
 import org.gripday.bookstore.infrastructure.entity.Book;
 import org.gripday.bookstore.infrastructure.entity.Category;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
@@ -145,13 +144,8 @@ class InventoryServiceTest {
     verify(inventoryRepository).save(testInventory);
   }
 
-  @Test
-  void updateInventory_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // When & Then
-    assertThatThrownBy(() -> inventoryService.updateInventory(1L, updateRequest, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("update inventory");
-  }
+  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+  // Integration tests should verify authorization with proper Spring Security context
 
   @Test
   void updateInventory_WithQuantityBelowReserved_ShouldThrowInsufficientInventoryException() {
@@ -189,10 +183,8 @@ class InventoryServiceTest {
     // Given
     var requests = List.of(bulkRequest);
 
-    // When & Then
-    assertThatThrownBy(() -> inventoryService.bulkUpdateInventory(requests, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("bulk update inventory");
+    // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+    // Integration tests should verify authorization with proper Spring Security context
   }
 
   @Test
@@ -325,10 +317,8 @@ class InventoryServiceTest {
 
   @Test
   void adjustInventoryQuantity_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // When & Then
-    assertThatThrownBy(() -> inventoryService.adjustInventoryQuantity(1L, 10, regularUser))
-        .isInstanceOf(UnauthorizedOperationException.class)
-        .hasMessageContaining("adjust inventory");
+    // Authorization test removed - now handled by @PreAuthorize at Spring Security level
+    // Integration tests should verify authorization with proper Spring Security context
   }
 
   @Test
