@@ -180,9 +180,6 @@ class InventoryServiceTest {
 
   @Test
   void bulkUpdateInventory_WithRegularUser_ShouldThrowUnauthorizedException() {
-    // Given
-    var requests = List.of(bulkRequest);
-
     // Authorization test removed - now handled by @PreAuthorize at Spring Security level
     // Integration tests should verify authorization with proper Spring Security context
   }
