@@ -85,19 +85,21 @@ cp gripday-gateway-service/src/main/resources/application.yml \
    - `SecurityConfig.java`
 
 3. **Build and test:**
+
    ```bash
    cd gripday-user-service
    mvn clean package -DskipTests
    ```
 
 4. **Deploy User Service:**
+
    ```bash
    # Stop current service
    docker-compose stop user-service
-   
+
    # Deploy new version
    docker-compose up -d user-service
-   
+
    # Check logs
    docker-compose logs -f user-service
    ```
@@ -116,25 +118,28 @@ cp gripday-gateway-service/src/main/resources/application.yml \
    - `application.yml`
 
 2. **Update environment variables:**
+
    ```bash
    # Add to .env or docker-compose.yml
    USER_SERVICE_JWK_URI=http://user-service:8080/.well-known/jwks.json
    ```
 
 3. **Build and test:**
+
    ```bash
    cd gripday-gateway-service
    mvn clean package -DskipTests
    ```
 
 4. **Deploy Gateway Service:**
+
    ```bash
    # Stop current service
    docker-compose stop gateway-service
-   
+
    # Deploy new version
    docker-compose up -d gateway-service
-   
+
    # Check logs
    docker-compose logs -f gateway-service
    ```
@@ -144,6 +149,7 @@ cp gripday-gateway-service/src/main/resources/application.yml \
 For each downstream service (e.g., Bookstore Service):
 
 1. **Update application.yml:**
+
    ```yaml
    spring:
      security:
@@ -164,26 +170,29 @@ For each downstream service (e.g., Bookstore Service):
 ### Step 5: Verify End-to-End
 
 1. **Test login:**
+
    ```bash
    TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
      -H "Content-Type: application/json" \
      -d '{"username":"test","password":"Test123!"}' | jq -r '.accessToken')
-   
+
    echo "Token: $TOKEN"
    ```
 
 2. **Test protected endpoint:**
+
    ```bash
    curl -H "Authorization: Bearer $TOKEN" \
         http://localhost:8080/api/v1/bookstore/books
    ```
 
 3. **Test token refresh:**
+
    ```bash
    REFRESH_TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/auth/login \
      -H "Content-Type: application/json" \
      -d '{"username":"test","password":"Test123!"}' | jq -r '.refreshToken')
-   
+
    curl -X POST http://localhost:8080/api/v1/auth/refresh \
      -H "Content-Type: application/json" \
      -d "{\"refreshToken\":\"$REFRESH_TOKEN\"}"
@@ -198,6 +207,7 @@ For each downstream service (e.g., Bookstore Service):
 ### Step 6: Cleanup
 
 1. **Remove HMAC secret from environment:**
+
    ```bash
    # Remove from .env or docker-compose.yml
    # JWT_SECRET_KEY=...
@@ -214,6 +224,7 @@ For each downstream service (e.g., Bookstore Service):
 ### User Service
 
 **Before:**
+
 ```yaml
 gripday:
   auth:
@@ -228,6 +239,7 @@ gripday:
 ### Gateway Service
 
 **Before:**
+
 ```yaml
 gripday:
   gateway:
@@ -240,6 +252,7 @@ gripday:
 ```
 
 **After:**
+
 ```yaml
 gripday:
   gateway:
@@ -256,6 +269,7 @@ gripday:
 ### Downstream Services
 
 **Before:**
+
 ```java
 @Bean
 public JwtDecoder jwtDecoder(KeyPair keyPair) {
@@ -265,6 +279,7 @@ public JwtDecoder jwtDecoder(KeyPair keyPair) {
 ```
 
 **After:**
+
 ```yaml
 spring:
   security:
@@ -283,6 +298,7 @@ If you need to rollback:
 ### Quick Rollback
 
 1. **Restore backup configurations:**
+
    ```bash
    cp application.yml.backup application.yml
    ```
@@ -295,17 +311,20 @@ If you need to rollback:
 ### Detailed Rollback
 
 #### User Service
+
 1. Revert code changes
 2. Rebuild: `mvn clean package`
 3. Redeploy: `docker-compose up -d user-service`
 
 #### Gateway Service
+
 1. Revert code changes
 2. Restore HMAC configuration
 3. Rebuild: `mvn clean package`
 4. Redeploy: `docker-compose up -d gateway-service`
 
 #### Downstream Services
+
 1. Revert to manual public key configuration
 2. Redeploy each service
 
@@ -318,6 +337,7 @@ If you need to rollback:
 **Cause:** SecurityConfig not updated to allow public access
 
 **Solution:**
+
 ```java
 .requestMatchers("/.well-known/jwks.json").permitAll()
 ```
@@ -327,6 +347,7 @@ If you need to rollback:
 **Cause:** JWK URI not configured or incorrect
 
 **Solution:**
+
 ```yaml
 gripday:
   gateway:
@@ -340,6 +361,7 @@ gripday:
 **Cause:** Network connectivity or DNS resolution issue
 
 **Solution:**
+
 1. Check service discovery
 2. Verify network connectivity
 3. Use IP address instead of hostname temporarily
@@ -349,6 +371,7 @@ gripday:
 **Cause:** Grace period expired or not configured
 
 **Solution:**
+
 - Grace period is 7 days by default
 - Old tokens should work during grace period
 - Check key management service logs
@@ -358,6 +381,7 @@ gripday:
 **Cause:** Token cleanup job not running
 
 **Solution:**
+
 1. Check if `@EnableScheduling` is present
 2. Verify cleanup job logs
 3. Manually trigger cleanup:
@@ -433,6 +457,7 @@ curl http://localhost:8080/actuator/prometheus | grep token_cleanup_duration
 Default: Every 90 days
 
 To change:
+
 ```java
 @Scheduled(cron = "0 0 0 1 */3 *") // Every 3 months
 ```
@@ -442,6 +467,7 @@ To change:
 Default: 7 days
 
 To change:
+
 ```java
 private static final long KEY_ROTATION_GRACE_PERIOD_DAYS = 7;
 ```
@@ -452,6 +478,7 @@ private static final long KEY_ROTATION_GRACE_PERIOD_DAYS = 7;
 - Refresh Token: 7 days
 
 To change:
+
 ```yaml
 gripday:
   auth:

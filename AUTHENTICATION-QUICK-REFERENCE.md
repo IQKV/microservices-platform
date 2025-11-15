@@ -2,19 +2,20 @@
 
 ## 🔑 Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Algorithm** | RSA256 (asymmetric) everywhere |
-| **Key Distribution** | JWK endpoint at `/.well-known/jwks.json` |
-| **Key Rotation** | Automatic every 90 days, 7-day grace period |
-| **Token Expiry** | Access: 15 min, Refresh: 7 days |
-| **Token Cleanup** | Daily at 2 AM (automatic) |
+| Concept              | Description                                 |
+| -------------------- | ------------------------------------------- |
+| **Algorithm**        | RSA256 (asymmetric) everywhere              |
+| **Key Distribution** | JWK endpoint at `/.well-known/jwks.json`    |
+| **Key Rotation**     | Automatic every 90 days, 7-day grace period |
+| **Token Expiry**     | Access: 15 min, Refresh: 7 days             |
+| **Token Cleanup**    | Daily at 2 AM (automatic)                   |
 
 ---
 
 ## 📋 Configuration Cheat Sheet
 
 ### User Service (No Configuration Needed)
+
 ```yaml
 # Everything is automatic!
 # - Key generation on startup
@@ -24,6 +25,7 @@
 ```
 
 ### Gateway Service
+
 ```yaml
 gripday:
   gateway:
@@ -39,6 +41,7 @@ gripday:
 ```
 
 ### Downstream Services
+
 ```yaml
 spring:
   security:
@@ -53,11 +56,13 @@ spring:
 ## 🚀 Quick Start
 
 ### 1. Test JWK Endpoint
+
 ```bash
 curl http://localhost:8080/.well-known/jwks.json | jq
 ```
 
 ### 2. Login
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -65,6 +70,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 ### 3. Use Token
+
 ```bash
 TOKEN="your-access-token"
 curl -H "Authorization: Bearer $TOKEN" \
@@ -76,18 +82,21 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## 🔧 Admin Operations
 
 ### Manual Key Rotation
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/admin/keys/rotate \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ### Manual Token Cleanup
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/admin/keys/cleanup \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ### Check Metrics
+
 ```bash
 curl http://localhost:8080/actuator/prometheus | grep -E "jwt|token_cleanup"
 ```
@@ -116,12 +125,12 @@ token_cleanup_duration_seconds
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| 401 Unauthorized | Check token expiry, verify JWK endpoint accessible |
-| JWK endpoint 404 | Verify SecurityConfig allows public access |
-| Token validation fails | Check issuer matches, verify network connectivity |
-| Redis memory growing | Check TokenCleanupService logs, trigger manual cleanup |
+| Issue                  | Solution                                               |
+| ---------------------- | ------------------------------------------------------ |
+| 401 Unauthorized       | Check token expiry, verify JWK endpoint accessible     |
+| JWK endpoint 404       | Verify SecurityConfig allows public access             |
+| Token validation fails | Check issuer matches, verify network connectivity      |
+| Redis memory growing   | Check TokenCleanupService logs, trigger manual cleanup |
 
 ---
 
@@ -143,18 +152,18 @@ token_cleanup_duration_seconds
 ✅ Monitor Redis memory usage  
 ✅ Use short-lived access tokens (15 min)  
 ✅ Implement token blacklisting for logout  
-✅ Enable security audit logging  
+✅ Enable security audit logging
 
 ---
 
 ## 🌍 Environment-Specific URLs
 
-| Environment | JWK Endpoint URL |
-|-------------|------------------|
-| Local | `http://localhost:8080/.well-known/jwks.json` |
-| Docker | `http://user-service:8080/.well-known/jwks.json` |
-| Kubernetes | `http://user-service.default.svc.cluster.local:8080/.well-known/jwks.json` |
-| Production | `https://api.gripday.com/.well-known/jwks.json` |
+| Environment | JWK Endpoint URL                                                           |
+| ----------- | -------------------------------------------------------------------------- |
+| Local       | `http://localhost:8080/.well-known/jwks.json`                              |
+| Docker      | `http://user-service:8080/.well-known/jwks.json`                           |
+| Kubernetes  | `http://user-service.default.svc.cluster.local:8080/.well-known/jwks.json` |
+| Production  | `https://api.gripday.com/.well-known/jwks.json`                            |
 
 ---
 
@@ -170,6 +179,7 @@ token_cleanup_duration_seconds
 ## 📞 Support
 
 For issues or questions:
+
 1. Check logs: `docker-compose logs -f user-service gateway-service`
 2. Verify metrics: `curl http://localhost:8080/actuator/prometheus`
 3. Review documentation in this repository

@@ -16,6 +16,7 @@ This document summarizes the implementation of the 4 critical authentication gap
 ### What Was Added
 
 **New Controller: `JwkSetResource.java`**
+
 - Location: `gripday-user-service/src/main/java/org/gripday/userservice/presentation/web/JwkSetResource.java`
 - Endpoint: `GET /.well-known/jwks.json`
 - Purpose: Exposes public keys for JWT validation by downstream services
@@ -30,11 +31,13 @@ This document summarizes the implementation of the 4 critical authentication gap
 ### Configuration Changes
 
 **SecurityConfig.java** - Added public access:
+
 ```java
 .requestMatchers("/.well-known/jwks.json").permitAll()
 ```
 
 **Gateway application.yml** - Added to public paths:
+
 ```yaml
 public-paths:
   - /.well-known/jwks.json
@@ -68,6 +71,7 @@ curl http://localhost:8080/.well-known/jwks.json
 ### What Was Added
 
 **New Service: `JwtKeyManagementService.java`**
+
 - Location: `gripday-user-service/src/main/java/org/gripday/userservice/domain/service/JwtKeyManagementService.java`
 - Purpose: Manages RSA key pairs with rotation support
 
@@ -92,17 +96,18 @@ public void rotateKeys() {
 ### Configuration Changes
 
 **JwtConfiguration.java** - Updated to use key management service:
+
 ```java
 @Bean
 public JWKSource<SecurityContext> jwkSource() {
-  return (jwkSelector, context) -> 
-    jwkSelector.select(keyManagementService.getJwkSet());
+  return (jwkSelector, context) -> jwkSelector.select(keyManagementService.getJwkSet());
 }
 ```
 
 ### Admin Endpoints
 
 **New Controller: `AdminKeyManagementResource.java`**
+
 - `POST /api/v1/admin/keys/rotate` - Manual key rotation (SUPER_ADMIN only)
 - `POST /api/v1/admin/keys/cleanup` - Manual token cleanup (SUPER_ADMIN only)
 
@@ -127,11 +132,13 @@ curl -X POST http://localhost:8080/api/v1/admin/keys/rotate \
 ### What Changed
 
 **Before:**
+
 - Gateway: HMAC-SHA256 with shared secret
 - User Service: RSA256 with private key
 - Downstream: RSA256 with public key
 
 **After:**
+
 - Gateway: RSA256 with JWK endpoint ✅
 - User Service: RSA256 with private key ✅
 - Downstream: RSA256 with JWK endpoint ✅
@@ -139,6 +146,7 @@ curl -X POST http://localhost:8080/api/v1/admin/keys/rotate \
 ### Gateway Changes
 
 **SecurityConfiguration.java** - Updated to use OAuth2 Resource Server:
+
 ```java
 @Bean
 public ReactiveJwtDecoder jwtDecoder() {
@@ -148,15 +156,12 @@ public ReactiveJwtDecoder jwtDecoder() {
 
 @Bean
 public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-  return http
-    .oauth2ResourceServer(oauth2 -> oauth2
-      .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
-    )
-    .build();
+  return http.oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.jwtDecoder(jwtDecoder()))).build();
 }
 ```
 
 **JwtAuthenticationFilter.java** - Simplified to use Spring Security JWT:
+
 ```java
 // Extract user context from validated JWT
 return ReactiveSecurityContextHolder.getContext()
@@ -172,6 +177,7 @@ return ReactiveSecurityContextHolder.getContext()
 ```
 
 **application.yml** - Updated JWT configuration:
+
 ```yaml
 gripday:
   gateway:
@@ -198,6 +204,7 @@ gripday:
 ### What Was Added
 
 **New Service: `TokenCleanupService.java`**
+
 - Location: `gripday-user-service/src/main/java/org/gripday/userservice/domain/service/TokenCleanupService.java`
 - Purpose: Scheduled cleanup of expired tokens and sessions from Redis
 
@@ -220,6 +227,7 @@ public void cleanupExpiredTokens() {
 ### Metrics
 
 The service records metrics for monitoring:
+
 - `token.cleanup.refresh_tokens` - Number of refresh tokens removed
 - `token.cleanup.revocations` - Number of revocation records removed
 - `token.cleanup.sessions` - Number of sessions removed
@@ -367,7 +375,7 @@ redis_keys_count
 
 # Alert if Redis memory grows too large
 - alert: RedisMemoryHigh
-  expr: redis_memory_used_bytes > 1073741824  # 1GB
+  expr: redis_memory_used_bytes > 1073741824 # 1GB
 ```
 
 ---
@@ -377,18 +385,21 @@ redis_keys_count
 If issues occur during deployment:
 
 ### 1. JWK Endpoint Issues
+
 ```bash
 # Revert to manual public key configuration in downstream services
 # Update application.yml to use static public key
 ```
 
 ### 2. Key Rotation Issues
+
 ```bash
 # Disable scheduled rotation temporarily
 # Use single key until issue is resolved
 ```
 
 ### 3. Gateway RSA Validation Issues
+
 ```bash
 # Revert Gateway to HMAC validation
 # Update application.yml with secret key
@@ -396,6 +407,7 @@ If issues occur during deployment:
 ```
 
 ### 4. Cleanup Job Issues
+
 ```bash
 # Disable scheduled cleanup
 # Perform manual cleanup if needed
@@ -504,16 +516,19 @@ curl http://localhost:8080/actuator/prometheus | grep token_cleanup
 ## Performance Impact
 
 ### JWK Endpoint
+
 - **Latency**: < 10ms (in-memory operation)
 - **Caching**: Downstream services cache JWK Set
 - **Load**: Minimal (only fetched on startup or key rotation)
 
 ### Key Rotation
+
 - **Frequency**: Every 90 days (configurable)
 - **Duration**: < 100ms (key generation)
 - **Downtime**: Zero (grace period support)
 
 ### Token Cleanup
+
 - **Frequency**: Daily at 2 AM
 - **Duration**: Depends on Redis size (typically < 5 seconds)
 - **Impact**: Minimal (runs during low-traffic period)

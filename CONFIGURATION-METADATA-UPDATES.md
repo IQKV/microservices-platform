@@ -9,6 +9,7 @@ This document summarizes the updates made to Spring configuration metadata files
 ## Gateway Service Metadata Updates
 
 ### File Location
+
 `gripday-gateway-service/src/main/resources/META-INF/spring-configuration-metadata.json`
 
 ### Changes Made
@@ -16,6 +17,7 @@ This document summarizes the updates made to Spring configuration metadata files
 #### 1. New Property: `gripday.gateway.security.jwt.jwk-set-uri`
 
 **Added:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.jwk-set-uri",
@@ -28,6 +30,7 @@ This document summarizes the updates made to Spring configuration metadata files
 **Purpose:** Specifies the URL where the Gateway Service fetches public keys from the User Service for JWT validation.
 
 **Hints Added:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.jwk-set-uri",
@@ -51,6 +54,7 @@ This document summarizes the updates made to Spring configuration metadata files
 #### 2. Updated Property: `gripday.gateway.security.jwt.algorithm`
 
 **Before:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.algorithm",
@@ -61,6 +65,7 @@ This document summarizes the updates made to Spring configuration metadata files
 ```
 
 **After:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.algorithm",
@@ -73,6 +78,7 @@ This document summarizes the updates made to Spring configuration metadata files
 **Change:** Default algorithm changed from `HS256` to `RS256` to reflect the new architecture.
 
 **Hints Updated:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.algorithm",
@@ -100,6 +106,7 @@ This document summarizes the updates made to Spring configuration metadata files
 #### 4. Updated Property: `gripday.gateway.security.jwt.issuer`
 
 **Before:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.issuer",
@@ -110,6 +117,7 @@ This document summarizes the updates made to Spring configuration metadata files
 ```
 
 **After:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.issuer",
@@ -120,12 +128,14 @@ This document summarizes the updates made to Spring configuration metadata files
 ```
 
 **Changes:**
+
 - Default value changed from `gripday` to `gripday-user-service`
 - Description clarified that it must match User Service issuer
 
 #### 5. Updated Property: `gripday.gateway.security.jwt.audience`
 
 **Before:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.audience",
@@ -136,6 +146,7 @@ This document summarizes the updates made to Spring configuration metadata files
 ```
 
 **After:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.audience",
@@ -149,6 +160,7 @@ This document summarizes the updates made to Spring configuration metadata files
 #### 6. New Properties: Token Expiry Configuration
 
 **Added:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.access-token-expiry",
@@ -171,9 +183,11 @@ This document summarizes the updates made to Spring configuration metadata files
 ## User Service Metadata
 
 ### File Location
+
 `gripday-user-service/src/main/resources/META-INF/spring-configuration-metadata.json`
 
 ### Status
+
 **No changes required.**
 
 **Reason:** The User Service JWT configuration is managed programmatically by `JwtKeyManagementService` and `JwtConfiguration` classes, which don't expose configuration properties. The key rotation and token cleanup are automatic and don't require user configuration.
@@ -205,6 +219,7 @@ With these metadata updates, IDEs will provide:
 ### Example IDE Experience
 
 **Before (HS256):**
+
 ```yaml
 gripday:
   gateway:
@@ -215,13 +230,14 @@ gripday:
 ```
 
 **After (RS256):**
+
 ```yaml
 gripday:
   gateway:
     security:
       jwt:
         algorithm: RS256
-        jwk-set-uri: http://localhost:8080/.well-known/jwks.json  # ✓ Autocomplete available
+        jwk-set-uri: http://localhost:8080/.well-known/jwks.json # ✓ Autocomplete available
         # secret-key removed - no longer needed
 ```
 
@@ -292,6 +308,7 @@ gripday:
 ### Step 1: Update Gateway Configuration
 
 **Old Configuration (HMAC):**
+
 ```yaml
 gripday:
   gateway:
@@ -304,6 +321,7 @@ gripday:
 ```
 
 **New Configuration (RSA):**
+
 ```yaml
 gripday:
   gateway:
@@ -319,11 +337,13 @@ gripday:
 ### Step 2: Update Environment Variables
 
 **Remove:**
+
 ```bash
 JWT_SECRET_KEY=your-secret-key  # No longer used
 ```
 
 **Add:**
+
 ```bash
 USER_SERVICE_JWK_URI=http://user-service:8080/.well-known/jwks.json
 ```
@@ -361,6 +381,7 @@ mvn validate
 ### JSON Schema Validation
 
 The metadata files follow Spring Boot's configuration metadata JSON schema:
+
 - Schema: `https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html`
 - Format: JSON with groups, properties, and hints
 
@@ -371,6 +392,7 @@ The metadata files follow Spring Boot's configuration metadata JSON schema:
 ### Issue: IDE Not Showing Autocomplete
 
 **Solution:**
+
 1. Rebuild project: `mvn clean install`
 2. Refresh IDE: File → Invalidate Caches / Restart
 3. Verify metadata file location: `src/main/resources/META-INF/spring-configuration-metadata.json`
@@ -378,6 +400,7 @@ The metadata files follow Spring Boot's configuration metadata JSON schema:
 ### Issue: Deprecated Warning Not Showing
 
 **Solution:**
+
 1. Ensure IDE has Spring Boot plugin installed
 2. Check that metadata file is in classpath
 3. Verify JSON syntax is valid
@@ -385,6 +408,7 @@ The metadata files follow Spring Boot's configuration metadata JSON schema:
 ### Issue: Wrong Default Values
 
 **Solution:**
+
 1. Check `defaultValue` in metadata matches actual code
 2. Verify property type matches (String, Duration, Boolean, etc.)
 3. Update metadata file and rebuild

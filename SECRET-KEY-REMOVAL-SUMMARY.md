@@ -9,7 +9,9 @@ The `secret-key` property has been completely removed from the Gateway Service a
 ## What Was Removed
 
 ### 1. GripdayProperties.java
+
 **Removed from JwtProperties record:**
+
 ```java
 String secretKey, // Optional - only needed for HMAC (deprecated)
 ```
@@ -17,16 +19,19 @@ String secretKey, // Optional - only needed for HMAC (deprecated)
 ### 2. Configuration Files
 
 #### application.yml
+
 **Before:**
+
 ```yaml
 gripday:
   gateway:
     security:
       jwt:
-        secret-key: ${JWT_SECRET_KEY:}  # Deprecated
+        secret-key: ${JWT_SECRET_KEY:} # Deprecated
 ```
 
 **After:**
+
 ```yaml
 gripday:
   gateway:
@@ -36,7 +41,9 @@ gripday:
 ```
 
 #### application-local.yml
+
 **Before:**
+
 ```yaml
 secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET:local-development-secret-key-not-for-production-use}
 algorithm: HS256
@@ -44,6 +51,7 @@ issuer: gripday-local
 ```
 
 **After:**
+
 ```yaml
 algorithm: RS256
 issuer: gripday-user-service
@@ -51,7 +59,9 @@ jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
 ```
 
 #### application-staging.yml
+
 **Before:**
+
 ```yaml
 secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
 algorithm: HS256
@@ -59,6 +69,7 @@ issuer: gripday-staging
 ```
 
 **After:**
+
 ```yaml
 algorithm: RS256
 issuer: gripday-user-service
@@ -66,7 +77,9 @@ jwk-set-uri: ${USER_SERVICE_JWK_URI:http://user-service:8080/.well-known/jwks.js
 ```
 
 #### application-production.yml
+
 **Before:**
+
 ```yaml
 secret-key: ${GRIPDAY_GATEWAY_SECURITY_JWT_SECRET}
 algorithm: HS256
@@ -74,6 +87,7 @@ issuer: gripday
 ```
 
 **After:**
+
 ```yaml
 algorithm: RS256
 issuer: gripday-user-service
@@ -81,7 +95,9 @@ jwk-set-uri: ${USER_SERVICE_JWK_URI}
 ```
 
 #### application-test.yml
+
 **Before:**
+
 ```yaml
 secret-key: test-secret-key-for-unit-tests-only
 algorithm: HS256
@@ -89,6 +105,7 @@ issuer: gripday-test
 ```
 
 **After:**
+
 ```yaml
 algorithm: RS256
 issuer: gripday-user-service
@@ -98,6 +115,7 @@ jwk-set-uri: http://localhost:8080/.well-known/jwks.json
 ### 3. Configuration Metadata
 
 **Removed from spring-configuration-metadata.json:**
+
 ```json
 {
   "name": "gripday.gateway.security.jwt.secret-key",
@@ -146,6 +164,7 @@ USER_SERVICE_JWK_URI=http://user-service:8080/.well-known/jwks.json
 ### Configuration Changes Required
 
 **All Gateway Service configuration files must:**
+
 1. Remove `secret-key` property
 2. Change `algorithm` from `HS256` to `RS256`
 3. Add `jwk-set-uri` property
@@ -232,18 +251,21 @@ If you need to rollback to HMAC (not recommended):
 ## Benefits of Removal
 
 ### Security
+
 - ✅ No shared secrets to manage or leak
 - ✅ Asymmetric encryption (more secure)
 - ✅ Automatic key rotation support
 - ✅ Industry-standard approach
 
 ### Operations
+
 - ✅ Simpler configuration (one less property)
 - ✅ No secret rotation needed
 - ✅ Automatic key distribution
 - ✅ Zero-downtime key rotation
 
 ### Development
+
 - ✅ Easier local development setup
 - ✅ No secret management in development
 - ✅ Consistent across all environments
@@ -265,8 +287,9 @@ The following documentation has been updated to reflect the removal:
 ## Summary
 
 The `secret-key` property has been completely removed from:
+
 - ✅ Java code (GripdayProperties.java)
-- ✅ All configuration files (application*.yml)
+- ✅ All configuration files (application\*.yml)
 - ✅ Configuration metadata (spring-configuration-metadata.json)
 - ✅ Test configuration (application-test.yml)
 

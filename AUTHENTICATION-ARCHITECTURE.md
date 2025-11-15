@@ -5,6 +5,7 @@
 The Gripday platform implements a **centralized authentication** pattern with **JWT-based token propagation** across microservices. The User Service acts as the authentication authority, while the Gateway Service enforces authentication and propagates user context to downstream services.
 
 **Key Architecture Principles:**
+
 - **Single Source of Truth**: User Service is the sole authentication authority
 - **Asymmetric Encryption**: RSA256 everywhere for enhanced security
 - **Dynamic Key Distribution**: JWK endpoint for automatic public key fetching
@@ -14,10 +15,12 @@ The Gripday platform implements a **centralized authentication** pattern with **
 ## Architecture Components
 
 ### 1. User Service (Authentication Authority)
+
 **Port:** 8080  
 **Role:** Centralized authentication and user management
 
 #### Responsibilities
+
 - User registration with email verification
 - User authentication (login/logout)
 - JWT token generation (access + refresh tokens)
@@ -28,11 +31,14 @@ The Gripday platform implements a **centralized authentication** pattern with **
 - Multi-tenant user isolation
 
 #### JWT Token Generation
+
 **Algorithm:** RSA256 (asymmetric encryption)
+
 - **Access Token:** 15 minutes expiry
 - **Refresh Token:** 7 days expiry (30 days with "remember me")
 
 **Token Structure:**
+
 ```json
 {
   "iss": "gripday-user-service",
@@ -55,6 +61,7 @@ The Gripday platform implements a **centralized authentication** pattern with **
 ```
 
 **JWT Header (includes key ID for rotation):**
+
 ```json
 {
   "alg": "RS256",
@@ -64,6 +71,7 @@ The Gripday platform implements a **centralized authentication** pattern with **
 ```
 
 #### Key Features
+
 - **RSA256 Key Pair:** Managed by JwtKeyManagementService (2048-bit)
 - **Automated Key Rotation:** Every 90 days with 7-day grace period
 - **JWK Endpoint:** `/.well-known/jwks.json` for public key distribution
@@ -75,19 +83,20 @@ The Gripday platform implements a **centralized authentication** pattern with **
 - **Security Audit Logging:** All auth events logged
 
 #### Configuration
+
 ```yaml
 gripday:
   auth:
     jwt:
-      access-token-expiry: PT15M  # 15 minutes
-      refresh-token-expiry: P7D   # 7 days
+      access-token-expiry: PT15M # 15 minutes
+      refresh-token-expiry: P7D # 7 days
       issuer: gripday-user-service
-
 # Key rotation is automatic via JwtKeyManagementService
 # Cleanup runs daily at 2 AM via TokenCleanupService
 ```
 
 #### Public Endpoints
+
 - `GET /.well-known/jwks.json` - JWK Set for public key distribution (no auth required)
 - `POST /api/v1/admin/keys/rotate` - Manual key rotation (SUPER_ADMIN only)
 - `POST /api/v1/admin/keys/cleanup` - Manual token cleanup (SUPER_ADMIN only)
@@ -95,10 +104,12 @@ gripday:
 ---
 
 ### 2. Gateway Service (BFF + Authentication Enforcer)
+
 **Port:** 8080  
 **Role:** API Gateway with JWT validation and context propagation
 
 #### Responsibilities
+
 - Route requests to downstream microservices
 - Validate JWT tokens for protected endpoints using RSA256
 - Extract and propagate user context via headers
@@ -108,7 +119,9 @@ gripday:
 - CORS handling for frontend applications
 
 #### JWT Validation
+
 **Algorithm:** RSA256 (asymmetric encryption)
+
 - Uses OAuth2 Resource Server with JWK endpoint
 - Fetches public keys from User Service dynamically
 - Validates token signature, issuer, expiry
@@ -116,6 +129,7 @@ gripday:
 - No shared secrets required
 
 **Configuration:**
+
 ```yaml
 gripday:
   gateway:
@@ -128,13 +142,14 @@ gripday:
         enabled: true
         enable-user-context-propagation: true
       public-paths:
-        - /.well-known/jwks.json  # JWK endpoint
+        - /.well-known/jwks.json # JWK endpoint
         - /api/v1/auth/login
         - /api/v1/auth/signup
         # ... other public paths
 ```
 
 #### User Context Propagation
+
 Gateway extracts JWT claims and propagates via HTTP headers:
 
 ```http
@@ -146,36 +161,39 @@ X-Tenant-ID: default
 ```
 
 #### Public Paths (No Authentication)
+
 ```yaml
 public-paths:
   # JWK endpoint for public key distribution
   - /.well-known/jwks.json
-  
+
   # Authentication endpoints
   - /api/v1/auth/login
   - /api/v1/auth/signup
   - /api/v1/auth/refresh
   - /api/v1/auth/validate
-  
+
   # Email verification
   - /api/v1/auth/email/verify
   - /api/v1/auth/email/resend
-  
+
   # Password management
   - /api/v1/password/forgot
   - /api/v1/password/reset
-  
+
   # Public bookstore endpoints
   - /api/v1/bookstore/books
   - /api/v1/bookstore/books/**
-  
+
   # Health checks
   - /actuator/health
   - /actuator/info
 ```
 
 #### Tenant Context Extraction
+
 Priority order:
+
 1. `X-Tenant-ID` header
 2. JWT `tenantId` claim
 3. Subdomain extraction (e.g., `tenant1.api.gripday.com`)
@@ -183,17 +201,21 @@ Priority order:
 ---
 
 ### 3. Downstream Services (e.g., Bookstore Service)
+
 **Port:** 8081  
 **Role:** Business microservice consuming authentication
 
 #### Responsibilities
+
 - Validate JWT tokens from Gateway
 - Extract user context from JWT claims
 - Enforce method-level security with `@PreAuthorize`
 - Implement business logic with user context
 
 #### JWT Validation
+
 **Algorithm:** RSA256 (public key validation via JWK endpoint)
+
 - Fetches public keys from User Service's JWK endpoint
 - Validates token signature using RSA public key
 - Automatically handles key rotation (grace period support)
@@ -201,29 +223,34 @@ Priority order:
 - No shared secrets or manual key distribution needed
 
 #### Security Configuration
+
 ```java
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
-  
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) {
     return http
-      .oauth2ResourceServer(oauth2 -> oauth2.jwt())
-      .authorizeHttpRequests(authz -> authz
-        // Public endpoints
-        .requestMatchers(GET, "/api/v1/bookstore/books").permitAll()
-        
-        // Authenticated endpoints
-        .requestMatchers(GET, "/api/v1/bookstore/books/*").authenticated()
-        
-        // Admin-only endpoints
-        .requestMatchers(POST, "/api/v1/bookstore/books").hasAnyRole("ADMIN", "SUPERADMIN")
-        .requestMatchers(PUT, "/api/v1/bookstore/books/**").hasAnyRole("ADMIN", "SUPERADMIN")
-        .requestMatchers(DELETE, "/api/v1/bookstore/books/**").hasAnyRole("ADMIN", "SUPERADMIN")
-        
-        .anyRequest().authenticated()
+      .oauth2ResourceServer((oauth2) -> oauth2.jwt())
+      .authorizeHttpRequests((authz) ->
+        authz
+          // Public endpoints
+          .requestMatchers(GET, "/api/v1/bookstore/books")
+          .permitAll()
+          // Authenticated endpoints
+          .requestMatchers(GET, "/api/v1/bookstore/books/*")
+          .authenticated()
+          // Admin-only endpoints
+          .requestMatchers(POST, "/api/v1/bookstore/books")
+          .hasAnyRole("ADMIN", "SUPERADMIN")
+          .requestMatchers(PUT, "/api/v1/bookstore/books/**")
+          .hasAnyRole("ADMIN", "SUPERADMIN")
+          .requestMatchers(DELETE, "/api/v1/bookstore/books/**")
+          .hasAnyRole("ADMIN", "SUPERADMIN")
+          .anyRequest()
+          .authenticated()
       )
       .build();
   }
@@ -231,6 +258,7 @@ public class SecurityConfiguration {
 ```
 
 #### Application Configuration
+
 ```yaml
 spring:
   security:
@@ -242,13 +270,14 @@ spring:
 ```
 
 #### User Context Extraction
+
 ```java
 @Component
 public class UserContextExtractor {
-  
+
   public UserContext extractFromJwt(Jwt jwt) {
     var claims = jwt.getClaims();
-    
+
     return new UserContext(
       extractUserId(claims),
       extractUsername(claims),
@@ -373,24 +402,28 @@ public class UserContextExtractor {
 ## Security Features
 
 ### 1. Multi-Tenant Isolation
+
 - **Database Level:** Separate schemas per tenant
 - **JWT Claims:** `tenantId` embedded in tokens
 - **Header Propagation:** `X-Tenant-ID` header
 - **Rate Limiting:** Per-tenant quotas
 
 ### 2. Token Security
+
 - **Access Token:** Short-lived (15 min), RSA256 signed
 - **Refresh Token:** Long-lived (7 days), stored in Redis
 - **Token Blacklisting:** Immediate invalidation on logout
 - **Refresh Revocation:** User-wide revocation on password change
 
 ### 3. Account Protection
+
 - **Account Lockout:** 5 failed attempts = 15-minute lockout
 - **Email Verification:** Required before login
 - **Password Requirements:** Min 8 chars, uppercase, lowercase, number, special char
 - **Rate Limiting:** Per-endpoint and per-tenant limits
 
 ### 4. Audit Logging
+
 - **Authentication Events:** Login, logout, failed attempts
 - **Token Events:** Generation, refresh, revocation
 - **Security Events:** Account lockout, suspicious activity
@@ -400,16 +433,16 @@ public class UserContextExtractor {
 
 ## Key Differences: User Service vs Gateway vs Downstream
 
-| Aspect | User Service | Gateway Service | Downstream Services |
-|--------|-------------|-----------------|---------------------|
-| **JWT Algorithm** | RSA256 (asymmetric) | RSA256 (asymmetric) | RSA256 (asymmetric) |
-| **Key Type** | RSA key pair (private) | RSA public key (via JWK) | RSA public key (via JWK) |
-| **Token Generation** | ✅ Generates tokens | ❌ Only validates | ❌ Only validates |
-| **Token Validation** | ✅ Validates own tokens | ✅ Validates all tokens | ✅ Validates all tokens |
-| **User Context** | ✅ Creates from database | ✅ Extracts from JWT | ✅ Extracts from JWT |
-| **Header Propagation** | ❌ Not needed | ✅ Propagates to downstream | ❌ Receives from Gateway |
-| **Key Management** | ✅ Manages key rotation | ❌ Fetches from JWK | ❌ Fetches from JWK |
-| **JWK Endpoint** | ✅ Exposes public keys | ❌ Consumes JWK endpoint | ❌ Consumes JWK endpoint |
+| Aspect                 | User Service             | Gateway Service             | Downstream Services      |
+| ---------------------- | ------------------------ | --------------------------- | ------------------------ |
+| **JWT Algorithm**      | RSA256 (asymmetric)      | RSA256 (asymmetric)         | RSA256 (asymmetric)      |
+| **Key Type**           | RSA key pair (private)   | RSA public key (via JWK)    | RSA public key (via JWK) |
+| **Token Generation**   | ✅ Generates tokens      | ❌ Only validates           | ❌ Only validates        |
+| **Token Validation**   | ✅ Validates own tokens  | ✅ Validates all tokens     | ✅ Validates all tokens  |
+| **User Context**       | ✅ Creates from database | ✅ Extracts from JWT        | ✅ Extracts from JWT     |
+| **Header Propagation** | ❌ Not needed            | ✅ Propagates to downstream | ❌ Receives from Gateway |
+| **Key Management**     | ✅ Manages key rotation  | ❌ Fetches from JWK         | ❌ Fetches from JWK      |
+| **JWK Endpoint**       | ✅ Exposes public keys   | ❌ Consumes JWK endpoint    | ❌ Consumes JWK endpoint |
 
 ### Why RSA256 Everywhere?
 
@@ -445,6 +478,7 @@ public class UserContextExtractor {
 ## Configuration Summary
 
 ### User Service
+
 ```yaml
 gripday:
   auth:
@@ -452,7 +486,6 @@ gripday:
       access-token-expiry: PT15M
       refresh-token-expiry: P7D
       issuer: gripday-user-service
-
 # Key rotation and cleanup are automatic
 # - Key rotation: Every 90 days (configurable via @Scheduled annotation)
 # - Token cleanup: Daily at 2 AM
@@ -460,6 +493,7 @@ gripday:
 ```
 
 ### Gateway Service
+
 ```yaml
 gripday:
   gateway:
@@ -477,6 +511,7 @@ gripday:
 ```
 
 ### Downstream Services
+
 ```yaml
 spring:
   security:
@@ -485,7 +520,6 @@ spring:
         jwt:
           issuer-uri: http://user-service:8080
           jwk-set-uri: http://user-service:8080/.well-known/jwks.json
-
 # Spring Security automatically:
 # - Fetches public keys from JWK endpoint
 # - Caches keys (5 minutes default)
@@ -498,6 +532,7 @@ spring:
 ## Best Practices
 
 ### 1. Token Management
+
 - ✅ Use short-lived access tokens (15 min)
 - ✅ Use long-lived refresh tokens (7 days)
 - ✅ Implement token blacklisting for logout
@@ -507,6 +542,7 @@ spring:
 - ✅ Include unique token ID (jti) for tracking
 
 ### 2. Key Management
+
 - ✅ Automated key rotation every 90 days
 - ✅ 7-day grace period for old keys
 - ✅ Unique key IDs (kid) in JWT header
@@ -515,24 +551,28 @@ spring:
 - ✅ Comprehensive metrics and monitoring
 
 ### 3. Security Headers
+
 - ✅ Propagate `X-Correlation-ID` for tracing
 - ✅ Propagate `X-User-ID`, `X-Username`, `X-User-Roles`
 - ✅ Propagate `X-Tenant-ID` for multi-tenancy
 - ✅ Remove internal headers in responses
 
 ### 4. Error Handling
+
 - ✅ Return RFC7807 Problem Details for errors
 - ✅ Include correlation IDs in error responses
 - ✅ Log security events with audit trail
 - ✅ Rate limit authentication endpoints
 
 ### 5. Multi-Tenant Support
+
 - ✅ Isolate data at database level
 - ✅ Validate tenant context in every request
 - ✅ Enforce tenant-specific rate limits
 - ✅ Prevent cross-tenant access
 
 ### 6. Observability
+
 - ✅ Metrics for token operations (generation, validation, cleanup)
 - ✅ Metrics for key rotation events
 - ✅ Distributed tracing with correlation IDs
@@ -544,6 +584,7 @@ spring:
 ## Testing Authentication
 
 ### 1. Test JWK Endpoint
+
 ```bash
 # Verify public keys are exposed
 curl http://localhost:8080/.well-known/jwks.json | jq
@@ -564,6 +605,7 @@ curl http://localhost:8080/.well-known/jwks.json | jq
 ```
 
 ### 2. Register User
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/signup \
   -H "Content-Type: application/json" \
@@ -578,6 +620,7 @@ curl -X POST http://localhost:8080/api/v1/auth/signup \
 ```
 
 ### 3. Login
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -589,6 +632,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 ```
 
 ### 4. Access Protected Resource
+
 ```bash
 TOKEN="<access_token>"
 
@@ -598,6 +642,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```
 
 ### 5. Refresh Token
+
 ```bash
 REFRESH_TOKEN="<refresh_token>"
 
@@ -607,12 +652,14 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 ```
 
 ### 6. Logout
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### 7. Test Key Rotation (Admin)
+
 ```bash
 # Manual key rotation
 curl -X POST http://localhost:8080/api/v1/admin/keys/rotate \
@@ -623,6 +670,7 @@ curl http://localhost:8080/.well-known/jwks.json | jq '.keys[].kid'
 ```
 
 ### 8. Test Token Cleanup (Admin)
+
 ```bash
 # Manual cleanup trigger
 curl -X POST http://localhost:8080/api/v1/admin/keys/cleanup \
@@ -691,36 +739,40 @@ curl http://localhost:8080/actuator/prometheus | grep token_cleanup
 The authentication architecture was enhanced with the following improvements:
 
 #### 1. JWK Endpoint for Dynamic Key Distribution
+
 - **Before:** Manual public key configuration in each service
 - **After:** Automatic key fetching from `/.well-known/jwks.json`
 - **Benefit:** Zero-configuration key distribution, automatic updates
 
 #### 2. Automated Key Rotation
+
 - **Before:** Static keys generated at startup
 - **After:** Automated rotation every 90 days with 7-day grace period
 - **Benefit:** Enhanced security, zero-downtime rotation
 
 #### 3. Unified RSA256 Architecture
+
 - **Before:** Gateway used HMAC-SHA256, downstream used RSA256
 - **After:** RSA256 everywhere with JWK endpoint
 - **Benefit:** Simplified architecture, no shared secrets, better security
 
 #### 4. Automated Token Cleanup
+
 - **Before:** No cleanup, Redis memory growth
 - **After:** Daily cleanup of expired tokens and sessions
 - **Benefit:** Prevents memory leaks, maintains Redis performance
 
 ### Security Enhancements
 
-| Feature | Before | After | Impact |
-|---------|--------|-------|--------|
-| Key Distribution | Manual | Automatic (JWK) | High |
-| Key Rotation | None | Every 90 days | High |
-| Algorithm Consistency | Mixed (HMAC + RSA) | Unified (RSA256) | Medium |
-| Token Cleanup | None | Daily automated | Medium |
-| Grace Period | N/A | 7 days | High |
-| Key Versioning | None | kid in JWT header | Medium |
-| Shared Secrets | Required | None | High |
+| Feature               | Before             | After             | Impact |
+| --------------------- | ------------------ | ----------------- | ------ |
+| Key Distribution      | Manual             | Automatic (JWK)   | High   |
+| Key Rotation          | None               | Every 90 days     | High   |
+| Algorithm Consistency | Mixed (HMAC + RSA) | Unified (RSA256)  | Medium |
+| Token Cleanup         | None               | Daily automated   | Medium |
+| Grace Period          | N/A                | 7 days            | High   |
+| Key Versioning        | None               | kid in JWT header | Medium |
+| Shared Secrets        | Required           | None              | High   |
 
 ### Operational Improvements
 
@@ -734,6 +786,7 @@ The authentication architecture was enhanced with the following improvements:
 ### Migration Path
 
 For existing deployments, see:
+
 - [AUTHENTICATION-MIGRATION-GUIDE.md](AUTHENTICATION-MIGRATION-GUIDE.md) - Step-by-step migration
 - [AUTHENTICATION-FIXES-IMPLEMENTATION.md](AUTHENTICATION-FIXES-IMPLEMENTATION.md) - Implementation details
 
@@ -742,6 +795,7 @@ For existing deployments, see:
 ### Key Metrics to Monitor
 
 #### Authentication Metrics
+
 ```prometheus
 # Login attempts
 http_server_requests_seconds_count{uri="/api/v1/auth/login"}
@@ -759,6 +813,7 @@ auth_account_lockout_total
 ```
 
 #### Key Management Metrics
+
 ```prometheus
 # Active keys
 jwt_active_keys_count
@@ -772,6 +827,7 @@ http_server_requests_seconds_count{uri="/.well-known/jwks.json"}
 ```
 
 #### Token Cleanup Metrics
+
 ```prometheus
 # Cleanup operations
 token_cleanup_refresh_tokens_total{status="removed"}
@@ -787,6 +843,7 @@ token_cleanup_errors_total
 ```
 
 #### Redis Metrics
+
 ```prometheus
 # Memory usage
 redis_memory_used_bytes
@@ -818,7 +875,7 @@ redis_keys_count{pattern="session:*"}
 
 # Alert if Redis memory is high
 - alert: RedisMemoryHigh
-  expr: redis_memory_used_bytes > 1073741824  # 1GB
+  expr: redis_memory_used_bytes > 1073741824 # 1GB
   severity: warning
 
 # Alert if authentication failure rate is high
@@ -830,24 +887,28 @@ redis_keys_count{pattern="session:*"}
 ### Grafana Dashboard Panels
 
 **Authentication Overview:**
+
 - Login success/failure rate
 - Active sessions count
 - Token generation rate
 - Average token validation time
 
 **Key Management:**
+
 - Active keys count
 - Last key rotation timestamp
 - Key rotation history
 - JWK endpoint response time
 
 **Token Cleanup:**
+
 - Tokens cleaned per day
 - Cleanup duration trend
 - Redis memory usage
 - Cleanup success rate
 
 **Security:**
+
 - Failed login attempts
 - Account lockouts
 - Suspicious activity alerts

@@ -7,6 +7,7 @@ This document provides implementation guidance for the **4 critical gaps** that 
 ## 1. JWK Endpoint Implementation
 
 ### Problem
+
 Downstream services cannot dynamically fetch the public key for JWT validation.
 
 ### Solution
@@ -16,12 +17,11 @@ Downstream services cannot dynamically fetch the public key for JWT validation.
 ```java
 package org.gripday.userservice.presentation.web;
 
-import java.util.Map;
-
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,10 +41,7 @@ public class JwkSetController {
     this.jwkSource = jwkSource;
   }
 
-  @Operation(
-      summary = "Get JWK Set",
-      description = "Returns the JSON Web Key Set containing public keys for JWT validation"
-  )
+  @Operation(summary = "Get JWK Set", description = "Returns the JSON Web Key Set containing public keys for JWT validation")
   @GetMapping("/jwks.json")
   public Map<String, Object> jwkSet() {
     try {
@@ -119,6 +116,7 @@ curl http://localhost:8080/.well-known/jwks.json
 ## 2. Key Rotation Implementation
 
 ### Problem
+
 RSA keys are generated once at startup with no rotation mechanism.
 
 ### Solution
@@ -128,6 +126,8 @@ RSA keys are generated once at startup with no rotation mechanism.
 ```java
 package org.gripday.userservice.domain.service;
 
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -137,9 +137,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -179,7 +176,6 @@ public class JwtKeyManagementService {
 
       // Clean up old keys (older than grace period)
       cleanupOldKeys();
-
     } catch (final Exception e) {
       logger.error("Failed to rotate keys", e);
       throw new RuntimeException("Key rotation failed", e);
@@ -215,11 +211,11 @@ public class JwtKeyManagementService {
       var privateKey = (RSAPrivateKey) entry.keyPair().getPrivate();
 
       var jwk = new RSAKey.Builder(publicKey)
-          .privateKey(privateKey)
-          .keyID(entry.keyId())
-          .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
-          .keyUse(com.nimbusds.jose.jwk.KeyUse.SIGNATURE)
-          .build();
+        .privateKey(privateKey)
+        .keyID(entry.keyId())
+        .algorithm(com.nimbusds.jose.JWSAlgorithm.RS256)
+        .keyUse(com.nimbusds.jose.jwk.KeyUse.SIGNATURE)
+        .build();
 
       jwkList.add(jwk);
     }
@@ -241,14 +237,16 @@ public class JwtKeyManagementService {
   private void cleanupOldKeys() {
     var cutoffTime = Instant.now().minusSeconds(KEY_ROTATION_GRACE_PERIOD_DAYS * 24 * 60 * 60);
 
-    var removedKeys = keys.entrySet().stream()
-        .filter(entry -> !entry.getKey().equals(currentKeyId))
-        .filter(entry -> entry.getValue().createdAt().isBefore(cutoffTime))
-        .map(entry -> {
-          keys.remove(entry.getKey());
-          return entry.getKey();
-        })
-        .toList();
+    var removedKeys = keys
+      .entrySet()
+      .stream()
+      .filter((entry) -> !entry.getKey().equals(currentKeyId))
+      .filter((entry) -> entry.getValue().createdAt().isBefore(cutoffTime))
+      .map((entry) -> {
+        keys.remove(entry.getKey());
+        return entry.getKey();
+      })
+      .toList();
 
     if (!removedKeys.isEmpty()) {
       logger.info("Removed {} old key(s): {}", removedKeys.size(), removedKeys);
@@ -268,12 +266,7 @@ public class JwtKeyManagementService {
   /**
    * Key entry with metadata.
    */
-  private record KeyEntry(
-      String keyId,
-      KeyPair keyPair,
-      Instant createdAt
-  ) {
-  }
+  private record KeyEntry(String keyId, KeyPair keyPair, Instant createdAt) {}
 }
 ```
 
@@ -377,8 +370,8 @@ gripday:
     jwt:
       key-rotation:
         enabled: true
-        schedule: "0 0 0 1 */3 *"  # Every 3 months
-        grace-period-days: 7        # Keep old keys for 7 days
+        schedule: "0 0 0 1 */3 *" # Every 3 months
+        grace-period-days: 7 # Keep old keys for 7 days
 ```
 
 ---
@@ -386,6 +379,7 @@ gripday:
 ## 3. Consistent JWT Validation (Remove HMAC from Gateway)
 
 ### Problem
+
 Gateway uses HMAC-SHA256 while downstream services use RSA256, creating complexity and security concerns.
 
 ### Solution
@@ -399,8 +393,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
@@ -416,19 +410,12 @@ public class SecurityConfiguration {
   @Bean
   public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
     return http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .authorizeExchange(exchanges -> exchanges
-            .pathMatchers(gripdayProperties.gateway().security().publicPaths().toArray(new String[0]))
-            .permitAll()
-            .anyExchange()
-            .authenticated()
-        )
-        // Use OAuth2 Resource Server with JWK Set
-        .oauth2ResourceServer(oauth2 -> oauth2
-            .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
-        )
-        .build();
+      .csrf((csrf) -> csrf.disable())
+      .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
+      .authorizeExchange((exchanges) -> exchanges.pathMatchers(gripdayProperties.gateway().security().publicPaths().toArray(new String[0])).permitAll().anyExchange().authenticated())
+      // Use OAuth2 Resource Server with JWK Set
+      .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.jwtDecoder(jwtDecoder())))
+      .build();
   }
 
   @Bean
@@ -476,36 +463,32 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     return ReactiveSecurityContextHolder.getContext()
-        .map(securityContext -> securityContext.getAuthentication())
-        .filter(auth -> auth instanceof JwtAuthenticationToken)
-        .map(auth -> (JwtAuthenticationToken) auth)
-        .map(jwtAuth -> jwtAuth.getToken())
-        .flatMap(jwt -> {
-          // Extract user context from JWT
-          var userContext = extractUserContext(jwt);
-          
-          // Add headers
-          var modifiedRequest = exchange.getRequest().mutate()
-              .header("X-User-ID", userContext.userId().toString())
-              .header("X-Username", userContext.username())
-              .header("X-User-Roles", String.join(",", userContext.roles()))
-              .header("X-Tenant-ID", userContext.tenantId())
-              .build();
-          
-          return chain.filter(exchange.mutate().request(modifiedRequest).build());
-        })
-        .switchIfEmpty(chain.filter(exchange));
+      .map((securityContext) -> securityContext.getAuthentication())
+      .filter((auth) -> auth instanceof JwtAuthenticationToken)
+      .map((auth) -> (JwtAuthenticationToken) auth)
+      .map((jwtAuth) -> jwtAuth.getToken())
+      .flatMap((jwt) -> {
+        // Extract user context from JWT
+        var userContext = extractUserContext(jwt);
+
+        // Add headers
+        var modifiedRequest = exchange
+          .getRequest()
+          .mutate()
+          .header("X-User-ID", userContext.userId().toString())
+          .header("X-Username", userContext.username())
+          .header("X-User-Roles", String.join(",", userContext.roles()))
+          .header("X-Tenant-ID", userContext.tenantId())
+          .build();
+
+        return chain.filter(exchange.mutate().request(modifiedRequest).build());
+      })
+      .switchIfEmpty(chain.filter(exchange));
   }
 
   private UserContext extractUserContext(Jwt jwt) {
     // Extract from JWT claims
-    return new UserContext(
-        jwt.getClaim("userId"),
-        jwt.getClaim("username"),
-        jwt.getClaim("email"),
-        jwt.getClaim("roles"),
-        jwt.getClaim("tenantId")
-    );
+    return new UserContext(jwt.getClaim("userId"), jwt.getClaim("username"), jwt.getClaim("email"), jwt.getClaim("roles"), jwt.getClaim("tenantId"));
   }
 
   @Override
@@ -526,6 +509,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 ```
 
 ### Benefits
+
 - ✅ Single algorithm (RSA256) everywhere
 - ✅ No shared secrets to manage
 - ✅ Easier key rotation
@@ -537,6 +521,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 ## 4. Token Cleanup Jobs
 
 ### Problem
+
 Redis accumulates stale refresh tokens and revocation records without cleanup.
 
 ### Solution
@@ -546,10 +531,9 @@ Redis accumulates stale refresh tokens and revocation records without cleanup.
 ```java
 package org.gripday.userservice.domain.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
 import java.util.Set;
-
-import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -567,9 +551,7 @@ public class TokenCleanupService {
   private final RedisTemplate<String, String> redisTemplate;
   private final MeterRegistry meterRegistry;
 
-  public TokenCleanupService(
-      final RedisTemplate<String, String> redisTemplate,
-      final MeterRegistry meterRegistry) {
+  public TokenCleanupService(final RedisTemplate<String, String> redisTemplate, final MeterRegistry meterRegistry) {
     this.redisTemplate = redisTemplate;
     this.meterRegistry = meterRegistry;
   }
@@ -590,8 +572,14 @@ public class TokenCleanupService {
 
       var duration = Instant.now().toEpochMilli() - startTime.toEpochMilli();
 
-      logger.info("Token cleanup completed in {}ms. Removed: {} refresh tokens, {} revocation records, {} sessions, {} blacklist entries",
-          duration, refreshTokensRemoved, revocationRecordsRemoved, sessionsRemoved, blacklistEntriesRemoved);
+      logger.info(
+        "Token cleanup completed in {}ms. Removed: {} refresh tokens, {} revocation records, {} sessions, {} blacklist entries",
+        duration,
+        refreshTokensRemoved,
+        revocationRecordsRemoved,
+        sessionsRemoved,
+        blacklistEntriesRemoved
+      );
 
       // Record metrics
       meterRegistry.counter("token.cleanup.refresh_tokens", "status", "removed").increment(refreshTokensRemoved);
@@ -599,7 +587,6 @@ public class TokenCleanupService {
       meterRegistry.counter("token.cleanup.sessions", "status", "removed").increment(sessionsRemoved);
       meterRegistry.counter("token.cleanup.blacklist", "status", "removed").increment(blacklistEntriesRemoved);
       meterRegistry.timer("token.cleanup.duration").record(java.time.Duration.ofMillis(duration));
-
     } catch (final Exception e) {
       logger.error("Token cleanup job failed", e);
       meterRegistry.counter("token.cleanup.errors").increment();
@@ -612,7 +599,7 @@ public class TokenCleanupService {
   private long cleanupExpiredRefreshTokens() {
     var pattern = "refresh:token:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -642,7 +629,7 @@ public class TokenCleanupService {
   private long cleanupOldRevocationRecords() {
     var pattern = "revoked:refresh:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -674,7 +661,7 @@ public class TokenCleanupService {
   private long cleanupExpiredSessions() {
     var pattern = "session:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -702,7 +689,7 @@ public class TokenCleanupService {
   private long cleanupExpiredBlacklistEntries() {
     var pattern = "blacklist:token:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -745,7 +732,7 @@ gripday:
   auth:
     token-cleanup:
       enabled: true
-      schedule: "0 0 2 * * *"  # Daily at 2 AM
+      schedule: "0 0 2 * * *" # Daily at 2 AM
       refresh-token-retention-days: 7
       revocation-record-retention-days: 30
 ```
