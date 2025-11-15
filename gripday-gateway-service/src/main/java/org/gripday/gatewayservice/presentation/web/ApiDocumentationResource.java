@@ -1,5 +1,9 @@
 package org.gripday.gatewayservice.presentation.web;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -11,11 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Resource for API documentation discovery and navigation.
@@ -31,7 +30,7 @@ public class ApiDocumentationResource {
 
   private final GripdayProperties properties;
 
-  public ApiDocumentationResource(GripdayProperties properties) {
+  public ApiDocumentationResource(final GripdayProperties properties) {
     this.properties = properties;
   }
 
