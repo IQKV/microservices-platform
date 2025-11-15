@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  * Implements key rotation with grace period to allow validation of tokens signed with old keys.
  */
 @Service
-public class JwtKeyManagementService {
+public final class JwtKeyManagementService {
 
   private static final Logger logger = LoggerFactory.getLogger(JwtKeyManagementService.class);
   private static final int KEY_SIZE = 2048;
@@ -28,8 +28,29 @@ public class JwtKeyManagementService {
   private volatile String currentKeyId;
 
   public JwtKeyManagementService() {
-    // Generate initial key pair
-    rotateKeys();
+    // Generate initial key pair using private method to avoid overridable method call
+    initializeKeys();
+  }
+
+  /**
+   * Initialize keys during construction.
+   * Private and final to prevent override and ensure safe construction.
+   */
+  private void initializeKeys() {
+    try {
+      var keyId = java.util.UUID.randomUUID().toString();
+      var keyPair = generateKeyPair();
+      var keyEntry = new KeyEntry(keyId, keyPair, Instant.now());
+
+      keys.put(keyId, keyEntry);
+      currentKeyId = keyId;
+
+      logger.info("Generated initial RSA key pair with ID: {}", keyId);
+    } catch (final Exception e) {
+      logger.error("Failed to initialize keys", e);
+      // Don't throw from constructor - log and rethrow as Error to prevent partial initialization
+      throw new ExceptionInInitializerError(e);
+    }
   }
 
   /**
