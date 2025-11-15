@@ -9,7 +9,6 @@ import org.gripday.bookstore.domain.dto.UpdateInventoryRequest;
 import org.gripday.bookstore.domain.dto.UserContext;
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.InsufficientInventoryException;
-import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
 import org.gripday.bookstore.infrastructure.config.CacheConfig;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
 import org.gripday.bookstore.infrastructure.metrics.BookstoreMetrics;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +52,7 @@ public class InventoryService {
     return convertToDto(inventory);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#bookId"),
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
@@ -61,13 +62,6 @@ public class InventoryService {
     logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
 
     var timer = bookstoreMetrics.startInventoryUpdateTimer();
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("update inventory", "INVENTORY", userContext);
-      bookstoreMetrics.incrementUnauthorizedAccess();
-      throw new UnauthorizedOperationException("update inventory", "ADMIN or SUPERADMIN");
-    }
 
     var inventory = inventoryRepository.findByBookId(bookId)
         .orElseThrow(() -> new BookNotFoundException(bookId));
@@ -106,6 +100,7 @@ public class InventoryService {
     return convertToDto(updatedInventory);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
@@ -113,13 +108,6 @@ public class InventoryService {
   })
   public List<InventoryDto> bulkUpdateInventory(List<BulkInventoryRequest> requests, UserContext userContext) {
     logger.info("Bulk updating inventory for {} books by user: {}", requests.size(), userContext.username());
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("bulk update inventory", "INVENTORY", userContext);
-      bookstoreMetrics.incrementUnauthorizedAccess();
-      throw new UnauthorizedOperationException("bulk update inventory", "ADMIN or SUPERADMIN");
-    }
 
     var results = new ArrayList<InventoryDto>();
 
@@ -221,14 +209,9 @@ public class InventoryService {
     logger.info("Successfully released {} reserved units for book ID: {}", quantity, bookId);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   public void adjustInventoryQuantity(Long bookId, int adjustment, UserContext userContext) {
     logger.info("Adjusting inventory by {} for book ID: {} by user: {}", adjustment, bookId, userContext.username());
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("adjust inventory", "INVENTORY", userContext);
-      throw new UnauthorizedOperationException("adjust inventory", "ADMIN or SUPERADMIN");
-    }
 
     var inventory = inventoryRepository.findByBookId(bookId)
         .orElseThrow(() -> new BookNotFoundException(bookId));

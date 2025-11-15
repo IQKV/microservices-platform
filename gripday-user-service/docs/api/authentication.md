@@ -503,6 +503,7 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 curl -X POST http://localhost:8080/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```
+
 ## Password Reset
 
 ### POST /api/v1/auth/password/forgot
@@ -534,6 +535,7 @@ HTTP/1.1 202 Accepted
 ```
 
 **Security Features:**
+
 - Non-enumerating response (always 202)
 - Reset token expires in 30 minutes
 - Rate limiting per IP address
@@ -581,12 +583,12 @@ This endpoint is designed for UI applications to validate the reset token before
 ```javascript
 // Check token validity before showing reset form
 const response = await fetch(`/api/v1/auth/password/reset?token=${token}`, {
-  method: 'HEAD'
+  method: "HEAD",
 });
 
 if (response.status === 404) {
   // Show 404 page - invalid or expired token
-  showErrorPage('Invalid or expired reset link');
+  showErrorPage("Invalid or expired reset link");
 } else {
   // Show password reset form
   showResetForm(token);
@@ -643,6 +645,7 @@ Password has been reset successfully.
 ```
 
 **Security Actions on Success:**
+
 - User password is updated
 - All refresh tokens are revoked
 - All active sessions are invalidated
@@ -650,4 +653,3 @@ Password has been reset successfully.
 - Confirmation email is sent to user
 
 ---
-

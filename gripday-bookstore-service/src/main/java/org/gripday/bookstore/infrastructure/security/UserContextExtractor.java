@@ -13,6 +13,56 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Extracts user context from JWT tokens issued by Gripday User Service.
+ *
+ * <p>This component parses JWT claims and converts them into a structured UserContext
+ * object that can be used throughout the application for authorization and audit logging.
+ *
+ * <p><b>JWT Token Structure (from User Service):</b>
+ * <pre>
+ * {
+ *   "iss": "gripday-user-service",
+ *   "sub": "1",
+ *   "userId": 1,
+ *   "username": "johndoe",
+ *   "email": "john@example.com",
+ *   "roles": ["USER", "ADMIN"],
+ *   "permissions": ["read:profile", "update:profile"],
+ *   "firstName": "John",
+ *   "lastName": "Doe",
+ *   "tenantId": "default",
+ *   "department": "Engineering",
+ *   "organizationId": "org-123"
+ * }
+ * </pre>
+ *
+ * <p><b>Extracted UserContext Fields:</b>
+ * <ul>
+ *   <li><b>userId</b> - Unique user identifier</li>
+ *   <li><b>username</b> - User's login name</li>
+ *   <li><b>email</b> - User's email address</li>
+ *   <li><b>roles</b> - User's roles (e.g., USER, ADMIN, SUPERADMIN)</li>
+ *   <li><b>permissions</b> - Fine-grained permissions</li>
+ *   <li><b>department</b> - User's department</li>
+ *   <li><b>organizationId</b> - User's organization</li>
+ *   <li><b>customClaims</b> - Additional custom claims</li>
+ * </ul>
+ *
+ * <p><b>Usage in Controllers:</b>
+ * <pre>
+ * {@code @PostMapping}
+ * public ResponseEntity<BookDto> createBook(
+ *     {@code @RequestBody} CreateBookRequest request,
+ *     {@code @RequestAttribute("userContext")} UserContext userContext) {
+ *   // userContext is automatically extracted by JwtAuthenticationFilter
+ *   return bookService.createBook(request, userContext);
+ * }
+ * </pre>
+ *
+ * @see UserContext
+ * @see JwtAuthenticationFilter
+ */
 @Component
 public class UserContextExtractor {
 

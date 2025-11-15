@@ -10,7 +10,6 @@ import org.gripday.bookstore.domain.dto.UserContext;
 import org.gripday.bookstore.domain.exception.BookNotFoundException;
 import org.gripday.bookstore.domain.exception.CategoryNotFoundException;
 import org.gripday.bookstore.domain.exception.DuplicateIsbnException;
-import org.gripday.bookstore.domain.exception.UnauthorizedOperationException;
 import org.gripday.bookstore.infrastructure.config.CacheConfig;
 import org.gripday.bookstore.infrastructure.entity.Book;
 import org.gripday.bookstore.infrastructure.entity.Inventory;
@@ -25,6 +24,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +81,7 @@ public class BookService {
         .map(this::convertToDto);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
@@ -90,13 +91,6 @@ public class BookService {
     logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
 
     var timer = bookstoreMetrics.startBookCreationTimer();
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("create book", "BOOK", userContext);
-      bookstoreMetrics.incrementUnauthorizedAccess();
-      throw new UnauthorizedOperationException("create book", "ADMIN or SUPERADMIN");
-    }
 
     // Validate ISBN uniqueness
     if (bookRepository.findByIsbn(request.isbn()).isPresent()) {
@@ -135,6 +129,7 @@ public class BookService {
     return convertToDto(savedBook);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#id"),
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
@@ -143,13 +138,6 @@ public class BookService {
   })
   public BookDto updateBook(Long id, UpdateBookRequest request, UserContext userContext) {
     logger.info("Updating book ID: {} by user: {}", id, userContext.username());
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("update book", "BOOK", userContext);
-      bookstoreMetrics.incrementUnauthorizedAccess();
-      throw new UnauthorizedOperationException("update book", "ADMIN or SUPERADMIN");
-    }
 
     var book = bookRepository.findById(id)
         .orElseThrow(() -> new BookNotFoundException(id));
@@ -178,6 +166,7 @@ public class BookService {
     return convertToDto(updatedBook);
   }
 
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERADMIN')")
   @Caching(evict = {
       @CacheEvict(value = CacheConfig.BOOK_CACHE, key = "#id"),
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
@@ -185,13 +174,6 @@ public class BookService {
   })
   public void deleteBook(Long id, UserContext userContext) {
     logger.info("Deleting book ID: {} by user: {}", id, userContext.username());
-
-    // Authorization check
-    if (!userContext.isAdmin()) {
-      auditLogger.logUnauthorizedAccess("delete book", "BOOK", userContext);
-      bookstoreMetrics.incrementUnauthorizedAccess();
-      throw new UnauthorizedOperationException("delete book", "ADMIN or SUPERADMIN");
-    }
 
     var book = bookRepository.findById(id)
         .orElseThrow(() -> new BookNotFoundException(id));

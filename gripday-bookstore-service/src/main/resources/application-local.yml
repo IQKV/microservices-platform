@@ -1,22 +1,94 @@
+# ============================================================================
+# Gripday Bookstore Service - Local Development Configuration
+# ============================================================================
+# Profile: local
+# Purpose: Local development with Docker Compose
+# 
+# Usage:
+#   mvn spring-boot:run -Dspring-boot.run.profiles=local
+#   docker-compose up
+#
+# Services:
+#   - PostgreSQL: localhost:5432
+#   - Redis: localhost:6379
+#   - User Service: localhost:8080 (for JWT validation)
+# ============================================================================
+
 spring:
+  # ============================================================================
+  # Database Configuration - Local PostgreSQL
+  # ============================================================================
   datasource:
     url: jdbc:postgresql://localhost:5432/bookstore_db
     username: ${DB_USERNAME:bookstore_user}
     password: ${DB_PASSWORD:bookstore_pass}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 20000
   
+  # ============================================================================
+  # Redis Configuration - Local Redis
+  # ============================================================================
   data:
     redis:
       host: localhost
       port: 6379
-      password:
+      password:  # No password for local development
       timeout: 2000ms
   
   cache:
     redis:
-      time-to-live: 300000  # 5 minutes for local development
+      time-to-live: 300000  # 5 minutes for faster development feedback
+  
+  # ============================================================================
+  # Security Configuration - Local User Service
+  # ============================================================================
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
+          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
 
+# ============================================================================
+# Server Configuration - Local Port
+# ============================================================================
+server:
+  port: 8081  # Different from User Service (8080)
+
+# ============================================================================
+# Logging Configuration - Verbose for Development
+# ============================================================================
 logging:
   level:
     org.gripday.bookstore: DEBUG
-    org.springframework.cache: DEBUG
+    org.springframework.security: DEBUG  # See JWT validation details
+    org.springframework.cache: DEBUG     # See cache operations
     org.springframework.data.redis: DEBUG
+    org.hibernate.SQL: DEBUG             # See all SQL queries
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # See SQL parameters
+    AUDIT: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
+
+# ============================================================================
+# Actuator Configuration - Full Access for Development
+# ============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all endpoints for debugging
+
+# ============================================================================
+# CORS Configuration - Permissive for Development
+# ============================================================================
+gripday:
+  bookstore:
+    cors:
+      allowed-origins: "http://localhost:5173,http://localhost:3000,http://localhost:4200"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600

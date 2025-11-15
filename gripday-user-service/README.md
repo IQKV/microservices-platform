@@ -155,6 +155,7 @@ curl -I "http://localhost:8080/api/v1/auth/password/reset?token=550e8400-e29b-41
 ```
 
 **Response:**
+
 - `200 OK` - Token is valid
 - `404 Not Found` - Token is invalid or expired
 
