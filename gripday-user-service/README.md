@@ -63,14 +63,6 @@ This is the authentication hub for the Gripday microservices platform. It centra
 
 ## Architecture Patterns
 
-### Three-Tier Architecture
-
-```
-presentation.web     → REST controllers, API versioning
-domain.service       → Business logic, validation
-infrastructure       → Repositories, entities, config
-```
-
 ### Key Design Patterns
 
 - Repository pattern for data access
