@@ -1,0 +1,148 @@
+# Gripday Platform - Production Environment Values
+
+global:
+  environment: production
+  namespace: gripday-production-env
+  imagePullPolicy: IfNotPresent
+
+user-service:
+  replicaCount: 5
+  
+  image:
+    tag: "1.0.0"  # Use specific version tags in production
+  
+  autoscaling:
+    minReplicas: 5
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  postgresql:
+    replicaCount: 2  # Consider HA setup
+    persistence:
+      size: 50Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "1000m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+  
+  redis:
+    replicaCount: 2  # Consider HA setup
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+
+gateway-service:
+  replicaCount: 10
+  
+  image:
+    tag: "1.0.0"
+  
+  autoscaling:
+    minReplicas: 10
+    maxReplicas: 50
+    targetCPUUtilizationPercentage: 60
+  
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "2000m"
+    limits:
+      memory: "4Gi"
+      cpu: "4000m"
+  
+  redis:
+    replicaCount: 2
+    persistence:
+      size: 10Gi
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "1000m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+
+bookstore-service:
+  replicaCount: 5
+  
+  image:
+    tag: "1.0.0"
+  
+  autoscaling:
+    minReplicas: 5
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  postgresql:
+    replicaCount: 2
+    persistence:
+      size: 50Gi
+      storageClass: fast-ssd
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "1000m"
+      limits:
+        memory: "2Gi"
+        cpu: "2000m"
+  
+  redis:
+    replicaCount: 2
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+
+ingress:
+  tls:
+    enabled: true
+  hosts:
+    gateway: api.gripday.com
+    user: user.gripday.com
+    bookstore: bookstore.gripday.com
+
+observability:
+  enabled: true
+  jaeger:
+    enabled: true
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true
+
+# External secrets (recommended for production)
+externalSecrets:
+  enabled: true
+  backend: aws-secrets-manager
+  region: us-east-1

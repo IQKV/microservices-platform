@@ -1,12 +1,34 @@
-# Gripday Platform - Umbrella Helm Chart
+# Gripday Platform - Helm Chart
 
-This umbrella chart deploys the complete Gripday Platform microservices architecture.
+Complete Helm chart for deploying the Gripday microservices platform.
 
-## Services Included
+## Quick Start
 
-1. **User Service** - Authentication and authorization
-2. **Bookstore Service** - Business domain service
-3. **Gateway Service** - API Gateway (Spring Cloud Gateway)
+### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.0+
+- kubectl configured
+- Ingress controller (nginx recommended)
+
+### Install
+
+```bash
+# Add priority classes
+kubectl apply -f ../../k8s/priority-classes.yaml
+
+# Build dependencies
+helm dependency build
+
+# Install for local development
+helm install gripday . --create-namespace
+
+# Install for staging
+helm install gripday . -f values-staging.yaml --create-namespace
+
+# Install for production
+helm install gripday . -f values-production.yaml --create-namespace
+```
 
 ## Architecture
 
@@ -17,141 +39,104 @@ This umbrella chart deploys the complete Gripday Platform microservices architec
                    │
            ┌───────▼────────┐
            │ Gateway Service │
-           │   (Port 8080)   │
            └───────┬─────────┘
                    │
         ┏━━━━━━━━━━┻━━━━━━━━━━┓
         ▼                      ▼
 ┌───────────────┐      ┌──────────────────┐
 │ User Service  │      │Bookstore Service │
-│  (Port 8080)  │      │   (Port 8080)    │
 ├───────────────┤      ├──────────────────┤
 │ PostgreSQL    │      │  PostgreSQL      │
 │ Redis         │      │  Redis           │
 └───────────────┘      └──────────────────┘
 ```
 
-## Prerequisites
+## Configuration
 
-- Kubernetes 1.19+
-- Helm 3.0+
-- PV provisioner support
-- Ingress controller (nginx recommended)
+### Environment-Specific Deployments
 
-## Quick Start
-
-### 1. Install Priority Classes
-
-First, install the priority classes:
-
+**Local/Development:**
 ```bash
-kubectl apply -f ../k8s/priority-classes.yaml
+helm install gripday . 
+# Uses: gripday-dev-env namespace
 ```
 
-### 2. Install the Complete Platform
-
+**Staging:**
 ```bash
-# Build dependencies
-helm dependency build
-
-# Install all services
-helm install gripday . --namespace gripday --create-namespace
+helm install gripday . -f values-staging.yaml
+# Uses: gripday-staging-env namespace
 ```
 
-### 3. Verify Installation
-
+**Test:**
 ```bash
-# Check all pods
-kubectl get pods -n gripday-user
-kubectl get pods -n gripday-bookstore
-kubectl get pods -n gripday-gateway
-
-# Check services
-kubectl get svc -n gripday-user
-kubectl get svc -n gripday-bookstore
-kubectl get svc -n gripday-gateway
-
-# Check ingress
-kubectl get ingress -A
+helm install gripday . -f values-test.yaml
+# Uses: gripday-test-env namespace
 ```
 
-## Installation Options
-
-### Install Individual Services
-
+**Production:**
 ```bash
-# Install only user service
-helm install gripday . --set bookstore-service.enabled=false --set gateway-service.enabled=false
-
-# Install without gateway
-helm install gripday . --set gateway-service.enabled=false
+helm install gripday . -f values-production.yaml
+# Uses: gripday-production-env namespace
 ```
 
-### Custom Values
+### Custom Configuration
 
-Create a `custom-values.yaml`:
+Create `custom-values.yaml`:
 
 ```yaml
 global:
   environment: production
+  namespace: gripday-production-env
 
 user-service:
-  replicaCount: 3
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-
-gateway-service:
   replicaCount: 5
   autoscaling:
-    minReplicas: 5
     maxReplicas: 20
+
+gateway-service:
+  replicaCount: 10
+  autoscaling:
+    maxReplicas: 50
 ```
 
-Install with custom values:
-
+Install:
 ```bash
 helm install gripday . -f custom-values.yaml
 ```
 
-## Configuration
+### Selective Service Deployment
 
-### Global Configuration
+```bash
+# Install only user service
+helm install gripday . \
+  --set gateway-service.enabled=false \
+  --set bookstore-service.enabled=false
 
-| Parameter            | Description         | Default            |
-| -------------------- | ------------------- | ------------------ |
-| `global.environment` | Environment name    | `local`            |
-| `global.platform`    | Platform identifier | `gripday` |
-
-### Service-Specific Configuration
-
-Each service can be configured independently. See individual service READMEs:
-
-- [User Service](../user-service/README.md)
-- [Bookstore Service](../bookstore-service/README.md)
-- [Gateway Service](../gateway-service/README.md)
+# Install without observability
+helm install gripday . \
+  --set observability.enabled=false
+```
 
 ## Upgrading
 
 ```bash
 # Upgrade with new values
-helm upgrade gripday . -f custom-values.yaml
+helm upgrade gripday . -f values-production.yaml
 
 # Upgrade specific service version
-helm upgrade gripday . --set user-service.image.tag=1.1.0
+helm upgrade gripday . \
+  --set user-service.image.tag=1.1.0 \
+  --set gateway-service.image.tag=1.1.0
 ```
 
 ## Uninstalling
 
 ```bash
-# Uninstall the platform
-helm uninstall gripday --namespace gripday
+# Uninstall release
+helm uninstall gripday
 
-# Clean up namespaces
-kubectl delete namespace gripday-user
-kubectl delete namespace gripday-bookstore
-kubectl delete namespace gripday-gateway
+# Clean up namespace
+kubectl delete namespace gripday-dev-env
 ```
 
 ## Monitoring
@@ -159,147 +144,73 @@ kubectl delete namespace gripday-gateway
 ### Health Checks
 
 ```bash
-# Gateway health
-kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
+# Gateway
+kubectl port-forward -n gripday-dev-env svc/gateway-service 8080:8080
 curl http://localhost:8080/actuator/health
 
-# User service health
-kubectl port-forward -n gripday-user svc/user-service 8080:8080
-curl http://localhost:8080/actuator/health
-
-# Bookstore service health
-kubectl port-forward -n gripday-bookstore svc/bookstore-service 8080:8080
-curl http://localhost:8080/actuator/health
+# User Service
+kubectl port-forward -n gripday-dev-env svc/user-service 8081:8080
+curl http://localhost:8081/actuator/health
 ```
 
 ### View Logs
 
 ```bash
-# Gateway logs
-kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-service
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gateway-service
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=user-service
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=bookstore-service
+```
 
-# User service logs
-kubectl logs -f -n gripday-user -l app.kubernetes.io/name=gripday-user-service
+### View Resources
 
-# Bookstore service logs
-kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
+```bash
+kubectl get all -n gripday-dev-env
+kubectl get hpa -n gripday-dev-env
+kubectl get pvc -n gripday-dev-env
 ```
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **Pods not starting**
-
-   ```bash
-   kubectl describe pod <pod-name> -n <namespace>
-   kubectl logs <pod-name> -n <namespace>
-   ```
-
-2. **Service communication issues**
-
-   ```bash
-   # Test DNS resolution
-   kubectl run test-pod --image=busybox --rm -it -- nslookup user-service.gripday-user.svc.cluster.local
-   ```
-
-3. **Database connection issues**
-
-   ```bash
-   # Check PostgreSQL
-   kubectl exec -it <postgres-pod> -n <namespace> -- psql -U gripday_user -d <database>
-   ```
-
-4. **Persistent volume issues**
-   ```bash
-   kubectl get pv
-   kubectl get pvc -A
-   ```
-
-## Development Workflow
-
-### Local Development
+### Pods Not Starting
 
 ```bash
-# Install in local/dev mode
-helm install gripday . --set global.environment=local
-
-# Use port-forwarding for local access
-kubectl port-forward -n gripday-gateway svc/gateway-service 8080:8080
+kubectl describe pod <pod-name> -n gripday-dev-env
+kubectl logs <pod-name> -n gripday-dev-env
 ```
 
-### Staging Deployment
+### Service Communication Issues
 
 ```bash
-helm install gripday . -f values-staging.yaml --namespace staging
+# Test DNS
+kubectl run test --image=busybox --rm -it -- \
+  nslookup user-service.gripday-dev-env.svc.cluster.local
 ```
 
-### Production Deployment
+### Database Connection Issues
 
 ```bash
-helm install gripday . -f values-production.yaml --namespace production
+# Check PostgreSQL
+kubectl exec -it <postgres-pod> -n gripday-dev-env -- \
+  psql -U gripday_user -d gripday_user_local
 ```
-
-## Network Policies
-
-Network policies are enabled by default for security:
-
-- Gateway accepts external traffic via ingress
-- Services communicate within the cluster
-- Database access restricted to service pods
 
 ## Security
 
-- All pods run as non-root users
-- Read-only root filesystems where possible
-- Pod Security Standards enforced (restricted)
-- Network policies limit pod-to-pod communication
-- Secrets management via Kubernetes Secrets (consider external secret managers for production)
+- All pods run as non-root
+- Read-only root filesystems
+- Network policies enabled
+- Pod Security Standards enforced
+- Secrets management via Kubernetes Secrets
 
-## Scaling
+**Production**: Use external secret management (AWS Secrets Manager, HashiCorp Vault, etc.)
 
-### Manual Scaling
+## Values Reference
 
-```bash
-# Scale gateway
-kubectl scale deployment gateway-service -n gripday-gateway --replicas=5
+See individual service charts for detailed configuration:
+- [User Service](../user-service/README.md)
+- [Gateway Service](../gateway-service/README.md)
+- [Bookstore Service](../bookstore-service/README.md)
 
-# Scale user service
-kubectl scale deployment user-service -n gripday-user --replicas=3
-```
+## Support
 
-### Auto-scaling (HPA)
-
-HPA is configured for:
-
-- Gateway Service (3-10 replicas)
-- Bookstore Service (2-10 replicas)
-
-Monitor HPA:
-
-```bash
-kubectl get hpa -A
-```
-
-## Backup and Restore
-
-### Database Backups
-
-```bash
-# Backup auth database
-kubectl exec -n gripday-user user-postgres-<pod> -- pg_dump -U gripday_user gripday_user_local > auth-backup.sql
-
-# Backup bookstore database
-kubectl exec -n gripday-bookstore bookstore-postgres-<pod> -- pg_dump -U gripday_user gripday_bookstore_local > bookstore-backup.sql
-```
-
-## Support and Contact
-
-For issues, questions, or contributions:
-
-- Email: platform-team@gripday.site
-- GitHub: https://github.com/gripday/platform
-
-## License
-
-Proprietary - Gripday Platform Team
+For issues or questions, see [GAPS-AND-FIXES.md](./GAPS-AND-FIXES.md)

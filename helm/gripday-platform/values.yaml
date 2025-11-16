@@ -2,47 +2,124 @@
 
 # Global settings applied to all sub-charts
 global:
+  # Environment: local, staging, test, production
   environment: local
+  
+  # Namespace - all services deploy to same environment-specific namespace
+  namespace: gripday-dev-env
+  
+  # Platform identifier
   platform: gripday
+  
+  # Image pull policy
+  imagePullPolicy: IfNotPresent
+  
+  # Image registry (override for private registries)
+  imageRegistry: ""
 
-# Enable/disable individual services
+# User Service
 user-service:
   enabled: true
-  namespace:
-    create: true
-    name: gripday-user
   replicaCount: 2
+  
   image:
     tag: "1.0.0"
-  postgresql:
-    enabled: true
-  redis:
-    enabled: true
-
-bookstore-service:
-  enabled: true
-  namespace:
-    create: true
-    name: gripday-bookstore
-  replicaCount: 2
-  image:
-    tag: "1.0.0"
+  
   autoscaling:
     enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  
   postgresql:
     enabled: true
+    persistence:
+      size: 5Gi
+  
   redis:
     enabled: true
+    persistence:
+      size: 1Gi
 
+# Gateway Service
 gateway-service:
   enabled: true
-  namespace:
-    create: true
-    name: gripday-gateway
   replicaCount: 3
+  
   image:
     tag: "1.0.0"
+  
   autoscaling:
     enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  
   redis:
     enabled: true
+    persistence:
+      size: 2Gi
+  
+  # Service routing configuration
+  routing:
+    userServiceUrl: "http://user-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
+    bookstoreServiceUrl: "http://bookstore-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
+
+# Bookstore Service
+bookstore-service:
+  enabled: true
+  replicaCount: 2
+  
+  image:
+    tag: "1.0.0"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  
+  postgresql:
+    enabled: true
+    persistence:
+      size: 5Gi
+  
+  redis:
+    enabled: true
+    persistence:
+      size: 1Gi
+
+# Observability Stack (Optional)
+observability:
+  enabled: false
+  
+  jaeger:
+    enabled: false
+  
+  prometheus:
+    enabled: false
+  
+  grafana:
+    enabled: false
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: nginx
+  
+  # TLS configuration
+  tls:
+    enabled: false
+    secretName: gripday-tls
+  
+  # Hosts configuration
+  hosts:
+    gateway: api.gripday.site
+    user: user.gripday.site
+    bookstore: bookstore.gripday.site
+
+# Priority Classes
+priorityClasses:
+  high: high-priority
+  medium: medium-priority
+  infrastructure: infrastructure-priority

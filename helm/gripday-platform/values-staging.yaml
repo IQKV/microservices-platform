@@ -1,0 +1,97 @@
+# Gripday Platform - Staging Environment Values
+
+global:
+  environment: staging
+  namespace: gripday-staging-env
+  imagePullPolicy: Always
+
+user-service:
+  replicaCount: 3
+  
+  image:
+    tag: "staging"
+  
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 15
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  postgresql:
+    persistence:
+      size: 10Gi
+      storageClass: fast-ssd
+  
+  redis:
+    persistence:
+      size: 2Gi
+
+gateway-service:
+  replicaCount: 5
+  
+  image:
+    tag: "staging"
+  
+  autoscaling:
+    minReplicas: 5
+    maxReplicas: 20
+  
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1000m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
+  
+  redis:
+    persistence:
+      size: 5Gi
+
+bookstore-service:
+  replicaCount: 3
+  
+  image:
+    tag: "staging"
+  
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 15
+  
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  
+  postgresql:
+    persistence:
+      size: 10Gi
+      storageClass: fast-ssd
+  
+  redis:
+    persistence:
+      size: 2Gi
+
+ingress:
+  tls:
+    enabled: true
+  hosts:
+    gateway: api-staging.gripday.com
+    user: user-staging.gripday.com
+    bookstore: bookstore-staging.gripday.com
+
+observability:
+  enabled: true
+  jaeger:
+    enabled: true
+  prometheus:
+    enabled: true
