@@ -58,14 +58,6 @@ This is an exemplary Spring Boot microservice that showcases how to build a prod
 
 ## Architecture Patterns
 
-### Three-Tier Architecture
-
-```
-presentation.web     → REST controllers, API versioning
-domain.service       → Business logic, validation
-infrastructure       → Repositories, entities, config
-```
-
 ### Key Design Patterns
 
 - Repository pattern for data access
