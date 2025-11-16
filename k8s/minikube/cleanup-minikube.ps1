@@ -1,141 +1,66 @@
-# Gripday Platform - Minikube Cleanup Script (PowerShell)
-# Removes all deployed resources from minikube
-
+# Gripday Platform - Minikube Cleanup (PowerShell)
 param(
     [switch]$Force,
     [switch]$Help
 )
 
-function Write-Header {
-    param([string]$Message)
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host $Message -ForegroundColor Cyan
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host ""
-}
-
-function Write-Success {
-    param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
-}
-
-function Write-Warn {
-    param([string]$Message)
-    Write-Host "⚠ $Message" -ForegroundColor Yellow
-}
-
-function Write-Error {
-    param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
-}
-
-function Write-Info {
-    param([string]$Message)
-    Write-Host "ℹ $Message" -ForegroundColor Cyan
-}
-
-function Show-Usage {
-    @"
-Usage: .\cleanup-minikube.ps1 [OPTIONS]
-
-Cleanup Gripday Platform from Minikube
-
-OPTIONS:
-    -Force             Force cleanup without confirmation
-    -Help              Show this help message
-
-EXAMPLES:
-    .\cleanup-minikube.ps1           # Cleanup with confirmation
-    .\cleanup-minikube.ps1 -Force    # Cleanup without confirmation
-
-"@
-}
+function log { Write-Host "ℹ $args" -ForegroundColor Cyan }
+function ok { Write-Host "✓ $args" -ForegroundColor Green }
+function warn { Write-Host "⚠ $args" -ForegroundColor Yellow }
+function err { Write-Host "✗ $args" -ForegroundColor Red; exit 1 }
 
 if ($Help) {
-    Show-Usage
+    @"
+Usage: .\cleanup-minikube.ps1 [-Force]
+
+OPTIONS:
+    -Force      Force cleanup without confirmation
+    -Help       Show this help message
+"@
     exit 0
 }
 
-# Check prerequisites
-if (-not (Get-Command kubectl -ErrorAction SilentlyContinue)) {
-    Write-Error "kubectl is not installed"
-    exit 1
-}
-
-if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) {
-    Write-Error "minikube is not installed"
-    exit 1
-}
+if (-not (Get-Command kubectl -ErrorAction SilentlyContinue)) { err "kubectl not found" }
+if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) { err "minikube not found" }
 
 $minikubeStatus = minikube status 2>&1
+if ($LASTEXITCODE -ne 0) { warn "minikube not running"; exit 0 }
+
+$namespaceExists = kubectl get namespace gripday-dev-env 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Warn "minikube is not running"
+    log "Namespace doesn't exist. Nothing to clean."
     exit 0
 }
 
-# Check if namespace exists
-$namespaceExists = kubectl get namespace gripday 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Write-Info "Namespace 'gripday' does not exist. Nothing to clean up."
-    exit 0
-}
-
-# Show what will be deleted
-Write-Header "Resources to be Deleted"
-
-Write-Host ""
-Write-Host "Namespace: " -NoNewline -ForegroundColor Yellow
-Write-Host "gripday"
-Write-Host ""
-Write-Host "Resources in namespace:" -ForegroundColor Yellow
-kubectl get all -n gripday 2>$null
+log "Resources to delete:"
+kubectl get all -n gripday-dev-env 2>$null
 Write-Host ""
 
-# Confirm deletion
 if (-not $Force) {
-    Write-Host "This will delete all resources in the 'gripday' namespace." -ForegroundColor Yellow
-    $confirmation = Read-Host "Are you sure you want to continue? (yes/no)"
-    
+    $confirmation = Read-Host "Delete all resources in gripday-dev-env? (yes/no)"
     if ($confirmation -ne "yes") {
-        Write-Info "Cleanup cancelled"
+        log "Cancelled"
         exit 0
     }
 }
 
-# Delete resources
-Write-Header "Cleaning Up Resources"
+log "Deleting namespace gripday-dev-env..."
+kubectl delete namespace gripday-dev-env --timeout=60s
 
-Write-Info "Deleting all resources in namespace 'gripday'..."
-
-kubectl delete namespace gripday --timeout=60s
-if ($LASTEXITCODE -eq 0) {
-    Write-Success "Namespace 'gripday' deleted successfully"
-} else {
-    Write-Error "Failed to delete namespace (it may take a moment to fully terminate)"
-}
-
-# Wait for namespace deletion
-Write-Info "Waiting for namespace termination..."
+log "Waiting for termination..."
 $timeout = 60
 $counter = 0
-while ((kubectl get namespace gripday 2>&1 | Out-Null; $LASTEXITCODE -eq 0) -and ($counter -lt $timeout)) {
+while ((kubectl get namespace gripday-dev-env 2>&1 | Out-Null; $LASTEXITCODE -eq 0) -and ($counter -lt $timeout)) {
     Start-Sleep -Seconds 2
     $counter += 2
-    Write-Host "." -NoNewline
 }
-Write-Host ""
 
-$namespaceCheck = kubectl get namespace gripday 2>&1
+$namespaceCheck = kubectl get namespace gripday-dev-env 2>&1
 if ($LASTEXITCODE -ne 0) {
-    Write-Success "Namespace fully terminated"
+    ok "Namespace terminated"
 } else {
-    Write-Warn "Namespace is still terminating (this is normal)"
+    warn "Still terminating (normal)"
 }
 
-Write-Header "Cleanup Complete"
-
-Write-Success "All Gripday Platform resources have been removed from minikube"
-Write-Info "You can redeploy with: .\deploy-minikube.ps1"
-
-Write-Host ""
+ok "Cleanup complete"
+log "Redeploy with: .\deploy-minikube.ps1"
