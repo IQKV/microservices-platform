@@ -153,12 +153,25 @@ gripday:
         - /api/v1/auth/password/forgot
         - /api/v1/auth/password/reset
         
-        # Bookstore endpoints (public)
+        # Bookstore public endpoints (no authentication required)
         - /api/v1/bookstore/version
         - /api/v1/bookstore/books
-        - /api/v1/bookstore/books/**
+        - /api/v1/bookstore/books/*/
+        - /api/v1/bookstore/books/isbn/**
+        - /api/v1/bookstore/books/available
+        - /api/v1/bookstore/books/in-stock
+        - /api/v1/bookstore/books/search
+        - /api/v1/bookstore/books/search/**
+        - /api/v1/bookstore/inventory
         - /api/v1/bookstore/inventory/*/
         - /api/v1/bookstore/inventory/*/availability
+        - /api/v1/bookstore/inventory/low-stock
+        - /api/v1/bookstore/inventory/out-of-stock
+        - /api/v1/bookstore/inventory/stats/**
+        
+        # Bookstore admin endpoints require authentication (ADMIN/SUPERADMIN role):
+        # - /api/v1/bookstore/admin/books/** (POST, PUT, DELETE)
+        # - /api/v1/bookstore/admin/inventory/** (PUT, POST)
         
         # Actuator endpoints (public health checks)
         - /actuator/health
@@ -210,6 +223,14 @@ gripday:
             burst-capacity: 200
             enable-tenant-quotas: true
           "/api/v1/bookstore/inventory/**":
+            requests-per-minute: 50
+            burst-capacity: 100
+            enable-tenant-quotas: true
+          "/api/v1/bookstore/admin/books/**":
+            requests-per-minute: 50
+            burst-capacity: 100
+            enable-tenant-quotas: true
+          "/api/v1/bookstore/admin/inventory/**":
             requests-per-minute: 50
             burst-capacity: 100
             enable-tenant-quotas: true
