@@ -1,42 +1,15 @@
 #!/bin/bash
-
-# Docker deployment script for Bookstore Service
-# Usage: ./scripts/docker-deploy.sh [environment]
-
 set -e
 
-ENVIRONMENT=${1:-local}
+ENV=${1:-local}
 
-echo "Deploying Bookstore Service for environment: $ENVIRONMENT"
+[[ "$ENV" =~ ^(local|staging|production)$ ]] || { echo "Invalid environment: $ENV"; exit 1; }
 
-case $ENVIRONMENT in
-  local)
-    echo "Starting local development environment..."
-    docker-compose -f docker-compose.yml up -d
-    ;;
-  staging)
-    echo "Starting staging environment..."
-    docker-compose -f docker-compose.staging.yml up -d
-    ;;
-  production)
-    echo "Starting production environment..."
-    docker-compose -f docker-compose.production.yml up -d
-    ;;
-  *)
-    echo "Unknown environment: $ENVIRONMENT"
-    echo "Supported environments: local, staging, production"
-    exit 1
-    ;;
-esac
+echo "🚀 Deploying bookstore service ($ENV)..."
 
-echo "Waiting for services to be healthy..."
-sleep 30
+COMPOSE_FILE="docker-compose${ENV:+.$ENV}.yml"
+[ "$ENV" = "local" ] && COMPOSE_FILE="docker-compose.yml"
 
-# Check service health
-echo "Checking service health..."
-docker-compose -f docker-compose${ENVIRONMENT:+.$ENVIRONMENT}.yml ps
+docker-compose -f $COMPOSE_FILE up -d
 
-echo "Deployment completed for environment: $ENVIRONMENT"
-echo "Service should be available at: http://localhost:8080"
-echo "Health check: http://localhost:8080/actuator/health"
-echo "API documentation: http://localhost:8080/swagger-ui.html"
+echo "✅ Deployed: http://localhost:8080"
