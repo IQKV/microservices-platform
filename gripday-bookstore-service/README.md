@@ -9,7 +9,8 @@ A bookstore management system that handles:
 - **Book Catalog** - Maintain a searchable collection of books with details (title, author, ISBN, price, category)
 - **Inventory Tracking** - Monitor stock levels, reserved quantities, and availability in real-time
 - **Search & Discovery** - Enable customers to find books by multiple criteria (title, author, category, price range)
-- **Access Control** - Separate public browsing from administrative operations (adding books, updating inventory)
+- **Access Control** - Clear separation between public browsing endpoints and admin-only management operations
+- **Inventory Operations** - Reserve, release, and adjust inventory for order fulfillment workflows
 
 ## Overview
 
@@ -52,9 +53,10 @@ This is an exemplary Spring Boot microservice that showcases how to build a prod
 
 - JWT-based authentication
 - Role-based access control (RBAC)
-- Method-level security with @PreAuthorize
+- Clear separation of public and admin endpoints
 - User context extraction and propagation
 - Audit trail for administrative actions
+- Admin operations require ADMIN or SUPERADMIN role
 
 ## Architecture Patterns
 
@@ -69,10 +71,36 @@ This is an exemplary Spring Boot microservice that showcases how to build a prod
 ### API Design
 
 - RESTful endpoints with proper HTTP methods
+- Clear endpoint organization (public vs admin subpackages)
 - Versioning support (URL, header, content negotiation)
-- OpenAPI/Swagger documentation
+- OpenAPI/Swagger documentation with security schemes
 - Problem Details (RFC 7807) for errors
 - Pagination with Spring Data
+
+### Endpoint Organization Pattern
+
+The service follows a clear separation between public and administrative endpoints:
+
+**Public Resources** (`presentation.web` package)
+
+- `BookResource` - Public catalog browsing and search operations
+- `InventoryResource` - Public inventory information and availability checks
+- `ApiInfoResource` - API version and capability information
+- No authentication required, accessible to all users
+
+**Admin Resources** (`presentation.web.admin` package)
+
+- `BookManagementResource` - Administrative book CRUD operations
+- `InventoryManagementResource` - Administrative inventory management
+- Requires JWT authentication with ADMIN or SUPERADMIN role
+- All operations are audited with user context
+
+This pattern provides:
+
+- Clear security boundaries at the package level
+- Easy-to-configure gateway routing rules
+- Simplified access control policies
+- Better code organization and maintainability
 
 ## Technical Highlights
 
@@ -132,33 +160,70 @@ This is an exemplary Spring Boot microservice that showcases how to build a prod
 
 ### Administrative Functions
 
-- Role-based operations
-- Audit logging
+- Role-based operations (ADMIN/SUPERADMIN)
+- Separated admin endpoints under `/admin` path
+- Comprehensive audit logging with user context
+- Bulk operations for efficiency
 - Metrics collection
 - Health monitoring
 
 ## API Examples
 
-### Public Endpoints
+### Public Endpoints (No Authentication Required)
 
-- `GET /api/v1/bookstore/books` - Browse catalog with filters
-- `GET /api/v1/bookstore/books/{id}` - Get book details
-- `GET /api/v1/bookstore/books/search` - Advanced search
-- `GET /api/v1/bookstore/books/available` - Available books only
+**Book Catalog Browsing**
 
-### Admin Endpoints (Requires Authentication)
+- `GET /api/v1/bookstore/books` - Browse catalog with filters (title, author, category, price range)
+- `GET /api/v1/bookstore/books/{id}` - Get book details by ID
+- `GET /api/v1/bookstore/books/isbn/{isbn}` - Get book by ISBN
+- `GET /api/v1/bookstore/books/available` - List available books only
+- `GET /api/v1/bookstore/books/in-stock` - List books currently in stock
 
-- `POST /api/v1/bookstore/books` - Create new book
-- `PUT /api/v1/bookstore/books/{id}` - Update book
-- `DELETE /api/v1/bookstore/books/{id}` - Remove book
-- `PUT /api/v1/bookstore/inventory/{bookId}` - Update inventory
+**Search Operations**
+
+- `GET /api/v1/bookstore/books/search` - Advanced search with multiple criteria
+- `GET /api/v1/bookstore/books/search/title?title={query}` - Search by title
+- `GET /api/v1/bookstore/books/search/author?author={query}` - Search by author
+- `GET /api/v1/bookstore/books/search/category?category={name}` - Search by category
+- `GET /api/v1/bookstore/books/search/price-range?minPrice={min}&maxPrice={max}` - Search by price range
+
+**Inventory Information**
+
+- `GET /api/v1/bookstore/inventory/{bookId}` - Get inventory details
+- `GET /api/v1/bookstore/inventory/{bookId}/availability?quantity={qty}` - Check availability
+- `GET /api/v1/bookstore/inventory/low-stock` - List low stock items
+- `GET /api/v1/bookstore/inventory/out-of-stock` - List out of stock items
+- `GET /api/v1/bookstore/inventory/stats/total-count` - Total inventory count
+- `GET /api/v1/bookstore/inventory/stats/reserved-count` - Total reserved count
+- `GET /api/v1/bookstore/inventory/stats/low-stock-count` - Low stock item count
+- `GET /api/v1/bookstore/inventory/stats/out-of-stock-count` - Out of stock item count
+
+### Admin Endpoints (Requires ADMIN or SUPERADMIN Role)
+
+**Book Management** (`/api/v1/bookstore/admin/books`)
+
+- `POST /api/v1/bookstore/admin/books` - Create new book
+- `PUT /api/v1/bookstore/admin/books/{id}` - Update book details
+- `DELETE /api/v1/bookstore/admin/books/{id}` - Remove book from catalog
+
+**Inventory Management** (`/api/v1/bookstore/admin/inventory`)
+
+- `PUT /api/v1/bookstore/admin/inventory/{bookId}` - Update inventory quantity and threshold
+- `POST /api/v1/bookstore/admin/inventory/bulk-update` - Bulk update multiple inventories
+- `POST /api/v1/bookstore/admin/inventory/{bookId}/reserve?quantity={qty}` - Reserve inventory for orders
+- `POST /api/v1/bookstore/admin/inventory/{bookId}/release?quantity={qty}` - Release reserved inventory
+- `POST /api/v1/bookstore/admin/inventory/{bookId}/adjust?adjustment={qty}` - Adjust inventory (positive or negative)
+
+### API Information
+
+- `GET /api/v1/bookstore/version` - API version and capabilities information
 
 ### Monitoring Endpoints
 
 - `/actuator/health` - Health status
 - `/actuator/metrics` - Application metrics
 - `/actuator/prometheus` - Prometheus metrics
-- `/swagger-ui.html` - API documentation
+- `/swagger-ui.html` - Interactive API documentation
 
 ## Learning Points
 
