@@ -85,7 +85,7 @@ Request Flow:
 9. ResponseTransformationFilter → Clean response headers
 ```
 
-### Key Design Patterns
+### Gateway Patterns
 
 - Gateway Aggregation pattern for unified API entry
 - Filter Chain pattern for request processing
@@ -214,7 +214,7 @@ spring:
     gateway:
       routes:
         - id: user-service-auth
-          uri: http://localhost:8080
+          uri: http://user-service:8080
           predicates:
             - Path=/api/v1/auth/**
           filters:
