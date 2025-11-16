@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest({BookResource.class, BookstoreExceptionHandler.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, org.gripday.bookstore.presentation.web.admin.BookManagementResource.class})
 class BookstoreExceptionHandlerTest {
 
   @Autowired
@@ -77,7 +77,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -85,7 +85,7 @@ class BookstoreExceptionHandlerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("The requested book could not be found"))
         .andExpect(jsonPath("$.detail").exists())
-        .andExpect(jsonPath("$.instance").value("/api/v1/bookstore/books"))
+        .andExpect(jsonPath("$.instance").value("/api/v1/bookstore/admin/books"))
         .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
         .andExpect(jsonPath("$.method").value("POST"))
         .andExpect(jsonPath("$.correlationId").exists())
@@ -108,7 +108,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -134,7 +134,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -160,7 +160,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -186,7 +186,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -209,7 +209,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidRequest))
             .requestAttr("userContext", userContext))
@@ -251,7 +251,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
@@ -278,7 +278,7 @@ class BookstoreExceptionHandlerTest {
     );
     var userContext = createAdminUserContext();
 
-    mockMvc.perform(post("/api/v1/bookstore/books")
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request))
             .requestAttr("userContext", userContext))
