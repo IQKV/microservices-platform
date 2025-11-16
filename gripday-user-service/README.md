@@ -182,8 +182,8 @@ This is the authentication hub for the Gripday microservices platform. It centra
 
 ### Protected Endpoints (Requires Authentication)
 
-- `GET /api/v1/me` - Get current user
-- `PATCH /api/v1/me/password` - Change password
+- `GET /api/v1/users/me` - Get current user
+- `PATCH /api/v1/users/me/password` - Change password
 - `POST /api/v1/auth/logout` - Logout current session
 - `POST /api/v1/auth/logout-all` - Logout all sessions
 

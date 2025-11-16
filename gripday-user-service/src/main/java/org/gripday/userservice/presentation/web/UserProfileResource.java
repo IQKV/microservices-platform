@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for current user profile operations.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/users")
 @Tag(name = "User Profile", description = "Current authenticated user profile operations")
 @SecurityRequirement(name = "bearerAuth")
 public class UserProfileResource {

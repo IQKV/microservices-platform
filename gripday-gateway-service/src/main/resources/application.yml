@@ -22,7 +22,7 @@ spring:
         - id: user-service-profile
           uri: ${gripday.gateway.routing.services.user-service.uri}
           predicates:
-            - Path=/api/v1/me,/api/v1/me/**
+            - Path=/api/v1/users/me,/api/v1/users/me/**
           filters:
             - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
@@ -176,8 +176,8 @@ gripday:
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)
         # - /api/v1/auth/logout-all (requires Bearer token)
-        # - /api/v1/me (requires Bearer token)
-        # - /api/v1/me/password (requires Bearer token)
+        # - /api/v1/users/me (requires Bearer token)
+        # - /api/v1/users/me/password (requires Bearer token)
         # - /api/v1/admin/** (requires Bearer token + ADMIN role)
     
     rate-limiting:
@@ -233,11 +233,11 @@ gripday:
             requests-per-minute: 50
             burst-capacity: 75
             enable-tenant-quotas: true
-          "/api/v1/me":
+          "/api/v1/users/me":
             requests-per-minute: 100
             burst-capacity: 150
             enable-tenant-quotas: true
-          "/api/v1/me/password":
+          "/api/v1/users/me/password":
             requests-per-minute: 5
             burst-capacity: 10
             enable-tenant-quotas: true

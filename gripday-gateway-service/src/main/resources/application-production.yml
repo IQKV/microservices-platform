@@ -151,11 +151,11 @@ gripday:
             requests-per-minute: 5
             burst-capacity: 10
             enable-tenant-quotas: true
-          "/api/v1/me":
+          "/api/v1/users/me":
             requests-per-minute: 100
             burst-capacity: 150
             enable-tenant-quotas: true
-          "/api/v1/me/password":
+          "/api/v1/users/me/password":
             requests-per-minute: 5
             burst-capacity: 10
             enable-tenant-quotas: true

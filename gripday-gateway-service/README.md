@@ -148,7 +148,7 @@ Request Flow:
 
 ### Request Routing
 
-- Route requests to user-service (/api/v1/auth/**, /api/v1/me, /api/v1/admin/**)
+- Route requests to user-service (/api/v1/auth/**, /api/v1/users/me, /api/v1/admin/**)
 - Route requests to bookstore-service (/api/v1/bookstore/\*\*)
 - Dynamic service registration support
 - Load balancing across service instances
@@ -236,7 +236,7 @@ spring:
 
 ### Protected Endpoints (Requires JWT)
 
-- `GET /api/v1/me` - Get current user
+- `GET /api/v1/users/me` - Get current user
 - `POST /api/v1/auth/logout` - Logout current session
 - `GET /api/v1/admin/users` - List users (admin only)
 - `POST /api/v1/bookstore/orders` - Create order

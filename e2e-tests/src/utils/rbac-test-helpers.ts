@@ -94,13 +94,13 @@ export class RbacTestHelpers {
 
     // User endpoints (authenticated users)
     {
-      endpoint: '/api/v1/me',
+      endpoint: '/api/v1/users/me',
       method: 'GET',
       requiredRoles: ['USER'],
       description: 'Get current user profile'
     },
     {
-      endpoint: '/api/v1/me',
+      endpoint: '/api/v1/users/me',
       method: 'PUT',
       requiredRoles: ['USER'],
       description: 'Update current user profile'
@@ -334,7 +334,7 @@ export class RbacTestHelpers {
       try {
         const response = await this.apiClient.request({
           method: 'GET',
-          url: '/api/v1/me'
+          url: '/api/v1/users/me'
         });
 
         const actualPermissions = response.data.permissions || [];
