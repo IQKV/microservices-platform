@@ -1,51 +1,18 @@
 #!/bin/bash
-
-# Start Gripday Platform - Local Development
-# This script starts the entire platform with all services
-
 set -e
 
-echo "🚀 Starting Gripday Microservices Platform..."
+echo "🚀 Starting platform..."
 
-# Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "❌ Docker is not running. Please start Docker first."
-    exit 1
-fi
+docker info > /dev/null 2>&1 || { echo "❌ Docker not running"; exit 1; }
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-    echo "⚠️  .env file not found. Copying from .env.example..."
-    cp .env.example .env
-    echo "📝 Please update .env file with your configuration before running again."
-    exit 1
-fi
+[ -f .env ] || { cp .env.example .env; echo "📝 Update .env and run again"; exit 1; }
 
-# Build and start services
-echo "🔨 Building Docker images..."
 docker-compose build --parallel
-
-echo "🏗️  Starting infrastructure services (PostgreSQL, Redis)..."
 docker-compose up -d postgres-user redis
-
-echo "⏳ Waiting for infrastructure services to be healthy..."
-docker-compose exec postgres-user pg_isready -U gripday_user -d gripday_user
-docker-compose exec redis redis-cli ping
-
-echo "🚀 Starting application services..."
 docker-compose up -d user-service gateway-service
-
-echo "📊 Starting observability stack..."
 docker-compose up -d prometheus grafana loki promtail
 
-echo "✅ Platform started successfully!"
-echo ""
-echo "🌐 Service URLs:"
-echo "   Gateway Service:  http://localhost:8080"
-echo "   User Service:     http://localhost:8080"
-echo "   Prometheus:       http://localhost:9090"
-echo "   Grafana:          http://localhost:3000 (admin/admin)"
-echo ""
-echo "📋 To view logs: docker-compose logs -f [service-name]"
-echo "🛑 To stop: docker-compose down"
-echo "🧹 To clean up: docker-compose down -v --remove-orphans"
+echo "✅ Platform started"
+echo "   Gateway:    http://localhost:8080"
+echo "   Prometheus: http://localhost:9090"
+echo "   Grafana:    http://localhost:3000 (admin/admin)"
