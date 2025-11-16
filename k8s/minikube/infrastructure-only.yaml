@@ -7,9 +7,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday
+  name: gripday-dev-env
   labels:
-    name: gripday
+    name: gripday-dev-env
     environment: local
 
 ---

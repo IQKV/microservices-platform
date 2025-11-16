@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-TAG="${1:-staging}"
+TAG="${1:-test}"
 
 log() { echo "$(tput setaf 4)[INFO]$(tput sgr0) $1"; }
 err() { echo "$(tput setaf 1)[ERROR]$(tput sgr0) $1" >&2; exit 1; }
@@ -11,15 +11,15 @@ command -v kubectl > /dev/null || err "kubectl not found"
 kubectl cluster-info > /dev/null 2>&1 || err "Cannot connect to cluster"
 
 CONTEXT=$(kubectl config current-context)
-[[ "$CONTEXT" =~ staging ]] || { warn "Context doesn't appear to be staging: $CONTEXT"; read -p "Continue? (y/N): " -n 1 -r; echo; [[ $REPLY =~ ^[Yy]$ ]] || exit 1; }
+[[ "$CONTEXT" =~ test ]] || { warn "Context doesn't appear to be test: $CONTEXT"; read -p "Continue? (y/N): " -n 1 -r; echo; [[ $REPLY =~ ^[Yy]$ ]] || exit 1; }
 
-log "Deploying to staging (tag: $TAG)..."
+log "Deploying to test environment (tag: $TAG)..."
 
 # Update image tags
 for svc in user gateway bookstore; do
     sed "s|gripday/${svc}-service:latest|gripday/${svc}-service:$TAG|g" \
         ${svc}-service/${svc}-service-deployment.yaml | \
-    sed 's/namespace: gripday-dev-env/namespace: gripday-staging-env/g' | \
+    sed 's/namespace: gripday-dev-env/namespace: gripday-test-env/g' | \
     kubectl apply -f -
 done
 
@@ -31,8 +31,8 @@ kubectl apply -f priority-classes.yaml
 
 # Wait for rollout
 for svc in user gateway bookstore; do
-    kubectl rollout status deployment/${svc}-service -n gripday-staging-env --timeout=600s
+    kubectl rollout status deployment/${svc}-service -n gripday-test-env --timeout=600s
 done
 
-log "Staging deployment complete"
-log "Gateway: https://api-staging.gripday.com"
+log "Test deployment complete"
+log "Gateway: https://api-test.gripday.com"
