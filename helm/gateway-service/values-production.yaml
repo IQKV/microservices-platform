@@ -42,10 +42,6 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-        - path: /api
-          pathType: Prefix
-        - path: /actuator
-          pathType: Prefix
   tls:
     - secretName: gateway-production-tls
       hosts:

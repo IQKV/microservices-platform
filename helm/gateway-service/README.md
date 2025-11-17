@@ -4,7 +4,9 @@ Production-ready Helm chart for deploying the Gripday Gateway Service with Redis
 
 ## Overview
 
-The Gateway Service is a reactive API gateway built on Spring Cloud Gateway that provides intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and request transformation for the Gripday microservices platform.
+The Gateway Service is the **single public entry point** for the Gripday microservices platform. Built on Spring Cloud Gateway, it provides intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and request transformation. All client traffic flows through the gateway at `api.gripday.site`.
+
+**Architecture**: Gateway is the only service with public ingress. All other services (User, Bookstore) are internal-only with ClusterIP services.
 
 ## Features
 
@@ -30,15 +32,20 @@ The Gateway Service is a reactive API gateway built on Spring Cloud Gateway that
 ### Local Development
 
 ```bash
-# Install with default values
+# Install with default values (dev environment)
 helm install gateway-service ./helm/gateway-service \
-  --namespace gripday-gateway \
+  --namespace gripday-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-gateway
-kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-service
+kubectl get pods -n gripday-dev-env
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-gateway-service
+
+# Check ingress
+kubectl get ingress -n gripday-dev-env
 ```
+
+**Note**: Gateway is the only service with public ingress at `api.gripday.site`
 
 ### Staging Environment
 
@@ -47,12 +54,12 @@ kubectl logs -f -n gripday-gateway -l app.kubernetes.io/name=gripday-gateway-ser
 kubectl create secret generic gateway-service-secrets \
   --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
   --from-literal=GRIPDAY_CACHE_REDIS_PASSWORD=redis_password \
-  -n gripday-gateway-staging
+  -n gripday-staging-env
 
 # Install with staging configuration
 helm install gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-staging.yaml \
-  --namespace gripday-gateway-staging \
+  --namespace gripday-staging-env \
   --create-namespace
 ```
 
@@ -62,7 +69,7 @@ helm install gateway-service ./helm/gateway-service \
 # Install with production configuration
 helm install gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-production.yaml \
-  --namespace gripday-gateway-production \
+  --namespace gripday-production-env \
   --create-namespace
 ```
 

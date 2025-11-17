@@ -26,29 +26,7 @@ podAnnotations:
 priorityClassName: high-priority
 
 ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-staging
-    nginx.ingress.kubernetes.io/rate-limit: "200"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://test.gripday.site, https://*.test.gripday.site"
-  hosts:
-    - host: user-test.gripday.site
-      paths:
-        - path: /
-          pathType: Prefix
-        - path: /api
-          pathType: Prefix
-        - path: /actuator
-          pathType: Prefix
-        - path: /swagger-ui
-          pathType: Prefix
-        - path: /api-docs
-          pathType: Prefix
-  tls:
-    - secretName: user-test-tls
-      hosts:
-        - user-test.gripday.site
+  enabled: false  # User service is internal-only, accessed via Gateway
 
 resources:
   requests:

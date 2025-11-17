@@ -26,27 +26,7 @@ podAnnotations:
 priorityClassName: high-priority
 
 ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rate-limit: "500"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.site, https://*.gripday.site"
-    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
-    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
-  hosts:
-    - host: bookstore.gripday.site
-      paths:
-        - path: /
-          pathType: Prefix
-        - path: /api
-          pathType: Prefix
-        - path: /actuator
-          pathType: Prefix
-  tls:
-    - secretName: bookstore-production-tls
-      hosts:
-        - bookstore.gripday.site
+  enabled: false  # Bookstore service is internal-only, accessed via Gateway
 
 resources:
   requests:

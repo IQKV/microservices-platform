@@ -97,11 +97,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-        - path: /api
-          pathType: Prefix
-        - path: /actuator
-          pathType: Prefix
-  tls: []
+  tls:
+    - secretName: gateway-dev-tls
+      hosts:
+        - api.gripday.site
 
 resources:
   requests:

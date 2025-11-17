@@ -30,15 +30,17 @@ The User Service is the centralized authentication and user management microserv
 ### Local Development
 
 ```bash
-# Install with default values
+# Install with default values (dev environment)
 helm install user-service ./helm/user-service \
-  --namespace gripday-user \
+  --namespace gripday-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-user
-kubectl logs -f -n gripday-user -l app.kubernetes.io/name=gripday-user-service
+kubectl get pods -n gripday-dev-env
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-user-service
 ```
+
+**Note**: User service is internal-only. Access via Gateway Service at `api.gripday.site/api/v1/auth`
 
 ### Staging Environment
 
@@ -50,12 +52,12 @@ kubectl create secret generic user-service-secrets \
   --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
   --from-literal=SMTP_USERNAME=smtp_user \
   --from-literal=SMTP_PASSWORD=smtp_password \
-  -n gripday-user-staging
+  -n gripday-staging-env
 
 # Install with staging configuration
 helm install user-service ./helm/user-service \
   -f ./helm/user-service/values-staging.yaml \
-  --namespace gripday-user-staging \
+  --namespace gripday-staging-env \
   --create-namespace
 ```
 
@@ -65,7 +67,7 @@ helm install user-service ./helm/user-service \
 # Install with production configuration
 helm install user-service ./helm/user-service \
   -f ./helm/user-service/values-production.yaml \
-  --namespace gripday-user-production \
+  --namespace gripday-production-env \
   --create-namespace
 ```
 

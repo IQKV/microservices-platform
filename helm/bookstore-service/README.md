@@ -25,15 +25,17 @@ The Bookstore Service is a Spring Boot microservice that provides book catalog m
 ### Local Development
 
 ```bash
-# Install with default values (local environment)
+# Install with default values (dev environment)
 helm install bookstore-service ./helm/bookstore-service \
-  --namespace gripday-bookstore \
+  --namespace gripday-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-bookstore
-kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl get pods -n gripday-dev-env
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
 ```
+
+**Note**: Bookstore service is internal-only. Access via Gateway Service at `api.gripday.site/api/v1/bookstore`
 
 ### Staging Environment
 
@@ -113,11 +115,12 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 ### Ingress Parameters
 
-| Parameter               | Description        | Default                  |
-| ----------------------- | ------------------ | ------------------------ |
-| `ingress.enabled`       | Enable ingress     | `true`                   |
-| `ingress.className`     | Ingress class name | `nginx`                  |
-| `ingress.hosts[0].host` | Hostname           | `bookstore.gripday.site` |
+| Parameter         | Description    | Default |
+| ----------------- | -------------- | ------- |
+| `ingress.enabled` | Enable ingress | `false` |
+
+**Note**: Bookstore service is internal-only and accessed via Gateway Service.
+Direct ingress is disabled. All traffic routes through `api.gripday.site`.
 
 ### Resources
 
