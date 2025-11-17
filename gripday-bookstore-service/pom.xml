@@ -141,7 +141,7 @@
                         <excludes>
                            <exclude>**/shared/**</exclude>
                            <exclude>**/catalog/**</exclude>
-                           <exclude>**/inverntory/**</exclude>
+                           <exclude>**/inventory/**</exclude>
                            <exclude>**/*Application.class</exclude>
                         </excludes>
                     </configuration>
