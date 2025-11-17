@@ -29,7 +29,8 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # cert-manager.io/cluster-issuer: letsencrypt-prod  # Uncomment if using cert-manager
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/rate-limit: "2000"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.com, https://*.gripday.com"
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
@@ -42,10 +43,12 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - secretName: gateway-production-tls
-      hosts:
-        - api.gripday.com
+  tls: []  # TLS disabled by default - configure externally if needed
+  # Uncomment to enable TLS:
+  # tls:
+  #   - secretName: gateway-production-tls
+  #     hosts:
+  #       - api.gripday.com
 
 resources:
   requests:

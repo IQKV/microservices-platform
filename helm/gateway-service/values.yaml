@@ -73,8 +73,7 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.site, https://*.gripday.site"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -97,10 +96,7 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - secretName: gateway-dev-tls
-      hosts:
-        - api.gripday.site
+  tls: []  # TLS disabled by default - configure externally if needed
 
 resources:
   requests:
