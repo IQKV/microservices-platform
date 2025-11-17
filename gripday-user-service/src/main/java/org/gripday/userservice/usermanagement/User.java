@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.gripday.userservice.organization.Organization;
+import org.gripday.userservice.infrastructure.entity.Organization;
 import org.gripday.userservice.shared.Authority;
 import org.gripday.userservice.shared.TenantAware;
 import org.hibernate.annotations.CreationTimestamp;

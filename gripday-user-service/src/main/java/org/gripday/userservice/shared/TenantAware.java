@@ -5,7 +5,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
-import org.gripday.userservice.tenancy.TenantContext;
+import org.gripday.userservice.domain.service.TenantContext;
 
 /**
  * Base class for tenant-aware entities.

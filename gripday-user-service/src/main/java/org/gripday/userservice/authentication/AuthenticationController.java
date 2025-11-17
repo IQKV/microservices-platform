@@ -12,9 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.gripday.userservice.registration.RegistrationService;
-import org.gripday.userservice.registration.SignupRequest;
-import org.gripday.userservice.registration.RegistrationResponse;
+import org.gripday.userservice.domain.service.UserRegistrationService;
+import org.gripday.userservice.presentation.dto.SignupRequest;
+import org.gripday.userservice.presentation.dto.UserRegistrationResponse;
+import org.gripday.userservice.presentation.dto.LoginRequest;
+import org.gripday.userservice.presentation.dto.TokenResponse;
+import org.gripday.userservice.presentation.dto.RefreshTokenRequest;
+import org.gripday.userservice.presentation.dto.ValidateTokenRequest;
+import org.gripday.userservice.presentation.dto.ValidateTokenResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,14 +40,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "User authentication, registration, and token management")
 public class AuthenticationController {
 
-  private final AuthenticationService authenticationService;
-  private final RegistrationService registrationService;
-  private final JwtTokenService jwtTokenService;
+  private final org.gripday.userservice.domain.service.AuthenticationService authenticationService;
+  private final UserRegistrationService registrationService;
+  private final org.gripday.userservice.domain.service.JwtService jwtTokenService;
 
   public AuthenticationController(
-      final AuthenticationService authenticationService,
-      final RegistrationService registrationService,
-      final JwtTokenService jwtTokenService) {
+      final org.gripday.userservice.domain.service.AuthenticationService authenticationService,
+      final UserRegistrationService registrationService,
+      final org.gripday.userservice.domain.service.JwtService jwtTokenService) {
     this.authenticationService = authenticationService;
     this.registrationService = registrationService;
     this.jwtTokenService = jwtTokenService;
@@ -55,7 +60,7 @@ public class AuthenticationController {
       @ApiResponse(responseCode = "409", description = "Username or email already exists")
   })
   @PostMapping("/signup")
-  public ResponseEntity<RegistrationResponse> signup(
+  public ResponseEntity<UserRegistrationResponse> signup(
       @Valid @RequestBody SignupRequest request,
       HttpServletRequest httpRequest) {
 
