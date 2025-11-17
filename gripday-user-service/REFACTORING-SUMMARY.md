@@ -9,6 +9,7 @@ This refactoring transforms the codebase from a traditional three-tier architect
 ### 1. Structure Transformation
 
 **Before (Three-Tier):**
+
 ```
 src/main/java/org/gripday/userservice/
 ├── config/                    # Configuration
@@ -25,6 +26,7 @@ src/main/java/org/gripday/userservice/
 ```
 
 **After (DDD Bounded Contexts):**
+
 ```
 src/main/java/org/gripday/userservice/
 ├── shared/                   # Shared Kernel
@@ -42,16 +44,19 @@ src/main/java/org/gripday/userservice/
 ### 2. Bounded Contexts Identified
 
 #### Core Domains
+
 1. **Authentication** - Login, logout, JWT tokens, sessions
 2. **Registration** - User signup
 3. **User Management** - User CRUD, profiles
 
 #### Supporting Domains
+
 4. **Email Verification** - Email verification workflows
 5. **Password Management** - Password reset/change
 6. **Organization** - Organization management
 
 #### Generic Subdomains
+
 7. **Tenancy** - Multi-tenant isolation
 8. **Security** - Account lockout, rate limiting, audit logging
 
@@ -64,24 +69,26 @@ src/main/java/org/gripday/userservice/
 
 ### 4. File Renaming for Clarity
 
-| Old Name | New Name | Reason |
-|----------|----------|--------|
-| `TenantAwareEntity` | `TenantAware` | Simpler, clearer |
-| `EmailVerificationToken` | `VerificationToken` | Context makes "Email" redundant |
-| `UserRegistrationService` | `RegistrationService` | Context makes "User" redundant |
-| `JwtService` | `JwtTokenService` | More explicit |
-| `*Resource` | `*Controller` | Standard Spring naming |
-| `UserRegistrationResponse` | `RegistrationResponse` | Shorter, context-aware |
+| Old Name                   | New Name               | Reason                          |
+| -------------------------- | ---------------------- | ------------------------------- |
+| `TenantAwareEntity`        | `TenantAware`          | Simpler, clearer                |
+| `EmailVerificationToken`   | `VerificationToken`    | Context makes "Email" redundant |
+| `UserRegistrationService`  | `RegistrationService`  | Context makes "User" redundant  |
+| `JwtService`               | `JwtTokenService`      | More explicit                   |
+| `*Resource`                | `*Controller`          | Standard Spring naming          |
+| `UserRegistrationResponse` | `RegistrationResponse` | Shorter, context-aware          |
 
 ### 5. Package Structure Benefits
 
 #### Before
+
 - **Deep nesting**: 4-5 levels (`org.gripday.userservice.presentation.web.admin`)
 - **Technical grouping**: Files grouped by layer (all DTOs together)
 - **Hard to navigate**: Need to jump between layers
 - **Unclear boundaries**: Business logic scattered across layers
 
 #### After
+
 - **Flat structure**: 2 levels only (`org.gripday.userservice.authentication`)
 - **Business grouping**: Files grouped by business capability
 - **Easy navigation**: Everything for a feature in one place
@@ -115,6 +122,7 @@ src/main/java/org/gripday/userservice/
 ### 9. Migration Path
 
 The refactoring was designed to be:
+
 - **Non-breaking**: All existing functionality preserved
 - **Incremental**: Can be done context by context
 - **Reversible**: Clear mapping from old to new structure
@@ -123,6 +131,7 @@ The refactoring was designed to be:
 ### 10. Files Created/Modified
 
 #### Created
+
 - `DDD-REFACTORING-PLAN.md` - Complete refactoring plan
 - `REFACTORING-SUMMARY.md` - This summary
 - `execute-ddd-refactoring.ps1` - Automation script
@@ -134,12 +143,14 @@ The refactoring was designed to be:
 - `authentication/AuthenticationController.java` - Moved and updated
 
 #### To Be Moved (80+ files)
+
 - All remaining service, entity, repository, DTO, and controller files
 - See `DDD-REFACTORING-PLAN.md` for complete mapping
 
 ## How to Complete the Refactoring
 
 ### Option 1: Automated (Recommended)
+
 ```powershell
 # Run the refactoring script
 .\execute-ddd-refactoring.ps1
@@ -157,6 +168,7 @@ Remove-Item -Recurse -Force src/main/java/org/gripday/userservice/presentation
 ```
 
 ### Option 2: Manual
+
 1. Follow the file mapping in `DDD-REFACTORING-PLAN.md`
 2. For each file:
    - Move to new location
@@ -168,17 +180,20 @@ Remove-Item -Recurse -Force src/main/java/org/gripday/userservice/presentation
 ## Benefits Realized
 
 ### Business Benefits
+
 - ✅ Code structure matches business language
 - ✅ Easier to explain system to non-technical stakeholders
 - ✅ Clear feature boundaries for planning
 
 ### Technical Benefits
+
 - ✅ Reduced coupling between features
 - ✅ Easier to test individual bounded contexts
 - ✅ Simpler to add new features
 - ✅ Better code organization
 
 ### Team Benefits
+
 - ✅ Faster onboarding for new developers
 - ✅ Clearer code ownership
 - ✅ Reduced merge conflicts (features isolated)
@@ -204,6 +219,7 @@ Remove-Item -Recurse -Force src/main/java/org/gripday/userservice/presentation
 ## Conclusion
 
 This refactoring transforms the codebase from a technical architecture to a business-aligned architecture. The new structure is:
+
 - **Flatter**: 2 levels vs 4-5 levels
 - **Clearer**: Business domains vs technical layers
 - **Simpler**: Easy to navigate and understand

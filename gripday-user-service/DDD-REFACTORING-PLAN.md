@@ -1,6 +1,7 @@
 # DDD Refactoring Plan
 
 ## Overview
+
 Refactoring from three-tier architecture (presentation/domain/infrastructure) to Domain-Driven Design with bounded contexts.
 
 ## New Structure (Flat, 2-level depth)
@@ -121,48 +122,56 @@ src/main/java/org/gripday/userservice/
 ## Bounded Contexts Identified
 
 ### 1. **Authentication** (Core Domain)
+
 - **Purpose**: User login, logout, JWT token management, session management
 - **Aggregate Root**: Session (implicit)
 - **Key Services**: AuthenticationService, JwtTokenService
 - **Key Entities**: None (stateless, uses Redis for sessions)
 
 ### 2. **Registration** (Core Domain)
+
 - **Purpose**: New user signup and account creation
 - **Aggregate Root**: User (shared with User Management)
 - **Key Services**: RegistrationService
 - **Dependencies**: EmailVerification, UserManagement
 
 ### 3. **Email Verification** (Supporting Domain)
+
 - **Purpose**: Email verification tokens and workflows
 - **Aggregate Root**: VerificationToken
 - **Key Services**: EmailVerificationService
 - **Key Entities**: VerificationToken
 
 ### 4. **Password Management** (Supporting Domain)
+
 - **Purpose**: Password reset and change operations
 - **Aggregate Root**: None (operates on User)
 - **Key Services**: PasswordResetService
 - **Dependencies**: UserManagement, EmailService
 
 ### 5. **User Management** (Core Domain)
+
 - **Purpose**: User CRUD operations, user profile management
 - **Aggregate Root**: User
 - **Key Services**: UserManagementService
 - **Key Entities**: User
 
 ### 6. **Tenancy** (Generic Subdomain)
+
 - **Purpose**: Multi-tenant isolation and context management
 - **Aggregate Root**: Tenant
 - **Key Services**: TenantService, TenantContext
 - **Key Entities**: Tenant
 
 ### 7. **Organization** (Supporting Domain)
+
 - **Purpose**: Organization/company management
 - **Aggregate Root**: Organization
 - **Key Services**: OrganizationService
 - **Key Entities**: Organization
 
 ### 8. **Security** (Generic Subdomain - Cross-cutting)
+
 - **Purpose**: Account lockout, rate limiting, audit logging, input validation
 - **Key Services**: AccountLockoutService, SecurityAuditService, RateLimitingService
 - **Key Entities**: UserAuditLog
@@ -170,6 +179,7 @@ src/main/java/org/gripday/userservice/
 ## File Mapping (Old → New)
 
 ### Shared Kernel
+
 - `infrastructure/entity/Authority.java` → `shared/Authority.java`
 - `infrastructure/entity/TenantAwareEntity.java` → `shared/TenantAware.java`
 - `infrastructure/repository/AuthorityRepository.java` → `shared/AuthorityRepository.java`
@@ -178,6 +188,7 @@ src/main/java/org/gripday/userservice/
 - `infrastructure/i18n/MessageService.java` → `shared/MessageService.java`
 
 ### Authentication
+
 - `domain/service/AuthenticationService.java` → `authentication/AuthenticationService.java`
 - `domain/service/JwtService.java` → `authentication/JwtTokenService.java`
 - `domain/service/JwtKeyManagementService.java` → `authentication/JwtKeyManagementService.java`
@@ -191,11 +202,13 @@ src/main/java/org/gripday/userservice/
 - `presentation/dto/AuthenticationResult.java` → `authentication/AuthenticationResult.java`
 
 ### Registration
+
 - `domain/service/UserRegistrationService.java` → `registration/RegistrationService.java`
 - `presentation/dto/SignupRequest.java` → `registration/SignupRequest.java`
 - `presentation/dto/UserRegistrationResponse.java` → `registration/RegistrationResponse.java`
 
 ### Email Verification
+
 - `infrastructure/entity/EmailVerificationToken.java` → `emailverification/VerificationToken.java`
 - `infrastructure/repository/EmailVerificationTokenRepository.java` → `emailverification/VerificationTokenRepository.java`
 - `domain/service/EmailVerificationService.java` → `emailverification/EmailVerificationService.java`
@@ -207,6 +220,7 @@ src/main/java/org/gripday/userservice/
 - `presentation/dto/VerificationStatusResponse.java` → `emailverification/VerificationStatusResponse.java`
 
 ### Password Management
+
 - `domain/service/PasswordResetService.java` → `passwordmanagement/PasswordResetService.java`
 - `presentation/web/PasswordResetResource.java` → `passwordmanagement/PasswordResetController.java`
 - `presentation/dto/ForgotPasswordRequest.java` → `passwordmanagement/ForgotPasswordRequest.java`
@@ -214,6 +228,7 @@ src/main/java/org/gripday/userservice/
 - `presentation/dto/ChangePasswordRequest.java` → `passwordmanagement/ChangePasswordRequest.java`
 
 ### User Management
+
 - `infrastructure/entity/User.java` → `usermanagement/User.java`
 - `infrastructure/repository/UserRepository.java` → `usermanagement/UserRepository.java`
 - `domain/service/UserManagementService.java` → `usermanagement/UserManagementService.java`
@@ -225,6 +240,7 @@ src/main/java/org/gripday/userservice/
 - `presentation/dto/UpdateUserRequest.java` → `usermanagement/UpdateUserRequest.java`
 
 ### Tenancy
+
 - `infrastructure/entity/Tenant.java` → `tenancy/Tenant.java`
 - `infrastructure/repository/TenantRepository.java` → `tenancy/TenantRepository.java`
 - `domain/service/TenantContext.java` → `tenancy/TenantContext.java`
@@ -235,6 +251,7 @@ src/main/java/org/gripday/userservice/
 - `config/TenantConfig.java` → `tenancy/TenantConfig.java`
 
 ### Organization
+
 - `infrastructure/entity/Organization.java` → `organization/Organization.java`
 - `infrastructure/repository/OrganizationRepository.java` → `organization/OrganizationRepository.java`
 - `domain/service/OrganizationManagementService.java` → `organization/OrganizationService.java`
@@ -244,6 +261,7 @@ src/main/java/org/gripday/userservice/
 - `presentation/dto/UpdateOrganizationRequest.java` → `organization/UpdateOrganizationRequest.java`
 
 ### Security
+
 - `domain/service/AccountLockoutService.java` → `security/AccountLockoutService.java`
 - `domain/service/RateLimitingService.java` → `security/RateLimitingService.java`
 - `domain/service/SecurityAuditService.java` → `security/SecurityAuditService.java`

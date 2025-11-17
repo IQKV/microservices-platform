@@ -3,6 +3,7 @@
 ## Current Status
 
 ✅ **Completed:**
+
 - DDD structure designed and documented
 - Shared kernel created (Authority, TenantAware, AuthorityRepository)
 - User Management context partially created (User, UserRepository)
@@ -11,6 +12,7 @@
 - Automation script created
 
 ⏳ **Remaining:**
+
 - Move 70+ files to new bounded context structure
 - Update all package declarations
 - Update all imports
@@ -26,6 +28,7 @@ The easiest way is to manually move files following the mapping in `DDD-REFACTOR
 ### Step 2: Move Files by Bounded Context
 
 #### A. Tenancy Context (Priority 1 - Required by others)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/tenancy" -Force
@@ -42,6 +45,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/tenanc
 ```
 
 #### B. Security Context (Priority 1 - Required by others)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/security" -Force
@@ -63,6 +67,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/securi
 ```
 
 #### C. Shared Services (Priority 1)
+
 ```powershell
 # Move to shared/ (update package to org.gripday.userservice.shared)
 # - domain/service/EmailService.java → shared/EmailService.java
@@ -71,6 +76,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/securi
 ```
 
 #### D. Authentication Context (Priority 2)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/authentication" -Force
@@ -89,6 +95,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/authen
 ```
 
 #### E. Registration Context (Priority 2)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/registration" -Force
@@ -100,6 +107,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/regist
 ```
 
 #### F. Email Verification Context (Priority 2)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/emailverification" -Force
@@ -117,6 +125,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/emailv
 ```
 
 #### G. Password Management Context (Priority 3)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/passwordmanagement" -Force
@@ -130,6 +139,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/passwo
 ```
 
 #### H. User Management Context (Priority 3)
+
 ```powershell
 # Already partially created, complete it:
 # - domain/service/UserManagementService.java → usermanagement/UserManagementService.java
@@ -142,6 +152,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/passwo
 ```
 
 #### I. Organization Context (Priority 3)
+
 ```powershell
 # Create directory
 New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/organization" -Force
@@ -159,6 +170,7 @@ New-Item -ItemType Directory -Path "src/main/java/org/gripday/userservice/organi
 ### Step 3: Update Package Declarations
 
 For each moved file, update the package declaration:
+
 ```java
 // Old
 package org.gripday.userservice.domain.service;
@@ -190,6 +202,7 @@ Replace: import org.gripday.userservice.authentication.JwtTokenService;
 ### Step 5: Update Class Names
 
 Some classes need renaming:
+
 - `TenantAwareEntity` → `TenantAware`
 - `EmailVerificationToken` → `VerificationToken`
 - `UserRegistrationService` → `RegistrationService`
@@ -199,6 +212,7 @@ Some classes need renaming:
 ### Step 6: Update Tests
 
 Apply the same refactoring to test files:
+
 ```powershell
 # Update test structure to match main structure
 src/test/java/org/gripday/userservice/
@@ -249,15 +263,19 @@ Remove-Item -Recurse -Force src/test/java/org/gripday/userservice/presentation
 ## Common Issues and Solutions
 
 ### Issue: Circular Dependencies
+
 **Solution**: Tenancy and Security contexts should be moved first as they're used by others
 
 ### Issue: Import Not Found
+
 **Solution**: Check if the class was renamed (e.g., `JwtService` → `JwtTokenService`)
 
 ### Issue: Tests Failing
+
 **Solution**: Update test imports and package declarations
 
 ### Issue: Compilation Errors
+
 **Solution**: Search for old package names and update them
 
 ## Verification Checklist
@@ -284,6 +302,7 @@ Remove-Item -Recurse -Force src/test/java/org/gripday/userservice/presentation
 ## Need Help?
 
 Refer to:
+
 - `DDD-REFACTORING-PLAN.md` - Complete file mapping
 - `REFACTORING-SUMMARY.md` - Overview and benefits
 - `execute-ddd-refactoring.ps1` - Automation script (if you want to enhance it)
