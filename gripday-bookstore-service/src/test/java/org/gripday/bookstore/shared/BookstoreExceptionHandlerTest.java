@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest({org.gripday.bookstore.catalog.BookResource.class, org.gripday.bookstore.shared.web.BookstoreExceptionHandler.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({org.gripday.bookstore.shared.TestSecurityConfig.class, org.gripday.bookstore.catalog.BookManagementResource.class})
+@Import({org.gripday.bookstore.shared.TestSecurityConfig.class, org.gripday.bookstore.catalog.BookManagementResource.class, org.gripday.bookstore.catalog.BookCatalogResponseBuilder.class})
 class BookstoreExceptionHandlerTest {
 
   @Autowired

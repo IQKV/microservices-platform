@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(BookResource.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(org.gripday.bookstore.shared.TestSecurityConfig.class)
+@Import({org.gripday.bookstore.shared.TestSecurityConfig.class, BookCatalogResponseBuilder.class})
 class BookResourceTest {
 
   @Autowired
@@ -61,9 +61,9 @@ class BookResourceTest {
 
     mockMvc.perform(get("/api/v1/bookstore/books"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].title").value("Test Book"))
-        .andExpect(jsonPath("$.totalElements").value(1));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].title").value("Test Book"))
+        .andExpect(jsonPath("$.pagination.totalElements").value(1));
   }
 
   @Test
@@ -79,8 +79,8 @@ class BookResourceTest {
             .param("minPrice", "10.00")
             .param("maxPrice", "50.00"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].title").value("Test Book"));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].title").value("Test Book"));
   }
 
   @Test
@@ -112,8 +112,8 @@ class BookResourceTest {
     mockMvc.perform(get("/api/v1/bookstore/books/search")
             .param("title", "Test"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].title").value("Test Book"));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].title").value("Test Book"));
   }
 
   @Test
@@ -126,8 +126,8 @@ class BookResourceTest {
     mockMvc.perform(get("/api/v1/bookstore/books/search/title")
             .param("title", "Test"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].title").value("Test Book"));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].title").value("Test Book"));
   }
 
   @Test
@@ -140,8 +140,8 @@ class BookResourceTest {
     mockMvc.perform(get("/api/v1/bookstore/books/search/author")
             .param("author", "Test Author"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].author").value("Test Author"));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].author").value("Test Author"));
   }
 
   @Test
@@ -154,8 +154,8 @@ class BookResourceTest {
     mockMvc.perform(get("/api/v1/bookstore/books/search/category")
             .param("category", "Fiction"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].categoryName").value("Fiction"));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].categoryName").value("Fiction"));
   }
 
   @Test
@@ -170,8 +170,8 @@ class BookResourceTest {
             .param("minPrice", "20.00")
             .param("maxPrice", "40.00"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].price").value(29.99));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].price").value(29.99));
   }
 
   @Test
@@ -183,8 +183,8 @@ class BookResourceTest {
 
     mockMvc.perform(get("/api/v1/bookstore/books/available"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].available").value(true));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].available").value(true));
   }
 
   @Test
@@ -196,7 +196,7 @@ class BookResourceTest {
 
     mockMvc.perform(get("/api/v1/bookstore/books/in-stock"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content[0].availableQuantity").value(10));
+        .andExpect(jsonPath("$.books").isArray())
+        .andExpect(jsonPath("$.books[0].availableQuantity").value(10));
   }
 }
