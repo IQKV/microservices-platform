@@ -122,6 +122,19 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -232,10 +245,16 @@ configMap:
     application.yml: |
       server:
         port: 8080
+        shutdown: graceful
+        servlet:
+          context-path: /
+        error:
+          include-message: always
+          include-binding-errors: always
 
       spring:
         application:
-          name: gripday-bookstore-service
+          name: bookstore-service
         profiles:
           active: local
         
@@ -243,6 +262,7 @@ configMap:
           hibernate:
             ddl-auto: validate
           show-sql: false
+          open-in-view: false
           properties:
             hibernate:
               dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -252,7 +272,6 @@ configMap:
                 batch_size: 20
               order_inserts: true
               order_updates: true
-          open-in-view: false
         
         liquibase:
           change-log: classpath:db/changelog/db.changelog-master.xml
@@ -261,89 +280,120 @@ configMap:
         cache:
           type: redis
           redis:
-            time-to-live: PT1H
+            time-to-live: 600000
+            cache-null-values: false
+        
+        data:
+          redis:
+            host: ${REDIS_HOST:localhost}
+            port: ${REDIS_PORT:6379}
+            password: ${REDIS_PASSWORD:}
+            timeout: 2000ms
+            lettuce:
+              pool:
+                max-active: 8
+                max-idle: 8
+                min-idle: 0
+        
+        security:
+          oauth2:
+            resourceserver:
+              jwt:
+                issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+                jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
 
       springdoc:
         api-docs:
           enabled: true
           path: /api-docs
-          groups:
-            enabled: true
         swagger-ui:
           enabled: true
           path: /swagger-ui.html
-          groups-order: ASC
-          operations-sorter: alpha
+          operations-sorter: method
           tags-sorter: alpha
           try-it-out-enabled: true
           filter: true
           display-request-duration: true
-          display-operation-id: true
-          show-extensions: true
-          show-common-extensions: true
-        group-configs:
-          - group: books
-            display-name: Book Management APIs
-            paths-to-match: /api/*/books/**
-          - group: inventory
-            display-name: Inventory Management APIs
-            paths-to-match: /api/*/inventory/**
-          - group: search
-            display-name: Book Search APIs
-            paths-to-match: /api/*/search/**
+          display-operation-id: false
+          default-models-expand-depth: 1
+          default-model-expand-depth: 1
+          doc-expansion: none
         show-actuator: true
-        use-management-port: false
+        group-configs:
+          - group: bookstore-api-v1
+            display-name: Bookstore API v1 (Current)
+            paths-to-match: /api/v1/bookstore/**
+          - group: bookstore-api-all
+            display-name: Bookstore API (All Versions)
+            paths-to-match: /api/**/bookstore/**
+          - group: actuator
+            display-name: Actuator Endpoints
+            paths-to-match: /actuator/**
 
       management:
         endpoints:
           web:
             exposure:
-              include: health,info,metrics,prometheus,liquibase,openapi,caches
+              include: health,info,metrics,prometheus,env,configprops
+            base-path: /actuator
         endpoint:
           health:
             show-details: when-authorized
-          liquibase:
+            show-components: always
+            probes:
+              enabled: true
+          metrics:
             enabled: true
           prometheus:
             enabled: true
-          caches:
+        health:
+          defaults:
+            enabled: true
+          db:
+            enabled: true
+          redis:
+            enabled: true
+          diskspace:
             enabled: true
         metrics:
-          export:
-            prometheus:
-              enabled: true
           distribution:
             percentiles-histogram:
-              http.server.requests: true
-            percentiles:
-              http.server.requests: 0.5,0.95,0.99
+              "[http.server.requests]": true
+              "[bookstore.books.search.duration]": true
+              "[bookstore.books.creation.duration]": true
+              "[bookstore.inventory.update.duration]": true
+          tags:
+            application: bookstore-service
+            environment: ${spring.profiles.active:local}
+        prometheus:
+          metrics:
+            export:
+              enabled: true
+              step: 60s
+              descriptions: true
         tracing:
           sampling:
             probability: 1.0
 
+      logging:
+        level:
+          org.gripday.bookstore: INFO
+          org.springframework.security: INFO
+          org.springframework.cache: INFO
+          org.hibernate.SQL: INFO
+          org.hibernate.type.descriptor.sql.BasicBinder: INFO
+          AUDIT: INFO
+        pattern:
+          console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
+
       gripday:
-        observability:
-          tracing:
-            enabled: true
-            service-name: ${spring.application.name}
-            sampling-rate: 1.0
-            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
-            timeout: PT10S
-          metrics:
-            enabled: true
-            path: /actuator/prometheus
-            prefix: gripday_bookstore
-            include-host-tag: true
-            include-application-tag: true
-          logging:
-            include-correlation-id: true
-            include-trace-id: true
-            include-span-id: true
-            include-user-id: true
-            include-tenant-id: true
-            correlation-id-header: X-Correlation-ID
-            request-id-header: X-Request-ID
-            tenant-id-header: X-Tenant-ID
+        bookstore:
+          cors:
+            allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+            allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
 
 # Environment variables
 env:
@@ -357,6 +407,18 @@ env:
     value: "6379"
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "2"
+  - name: JWT_ISSUER_URI
+    value: "http://user-service:8080"
+  - name: JWT_JWK_SET_URI
+    value: "http://user-service:8080/.well-known/jwks.json"
+  - name: CORS_ALLOWED_ORIGINS
+    value: "http://localhost:5173,http://localhost:3000"
+  - name: REDIS_HOST
+    value: "bookstore-redis"
+  - name: REDIS_PORT
+    value: "6379"
+  - name: REDIS_PASSWORD
+    value: ""
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
