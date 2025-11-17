@@ -75,11 +75,11 @@ env:
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
-    value: "http://user-service.gripday-test-env.svc.cluster.local:8080/.well-known/jwks.json"
+    value: "http://user-service:8080/.well-known/jwks.json"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
-    value: "http://user-service.gripday-test-env.svc.cluster.local:8080"
+    value: "http://user-service:8080"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service.gripday-test-env.svc.cluster.local:8080"
+    value: "http://bookstore-service:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "https://gripday.website,https://*.gripday.website"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT

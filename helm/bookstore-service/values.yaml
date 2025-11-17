@@ -419,11 +419,9 @@ networkPolicy:
     - Ingress
     - Egress
   ingress:
+    # Allow traffic from gateway service (same namespace)
     - from:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/part-of: gripday
-          podSelector:
+        - podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-gateway-service
       ports:

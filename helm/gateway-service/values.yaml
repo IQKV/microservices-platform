@@ -547,11 +547,11 @@ env:
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
-    value: "http://user-service.gripday-dev-env.svc.cluster.local:8080/.well-known/jwks.json"
+    value: "http://user-service:8080/.well-known/jwks.json"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
-    value: "http://user-service.gripday-dev-env.svc.cluster.local:8080"
+    value: "http://user-service:8080"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service.gripday-dev-env.svc.cluster.local:8080"
+    value: "http://bookstore-service:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
@@ -617,23 +617,17 @@ networkPolicy:
         - protocol: TCP
           port: 8080
   egress:
-    # Allow access to user-service
+    # Allow access to user-service (same namespace)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/part-of: gripday
-          podSelector:
+        - podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-user-service
       ports:
         - protocol: TCP
           port: 8080
-    # Allow access to bookstore-service
+    # Allow access to bookstore-service (same namespace)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/part-of: gripday
-          podSelector:
+        - podSelector:
             matchLabels:
               app.kubernetes.io/name: gripday-bookstore-service
       ports:
