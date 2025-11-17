@@ -81,14 +81,14 @@ This is an exemplary Spring Boot microservice that showcases how to build a prod
 
 The service follows a clear separation between public and administrative endpoints:
 
-**Public Resources** (`presentation.web` package)
+**Public Resources**
 
 - `BookResource` - Public catalog browsing and search operations
 - `InventoryResource` - Public inventory information and availability checks
 - `ApiInfoResource` - API version and capability information
 - No authentication required, accessible to all users
 
-**Admin Resources** (`presentation.web.admin` package)
+**Admin Resources**
 
 - `BookManagementResource` - Administrative book CRUD operations
 - `InventoryManagementResource` - Administrative inventory management
