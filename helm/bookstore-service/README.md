@@ -22,49 +22,54 @@ The Bookstore Service is a Spring Boot microservice that provides book catalog m
 
 ## Quick Start
 
-### Local Development
+### Development Environment
 
 ```bash
-# Install with default values (dev environment)
+# Install with default values (optimized for k3s single instance)
 helm install bookstore-service ./helm/bookstore-service \
   --namespace gripday-dev-env \
   --create-namespace
 
 # Verify deployment
 kubectl get pods -n gripday-dev-env
+kubectl get svc -n gripday-dev-env
 kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
 ```
 
-**Note**: Bookstore service is internal-only. Access via Gateway Service at `api.gripday.site/api/v1/bookstore`
+**Important Notes**:
+- Bookstore service is **internal-only** (no public ingress)
+- Access via Gateway Service at `http://api.gripday.site/api/v1/bookstore`
+- Service exposed on port 80, container runs on port 8080
+- Default configuration optimized for k3s single node (1 replica, HPA disabled)
 
 ### Staging Environment
 
 ```bash
-# Install with staging configuration
-helm install bookstore-service ./helm/bookstore-service \
-  -f ./helm/bookstore-service/values-staging.yaml \
-  --namespace gripday-bookstore-staging \
-  --create-namespace
-
-# Create secrets (replace with actual values)
+# Create secrets first (replace with actual values)
 kubectl create secret generic bookstore-service-secrets \
   --from-literal=GRIPDAY_DATABASE_USERNAME=bookstore_user \
   --from-literal=GRIPDAY_DATABASE_PASSWORD=secure_password \
   --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
   --from-literal=GRIPDAY_CACHE_REDIS_PASSWORD=redis_password \
-  -n gripday-bookstore-staging
+  -n gripday-staging-env
+
+# Install with staging configuration
+helm install bookstore-service ./helm/bookstore-service \
+  -f ./helm/bookstore-service/values-staging.yaml \
+  --namespace gripday-staging-env \
+  --create-namespace
 ```
 
 ### Production Environment
 
 ```bash
+# Secrets should be managed via external secret management (AWS Secrets Manager, Vault, etc.)
+
 # Install with production configuration
 helm install bookstore-service ./helm/bookstore-service \
   -f ./helm/bookstore-service/values-production.yaml \
-  --namespace gripday-bookstore-production \
+  --namespace gripday-production-env \
   --create-namespace
-
-# Secrets should be managed via external secret management (AWS Secrets Manager, Vault, etc.)
 ```
 
 ## Upgrading
@@ -73,16 +78,16 @@ helm install bookstore-service ./helm/bookstore-service \
 # Upgrade with new values
 helm upgrade bookstore-service ./helm/bookstore-service \
   -f ./helm/bookstore-service/values-production.yaml \
-  --namespace gripday-bookstore-production
+  --namespace gripday-production-env
 
 # Rollback if needed
-helm rollback bookstore-service --namespace gripday-bookstore-production
+helm rollback bookstore-service --namespace gripday-production-env
 ```
 
 ## Uninstalling
 
 ```bash
-helm uninstall bookstore-service --namespace gripday-bookstore
+helm uninstall bookstore-service --namespace gripday-dev-env
 ```
 
 ## Configuration
@@ -93,34 +98,38 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 | Parameter            | Description      | Default   |
 | -------------------- | ---------------- | --------- |
-| `global.environment` | Environment name | `local`   |
+| `global.environment` | Environment name | `dev`     |
 | `global.platform`    | Platform name    | `gripday` |
 
 ### Application Parameters
 
 | Parameter          | Description        | Default                     |
 | ------------------ | ------------------ | --------------------------- |
-| `replicaCount`     | Number of replicas | `2`                         |
+| `replicaCount`     | Number of replicas | `1` (k3s optimized)         |
 | `image.repository` | Image repository   | `gripday/bookstore-service` |
 | `image.tag`        | Image tag          | `1.0.0`                     |
 | `image.pullPolicy` | Image pull policy  | `IfNotPresent`              |
 
 ### Service Parameters
 
-| Parameter                  | Description             | Default     |
-| -------------------------- | ----------------------- | ----------- |
-| `service.type`             | Service type            | `ClusterIP` |
-| `service.port`             | Service port            | `8080`      |
-| `service.headless.enabled` | Create headless service | `true`      |
+| Parameter                  | Description                  | Default     |
+| -------------------------- | ---------------------------- | ----------- |
+| `service.type`             | Service type                 | `ClusterIP` |
+| `service.port`             | Service port (external)      | `80`        |
+| `service.targetPort`       | Container port (internal)    | `8080`      |
+| `service.headless.enabled` | Create headless service      | `true`      |
 
-### Ingress Parameters
+### Access Configuration
 
-| Parameter         | Description    | Default |
-| ----------------- | -------------- | ------- |
-| `ingress.enabled` | Enable ingress | `false` |
+**Ingress**: Disabled (internal-only service)
+- Bookstore service has no public ingress
+- All traffic routes through Gateway Service
+- Access URL: `http://api.gripday.site/api/v1/bookstore`
 
-**Note**: Bookstore service is internal-only and accessed via Gateway Service.
-Direct ingress is disabled. All traffic routes through `api.gripday.site`.
+**Service Discovery**:
+- Internal URL: `http://bookstore-service` (port 80)
+- Gateway uses simple service name for routing
+- No namespace qualification needed (same namespace deployment)
 
 ### Resources
 
@@ -133,40 +142,43 @@ Direct ingress is disabled. All traffic routes through `api.gripday.site`.
 
 ### Autoscaling
 
-| Parameter                                       | Description      | Default |
-| ----------------------------------------------- | ---------------- | ------- |
-| `autoscaling.enabled`                           | Enable HPA       | `true`  |
-| `autoscaling.minReplicas`                       | Minimum replicas | `2`     |
-| `autoscaling.maxReplicas`                       | Maximum replicas | `10`    |
-| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU       | `70`    |
-| `autoscaling.targetMemoryUtilizationPercentage` | Target memory    | `80`    |
+| Parameter                                       | Description                | Default                    |
+| ----------------------------------------------- | -------------------------- | -------------------------- |
+| `autoscaling.enabled`                           | Enable HPA                 | `false` (disabled for k3s) |
+| `autoscaling.minReplicas`                       | Minimum replicas           | `1`                        |
+| `autoscaling.maxReplicas`                       | Maximum replicas           | `3`                        |
+| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU                 | `70`                       |
+| `autoscaling.targetMemoryUtilizationPercentage` | Target memory              | `80`                       |
 
 ### PostgreSQL Parameters
 
-| Parameter                              | Description          | Default       |
-| -------------------------------------- | -------------------- | ------------- |
-| `postgresql.enabled`                   | Enable PostgreSQL    | `true`        |
-| `postgresql.image.tag`                 | PostgreSQL image tag | `15.8-alpine` |
-| `postgresql.persistence.size`          | PVC size             | `10Gi`        |
-| `postgresql.resources.requests.memory` | Memory request       | `512Mi`       |
-| `postgresql.resources.requests.cpu`    | CPU request          | `500m`        |
+| Parameter                              | Description          | Default                  |
+| -------------------------------------- | -------------------- | ------------------------ |
+| `postgresql.enabled`                   | Enable PostgreSQL    | `true`                   |
+| `postgresql.image.tag`                 | PostgreSQL image tag | `15.8-alpine`            |
+| `postgresql.persistence.size`          | PVC size             | `10Gi`                   |
+| `postgresql.persistence.storageClass`  | Storage class        | `local-path` (k3s)       |
+| `postgresql.resources.requests.memory` | Memory request       | `512Mi`                  |
+| `postgresql.resources.requests.cpu`    | CPU request          | `500m`                   |
 
 ### Redis Parameters
 
-| Parameter                | Description     | Default      |
-| ------------------------ | --------------- | ------------ |
-| `redis.enabled`          | Enable Redis    | `true`       |
-| `redis.image.tag`        | Redis image tag | `7.2-alpine` |
-| `redis.persistence.size` | PVC size        | `2Gi`        |
-| `redis.config.maxmemory` | Max memory      | `512mb`      |
+| Parameter                        | Description       | Default            |
+| -------------------------------- | ----------------- | ------------------ |
+| `redis.enabled`                  | Enable Redis      | `true`             |
+| `redis.image.tag`                | Redis image tag   | `7.2-alpine`       |
+| `redis.persistence.size`         | PVC size          | `2Gi`              |
+| `redis.persistence.storageClass` | Storage class     | `local-path` (k3s) |
+| `redis.config.maxmemory`         | Max memory        | `512mb`            |
 
 ### Security Parameters
 
-| Parameter                      | Description           | Default           |
-| ------------------------------ | --------------------- | ----------------- |
-| `networkPolicy.enabled`        | Enable network policy | `true`            |
-| `podSecurityContext.runAsUser` | Run as user ID        | `1001`            |
-| `priorityClassName`            | Priority class name   | `medium-priority` |
+| Parameter                      | Description           | Default                |
+| ------------------------------ | --------------------- | ---------------------- |
+| `networkPolicy.enabled`        | Enable network policy | `true`                 |
+| `podSecurityContext.runAsUser` | Run as user ID        | `1001`                 |
+| `priorityClassName`            | Priority class name   | `""` (empty for k3s)   |
+| `ingress.enabled`              | Enable ingress        | `false` (internal-only)|
 
 ## Examples
 
@@ -269,7 +281,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: bookstore-service-secrets
-  namespace: gripday-bookstore
+  namespace: gripday-dev-env
 type: Opaque
 stringData:
   GRIPDAY_DATABASE_USERNAME: bookstore_user
@@ -285,9 +297,9 @@ The service validates JWT tokens from User Service:
 ```yaml
 env:
   - name: JWT_ISSUER_URI
-    value: "http://user-service:8080"
+    value: "http://user-service"
   - name: JWT_JWK_SET_URI
-    value: "http://user-service:8080/.well-known/jwks.json"
+    value: "http://user-service/.well-known/jwks.json"
 ```
 
 ### CORS Configuration
@@ -306,20 +318,20 @@ env:
 
 ```bash
 # Liveness probe
-curl http://bookstore-service:8080/actuator/health/liveness
+curl http://bookstore-service/actuator/health/liveness
 
 # Readiness probe
-curl http://bookstore-service:8080/actuator/health/readiness
+curl http://bookstore-service/actuator/health/readiness
 
 # Full health details
-curl http://bookstore-service:8080/actuator/health
+curl http://bookstore-service/actuator/health
 ```
 
 ### Metrics
 
 ```bash
 # Prometheus metrics endpoint
-curl http://bookstore-service:8080/actuator/prometheus
+curl http://bookstore-service/actuator/prometheus
 
 # View metrics in Grafana
 # Dashboard: Gripday Bookstore Service Overview
@@ -328,11 +340,15 @@ curl http://bookstore-service:8080/actuator/prometheus
 ### API Documentation
 
 ```bash
-# Swagger UI
-http://bookstore-service:8080/swagger-ui.html
+# Swagger UI (via Gateway)
+http://api.gripday.site/swagger-ui.html
 
-# OpenAPI JSON
-http://bookstore-service:8080/api-docs
+# OpenAPI JSON (via Gateway)
+http://api.gripday.site/api-docs
+
+# Internal access (from within cluster)
+curl http://bookstore-service/swagger-ui.html
+curl http://bookstore-service/api-docs
 ```
 
 ## Troubleshooting
@@ -341,51 +357,51 @@ http://bookstore-service:8080/api-docs
 
 ```bash
 # Pod status
-kubectl get pods -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl get pods -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
 
 # Deployment status
-kubectl rollout status deployment/bookstore-service -n gripday-bookstore
+kubectl rollout status deployment/bookstore-service -n gripday-dev-env
 
-# HPA status
-kubectl get hpa -n gripday-bookstore
+# HPA status (if enabled)
+kubectl get hpa -n gripday-dev-env
 ```
 
 ### View Logs
 
 ```bash
 # Application logs
-kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
 
 # PostgreSQL logs
-kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=bookstore-postgres
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=bookstore-postgres
 
 # Redis logs
-kubectl logs -f -n gripday-bookstore -l app.kubernetes.io/name=bookstore-redis
+kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=bookstore-redis
 
 # Previous container logs (if crashed)
-kubectl logs -n gripday-bookstore <pod-name> --previous
+kubectl logs -n gripday-dev-env <pod-name> --previous
 ```
 
 ### Debug Issues
 
 ```bash
 # Describe pod for events
-kubectl describe pod <pod-name> -n gripday-bookstore
+kubectl describe pod <pod-name> -n gripday-dev-env
 
 # Check service endpoints
-kubectl get endpoints -n gripday-bookstore
+kubectl get endpoints -n gripday-dev-env
 
 # Test database connectivity
-kubectl exec -it <bookstore-pod> -n gripday-bookstore -- \
+kubectl exec -it <bookstore-pod> -n gripday-dev-env -- \
   psql -h bookstore-postgres -U gripday_user -d gripday_bookstore_local
 
 # Test Redis connectivity
-kubectl exec -it <bookstore-pod> -n gripday-bookstore -- \
+kubectl exec -it <bookstore-pod> -n gripday-dev-env -- \
   redis-cli -h bookstore-redis ping
 
 # Check network policies
-kubectl get networkpolicies -n gripday-bookstore
-kubectl describe networkpolicy bookstore-service-netpol -n gripday-bookstore
+kubectl get networkpolicies -n gripday-dev-env
+kubectl describe networkpolicy bookstore-service-netpol -n gripday-dev-env
 ```
 
 ### Common Issues
