@@ -22,7 +22,7 @@ namespace:
 replicaCount: 1
 
 image:
-  repository: gripday/gateway-service
+  repository: gripday/gripday-gateway-service
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 

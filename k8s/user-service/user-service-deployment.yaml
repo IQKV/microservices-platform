@@ -42,7 +42,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: user-service
-          image: gripday/user-service:1.0.0
+          image: gripday/gripday-user-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

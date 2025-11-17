@@ -114,7 +114,7 @@ helm install user-service ./helm/user-service \
 | Parameter                     | Description        | Default                |
 | ----------------------------- | ------------------ | ---------------------- |
 | `replicaCount`                | Number of replicas | `1`                    |
-| `image.repository`            | Image repository   | `gripday/user-service` |
+| `image.repository`            | Image repository   | `gripday/gripday-user-service` |
 | `image.tag`                   | Image tag          | `1.0.0`                |
 | `service.port`                | Service port       | `80`                   |
 | `service.targetPort`          | Container port     | `8080`                 |
@@ -620,6 +620,6 @@ The Helm chart creates the following Kubernetes resources:
 
 ## Support
 
-- GitHub Issues: https://github.com/gripday/user-service
+- GitHub Issues: https://github.com/gripday/gripday-user-service
 - Platform Team: platform@gripday.site
 - Documentation: https://docs.gripday.site

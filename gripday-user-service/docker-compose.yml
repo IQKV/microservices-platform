@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database for User Service - Local Development
   postgres-user:
     image: postgres:15.8-alpine
-    container_name: gripday-user-postgres-local
+    container_name: gripday-user-postgres-dev
     environment:
       POSTGRES_DB: gripday_user_local
       POSTGRES_USER: gripday_user
@@ -46,7 +46,7 @@ services:
   # Redis for User Service - Local Development
   redis-user:
     image: redis:7.2-alpine
-    container_name: gripday-user-redis-local
+    container_name: gripday-user-redis-dev
     ports:
       - "6379:6379"
     volumes:
@@ -73,8 +73,8 @@ services:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
       target: builder
-    image: gripday/user-service:local
-    container_name: gripday-user-service-local
+    image: gripday/gripday-user-service:dev
+    container_name: gripday-user-service-dev
     environment:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: dev
@@ -154,21 +154,21 @@ services:
 networks:
   auth-network:
     driver: bridge
-    name: gripday-user-network-local
+    name: gripday-user-network-dev
     ipam:
       config:
         - subnet: 172.20.0.0/16
 
 volumes:
   postgres_user_data:
-    name: gripday_user_postgres_data_local
+    name: gripday_user_postgres_data_dev
     driver: local
   redis_user_data:
-    name: gripday_user_redis_data_local
+    name: gripday_user_redis_data_dev
     driver: local
   auth_logs:
-    name: gripday_user_logs_local
+    name: gripday_user_logs_dev
     driver: local
   auth_tmp:
-    name: gripday_user_tmp_local
+    name: gripday_user_tmp_dev
     driver: local

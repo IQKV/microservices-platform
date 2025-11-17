@@ -53,7 +53,7 @@ services:
     build:
       context: ..
       dockerfile: gripday-gateway-service/Dockerfile
-    image: gripday/gateway-service:staging
+    image: gripday/gripday-gateway-service:staging
     container_name: gripday-gateway-service-staging
     env_file:
       - .env.staging

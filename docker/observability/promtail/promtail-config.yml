@@ -47,7 +47,7 @@ scrape_configs:
         labels:
           job: gripday-user-service
           service: auth
-          __path__: /var/log/gripday/user-service/*.log
+          __path__: /var/log/gripday/gripday-user-service/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -80,7 +80,7 @@ scrape_configs:
         labels:
           job: gripday-gateway-service
           service: gateway
-          __path__: /var/log/gripday/gateway-service/*.log
+          __path__: /var/log/gripday/gripday-gateway-service/*.log
     pipeline_stages:
       - json:
           expressions:

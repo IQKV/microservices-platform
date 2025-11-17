@@ -24,7 +24,7 @@ namespace:
 replicaCount: 1
 
 image:
-  repository: gripday/user-service
+  repository: gripday/gripday-user-service
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 

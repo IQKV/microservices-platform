@@ -4323,7 +4323,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: gripday/user-service:latest
+          image: gripday/gripday-user-service:latest
           ports:
             - containerPort: 8080
           env:
@@ -5834,13 +5834,13 @@ done
 echo "Building user service Docker image..."
 cd gripday-user-service
 ./mvnw clean package -DskipTests
-docker build -t gripday/user-service:$VERSION .
+docker build -t gripday/gripday-user-service:$VERSION .
 cd ..
 
 echo "Building gateway service Docker image..."
 cd gripday-gateway-service
 ./mvnw clean package -DskipTests
-docker build -t gripday/gateway-service:$VERSION .
+docker build -t gripday/gripday-gateway-service:$VERSION .
 cd ..
 
 # Deploy user service first
@@ -5915,12 +5915,12 @@ fi
 # Build and tag production images
 echo "Building production Docker images..."
 ./mvnw clean package -Pproduction
-docker build -t gripday/user-service:$RELEASE_VERSION ./gripday-user-service
-docker build -t gripday/gateway-service:$RELEASE_VERSION ./gripday-gateway-service
+docker build -t gripday/gripday-user-service:$RELEASE_VERSION ./gripday-user-service
+docker build -t gripday/gripday-gateway-service:$RELEASE_VERSION ./gripday-gateway-service
 
 # Tag as latest for production
-docker tag gripday/user-service:$RELEASE_VERSION gripday/user-service:latest
-docker tag gripday/gateway-service:$RELEASE_VERSION gripday/gateway-service:latest
+docker tag gripday/gripday-user-service:$RELEASE_VERSION gripday/gripday-user-service:latest
+docker tag gripday/gripday-gateway-service:$RELEASE_VERSION gripday/gripday-gateway-service:latest
 
 # Deploy using Docker Compose
 echo "Deploying to production with Docker Compose..."

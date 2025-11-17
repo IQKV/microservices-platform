@@ -114,7 +114,7 @@ services:
     build:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
-    image: gripday/user-service:staging
+    image: gripday/gripday-user-service:staging
     container_name: gripday-user-service-staging
     env_file:
       - .env.staging

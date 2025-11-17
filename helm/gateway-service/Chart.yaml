@@ -13,5 +13,5 @@ maintainers:
   - name: Gripday Platform Team
 home: https://gripday.site
 sources:
-  - https://github.com/gripday/gateway-service
+  - https://github.com/gripday/gripday-gateway-service
 dependencies: []

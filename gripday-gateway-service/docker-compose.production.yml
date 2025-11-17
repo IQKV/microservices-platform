@@ -58,7 +58,7 @@ services:
     build:
       context: ..
       dockerfile: gripday-gateway-service/Dockerfile
-    image: gripday/gateway-service:production
+    image: gripday/gripday-gateway-service:production
     container_name: gripday-gateway-service-production
     env_file:
       - .env.production

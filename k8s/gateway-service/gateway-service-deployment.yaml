@@ -42,7 +42,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gateway-service
-          image: gripday/gateway-service:1.0.0
+          image: gripday/gripday-gateway-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

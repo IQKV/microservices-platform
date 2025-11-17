@@ -4,7 +4,7 @@ services:
   # Redis for Gateway Service - Local Development
   redis-gateway:
     image: redis:7-alpine
-    container_name: gripday-gateway-redis-local
+    container_name: gripday-gateway-redis-dev
     ports:
       - "6380:6379"
     volumes:
@@ -32,7 +32,7 @@ services:
   # Mock User Service for Gateway testing (local development)
   mock-user-service:
     image: wiremock/wiremock:3-alpine
-    container_name: gripday-mock-user-service-local
+    container_name: gripday-mock-user-service-dev
     ports:
       - "8080:8080"
     volumes:
@@ -54,8 +54,8 @@ services:
       context: ..
       dockerfile: gripday-gateway-service/Dockerfile
       target: builder
-    image: gripday/gateway-service:local
-    container_name: gripday-gateway-service-local
+    image: gripday/gripday-gateway-service:dev
+    container_name: gripday-gateway-service-dev
     environment:
       # Spring Configuration
       SPRING_PROFILES_ACTIVE: dev
@@ -122,18 +122,18 @@ services:
 networks:
   gateway-network:
     driver: bridge
-    name: gripday-gateway-network-local
+    name: gripday-gateway-network-dev
     ipam:
       config:
         - subnet: 172.23.0.0/16
 
 volumes:
   redis_gateway_data:
-    name: gripday_gateway_redis_data_local
+    name: gripday_gateway_redis_data_dev
     driver: local
   gateway_logs:
-    name: gripday_gateway_logs_local
+    name: gripday_gateway_logs_dev
     driver: local
   gateway_tmp:
-    name: gripday_gateway_tmp_local
+    name: gripday_gateway_tmp_dev
     driver: local

@@ -352,7 +352,7 @@ spec:
               echo "Redis is ready!"
       containers:
         - name: user-service
-          image: gripday/user-service:latest
+          image: gripday/gripday-user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -619,7 +619,7 @@ spec:
               echo "All services are ready!"
       containers:
         - name: gateway-service
-          image: gripday/gateway-service:latest
+          image: gripday/gripday-gateway-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

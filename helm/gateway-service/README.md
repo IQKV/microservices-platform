@@ -106,7 +106,7 @@ helm install gateway-service ./helm/gateway-service \
 | Parameter                 | Description                | Default                   |
 | ------------------------- | -------------------------- | ------------------------- |
 | `replicaCount`            | Number of gateway replicas | `1`                       |
-| `image.repository`        | Image repository           | `gripday/gateway-service` |
+| `image.repository`        | Image repository           | `gripday/gripday-gateway-service` |
 | `image.tag`               | Image tag                  | `1.0.0`                   |
 | `service.port`            | Service port               | `80`                      |
 | `service.targetPort`      | Container port             | `8080`                    |
@@ -505,6 +505,6 @@ The Helm chart creates the following Kubernetes resources:
 
 ## Support
 
-- GitHub Issues: https://github.com/gripday/gateway-service
+- GitHub Issues: https://github.com/gripday/gripday-gateway-service
 - Platform Team: platform@gripday.site
 - Documentation: https://docs.gripday.site

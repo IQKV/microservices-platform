@@ -133,7 +133,7 @@ services:
     build:
       context: ..
       dockerfile: gripday-user-service/Dockerfile
-    image: gripday/user-service:production
+    image: gripday/gripday-user-service:production
     container_name: gripday-user-service-production
     env_file:
       - .env.production

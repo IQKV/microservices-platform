@@ -13,7 +13,7 @@ namespace:
 replicaCount: 3
 
 image:
-  repository: gripday/user-service
+  repository: gripday/gripday-user-service
   pullPolicy: Always
   tag: "staging-latest"
 

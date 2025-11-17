@@ -13,7 +13,7 @@ namespace:
 replicaCount: 5
 
 image:
-  repository: gripday/gateway-service
+  repository: gripday/gripday-gateway-service
   pullPolicy: Always
   tag: "staging-latest"
 

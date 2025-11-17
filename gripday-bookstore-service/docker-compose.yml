@@ -5,7 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: bookstore-service-local
+    image: gripday/gripday-bookstore-service:dev
+    container_name: bookstore-service-dev
     ports:
       - "8082:8080" # Bookstore service (internal)
     environment:
@@ -71,7 +72,7 @@ services:
 
   bookstore-db:
     image: postgres:15.8-alpine
-    container_name: bookstore-db-local
+    container_name: bookstore-db-dev
     ports:
       - "5433:5432" # Bookstore DB on 5433 to avoid conflicts
     environment:
@@ -102,7 +103,7 @@ services:
 
   bookstore-redis:
     image: redis:7.2-alpine
-    container_name: bookstore-redis-local
+    container_name: bookstore-redis-dev
     ports:
       - "6381:6379" # Bookstore Redis on 6381 to avoid conflicts
     volumes:
@@ -125,22 +126,22 @@ services:
 
 volumes:
   bookstore_db_data:
-    name: gripday_bookstore_postgres_data_local
+    name: gripday_bookstore_postgres_data_dev
     driver: local
   bookstore_redis_data:
-    name: gripday_bookstore_redis_data_local
+    name: gripday_bookstore_redis_data_dev
     driver: local
   bookstore_logs:
-    name: gripday_bookstore_logs_local
+    name: gripday_bookstore_logs_dev
     driver: local
   bookstore_tmp:
-    name: gripday_bookstore_tmp_local
+    name: gripday_bookstore_tmp_dev
     driver: local
 
 networks:
   bookstore-network:
     driver: bridge
-    name: gripday-bookstore-network-local
+    name: gripday-bookstore-network-dev
     ipam:
       config:
         - subnet: 172.24.0.0/16
