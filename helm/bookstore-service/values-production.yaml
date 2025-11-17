@@ -5,7 +5,7 @@ global:
   platform: gripday
 
 namespace:
-  name: gripday-bookstore-production
+  name: gripday-production-env
   labels:
     app.kubernetes.io/component: bookstore
     environment: production

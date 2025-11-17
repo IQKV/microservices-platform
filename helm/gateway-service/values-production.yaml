@@ -5,7 +5,7 @@ global:
   platform: gripday
 
 namespace:
-  name: gripday-gateway-production
+  name: gripday-production-env
   labels:
     app.kubernetes.io/component: gateway
     environment: production
@@ -149,11 +149,11 @@ env:
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
-    value: "http://user-service.gripday-user-production.svc.cluster.local:8080/.well-known/jwks.json"
+    value: "http://user-service.gripday-production-env.svc.cluster.local:8080/.well-known/jwks.json"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
-    value: "http://user-service.gripday-user-production.svc.cluster.local:8080"
+    value: "http://user-service.gripday-production-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service.gripday-bookstore-production.svc.cluster.local:8080"
+    value: "http://bookstore-service.gripday-production-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "https://gripday.site,https://*.gripday.site"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT

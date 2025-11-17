@@ -4,16 +4,16 @@
 
 # Global settings
 global:
-  environment: local
+  environment: dev
   platform: gripday
 
 # Namespace configuration
 namespace:
   create: true
-  name: gripday-user
+  name: gripday-dev-env
   labels:
     app.kubernetes.io/component: authentication
-    environment: local
+    environment: dev
   annotations:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
@@ -367,7 +367,7 @@ configMap:
 # Environment variables
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "local"
+    value: "dev"
   - name: GRIPDAY_DATABASE_URL
     value: "jdbc:postgresql://user-postgres:5432/gripday_user_local"
   - name: GRIPDAY_CACHE_REDIS_HOST
@@ -399,7 +399,7 @@ env:
   - name: OTEL_SERVICE_NAME
     value: "gripday-user-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-user-service,service.version=1.0.0,deployment.environment=local"
+    value: "service.name=gripday-user-service,service.version=1.0.0,deployment.environment=dev"
   - name: JAVA_OPTS
     value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 

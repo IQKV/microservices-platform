@@ -2,16 +2,16 @@
 
 # Global settings
 global:
-  environment: local
+  environment: dev
   platform: gripday
 
 # Namespace configuration
 namespace:
   create: true
-  name: gripday-gateway
+  name: gripday-dev-env
   labels:
     app.kubernetes.io/component: gateway
-    environment: local
+    environment: dev
   annotations:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
@@ -555,7 +555,7 @@ configMap:
 # Environment variables
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "local"
+    value: "dev"
   - name: GRIPDAY_CACHE_REDIS_HOST
     value: "gateway-redis"
   - name: GRIPDAY_CACHE_REDIS_PORT
@@ -563,11 +563,11 @@ env:
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
-    value: "http://user-service.gripday-user.svc.cluster.local:8080/.well-known/jwks.json"
+    value: "http://user-service.gripday-dev-env.svc.cluster.local:8080/.well-known/jwks.json"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
-    value: "http://user-service.gripday-user.svc.cluster.local:8080"
+    value: "http://user-service.gripday-dev-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service.gripday-bookstore.svc.cluster.local:8080"
+    value: "http://bookstore-service.gripday-dev-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
@@ -577,7 +577,7 @@ env:
   - name: OTEL_SERVICE_NAME
     value: "gripday-gateway-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-gateway-service,service.version=1.0.0,deployment.environment=local"
+    value: "service.name=gripday-gateway-service,service.version=1.0.0,deployment.environment=dev"
   - name: JAVA_OPTS
     value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 

@@ -1,29 +1,29 @@
-# Staging environment values for bookstore-service
+# Test environment values for user-service
 
 global:
-  environment: staging
+  environment: test
   platform: gripday
 
 namespace:
-  name: gripday-staging-env
+  name: gripday-test-env
   labels:
-    app.kubernetes.io/component: bookstore
-    environment: staging
+    app.kubernetes.io/component: authentication
+    environment: test
 
-replicaCount: 3
+replicaCount: 2
 
 image:
-  repository: gripday/bookstore-service
+  repository: gripday/user-service
   pullPolicy: Always
-  tag: "staging-latest"
+  tag: "test-latest"
 
 podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "8080"
   prometheus.io/path: "/actuator/prometheus"
-  environment: "staging"
+  environment: "test"
 
-priorityClassName: medium-priority
+priorityClassName: high-priority
 
 ingress:
   enabled: true
@@ -31,9 +31,9 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
     nginx.ingress.kubernetes.io/rate-limit: "200"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.gripday.site, https://*.staging.gripday.site"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://test.gripday.site, https://*.test.gripday.site"
   hosts:
-    - host: bookstore-staging.gripday.site
+    - host: user-test.gripday.site
       paths:
         - path: /
           pathType: Prefix
@@ -46,9 +46,9 @@ ingress:
         - path: /api-docs
           pathType: Prefix
   tls:
-    - secretName: bookstore-staging-tls
+    - secretName: user-test-tls
       hosts:
-        - bookstore-staging.gripday.site
+        - user-test.gripday.site
 
 resources:
   requests:
@@ -60,74 +60,89 @@ resources:
 
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 15
-  targetCPUUtilizationPercentage: 65
-  targetMemoryUtilizationPercentage: 75
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
 
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2
+  minAvailable: 1
 
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "staging"
+    value: "test"
   - name: GRIPDAY_DATABASE_URL
-    value: "jdbc:postgresql://bookstore-postgres:5432/gripday_bookstore_staging"
+    value: "jdbc:postgresql://user-postgres:5432/gripday_user_test"
   - name: GRIPDAY_CACHE_REDIS_HOST
-    value: "bookstore-redis"
+    value: "user-redis"
   - name: GRIPDAY_CACHE_REDIS_PORT
     value: "6379"
   - name: GRIPDAY_CACHE_REDIS_DATABASE
-    value: "2"
-  - name: JWT_ISSUER_URI
-    value: "http://user-service:8080"
-  - name: JWT_JWK_SET_URI
-    value: "http://user-service:8080/.well-known/jwks.json"
-  - name: CORS_ALLOWED_ORIGINS
-    value: "https://staging.gripday.site,https://*.staging.gripday.site"
-  - name: REDIS_HOST
-    value: "bookstore-redis"
-  - name: REDIS_PORT
-    value: "6379"
+    value: "0"
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED
+    value: "false"
+  - name: SMTP_HOST
+    value: "smtp.sendgrid.net"
+  - name: SMTP_PORT
+    value: "587"
+  - name: EMAIL_FROM_EMAIL
+    value: "noreply@test.gripday.site"
+  - name: EMAIL_FROM_NAME
+    value: "Gripday Platform (Test)"
+  - name: APP_BASE_URL
+    value: "https://test.gripday.site"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-bookstore-service"
+    value: "gripday-user-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-bookstore-service,service.version=staging,deployment.environment=staging"
+    value: "service.name=gripday-user-service,service.version=test,deployment.environment=test"
   - name: JAVA_OPTS
     value: "-Xms384m -Xmx768m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
 secretEnv:
   - name: GRIPDAY_DATABASE_USERNAME
     secretKeyRef:
-      name: bookstore-service-secrets
+      name: user-service-secrets
       key: GRIPDAY_DATABASE_USERNAME
   - name: GRIPDAY_DATABASE_PASSWORD
     secretKeyRef:
-      name: bookstore-service-secrets
+      name: user-service-secrets
       key: GRIPDAY_DATABASE_PASSWORD
   - name: GRIPDAY_CACHE_REDIS_PASSWORD
     secretKeyRef:
-      name: bookstore-service-secrets
+      name: user-service-secrets
       key: GRIPDAY_CACHE_REDIS_PASSWORD
       optional: true
   - name: GRIPDAY_AUTH_JWT_SECRET
     secretKeyRef:
-      name: bookstore-service-secrets
+      name: user-service-secrets
       key: GRIPDAY_AUTH_JWT_SECRET
-  - name: REDIS_PASSWORD
+  - name: SMTP_USERNAME
     secretKeyRef:
-      name: bookstore-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      name: user-service-secrets
+      key: SMTP_USERNAME
+  - name: SMTP_PASSWORD
+    secretKeyRef:
+      name: user-service-secrets
+      key: SMTP_PASSWORD
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+      optional: true
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
       optional: true
 
 secrets:
   enabled: true
-  data: {}  # Secrets should be managed externally in staging
+  data: {}  # Secrets should be managed externally in test
 
 configMap:
   enabled: true
@@ -135,12 +150,12 @@ configMap:
     application.yml: |
       spring:
         profiles:
-          active: staging
+          active: test
       
       logging:
         level:
-          org.gripday.bookstore: INFO
-          org.springframework.security: WARN
+          org.gripday.user: INFO
+          org.springframework.security: INFO
           org.springframework.cache: WARN
           org.hibernate.SQL: WARN
           AUDIT: INFO
@@ -154,17 +169,17 @@ postgresql:
   replicaCount: 1
   persistence:
     enabled: true
-    size: 20Gi
-    storageClass: fast-ssd
+    size: 10Gi
+    storageClass: standard
   env:
-    POSTGRES_DB: gripday_bookstore_staging
+    POSTGRES_DB: gripday_user_test
   resources:
     requests:
-      memory: "768Mi"
-      cpu: "750m"
+      memory: "512Mi"
+      cpu: "500m"
     limits:
-      memory: "1536Mi"
-      cpu: "1500m"
+      memory: "1Gi"
+      cpu: "1000m"
 
 redis:
   enabled: true
@@ -173,36 +188,25 @@ redis:
   replicaCount: 1
   persistence:
     enabled: true
-    size: 5Gi
-    storageClass: fast-ssd
+    size: 2Gi
+    storageClass: standard
   config:
-    maxmemory: "768mb"
+    maxmemory: "384mb"
     maxmemoryPolicy: "allkeys-lru"
     appendonly: "yes"
   resources:
     requests:
+      memory: "192Mi"
+      cpu: "150m"
+    limits:
       memory: "384Mi"
       cpu: "300m"
-    limits:
-      memory: "768Mi"
-      cpu: "600m"
 
 networkPolicy:
   enabled: true
 
 resourceQuota:
   enabled: true
-  hard:
-    requests.cpu: "8"
-    requests.memory: "16Gi"
-    limits.cpu: "16"
-    limits.memory: "32Gi"
-    requests.storage: "50Gi"
-    persistentvolumeclaims: "10"
-    pods: "30"
-    services: "15"
-    configmaps: "15"
-    secrets: "15"
 
 limitRange:
   enabled: true

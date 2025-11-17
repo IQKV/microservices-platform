@@ -5,7 +5,7 @@ global:
   platform: gripday
 
 namespace:
-  name: gripday-user-staging
+  name: gripday-staging-env
   labels:
     app.kubernetes.io/component: authentication
     environment: staging

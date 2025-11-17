@@ -1,27 +1,27 @@
-# Staging environment values for gateway-service
+# Test environment values for gateway-service
 
 global:
-  environment: staging
+  environment: test
   platform: gripday
 
 namespace:
-  name: gripday-staging-env
+  name: gripday-test-env
   labels:
     app.kubernetes.io/component: gateway
-    environment: staging
+    environment: test
 
-replicaCount: 5
+replicaCount: 3
 
 image:
   repository: gripday/gateway-service
   pullPolicy: Always
-  tag: "staging-latest"
+  tag: "test-latest"
 
 podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "8080"
   prometheus.io/path: "/actuator/prometheus"
-  environment: "staging"
+  environment: "test"
 
 priorityClassName: high-priority
 
@@ -30,11 +30,11 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
-    nginx.ingress.kubernetes.io/rate-limit: "1000"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.gripday.site, https://*.staging.gripday.site"
+    nginx.ingress.kubernetes.io/rate-limit: "500"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://test.gripday.site, https://*.test.gripday.site"
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
   hosts:
-    - host: api-staging.gripday.site
+    - host: api-test.gripday.site
       paths:
         - path: /
           pathType: Prefix
@@ -43,9 +43,9 @@ ingress:
         - path: /actuator
           pathType: Prefix
   tls:
-    - secretName: gateway-staging-tls
+    - secretName: gateway-test-tls
       hosts:
-        - api-staging.gripday.site
+        - api-test.gripday.site
 
 resources:
   requests:
@@ -57,18 +57,18 @@ resources:
 
 autoscaling:
   enabled: true
-  minReplicas: 5
-  maxReplicas: 20
-  targetCPUUtilizationPercentage: 65
-  targetMemoryUtilizationPercentage: 75
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
 
 podDisruptionBudget:
   enabled: true
-  minAvailable: 3
+  minAvailable: 2
 
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "staging"
+    value: "test"
   - name: GRIPDAY_CACHE_REDIS_HOST
     value: "gateway-redis"
   - name: GRIPDAY_CACHE_REDIS_PORT
@@ -76,13 +76,13 @@ env:
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
-    value: "http://user-service.gripday-staging-env.svc.cluster.local:8080/.well-known/jwks.json"
+    value: "http://user-service.gripday-test-env.svc.cluster.local:8080/.well-known/jwks.json"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
-    value: "http://user-service.gripday-staging-env.svc.cluster.local:8080"
+    value: "http://user-service.gripday-test-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service.gripday-staging-env.svc.cluster.local:8080"
+    value: "http://bookstore-service.gripday-test-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
-    value: "https://staging.gripday.site,https://*.staging.gripday.site"
+    value: "https://test.gripday.site,https://*.test.gripday.site"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -90,7 +90,7 @@ env:
   - name: OTEL_SERVICE_NAME
     value: "gripday-gateway-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-gateway-service,service.version=staging,deployment.environment=staging"
+    value: "service.name=gripday-gateway-service,service.version=test,deployment.environment=test"
   - name: JAVA_OPTS
     value: "-Xms768m -Xmx1536m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
@@ -107,7 +107,7 @@ secretEnv:
 
 secrets:
   enabled: true
-  data: {}  # Secrets should be managed externally in staging
+  data: {}  # Secrets should be managed externally in test
 
 configMap:
   enabled: true
@@ -115,7 +115,7 @@ configMap:
     application.yml: |
       spring:
         profiles:
-          active: staging
+          active: test
       
       logging:
         level:
@@ -134,7 +134,7 @@ redis:
   persistence:
     enabled: true
     size: 5Gi
-    storageClass: fast-ssd
+    storageClass: standard
   config:
     maxmemory: "768mb"
     maxmemoryPolicy: "allkeys-lru"
@@ -152,17 +152,6 @@ networkPolicy:
 
 resourceQuota:
   enabled: true
-  hard:
-    requests.cpu: "12"
-    requests.memory: "24Gi"
-    limits.cpu: "24"
-    limits.memory: "48Gi"
-    requests.storage: "20Gi"
-    persistentvolumeclaims: "10"
-    pods: "40"
-    services: "15"
-    configmaps: "15"
-    secrets: "15"
 
 limitRange:
   enabled: true
