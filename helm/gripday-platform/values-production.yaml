@@ -7,15 +7,15 @@ global:
 
 user-service:
   replicaCount: 5
-  
+
   image:
-    tag: "1.0.0"  # Use specific version tags in production
-  
+    tag: "1.0.0" # Use specific version tags in production
+
   autoscaling:
     minReplicas: 5
     maxReplicas: 20
     targetCPUUtilizationPercentage: 60
-  
+
   resources:
     requests:
       memory: "1Gi"
@@ -23,9 +23,9 @@ user-service:
     limits:
       memory: "2Gi"
       cpu: "2000m"
-  
+
   postgresql:
-    replicaCount: 2  # Consider HA setup
+    replicaCount: 2 # Consider HA setup
     persistence:
       size: 50Gi
       storageClass: fast-ssd
@@ -36,9 +36,9 @@ user-service:
       limits:
         memory: "2Gi"
         cpu: "2000m"
-  
+
   redis:
-    replicaCount: 2  # Consider HA setup
+    replicaCount: 2 # Consider HA setup
     persistence:
       size: 5Gi
     resources:
@@ -51,15 +51,15 @@ user-service:
 
 gateway-service:
   replicaCount: 10
-  
+
   image:
     tag: "1.0.0"
-  
+
   autoscaling:
     minReplicas: 10
     maxReplicas: 50
     targetCPUUtilizationPercentage: 60
-  
+
   resources:
     requests:
       memory: "2Gi"
@@ -67,7 +67,7 @@ gateway-service:
     limits:
       memory: "4Gi"
       cpu: "4000m"
-  
+
   redis:
     replicaCount: 2
     persistence:
@@ -82,15 +82,15 @@ gateway-service:
 
 bookstore-service:
   replicaCount: 5
-  
+
   image:
     tag: "1.0.0"
-  
+
   autoscaling:
     minReplicas: 5
     maxReplicas: 20
     targetCPUUtilizationPercentage: 60
-  
+
   resources:
     requests:
       memory: "1Gi"
@@ -98,7 +98,7 @@ bookstore-service:
     limits:
       memory: "2Gi"
       cpu: "2000m"
-  
+
   postgresql:
     replicaCount: 2
     persistence:
@@ -111,7 +111,7 @@ bookstore-service:
       limits:
         memory: "2Gi"
         cpu: "2000m"
-  
+
   redis:
     replicaCount: 2
     persistence:

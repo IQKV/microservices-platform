@@ -15,7 +15,7 @@ replicaCount: 5
 image:
   repository: gripday/bookstore-service
   pullPolicy: IfNotPresent
-  tag: "1.0.0"  # Use specific version tags in production
+  tag: "1.0.0" # Use specific version tags in production
 
 podAnnotations:
   prometheus.io/scrape: "true"
@@ -26,7 +26,7 @@ podAnnotations:
 priorityClassName: high-priority
 
 ingress:
-  enabled: false  # Bookstore service is internal-only, accessed via Gateway
+  enabled: false # Bookstore service is internal-only, accessed via Gateway
 
 resources:
   requests:
@@ -172,7 +172,7 @@ secretEnv:
 
 secrets:
   enabled: true
-  data: {}  # Secrets must be managed externally in production (e.g., AWS Secrets Manager, Vault)
+  data: {} # Secrets must be managed externally in production (e.g., AWS Secrets Manager, Vault)
 
 configMap:
   enabled: true
@@ -181,7 +181,7 @@ configMap:
       spring:
         profiles:
           active: production
-      
+
       logging:
         level:
           org.gripday.bookstore: WARN
@@ -191,7 +191,7 @@ configMap:
           AUDIT: INFO
         pattern:
           console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","correlationId":"%X{correlationId}","userId":"%X{userId}","username":"%X{username}","logger":"%logger{36}","message":"%msg"}%n'
-      
+
       management:
         tracing:
           sampling:
@@ -239,7 +239,7 @@ redis:
     maxmemory: "1024mb"
     maxmemoryPolicy: "allkeys-lru"
     appendonly: "yes"
-    save: "900 1 300 10 60 10000"  # RDB snapshots
+    save: "900 1 300 10 60 10000" # RDB snapshots
   resources:
     requests:
       memory: "512Mi"

@@ -75,24 +75,25 @@ helm install user-service ./helm/user-service \
 
 ### Key Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of replicas | `2` |
-| `image.repository` | Image repository | `gripday/user-service` |
-| `image.tag` | Image tag | `1.0.0` |
-| `service.port` | Service port | `8080` |
-| `autoscaling.enabled` | Enable HPA | `true` |
-| `autoscaling.minReplicas` | Minimum replicas | `2` |
-| `autoscaling.maxReplicas` | Maximum replicas | `10` |
-| `postgresql.enabled` | Enable PostgreSQL | `true` |
-| `postgresql.persistence.size` | PostgreSQL storage | `5Gi` |
-| `redis.enabled` | Enable Redis | `true` |
-| `redis.persistence.size` | Redis storage | `1Gi` |
-| `priorityClassName` | Pod priority class | `high-priority` |
+| Parameter                     | Description        | Default                |
+| ----------------------------- | ------------------ | ---------------------- |
+| `replicaCount`                | Number of replicas | `2`                    |
+| `image.repository`            | Image repository   | `gripday/user-service` |
+| `image.tag`                   | Image tag          | `1.0.0`                |
+| `service.port`                | Service port       | `8080`                 |
+| `autoscaling.enabled`         | Enable HPA         | `true`                 |
+| `autoscaling.minReplicas`     | Minimum replicas   | `2`                    |
+| `autoscaling.maxReplicas`     | Maximum replicas   | `10`                   |
+| `postgresql.enabled`          | Enable PostgreSQL  | `true`                 |
+| `postgresql.persistence.size` | PostgreSQL storage | `5Gi`                  |
+| `redis.enabled`               | Enable Redis       | `true`                 |
+| `redis.persistence.size`      | Redis storage      | `1Gi`                  |
+| `priorityClassName`           | Pod priority class | `high-priority`        |
 
 ### Environment-Specific Configuration
 
 **Local Development** (`values.yaml`)
+
 - 2 replicas, autoscaling 2-10 pods
 - Embedded secrets for development
 - 5Gi PostgreSQL, 1Gi Redis storage
@@ -101,6 +102,7 @@ helm install user-service ./helm/user-service \
 - High priority class
 
 **Staging** (`values-staging.yaml`)
+
 - 3 replicas, autoscaling 3-15 pods
 - External secret management required
 - 10Gi PostgreSQL, 2Gi Redis storage
@@ -110,6 +112,7 @@ helm install user-service ./helm/user-service \
 - High priority class
 
 **Production** (`values-production.yaml`)
+
 - 5 replicas, autoscaling 5-20 pods
 - External secret management required
 - 20Gi PostgreSQL, 5Gi Redis storage
@@ -155,9 +158,9 @@ The following table lists the configurable parameters of the User Service chart 
 
 ### Global Parameters
 
-| Parameter            | Description      | Default            |
-| -------------------- | ---------------- | ------------------ |
-| `global.environment` | Environment name | `local`            |
+| Parameter            | Description      | Default   |
+| -------------------- | ---------------- | --------- |
+| `global.environment` | Environment name | `local`   |
 | `global.platform`    | Platform name    | `gripday` |
 
 ### Application Parameters
@@ -485,22 +488,26 @@ TTL "gripday:user:token:blacklist:abc123"
 ### Common Issues
 
 **Pods not starting**
+
 - Check resource quotas: `kubectl describe resourcequota -n gripday-user`
 - Verify secrets exist: `kubectl get secrets -n gripday-user`
 - Check image pull: `kubectl describe pod <pod-name> -n gripday-user`
 
 **Database connection failures**
+
 - Verify PostgreSQL is running: `kubectl get pods -n gripday-user -l app.kubernetes.io/name=user-postgres`
 - Check database credentials in secrets
 - Verify network policy allows traffic
 
 **Email not sending**
+
 - Check SMTP configuration in environment variables
 - Verify SMTP credentials in secrets
 - Check application logs for email errors
 - Test SMTP connectivity from pod
 
 **JWT validation failures in downstream services**
+
 - Ensure JWK endpoint is accessible: `curl http://user-service:8080/.well-known/jwks.json`
 - Check network policy allows traffic from downstream services
 - Verify JWT issuer matches configuration
@@ -522,6 +529,7 @@ helm rollback user-service --namespace gripday-user-production
 ### Network Policies
 
 The chart includes network policies that:
+
 - Allow ingress from Gateway Service
 - Allow egress to PostgreSQL and Redis
 - Allow egress to SMTP server (port 587)
@@ -541,6 +549,7 @@ The chart includes network policies that:
 **Production**: Use external secret management (AWS Secrets Manager, Vault, Azure Key Vault)
 
 Required secrets:
+
 - `GRIPDAY_DATABASE_USERNAME`
 - `GRIPDAY_DATABASE_PASSWORD`
 - `GRIPDAY_AUTH_JWT_SECRET` (RSA private key for JWT signing)

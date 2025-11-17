@@ -18,7 +18,8 @@ namespace:
     pod-security.kubernetes.io/warn: restricted
 
 # Application deployment configuration
-replicaCount: 3
+# Note: For k3s single instance, set to 1 to avoid scheduling issues
+replicaCount: 1
 
 image:
   repository: gripday/gateway-service
@@ -73,7 +74,7 @@ ingress:
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # TLS optional - set to "true" if TLS enabled
+    nginx.ingress.kubernetes.io/ssl-redirect: "false" # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.site, https://*.gripday.site"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -96,7 +97,7 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: []  # TLS disabled by default - configure externally if needed
+  tls: [] # TLS disabled by default - configure externally if needed
 
 resources:
   requests:
@@ -107,10 +108,11 @@ resources:
     cpu: "1000m"
 
 # Horizontal Pod Autoscaler (HPA)
+# Note: For k3s single instance, disable HPA or set minReplicas: 1
 autoscaling:
-  enabled: true
-  minReplicas: 3
-  maxReplicas: 15
+  enabled: false # Disabled for k3s single instance
+  minReplicas: 1
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   metrics:
@@ -149,39 +151,26 @@ autoscaling:
       selectPolicy: Max
 
 # Pod Disruption Budget
+# Note: For k3s single instance, disable PDB
 podDisruptionBudget:
-  enabled: true
-  minAvailable: 2
+  enabled: false # Disabled for k3s single instance
+  minAvailable: 1
 
 # Priority Class
-priorityClassName: high-priority
+# Note: For k3s, priority classes may not be configured - leave empty or create them
+priorityClassName: "" # Empty for k3s - set to "high-priority" if priority classes are configured
 
 # Node selection and affinity
 nodeSelector: {}
 
 tolerations: []
 
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - gripday-gateway-service
-          topologyKey: kubernetes.io/hostname
+# Note: For k3s single instance, affinity rules are not needed
+affinity: {}
 
 # Topology spread constraints
-topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: kubernetes.io/hostname
-    whenUnsatisfiable: ScheduleAnyway
-  - maxSkew: 1
-    topologyKey: topology.kubernetes.io/zone
-    whenUnsatisfiable: ScheduleAnyway
+# Note: For k3s single instance, topology spread is not applicable
+topologySpreadConstraints: []
 
 # Probes configuration
 livenessProbe:
@@ -736,13 +725,13 @@ redis:
     tag: "7.2-alpine"
     pullPolicy: IfNotPresent
   replicaCount: 1
-  priorityClassName: infrastructure-priority
+  priorityClassName: "" # Empty for k3s
   service:
     type: ClusterIP
     port: 6379
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: local-path # k3s default storage class
     accessModes:
       - ReadWriteOnce
     size: 2Gi

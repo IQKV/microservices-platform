@@ -20,7 +20,8 @@ namespace:
     pod-security.kubernetes.io/warn: restricted
 
 # Application deployment configuration
-replicaCount: 2
+# Note: For k3s single instance, set to 1 to avoid scheduling issues
+replicaCount: 1
 
 image:
   repository: gripday/user-service
@@ -72,7 +73,7 @@ service:
     enabled: true
 
 ingress:
-  enabled: false  # User service is internal-only, accessed via Gateway
+  enabled: false # User service is internal-only, accessed via Gateway
 
 resources:
   requests:
@@ -83,10 +84,11 @@ resources:
     cpu: "500m"
 
 # Horizontal Pod Autoscaler (HPA)
+# Note: For k3s single instance, disable HPA or set minReplicas: 1
 autoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 10
+  enabled: false # Disabled for k3s single instance
+  minReplicas: 1
+  maxReplicas: 3
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   metrics:
@@ -125,39 +127,26 @@ autoscaling:
       selectPolicy: Max
 
 # Pod Disruption Budget
+# Note: For k3s single instance, disable PDB
 podDisruptionBudget:
-  enabled: true
+  enabled: false # Disabled for k3s single instance
   minAvailable: 1
 
 # Priority Class
-priorityClassName: high-priority
+# Note: For k3s, priority classes may not be configured - leave empty or create them
+priorityClassName: "" # Empty for k3s - set to "high-priority" if priority classes are configured
 
 # Node selection and affinity
 nodeSelector: {}
 
 tolerations: []
 
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/name
-                operator: In
-                values:
-                  - gripday-user-service
-          topologyKey: kubernetes.io/hostname
+# Note: For k3s single instance, affinity rules are not needed
+affinity: {}
 
 # Topology spread constraints
-topologySpreadConstraints:
-  - maxSkew: 1
-    topologyKey: kubernetes.io/hostname
-    whenUnsatisfiable: ScheduleAnyway
-  - maxSkew: 1
-    topologyKey: topology.kubernetes.io/zone
-    whenUnsatisfiable: ScheduleAnyway
+# Note: For k3s single instance, topology spread is not applicable
+topologySpreadConstraints: []
 
 # Probes configuration
 livenessProbe:
@@ -544,13 +533,13 @@ postgresql:
     tag: "15.8-alpine"
     pullPolicy: IfNotPresent
   replicaCount: 1
-  priorityClassName: infrastructure-priority
+  priorityClassName: "" # Empty for k3s
   service:
     type: ClusterIP
     port: 5432
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: local-path # k3s default storage class
     accessModes:
       - ReadWriteOnce
     size: 5Gi
@@ -624,13 +613,13 @@ redis:
     tag: "7.2-alpine"
     pullPolicy: IfNotPresent
   replicaCount: 1
-  priorityClassName: infrastructure-priority
+  priorityClassName: "" # Empty for k3s
   service:
     type: ClusterIP
     port: 6379
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: local-path # k3s default storage class
     accessModes:
       - ReadWriteOnce
     size: 1Gi

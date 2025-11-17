@@ -13,17 +13,20 @@ Complete guide for deploying the Bookstore Service across different environments
 ### Infrastructure Requirements
 
 **Local/Development**
+
 - Kubernetes cluster (minikube, kind, k3s)
 - 4 CPU cores, 8GB RAM minimum
 - 20GB storage
 
 **Staging**
+
 - Kubernetes 1.24+
 - 8 CPU cores, 16GB RAM minimum
 - 50GB SSD storage
 - Ingress controller with TLS support
 
 **Production**
+
 - Kubernetes 1.24+
 - 16+ CPU cores, 32GB+ RAM
 - 100GB+ SSD storage

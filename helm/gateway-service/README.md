@@ -77,22 +77,23 @@ helm install gateway-service ./helm/gateway-service \
 
 ### Key Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of gateway replicas | `3` |
-| `image.repository` | Image repository | `gripday/gateway-service` |
-| `image.tag` | Image tag | `1.0.0` |
-| `service.port` | Service port | `8080` |
-| `autoscaling.enabled` | Enable HPA | `true` |
-| `autoscaling.minReplicas` | Minimum replicas | `3` |
-| `autoscaling.maxReplicas` | Maximum replicas | `15` |
-| `redis.enabled` | Enable Redis | `true` |
-| `redis.persistence.size` | Redis storage size | `2Gi` |
-| `priorityClassName` | Pod priority class | `high-priority` |
+| Parameter                 | Description                | Default                   |
+| ------------------------- | -------------------------- | ------------------------- |
+| `replicaCount`            | Number of gateway replicas | `3`                       |
+| `image.repository`        | Image repository           | `gripday/gateway-service` |
+| `image.tag`               | Image tag                  | `1.0.0`                   |
+| `service.port`            | Service port               | `8080`                    |
+| `autoscaling.enabled`     | Enable HPA                 | `true`                    |
+| `autoscaling.minReplicas` | Minimum replicas           | `3`                       |
+| `autoscaling.maxReplicas` | Maximum replicas           | `15`                      |
+| `redis.enabled`           | Enable Redis               | `true`                    |
+| `redis.persistence.size`  | Redis storage size         | `2Gi`                     |
+| `priorityClassName`       | Pod priority class         | `high-priority`           |
 
 ### Environment-Specific Configuration
 
 **Local Development** (`values.yaml`)
+
 - 3 replicas, autoscaling 3-15 pods
 - Embedded secrets for development
 - Permissive CORS for local development
@@ -101,6 +102,7 @@ helm install gateway-service ./helm/gateway-service \
 - 2Gi Redis storage
 
 **Staging** (`values-staging.yaml`)
+
 - 5 replicas, autoscaling 5-20 pods
 - External secret management required
 - Staging domain with TLS
@@ -110,6 +112,7 @@ helm install gateway-service ./helm/gateway-service \
 - High priority class
 
 **Production** (`values-production.yaml`)
+
 - 10 replicas, autoscaling 10-30 pods
 - External secret management required
 - Production domain with TLS
@@ -247,7 +250,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users/me
 
 ```bash
 # Trigger rate limit
-for i in {1..100}; do 
+for i in {1..100}; do
   curl -X POST http://localhost:8080/api/v1/auth/login
 done
 
@@ -276,21 +279,25 @@ TTL "gripday:gateway:rate-limit:user:123"
 ### Common Issues
 
 **Routing failures**
+
 - Verify downstream services are running
 - Check service DNS resolution
 - Verify network policies allow traffic
 
 **JWT validation failures**
+
 - Ensure User Service is accessible
 - Check JWK endpoint: `curl http://user-service:8080/.well-known/jwks.json`
 - Verify JWT_JWK_URI environment variable
 
 **Rate limiting not working**
+
 - Check Redis is running and accessible
 - Verify Redis connection in gateway logs
 - Check rate limit keys in Redis
 
 **Circuit breaker open**
+
 - Check downstream service health
 - Review failure rate threshold configuration
 - Check circuit breaker metrics
@@ -318,6 +325,7 @@ helm uninstall gateway-service --namespace gripday-gateway
 ### Network Policies
 
 The chart includes network policies that:
+
 - Allow ingress from Nginx Ingress Controller
 - Allow egress to User Service and Bookstore Service
 - Allow egress to Redis

@@ -4,16 +4,16 @@
 global:
   # Environment: local, staging, test, production
   environment: local
-  
+
   # Namespace - all services deploy to same environment-specific namespace
   namespace: gripday-dev-env
-  
+
   # Platform identifier
   platform: gripday
-  
+
   # Image pull policy
   imagePullPolicy: IfNotPresent
-  
+
   # Image registry (override for private registries)
   imageRegistry: ""
 
@@ -21,21 +21,21 @@ global:
 user-service:
   enabled: true
   replicaCount: 2
-  
+
   image:
     tag: "1.0.0"
-  
+
   autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
-  
+
   postgresql:
     enabled: true
     persistence:
       size: 5Gi
-  
+
   redis:
     enabled: true
     persistence:
@@ -45,21 +45,21 @@ user-service:
 gateway-service:
   enabled: true
   replicaCount: 3
-  
+
   image:
     tag: "1.0.0"
-  
+
   autoscaling:
     enabled: true
     minReplicas: 3
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
-  
+
   redis:
     enabled: true
     persistence:
       size: 2Gi
-  
+
   # Service routing configuration
   routing:
     userServiceUrl: "http://user-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
@@ -69,21 +69,21 @@ gateway-service:
 bookstore-service:
   enabled: true
   replicaCount: 2
-  
+
   image:
     tag: "1.0.0"
-  
+
   autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
-  
+
   postgresql:
     enabled: true
     persistence:
       size: 5Gi
-  
+
   redis:
     enabled: true
     persistence:
@@ -92,13 +92,13 @@ bookstore-service:
 # Observability Stack (Optional)
 observability:
   enabled: false
-  
+
   jaeger:
     enabled: false
-  
+
   prometheus:
     enabled: false
-  
+
   grafana:
     enabled: false
 
@@ -106,12 +106,12 @@ observability:
 ingress:
   enabled: true
   className: nginx
-  
+
   # TLS configuration
   tls:
     enabled: false
     secretName: gripday-tls
-  
+
   # Hosts configuration
   hosts:
     gateway: api.gripday.site

@@ -91,9 +91,9 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 ### Global Parameters
 
-| Parameter            | Description      | Default            |
-| -------------------- | ---------------- | ------------------ |
-| `global.environment` | Environment name | `local`            |
+| Parameter            | Description      | Default   |
+| -------------------- | ---------------- | --------- |
+| `global.environment` | Environment name | `local`   |
 | `global.platform`    | Platform name    | `gripday` |
 
 ### Application Parameters
@@ -275,7 +275,7 @@ stringData:
   GRIPDAY_DATABASE_USERNAME: bookstore_user
   GRIPDAY_DATABASE_PASSWORD: secure_db_password
   GRIPDAY_AUTH_JWT_SECRET: jwt_secret_key
-  GRIPDAY_CACHE_REDIS_PASSWORD: redis_password  # optional
+  GRIPDAY_CACHE_REDIS_PASSWORD: redis_password # optional
 ```
 
 ### JWT Configuration
@@ -391,16 +391,19 @@ kubectl describe networkpolicy bookstore-service-netpol -n gripday-bookstore
 ### Common Issues
 
 **Pods not starting**
+
 - Check resource quotas: `kubectl describe resourcequota -n gripday-bookstore`
 - Verify secrets exist: `kubectl get secrets -n gripday-bookstore`
 - Check image pull: `kubectl describe pod <pod-name> -n gripday-bookstore`
 
 **Database connection failures**
+
 - Verify PostgreSQL is running: `kubectl get pods -n gripday-bookstore -l app.kubernetes.io/name=bookstore-postgres`
 - Check database credentials in secrets
 - Verify network policy allows traffic
 
 **JWT validation failures**
+
 - Ensure User Service is accessible: `curl http://user-service:8080/.well-known/jwks.json`
 - Check JWT_ISSUER_URI and JWT_JWK_SET_URI environment variables
 - Verify network policy allows egress to User Service
@@ -414,7 +417,7 @@ Adjust resources based on load:
 ```yaml
 resources:
   requests:
-    memory: "768Mi"  # Increase for high traffic
+    memory: "768Mi" # Increase for high traffic
     cpu: "500m"
   limits:
     memory: "1536Mi"
@@ -427,7 +430,7 @@ resources:
 autoscaling:
   minReplicas: 5
   maxReplicas: 20
-  targetCPUUtilizationPercentage: 60  # Lower = more aggressive scaling
+  targetCPUUtilizationPercentage: 60 # Lower = more aggressive scaling
   targetMemoryUtilizationPercentage: 70
 ```
 
@@ -441,7 +444,7 @@ postgresql:
       cpu: "1000m"
   persistence:
     size: 50Gi
-    storageClass: fast-ssd  # Use SSD for better performance
+    storageClass: fast-ssd # Use SSD for better performance
 ```
 
 ### Redis Optimization
@@ -449,7 +452,7 @@ postgresql:
 ```yaml
 redis:
   config:
-    maxmemory: "1024mb"  # Increase for more caching
+    maxmemory: "1024mb" # Increase for more caching
     maxmemoryPolicy: "allkeys-lru"
   persistence:
     size: 10Gi
@@ -460,6 +463,7 @@ redis:
 ### Network Policies
 
 The chart includes network policies that:
+
 - Allow ingress from Gateway Service only
 - Allow egress to PostgreSQL and Redis
 - Allow egress to observability services
@@ -476,6 +480,7 @@ The chart includes network policies that:
 
 **Local/Staging**: Use Kubernetes secrets
 **Production**: Use external secret management:
+
 - AWS Secrets Manager with External Secrets Operator
 - HashiCorp Vault
 - Azure Key Vault
@@ -483,6 +488,7 @@ The chart includes network policies that:
 ## Support
 
 For issues and questions:
+
 - GitHub Issues: https://github.com/gripday/bookstore-service
 - Platform Team: platform@gripday.site
 - Documentation: https://docs.gripday.site

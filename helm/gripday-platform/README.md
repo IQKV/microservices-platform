@@ -56,24 +56,28 @@ helm install gripday . -f values-production.yaml --create-namespace
 ### Environment-Specific Deployments
 
 **Local/Development:**
+
 ```bash
-helm install gripday . 
+helm install gripday .
 # Uses: gripday-dev-env namespace
 ```
 
 **Staging:**
+
 ```bash
 helm install gripday . -f values-staging.yaml
 # Uses: gripday-staging-env namespace
 ```
 
 **Test:**
+
 ```bash
 helm install gripday . -f values-test.yaml
 # Uses: gripday-test-env namespace
 ```
 
 **Production:**
+
 ```bash
 helm install gripday . -f values-production.yaml
 # Uses: gripday-production-env namespace
@@ -100,6 +104,7 @@ gateway-service:
 ```
 
 Install:
+
 ```bash
 helm install gripday . -f custom-values.yaml
 ```
@@ -207,6 +212,7 @@ kubectl exec -it <postgres-pod> -n gripday-dev-env -- \
 ## Values Reference
 
 See individual service charts for detailed configuration:
+
 - [User Service](../user-service/README.md)
 - [Gateway Service](../gateway-service/README.md)
 - [Bookstore Service](../bookstore-service/README.md)

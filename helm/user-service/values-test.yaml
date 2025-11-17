@@ -26,7 +26,7 @@ podAnnotations:
 priorityClassName: high-priority
 
 ingress:
-  enabled: false  # User service is internal-only, accessed via Gateway
+  enabled: false # User service is internal-only, accessed via Gateway
 
 resources:
   requests:
@@ -120,7 +120,7 @@ secretEnv:
 
 secrets:
   enabled: true
-  data: {}  # Secrets should be managed externally in test
+  data: {} # Secrets should be managed externally in test
 
 configMap:
   enabled: true
@@ -129,7 +129,7 @@ configMap:
       spring:
         profiles:
           active: test
-      
+
       logging:
         level:
           org.gripday.user: INFO

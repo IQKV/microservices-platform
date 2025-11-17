@@ -15,7 +15,7 @@ replicaCount: 10
 image:
   repository: gripday/gateway-service
   pullPolicy: IfNotPresent
-  tag: "1.0.0"  # Use specific version tags in production
+  tag: "1.0.0" # Use specific version tags in production
 
 podAnnotations:
   prometheus.io/scrape: "true"
@@ -30,7 +30,7 @@ ingress:
   className: nginx
   annotations:
     # cert-manager.io/cluster-issuer: letsencrypt-prod  # Uncomment if using cert-manager
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # TLS optional - set to "true" if TLS enabled
+    nginx.ingress.kubernetes.io/ssl-redirect: "false" # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/rate-limit: "2000"
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.com, https://*.gripday.com"
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
@@ -43,7 +43,7 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: []  # TLS disabled by default - configure externally if needed
+  tls: [] # TLS disabled by default - configure externally if needed
   # Uncomment to enable TLS:
   # tls:
   #   - secretName: gateway-production-tls
@@ -178,7 +178,7 @@ secretEnv:
 
 secrets:
   enabled: true
-  data: {}  # Secrets must be managed externally in production (e.g., AWS Secrets Manager, Vault)
+  data: {} # Secrets must be managed externally in production (e.g., AWS Secrets Manager, Vault)
 
 configMap:
   enabled: true
@@ -187,7 +187,7 @@ configMap:
       spring:
         profiles:
           active: production
-      
+
       logging:
         level:
           org.gripday.gateway: WARN
@@ -196,12 +196,12 @@ configMap:
           AUDIT: INFO
         pattern:
           console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","correlationId":"%X{correlationId}","userId":"%X{userId}","username":"%X{username}","logger":"%logger{36}","message":"%msg"}%n'
-      
+
       management:
         tracing:
           sampling:
             probability: 0.1  # Sample 10% of requests in production
-      
+
       gripday:
         observability:
           logging:
@@ -221,7 +221,7 @@ redis:
     maxmemory: "1536mb"
     maxmemoryPolicy: "allkeys-lru"
     appendonly: "yes"
-    save: "900 1 300 10 60 10000"  # RDB snapshots
+    save: "900 1 300 10 60 10000" # RDB snapshots
   resources:
     requests:
       memory: "768Mi"
