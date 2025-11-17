@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ProblemDetail;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1/bookstore/books")
@@ -32,10 +32,13 @@ public class BookResource {
 
   private final CatalogService catalogService;
   private final SearchService searchService;
+  private final BookCatalogResponseBuilder responseBuilder;
 
-  public BookResource(final CatalogService catalogService, final SearchService searchService) {
+  public BookResource(final CatalogService catalogService, final SearchService searchService,
+      final BookCatalogResponseBuilder responseBuilder) {
     this.catalogService = catalogService;
     this.searchService = searchService;
+    this.responseBuilder = responseBuilder;
   }
 
   @Operation(
@@ -56,12 +59,12 @@ public class BookResource {
           description = "Successfully retrieved book catalog",
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = Page.class),
+              schema = @Schema(implementation = BookCatalogResponse.class),
               examples = @ExampleObject(
                   name = "Book catalog response",
                   value = """
                       {
-                        "content": [
+                        "books": [
                           {
                             "id": 1,
                             "title": "The Great Gatsby",
@@ -76,14 +79,28 @@ public class BookResource {
                             "updatedAt": "2024-01-15T10:30:00Z"
                           }
                         ],
-                        "pageable": {
-                          "pageNumber": 0,
-                          "pageSize": 20
+                        "pagination": {
+                          "currentPage": 0,
+                          "totalPages": 1,
+                          "totalElements": 1,
+                          "pageSize": 20,
+                          "hasNext": false,
+                          "hasPrevious": false,
+                          "nextPageUrl": null,
+                          "previousPageUrl": null
                         },
-                        "totalElements": 1,
-                        "totalPages": 1,
-                        "first": true,
-                        "last": true
+                        "filters": {
+                          "categories": [],
+                          "priceRange": null,
+                          "authors": [],
+                          "availability": null
+                        },
+                        "search": {
+                          "query": null,
+                          "resultCount": 1,
+                          "suggestions": [],
+                          "searchType": "catalog"
+                        }
                       }
                       """
               )
@@ -99,7 +116,7 @@ public class BookResource {
       )
   })
   @GetMapping
-  public ResponseEntity<Page<BookDto>> getBooks(
+  public ResponseEntity<BookCatalogResponse> getBooks(
       @Parameter(description = "Filter by book title (case-insensitive partial match)")
       @RequestParam(required = false) String title,
       @Parameter(description = "Filter by author name (case-insensitive partial match)")
@@ -119,8 +136,10 @@ public class BookResource {
 
     var criteria = new BookSearchCriteria(title, author, category, minPrice, maxPrice, availableOnly);
     var books = catalogService.findBooks(criteria, pageable);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
 
-    return ResponseEntity.ok(books);
+    return ResponseEntity.ok(response);
   }
 
   @Operation(
@@ -166,23 +185,29 @@ public class BookResource {
   }
 
   @GetMapping("/available")
-  public ResponseEntity<Page<BookDto>> getAvailableBooks(@PageableDefault(size = 20) Pageable pageable) {
+  public ResponseEntity<BookCatalogResponse> getAvailableBooks(@PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Getting available books");
 
     var books = catalogService.findAvailableBooks(pageable);
-    return ResponseEntity.ok(books);
+    var criteria = new BookSearchCriteria(null, null, null, null, null, true);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/in-stock")
-  public ResponseEntity<Page<BookDto>> getBooksInStock(@PageableDefault(size = 20) Pageable pageable) {
+  public ResponseEntity<BookCatalogResponse> getBooksInStock(@PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Getting books in stock");
 
     var books = catalogService.findBooksInStock(pageable);
-    return ResponseEntity.ok(books);
+    var criteria = new BookSearchCriteria(null, null, null, null, null, true);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/search")
-  public ResponseEntity<Page<BookDto>> searchBooks(
+  public ResponseEntity<BookCatalogResponse> searchBooks(
       @RequestParam(required = false) String title,
       @RequestParam(required = false) String author,
       @RequestParam(required = false) String category,
@@ -195,52 +220,66 @@ public class BookResource {
 
     var criteria = new BookSearchCriteria(title, author, category, minPrice, maxPrice, availableOnly);
     var books = searchService.searchWithCriteria(criteria, pageable);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
 
-    return ResponseEntity.ok(books);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/search/title")
-  public ResponseEntity<Page<BookDto>> searchByTitle(
+  public ResponseEntity<BookCatalogResponse> searchByTitle(
       @RequestParam String title,
       @PageableDefault(size = 20) Pageable pageable) {
 
     logger.debug("Searching books by title: {}", title);
 
+    var criteria = new BookSearchCriteria(title, null, null, null, null, null);
     var books = searchService.searchByTitle(title, pageable);
-    return ResponseEntity.ok(books);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/search/author")
-  public ResponseEntity<Page<BookDto>> searchByAuthor(
+  public ResponseEntity<BookCatalogResponse> searchByAuthor(
       @RequestParam String author,
       @PageableDefault(size = 20) Pageable pageable) {
 
     logger.debug("Searching books by author: {}", author);
 
+    var criteria = new BookSearchCriteria(null, author, null, null, null, null);
     var books = searchService.searchByAuthor(author, pageable);
-    return ResponseEntity.ok(books);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/search/category")
-  public ResponseEntity<Page<BookDto>> searchByCategory(
+  public ResponseEntity<BookCatalogResponse> searchByCategory(
       @RequestParam String category,
       @PageableDefault(size = 20) Pageable pageable) {
 
     logger.debug("Searching books by category: {}", category);
 
+    var criteria = new BookSearchCriteria(null, null, category, null, null, null);
     var books = searchService.searchByCategory(category, pageable);
-    return ResponseEntity.ok(books);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/search/price-range")
-  public ResponseEntity<Page<BookDto>> searchByPriceRange(
+  public ResponseEntity<BookCatalogResponse> searchByPriceRange(
       @RequestParam BigDecimal minPrice,
       @RequestParam BigDecimal maxPrice,
       @PageableDefault(size = 20) Pageable pageable) {
 
     logger.debug("Searching books by price range: {} - {}", minPrice, maxPrice);
 
+    var criteria = new BookSearchCriteria(null, null, null, minPrice, maxPrice, null);
     var books = searchService.searchByPriceRange(minPrice, maxPrice, pageable);
-    return ResponseEntity.ok(books);
+    var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
+    var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
+    return ResponseEntity.ok(response);
   }
 }

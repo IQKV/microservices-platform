@@ -1,6 +1,6 @@
 package org.gripday.bookstore.catalog;
 
-record CategoryFilter(
+public record CategoryFilter(
     Long id,
     String name,
     int bookCount

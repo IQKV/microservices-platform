@@ -28,13 +28,16 @@ public class CatalogService {
   private final CategoryRepository categoryRepository;
   private final AuditLogger auditLogger;
   private final BookstoreMetrics bookstoreMetrics;
+  private final BookCatalogResponseBuilder responseBuilder;
 
   public CatalogService(final BookRepository bookRepository, final CategoryRepository categoryRepository,
-      final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
+      final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics,
+      final BookCatalogResponseBuilder responseBuilder) {
     this.bookRepository = bookRepository;
     this.categoryRepository = categoryRepository;
     this.auditLogger = auditLogger;
     this.bookstoreMetrics = bookstoreMetrics;
+    this.responseBuilder = responseBuilder;
   }
 
   @Transactional(readOnly = true)
@@ -195,6 +198,16 @@ public class CatalogService {
 
     return bookRepository.findBooksInStock(pageable)
         .map(this::convertToDto);
+  }
+
+  @Transactional(readOnly = true)
+  @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
+      key = "'catalog_response_' + #criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+  public BookCatalogResponse findBooksWithCatalogResponse(BookSearchCriteria criteria, Pageable pageable) {
+    logger.debug("Finding books with catalog response for criteria: {}", criteria);
+
+    var books = findBooks(criteria, pageable);
+    return responseBuilder.build(books, criteria);
   }
 
   private BookDto convertToDto(Book book) {

@@ -1,6 +1,6 @@
 package org.gripday.bookstore.catalog;
 
-record AvailabilityFilter(
+public record AvailabilityFilter(
     int totalBooks,
     int availableBooks,
     int outOfStockBooks

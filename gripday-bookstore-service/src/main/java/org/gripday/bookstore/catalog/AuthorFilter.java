@@ -1,6 +1,6 @@
 package org.gripday.bookstore.catalog;
 
-record AuthorFilter(
+public record AuthorFilter(
     String name,
     int bookCount
 ) {

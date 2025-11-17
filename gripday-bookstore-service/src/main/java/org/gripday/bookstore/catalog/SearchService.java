@@ -19,9 +19,11 @@ public class SearchService {
   private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
 
   private final BookRepository bookRepository;
+  private final BookCatalogResponseBuilder responseBuilder;
 
-  public SearchService(final BookRepository bookRepository) {
+  public SearchService(final BookRepository bookRepository, final BookCatalogResponseBuilder responseBuilder) {
     this.bookRepository = bookRepository;
+    this.responseBuilder = responseBuilder;
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
@@ -167,6 +169,13 @@ public class SearchService {
     logger.debug("Checking availability for book ID: {} with quantity: {}", bookId, requestedQuantity);
 
     return bookRepository.isBookAvailableWithQuantity(bookId, requestedQuantity);
+  }
+
+  public BookCatalogResponse searchWithCatalogResponse(BookSearchCriteria criteria, Pageable pageable) {
+    logger.debug("Searching books with criteria and building catalog response: {}", criteria);
+
+    var books = searchWithCriteria(criteria, pageable);
+    return responseBuilder.build(books, criteria);
   }
 
   private BookDto convertToDto(Book book) {
