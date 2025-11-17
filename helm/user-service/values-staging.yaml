@@ -1,0 +1,223 @@
+# Staging environment values for user-service
+
+global:
+  environment: staging
+  platform: gripday
+
+namespace:
+  name: gripday-user-staging
+  labels:
+    app.kubernetes.io/component: authentication
+    environment: staging
+
+replicaCount: 3
+
+image:
+  repository: gripday/user-service
+  pullPolicy: Always
+  tag: "staging-latest"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/actuator/prometheus"
+  environment: "staging"
+
+priorityClassName: high-priority
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/rate-limit: "200"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.gripday.site, https://*.staging.gripday.site"
+  hosts:
+    - host: user-staging.gripday.site
+      paths:
+        - path: /
+          pathType: Prefix
+        - path: /api
+          pathType: Prefix
+        - path: /actuator
+          pathType: Prefix
+        - path: /swagger-ui
+          pathType: Prefix
+        - path: /api-docs
+          pathType: Prefix
+  tls:
+    - secretName: user-staging-tls
+      hosts:
+        - user-staging.gripday.site
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "300m"
+  limits:
+    memory: "1Gi"
+    cpu: "750m"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "staging"
+  - name: GRIPDAY_DATABASE_URL
+    value: "jdbc:postgresql://user-postgres:5432/gripday_user_staging"
+  - name: GRIPDAY_CACHE_REDIS_HOST
+    value: "user-redis"
+  - name: GRIPDAY_CACHE_REDIS_PORT
+    value: "6379"
+  - name: GRIPDAY_CACHE_REDIS_DATABASE
+    value: "0"
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED
+    value: "false"
+  - name: SMTP_HOST
+    value: "smtp.sendgrid.net"
+  - name: SMTP_PORT
+    value: "587"
+  - name: EMAIL_FROM_EMAIL
+    value: "noreply@staging.gripday.site"
+  - name: EMAIL_FROM_NAME
+    value: "Gripday Platform (Staging)"
+  - name: APP_BASE_URL
+    value: "https://staging.gripday.site"
+  - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+    value: "http://jaeger-collector.observability:14268/api/traces"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector.observability:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "gripday-user-service"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.name=gripday-user-service,service.version=staging,deployment.environment=staging"
+  - name: JAVA_OPTS
+    value: "-Xms384m -Xmx768m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
+
+secretEnv:
+  - name: GRIPDAY_DATABASE_USERNAME
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_DATABASE_USERNAME
+  - name: GRIPDAY_DATABASE_PASSWORD
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_DATABASE_PASSWORD
+  - name: GRIPDAY_CACHE_REDIS_PASSWORD
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      optional: true
+  - name: GRIPDAY_AUTH_JWT_SECRET
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_AUTH_JWT_SECRET
+  - name: SMTP_USERNAME
+    secretKeyRef:
+      name: user-service-secrets
+      key: SMTP_USERNAME
+  - name: SMTP_PASSWORD
+    secretKeyRef:
+      name: user-service-secrets
+      key: SMTP_PASSWORD
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+      optional: true
+  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+    secretKeyRef:
+      name: user-service-secrets
+      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+      optional: true
+
+secrets:
+  enabled: true
+  data: {}  # Secrets should be managed externally in staging
+
+configMap:
+  enabled: true
+  data:
+    application.yml: |
+      spring:
+        profiles:
+          active: staging
+      
+      logging:
+        level:
+          org.gripday.user: INFO
+          org.springframework.security: WARN
+          org.springframework.cache: WARN
+          org.hibernate.SQL: WARN
+          AUDIT: INFO
+        pattern:
+          console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","correlationId":"%X{correlationId}","userId":"%X{userId}","username":"%X{username}","logger":"%logger{36}","message":"%msg"}%n'
+
+postgresql:
+  enabled: true
+  image:
+    tag: "15.8-alpine"
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: fast-ssd
+  env:
+    POSTGRES_DB: gripday_user_staging
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+redis:
+  enabled: true
+  image:
+    tag: "7.2-alpine"
+  replicaCount: 1
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: fast-ssd
+  config:
+    maxmemory: "384mb"
+    maxmemoryPolicy: "allkeys-lru"
+    appendonly: "yes"
+  resources:
+    requests:
+      memory: "192Mi"
+      cpu: "150m"
+    limits:
+      memory: "384Mi"
+      cpu: "300m"
+
+networkPolicy:
+  enabled: true
+
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "8"
+    requests.memory: "16Gi"
+    limits.cpu: "16"
+    limits.memory: "32Gi"
+    requests.storage: "30Gi"
+    persistentvolumeclaims: "10"
+    pods: "30"
+    services: "15"
+    configmaps: "15"
+    secrets: "15"
+
+limitRange:
+  enabled: true

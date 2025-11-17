@@ -120,11 +120,45 @@ resources:
 
 # Horizontal Pod Autoscaler (HPA)
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+        - type: Pods
+          value: 3
+          periodSeconds: 60
+      selectPolicy: Max
 
 # Pod Disruption Budget
 podDisruptionBudget:
@@ -344,6 +378,20 @@ env:
     value: "0"
   - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED
     value: "false"
+  - name: SMTP_HOST
+    value: "localhost"
+  - name: SMTP_PORT
+    value: "587"
+  - name: SMTP_USERNAME
+    value: ""
+  - name: SMTP_PASSWORD
+    value: ""
+  - name: EMAIL_FROM_EMAIL
+    value: "noreply@gripday.site"
+  - name: EMAIL_FROM_NAME
+    value: "Gripday Platform"
+  - name: APP_BASE_URL
+    value: "http://localhost:3000"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -378,10 +426,17 @@ secretEnv:
     secretKeyRef:
       name: user-service-secrets
       key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+      optional: true
   - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
     secretKeyRef:
       name: user-service-secrets
       key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+      optional: true
+  - name: SMTP_PASSWORD
+    secretKeyRef:
+      name: user-service-secrets
+      key: SMTP_PASSWORD
+      optional: true
 
 # Secrets configuration
 secrets:
