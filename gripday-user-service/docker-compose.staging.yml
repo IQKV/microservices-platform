@@ -3,10 +3,10 @@ version: "3.8"
 services:
   # PostgreSQL Database for User Service - Staging Environment
   postgres-user:
-    image: postgres:15-alpine
+    image: postgres:15.8-alpine
     container_name: gripday-user-postgres-staging
     environment:
-      POSTGRES_DB: ${GRIPDAY_DATABASE_NAME:-gripday_user}
+      POSTGRES_DB: gripday_user_staging
       POSTGRES_USER: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       POSTGRES_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
@@ -22,7 +22,7 @@ services:
       - auth-network-staging
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d ${GRIPDAY_DATABASE_NAME:-gripday_user} -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${GRIPDAY_DATABASE_USERNAME:-gripday_user} -d gripday_user_staging -h localhost"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -64,7 +64,7 @@ services:
 
   # Redis for User Service - Staging Environment
   redis-user:
-    image: redis:7-alpine
+    image: redis:7.2-alpine
     container_name: gripday-user-redis-staging
     environment:
       REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
@@ -124,51 +124,50 @@ services:
       SPRING_APPLICATION_NAME: gripday-user-service
 
       # Database Configuration
-      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/${GRIPDAY_DATABASE_NAME:-gripday_user}
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/gripday_user_staging
       GRIPDAY_DATABASE_USERNAME: ${GRIPDAY_DATABASE_USERNAME:-gripday_user}
       GRIPDAY_DATABASE_PASSWORD: ${GRIPDAY_DATABASE_PASSWORD}
-      GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
-      GRIPDAY_DATABASE_JPA_SHOW_SQL: false
 
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-user
       GRIPDAY_CACHE_REDIS_PORT: 6379
       GRIPDAY_CACHE_REDIS_PASSWORD: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      GRIPDAY_CACHE_REDIS_TIMEOUT: 3000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
 
       # JWT Configuration
       GRIPDAY_AUTH_JWT_SECRET: ${GRIPDAY_AUTH_JWT_SECRET}
-      GRIPDAY_AUTH_JWT_EXPIRATION: ${GRIPDAY_AUTH_JWT_EXPIRATION:-900}
-      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: ${GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION:-604800}
       GRIPDAY_AUTH_JWT_ISSUER: gripday-user-service
 
-      # Security Configuration
-      GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
-      GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: ${GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS:-5}
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: ${GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION:-900}
+      # Email Configuration
+      SMTP_HOST: smtp.sendgrid.net
+      SMTP_PORT: 587
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM_EMAIL: noreply@gripday.space
+      EMAIL_FROM_NAME: Gripday Platform (Staging)
+      APP_BASE_URL: https://gripday.space
+
+      # OAuth2 Configuration
+      GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED: false
 
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
-      GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
-      GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: INFO
+      GRIPDAY_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
+      GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger-collector.observability:14268/api/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability:4317
+      OTEL_SERVICE_NAME: gripday-user-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=gripday-user-service,service.version=staging,deployment.environment=staging
 
       # JVM Configuration for staging
       JAVA_OPTS: >-
+        -Xms384m
+        -Xmx768m
+        -XX:+UseG1GC
         -XX:+UseContainerSupport
         -XX:MaxRAMPercentage=75.0
-        -XX:+UseG1GC
-        -XX:+UseStringDeduplication
-        -XX:+OptimizeStringConcat
-        -XX:+UseCompressedOops
-        -XX:+UseCompressedClassPointers
+        -XX:+HeapDumpOnOutOfMemoryError
+        -XX:HeapDumpPath=/tmp/heapdump.hprof
         -Djava.security.egd=file:/dev/./urandom
-        -Dspring.profiles.active=staging
-        -Dlogging.level.org.gripday=INFO
-        -Dlogging.config=classpath:logback-spring.xml
     ports:
       - "${USER_SERVICE_PORT:-8080}:8080"
     depends_on:

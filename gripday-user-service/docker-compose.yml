@@ -3,10 +3,10 @@ version: "3.8"
 services:
   # PostgreSQL Database for User Service - Local Development
   postgres-user:
-    image: postgres:15-alpine
+    image: postgres:15.8-alpine
     container_name: gripday-user-postgres-local
     environment:
-      POSTGRES_DB: gripday_user
+      POSTGRES_DB: gripday_user_local
       POSTGRES_USER: gripday_user
       POSTGRES_PASSWORD: gripday_password
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -20,7 +20,7 @@ services:
     networks:
       - auth-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_user -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_user_local -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,13 +45,12 @@ services:
 
   # Redis for User Service - Local Development
   redis-user:
-    image: redis:7-alpine
+    image: redis:7.2-alpine
     container_name: gripday-user-redis-local
     ports:
       - "6379:6379"
     volumes:
       - redis_user_data:/data
-      - ./scripts/redis-user.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - auth-network
     healthcheck:
@@ -62,14 +61,11 @@ services:
       start_period: 30s
     restart: unless-stopped
     command: >
-      redis-server /usr/local/etc/redis/redis.conf
+      redis-server
       --appendonly yes
       --appendfsync everysec
-      --maxmemory 512mb
+      --maxmemory 256mb
       --maxmemory-policy allkeys-lru
-      --save 900 1
-      --save 300 10
-      --save 60 10000
 
   # User Service - Local Development
   user-service:
@@ -81,54 +77,54 @@ services:
     container_name: gripday-user-service-local
     environment:
       # Spring Configuration
-      SPRING_PROFILES_ACTIVE: local
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_APPLICATION_NAME: gripday-user-service
 
       # Database Configuration
-      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/gripday_user
+      GRIPDAY_DATABASE_URL: jdbc:postgresql://postgres-user:5432/gripday_user_local
       GRIPDAY_DATABASE_USERNAME: gripday_user
       GRIPDAY_DATABASE_PASSWORD: gripday_password
-      GRIPDAY_DATABASE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      GRIPDAY_DATABASE_JPA_HIBERNATE_DDL_AUTO: validate
-      GRIPDAY_DATABASE_JPA_SHOW_SQL: true
 
       # Redis Configuration
       GRIPDAY_CACHE_REDIS_HOST: redis-user
       GRIPDAY_CACHE_REDIS_PORT: 6379
-      GRIPDAY_CACHE_REDIS_TIMEOUT: 2000ms
       GRIPDAY_CACHE_REDIS_DATABASE: 0
+      GRIPDAY_CACHE_REDIS_PASSWORD: ""
 
       # JWT Configuration
-      GRIPDAY_AUTH_JWT_SECRET: dev-secret-key-change-in-production-256-bit-minimum
-      GRIPDAY_AUTH_JWT_EXPIRATION: 900
-      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      GRIPDAY_AUTH_JWT_SECRET: local-development-secret-key-not-for-production-use
       GRIPDAY_AUTH_JWT_ISSUER: gripday-user-service
 
-      # Security Configuration
-      GRIPDAY_AUTH_RATE_LIMIT_ENABLED: true
-      GRIPDAY_AUTH_RATE_LIMIT_REQUESTS_PER_MINUTE: 60
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_ENABLED: true
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_MAX_ATTEMPTS: 5
-      GRIPDAY_AUTH_ACCOUNT_LOCKOUT_DURATION: 900
+      # Email Configuration
+      SMTP_HOST: localhost
+      SMTP_PORT: 587
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      EMAIL_FROM_EMAIL: noreply@gripday.site
+      EMAIL_FROM_NAME: Gripday Platform
+      APP_BASE_URL: http://localhost:3000
+
+      # OAuth2 Configuration
+      GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED: false
 
       # Observability Configuration
       GRIPDAY_OBSERVABILITY_TRACING_ENABLED: true
-      GRIPDAY_OBSERVABILITY_METRICS_ENABLED: true
-      GRIPDAY_OBSERVABILITY_LOGGING_LEVEL: DEBUG
+      GRIPDAY_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
+      GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: gripday-user-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=gripday-user-service,service.version=1.0.0,deployment.environment=dev
 
       # JVM Configuration
       JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
         -XX:+UseContainerSupport
         -XX:MaxRAMPercentage=75.0
-        -XX:+UseG1GC
-        -XX:+UseStringDeduplication
         -Djava.security.egd=file:/dev/./urandom
-        -Dspring.profiles.active=local
-        -Dlogging.level.org.gripday=DEBUG
-        -Dlogging.level.org.springframework.security=DEBUG
     ports:
-      - "8080:8080"
-      - "8091:8091" # Debug port
+      - "8081:8080" # User service (internal)
     depends_on:
       postgres-user:
         condition: service_healthy
@@ -145,15 +141,15 @@ services:
     restart: unless-stopped
     volumes:
       - auth_logs:/app/logs
-      - auth_tmp:/app/tmp
+      - auth_tmp:/tmp
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 1G
-        reservations:
           cpus: "0.5"
-          memory: 512M
+          memory: 768Mi
+        reservations:
+          cpus: "0.25"
+          memory: 384Mi
 
 networks:
   auth-network:
