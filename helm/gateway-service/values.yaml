@@ -115,37 +115,42 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 10
+  maxReplicas: 15
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   metrics:
-    - type: Pods
-      pods:
-        metric:
-          name: http_requests_per_second
+    - type: Resource
+      resource:
+        name: cpu
         target:
-          type: AverageValue
-          averageValue: "100"
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
         - type: Percent
-          value: 10
+          value: 25
           periodSeconds: 60
         - type: Pods
           value: 2
           periodSeconds: 60
       selectPolicy: Min
     scaleUp:
-      stabilizationWindowSeconds: 60
+      stabilizationWindowSeconds: 30
       policies:
         - type: Percent
-          value: 50
-          periodSeconds: 60
+          value: 100
+          periodSeconds: 30
         - type: Pods
-          value: 4
-          periodSeconds: 60
+          value: 5
+          periodSeconds: 30
       selectPolicy: Max
 
 # Pod Disruption Budget
@@ -236,6 +241,7 @@ configMap:
     application.yml: |
       server:
         port: 8080
+        shutdown: graceful
 
       spring:
         application:
@@ -246,110 +252,228 @@ configMap:
         cloud:
           gateway:
             routes:
-            # User Service Routes
-            - id: user-service-api
-              uri: http://user-service.gripday-user.svc.cluster.local:8080
-              predicates:
-              - Path=/api/v1/auth/**
-              filters:
-              - StripPrefix=0
-            
-            - id: user-service-users
-              uri: http://user-service.gripday-user.svc.cluster.local:8080
-              predicates:
-              - Path=/api/v1/admin/users/**
-              filters:
-              - StripPrefix=0
-            
-            - id: user-service-tenants
-              uri: http://user-service.gripday-user.svc.cluster.local:8080
-              predicates:
-              - Path=/api/v1/tenants/**
-              filters:
-              - StripPrefix=0
-            
-            # Bookstore Service Routes
-            - id: bookstore-service-api
-              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
-              predicates:
-              - Path=/api/v1/bookstore/**
-              filters:
-              - StripPrefix=0
-            
-            - id: bookstore-service-public
-              uri: http://bookstore-service.gripday-bookstore.svc.cluster.local:8080
-              predicates:
-              - Path=/api/v1/bookstore/public/**
-              filters:
-              - StripPrefix=0
-            
-            # Gateway Health & Monitoring
-            - id: gateway-actuator
-              uri: http://localhost:8080
-              predicates:
-              - Path=/actuator/**
-              filters:
-              - StripPrefix=0
+              # User Service Routes
+              - id: user-service-auth
+                uri: ${gripday.gateway.routing.services.user-service.uri}
+                predicates:
+                  - Path=/api/v1/auth/**
+                filters:
+                  - StripPrefix=0
+                  - name: RequestRateLimiter
+                    args:
+                      redis-rate-limiter.replenish-rate: 60
+                      redis-rate-limiter.burst-capacity: 100
+              
+              - id: user-service-profile
+                uri: ${gripday.gateway.routing.services.user-service.uri}
+                predicates:
+                  - Path=/api/v1/users/me,/api/v1/users/me/**
+                filters:
+                  - StripPrefix=0
+                  - name: RequestRateLimiter
+                    args:
+                      redis-rate-limiter.replenish-rate: 100
+                      redis-rate-limiter.burst-capacity: 150
+              
+              - id: user-service-admin
+                uri: ${gripday.gateway.routing.services.user-service.uri}
+                predicates:
+                  - Path=/api/v1/admin/**
+                filters:
+                  - StripPrefix=0
+                  - name: RequestRateLimiter
+                    args:
+                      redis-rate-limiter.replenish-rate: 100
+                      redis-rate-limiter.burst-capacity: 150
+              
+              - id: user-service-jwks
+                uri: ${gripday.gateway.routing.services.user-service.uri}
+                predicates:
+                  - Path=/.well-known/jwks.json
+                filters:
+                  - StripPrefix=0
+              
+              # Bookstore Service Routes
+              - id: bookstore-service
+                uri: ${gripday.gateway.routing.services.bookstore-service.uri}
+                predicates:
+                  - Path=/api/v1/bookstore/**
+                filters:
+                  - StripPrefix=0
+                  - name: RequestRateLimiter
+                    args:
+                      redis-rate-limiter.replenish-rate: 100
+                      redis-rate-limiter.burst-capacity: 200
+                  - name: CircuitBreaker
+                    args:
+                      name: bookstore-circuit-breaker
+                      fallbackUri: forward:/fallback/bookstore
+              
+              # Gateway Health & Monitoring
+              - id: gateway-actuator
+                uri: http://localhost:8080
+                predicates:
+                  - Path=/actuator/**
+                filters:
+                  - StripPrefix=0
             
             globalcors:
               cors-configurations:
                 '[/**]':
-                  allowedOriginPatterns: "*"
+                  allowedOriginPatterns: ${gripday.gateway.cors.allowed-origins}
                   allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - PATCH
-                  - DELETE
-                  - OPTIONS
+                    - GET
+                    - POST
+                    - PUT
+                    - PATCH
+                    - DELETE
+                    - OPTIONS
                   allowedHeaders:
-                  - "*"
+                    - "*"
                   allowCredentials: true
                   maxAge: 3600
             
             default-filters:
-            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+              - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
-      management:
-        endpoints:
-          web:
-            exposure:
-              include: health,info,metrics,prometheus,gateway
-        endpoint:
-          health:
-            show-details: when-authorized
-          prometheus:
-            enabled: true
-        metrics:
-          export:
-            prometheus:
-              enabled: true
-          distribution:
-            percentiles-histogram:
-              http.server.requests: true
-            percentiles:
-              http.server.requests: 0.5,0.95,0.99
-        tracing:
-          sampling:
-            probability: 1.0
-
+      # Gripday Gateway Configuration
       gripday:
+        cache:
+          redis:
+            host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
+            port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
+            password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
+            database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
+            timeout: PT2S
+            pool:
+              max-active: 8
+              max-idle: 8
+              min-idle: 0
+            key-prefix: "gripday:gateway"
+            default-ttl: PT1H
+        
         gateway:
-          auth:
+          routing:
+            api-prefix:
+              enabled: true
+              prefix: /api
+              strip-count: 0
+            services:
+              user-service:
+                uri: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service:8080}
+                path: /v1/**
+                enabled: true
+                connect-timeout: 5000
+                response-timeout: 30000
+              bookstore-service:
+                uri: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI:http://bookstore-service:8080}
+                path: /v1/bookstore/**
+                enabled: true
+                connect-timeout: 5000
+                response-timeout: 30000
+          
+          security:
             jwt:
-              secret: ${GRIPDAY_AUTH_JWT_SECRET}
+              access-token-expiry: PT15M
+              refresh-token-expiry: P7D
               issuer: gripday-user-service
+              audience: gripday-services
+              algorithm: RS256
+              jwk-set-uri: ${USER_SERVICE_JWK_URI:http://user-service:8080/.well-known/jwks.json}
+            authentication:
+              enabled: true
+              user-service-url: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service:8080}
+              token-validation-timeout: PT5S
+              enable-user-context-propagation: true
+            public-paths:
+              - /.well-known/jwks.json
+              - /api/v1/auth/login
+              - /api/v1/auth/signup
+              - /api/v1/auth/refresh
+              - /api/v1/auth/validate
+              - /api/v1/auth/health
+              - /api/v1/auth/email/verify
+              - /api/v1/auth/email/resend
+              - /api/v1/auth/email/status
+              - /api/v1/auth/password/forgot
+              - /api/v1/auth/password/reset
+              - /api/v1/bookstore/version
+              - /api/v1/bookstore/books
+              - /api/v1/bookstore/books/*/
+              - /api/v1/bookstore/books/isbn/**
+              - /api/v1/bookstore/books/available
+              - /api/v1/bookstore/books/in-stock
+              - /api/v1/bookstore/books/search
+              - /api/v1/bookstore/books/search/**
+              - /api/v1/bookstore/inventory
+              - /api/v1/bookstore/inventory/*/
+              - /api/v1/bookstore/inventory/*/availability
+              - /api/v1/bookstore/inventory/low-stock
+              - /api/v1/bookstore/inventory/out-of-stock
+              - /api/v1/bookstore/inventory/stats/**
+              - /actuator/health
+              - /actuator/info
+              - /swagger-ui/**
+              - /api-docs/**
+          
           rate-limiting:
             enabled: true
-            default-requests-per-minute: 60
-            burst-capacity: 10
-            replenish-rate: 1
+            redis:
+              key-prefix: "gripday:gateway:rate-limit"
+              key-expiry: PT1M
+            policies:
+              default-requests-per-minute: 60
+              default-burst-capacity: 100
+              endpoints:
+                "/api/v1/auth/login":
+                  requests-per-minute: 10
+                  burst-capacity: 20
+                "/api/v1/auth/signup":
+                  requests-per-minute: 5
+                  burst-capacity: 10
+                "/api/v1/bookstore/books":
+                  requests-per-minute: 100
+                  burst-capacity: 200
+          
           circuit-breaker:
             enabled: true
             failure-rate-threshold: 50
-            wait-duration-in-open-state: 30s
-            sliding-window-size: 10
-            minimum-number-of-calls: 5
+            slow-call-rate-threshold: 50
+            slow-call-duration-threshold: PT2S
+            minimum-number-of-calls: 10
+            wait-duration-in-open-state: PT30S
+            sliding-window-size: 100
+            sliding-window-type: COUNT_BASED
+          
+          cors:
+            enabled: true
+            allowed-origins: ${GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "*"
+            allow-credentials: true
+            max-age: 3600
+          
+          transformation:
+            request:
+              enabled: true
+              enable-header-enrichment: true
+              enable-user-context-propagation: true
+              enable-tenant-context-propagation: true
+              additional-headers:
+                X-Gateway-Version: "1.0.0"
+            response:
+              enabled: true
+              enable-security-headers: true
+              enable-correlation-headers: true
+              remove-internal-headers: true
+        
         observability:
           tracing:
             enabled: true
@@ -364,7 +488,11 @@ configMap:
             include-host-tag: true
             include-application-tag: true
           logging:
-            include-correlation-id: true
+            level: INFO
+            format: console
+            enable-request-logging: true
+            enable-response-logging: false
+            enable-correlation-id: true
             include-trace-id: true
             include-span-id: true
             include-user-id: true
@@ -372,6 +500,57 @@ configMap:
             correlation-id-header: X-Correlation-ID
             request-id-header: X-Request-ID
             tenant-id-header: X-Tenant-ID
+
+      # SpringDoc OpenAPI Configuration
+      springdoc:
+        api-docs:
+          enabled: true
+          path: /api-docs
+        swagger-ui:
+          enabled: true
+          path: /swagger-ui.html
+
+      # Management Configuration
+      management:
+        endpoints:
+          web:
+            exposure:
+              include: health,info,metrics,prometheus,gateway
+            base-path: /actuator
+        endpoint:
+          health:
+            show-details: when-authorized
+            show-components: always
+            probes:
+              enabled: true
+          prometheus:
+            enabled: true
+        health:
+          defaults:
+            enabled: true
+          redis:
+            enabled: true
+          diskspace:
+            enabled: true
+        metrics:
+          distribution:
+            percentiles-histogram:
+              "[http.server.requests]": true
+              "[gateway.requests]": true
+            percentiles:
+              "[http.server.requests]": 0.5,0.95,0.99
+          tags:
+            application: gripday-gateway-service
+            environment: ${spring.profiles.active:local}
+        prometheus:
+          metrics:
+            export:
+              enabled: true
+              step: 60s
+              descriptions: true
+        tracing:
+          sampling:
+            probability: 1.0
 
 # Environment variables
 env:
@@ -383,6 +562,14 @@ env:
     value: "6379"
   - name: GRIPDAY_CACHE_REDIS_DATABASE
     value: "1"
+  - name: USER_SERVICE_JWK_URI
+    value: "http://user-service.gripday-user.svc.cluster.local:8080/.well-known/jwks.json"
+  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
+    value: "http://user-service.gripday-user.svc.cluster.local:8080"
+  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
+    value: "http://bookstore-service.gripday-bookstore.svc.cluster.local:8080"
+  - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
+    value: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
