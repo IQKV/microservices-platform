@@ -65,11 +65,11 @@ env:
   - name: SMTP_PORT
     value: "587"
   - name: EMAIL_FROM_EMAIL
-    value: "noreply@test.gripday.site"
+    value: "noreply@gripday.website"
   - name: EMAIL_FROM_NAME
     value: "Gripday Platform (Test)"
   - name: APP_BASE_URL
-    value: "https://test.gripday.site"
+    value: "https://gripday.website"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT

@@ -31,17 +31,17 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
     nginx.ingress.kubernetes.io/rate-limit: "1000"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://staging.gripday.site, https://*.staging.gripday.site"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.space, https://*.gripday.space"
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
   hosts:
-    - host: api-staging.gripday.site
+    - host: api.gripday.space
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: gateway-staging-tls
       hosts:
-        - api-staging.gripday.site
+        - api.gripday.space
 
 resources:
   requests:
@@ -78,7 +78,7 @@ env:
   - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
     value: "http://bookstore-service.gripday-staging-env.svc.cluster.local:8080"
   - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
-    value: "https://staging.gripday.site,https://*.staging.gripday.site"
+    value: "https://gripday.space,https://*.gripday.space"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT

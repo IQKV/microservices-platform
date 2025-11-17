@@ -134,11 +134,11 @@ env:
   - name: SMTP_PORT
     value: "587"
   - name: EMAIL_FROM_EMAIL
-    value: "noreply@gripday.site"
+    value: "noreply@gripday.com"
   - name: EMAIL_FROM_NAME
     value: "Gripday Platform"
   - name: APP_BASE_URL
-    value: "https://gripday.site"
+    value: "https://gripday.com"
   - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT

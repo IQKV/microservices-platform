@@ -63,7 +63,7 @@ env:
   - name: JWT_JWK_SET_URI
     value: "http://user-service:8080/.well-known/jwks.json"
   - name: CORS_ALLOWED_ORIGINS
-    value: "https://test.gripday.site,https://*.test.gripday.site"
+    value: "https://gripday.website,https://*.gripday.website"
   - name: REDIS_HOST
     value: "bookstore-redis"
   - name: REDIS_PORT
