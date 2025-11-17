@@ -60,8 +60,8 @@ securityContext:
 
 service:
   type: ClusterIP
-  port: 80  # External service port
-  targetPort: 8080  # Internal container port
+  port: 80 # External service port
+  targetPort: 8080 # Internal container port
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8080"

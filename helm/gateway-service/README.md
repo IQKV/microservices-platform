@@ -92,12 +92,12 @@ helm install gateway-service ./helm/gateway-service \
 
 ## Environments and Domains
 
-| Environment | Domain              | Namespace              | Values File              |
-| ----------- | ------------------- | ---------------------- | ------------------------ |
-| Development | api.gripday.site    | gripday-dev-env        | values.yaml              |
-| Test        | api.gripday.website | gripday-test-env       | values-test.yaml         |
-| Staging     | api.gripday.space   | gripday-staging-env    | values-staging.yaml      |
-| Production  | api.gripday.com     | gripday-production-env | values-production.yaml   |
+| Environment | Domain              | Namespace              | Values File            |
+| ----------- | ------------------- | ---------------------- | ---------------------- |
+| Development | api.gripday.site    | gripday-dev-env        | values.yaml            |
+| Test        | api.gripday.website | gripday-test-env       | values-test.yaml       |
+| Staging     | api.gripday.space   | gripday-staging-env    | values-staging.yaml    |
+| Production  | api.gripday.com     | gripday-production-env | values-production.yaml |
 
 ## Configuration
 
@@ -427,6 +427,7 @@ The chart includes network policies that:
 **Production**: Use external secret management (AWS Secrets Manager, Vault, Azure Key Vault)
 
 Required secrets:
+
 - `GRIPDAY_AUTH_JWT_SECRET`: JWT signing secret
 - `GRIPDAY_CACHE_REDIS_PASSWORD`: Redis password (optional in dev)
 
@@ -435,20 +436,23 @@ Required secrets:
 ### JVM Options by Environment
 
 **Development**:
+
 ```
 -Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
 ```
 
 **Test/Staging**:
+
 ```
--Xms768m -Xmx1536m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 
+-Xms768m -Xmx1536m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof
 ```
 
 **Production**:
+
 ```
--Xms1024m -Xmx2048m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 
--XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof 
+-Xms1024m -Xmx2048m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof
 -XX:+UseStringDeduplication -XX:+ParallelRefProcEnabled
 ```
 
@@ -473,6 +477,7 @@ Required secrets:
 | Production  | 500m        | 768Mi          | 1000m     | 1536Mi       | 10Gi    | 1536mb     | fast-ssd      |
 
 Redis configuration:
+
 - Image: redis:7.2-alpine
 - Max memory policy: allkeys-lru
 - Append-only file: enabled

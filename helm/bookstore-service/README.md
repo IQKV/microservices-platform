@@ -37,6 +37,7 @@ kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-s
 ```
 
 **Important Notes**:
+
 - Bookstore service is **internal-only** (no public ingress)
 - Access via Gateway Service at `http://api.gripday.site/api/v1/bookstore`
 - Service exposed on port 80, container runs on port 8080
@@ -112,21 +113,23 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 ### Service Parameters
 
-| Parameter                  | Description                  | Default     |
-| -------------------------- | ---------------------------- | ----------- |
-| `service.type`             | Service type                 | `ClusterIP` |
-| `service.port`             | Service port (external)      | `80`        |
-| `service.targetPort`       | Container port (internal)    | `8080`      |
-| `service.headless.enabled` | Create headless service      | `true`      |
+| Parameter                  | Description               | Default     |
+| -------------------------- | ------------------------- | ----------- |
+| `service.type`             | Service type              | `ClusterIP` |
+| `service.port`             | Service port (external)   | `80`        |
+| `service.targetPort`       | Container port (internal) | `8080`      |
+| `service.headless.enabled` | Create headless service   | `true`      |
 
 ### Access Configuration
 
 **Ingress**: Disabled (internal-only service)
+
 - Bookstore service has no public ingress
 - All traffic routes through Gateway Service
 - Access URL: `http://api.gripday.site/api/v1/bookstore`
 
 **Service Discovery**:
+
 - Internal URL: `http://bookstore-service` (port 80)
 - Gateway uses simple service name for routing
 - No namespace qualification needed (same namespace deployment)
@@ -142,43 +145,43 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 ### Autoscaling
 
-| Parameter                                       | Description                | Default                    |
-| ----------------------------------------------- | -------------------------- | -------------------------- |
-| `autoscaling.enabled`                           | Enable HPA                 | `false` (disabled for k3s) |
-| `autoscaling.minReplicas`                       | Minimum replicas           | `1`                        |
-| `autoscaling.maxReplicas`                       | Maximum replicas           | `3`                        |
-| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU                 | `70`                       |
-| `autoscaling.targetMemoryUtilizationPercentage` | Target memory              | `80`                       |
+| Parameter                                       | Description      | Default                    |
+| ----------------------------------------------- | ---------------- | -------------------------- |
+| `autoscaling.enabled`                           | Enable HPA       | `false` (disabled for k3s) |
+| `autoscaling.minReplicas`                       | Minimum replicas | `1`                        |
+| `autoscaling.maxReplicas`                       | Maximum replicas | `3`                        |
+| `autoscaling.targetCPUUtilizationPercentage`    | Target CPU       | `70`                       |
+| `autoscaling.targetMemoryUtilizationPercentage` | Target memory    | `80`                       |
 
 ### PostgreSQL Parameters
 
-| Parameter                              | Description          | Default                  |
-| -------------------------------------- | -------------------- | ------------------------ |
-| `postgresql.enabled`                   | Enable PostgreSQL    | `true`                   |
-| `postgresql.image.tag`                 | PostgreSQL image tag | `15.8-alpine`            |
-| `postgresql.persistence.size`          | PVC size             | `10Gi`                   |
-| `postgresql.persistence.storageClass`  | Storage class        | `local-path` (k3s)       |
-| `postgresql.resources.requests.memory` | Memory request       | `512Mi`                  |
-| `postgresql.resources.requests.cpu`    | CPU request          | `500m`                   |
+| Parameter                              | Description          | Default            |
+| -------------------------------------- | -------------------- | ------------------ |
+| `postgresql.enabled`                   | Enable PostgreSQL    | `true`             |
+| `postgresql.image.tag`                 | PostgreSQL image tag | `15.8-alpine`      |
+| `postgresql.persistence.size`          | PVC size             | `10Gi`             |
+| `postgresql.persistence.storageClass`  | Storage class        | `local-path` (k3s) |
+| `postgresql.resources.requests.memory` | Memory request       | `512Mi`            |
+| `postgresql.resources.requests.cpu`    | CPU request          | `500m`             |
 
 ### Redis Parameters
 
-| Parameter                        | Description       | Default            |
-| -------------------------------- | ----------------- | ------------------ |
-| `redis.enabled`                  | Enable Redis      | `true`             |
-| `redis.image.tag`                | Redis image tag   | `7.2-alpine`       |
-| `redis.persistence.size`         | PVC size          | `2Gi`              |
-| `redis.persistence.storageClass` | Storage class     | `local-path` (k3s) |
-| `redis.config.maxmemory`         | Max memory        | `512mb`            |
+| Parameter                        | Description     | Default            |
+| -------------------------------- | --------------- | ------------------ |
+| `redis.enabled`                  | Enable Redis    | `true`             |
+| `redis.image.tag`                | Redis image tag | `7.2-alpine`       |
+| `redis.persistence.size`         | PVC size        | `2Gi`              |
+| `redis.persistence.storageClass` | Storage class   | `local-path` (k3s) |
+| `redis.config.maxmemory`         | Max memory      | `512mb`            |
 
 ### Security Parameters
 
-| Parameter                      | Description           | Default                |
-| ------------------------------ | --------------------- | ---------------------- |
-| `networkPolicy.enabled`        | Enable network policy | `true`                 |
-| `podSecurityContext.runAsUser` | Run as user ID        | `1001`                 |
-| `priorityClassName`            | Priority class name   | `""` (empty for k3s)   |
-| `ingress.enabled`              | Enable ingress        | `false` (internal-only)|
+| Parameter                      | Description           | Default                 |
+| ------------------------------ | --------------------- | ----------------------- |
+| `networkPolicy.enabled`        | Enable network policy | `true`                  |
+| `podSecurityContext.runAsUser` | Run as user ID        | `1001`                  |
+| `priorityClassName`            | Priority class name   | `""` (empty for k3s)    |
+| `ingress.enabled`              | Enable ingress        | `false` (internal-only) |
 
 ## Examples
 
