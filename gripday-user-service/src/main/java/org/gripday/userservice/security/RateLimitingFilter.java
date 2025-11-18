@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gripday.userservice.security.RateLimitingService;
-import org.gripday.userservice.security.SecurityAuditService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;

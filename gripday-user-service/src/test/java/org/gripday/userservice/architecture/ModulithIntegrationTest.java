@@ -1,11 +1,11 @@
 package org.gripday.userservice.architecture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.gripday.userservice.UserServiceApplication;
 import org.junit.jupiter.api.Test;
-import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.modulith.core.ApplicationModule;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.modulith.core.ApplicationModules;
 
 /**
  * Advanced Spring Modulith integration tests for module interactions and boundaries.

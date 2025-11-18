@@ -1,14 +1,9 @@
 package org.gripday.userservice.organization;
 
-import org.gripday.userservice.organization.Organization;
 import org.gripday.userservice.security.UserAuditLog;
-import org.gripday.userservice.organization.OrganizationRepository;
 import org.gripday.userservice.security.UserAuditLogRepository;
-import org.gripday.userservice.usermanagement.UserRepository;
-import org.gripday.userservice.organization.CreateOrganizationRequest;
-import org.gripday.userservice.organization.OrganizationDto;
-import org.gripday.userservice.organization.UpdateOrganizationRequest;
 import org.gripday.userservice.usermanagement.UserContext;
+import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

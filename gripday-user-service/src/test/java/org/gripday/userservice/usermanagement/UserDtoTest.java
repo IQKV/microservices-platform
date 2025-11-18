@@ -1,10 +1,13 @@
 package org.gripday.userservice.usermanagement;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for UserDto class.

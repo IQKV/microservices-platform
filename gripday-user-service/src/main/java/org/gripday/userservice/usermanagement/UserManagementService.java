@@ -5,15 +5,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.gripday.userservice.security.UserAuditLog;
-import org.gripday.userservice.shared.Authority;
-import org.gripday.userservice.usermanagement.User;
-import org.gripday.userservice.shared.AuthorityRepository;
 import org.gripday.userservice.security.UserAuditLogRepository;
-import org.gripday.userservice.usermanagement.UserRepository;
-import org.gripday.userservice.usermanagement.CreateUserRequest;
-import org.gripday.userservice.usermanagement.UpdateUserRequest;
-import org.gripday.userservice.usermanagement.UserContext;
-import org.gripday.userservice.usermanagement.UserDto;
+import org.gripday.userservice.shared.Authority;
+import org.gripday.userservice.shared.AuthorityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

@@ -1,12 +1,13 @@
 package org.gripday.userservice.authentication;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.gripday.userservice.usermanagement.UserContext;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Map;
 import java.util.Set;
+
+import org.gripday.userservice.usermanagement.UserContext;
+import org.junit.jupiter.api.Test;
 
 class TokenResponseTest {
 

@@ -6,7 +6,6 @@ import java.util.Locale;
 import org.gripday.userservice.config.GripdayProperties;
 import org.gripday.userservice.emailverification.VerificationMetrics;
 import org.gripday.userservice.usermanagement.User;
-import org.gripday.userservice.shared.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;

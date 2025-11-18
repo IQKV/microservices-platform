@@ -2,8 +2,6 @@ package org.gripday.userservice.security;
 
 import java.time.Instant;
 
-import org.gripday.userservice.security.UserAuditLog;
-import org.gripday.userservice.security.UserAuditLogRepository;
 import org.gripday.userservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,16 +1,14 @@
 package org.gripday.userservice.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import org.springframework.stereotype.Service;
-import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.context.annotation.Configuration;
-import jakarta.persistence.Entity;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Architecture tests for naming conventions across the application.

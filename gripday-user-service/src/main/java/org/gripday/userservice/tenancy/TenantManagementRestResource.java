@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.gripday.userservice.tenancy.TenantManagementService;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantResponse;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantStatistics;

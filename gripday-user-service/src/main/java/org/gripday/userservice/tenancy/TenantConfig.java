@@ -1,6 +1,5 @@
 package org.gripday.userservice.tenancy;
 
-import org.gripday.userservice.tenancy.TenantContext;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;

@@ -1,8 +1,9 @@
 package org.gripday.userservice.architecture;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
+
+import jakarta.persistence.Entity;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -10,7 +11,6 @@ import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.persistence.Entity;
 
 /**
  * Architectural tests focused on dependency rules and layer isolation.

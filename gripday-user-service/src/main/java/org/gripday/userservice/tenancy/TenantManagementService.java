@@ -3,14 +3,12 @@ package org.gripday.userservice.tenancy;
 import java.util.List;
 import java.util.Optional;
 
-import org.gripday.userservice.tenancy.Tenant;
-import org.gripday.userservice.tenancy.TenantRepository;
-import org.gripday.userservice.usermanagement.UserRepository;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantResponse;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantStatistics;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantSummary;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.UpdateTenantRequest;
+import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;

@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gripday.userservice.authentication.AuthenticationService;
 import org.gripday.userservice.authentication.JwtService;
 import org.gripday.userservice.passwordmanagement.ChangePasswordRequest;
-import org.gripday.userservice.usermanagement.UserContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

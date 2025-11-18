@@ -1,12 +1,12 @@
 package org.gripday.userservice.registration;
 
 import org.gripday.userservice.emailverification.EmailVerificationService;
+import org.gripday.userservice.security.InputSanitizer;
 import org.gripday.userservice.security.SecurityAuditService;
 import org.gripday.userservice.shared.Authority;
-import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.shared.AuthorityRepository;
+import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserRepository;
-import org.gripday.userservice.security.InputSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
