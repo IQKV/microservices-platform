@@ -1,162 +1,157 @@
 package org.gripday.userservice.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.library.GeneralCodingRules.*;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.Entity;
 
 /**
  * Comprehensive platform architecture tests that validate cross-cutting concerns and platform-wide architectural standards.
- * <p>
- * Validates: - Consistent naming conventions across all components - Proper annotation usage and placement - Platform-wide architectural patterns - Security and validation standards -
- * Integration patterns and dependencies
  */
 @AnalyzeClasses(packages = "org.gripday.userservice")
 class PlatformArchitectureTest {
 
-  /**
-   * Validates that all service classes are annotated with @Service. Ensures proper Spring component detection and dependency injection.
-   */
   @ArchTest
-  static final ArchRule service_classes_should_be_annotated =
-      classes().that().resideInAPackage("..domain.service..")
-          .and().haveSimpleNameEndingWith("Service")
-          .should().beAnnotatedWith(Service.class);
+  static final ArchRule no_generic_exceptions =
+      NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS
+          .because("Generic exceptions should not be thrown");
 
-  /**
-   * Validates that all repository interfaces are annotated with @Repository. Ensures proper Spring Data JPA integration and exception translation.
-   */
   @ArchTest
-  static final ArchRule repository_interfaces_should_be_annotated =
-      classes().that().resideInAPackage("..infrastructure.repository..")
-          .and().haveSimpleNameEndingWith("Repository")
-          .should().beAnnotatedWith(Repository.class);
+  static final ArchRule no_java_util_logging =
+      NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING
+          .because("Use SLF4J for logging instead of java.util.logging");
 
-  /**
-   * Ensures that entity classes are properly placed in infrastructure layer. Validates proper separation of data access concerns.
-   */
   @ArchTest
-  static final ArchRule entity_classes_should_be_in_infrastructure =
-      classes().that().areAnnotatedWith(jakarta.persistence.Entity.class)
-          .should().resideInAPackage("..infrastructure.entity..");
+  static final ArchRule no_jodatime =
+      NO_CLASSES_SHOULD_USE_JODATIME
+          .because("Use Java Time API instead of Joda Time");
 
-  /**
-   * Validates that DTO classes are properly placed in presentation layer.
-   * Ensures proper separation of data transfer concerns.
-   * Allows infrastructure DTOs for repository-specific data transfer objects.
-   */
   @ArchTest
-  static final ArchRule dto_classes_should_be_in_presentation =
-      classes().that().haveNameMatching(".*(Dto|Request|Response)")
-          .and().resideInAPackage("org.gripday.userservice..")
-          .and().resideOutsideOfPackages("..infrastructure.repository.dto..")
-          .and().areNotMemberClasses()
-          .should().resideInAPackage("..presentation.dto..");
+  static final ArchRule no_field_injection =
+      NO_CLASSES_SHOULD_USE_FIELD_INJECTION
+          .because("Use constructor injection instead of field injection");
 
-  /**
-   * Ensures that validation classes are properly organized. Validates that validation logic is in appropriate packages.
-   */
   @ArchTest
-  static final ArchRule validation_classes_should_be_in_validation_package =
-      classes().that().haveNameMatching(".*(Validator|Validation)")
-          .should().resideInAPackage("..presentation.validation..");
+  static final ArchRule services_should_be_transactional =
+      classes()
+          .that().areAnnotatedWith(Service.class)
+          .and().resideInAnyPackage(
+              "..authentication..",
+              "..registration..",
+              "..usermanagement..",
+              "..organization..",
+              "..passwordmanagement..",
+              "..emailverification..",
+              "..tenancy.."
+          )
+          .should().beAnnotatedWith(Transactional.class)
+          .because("Domain services should be transactional");
 
-  /**
-   * Validates that exception handling is centralized. Ensures consistent error handling across the service.
-   */
   @ArchTest
-  static final ArchRule exception_handlers_should_be_in_exception_package =
-      classes().that().areAnnotatedWith(org.springframework.web.bind.annotation.RestControllerAdvice.class)
-          .should().resideInAPackage("..presentation.exception..");
+  static final ArchRule repositories_should_extend_spring_data =
+      classes()
+          .that().haveSimpleNameEndingWith("Repository")
+          .and().areInterfaces()
+          .should().beAssignableTo(org.springframework.data.repository.Repository.class)
+          .because("Repositories should extend Spring Data Repository");
 
-  /**
-   * Ensures that configuration classes follow proper naming conventions.
-   * Validates consistent configuration organization.
-   * Accepts both "Config" and "Configuration" suffixes as valid.
-   */
   @ArchTest
-  static final ArchRule configuration_classes_should_have_config_suffix =
-      classes().that().areAnnotatedWith(org.springframework.context.annotation.Configuration.class)
-          .should().haveSimpleNameEndingWith("Config")
-          .orShould().haveSimpleNameEndingWith("Configuration");
+  static final ArchRule entities_should_have_no_arg_constructor =
+      classes()
+          .that().areAnnotatedWith(Entity.class)
+          .should().haveOnlyPrivateConstructors()
+          .orShould().haveOnlyPackagePrivateConstructors()
+          .because("JPA entities should have protected or private no-arg constructor");
 
-  /**
-   * Validates that no classes use deprecated Java features. Ensures modern Java practices are followed.
-   */
   @ArchTest
-  static final ArchRule should_not_use_deprecated_features =
-      noClasses().should().dependOnClassesThat()
-          .resideInAnyPackage("java.util.Vector", "java.util.Hashtable", "java.util.Stack");
+  static final ArchRule controllers_should_not_use_implementation_types =
+      methods()
+          .that().areDeclaredInClassesThat().areAnnotatedWith(RestController.class)
+          .and().arePublic()
+          .should().notHaveRawReturnType(java.util.ArrayList.class)
+          .andShould().notHaveRawReturnType(java.util.HashSet.class)
+          .andShould().notHaveRawReturnType(java.util.HashMap.class)
+          .because("Controllers should return interface types, not implementations");
 
-  /**
-   * Ensures proper logging practices are followed. Validates that SLF4J is used consistently for logging.
-   */
   @ArchTest
-  static final ArchRule should_use_slf4j_for_logging =
-      classes().that().resideInAPackage("org.gripday.userservice..")
-          .should().onlyDependOnClassesThat()
-          .resideOutsideOfPackages("java.util.logging..", "org.apache.commons.logging..")
-          .orShould().dependOnClassesThat()
-          .resideInAPackage("org.slf4j..");
+  static final ArchRule services_should_not_depend_on_jakarta_servlet =
+      noClasses()
+          .that().areAnnotatedWith(Service.class)
+          .should().dependOnClassesThat().resideInAPackage("jakarta.servlet..")
+          .because("Services should not depend on servlet API");
 
-  /**
-   * Validates that security annotations are used appropriately.
-   * Ensures proper security implementation across the service.
-   * Currently not enforced as @PreAuthorize is not used in the codebase.
-   */
   @ArchTest
-  static final ArchRule security_annotations_should_be_on_appropriate_classes =
-      classes().that().areAnnotatedWith(org.springframework.security.access.prepost.PreAuthorize.class)
-          .should().resideInAnyPackage("..presentation.web..", "..domain.service..")
-          .allowEmptyShould(true);
+  static final ArchRule no_classes_should_access_standard_streams =
+      noClasses()
+          .that().resideOutsideOfPackage("..config..")
+          .should().accessClassesThat().belongToAnyOf(System.class)
+          .because("Use proper logging instead of System.out/err");
 
-  /**
-   * Ensures that transactional annotations are used appropriately.
-   * Validates proper transaction management in service layer.
-   * Allows test classes to use @Transactional for test data setup.
-   */
   @ArchTest
-  static final ArchRule transactional_annotations_should_be_on_services =
-      classes().that().areAnnotatedWith(org.springframework.transaction.annotation.Transactional.class)
-          .and().resideOutsideOfPackages("..unit..", "..integration..")
-          .should().resideInAPackage("..domain.service..");
+  static final ArchRule dtos_should_be_records_or_have_proper_naming =
+      classes()
+          .that().haveSimpleNameEndingWith("Request")
+          .or().haveSimpleNameEndingWith("Response")
+          .or().haveSimpleNameEndingWith("Dto")
+          .should().beRecords()
+          .orShould().beTopLevelClasses()
+          .because("DTOs should be records or properly named classes");
 
-  /**
-   * Validates that caching annotations are used appropriately.
-   * Ensures proper caching implementation in service layer.
-   * Currently not enforced as caching annotations are not used in the codebase.
-   */
   @ArchTest
-  static final ArchRule caching_annotations_should_be_on_services =
-      classes().that().areAnnotatedWith(org.springframework.cache.annotation.Cacheable.class)
-          .or().areAnnotatedWith(org.springframework.cache.annotation.CacheEvict.class)
-          .or().areAnnotatedWith(org.springframework.cache.annotation.CachePut.class)
-          .should().resideInAPackage("..domain.service..")
-          .allowEmptyShould(true);
+  static final ArchRule security_annotations_should_be_on_controllers =
+      classes()
+          .that().areAnnotatedWith(RestController.class)
+          .should().beAnnotatedWith(org.springframework.security.access.prepost.PreAuthorize.class)
+          .orShould().containAnyMethodsThat().areAnnotatedWith(org.springframework.security.access.prepost.PreAuthorize.class)
+          .because("Controllers should have security annotations");
 
-  /**
-   * Ensures that validation annotations are used consistently.
-   * Validates proper input validation across DTOs and entities.
-   * Currently not enforced as validation annotations are used on fields, not classes.
-   */
   @ArchTest
-  static final ArchRule validation_annotations_should_be_on_dtos_and_entities =
-      classes().that().areAnnotatedWith(jakarta.validation.Valid.class)
-          .or().areAnnotatedWith(jakarta.validation.constraints.NotNull.class)
-          .or().areAnnotatedWith(jakarta.validation.constraints.NotBlank.class)
-          .should().resideInAnyPackage("..presentation.dto..", "..infrastructure.entity..")
-          .allowEmptyShould(true);
+  static final ArchRule validated_annotations_on_request_objects =
+      classes()
+          .that().haveSimpleNameEndingWith("Request")
+          .and().areRecords()
+          .should().beAnnotatedWith(jakarta.validation.Valid.class)
+          .orShould().containAnyFieldsThat().areAnnotatedWith(jakarta.validation.constraints.NotNull.class)
+          .orShould().containAnyFieldsThat().areAnnotatedWith(jakarta.validation.constraints.NotBlank.class)
+          .because("Request objects should have validation annotations");
 
-  /**
-   * Validates that OpenAPI annotations are used consistently. Ensures proper API documentation across REST controllers.
-   */
   @ArchTest
-  static final ArchRule openapi_annotations_should_be_on_controllers =
-      classes().that().areAnnotatedWith(io.swagger.v3.oas.annotations.Operation.class)
-          .or().areAnnotatedWith(io.swagger.v3.oas.annotations.tags.Tag.class)
-          .should().resideInAPackage("..presentation.web..");
+  static final ArchRule no_public_fields_in_entities =
+      classes()
+          .that().areAnnotatedWith(Entity.class)
+          .should().haveOnlyPrivateFields()
+          .orShould().haveOnlyPackagePrivateFields()
+          .because("Entity fields should be private or package-private");
+
+  @ArchTest
+  static final ArchRule configuration_classes_should_not_be_final =
+      classes()
+          .that().haveSimpleNameEndingWith("Config")
+          .or().haveSimpleNameEndingWith("Configuration")
+          .should().notBeAnnotatedWith(org.springframework.context.annotation.Configuration.class)
+          .orShould().notBeFinal()
+          .because("Spring configuration classes should not be final");
+
+  @ArchTest
+  static final ArchRule rest_controllers_should_have_request_mapping =
+      classes()
+          .that().areAnnotatedWith(RestController.class)
+          .should().beAnnotatedWith(org.springframework.web.bind.annotation.RequestMapping.class)
+          .because("REST controllers should have @RequestMapping at class level");
+
+  @ArchTest
+  static final ArchRule services_should_have_single_public_constructor =
+      classes()
+          .that().areAnnotatedWith(Service.class)
+          .should().haveOnlyOneConstructor()
+          .because("Services should have a single constructor for dependency injection");
 }

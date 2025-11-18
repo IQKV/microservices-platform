@@ -2,7 +2,7 @@ package org.gripday.userservice.config;
 
 import java.time.Duration;
 
-import org.gripday.userservice.domain.service.TenantContext;
+import org.gripday.userservice.tenancy.TenantContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;

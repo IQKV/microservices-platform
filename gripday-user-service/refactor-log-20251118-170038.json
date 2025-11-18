@@ -1,0 +1,290 @@
+[
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/User.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/User.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantExtractionFilter.java",
+        "Source":  "src/main/java/org/gripday/userservice/config/TenantExtractionFilter.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/registration/SignupRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/SignupRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/TenantManagementService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/passwordmanagement/ForgotPasswordRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ForgotPasswordRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/OrganizationRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/admin/OrganizationManagementResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/GlobalExceptionHandler.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/exception/GlobalExceptionHandler.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/passwordmanagement/ChangePasswordRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ChangePasswordRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/EmailService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/EmailService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserManagementService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/UserManagementService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/PasswordValidator.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/validation/PasswordValidator.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/AuthenticationResult.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/AuthenticationResult.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/AuthorityRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/AuthorityRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/CreateUserRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/CreateUserRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/ValidUsername.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/validation/ValidUsername.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/ValidPassword.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/validation/ValidPassword.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/passwordmanagement/PasswordResetRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/PasswordResetResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/TenantRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/SecurityConfig.java",
+        "Source":  "src/main/java/org/gripday/userservice/config/SecurityConfig.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/passwordmanagement/PasswordResetService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/PasswordResetService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserManagementRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/admin/UserManagementResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/AuthenticationService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/AuthenticationService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/EmailVerificationService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/EmailVerificationService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/ValidateTokenRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ValidateTokenRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/TokenCleanupService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/EmailVerificationTokenCleanupService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/UsernameValidator.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/validation/UsernameValidator.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserContext.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/UserContext.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/UserAuditLog.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/UserAuditLog.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/registration/RegistrationService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/UserRegistrationService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/JwtKeyManagementService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/JwtKeyManagementService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/RateLimitingFilter.java",
+        "Source":  "src/main/java/org/gripday/userservice/config/RateLimitingFilter.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationResponse.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/EmailVerificationResponse.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/RefreshTokenRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/RefreshTokenRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/MessageService.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/i18n/MessageService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/CreateOrganizationRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/CreateOrganizationRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/Authority.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/Authority.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/EmailVerificationResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantManagementRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/admin/TenantManagementResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/registration/RegistrationResponse.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/UserRegistrationResponse.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/AccountLockoutService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/AccountLockoutService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/EmailOperations.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/EmailOperations.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/RateLimitingService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/RateLimitingService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UpdateUserRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/UpdateUserRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/UserRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/InputSanitizer.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/validation/InputSanitizer.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserProfileRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/UserProfileResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/UpdateOrganizationRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/UpdateOrganizationRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/shared/TenantAware.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/TenantAware.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationTokenRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/EmailVerificationTokenRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/ValidateTokenResponse.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ValidateTokenResponse.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/Tenant.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/Tenant.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/OrganizationService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/OrganizationManagementService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantExtractionService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/TenantExtractionService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/SecurityAuditService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/SecurityAuditService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationToken.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/EmailVerificationToken.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/passwordmanagement/ResetPasswordRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ResetPasswordRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/security/UserAuditLogRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/UserAuditLogRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationStatusResponse.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/VerificationStatusResponse.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/TokenResponse.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/TokenResponse.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/OrganizationRepository.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/repository/OrganizationRepository.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantContext.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/TenantContext.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/ResendVerificationRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/ResendVerificationRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/OrganizationDto.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/OrganizationDto.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/AuthenticationRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/AuthenticationResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/usermanagement/UserDto.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/UserDto.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/config/TokenCleanupService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/TokenCleanupService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/LoginRequest.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/dto/LoginRequest.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/emailverification/VerificationMetrics.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/EmailVerificationMetricsService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/tenancy/TenantConfig.java",
+        "Source":  "src/main/java/org/gripday/userservice/config/TenantConfig.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/JwkSetRestResource.java",
+        "Source":  "src/main/java/org/gripday/userservice/presentation/web/JwkSetResource.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/authentication/JwtTokenService.java",
+        "Source":  "src/main/java/org/gripday/userservice/domain/service/JwtService.java"
+    },
+    {
+        "Target":  "src/main/java/org/gripday/userservice/organization/Organization.java",
+        "Source":  "src/main/java/org/gripday/userservice/infrastructure/entity/Organization.java"
+    }
+]

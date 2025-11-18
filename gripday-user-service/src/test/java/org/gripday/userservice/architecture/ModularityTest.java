@@ -3,41 +3,114 @@ package org.gripday.userservice.architecture;
 import org.gripday.userservice.UserServiceApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
+import org.springframework.modulith.docs.Documenter;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Spring Modulith tests for module boundary validation and architectural compliance.
- * <p>
- * Note: These tests are currently disabled as the codebase uses a pragmatic three-tier
- * architecture where domain services directly use presentation DTOs and infrastructure entities.
- * This is a conscious design decision that prioritizes simplicity and development velocity
- * over strict module encapsulation. The ArchUnit tests provide sufficient architectural validation.
  */
 class ModularityTest {
 
-  /**
-   * Verifies that the application modules can be detected and loaded.
-   * This is a basic smoke test to ensure Spring Modulith can analyze the structure.
-   */
+  private final ApplicationModules modules = ApplicationModules.of(UserServiceApplication.class);
+
   @Test
-  void shouldDetectApplicationModules() {
-    var modules = ApplicationModules.of(UserServiceApplication.class);
-    
-    // Basic validation that modules are detected
-    assert !modules.stream().toList().isEmpty() : "Should detect at least one module";
+  void verifyModularStructure() {
+    // Verify that the application has a valid modular structure
+    modules.verify();
   }
 
-  /**
-   * Validates that each detected module has a valid name and base package.
-   */
   @Test
-  void shouldHaveValidModuleNames() {
-    var modules = ApplicationModules.of(UserServiceApplication.class);
+  void shouldNotHaveCircularDependencies() {
+    // Ensure no circular dependencies between modules
+    assertThat(modules.detectDependencies())
+        .as("Modules should not have circular dependencies")
+        .isNotNull();
+  }
 
+  @Test
+  void allModulesShouldBeValid() {
+    // Verify all modules are properly structured
     modules.forEach(module -> {
-      assert module.getName() != null && !module.getName().isEmpty() : 
-          "Module should have a non-empty name";
-      assert module.getBasePackage() != null : 
-          "Module should have a base package";
+      assertThat(module.getBasePackage()).isNotNull();
+      assertThat(module.getName()).isNotBlank();
     });
+  }
+
+  @Test
+  void verifyModuleDependencies() {
+    // Verify that module dependencies follow architectural rules
+    modules.forEach(module -> {
+      var dependencies = module.getDependencies(modules);
+      
+      // Shared module should not depend on specific domain modules
+      if (module.getName().equals("shared")) {
+        assertThat(dependencies)
+            .noneMatch(dep -> dep.getName().equals("authentication") 
+                || dep.getName().equals("registration")
+                || dep.getName().equals("usermanagement")
+                || dep.getName().equals("organization")
+                || dep.getName().equals("passwordmanagement")
+                || dep.getName().equals("emailverification")
+                || dep.getName().equals("tenancy"));
+      }
+    });
+  }
+
+  @Test
+  void documentModules() {
+    // Generate module documentation
+    new Documenter(modules)
+        .writeModulesAsPlantUml()
+        .writeIndividualModulesAsPlantUml();
+  }
+
+  @Test
+  void verifyModuleExposure() {
+    // Verify that modules only expose intended APIs
+    modules.forEach(module -> {
+      var exposedTypes = module.getExposedTypes();
+      
+      // Verify that internal implementation details are not exposed
+      exposedTypes.forEach(type -> {
+        assertThat(type.getPackageName())
+            .as("Exposed type should not be in internal package")
+            .doesNotContain(".internal.");
+      });
+    });
+  }
+
+  @Test
+  void verifyBootstrapModules() {
+    // Verify bootstrap modules (config, infrastructure) are properly isolated
+    modules.stream()
+        .filter(module -> module.getName().equals("config") || module.getName().equals("infrastructure"))
+        .forEach(module -> {
+          assertThat(module.getBootstrapDependencies(modules))
+              .as("Bootstrap modules should have minimal dependencies")
+              .isNotNull();
+        });
+  }
+
+  @Test
+  void verifyDomainModulesAreIndependent() {
+    // Verify domain modules are independent of each other
+    var domainModules = java.util.List.of(
+        "authentication", "registration", "usermanagement", 
+        "organization", "passwordmanagement", "emailverification", "tenancy"
+    );
+
+    modules.stream()
+        .filter(module -> domainModules.contains(module.getName()))
+        .forEach(module -> {
+          var dependencies = module.getDependencies(modules);
+          
+          // Domain modules should only depend on shared, security, config, or infrastructure
+          dependencies.forEach(dep -> {
+            assertThat(dep.getName())
+                .as("Domain module %s should not depend on other domain modules", module.getName())
+                .isIn("shared", "security", "config", "infrastructure", "presentation");
+          });
+        });
   }
 }

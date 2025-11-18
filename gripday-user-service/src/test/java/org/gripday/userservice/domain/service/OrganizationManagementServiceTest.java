@@ -15,6 +15,7 @@ import org.gripday.userservice.infrastructure.entity.User;
 import org.gripday.userservice.infrastructure.repository.OrganizationRepository;
 import org.gripday.userservice.infrastructure.repository.UserAuditLogRepository;
 import org.gripday.userservice.infrastructure.repository.UserRepository;
+import org.gripday.userservice.organization.Organization;
 import org.gripday.userservice.presentation.dto.CreateOrganizationRequest;
 import org.gripday.userservice.presentation.dto.UpdateOrganizationRequest;
 import org.gripday.userservice.presentation.dto.UserContext;
@@ -59,7 +60,7 @@ class OrganizationManagementServiceTest {
         null
     );
 
-    testOrganization = new Organization("Test Org", "tenant-123");
+    testOrganization = new org.gripday.userservice.organization.Organization("Test Org", "tenant-123");
     testOrganization.setDescription("Test Description");
     testOrganization.setIndustry("Technology");
 

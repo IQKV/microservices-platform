@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.gripday.userservice.domain.service.JwtKeyManagementService;
+import org.gripday.userservice.authentication.JwtKeyManagementService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
