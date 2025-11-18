@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+git add .
+npx lint-staged
+
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+main_branch="(main|master|dev|develop)"
+if [[ $current_branch =~ $main_branch ]]; then
+    echo -e "\n⚠️ Please don't commit directly to $current_branch.";
+    exit 1
+fi
+
+valid_branch_names="^(feature|rfc|poc|bugfix|improvement|enhancement|library|prerelease|hotfix)\/[a-z0-9._-]+$|^(wip|poc|\d+\.\d+\.x)$"
+if [[ ! $current_branch =~ $valid_branch_names ]]; then
+    echo -e "\n🚧 Your branch name is illegal. Please rename your branch with using following regex: $valid_branch_names"
+    exit 1
+fi
+
+./mvnw clean validate
+if [ "$?" -ne 0 ]; then
+    echo -e "\n🛑 Maven Validate unsuccessful.\033[0m"
+    exit 1
+fi
+
+exit 0

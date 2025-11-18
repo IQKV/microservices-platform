@@ -1,0 +1,31 @@
+name: "Create"
+
+# The workflow will run when the "Use this template" button is used
+on:
+  push:
+
+jobs:
+  create:
+    # We only run this action when the repository isn't the template repository. References:
+    # - https://docs.github.com/en/actions/learn-github-actions/contexts
+    # - https://docs.github.com/en/actions/learn-github-actions/expressions
+    if: ${{ !github.event.repository.is_template }}
+    permissions: "write-all"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out the repo"
+        uses: "actions/checkout@v4"
+
+      - name: "Modify/remove files before use"
+        run: |
+          rm -f "./.github/workflows/use-template.yml"
+          mv README.md README.boilerplate.md
+          mv README.template.md README.md
+
+      - name: "Update commit"
+        uses: "stefanzweifel/git-auto-commit-action@v4"
+        with:
+          commit_message: "feat: create initial directory layout"
+          commit_options: "--amend -a"
+          push_options: "--force"
+          skip_fetch: true
