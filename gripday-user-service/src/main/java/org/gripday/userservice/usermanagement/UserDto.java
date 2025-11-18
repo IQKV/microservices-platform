@@ -24,9 +24,16 @@ public record UserDto(
    * Get user's full name.
    */
   public String getFullName() {
-    var first = firstName != null ? firstName : "";
-    var last = lastName != null ? lastName : "";
-    return (first + " " + last).trim();
+    if (firstName == null && lastName == null) {
+      return "";
+    }
+    if (firstName == null) {
+      return lastName;
+    }
+    if (lastName == null) {
+      return firstName;
+    }
+    return firstName + " " + lastName;
   }
 
   /**

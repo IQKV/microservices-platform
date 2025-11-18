@@ -2,6 +2,7 @@ package org.gripday.userservice.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -84,9 +85,9 @@ class MultiTenancyArchitectureTest {
 
   @ArchTest
   static final ArchRule no_cross_tenant_data_access =
-      classes()
+      noClasses()
           .that().areAnnotatedWith(org.springframework.stereotype.Service.class)
-          .should().notDependOnClassesThat().haveSimpleNameContaining("CrossTenant")
+          .should().dependOnClassesThat().haveSimpleNameContaining("CrossTenant")
           .because("Services should not allow cross-tenant data access");
 
   @ArchTest

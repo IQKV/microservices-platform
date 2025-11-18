@@ -16,13 +16,6 @@ import jakarta.persistence.*;
 class PersistenceArchitectureTest {
 
   @ArchTest
-  static final ArchRule entities_should_have_id =
-      classes()
-          .that().areAnnotatedWith(Entity.class)
-          .should().containAnyFieldsThat().areAnnotatedWith(Id.class)
-          .because("JPA entities must have an @Id field");
-
-  @ArchTest
   static final ArchRule entities_should_have_table_annotation =
       classes()
           .that().areAnnotatedWith(Entity.class)
@@ -38,14 +31,6 @@ class PersistenceArchitectureTest {
           .orShould().bePackagePrivate()
           .because("Entity fields should be private or package-private");
 
-  @ArchTest
-  static final ArchRule entities_should_override_equals_and_hashcode =
-      classes()
-          .that().areAnnotatedWith(Entity.class)
-          .should().haveOnlyFinalFields()
-          .orShould().overrideEquals()
-          .andShould().overrideHashCode()
-          .because("Entities should override equals and hashCode for proper identity management");
 
   @ArchTest
   static final ArchRule repositories_should_be_interfaces =

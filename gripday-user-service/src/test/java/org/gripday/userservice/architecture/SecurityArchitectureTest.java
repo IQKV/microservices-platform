@@ -18,13 +18,12 @@ import org.springframework.web.bind.annotation.*;
 class SecurityArchitectureTest {
 
   @ArchTest
-  static final ArchRule controllers_should_have_security_annotations =
-      classes()
-          .that().areAnnotatedWith(RestController.class)
+  static final ArchRule controller_methods_should_have_security_annotations =
+      methods()
+          .that().areDeclaredInClassesThat().areAnnotatedWith(RestController.class)
+          .and().arePublic()
           .should().beAnnotatedWith(PreAuthorize.class)
-          .orShould().containAnyMethodsThat().areAnnotatedWith(PreAuthorize.class)
-          .orShould().haveSimpleNameContaining("Public")
-          .because("Controllers should have security annotations unless explicitly public");
+          .because("Public REST controller methods should be secured with @PreAuthorize");
 
   @ArchTest
   static final ArchRule password_fields_should_not_be_logged =
@@ -37,7 +36,7 @@ class SecurityArchitectureTest {
   @ArchTest
   static final ArchRule no_hardcoded_credentials =
       noClasses()
-          .should().accessClassesThat().haveSimpleNameContaining("Password")
+          .should().dependOnClassesThat().haveSimpleNameContaining("Password")
           .andShould().haveSimpleNameContaining("Hardcoded")
           .because("Credentials should not be hardcoded");
 
