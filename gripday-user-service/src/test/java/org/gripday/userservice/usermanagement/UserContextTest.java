@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 class UserContextTest {
@@ -140,15 +141,15 @@ class UserContextTest {
   // Helper to construct UserContext in tests; used to avoid SpotBugs false positives
   // when intentionally passing null to validate constructor preconditions.
   private static UserContext constructUserContextThrowCause(
-      Long userId,
-      String username,
-      String email,
-      Set<String> roles,
-      Set<String> permissions,
-      String firstName,
-      String lastName,
-      String tenantId,
-      Map<String, Object> customClaims
+      @Nullable Long userId,
+      @Nullable String username,
+      @Nullable String email,
+      @Nullable Set<String> roles,
+      @Nullable Set<String> permissions,
+      @Nullable String firstName,
+      @Nullable String lastName,
+      @Nullable String tenantId,
+      @Nullable Map<String, Object> customClaims
   ) {
     return new UserContext(
         userId,
