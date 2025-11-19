@@ -41,7 +41,7 @@ class UserContextTest {
   @Test
   void shouldThrowExceptionWhenUserIdIsNull() {
     assertThrows(NullPointerException.class, () ->
-        new UserContext(
+        constructUserContextThrowCause(
             null,
             "john.doe",
             "john.doe@example.com",
@@ -58,7 +58,7 @@ class UserContextTest {
   @Test
   void shouldThrowExceptionWhenUsernameIsNull() {
     assertThrows(NullPointerException.class, () ->
-        new UserContext(
+        constructUserContextThrowCause(
             1L,
             null,
             "john.doe@example.com",
@@ -75,7 +75,7 @@ class UserContextTest {
   @Test
   void shouldThrowExceptionWhenEmailIsNull() {
     assertThrows(NullPointerException.class, () ->
-        new UserContext(
+        constructUserContextThrowCause(
             1L,
             "john.doe",
             null,
@@ -92,7 +92,7 @@ class UserContextTest {
   @Test
   void shouldThrowExceptionWhenTenantIdIsNull() {
     assertThrows(NullPointerException.class, () ->
-        new UserContext(
+        constructUserContextThrowCause(
             1L,
             "john.doe",
             "john.doe@example.com",
@@ -134,6 +134,32 @@ class UserContextTest {
 
     assertThrows(UnsupportedOperationException.class, () ->
         context.customClaims().put("new", "value")
+    );
+  }
+
+  // Helper to construct UserContext in tests; used to avoid SpotBugs false positives
+  // when intentionally passing null to validate constructor preconditions.
+  private static UserContext constructUserContextThrowCause(
+      Long userId,
+      String username,
+      String email,
+      Set<String> roles,
+      Set<String> permissions,
+      String firstName,
+      String lastName,
+      String tenantId,
+      Map<String, Object> customClaims
+  ) {
+    return new UserContext(
+        userId,
+        username,
+        email,
+        roles,
+        permissions,
+        firstName,
+        lastName,
+        tenantId,
+        customClaims
     );
   }
 

@@ -24,11 +24,11 @@ class VerificationTokenRepositoryTest {
   @DisplayName("findByTokenAndUsedFalse and existsByTokenAndValidAt should respect used and expiry")
   void findByTokenAndValidity() {
     var now = LocalDateTime.now();
-    var valid = repository.save(new VerificationToken("tok-valid", 1L, now.plusHours(2), "t1"));
+    repository.save(new VerificationToken("tok-valid", 1L, now.plusHours(2), "t1"));
     var used = repository.save(new VerificationToken("tok-used", 1L, now.plusHours(2), "t1"));
     used.markAsUsed();
     repository.save(used);
-    var expired = repository.save(new VerificationToken("tok-expired", 1L, now.minusMinutes(1), "t1"));
+    repository.save(new VerificationToken("tok-expired", 1L, now.minusMinutes(1), "t1"));
 
     assertThat(repository.findByTokenAndUsedFalse("tok-valid")).isPresent();
     assertThat(repository.findByTokenAndUsedFalse("tok-used")).isEmpty();

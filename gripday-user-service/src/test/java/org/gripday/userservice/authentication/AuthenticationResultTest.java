@@ -1,7 +1,6 @@
 package org.gripday.userservice.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.gripday.userservice.usermanagement.UserContext;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,6 @@ class AuthenticationResultTest {
         timestamp
     );
 
-    assertInstanceOf(AuthenticationResult.class, result);
     assertEquals(userContext, result.user());
     assertEquals("access-token", result.accessToken());
     assertEquals("refresh-token", result.refreshToken());
@@ -47,7 +46,6 @@ class AuthenticationResultTest {
         timestamp
     );
 
-    assertInstanceOf(AuthenticationResult.class, result);
     assertEquals("Invalid credentials", result.reason());
     assertEquals("AUTH_001", result.errorCode());
     assertEquals("correlation-456", result.correlationId());
@@ -56,24 +54,12 @@ class AuthenticationResultTest {
 
   @Test
   void shouldBeSealed() {
-    var userContext = createUserContext();
-    var success = new AuthenticationResult.Success(
-        userContext,
-        "token",
-        "refresh",
-        "corr-1",
-        Instant.now()
-    );
-
-    var failure = new AuthenticationResult.Failure(
-        "Failed",
-        "ERR_001",
-        "corr-2",
-        Instant.now()
-    );
-
-    assertTrue(success instanceof AuthenticationResult);
-    assertTrue(failure instanceof AuthenticationResult);
+    assertTrue(AuthenticationResult.class.isSealed());
+    var permitted = AuthenticationResult.class.getPermittedSubclasses();
+    assertEquals(2, permitted.length);
+    var permittedSet = Arrays.stream(permitted).collect(java.util.stream.Collectors.toSet());
+    assertTrue(permittedSet.contains(AuthenticationResult.Success.class));
+    assertTrue(permittedSet.contains(AuthenticationResult.Failure.class));
   }
 
   @Test

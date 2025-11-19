@@ -67,8 +67,8 @@ class TenantRepositoryTest {
   @Test
   @DisplayName("findTenantsWithUserCountBetween returns enabled tenants with user counts in range")
   void tenantsWithUserCountBetween() {
-    var t1 = tenantRepository.save(new Tenant("T1", "T1"));
-    var t2 = tenantRepository.save(new Tenant("T2", "T2"));
+    tenantRepository.save(new Tenant("T1", "T1"));
+    tenantRepository.save(new Tenant("T2", "T2"));
 
     // Users: T1 has 1 enabled, T2 has 2 enabled, and one disabled should not count
     userRepository.save(new User("u1", "u1@x.com", "h", "F", "L", "T1"));

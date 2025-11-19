@@ -28,7 +28,7 @@ class UserRepositoryTest {
   @Test
   @DisplayName("findByUsernameOrEmail should find by either username or email")
   void findByUsernameOrEmail() {
-    var user = persistUser("tenantA", "john", "john@example.com", true, true, Set.of("ADMIN", "USER"));
+    persistUser("tenantA", "john", "john@example.com", true, true, Set.of("ADMIN", "USER"));
 
     assertThat(userRepository.findByUsernameOrEmail("john", "nope@example.com")).isPresent();
     assertThat(userRepository.findByUsernameOrEmail("nouser", "john@example.com")).isPresent();
@@ -50,8 +50,8 @@ class UserRepositoryTest {
   @Test
   @DisplayName("findEnabledUsersByTenantId should return only enabled users in the tenant ordered by createdAt desc")
   void findEnabledUsersByTenant() {
-    var u1 = persistUser("tenantT", "u1", "u1@x.com", true, true, Set.of("USER"));
-    var u2 = persistUser("tenantT", "u2", "u2@x.com", false, true, Set.of("USER"));
+    persistUser("tenantT", "u1", "u1@x.com", true, true, Set.of("USER"));
+    persistUser("tenantT", "u2", "u2@x.com", false, true, Set.of("USER"));
     var u3 = persistUser("tenantT", "u3", "u3@x.com", true, true, Set.of("USER"));
     persistUser("tenantOther", "u4", "u4@x.com", true, true, Set.of("USER"));
 
