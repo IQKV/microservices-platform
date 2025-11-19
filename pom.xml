@@ -124,6 +124,7 @@
                            <exclude>**/security/**</exclude>
                            <exclude>**/filter/**</exclude>
                            <exclude>**/service/**</exclude>
+                           <exclude>**/userservice/**</exclude>
                            <exclude>**/*Application.class</exclude>
                         </excludes>
                     </configuration>
