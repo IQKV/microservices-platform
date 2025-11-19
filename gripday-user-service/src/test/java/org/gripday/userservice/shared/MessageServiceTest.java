@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Locale;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
@@ -14,12 +15,12 @@ class MessageServiceTest {
 
   static class StubMessageSource implements MessageSource {
     @Override
-    public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+    public String getMessage(@NotNull String code, Object[] args, String defaultMessage, Locale locale) {
       return format(code, args, locale);
     }
 
     @Override
-    public String getMessage(String code, Object[] args, Locale locale) {
+    public String getMessage(@NotNull String code, Object[] args, Locale locale) {
       return format(code, args, locale);
     }
 
