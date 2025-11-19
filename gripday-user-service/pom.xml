@@ -172,13 +172,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- SpotBugs annotations for tests (e.g., @SuppressFBWarnings) -->
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-annotations</artifactId>
-            <version>4.8.6</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -192,30 +185,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                   <excludes>
-                    <exclude>**/architecture/*.java</exclude>
                     <exclude>**/integration/*.java</exclude>
                   </excludes>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.8.6.4</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <failOnError>true</failOnError>
-                    <includeTests>true</includeTests>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>spotbugs</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -2,9 +2,9 @@ package org.gripday.userservice.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import jakarta.annotation.Nullable;
 import java.util.Locale;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
