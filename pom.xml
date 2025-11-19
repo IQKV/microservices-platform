@@ -110,12 +110,6 @@
                         </excludes>
                     </configuration>
                 </plugin>
-                
-                <!-- JaCoCo for code coverage -->
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                </plugin>
                 <!-- Checkstyle for code style -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
