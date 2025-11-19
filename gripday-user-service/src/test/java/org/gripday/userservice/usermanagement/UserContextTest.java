@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.spotbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -142,7 +142,7 @@ class UserContextTest {
   // Helper to construct UserContext in tests; used to avoid SpotBugs false positives
   // when intentionally passing null to validate constructor preconditions.
   @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_NONVIRTUAL", justification = "Tests intentionally pass null to verify constructor preconditions")
-  private static UserContext constructUserContextThrowCause(
+  private static void constructUserContextThrowCause(
       Long userId,
       String username,
       String email,
@@ -153,7 +153,7 @@ class UserContextTest {
       String tenantId,
       @Nullable Map<String, Object> customClaims
   ) {
-    return new UserContext(
+    new UserContext(
         userId,
         username,
         email,
