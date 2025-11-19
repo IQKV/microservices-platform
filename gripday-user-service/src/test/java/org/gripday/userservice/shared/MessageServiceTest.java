@@ -26,10 +26,16 @@ class MessageServiceTest {
 
     @Override
     public @NotNull String getMessage(MessageSourceResolvable resolvable, Locale locale) {
-      String code = (resolvable.getCodes() != null && resolvable.getCodes().length > 0)
-          ? resolvable.getCodes()[0]
-          : "unknown";
-      return format(code, resolvable.getArguments(), locale);
+      String code;
+      Object[] args = null;
+      if (resolvable != null) {
+        String[] codes = resolvable.getCodes();
+        code = (codes != null && codes.length > 0) ? codes[0] : "unknown";
+        args = resolvable.getArguments();
+      } else {
+        code = "unknown";
+      }
+      return format(code, args, locale);
     }
 
     private String format(String code, Object[] args, Locale locale) {

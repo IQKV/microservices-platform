@@ -141,14 +141,14 @@ class UserContextTest {
   // Helper to construct UserContext in tests; used to avoid SpotBugs false positives
   // when intentionally passing null to validate constructor preconditions.
   private static UserContext constructUserContextThrowCause(
-      @Nullable Long userId,
-      @Nullable String username,
-      @Nullable String email,
+      Long userId,
+      String username,
+      String email,
       @Nullable Set<String> roles,
       @Nullable Set<String> permissions,
       @Nullable String firstName,
       @Nullable String lastName,
-      @Nullable String tenantId,
+      String tenantId,
       @Nullable Map<String, Object> customClaims
   ) {
     return new UserContext(
