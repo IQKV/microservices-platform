@@ -24,9 +24,9 @@ class LayeredArchitectureTest {
   @ArchTest
   static final ArchRule layer_dependencies_are_respected =
       layeredArchitecture().consideringAllDependencies()
-          .layer("Presentation").definedBy("..presentation..", "..authentication..", "..registration..", 
-                                           "..usermanagement..", "..organization..", "..passwordmanagement..", 
-                                           "..emailverification..", "..tenancy..")
+          .layer("Presentation").definedBy("..presentation..", "..authentication..", "..registration..",
+              "..usermanagement..", "..organization..", "..passwordmanagement..",
+              "..emailverification..", "..tenancy..")
           .layer("Domain").definedBy("..shared..", "..security..")
           .layer("Infrastructure").definedBy("..infrastructure..", "..config..")
           .whereLayer("Presentation").mayNotBeAccessedByAnyLayer()

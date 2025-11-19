@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 class TenantAwareTest {
 
   static class TestEntity extends TenantAware {
-    TestEntity(String tenantId) { super(tenantId); }
+    TestEntity(final String tenantId) {
+      super(tenantId);
+    }
   }
 
   @AfterEach

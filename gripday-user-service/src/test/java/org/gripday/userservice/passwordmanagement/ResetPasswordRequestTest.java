@@ -140,7 +140,7 @@ class ResetPasswordRequestTest {
 
   @Test
   void shouldAcceptVariousTokenFormats() {
-    var tokens = new String[]{
+    var tokens = new String[] {
         "simple-token",
         "token_with_underscore",
         "token.with.dots",
@@ -148,7 +148,7 @@ class ResetPasswordRequestTest {
         "very-long-token-with-many-characters-123456789"
     };
 
-    for (var token : tokens) {
+    for (final var token : tokens) {
       var request = new ResetPasswordRequest(token, "newPassword123");
       assertTrue(validator.validate(request).isEmpty(), "Token should be valid: " + token);
     }

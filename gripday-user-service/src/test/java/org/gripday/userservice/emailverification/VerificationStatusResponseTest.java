@@ -127,8 +127,8 @@ class VerificationStatusResponseTest {
   @Test
   void shouldHandleLongMessage() {
     var longMessage = "Your email verification is pending. " +
-        "We have sent a verification link to your email address. " +
-        "Please check your inbox and spam folder.";
+                      "We have sent a verification link to your email address. " +
+                      "Please check your inbox and spam folder.";
     var response = new VerificationStatusResponse(
         "user@example.com",
         false,

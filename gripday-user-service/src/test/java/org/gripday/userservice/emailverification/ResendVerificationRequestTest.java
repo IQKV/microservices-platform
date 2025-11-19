@@ -76,14 +76,14 @@ class ResendVerificationRequestTest {
 
   @Test
   void shouldAcceptValidEmailFormats() {
-    var emails = new String[]{
+    var emails = new String[] {
         "user@example.com",
         "user.name@example.com",
         "user+tag@example.co.uk",
         "user_name@sub.example.com"
     };
 
-    for (var email : emails) {
+    for (final var email : emails) {
       var request = new ResendVerificationRequest(email);
       Set<ConstraintViolation<ResendVerificationRequest>> violations = validator.validate(request);
       assertTrue(violations.isEmpty(), "Email should be valid: " + email);

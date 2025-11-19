@@ -32,7 +32,7 @@ class MessageServiceTest {
     }
 
     private String format(String code, Object[] args, Locale locale) {
-      var argsStr = (args == null || args.length == 0) ? "" : ("[" + java.util.Arrays.stream(args).map(String::valueOf).reduce((a,b) -> a + "," + b).orElse("") + "]");
+      var argsStr = (args == null || args.length == 0) ? "" : ("[" + java.util.Arrays.stream(args).map(String::valueOf).reduce((a, b) -> a + "," + b).orElse("") + "]");
       var loc = (locale == null) ? "null" : locale.toLanguageTag();
       return code + argsStr + "@" + loc;
     }
@@ -59,7 +59,7 @@ class MessageServiceTest {
     var ms = new MessageService(new StubMessageSource());
 
     LocaleContextHolder.setLocale(Locale.GERMANY);
-    assertEquals("hello[John,3]@de-DE", ms.getMessage("hello", new Object[]{"John", 3}));
+    assertEquals("hello[John,3]@de-DE", ms.getMessage("hello", new Object[] {"John", 3}));
   }
 
   @Test
@@ -68,6 +68,6 @@ class MessageServiceTest {
 
     LocaleContextHolder.setLocale(Locale.JAPAN);
     assertEquals("key@en-GB", ms.getMessage("key", Locale.UK));
-    assertEquals("key[1]@en-GB", ms.getMessage("key", new Object[]{1}, Locale.UK));
+    assertEquals("key[1]@en-GB", ms.getMessage("key", new Object[] {1}, Locale.UK));
   }
 }

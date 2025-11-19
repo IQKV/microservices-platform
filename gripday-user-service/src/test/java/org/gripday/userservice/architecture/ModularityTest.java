@@ -40,14 +40,14 @@ class ModularityTest {
     // Verify that module dependencies follow architectural rules
     modules.forEach(module -> {
       var dependencies = module.getDependencies(modules);
-      
+
       // Shared module should not depend on specific domain modules
       if (module.getName().equals("shared")) {
         Assertions.assertThat(dependencies.stream().noneMatch(dep -> {
           var name = dep.getTargetModule().getName();
           return name.equals("authentication") || name.equals("registration") || name.equals("usermanagement")
-              || name.equals("organization") || name.equals("passwordmanagement") || name.equals("emailverification")
-              || name.equals("tenancy");
+                 || name.equals("organization") || name.equals("passwordmanagement") || name.equals("emailverification")
+                 || name.equals("tenancy");
         })).isTrue();
       }
     });
@@ -77,7 +77,7 @@ class ModularityTest {
   void verifyDomainModulesAreIndependent() {
     // Verify domain modules are independent of each other
     var domainModules = java.util.List.of(
-        "authentication", "registration", "usermanagement", 
+        "authentication", "registration", "usermanagement",
         "organization", "passwordmanagement", "emailverification", "tenancy"
     );
 
@@ -85,7 +85,7 @@ class ModularityTest {
         .filter(module -> domainModules.contains(module.getName()))
         .forEach(module -> {
           var dependencies = module.getDependencies(modules);
-          
+
           // Domain modules should only depend on shared, security, config, or infrastructure
           dependencies.stream().forEach(dep -> {
             org.assertj.core.api.Assertions.assertThat(dep.getTargetModule().getName())

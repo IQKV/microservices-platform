@@ -1,158 +1,158 @@
 # Test configuration for User Service
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+spring :
+  datasource :
+    url : jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username : sa
+    password :
+    driver-class-name : org.h2.Driver
   
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    database-platform: org.hibernate.dialect.H2Dialect
-    properties:
-      hibernate:
-        format_sql: false
+  jpa :
+    hibernate :
+      ddl-auto : create-drop
+    show-sql : true
+    database-platform : org.hibernate.dialect.H2Dialect
+    properties :
+      hibernate :
+        format_sql : true
   
-  liquibase:
-    enabled: false
+  liquibase :
+    enabled : false
   
-  data:
-    redis:
-      repositories:
-        enabled: false
+  data :
+    redis :
+      repositories :
+        enabled : false
   
-  session:
-    store-type: none
+  session :
+    store-type : none
   
-  cache:
-    type: none
+  cache :
+    type : none
   
-  redis:
-    cache:
-      enabled: false
+  redis :
+    cache :
+      enabled : false
   
-  mail:
-    host: localhost
-    port: 1025
+  mail :
+    host : localhost
+    port : 1025
 
 # Gripday test configuration
-gripday:
-  database:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: "test-password"
-    pool:
-      maximum-size: 5
-      minimum-idle: 1
-      connection-timeout: PT30S
-      idle-timeout: PT10M
-      max-lifetime: PT30M
-    migration:
-      enabled: false
-      contexts: test
-      validate-on-migrate: false
+gripday :
+  database :
+    url : jdbc:h2:mem:testdb
+    username : sa
+    password : "test-password"
+    pool :
+      maximum-size : 5
+      minimum-idle : 1
+      connection-timeout : PT30S
+      idle-timeout : PT10M
+      max-lifetime : PT30M
+    migration :
+      enabled : false
+      contexts : test
+      validate-on-migrate : false
 
-  auth:
-    jwt:
-      secret-key: test-secret-key-for-testing-must-be-at-least-256-bits-long-to-work-properly
-      access-token-expiry: PT15M
-      refresh-token-expiry: P7D
-      issuer: test-issuer
-      audience: test-audience
-      algorithm: HS256
-    security:
-      password:
-        encoder-strength: 4
-        require-special-chars: false
-        min-length: 8
-      rate-limiting:
-        login-attempts: 5
-        lockout-duration: PT15M
-      session:
-        timeout: PT30M
-        concurrent-sessions: 1
-    oauth2:
-      enabled: false
-      providers: {}
+  auth :
+    jwt :
+      secret-key : test-secret-key-for-testing-must-be-at-least-256-bits-long-to-work-properly
+      access-token-expiry : PT15M
+      refresh-token-expiry : P7D
+      issuer : test-issuer
+      audience : test-audience
+      algorithm : HS256
+    security :
+      password :
+        encoder-strength : 4
+        require-special-chars : false
+        min-length : 8
+      rate-limiting :
+        login-attempts : 5
+        lockout-duration : PT15M
+      session :
+        timeout : PT30M
+        concurrent-sessions : 1
+    oauth2 :
+      enabled : false
+      providers : { }
 
-  cache:
-    redis:
-      host: localhost
-      port: 6379
-      password: "test-password"
-      database: 15
-      timeout: PT5S
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 1
-        max-wait: PT30S
-      key-prefix: "test:auth:"
-      default-ttl: PT1H
-      enable-statistics: false
+  cache :
+    redis :
+      host : localhost
+      port : 6379
+      password : "test-password"
+      database : 15
+      timeout : PT5S
+      pool :
+        max-active : 8
+        max-idle : 8
+        min-idle : 1
+        max-wait : PT30S
+      key-prefix : "test:auth:"
+      default-ttl : PT1H
+      enable-statistics : false
 
-  email:
-    smtp:
-      host: localhost
-      port: 587
-      username: test-user
-      password: test-password
-      auth: true
-      starttls: true
-      timeout: PT30S
-    sender:
-      from-email: noreply@gripday.com
-      from-name: Gripday Platform
-      base-url: https://test.gripday.site
-    verification:
-      token-expiry: PT24H
-      rate-limit: 3
-    templates:
-      verification-subject: "Verify your Gripday account"
-      verification-template: "email/user-registration/email-verification.html"
-      password-reset-subject: "Reset your Gripday password"
-      password-reset-template: "email/password-reset/initiate.html"
-      registration-confirmed-subject: "Welcome to Gripday - Email Verified!"
-      registration-confirmed-template: "email/user-registration/email-confirmed.html"
+  email :
+    smtp :
+      host : localhost
+      port : 587
+      username : test-user
+      password : test-password
+      auth : true
+      starttls : true
+      timeout : PT30S
+    sender :
+      from-email : noreply@gripday.com
+      from-name : Gripday Platform
+      base-url : https://test.gripday.site
+    verification :
+      token-expiry : PT24H
+      rate-limit : 3
+    templates :
+      verification-subject : "Verify your Gripday account"
+      verification-template : "email/user-registration/email-verification.html"
+      password-reset-subject : "Reset your Gripday password"
+      password-reset-template : "email/password-reset/initiate.html"
+      registration-confirmed-subject : "Welcome to Gripday - Email Verified!"
+      registration-confirmed-template : "email/user-registration/email-confirmed.html"
 
-  observability:
-    tracing:
-      enabled: false
-      service-name: test-user-service
-      sampling-rate: 0.0
-      endpoint: http://localhost:4318/v1/traces
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 512
-    metrics:
-      enabled: false
-      path: /actuator/prometheus
-      prefix: gripday_user
-      include-host-tag: false
-      include-application-tag: false
-      include-environment-tag: false
-      custom-tags: {}
-    logging:
-      level: DEBUG
-      format: console
-      include-correlation-id: true
-      include-trace-id: false
-      include-span-id: false
-      include-user-id: false
-      include-tenant-id: false
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
-      enable-sql-logging: false
-      enable-security-events: false
-      enable-performance-logging: false
+  observability :
+    tracing :
+      enabled : false
+      service-name : test-user-service
+      sampling-rate : 0.0
+      endpoint : http://localhost:4318/v1/traces
+      timeout : PT10S
+      export-timeout : PT30S
+      batch-size : 512
+    metrics :
+      enabled : false
+      path : /actuator/prometheus
+      prefix : gripday_user
+      include-host-tag : false
+      include-application-tag : false
+      include-environment-tag : false
+      custom-tags : { }
+    logging :
+      level : DEBUG
+      format : console
+      include-correlation-id : true
+      include-trace-id : false
+      include-span-id : false
+      include-user-id : false
+      include-tenant-id : false
+      correlation-id-header : X-Correlation-ID
+      request-id-header : X-Request-ID
+      tenant-id-header : X-Tenant-ID
+      enable-sql-logging : false
+      enable-security-events : false
+      enable-performance-logging : false
 
-logging:
-  level:
-    org.gripday.userservice: DEBUG
-    org.springframework.security: WARN
-    org.hibernate.SQL: DEBUG
-    liquibase: WARN
-    root: WARN
+logging :
+  level :
+    org.gripday.userservice : DEBUG
+    org.springframework.security : WARN
+    org.hibernate.SQL : DEBUG
+    liquibase : WARN
+    root : WARN

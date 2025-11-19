@@ -54,7 +54,7 @@ class ForgotPasswordRequestTest {
 
   @Test
   void shouldAcceptValidEmailFormats() {
-    var validEmails = new String[]{
+    var validEmails = new String[] {
         "user@example.com",
         "user.name@example.com",
         "user+tag@example.co.uk",
@@ -62,7 +62,7 @@ class ForgotPasswordRequestTest {
         "123@example.com"
     };
 
-    for (var email : validEmails) {
+    for (final var email : validEmails) {
       var request = new ForgotPasswordRequest(email);
       Set<ConstraintViolation<ForgotPasswordRequest>> violations = validator.validate(request);
       assertTrue(violations.isEmpty(), "Email should be valid: " + email);
@@ -71,14 +71,14 @@ class ForgotPasswordRequestTest {
 
   @Test
   void shouldRejectInvalidEmailFormats() {
-    var invalidEmails = new String[]{
+    var invalidEmails = new String[] {
         "invalid",
         "@example.com",
         "user@",
         "user @example.com"
     };
 
-    for (var email : invalidEmails) {
+    for (final var email : invalidEmails) {
       var request = new ForgotPasswordRequest(email);
       Set<ConstraintViolation<ForgotPasswordRequest>> violations = validator.validate(request);
       assertFalse(violations.isEmpty(), "Email should be invalid: " + email);

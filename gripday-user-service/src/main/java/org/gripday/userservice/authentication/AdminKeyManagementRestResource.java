@@ -1,11 +1,10 @@
-package org.gripday.userservice.security;
+package org.gripday.userservice.authentication;
 
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.gripday.userservice.authentication.JwtKeyManagementService;
 import org.gripday.userservice.config.TokenCleanupService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

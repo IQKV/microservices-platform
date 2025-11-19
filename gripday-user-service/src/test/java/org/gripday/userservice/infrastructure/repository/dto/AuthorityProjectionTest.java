@@ -174,9 +174,9 @@ class AuthorityProjectionTest {
 
   @Test
   void shouldIdentifyDefaultAuthority() {
-    var authorities = new String[]{"USER", "BASIC_USER", "STANDARD_USER"};
+    var authorities = new String[] {"USER", "BASIC_USER", "STANDARD_USER"};
 
-    for (var authority : authorities) {
+    for (final var authority : authorities) {
       var projection = new AuthorityProjection(
           1L,
           authority,

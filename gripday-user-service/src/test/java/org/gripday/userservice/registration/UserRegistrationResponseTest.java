@@ -160,14 +160,14 @@ class UserRegistrationResponseTest {
   @Test
   void shouldHandleVariousMessages() {
     var createdAt = LocalDateTime.now();
-    var messages = new String[]{
+    var messages = new String[] {
         "User registered successfully. Please verify your email.",
         "Registration complete. Check your inbox for verification link.",
         "Welcome! Please verify your email to activate your account.",
         "Account created. Verification email sent."
     };
 
-    for (var message : messages) {
+    for (final var message : messages) {
       var response = new UserRegistrationResponse(
           1L,
           "john_doe",

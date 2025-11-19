@@ -25,4 +25,5 @@
  * @see com.tngtech.archunit.junit.AnalyzeClasses
  * @see org.springframework.modulith.core.ApplicationModules
  */
+
 package org.gripday.userservice.architecture;

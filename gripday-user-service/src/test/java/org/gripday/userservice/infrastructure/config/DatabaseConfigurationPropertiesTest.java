@@ -1,12 +1,12 @@
 package org.gripday.userservice.infrastructure.config;
 
+import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.Duration;
 import java.util.Set;
@@ -20,7 +20,7 @@ class DatabaseConfigurationPropertiesTest {
 
   @BeforeAll
   static void setUp() {
-    validator = Validation.buildDefaultValidatorFactory().getValidator();
+    validator = buildDefaultValidatorFactory().getValidator();
   }
 
   @Test
@@ -219,14 +219,14 @@ class DatabaseConfigurationPropertiesTest {
     var pool = createValidPoolProperties();
     var migration = createValidMigrationProperties();
 
-    var urls = new String[]{
+    var urls = new String[] {
         "jdbc:postgresql://localhost:5432/db",
         "jdbc:mysql://localhost:3306/db",
         "jdbc:h2:mem:testdb",
         "jdbc:oracle:thin:@localhost:1521:db"
     };
 
-    for (var url : urls) {
+    for (final var url : urls) {
       var config = new DatabaseConfigurationProperties(url, "user", "pass", pool, migration);
       assertEquals(url, config.url());
     }

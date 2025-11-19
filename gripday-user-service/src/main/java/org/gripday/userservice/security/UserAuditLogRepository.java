@@ -1,6 +1,6 @@
 package org.gripday.userservice.security;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -80,8 +80,8 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
       ORDER BY al.createdAt DESC
       """)
   Page<UserAuditLog> findByTenantIdAndDateRange(@Param("tenantId") String tenantId,
-      @Param("startDate") LocalDateTime startDate,
-      @Param("endDate") LocalDateTime endDate,
+      @Param("startDate") Instant startDate,
+      @Param("endDate") Instant endDate,
       Pageable pageable);
 
   /**
@@ -120,7 +120,7 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
       """)
   List<UserAuditLog> findFailedLoginAttempts(@Param("userId") Long userId,
       @Param("tenantId") String tenantId,
-      @Param("since") LocalDateTime since);
+      @Param("since") Instant since);
 
   /**
    * Count audit logs by action type for a tenant.
@@ -177,5 +177,5 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
         AND al.createdAt < :beforeDate
       """)
   int deleteOldAuditLogs(@Param("tenantId") String tenantId,
-      @Param("beforeDate") LocalDateTime beforeDate);
+      @Param("beforeDate") Instant beforeDate);
 }

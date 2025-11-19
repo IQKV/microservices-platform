@@ -306,14 +306,14 @@ class CreateOrganizationRequestTest {
 
   @Test
   void shouldAcceptVariousPhoneFormats() {
-    var phoneFormats = new String[]{
+    var phoneFormats = new String[] {
         "+1-555-0100",
         "(555) 123-4567",
         "555.123.4567",
         "+44 20 7946 0958"
     };
 
-    for (var phone : phoneFormats) {
+    for (final var phone : phoneFormats) {
       var request = new CreateOrganizationRequest(
           "Acme Corp",
           null,
@@ -332,14 +332,14 @@ class CreateOrganizationRequestTest {
 
   @Test
   void shouldAcceptVariousWebsiteFormats() {
-    var websiteFormats = new String[]{
+    var websiteFormats = new String[] {
         "https://acme.com",
         "http://www.acme.com",
         "www.acme.com",
         "acme.com"
     };
 
-    for (var website : websiteFormats) {
+    for (final var website : websiteFormats) {
       var request = new CreateOrganizationRequest(
           "Acme Corp",
           null,
