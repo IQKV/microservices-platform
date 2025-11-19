@@ -20,12 +20,12 @@ class MessageServiceTest {
     }
 
     @Override
-    public String getMessage(@NotNull String code, Object[] args, Locale locale) {
+    public @NotNull String getMessage(@NotNull String code, Object[] args, Locale locale) {
       return format(code, args, locale);
     }
 
     @Override
-    public String getMessage(MessageSourceResolvable resolvable, Locale locale) {
+    public @NotNull String getMessage(MessageSourceResolvable resolvable, Locale locale) {
       String code = (resolvable.getCodes() != null && resolvable.getCodes().length > 0)
           ? resolvable.getCodes()[0]
           : "unknown";
