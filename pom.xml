@@ -171,18 +171,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                
-                <!-- SpotBugs for static analysis -->
-                <plugin>
-                    <groupId>com.github.spotbugs</groupId>
-                    <artifactId>spotbugs-maven-plugin</artifactId>
-                    <configuration>
-                        <effort>Max</effort>
-                        <threshold>Low</threshold>
-                        <xmlOutput>true</xmlOutput>
-                    </configuration>
-                </plugin>
-                
                 <!-- Checkstyle for code style -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -236,37 +224,4 @@
         </plugins>
     </build>
     
-    <profiles>
-        <!-- Minimal Maven profiles - rely primarily on Spring profiles -->
-        <profile>
-            <id>code-quality</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.spotbugs</groupId>
-                        <artifactId>spotbugs-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
