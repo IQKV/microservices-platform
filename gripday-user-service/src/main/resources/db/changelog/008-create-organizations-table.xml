@@ -106,6 +106,10 @@
             <column name="enabled"/>
         </createIndex>
 
+        <createIndex indexName="idx_organizations_created_at" tableName="organizations">
+            <column name="created_at"/>
+        </createIndex>
+
         <createIndex indexName="idx_users_organization_id" tableName="users">
             <column name="organization_id"/>
         </createIndex>
@@ -114,7 +118,27 @@
             <dropIndex indexName="idx_organizations_tenant_id" tableName="organizations"/>
             <dropIndex indexName="idx_organizations_name" tableName="organizations"/>
             <dropIndex indexName="idx_organizations_enabled" tableName="organizations"/>
+            <dropIndex indexName="idx_organizations_created_at" tableName="organizations"/>
             <dropIndex indexName="idx_users_organization_id" tableName="users"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="11" author="gripday">
+        <comment>Enforce per-tenant organization name uniqueness and one-to-one user organization relation</comment>
+
+        <addUniqueConstraint 
+                tableName="organizations" 
+                columnNames="tenant_id, name" 
+                constraintName="uq_organizations_tenant_name"/>
+
+        <addUniqueConstraint 
+                tableName="users" 
+                columnNames="organization_id" 
+                constraintName="uq_users_organization_id"/>
+
+        <rollback>
+            <dropUniqueConstraint tableName="organizations" constraintName="uq_organizations_tenant_name"/>
+            <dropUniqueConstraint tableName="users" constraintName="uq_users_organization_id"/>
         </rollback>
     </changeSet>
 </databaseChangeLog>

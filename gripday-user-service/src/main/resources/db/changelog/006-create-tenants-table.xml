@@ -3,13 +3,13 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <changeSet id="6.1" author="gripday">
         <comment>Create tenants table for multi-tenant architecture support</comment>
 
         <createTable tableName="tenants">
-            <column name="id" type="BIGSERIAL">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
@@ -106,29 +106,42 @@
     <changeSet id="6.4" author="gripday">
         <comment>Add check constraints for tenant configuration validation</comment>
 
-        <sql>
-            ALTER TABLE tenants
-                ADD CONSTRAINT chk_tenants_max_users_positive
-                    CHECK (max_users IS NULL OR max_users > 0);
-        </sql>
+        <addCheckConstraint tableName="tenants"
+                            constraintName="chk_tenants_max_users_non_negative"
+                            checkConstraint="max_users IS NULL OR max_users >= 0"/>
 
-        <sql>
-            ALTER TABLE tenants
-                ADD CONSTRAINT chk_tenants_storage_quota_positive
-                    CHECK (storage_quota_gb IS NULL OR storage_quota_gb > 0);
-        </sql>
+        <addCheckConstraint tableName="tenants"
+                            constraintName="chk_tenants_storage_quota_non_negative"
+                            checkConstraint="storage_quota_gb IS NULL OR storage_quota_gb >= 0"/>
 
-        <sql>
-            ALTER TABLE tenants
-                ADD CONSTRAINT chk_tenants_rate_limit_positive
-                    CHECK (api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute > 0);
-        </sql>
+        <addCheckConstraint tableName="tenants"
+                            constraintName="chk_tenants_rate_limit_non_negative"
+                            checkConstraint="api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute >= 0"/>
+    </changeSet>
 
+    <changeSet id="6.5" author="gripday">
+        <comment>Tenant ID format validation (PostgreSQL only)</comment>
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
         <sql>
             ALTER TABLE tenants
                 ADD CONSTRAINT chk_tenants_tenant_id_format
                     CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH (tenant_id) >= 3);
         </sql>
+        <rollback>
+            <sql>ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_tenant_id_format;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="6.6" author="gripday">
+        <comment>Add updated_at index for tenants</comment>
+        <createIndex indexName="idx_tenants_updated_at" tableName="tenants">
+            <column name="updated_at"/>
+        </createIndex>
+        <rollback>
+            <dropIndex indexName="idx_tenants_updated_at" tableName="tenants"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
