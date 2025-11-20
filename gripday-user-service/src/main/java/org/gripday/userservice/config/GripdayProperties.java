@@ -265,8 +265,13 @@ public record GripdayProperties(
      * Default is the fallback schema when no tenant context is set (typically 'public').
      */
     public record Schema(
-        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "Schema prefix must start with lowercase letter and contain only lowercase letters, numbers, and underscores") String prefix,
-        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "Default schema must start with lowercase letter and contain only lowercase letters, numbers, and underscores") @Name("default") String defaultSchema
+        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$",
+                           message = "Schema prefix must start with lowercase letter"
+                                     + " and contain only lowercase letters, numbers, and underscores") String prefix,
+        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$",
+                           message = "Default schema must start with lowercase letter"
+                                     + " and contain only lowercase letters, numbers, and underscores")
+        @Name("default") String defaultSchema
     ) {
 
     }
@@ -278,8 +283,12 @@ public record GripdayProperties(
    * Tenant changelog runs per-tenant schema during tenant provisioning.
    */
   public record Liquibase(
-      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$", message = "System changelog must be a classpath XML file") String systemChangeLog,
-      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$", message = "Tenant changelog must be a classpath XML file") String tenantChangeLog
+      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$",
+                         message = "System changelog must be a classpath XML file")
+      String systemChangeLog,
+      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$",
+                         message = "Tenant changelog must be a classpath XML file")
+      String tenantChangeLog
   ) {
 
   }

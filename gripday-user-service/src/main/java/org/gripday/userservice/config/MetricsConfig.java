@@ -13,12 +13,12 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 @EnableConfigurationProperties(GripdayProperties.class)
-public class MetricsConfiguration {
+public class MetricsConfig {
 
   private final GripdayProperties.Observability observabilityProperties;
   private final Environment environment;
 
-  public MetricsConfiguration(final GripdayProperties gripdayProperties, final Environment environment) {
+  public MetricsConfig(final GripdayProperties gripdayProperties, final Environment environment) {
     this.observabilityProperties = gripdayProperties.observability();
     this.environment = environment;
   }
