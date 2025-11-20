@@ -128,8 +128,8 @@ public class ResponseTransformationFilter extends AbstractGatewayFilterFactory<R
     var path = MDC.get("requestPath");
     if (path != null) {
       return path.contains("/auth/")
-          || path.contains("/users/")
-          || path.contains("/admin/");
+             || path.contains("/users/")
+             || path.contains("/admin/");
     }
     return false;
   }

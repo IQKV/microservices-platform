@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Dynamic configuration for OpenAPI documentation routes.
- * 
+ * <p>
  * Automatically creates gateway routes for Swagger UI and OpenAPI JSON endpoints
  * for all enabled downstream services based on configuration.
  */
@@ -26,7 +26,7 @@ public class DynamicOpenApiRoutesConfiguration {
 
   /**
    * Creates dynamic routes for OpenAPI documentation endpoints.
-   * 
+   * <p>
    * For each enabled service with OpenAPI enabled, creates two routes:
    * 1. Swagger UI route: /{service-name}/swagger-ui/** -> /swagger-ui/**
    * 2. API Docs route: /{service-name}/api-docs/** -> /api-docs/**
@@ -64,7 +64,7 @@ public class DynamicOpenApiRoutesConfiguration {
       }
 
       var serviceUri = serviceConfig.uri();
-      
+
       // Create Swagger UI route
       var swaggerUiRouteId = serviceName + "-swagger-ui";
       var swaggerUiPath = "/" + contextPath + "/swagger-ui";

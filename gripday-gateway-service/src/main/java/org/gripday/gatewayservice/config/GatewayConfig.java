@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Gateway configuration class.
- * 
+ * <p>
  * Route definitions are configured in application.yml for clarity and maintainability.
  * This class can be used for additional gateway-related beans and configuration if needed.
- * 
+ * <p>
  * All routing, filtering, rate limiting, and security configurations are managed
  * through application.yml and the respective filter/security configuration classes.
  */
@@ -31,11 +31,11 @@ public class GatewayConfig {
   private void logGatewayConfiguration() {
     var routing = gripdayProperties.gateway().routing();
     var services = routing.services();
-    
+
     logger.info("Gateway Configuration:");
     logger.info("  API Prefix: {}", routing.apiPrefix().prefix());
     logger.info("  Strip Count: {}", routing.apiPrefix().stripCount());
-    
+
     services.forEach((name, config) -> {
       if (config.enabled()) {
         logger.info("  Service '{}' enabled: {} -> {}", name, config.path(), config.uri());
@@ -43,7 +43,7 @@ public class GatewayConfig {
         logger.info("  Service '{}' disabled", name);
       }
     });
-    
+
     logger.info("  Rate Limiting: {}", gripdayProperties.gateway().rateLimiting().enabled() ? "enabled" : "disabled");
     logger.info("  Circuit Breaker: {}", gripdayProperties.gateway().circuitBreaker().enabled() ? "enabled" : "disabled");
     logger.info("  CORS: {}", gripdayProperties.gateway().cors().enabled() ? "enabled" : "disabled");

@@ -33,15 +33,15 @@ public class ApiPrefixConfigurationLogger {
     logger.info("Prefix: '{}'", apiPrefixService.getPrefix());
     logger.info("Strip Count: {}", apiPrefixService.getStripCount());
     logger.info("-".repeat(80));
-    
+
     if (apiPrefixService.isEnabled()) {
       var exampleServicePath = "/v1/auth/login";
       var fullPath = apiPrefixService.buildFullPath(exampleServicePath);
-      
+
       logger.info("Example Route Configuration:");
       logger.info("  Service Path: {}", exampleServicePath);
       logger.info("  Full Path: {}", fullPath);
-      
+
       if (apiPrefixService.getStripCount() > 0) {
         var strippedPath = apiPrefixService.stripPrefix(fullPath);
         logger.info("  Backend Receives: {}", strippedPath);
@@ -51,7 +51,7 @@ public class ApiPrefixConfigurationLogger {
     } else {
       logger.info("API prefix handling is disabled");
     }
-    
+
     logger.info("-".repeat(80));
     logServiceRoutes();
     logger.info("=".repeat(80));
@@ -59,7 +59,7 @@ public class ApiPrefixConfigurationLogger {
 
   private void logServiceRoutes() {
     logger.info("Configured Service Routes:");
-    
+
     var services = gripdayProperties.gateway().routing().services();
     if (services != null && !services.isEmpty()) {
       services.forEach((serviceName, serviceConfig) -> {

@@ -1,94 +1,94 @@
 # Production Environment Configuration
 # This configuration is optimized for production with minimal logging and maximum security
 
-server:
-  port: 8080
+server :
+  port : 8080
 
-spring:
+spring :
   # Redis Configuration - Production Redis
-  data:
-    redis:
-      host: ${GRIPDAY_CACHE_REDIS_HOST}
-      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
-      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
-          max-wait: -1ms
+  data :
+    redis :
+      host : ${GRIPDAY_CACHE_REDIS_HOST}
+      port : ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password : ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database : ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout : 2000ms
+      lettuce :
+        pool :
+          max-active : 32
+          max-idle : 16
+          min-idle : 4
+          max-wait : -1ms
 
   # Cloud Gateway Configuration - Production
   # Note: Routes are defined in main application.yml
   # Environment-specific overrides only
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: false
+  cloud :
+    gateway :
+      discovery :
+        locator :
+          enabled : false
 
 # Gripday Gateway Configuration - Production Environment
-gripday:
+gripday :
   # Cache Configuration - Redis
-  cache:
-    redis:
-      host: ${GRIPDAY_CACHE_REDIS_HOST}
-      port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
-      password: ${GRIPDAY_CACHE_REDIS_PASSWORD}
-      database: ${GRIPDAY_CACHE_REDIS_DATABASE:0}
-      timeout: PT2S
-      pool:
-        max-active: 32
-        max-idle: 16
-        min-idle: 4
-        max-wait: PT-1S
-      key-prefix: "gripday:gateway:production"
-      default-ttl: PT15M
-      enable-statistics: false
+  cache :
+    redis :
+      host : ${GRIPDAY_CACHE_REDIS_HOST}
+      port : ${GRIPDAY_CACHE_REDIS_PORT:6379}
+      password : ${GRIPDAY_CACHE_REDIS_PASSWORD}
+      database : ${GRIPDAY_CACHE_REDIS_DATABASE:0}
+      timeout : PT2S
+      pool :
+        max-active : 32
+        max-idle : 16
+        min-idle : 4
+        max-wait : PT-1S
+      key-prefix : "gripday:gateway:production"
+      default-ttl : PT15M
+      enable-statistics : false
 
   # Gateway Configuration
-  gateway:
-    routing:
+  gateway :
+    routing :
       # API prefix configuration - strip /api prefix in production (deployed on api.gripday.com)
-      api-prefix:
-        enabled: true
-        prefix: ""  # No prefix in production (api.gripday.com already indicates API)
-        strip-count: 0  # No stripping needed when prefix is empty
-      services:
-        user-service:
-          uri: ${GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-        bookstore-service:
-          uri: ${GRIPDAY_GATEWAY_ROUTING_BOOKSTORE_SERVICE_URI}
-          path: /v1/bookstore/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-      enable-service-discovery: false
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: true
-        health-check-interval: PT30S
+      api-prefix :
+        enabled : true
+        prefix : ""  # No prefix in production (api.gripday.com already indicates API)
+        strip-count : 0  # No stripping needed when prefix is empty
+      services :
+        user-service :
+          uri : ${GRIPDAY_GATEWAY_ROUTING_USER_SERVICE_URI}
+          path : /v1/**
+          enabled : true
+          connect-timeout : 5000
+          response-timeout : 30000
+        bookstore-service :
+          uri : ${GRIPDAY_GATEWAY_ROUTING_BOOKSTORE_SERVICE_URI}
+          path : /v1/bookstore/**
+          enabled : true
+          connect-timeout : 5000
+          response-timeout : 30000
+      enable-service-discovery : false
+      load-balancing :
+        strategy : round-robin
+        enable-health-check : true
+        health-check-interval : PT30S
     
-    security:
-      jwt:
-        access-token-expiry: PT15M
-        refresh-token-expiry: P7D
-        issuer: gripday-user-service
-        audience: gripday-services
-        algorithm: RS256
-        jwk-set-uri: ${USER_SERVICE_JWK_URI}
-      authentication:
-        enabled: true
-        user-service-url: ${GRIPDAY_GATEWAY_SECURITY_USER_SERVICE_URL}
-        token-validation-timeout: PT5S
-        enable-user-context-propagation: true
-      public-paths:
+    security :
+      jwt :
+        access-token-expiry : PT15M
+        refresh-token-expiry : P7D
+        issuer : gripday-user-service
+        audience : gripday-services
+        algorithm : RS256
+        jwk-set-uri : ${USER_SERVICE_JWK_URI}
+      authentication :
+        enabled : true
+        user-service-url : ${GRIPDAY_GATEWAY_SECURITY_USER_SERVICE_URL}
+        token-validation-timeout : PT5S
+        enable-user-context-propagation : true
+      public-paths :
         # JWK endpoint for public key distribution
         - /.well-known/jwks.json
         
@@ -131,206 +131,206 @@ gripday:
         # Actuator endpoints (public health checks)
         - /actuator/health
     
-    rate-limiting:
-      enabled: true
-      redis:
-        key-prefix: "gripday:gateway:rate-limit:production"
-        key-expiry: PT1M
-      policies:
-        default-requests-per-minute: 60
-        default-burst-capacity: 100
-        endpoints:
-          "/api/v1/auth/login":
-            requests-per-minute: 10
-            burst-capacity: 20
-            enable-tenant-quotas: true
-          "/api/v1/auth/signup":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/auth/email/resend":
-            requests-per-minute: 3
-            burst-capacity: 5
-            enable-tenant-quotas: true
-          "/api/v1/auth/email/verify":
-            requests-per-minute: 10
-            burst-capacity: 15
-            enable-tenant-quotas: true
-          "/api/v1/auth/password/forgot":
-            requests-per-minute: 3
-            burst-capacity: 5
-            enable-tenant-quotas: true
-          "/api/v1/auth/password/reset":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/users/me":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/users/me/password":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/admin/users/**":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/admin/organizations/**":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/admin/tenants/**":
-            requests-per-minute: 50
-            burst-capacity: 75
-            enable-tenant-quotas: true
-          "/api/v1/bookstore/books":
-            requests-per-minute: 100
-            burst-capacity: 200
-            enable-tenant-quotas: true
-          "/api/v1/bookstore/inventory/**":
-            requests-per-minute: 50
-            burst-capacity: 100
-            enable-tenant-quotas: true
-          "/api/v1/bookstore/admin/books/**":
-            requests-per-minute: 50
-            burst-capacity: 100
-            enable-tenant-quotas: true
-          "/api/v1/bookstore/admin/inventory/**":
-            requests-per-minute: 50
-            burst-capacity: 100
-            enable-tenant-quotas: true
-      tenant-quotas:
-        enabled: true
-        default-tenant-requests-per-minute: 1000
-        tenant-specific-quotas: { }
+    rate-limiting :
+      enabled : true
+      redis :
+        key-prefix : "gripday:gateway:rate-limit:production"
+        key-expiry : PT1M
+      policies :
+        default-requests-per-minute : 60
+        default-burst-capacity : 100
+        endpoints :
+          "/api/v1/auth/login" :
+            requests-per-minute : 10
+            burst-capacity : 20
+            enable-tenant-quotas : true
+          "/api/v1/auth/signup" :
+            requests-per-minute : 5
+            burst-capacity : 10
+            enable-tenant-quotas : true
+          "/api/v1/auth/email/resend" :
+            requests-per-minute : 3
+            burst-capacity : 5
+            enable-tenant-quotas : true
+          "/api/v1/auth/email/verify" :
+            requests-per-minute : 10
+            burst-capacity : 15
+            enable-tenant-quotas : true
+          "/api/v1/auth/password/forgot" :
+            requests-per-minute : 3
+            burst-capacity : 5
+            enable-tenant-quotas : true
+          "/api/v1/auth/password/reset" :
+            requests-per-minute : 5
+            burst-capacity : 10
+            enable-tenant-quotas : true
+          "/api/v1/users/me" :
+            requests-per-minute : 100
+            burst-capacity : 150
+            enable-tenant-quotas : true
+          "/api/v1/users/me/password" :
+            requests-per-minute : 5
+            burst-capacity : 10
+            enable-tenant-quotas : true
+          "/api/v1/admin/users/**" :
+            requests-per-minute : 100
+            burst-capacity : 150
+            enable-tenant-quotas : true
+          "/api/v1/admin/organizations/**" :
+            requests-per-minute : 100
+            burst-capacity : 150
+            enable-tenant-quotas : true
+          "/api/v1/admin/tenants/**" :
+            requests-per-minute : 50
+            burst-capacity : 75
+            enable-tenant-quotas : true
+          "/api/v1/bookstore/books" :
+            requests-per-minute : 100
+            burst-capacity : 200
+            enable-tenant-quotas : true
+          "/api/v1/bookstore/inventory/**" :
+            requests-per-minute : 50
+            burst-capacity : 100
+            enable-tenant-quotas : true
+          "/api/v1/bookstore/admin/books/**" :
+            requests-per-minute : 50
+            burst-capacity : 100
+            enable-tenant-quotas : true
+          "/api/v1/bookstore/admin/inventory/**" :
+            requests-per-minute : 50
+            burst-capacity : 100
+            enable-tenant-quotas : true
+      tenant-quotas :
+        enabled : true
+        default-tenant-requests-per-minute : 1000
+        tenant-specific-quotas : { }
     
-    circuit-breaker:
-      enabled: true
-      failure-rate-threshold: 50
-      slow-call-rate-threshold: 50
-      slow-call-duration-threshold: PT2S
-      minimum-number-of-calls: 10
-      wait-duration-in-open-state: PT30S
-      sliding-window-size: 100
-      sliding-window-type: COUNT_BASED
+    circuit-breaker :
+      enabled : true
+      failure-rate-threshold : 50
+      slow-call-rate-threshold : 50
+      slow-call-duration-threshold : PT2S
+      minimum-number-of-calls : 10
+      wait-duration-in-open-state : PT30S
+      sliding-window-size : 100
+      sliding-window-type : COUNT_BASED
     
-    cors:
-      enabled: true
-      allowed-origins:
+    cors :
+      enabled : true
+      allowed-origins :
         - ${GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS}
-      allowed-methods:
+      allowed-methods :
         - GET
         - POST
         - PUT
         - PATCH
         - DELETE
         - OPTIONS
-      allowed-headers:
+      allowed-headers :
         - "*"
-      allow-credentials: true
-      max-age: 3600
+      allow-credentials : true
+      max-age : 3600
     
-    transformation:
-      request:
-        enabled: true
-        enable-header-enrichment: true
-        enable-user-context-propagation: true
-        enable-tenant-context-propagation: true
-        headers-to-remove:
+    transformation :
+      request :
+        enabled : true
+        enable-header-enrichment : true
+        enable-user-context-propagation : true
+        enable-tenant-context-propagation : true
+        headers-to-remove :
           - Authorization-Internal
           - X-Internal-Token
-        additional-headers:
-          X-Gateway-Version: "1.0.0"
-          X-Environment: "production"
-      response:
-        enabled: true
-        enable-security-headers: true
-        enable-correlation-headers: true
-        remove-internal-headers: true
-        additional-headers-to-remove:
+        additional-headers :
+          X-Gateway-Version : "1.0.0"
+          X-Environment : "production"
+      response :
+        enabled : true
+        enable-security-headers : true
+        enable-correlation-headers : true
+        remove-internal-headers : true
+        additional-headers-to-remove :
           - X-Internal-Service
           - X-Database-Query-Time
 
   # Observability Configuration - Production
-  observability:
-    tracing:
-      enabled: true
-      service-name: ${spring.application.name}
-      sampling-rate: 0.01  # Minimal sampling for production
-      endpoint: ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 1024
-    metrics:
-      enabled: true
-      path: /actuator/prometheus
-      prefix: gripday_gateway
-      include-host-tag: true
-      include-application-tag: true
-      include-environment-tag: true
-      custom-tags:
-        environment: production
-        service: gateway-service
-      enabled-metrics:
+  observability :
+    tracing :
+      enabled : true
+      service-name : ${spring.application.name}
+      sampling-rate : 0.01  # Minimal sampling for production
+      endpoint : ${GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT}
+      timeout : PT10S
+      export-timeout : PT30S
+      batch-size : 1024
+    metrics :
+      enabled : true
+      path : /actuator/prometheus
+      prefix : gripday_gateway
+      include-host-tag : true
+      include-application-tag : true
+      include-environment-tag : true
+      custom-tags :
+        environment : production
+        service : gateway-service
+      enabled-metrics :
         - gateway.requests
         - gateway.response.time
         - gateway.circuit.breaker
         - gateway.rate.limit
-    logging:
-      level: WARN
-      format: json  # JSON format for production
-      enable-request-logging: false  # Disabled for performance
-      enable-response-logging: false
-      enable-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
-      include-user-id: false  # Disabled for privacy in production
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
+    logging :
+      level : WARN
+      format : json  # JSON format for production
+      enable-request-logging : false  # Disabled for performance
+      enable-response-logging : false
+      enable-correlation-id : true
+      include-trace-id : true
+      include-span-id : true
+      include-user-id : false  # Disabled for privacy in production
+      include-tenant-id : true
+      correlation-id-header : X-Correlation-ID
+      request-id-header : X-Request-ID
+      tenant-id-header : X-Tenant-ID
 
 # Logging Configuration - Production
-logging:
-  level:
-    org.gripday: WARN
-    org.springframework.cloud.gateway: ERROR
-    org.springframework.security: ERROR
-    org.springframework.web: ERROR
-    reactor.netty: ERROR
-    io.lettuce: ERROR
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
+logging :
+  level :
+    org.gripday : WARN
+    org.springframework.cloud.gateway : ERROR
+    org.springframework.security : ERROR
+    org.springframework.web : ERROR
+    reactor.netty : ERROR
+    io.lettuce : ERROR
+  pattern :
+    console : "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
 # Management Configuration - Production
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics,prometheus
-  endpoint:
-    health:
-      show-details: never
-    prometheus:
-      access: read_only
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5,0.95,0.99
-  tracing:
-    sampling:
-      probability: 0.01  # Minimal sampling for production
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+management :
+  endpoints :
+    web :
+      exposure :
+        include : health,metrics,prometheus
+  endpoint :
+    health :
+      show-details : never
+    prometheus :
+      access : read_only
+  metrics :
+    distribution :
+      percentiles-histogram :
+        http.server.requests : true
+      percentiles :
+        http.server.requests : 0.5,0.95,0.99
+  tracing :
+    sampling :
+      probability : 0.01  # Minimal sampling for production
+  prometheus :
+    metrics :
+      export :
+        enabled : true
 
 # SpringDoc Configuration - Production
-springdoc:
-  api-docs:
-    enabled: false  # Disabled in production
-  swagger-ui:
-    enabled: false  # Disabled in production
+springdoc :
+  api-docs :
+    enabled : false  # Disabled in production
+  swagger-ui :
+    enabled : false  # Disabled in production

@@ -15,7 +15,8 @@ A centralized entry point for the Gripday microservices platform that handles:
 
 ## Overview
 
-This is the front door to the Gripday microservices ecosystem. Built on Spring Cloud Gateway with reactive programming, it provides a single entry point for all client requests while handling cross-cutting concerns like authentication, rate limiting, and observability.
+This is the front door to the Gripday microservices ecosystem. Built on Spring Cloud Gateway with reactive programming, it provides a single entry point for all client requests while
+handling cross-cutting concerns like authentication, rate limiting, and observability.
 
 ## What It Demonstrates
 
@@ -392,4 +393,5 @@ public ResponseEntity<Map<String, String>> health() {
 
 ---
 
-**Use this as a blueprint** for building reactive API gateways with intelligent routing, distributed rate limiting, circuit breaker patterns, and multi-tenant support in your microservices architecture.
+**Use this as a blueprint** for building reactive API gateways with intelligent routing, distributed rate limiting, circuit breaker patterns, and multi-tenant support in your microservices
+architecture.

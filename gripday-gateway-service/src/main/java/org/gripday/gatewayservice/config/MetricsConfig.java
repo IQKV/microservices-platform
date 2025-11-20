@@ -58,9 +58,9 @@ public class MetricsConfig {
         // Filter out noisy metrics in production
         if ("production".equals(getActiveProfile())) {
           return name.startsWith("jvm.gc.pause")
-              || name.startsWith("process.")
-              || name.startsWith("system.cpu.count")
-              || name.startsWith("reactor.netty.connection.provider");
+                 || name.startsWith("process.")
+                 || name.startsWith("system.cpu.count")
+                 || name.startsWith("reactor.netty.connection.provider");
         }
         return false;
       }));
@@ -69,10 +69,10 @@ public class MetricsConfig {
       registry.config().meterFilter(MeterFilter.accept(id -> {
         var name = id.getName();
         return metricsProps.enabledMetrics().stream()
-            .anyMatch(enabledMetric -> name.contains(enabledMetric))
-            || name.startsWith("gripday.gateway")
-            || name.startsWith("http.server.requests")
-            || name.startsWith("spring.cloud.gateway");
+                   .anyMatch(enabledMetric -> name.contains(enabledMetric))
+               || name.startsWith("gripday.gateway")
+               || name.startsWith("http.server.requests")
+               || name.startsWith("spring.cloud.gateway");
       }));
 
       // Add service tag

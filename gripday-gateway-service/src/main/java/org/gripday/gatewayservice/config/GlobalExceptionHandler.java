@@ -88,10 +88,10 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       return response.writeWith(Mono.just(buffer));
     } catch (final Exception writeEx) {
       var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
-          "  \"title\": \"" + pd.getTitle() + "\",\n" +
-          "  \"status\": " + pd.getStatus() + ",\n" +
-          "  \"detail\": \"" + message + "\",\n" +
-          "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                      "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                      "  \"status\": " + pd.getStatus() + ",\n" +
+                      "  \"detail\": \"" + message + "\",\n" +
+                      "  \"instance\": \"" + request.getPath().value() + "\"\n}")
           .getBytes(StandardCharsets.UTF_8);
       var buffer = response.bufferFactory().wrap(fallback);
       return response.writeWith(Mono.just(buffer));

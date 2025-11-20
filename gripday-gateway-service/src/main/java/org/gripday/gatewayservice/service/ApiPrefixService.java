@@ -69,7 +69,7 @@ public class ApiPrefixService {
 
     var segments = path.split("/");
     var stripCount = Math.min(getStripCount(), segments.length - 1);
-    
+
     if (stripCount <= 0) {
       return path;
     }

@@ -105,7 +105,7 @@ public class ApiVersionExtractor {
    */
   public boolean isSupportedVersion(String version) {
     return StringUtils.hasText(version)
-        && (version.equals("v1") || version.equals("v2"));
+           && (version.equals("v1") || version.equals("v2"));
   }
 
   /**

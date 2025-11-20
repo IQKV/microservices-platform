@@ -39,9 +39,9 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
   private final ObjectMapper objectMapper;
 
   public TenantRateLimitingFilter(final GripdayProperties gripdayProperties,
-      final ReactiveStringRedisTemplate redisTemplate,
-      final TenantQuotaMonitoringService quotaMonitoringService,
-      final ObjectMapper objectMapper) {
+                                  final ReactiveStringRedisTemplate redisTemplate,
+                                  final TenantQuotaMonitoringService quotaMonitoringService,
+                                  final ObjectMapper objectMapper) {
     this.gripdayProperties = gripdayProperties;
     this.redisTemplate = redisTemplate;
     this.quotaMonitoringService = quotaMonitoringService;
@@ -239,10 +239,10 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
       return response.writeWith(Mono.just(buffer));
     } catch (final Exception e) {
       var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
-          "  \"title\": \"" + pd.getTitle() + "\",\n" +
-          "  \"status\": " + pd.getStatus() + ",\n" +
-          "  \"detail\": \"" + message + "\",\n" +
-          "  \"instance\": \"" + request.getPath().value() + "\"\n}")
+                      "  \"title\": \"" + pd.getTitle() + "\",\n" +
+                      "  \"status\": " + pd.getStatus() + ",\n" +
+                      "  \"detail\": \"" + message + "\",\n" +
+                      "  \"instance\": \"" + request.getPath().value() + "\"\n}")
           .getBytes(StandardCharsets.UTF_8);
       var buffer = response.bufferFactory().wrap(fallback);
       return response.writeWith(Mono.just(buffer));

@@ -69,21 +69,21 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
           try {
             // Extract user context from JWT
             var userContext = extractUserContext(jwt);
-            
+
             // Extract tenant context
             var tenantContext = extractTenantContext(request, jwt);
-            
+
             // Add tenant context to MDC for logging
             if (StringUtils.hasText(tenantContext.tenantId())) {
               MDC.put("tenantId", tenantContext.tenantId());
             }
-            
+
             logger.debug("Authenticated user: {} for tenant: {}", userContext.username(), tenantContext.tenantId());
-            
+
             // Propagate user and tenant context to downstream services
             var modifiedRequest = propagateContextHeaders(request, userContext, tenantContext, correlationId);
             var modifiedExchange = exchange.mutate().request(modifiedRequest).build();
-            
+
             return chain.filter(modifiedExchange);
           } finally {
             // Clean up MDC
@@ -112,14 +112,14 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private UserContext extractUserContext(Jwt jwt) {
     var claims = jwt.getClaims();
-    
-    var userId = extractLong(claims.get("userId"));
+
+    var userId = extractLong(claims.get(JwtClaimNames.USER_ID));
     var username = jwt.getSubject();
-    var email = extractString(claims.get("email"));
-    var roles = extractStringList(claims.get("roles"));
-    var permissions = extractStringList(claims.get("permissions"));
-    var department = extractString(claims.get("department"));
-    var organizationId = extractString(claims.get("organizationId"));
+    var email = extractString(claims.get(JwtClaimNames.EMAIL));
+    var roles = extractStringList(claims.get(JwtClaimNames.ROLES));
+    var permissions = extractStringList(claims.get(JwtClaimNames.PERMISSIONS));
+    var department = extractString(claims.get(JwtClaimNames.DEPARTMENT));
+    var organizationId = extractString(claims.get(JwtClaimNames.ORGANIZATION_ID));
 
     return new UserContext(
         userId,
@@ -137,7 +137,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     var tenantId = request.getHeaders().getFirst(X_TENANT_ID_HEADER);
 
     if (!StringUtils.hasText(tenantId)) {
-      tenantId = extractString(jwt.getClaims().get("tenantId"));
+      tenantId = extractString(jwt.getClaims().get(JwtClaimNames.TENANT_ID));
     }
 
     if (!StringUtils.hasText(tenantId)) {
@@ -215,7 +215,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
       if (!userContext.roles().isEmpty()) {
         builder.header(X_USER_ROLES_HEADER, String.join(",", userContext.roles()));
       }
-      
+
       logger.debug("User context propagated for user: {}", userContext.username());
     } else {
       logger.debug("User context propagation is disabled");

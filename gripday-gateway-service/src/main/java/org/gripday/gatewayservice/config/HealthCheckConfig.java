@@ -31,7 +31,7 @@ public class HealthCheckConfig {
    */
   @Bean
   public ReactiveHealthIndicator userServiceHealthIndicator(WebClient.Builder webClientBuilder,
-      GripdayProperties gripdayProperties) {
+                                                            GripdayProperties gripdayProperties) {
     return new UserServiceHealthIndicator(webClientBuilder, gripdayProperties);
   }
 

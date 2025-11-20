@@ -79,7 +79,7 @@ public record GripdayProperties(
       /**
        * API prefix configuration for environment-specific routing.
        * Allows configuring /api prefix in development/staging and clean URLs in production.
-       * 
+       * <p>
        * Example configurations:
        * - Development/Staging: enabled=true, prefix="/api", stripCount=0 (keep /api in URLs)
        * - Production: enabled=true, prefix="", stripCount=0 (no prefix, deployed on api.gripday.com)
@@ -108,7 +108,7 @@ public record GripdayProperties(
             String description,
             String contextPath
         ) {
-          
+
           public OpenApiProperties {
             // Default values if not provided
             if (displayName == null || displayName.isBlank()) {

@@ -48,7 +48,7 @@ public class StructuredLoggingConfig {
     private static final Logger logger = LoggerFactory.getLogger(StructuredLogger.class);
 
     public void logGatewayRequest(String method, String path, String route, String clientIp,
-        String userAgent, String tenantId) {
+                                  String userAgent, String tenantId) {
       try {
         MDC.put("event", "gateway_request");
         MDC.put("method", method);
@@ -73,7 +73,7 @@ public class StructuredLoggingConfig {
     }
 
     public void logGatewayResponse(String method, String path, String route, int statusCode,
-        long durationMs, String result) {
+                                   long durationMs, String result) {
       try {
         MDC.put("event", "gateway_response");
         MDC.put("method", method);
@@ -182,7 +182,7 @@ public class StructuredLoggingConfig {
     private static final Logger requestLogger = LoggerFactory.getLogger("org.gripday.gatewayservice.request");
 
     public void logIncomingRequest(String correlationId, String method, String path,
-        Map<String, String> headers, String body) {
+                                   Map<String, String> headers, String body) {
       try {
         MDC.put("requestType", "incoming");
         MDC.put("correlationId", correlationId);
@@ -212,7 +212,7 @@ public class StructuredLoggingConfig {
     }
 
     public void logOutgoingRequest(String correlationId, String method, String uri,
-        String targetService, Map<String, String> headers) {
+                                   String targetService, Map<String, String> headers) {
       try {
         MDC.put("requestType", "outgoing");
         MDC.put("correlationId", correlationId);
@@ -231,7 +231,7 @@ public class StructuredLoggingConfig {
     }
 
     public void logResponse(String correlationId, int statusCode, long durationMs,
-        Map<String, String> headers, String body) {
+                            Map<String, String> headers, String body) {
       try {
         MDC.put("responseType", "outgoing");
         MDC.put("correlationId", correlationId);

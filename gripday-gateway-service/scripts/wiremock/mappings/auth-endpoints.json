@@ -48,7 +48,9 @@
             "userId": 1,
             "username": "testuser",
             "email": "test@example.com",
-            "roles": ["USER"],
+            "roles": [
+              "USER"
+            ],
             "tenantId": "default"
           }
         }
@@ -101,7 +103,9 @@
             "userId": 1,
             "username": "testuser",
             "email": "test@example.com",
-            "roles": ["USER"],
+            "roles": [
+              "USER"
+            ],
             "tenantId": "default"
           }
         }

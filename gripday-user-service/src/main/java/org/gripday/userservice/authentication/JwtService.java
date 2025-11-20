@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.gripday.userservice.config.JwtConfiguration;
+import org.gripday.userservice.shared.JwtClaimNames;
 import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserContext;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -63,9 +64,9 @@ public class JwtService {
         .subject(user.getId().toString())
         .issuedAt(now)
         .expiresAt(expiry)
-        .claim("type", "refresh")
-        .claim("username", user.getUsername())
-        .claim("tenantId", user.getTenantId())
+        .claim(JwtClaimNames.TYPE, JwtClaimNames.TOKEN_TYPE_REFRESH)
+        .claim(JwtClaimNames.USERNAME, user.getUsername())
+        .claim(JwtClaimNames.TENANT_ID, user.getTenantId())
         .build();
 
     var jwt = jwtEncoder.encode(JwtEncoderParameters.from(claims));
@@ -96,14 +97,14 @@ public class JwtService {
   public UserContext extractUserContext(Jwt jwt) {
     var claims = jwt.getClaims();
 
-    var userId = extractLong(claims.get("sub"));
-    var username = extractString(claims.get("username"));
-    var email = extractString(claims.get("email"));
-    var roles = extractStringSet(claims.get("roles"));
-    var permissions = extractStringSet(claims.get("permissions"));
-    var firstName = extractString(claims.get("firstName"));
-    var lastName = extractString(claims.get("lastName"));
-    var tenantId = extractString(claims.get("tenantId"));
+    var userId = extractLong(claims.get(JwtClaimNames.SUBJECT));
+    var username = extractString(claims.get(JwtClaimNames.USERNAME));
+    var email = extractString(claims.get(JwtClaimNames.EMAIL));
+    var roles = extractStringSet(claims.get(JwtClaimNames.ROLES));
+    var permissions = extractStringSet(claims.get(JwtClaimNames.PERMISSIONS));
+    var firstName = extractString(claims.get(JwtClaimNames.FIRST_NAME));
+    var lastName = extractString(claims.get(JwtClaimNames.LAST_NAME));
+    var tenantId = extractString(claims.get(JwtClaimNames.TENANT_ID));
     var customClaims = extractCustomClaims(claims);
 
     return new UserContext(
@@ -210,14 +211,14 @@ public class JwtService {
         .issuedAt(issuedAt)
         .expiresAt(expiresAt)
         .id(generateJti())
-        .claim("type", type)
-        .claim("username", userContext.username())
-        .claim("email", userContext.email())
-        .claim("roles", userContext.roles())
-        .claim("permissions", userContext.permissions())
-        .claim("firstName", userContext.firstName())
-        .claim("lastName", userContext.lastName())
-        .claim("tenantId", userContext.tenantId())
+        .claim(JwtClaimNames.TYPE, type)
+        .claim(JwtClaimNames.USERNAME, userContext.username())
+        .claim(JwtClaimNames.EMAIL, userContext.email())
+        .claim(JwtClaimNames.ROLES, userContext.roles())
+        .claim(JwtClaimNames.PERMISSIONS, userContext.permissions())
+        .claim(JwtClaimNames.FIRST_NAME, userContext.firstName())
+        .claim(JwtClaimNames.LAST_NAME, userContext.lastName())
+        .claim(JwtClaimNames.TENANT_ID, userContext.tenantId())
         .build();
   }
 
@@ -275,9 +276,21 @@ public class JwtService {
    * Extract custom claims excluding standard JWT claims.
    */
   private Map<String, Object> extractCustomClaims(Map<String, Object> allClaims) {
-    var standardClaims = Set.of("sub", "iss", "iat", "exp", "jti", "type",
-        "username", "email", "roles", "permissions",
-        "firstName", "lastName", "tenantId");
+    var standardClaims = Set.of(
+        JwtClaimNames.SUBJECT,
+        JwtClaimNames.ISSUER,
+        JwtClaimNames.ISSUED_AT,
+        JwtClaimNames.EXPIRATION,
+        JwtClaimNames.JWT_ID,
+        JwtClaimNames.TYPE,
+        JwtClaimNames.USERNAME,
+        JwtClaimNames.EMAIL,
+        JwtClaimNames.ROLES,
+        JwtClaimNames.PERMISSIONS,
+        JwtClaimNames.FIRST_NAME,
+        JwtClaimNames.LAST_NAME,
+        JwtClaimNames.TENANT_ID
+    );
 
     return allClaims.entrySet().stream()
         .filter(entry -> !standardClaims.contains(entry.getKey()))

@@ -73,8 +73,8 @@ public class ApiVersionRoutingFilter implements GlobalFilter, Ordered {
    */
   public boolean needsVersionRouting(String path) {
     return path != null
-        && path.startsWith("/api/")
-        && versionExtractor.extractVersionFromPath(path) == null;
+           && path.startsWith("/api/")
+           && versionExtractor.extractVersionFromPath(path) == null;
   }
 
   /**

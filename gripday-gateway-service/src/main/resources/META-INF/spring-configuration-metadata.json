@@ -198,46 +198,91 @@
     {
       "name": "gripday.gateway.routing.api-prefix.strip-count",
       "values": [
-        {"value": 0, "description": "No stripping - forward full path"},
-        {"value": 1, "description": "Strip one segment (e.g., /api)"},
-        {"value": 2, "description": "Strip two segments"}
+        {
+          "value": 0,
+          "description": "No stripping - forward full path"
+        },
+        {
+          "value": 1,
+          "description": "Strip one segment (e.g., /api)"
+        },
+        {
+          "value": 2,
+          "description": "Strip two segments"
+        }
       ]
     },
     {
       "name": "gripday.gateway.routing.api-prefix.prefix",
       "values": [
-        {"value": "/api", "description": "Standard API prefix"},
-        {"value": "", "description": "No prefix (production)"},
-        {"value": "/v1", "description": "Version-specific prefix"}
+        {
+          "value": "/api",
+          "description": "Standard API prefix"
+        },
+        {
+          "value": "",
+          "description": "No prefix (production)"
+        },
+        {
+          "value": "/v1",
+          "description": "Version-specific prefix"
+        }
       ]
     },
     {
       "name": "gripday.gateway.security.jwt.algorithm",
       "values": [
-        {"value": "RS256", "description": "RSA SHA-256 (asymmetric) - Recommended"},
-        {"value": "HS256", "description": "HMAC SHA-256 (symmetric) - Deprecated"}
+        {
+          "value": "RS256",
+          "description": "RSA SHA-256 (asymmetric) - Recommended"
+        },
+        {
+          "value": "HS256",
+          "description": "HMAC SHA-256 (symmetric) - Deprecated"
+        }
       ]
     },
     {
       "name": "gripday.gateway.security.jwt.jwk-set-uri",
       "values": [
-        {"value": "http://localhost:8080/.well-known/jwks.json", "description": "Local User Service JWK endpoint"},
-        {"value": "http://user-service:8080/.well-known/jwks.json", "description": "Docker/Kubernetes User Service JWK endpoint"},
-        {"value": "https://api.gripday.com/.well-known/jwks.json", "description": "Production User Service JWK endpoint"}
+        {
+          "value": "http://localhost:8080/.well-known/jwks.json",
+          "description": "Local User Service JWK endpoint"
+        },
+        {
+          "value": "http://user-service:8080/.well-known/jwks.json",
+          "description": "Docker/Kubernetes User Service JWK endpoint"
+        },
+        {
+          "value": "https://api.gripday.com/.well-known/jwks.json",
+          "description": "Production User Service JWK endpoint"
+        }
       ]
     },
     {
       "name": "gripday.gateway.routing.services.*.enabled",
       "values": [
-        {"value": true, "description": "Enable service route"},
-        {"value": false, "description": "Disable service route (returns 404)"}
+        {
+          "value": true,
+          "description": "Enable service route"
+        },
+        {
+          "value": false,
+          "description": "Disable service route (returns 404)"
+        }
       ]
     },
     {
       "name": "gripday.gateway.security.authentication.enable-user-context-propagation",
       "values": [
-        {"value": true, "description": "Propagate X-User-ID, X-Username, X-User-Roles headers"},
-        {"value": false, "description": "Do not propagate user context headers"}
+        {
+          "value": true,
+          "description": "Propagate X-User-ID, X-Username, X-User-Roles headers"
+        },
+        {
+          "value": false,
+          "description": "Do not propagate user context headers"
+        }
       ]
     }
   ]

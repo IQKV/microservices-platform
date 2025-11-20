@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * SpringDoc configuration for dynamic service discovery and Swagger UI setup.
- * 
+ * <p>
  * Automatically configures Swagger UI to display all enabled downstream services
  * in the API dropdown selector.
  */
@@ -32,7 +32,7 @@ public class SpringDocConfiguration {
   public CommandLineRunner openApiUrlsRegistrar(SwaggerUiConfigParameters swaggerUiConfig) {
     return args -> {
       var services = properties.gateway().routing().services();
-      
+
       if (services == null || services.isEmpty()) {
         log.warn("No downstream services configured for OpenAPI documentation");
         return;

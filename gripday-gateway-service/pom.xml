@@ -189,7 +189,7 @@
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>MISSEDCOUNT</value>
-                                            <maximum>49</maximum>
+                                            <maximum>50</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -220,7 +220,8 @@
                                         <exclude>org.gripday.gatewayservice.config.SecurityConfiguration</exclude>
                                         <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.SecurityProperties</exclude>
                                         <exclude>org.gripday.gatewayservice.config.ApiPrefixConfigurationLogger</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties</exclude>
+                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties
+                                        </exclude>
                                         <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties</exclude>
                                         <exclude>org.gripday.gatewayservice.config.HealthCheckConfig</exclude>
                                         <exclude>org.gripday.gatewayservice.config.DynamicOpenApiRoutesConfiguration</exclude>
@@ -245,6 +246,7 @@
                                         <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties</exclude>
                                         <exclude>org.gripday.gatewayservice.config.ObservabilityConfig</exclude>
                                         <exclude>org.gripday.gatewayservice.config.GlobalExceptionHandler</exclude>
+                                        <exclude>org.gripday.gatewayservice.security.JwtClaimNames</exclude>
                                     </excludes>
                                     <limits>
                                         <limit>

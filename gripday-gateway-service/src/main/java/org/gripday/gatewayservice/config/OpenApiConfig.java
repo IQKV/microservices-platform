@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Dynamic OpenAPI configuration for Gateway Service with automatic aggregation of downstream service documentation.
- * 
+ * <p>
  * This configuration automatically discovers and configures OpenAPI documentation for all enabled downstream services
  * based on the gripday.gateway.routing.services configuration properties.
  */
@@ -150,7 +150,7 @@ public class OpenApiConfig {
       }
 
       var pathPattern = contextPath + "/**";
-      
+
       log.info("Configuring OpenAPI documentation for service '{}': displayName='{}', pathPattern='{}'",
           serviceName, openApiConfig.displayName(), pathPattern);
 
