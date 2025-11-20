@@ -14,6 +14,7 @@ spring :
     properties :
       hibernate :
         format_sql : true
+        multiTenancy : SCHEMA
   
   liquibase :
     enabled : false

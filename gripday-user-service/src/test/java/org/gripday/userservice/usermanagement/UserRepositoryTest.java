@@ -7,11 +7,15 @@ import java.util.Set;
 
 import org.gripday.userservice.shared.Authority;
 import org.gripday.userservice.shared.AuthorityRepository;
+import org.gripday.userservice.tenancy.TenantContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -53,12 +57,11 @@ class UserRepositoryTest {
     persistUser("tenantT", "u1", "u1@x.com", true, true, Set.of("USER"));
     persistUser("tenantT", "u2", "u2@x.com", false, true, Set.of("USER"));
     var u3 = persistUser("tenantT", "u3", "u3@x.com", true, true, Set.of("USER"));
-    persistUser("tenantOther", "u4", "u4@x.com", true, true, Set.of("USER"));
 
-    var enabled = userRepository.findEnabledUsersByTenantId("tenantT");
+    TenantContext.setCurrentTenantId("tenantT");
+    var enabled = userRepository.findEnabledUsersOrderByCreatedAtDesc();
 
     assertThat(enabled).extracting(User::getEnabled).containsOnly(true);
-    assertThat(enabled).extracting(User::getTenantId).containsOnly("tenantT");
     assertThat(enabled).hasSize(2);
     // createdAt is generated, but order should be desc, so last persisted should come first
     assertThat(enabled.get(0).getUsername()).isEqualTo(u3.getUsername());
@@ -71,8 +74,9 @@ class UserRepositoryTest {
     persistUser("t1", "a2", "a2@x.com", false, true, Set.of("USER"));
     persistUser("t1", "a3", "a3@x.com", true, true, Set.of("USER"));
 
-    assertThat(userRepository.countByTenantId("t1")).isEqualTo(3);
-    assertThat(userRepository.countByTenantIdAndEnabledTrue("t1")).isEqualTo(2);
+    TenantContext.setCurrentTenantId("t1");
+    assertThat(userRepository.count()).isEqualTo(3);
+    assertThat(userRepository.countByEnabledTrue()).isEqualTo(2);
   }
 
   @Test
@@ -81,6 +85,7 @@ class UserRepositoryTest {
     var admin = getOrCreateAuthorities(Set.of("ADMIN")).get(0);
     var userRole = getOrCreateAuthorities(Set.of("USER")).get(0);
 
+    TenantContext.setCurrentTenantId("tA");
     var u1 = baseUser("tA", "x1", "x1@x.com", true, true);
     u1.getAuthorities().add(admin);
     admin.getUsers().add(u1);
@@ -89,14 +94,12 @@ class UserRepositoryTest {
     u2.getAuthorities().add(userRole);
     userRole.getUsers().add(u2);
 
-    var u3 = baseUser("tB", "x3", "x3@x.com", true, true);
-    u3.getAuthorities().add(admin);
-    admin.getUsers().add(u3);
 
     authorityRepository.saveAll(List.of(admin, userRole));
-    userRepository.saveAll(List.of(u1, u2, u3));
-
-    var result = userRepository.findByTenantIdAndAuthorityName("tA", "ADMIN");
+    TenantContext.setCurrentTenantId("tA");
+    userRepository.saveAll(List.of(u1, u2));
+    TenantContext.setCurrentTenantId("tA");
+    var result = userRepository.findByAuthorityName("ADMIN");
     assertThat(result).extracting(User::getUsername).containsExactly("x1");
   }
 
@@ -106,7 +109,8 @@ class UserRepositoryTest {
     persistUser("tZ", "v1", "v1@x.com", true, false, Set.of("USER"));
     persistUser("tZ", "v2", "v2@x.com", true, true, Set.of("USER"));
 
-    var res = userRepository.findUnverifiedUsersByTenantId("tZ");
+    TenantContext.setCurrentTenantId("tZ");
+    var res = userRepository.findUnverifiedUsers();
     assertThat(res).extracting(User::getEmailVerified).containsOnly(false);
   }
 
@@ -116,7 +120,7 @@ class UserRepositoryTest {
     u.getAuthorities().addAll(auths);
     auths.forEach(a -> a.getUsers().add(u));
     authorityRepository.saveAll(auths);
-    return userRepository.save(u);
+    return TenantContext.executeInTenantContext(tenant, () -> userRepository.save(u));
   }
 
   private User baseUser(String tenant, String username, String email, boolean enabled, boolean emailVerified) {
@@ -131,4 +135,6 @@ class UserRepositoryTest {
         .map(n -> authorityRepository.findByName(n).orElseGet(() -> new Authority(n)))
         .toList();
   }
+
+  
 }

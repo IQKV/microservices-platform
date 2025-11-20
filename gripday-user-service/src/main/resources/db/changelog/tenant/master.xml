@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <include file="db/changelog/001-create-users-table.xml"/>
+    <include file="db/changelog/002-create-authorities-table.xml"/>
+    <include file="db/changelog/003-create-user-authorities-table.xml"/>
+    <include file="db/changelog/004-create-user-audit-log-table.xml"/>
+    <include file="db/changelog/005-add-indexes.xml"/>
+    <include file="db/changelog/007-create-email-verification-tokens-table.xml"/>
+    <include file="db/changelog/008-create-organizations-table.xml"/>
+    <include file="db/changelog/009-add-missing-critical-indexes.xml"/>
+    <include file="db/changelog/010-add-user-preferred-locale.xml"/>
+
+</databaseChangeLog>

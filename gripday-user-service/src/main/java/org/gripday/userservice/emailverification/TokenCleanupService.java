@@ -2,6 +2,8 @@ package org.gripday.userservice.emailverification;
 
 import java.time.LocalDateTime;
 
+import org.gripday.userservice.tenancy.TenantContext;
+import org.gripday.userservice.tenancy.TenantRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,11 +20,14 @@ public class TokenCleanupService {
 
   private final VerificationTokenRepository tokenRepository;
   private final VerificationMetrics metricsService;
+  private final TenantRepository tenantRepository;
 
   public TokenCleanupService(final VerificationTokenRepository tokenRepository,
-                             final VerificationMetrics metricsService) {
+                             final VerificationMetrics metricsService,
+                             final TenantRepository tenantRepository) {
     this.tokenRepository = tokenRepository;
     this.metricsService = metricsService;
+    this.tenantRepository = tenantRepository;
   }
 
   /**
@@ -39,18 +44,24 @@ public class TokenCleanupService {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
 
-      // Count expired tokens before cleanup for metrics
-      var expiredCount = tokenRepository.countByExpiresAtBefore(cutoffTime);
-      metricsService.updateExpiredTokensCount(expiredCount);
+      var tenants = tenantRepository.findByEnabledTrue();
+      long totalDeleted = 0L;
+      long totalExpired = 0L;
 
-      // Perform cleanup
-      var deletedCount = tokenRepository.deleteByExpiresAtBefore(cutoffTime);
+      for (final var tenant : tenants) {
+        var perTenant = TenantContext.executeInTenantContext(tenant.getTenantId(), () -> {
+          var expiredCount = tokenRepository.countByExpiresAtBefore(cutoffTime);
+          metricsService.updateExpiredTokensCount(expiredCount);
+          var deletedCount = tokenRepository.deleteByExpiresAtBefore(cutoffTime);
+          metricsService.recordTokensCleanedUp(deletedCount);
+          return new long[]{expiredCount, deletedCount};
+        });
+        totalExpired += perTenant[0];
+        totalDeleted += perTenant[1];
+      }
 
-      // Record metrics
-      metricsService.recordTokensCleanedUp(deletedCount);
-
-      logger.info("Cleanup completed successfully. Deleted {} expired verification tokens older than {}",
-          deletedCount, cutoffTime);
+      logger.info("Cleanup completed. Tenants processed: {}, expired tokens counted: {}, deleted: {}",
+          tenants.size(), totalExpired, totalDeleted);
 
     } catch (final Exception e) {
       logger.error("Error during scheduled cleanup of expired verification tokens", e);
@@ -74,20 +85,24 @@ public class TokenCleanupService {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
 
-      // Count expired tokens before cleanup for metrics
-      var expiredCount = tokenRepository.countByExpiresAtBefore(cutoffTime);
-      metricsService.updateExpiredTokensCount(expiredCount);
+      var tenants = tenantRepository.findByEnabledTrue();
+      long totalDeleted = 0L;
 
-      // Perform cleanup
-      var deletedCount = tokenRepository.deleteByExpiresAtBefore(cutoffTime);
+      for (final var tenant : tenants) {
+        var deletedCount = TenantContext.executeInTenantContext(tenant.getTenantId(), () -> {
+          var expiredCount = tokenRepository.countByExpiresAtBefore(cutoffTime);
+          metricsService.updateExpiredTokensCount(expiredCount);
+          var deleted = tokenRepository.deleteByExpiresAtBefore(cutoffTime);
+          metricsService.recordTokensCleanedUp(deleted);
+          return deleted;
+        });
+        totalDeleted += deletedCount;
+      }
 
-      // Record metrics
-      metricsService.recordTokensCleanedUp(deletedCount);
+      logger.info("Manual cleanup completed. Tenants processed: {}, total deleted: {}",
+          tenants.size(), totalDeleted);
 
-      logger.info("Manual cleanup completed successfully. Deleted {} expired verification tokens older than {}",
-          deletedCount, cutoffTime);
-
-      return deletedCount;
+      return totalDeleted;
 
     } catch (final Exception e) {
       logger.error("Error during manual cleanup of expired verification tokens", e);
@@ -106,7 +121,15 @@ public class TokenCleanupService {
   public long getExpiredTokenCount() {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
-      return tokenRepository.countByExpiresAtBefore(cutoffTime);
+      var tenants = tenantRepository.findByEnabledTrue();
+      long total = 0L;
+      for (final var tenant : tenants) {
+        var count = TenantContext.executeInTenantContext(tenant.getTenantId(), () ->
+            tokenRepository.countByExpiresAtBefore(cutoffTime)
+        );
+        total += count;
+      }
+      return total;
 
     } catch (final Exception e) {
       logger.error("Error counting expired verification tokens", e);

@@ -25,6 +25,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
+        multiTenancy: SCHEMA
         jdbc:
           batch_size: 20
         order_inserts: true
@@ -34,7 +35,7 @@ spring:
   # Liquibase Configuration
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
-    enabled: true
+    enabled: false
 
 # SpringDoc OpenAPI Configuration
 springdoc:
@@ -148,4 +149,12 @@ gripday:
       include-tenant-id: true
       correlation-id-header: X-Correlation-ID
       request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
+  tenant-id-header: X-Tenant-ID
+
+app:
+  tenancy:
+    schema:
+      prefix: tenant_
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml

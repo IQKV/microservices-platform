@@ -5,16 +5,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.gripday.userservice.tenancy.TenantContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.gripday.userservice.tenancy.SchemaNameResolver;
+import org.gripday.userservice.tenancy.SchemaTenantIdentifierResolver;
+import org.gripday.userservice.tenancy.SchemaPerTenantConnectionProvider;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
+@Import(VerificationTokenRepositoryTest.MultiTenantTestConfig.class)
 class VerificationTokenRepositoryTest {
 
   @Autowired
@@ -41,6 +49,7 @@ class VerificationTokenRepositoryTest {
   @DisplayName("findByUserIdAndUsedFalse and countUnusedTokensByUserIdAndTenantId should return only unused")
   void unusedByUser() {
     var now = LocalDateTime.now();
+    TenantContext.setCurrentTenantId("tA");
     repository.save(new VerificationToken("a1", 10L, now.plusHours(1), "tA"));
     var used = repository.save(new VerificationToken("a2", 10L, now.plusHours(1), "tA"));
     used.markAsUsed();
@@ -49,23 +58,23 @@ class VerificationTokenRepositoryTest {
     var list = repository.findByUserIdAndUsedFalse(10L);
     assertThat(list).extracting(VerificationToken::getToken).containsExactly("a1");
 
-    var count = repository.countUnusedTokensByUserIdAndTenantId(10L, "tA");
+    var count = repository.countUnusedTokensByUserId(10L);
     assertThat(count).isEqualTo(1);
   }
 
   @Test
-  @DisplayName("findByUserIdAndTenantId and findUnusedTokensByUserIdAndTenantId should filter by tenant and order by createdAt desc")
+  @DisplayName("findByUserId and findUnusedTokensByUserId should order by createdAt desc within schema")
   void byTenantAndOrdering() throws InterruptedException {
     var now = LocalDateTime.now();
+    TenantContext.setCurrentTenantId("tenantX");
     repository.save(new VerificationToken("t-1", 20L, now.plusHours(2), "tenantX"));
     Thread.sleep(5); // ensure createdAt ordering difference
     repository.save(new VerificationToken("t-2", 20L, now.plusHours(2), "tenantX"));
-    repository.save(new VerificationToken("t-3", 20L, now.plusHours(2), "tenantY"));
 
-    var allTenantX = repository.findByUserIdAndTenantId(20L, "tenantX");
+    var allTenantX = repository.findByUserId(20L);
     assertThat(allTenantX).hasSize(2);
 
-    var unusedDesc = repository.findUnusedTokensByUserIdAndTenantId(20L, "tenantX");
+    var unusedDesc = repository.findUnusedTokensByUserId(20L);
     assertThat(unusedDesc.get(0).getToken()).isEqualTo("t-2");
   }
 
@@ -85,7 +94,8 @@ class VerificationTokenRepositoryTest {
     var deleted = repository.deleteByExpiresAtBefore(now);
     assertThat(deleted).isEqualTo(2);
 
-    var remaining = repository.findByUserIdAndTenantId(30L, "tZ");
+    TenantContext.setCurrentTenantId("tZ");
+    var remaining = repository.findByUserId(30L);
     assertThat(remaining).extracting(VerificationToken::getToken).containsExactly("ok");
   }
 
@@ -93,18 +103,19 @@ class VerificationTokenRepositoryTest {
   @DisplayName("markAllUnusedTokensAsUsedByUserIdAndTenantId should invalidate previous tokens")
   void invalidateUnused() {
     var now = LocalDateTime.now();
+    TenantContext.setCurrentTenantId("t1");
     repository.save(new VerificationToken("iv1", 40L, now.plusHours(2), "t1"));
     repository.save(new VerificationToken("iv2", 40L, now.plusHours(2), "t1"));
 
-    var updated = repository.markAllUnusedTokensAsUsedByUserIdAndTenantId(40L, "t1");
+    var updated = repository.markAllUnusedTokensAsUsedByUserId(40L);
     assertThat(updated).isEqualTo(2);
 
-    var unused = repository.findUnusedTokensByUserIdAndTenantId(40L, "t1");
+    var unused = repository.findUnusedTokensByUserId(40L);
     assertThat(unused).isEmpty();
   }
 
   @Test
-  @DisplayName("countTokensCreatedSince and findExpiredTokensByTenantId should reflect time windows")
+  @DisplayName("countTokensCreatedSince and findExpiredTokens should reflect time windows in schema")
   void createdSinceAndExpiredByTenant() {
     var now = LocalDateTime.now();
     var ten = "TEN";
@@ -114,7 +125,8 @@ class VerificationTokenRepositoryTest {
     ));
 
     var since = now.minusMinutes(1);
-    var countSince = repository.countTokensCreatedSince(50L, ten, since);
+    TenantContext.setCurrentTenantId(ten);
+    var countSince = repository.countTokensCreatedSince(50L, since);
     assertThat(countSince).isEqualTo(2);
 
     repository.saveAll(List.of(
@@ -122,7 +134,20 @@ class VerificationTokenRepositoryTest {
         new VerificationToken("ex2", 52L, now.minusHours(2), ten)
     ));
 
-    var expired = repository.findExpiredTokensByTenantId(ten, now);
+    var expired = repository.findExpiredTokens(now);
     assertThat(expired).hasSize(2);
+  }
+
+  @TestConfiguration
+  static class MultiTenantTestConfig {
+    @Bean
+    SchemaNameResolver schemaNameResolver() {
+      return new SchemaNameResolver("tenant_");
+    }
+
+    @Bean
+    SchemaTenantIdentifierResolver schemaTenantIdentifierResolver(SchemaNameResolver resolver) {
+      return new SchemaTenantIdentifierResolver(resolver);
+    }
   }
 }

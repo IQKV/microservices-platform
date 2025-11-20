@@ -55,26 +55,25 @@ public class EmailVerificationService {
       throw new EmailVerificationException("User email is already verified");
     }
 
-    var tenantId = user.getTenantId();
     var userId = user.getId();
 
     // Check rate limiting - max 3 emails per hour
     var oneHourAgo = LocalDateTime.now().minusHours(1);
-    var recentTokenCount = tokenRepository.countTokensCreatedSince(userId, tenantId, oneHourAgo);
+    var recentTokenCount = tokenRepository.countTokensCreatedSince(userId, oneHourAgo);
 
     if (recentTokenCount >= MAX_EMAILS_PER_HOUR) {
       throw new EmailVerificationException("Rate limit exceeded. Maximum " + MAX_EMAILS_PER_HOUR + " verification emails per hour");
     }
 
     // Invalidate any existing unused tokens for this user
-    tokenRepository.markAllUnusedTokensAsUsedByUserIdAndTenantId(userId, tenantId);
+    tokenRepository.markAllUnusedTokensAsUsedByUserId(userId);
 
     // Generate secure token using UUID
     var token = UUID.randomUUID().toString();
     var expiresAt = LocalDateTime.now().plusHours(TOKEN_EXPIRY_HOURS);
 
     // Create and save new verification token
-    var verificationToken = new VerificationToken(token, userId, expiresAt, tenantId);
+    var verificationToken = new VerificationToken(token, userId, expiresAt, user.getTenantId());
     tokenRepository.save(verificationToken);
 
     // Send verification email
@@ -129,11 +128,7 @@ public class EmailVerificationService {
         });
 
     // Verify tenant context matches
-    var currentTenantId = TenantContext.getCurrentTenantId();
-    if (currentTenantId != null && !currentTenantId.equals(user.getTenantId())) {
-      metricsService.recordVerificationFailed();
-      throw new EmailVerificationException("Token not valid for current tenant");
-    }
+    
 
     // Check if user is already verified
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
@@ -195,10 +190,7 @@ public class EmailVerificationService {
         .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
 
     // Check tenant context
-    var currentTenantId = TenantContext.getCurrentTenantId();
-    if (currentTenantId != null && !currentTenantId.equals(user.getTenantId())) {
-      throw new EmailVerificationException("User not found in current tenant");
-    }
+    
 
     // Check if user is already verified
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
@@ -244,7 +236,7 @@ public class EmailVerificationService {
    */
   public int getRemainingEmailCount(Long userId, String tenantId) {
     var oneHourAgo = LocalDateTime.now().minusHours(1);
-    var recentTokenCount = tokenRepository.countTokensCreatedSince(userId, tenantId, oneHourAgo);
+    var recentTokenCount = tokenRepository.countTokensCreatedSince(userId, oneHourAgo);
     return Math.max(0, MAX_EMAILS_PER_HOUR - (int) recentTokenCount);
   }
 
@@ -256,7 +248,7 @@ public class EmailVerificationService {
    * @return true if user has unused tokens
    */
   public boolean hasUnusedTokens(Long userId, String tenantId) {
-    var unusedTokenCount = tokenRepository.countUnusedTokensByUserIdAndTenantId(userId, tenantId);
+    var unusedTokenCount = tokenRepository.countUnusedTokensByUserId(userId);
     return unusedTokenCount > 0;
   }
 
@@ -268,7 +260,7 @@ public class EmailVerificationService {
    * @return The most recent unused token, or null if none exists
    */
   public VerificationToken getMostRecentUnusedToken(Long userId, String tenantId) {
-    return tokenRepository.findMostRecentUnusedTokenByUserIdAndTenantId(userId, tenantId)
+    return tokenRepository.findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(userId)
         .orElse(null);
   }
 
@@ -289,10 +281,7 @@ public class EmailVerificationService {
         .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
 
     // Check tenant context
-    var currentTenantId = TenantContext.getCurrentTenantId();
-    if (currentTenantId != null && !currentTenantId.equals(user.getTenantId())) {
-      throw new EmailVerificationException("User not found in current tenant");
-    }
+    
 
     var isVerified = user.getEmailVerified() != null && user.getEmailVerified();
     var message = isVerified

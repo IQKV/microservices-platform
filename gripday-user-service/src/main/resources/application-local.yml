@@ -29,6 +29,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
+        multiTenancy: SCHEMA
+        tenant_identifier_resolver: org.gripday.userservice.tenancy.SchemaTenantIdentifierResolver
         generate_statistics: true
         jdbc:
           batch_size: 20
@@ -53,7 +55,7 @@ spring:
   # Liquibase Configuration
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
-    enabled: true
+    enabled: false
     contexts: local,development
 
 # Gripday Configuration - Local Environment
@@ -70,7 +72,7 @@ gripday:
       idle-timeout: PT5M
       max-lifetime: PT20M
     migration:
-      enabled: true
+      enabled: false
       contexts: local,development
       validate-on-migrate: true
 
@@ -230,3 +232,10 @@ springdoc:
     filter: true
     display-request-duration: true
     display-operation-id: true
+app:
+  tenancy:
+    schema:
+      prefix: tenant_
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml

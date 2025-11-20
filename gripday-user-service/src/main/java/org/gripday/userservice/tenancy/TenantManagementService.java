@@ -28,10 +28,21 @@ public class TenantManagementService {
 
   private final TenantRepository tenantRepository;
   private final UserRepository userRepository;
+  private final SchemaNameResolver schemaNameResolver;
+  private final TenantLiquibaseRunner liquibaseRunner;
+  private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
-  public TenantManagementService(final TenantRepository tenantRepository, final UserRepository userRepository) {
+  public TenantManagementService(
+      final TenantRepository tenantRepository,
+      final UserRepository userRepository,
+      final SchemaNameResolver schemaNameResolver,
+      final TenantLiquibaseRunner liquibaseRunner,
+      final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
     this.tenantRepository = tenantRepository;
     this.userRepository = userRepository;
+    this.schemaNameResolver = schemaNameResolver;
+    this.liquibaseRunner = liquibaseRunner;
+    this.jdbcTemplate = jdbcTemplate;
   }
 
   /**
@@ -197,7 +208,7 @@ public class TenantManagementService {
         .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
 
     // Check if tenant has users
-    var userCount = userRepository.countByTenantId(tenantId);
+    var userCount = TenantContext.executeInTenantContext(tenantId, () -> userRepository.count());
     if (userCount > 0) {
       throw new IllegalStateException("Cannot delete tenant with existing users. User count: " + userCount);
     }
@@ -312,7 +323,7 @@ public class TenantManagementService {
   }
 
   private TenantSummary mapToTenantSummary(Tenant tenant) {
-    var userCount = userRepository.countByTenantIdAndEnabledTrue(tenant.getTenantId());
+    var userCount = TenantContext.executeInTenantContext(tenant.getTenantId(), () -> userRepository.countByEnabledTrue());
 
     return new TenantSummary(
         tenant.getTenantId(),
@@ -325,10 +336,14 @@ public class TenantManagementService {
   }
 
   private void provisionTenantSchema(String tenantId) {
-    // Placeholder for tenant schema provisioning
-    // This could include creating tenant-specific database schemas,
-    // setting up tenant-specific configurations, etc.
-    logger.info("Provisioning schema for tenant: {}", tenantId);
+    var schema = schemaNameResolver.toSchema(tenantId);
+    jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + schema);
+    try {
+      liquibaseRunner.runTenantChangelog(schema);
+    } catch (final Exception e) {
+      throw new IllegalStateException("Failed to apply tenant changelog for schema: " + schema, e);
+    }
+    logger.info("Provisioned schema {} for tenant: {}", schema, tenantId);
   }
 
   private void cleanupTenantSchema(String tenantId) {

@@ -62,85 +62,86 @@ public interface UserRepository extends JpaRepository<User, Long> {
   boolean existsByEmail(String email);
 
   /**
-   * Find all users within a specific tenant.
-   *
-   * @param tenantId the tenant identifier
-   * @return List of users in the tenant
+   * Find all users in current tenant schema.
    */
-  List<User> findByTenantId(String tenantId);
+  List<User> findAll();
 
   /**
-   * Find enabled users within a specific tenant.
-   *
-   * @param tenantId the tenant identifier
-   * @return List of enabled users in the tenant
+   * Find enabled users ordered by creation time.
    */
   @Query("""
       SELECT u FROM User u 
-      WHERE u.tenantId = :tenantId 
-        AND u.enabled = true
+      WHERE u.enabled = true
       ORDER BY u.createdAt DESC
       """)
-  List<User> findEnabledUsersByTenantId(@Param("tenantId") String tenantId);
+  List<User> findEnabledUsersOrderByCreatedAtDesc();
 
   /**
-   * Find users by tenant and authority name.
-   *
-   * @param tenantId      the tenant identifier
-   * @param authorityName the authority name to filter by
-   * @return List of users with the specified authority in the tenant
+   * Find users by authority name.
    */
   @Query("""
       SELECT DISTINCT u FROM User u 
       JOIN u.authorities a 
-      WHERE u.tenantId = :tenantId 
-        AND a.name = :authorityName
+      WHERE a.name = :authorityName
       ORDER BY u.createdAt DESC
       """)
-  List<User> findByTenantIdAndAuthorityName(@Param("tenantId") String tenantId,
-      @Param("authorityName") String authorityName);
+  List<User> findByAuthorityName(@Param("authorityName") String authorityName);
 
   /**
-   * Count users in a specific tenant.
-   *
-   * @param tenantId the tenant identifier
-   * @return number of users in the tenant
+   * Count users in current tenant schema.
    */
-  long countByTenantId(String tenantId);
+  long count();
 
   /**
-   * Count enabled users in a specific tenant.
-   *
-   * @param tenantId the tenant identifier
-   * @return number of enabled users in the tenant
+   * Count enabled users in current tenant schema.
    */
   @Query("""
       SELECT COUNT(u) FROM User u 
-      WHERE u.tenantId = :tenantId 
-        AND u.enabled = true
+      WHERE u.enabled = true
       """)
-  long countEnabledUsersByTenantId(@Param("tenantId") String tenantId);
+  long countEnabledUsers();
 
   /**
-   * Count enabled users in a specific tenant (alternative method name).
-   *
-   * @param tenantId the tenant identifier
-   * @return number of enabled users in the tenant
+   * Count enabled users.
    */
-  long countByTenantIdAndEnabledTrue(String tenantId);
+  long countByEnabledTrue();
 
   /**
-   * Find users with unverified emails in a tenant.
-   *
-   * @param tenantId the tenant identifier
-   * @return List of users with unverified emails
+   * Find users with unverified emails.
    */
   @Query("""
       SELECT u FROM User u 
-      WHERE u.tenantId = :tenantId 
-        AND u.emailVerified = false 
+      WHERE u.emailVerified = false 
         AND u.enabled = true
       ORDER BY u.createdAt ASC
       """)
-  List<User> findUnverifiedUsersByTenantId(@Param("tenantId") String tenantId);
+  List<User> findUnverifiedUsers();
+
+  default List<User> findByTenantId(String tenantId) {
+    return findAll();
+  }
+
+  default List<User> findEnabledUsersByTenantId(String tenantId) {
+    return findEnabledUsersOrderByCreatedAtDesc();
+  }
+
+  default List<User> findByTenantIdAndAuthorityName(String tenantId, String authorityName) {
+    return findByAuthorityName(authorityName);
+  }
+
+  default long countByTenantId(String tenantId) {
+    return count();
+  }
+
+  default long countEnabledUsersByTenantId(String tenantId) {
+    return countEnabledUsers();
+  }
+
+  default long countByTenantIdAndEnabledTrue(String tenantId) {
+    return countByEnabledTrue();
+  }
+
+  default List<User> findUnverifiedUsersByTenantId(String tenantId) {
+    return findUnverifiedUsers();
+  }
 }

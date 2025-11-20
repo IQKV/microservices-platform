@@ -54,8 +54,7 @@ public class UserManagementService {
   public Page<UserDto> getAllUsers(Pageable pageable, UserContext currentUser) {
     validateAdminAccess(currentUser, "LIST_USERS");
 
-    var tenantId = currentUser.tenantId();
-    var users = userRepository.findByTenantId(tenantId);
+    var users = userRepository.findAll();
 
     // Apply role-based filtering
     var filteredUsers = applyRoleBasedFiltering(users, currentUser);
@@ -84,7 +83,8 @@ public class UserManagementService {
   public UserDto getUserById(Long userId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_USER");
 
-    var user = findUserByIdWithTenantCheck(userId, currentUser.tenantId());
+    var user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserManagementException("User not found: " + userId));
     validateUserAccess(user, currentUser);
 
     logAuditEvent("GET_USER", "Retrieved user: " + user.getUsername(), currentUser);
@@ -146,7 +146,8 @@ public class UserManagementService {
   public UserDto updateUser(Long userId, UpdateUserRequest request, UserContext currentUser) {
     validateAdminAccess(currentUser, "UPDATE_USER");
 
-    var user = findUserByIdWithTenantCheck(userId, currentUser.tenantId());
+    var user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserManagementException("User not found: " + userId));
     validateUserAccess(user, currentUser);
 
     // Update fields if provided
@@ -209,7 +210,8 @@ public class UserManagementService {
   public void deleteUser(Long userId, UserContext currentUser) {
     validateAdminAccess(currentUser, "DELETE_USER");
 
-    var user = findUserByIdWithTenantCheck(userId, currentUser.tenantId());
+    var user = userRepository.findById(userId)
+        .orElseThrow(() -> new UserManagementException("User not found: " + userId));
     validateUserAccess(user, currentUser);
 
     // Prevent self-deletion
@@ -290,15 +292,9 @@ public class UserManagementService {
   /**
    * Find user by ID with tenant check.
    */
-  private User findUserByIdWithTenantCheck(Long userId, String tenantId) {
-    var user = userRepository.findById(userId)
+  private User findUserByIdOrThrow(Long userId) {
+    return userRepository.findById(userId)
         .orElseThrow(() -> new UserManagementException("User not found: " + userId));
-
-    if (!user.getTenantId().equals(tenantId)) {
-      throw new AccessDeniedException("User not found in current tenant");
-    }
-
-    return user;
   }
 
   /**

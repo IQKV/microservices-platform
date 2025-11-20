@@ -1,7 +1,10 @@
 package org.gripday.userservice.tenancy;
 
+import javax.sql.DataSource;
+
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
+import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,26 +19,14 @@ public class TenantConfig {
    * Custom tenant identifier resolver for Hibernate multi-tenancy. Resolves tenant ID from ThreadLocal context.
    */
   @Bean
-  public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
-    return new CurrentTenantIdentifierResolver() {
+  public CurrentTenantIdentifierResolver currentTenantIdentifierResolver(
+      SchemaTenantIdentifierResolver resolver) {
+    return resolver;
+  }
 
-      @Override
-      public String resolveCurrentTenantIdentifier() {
-        var tenantId = TenantContext.getCurrentTenantId();
-        if (tenantId != null) {
-          return tenantId;
-        }
-
-        // Return default tenant if no context is set
-        return TenantContext.getDefaultTenantId();
-      }
-
-      @Override
-      public boolean validateExistingCurrentSessions() {
-        // Don't validate existing sessions to allow tenant switching
-        return false;
-      }
-    };
+  @Bean
+  public MultiTenantConnectionProvider multiTenantConnectionProvider(DataSource dataSource) {
+    return new SchemaPerTenantConnectionProvider(dataSource);
   }
 
   /**
@@ -43,26 +34,14 @@ public class TenantConfig {
    */
   @Bean
   public HibernatePropertiesCustomizer hibernatePropertiesCustomizer(
-      CurrentTenantIdentifierResolver tenantResolver) {
+      final CurrentTenantIdentifierResolver tenantResolver,
+      final MultiTenantConnectionProvider connectionProvider) {
 
     return hibernateProperties -> {
-      // Configure tenant identifier resolver
-      hibernateProperties.put(
-          AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER,
-          tenantResolver
-      );
-
-      // Enable Hibernate filters for tenant isolation
-      hibernateProperties.put(
-          AvailableSettings.USE_SQL_COMMENTS,
-          true
-      );
-
-      // Configure tenant-aware connection handling
-      hibernateProperties.put(
-          "hibernate.tenant.identifier_resolver",
-          tenantResolver
-      );
+      hibernateProperties.put("hibernate.multiTenancy", "SCHEMA");
+      hibernateProperties.put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, connectionProvider);
+      hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, tenantResolver);
+      hibernateProperties.put(AvailableSettings.USE_SQL_COMMENTS, true);
     };
   }
 }

@@ -39,7 +39,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * @param tenantId the tenant identifier
    * @return List of tokens for the user in the tenant
    */
-  List<VerificationToken> findByUserIdAndTenantId(Long userId, String tenantId);
+  List<VerificationToken> findByUserId(Long userId);
 
   /**
    * Find unused verification tokens for a specific user within a tenant.
@@ -51,12 +51,10 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
   @Query("""
       SELECT evt FROM VerificationToken evt 
       WHERE evt.userId = :userId 
-        AND evt.tenantId = :tenantId 
         AND evt.used = false
       ORDER BY evt.createdAt DESC
       """)
-  List<VerificationToken> findUnusedTokensByUserIdAndTenantId(@Param("userId") Long userId,
-                                                              @Param("tenantId") String tenantId);
+  List<VerificationToken> findUnusedTokensByUserId(@Param("userId") Long userId);
 
   /**
    * Find the most recent unused token for a user within a tenant.
@@ -65,16 +63,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * @param tenantId the tenant identifier
    * @return Optional containing the most recent unused token
    */
-  @Query("""
-      SELECT evt FROM VerificationToken evt 
-      WHERE evt.userId = :userId 
-        AND evt.tenantId = :tenantId 
-        AND evt.used = false
-      ORDER BY evt.createdAt DESC
-      LIMIT 1
-      """)
-  Optional<VerificationToken> findMostRecentUnusedTokenByUserIdAndTenantId(@Param("userId") Long userId,
-                                                                           @Param("tenantId") String tenantId);
+  Optional<VerificationToken> findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(Long userId);
 
   /**
    * Delete all tokens that have expired before the specified date. Used for cleanup of old verification tokens.
@@ -101,11 +90,9 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
       UPDATE VerificationToken evt 
       SET evt.used = true 
       WHERE evt.userId = :userId 
-        AND evt.tenantId = :tenantId 
         AND evt.used = false
       """)
-  int markAllUnusedTokensAsUsedByUserIdAndTenantId(@Param("userId") Long userId,
-      @Param("tenantId") String tenantId);
+  int markAllUnusedTokensAsUsedByUserId(@Param("userId") Long userId);
 
   /**
    * Count unused tokens for a specific user within a tenant.
@@ -117,11 +104,9 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
   @Query("""
       SELECT COUNT(evt) FROM VerificationToken evt 
       WHERE evt.userId = :userId 
-        AND evt.tenantId = :tenantId 
         AND evt.used = false
       """)
-  long countUnusedTokensByUserIdAndTenantId(@Param("userId") Long userId,
-      @Param("tenantId") String tenantId);
+  long countUnusedTokensByUserId(@Param("userId") Long userId);
 
   /**
    * Count tokens created within a time period for a user (for rate limiting).
@@ -134,11 +119,9 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
   @Query("""
       SELECT COUNT(evt) FROM VerificationToken evt 
       WHERE evt.userId = :userId 
-        AND evt.tenantId = :tenantId 
         AND evt.createdAt >= :since
       """)
   long countTokensCreatedSince(@Param("userId") Long userId,
-      @Param("tenantId") String tenantId,
       @Param("since") LocalDateTime since);
 
   /**
@@ -150,12 +133,10 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    */
   @Query("""
       SELECT evt FROM VerificationToken evt 
-      WHERE evt.tenantId = :tenantId 
-        AND evt.expiresAt < :currentTime
+      WHERE evt.expiresAt < :currentTime
       ORDER BY evt.expiresAt ASC
       """)
-  List<VerificationToken> findExpiredTokensByTenantId(@Param("tenantId") String tenantId,
-                                                      @Param("currentTime") LocalDateTime currentTime);
+  List<VerificationToken> findExpiredTokens(@Param("currentTime") LocalDateTime currentTime);
 
   /**
    * Check if a token exists and is valid (unused and not expired).
@@ -184,4 +165,32 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
       WHERE evt.expiresAt < :dateTime
       """)
   long countByExpiresAtBefore(@Param("dateTime") LocalDateTime dateTime);
+
+  default List<VerificationToken> findByUserIdAndTenantId(Long userId, String tenantId) {
+    return findByUserId(userId);
+  }
+
+  default List<VerificationToken> findUnusedTokensByUserIdAndTenantId(Long userId, String tenantId) {
+    return findUnusedTokensByUserId(userId);
+  }
+
+  default Optional<VerificationToken> findMostRecentUnusedTokenByUserIdAndTenantId(Long userId, String tenantId) {
+    return findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(userId);
+  }
+
+  default int markAllUnusedTokensAsUsedByUserIdAndTenantId(Long userId, String tenantId) {
+    return markAllUnusedTokensAsUsedByUserId(userId);
+  }
+
+  default long countUnusedTokensByUserIdAndTenantId(Long userId, String tenantId) {
+    return countUnusedTokensByUserId(userId);
+  }
+
+  default long countTokensCreatedSince(Long userId, String tenantId, LocalDateTime since) {
+    return countTokensCreatedSince(userId, since);
+  }
+
+  default List<VerificationToken> findExpiredTokensByTenantId(String tenantId, LocalDateTime currentTime) {
+    return findExpiredTokens(currentTime);
+  }
 }
