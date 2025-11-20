@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -25,7 +26,10 @@ public record GripdayProperties(
     @Valid @NotNull Cache cache,
     @Valid @NotNull Auth auth,
     @Valid @NotNull Email email,
-    @Valid @NotNull Observability observability
+    @Valid @NotNull Observability observability,
+    @Valid @NotNull Tenancy tenancy,
+    @Valid @NotNull Liquibase liquibase,
+    @NotBlank String tenantIdHeader
 ) {
 
   /**
@@ -35,8 +39,7 @@ public record GripdayProperties(
       @NotBlank String url,
       @NotBlank String username,
       @NotBlank String password,
-      @Valid @NotNull Pool pool,
-      @Valid @NotNull Migration migration
+      @Valid @NotNull Pool pool
   ) {
 
     public record Pool(
@@ -45,14 +48,6 @@ public record GripdayProperties(
         @NotNull Duration connectionTimeout,
         @NotNull Duration idleTimeout,
         @NotNull Duration maxLifetime
-    ) {
-
-    }
-
-    public record Migration(
-        boolean enabled,
-        @NotBlank String contexts,
-        boolean validateOnMigrate
     ) {
 
     }
@@ -255,5 +250,37 @@ public record GripdayProperties(
     ) {
 
     }
+  }
+
+  /**
+   * Multi-tenancy configuration properties with gripday.tenancy prefix.
+   */
+  public record Tenancy(
+      @Valid @NotNull Schema schema
+  ) {
+
+    /**
+     * Schema configuration for multi-tenant isolation.
+     * Prefix is used to generate tenant schema names (e.g., tenant_acme).
+     * Default is the fallback schema when no tenant context is set (typically 'public').
+     */
+    public record Schema(
+        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "Schema prefix must start with lowercase letter and contain only lowercase letters, numbers, and underscores") String prefix,
+        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]*$", message = "Default schema must start with lowercase letter and contain only lowercase letters, numbers, and underscores") @Name("default") String defaultSchema
+    ) {
+
+    }
+  }
+
+  /**
+   * Liquibase migration configuration properties with gripday.liquibase prefix.
+   * System changelog runs once on startup for public schema (tenants table, etc.).
+   * Tenant changelog runs per-tenant schema during tenant provisioning.
+   */
+  public record Liquibase(
+      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$", message = "System changelog must be a classpath XML file") String systemChangeLog,
+      @NotBlank @Pattern(regexp = "^classpath:.+\\.xml$", message = "Tenant changelog must be a classpath XML file") String tenantChangeLog
+  ) {
+
   }
 }

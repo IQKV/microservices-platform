@@ -14,9 +14,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Tenant entity representing isolated customer environments in the multi-tenant architecture. Each tenant has its own isolated data and configuration settings.
+ * This entity is stored in the public schema as it contains system-wide tenant metadata.
  */
 @Entity
-@Table(name = "tenants")
+@Table(name = "tenants", schema = "public")
 public class Tenant {
 
   @Id

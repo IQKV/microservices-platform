@@ -9,9 +9,23 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Database configuration for User Service. Configures JPA repositories, entity scanning, and transaction management.
  */
 @Configuration
-@EnableJpaRepositories(basePackages = "org.gripday.userservice.infrastructure.repository")
-@EntityScan(basePackages = "org.gripday.userservice.infrastructure.entity")
+@EnableJpaRepositories(basePackages = {
+    "org.gripday.userservice.usermanagement",
+    "org.gripday.userservice.tenancy",
+    "org.gripday.userservice.organization",
+    "org.gripday.userservice.emailverification",
+    "org.gripday.userservice.security",
+    "org.gripday.userservice.shared"
+})
+@EntityScan(basePackages = {
+    "org.gripday.userservice.usermanagement",
+    "org.gripday.userservice.tenancy",
+    "org.gripday.userservice.organization",
+    "org.gripday.userservice.emailverification",
+    "org.gripday.userservice.security",
+    "org.gripday.userservice.shared"
+})
 @EnableTransactionManagement
 public class DatabaseConfig {
-  // JPA configuration will be enhanced in subsequent tasks
+  // Entities and repositories are organized by domain modules
 }

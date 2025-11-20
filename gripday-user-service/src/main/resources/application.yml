@@ -33,8 +33,8 @@ spring:
     open-in-view: false
 
   # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: false
 
 # SpringDoc OpenAPI Configuration
@@ -150,11 +150,12 @@ gripday:
       correlation-id-header: X-Correlation-ID
       request-id-header: X-Request-ID
   tenant-id-header: X-Tenant-ID
-
-app:
   tenancy:
     schema:
       prefix: tenant_
+      default: public
   liquibase:
     systemChangeLog: classpath:db/changelog/system/master.xml
     tenantChangeLog: classpath:db/changelog/tenant/master.xml
+    # System changelog runs once on startup for public schema (tenants table, etc.)
+    # Tenant changelog runs per-tenant schema during tenant provisioning

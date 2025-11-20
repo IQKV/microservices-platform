@@ -51,9 +51,9 @@ spring:
           max-wait: -1ms
 
   # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
-    enabled: true
+    enabled: false
     contexts: production
 
 # Gripday Configuration - Production Environment
@@ -69,10 +69,6 @@ gripday:
       connection-timeout: PT20S
       idle-timeout: PT5M
       max-lifetime: PT20M
-    migration:
-      enabled: true
-      contexts: production
-      validate-on-migrate: true
 
   # Cache Configuration - Redis
   cache:

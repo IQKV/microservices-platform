@@ -14,7 +14,7 @@ public class SchemaNameResolver {
   private final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
   private static final Pattern ILLEGAL = Pattern.compile("[^a-z0-9_]");
 
-  public SchemaNameResolver(@Value("${app.tenancy.schema.prefix:tenant_}") final String prefix) {
+  public SchemaNameResolver(@Value("${gripday.tenancy.schema.prefix:tenant_}") final String prefix) {
     this.prefix = prefix;
   }
 

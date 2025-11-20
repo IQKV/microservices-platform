@@ -34,6 +34,21 @@
       "name": "gripday.observability",
       "type": "org.gripday.userservice.config.GripdayProperties$Observability",
       "description": "Observability configuration for tracing, metrics, and logging"
+    },
+    {
+      "name": "gripday.tenancy",
+      "type": "org.gripday.userservice.config.GripdayProperties$Tenancy",
+      "description": "Multi-tenancy configuration for schema-per-tenant isolation"
+    },
+    {
+      "name": "gripday.tenancy.schema",
+      "type": "org.gripday.userservice.config.GripdayProperties$Tenancy$Schema",
+      "description": "Schema naming and resolution configuration for tenant isolation"
+    },
+    {
+      "name": "gripday.liquibase",
+      "type": "org.gripday.userservice.config.GripdayProperties$Liquibase",
+      "description": "Liquibase migration configuration for system and tenant schemas"
     }
   ],
   "properties": [
@@ -90,27 +105,7 @@
       "sourceType": "org.gripday.userservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
       "defaultValue": "1800s"
     },
-    {
-      "name": "gripday.database.migration.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable database migration using Liquibase",
-      "sourceType": "org.gripday.userservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
-      "defaultValue": true
-    },
-    {
-      "name": "gripday.database.migration.contexts",
-      "type": "java.lang.String",
-      "description": "Migration contexts for Liquibase",
-      "sourceType": "org.gripday.userservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
-      "defaultValue": "default"
-    },
-    {
-      "name": "gripday.database.migration.validate-on-migrate",
-      "type": "java.lang.Boolean",
-      "description": "Validate migration on startup",
-      "sourceType": "org.gripday.userservice.infrastructure.config.DatabaseConfigurationProperties$MigrationProperties",
-      "defaultValue": true
-    },
+
     {
       "name": "gripday.cache.redis.host",
       "type": "java.lang.String",
@@ -525,6 +520,41 @@
       "description": "Enable performance metrics logging",
       "sourceType": "org.gripday.userservice.config.GripdayProperties$Observability$Logging",
       "defaultValue": false
+    },
+    {
+      "name": "gripday.tenant-id-header",
+      "type": "java.lang.String",
+      "description": "HTTP header name used for tenant identification in multi-tenant requests",
+      "sourceType": "org.gripday.userservice.config.GripdayProperties",
+      "defaultValue": "X-Tenant-ID"
+    },
+    {
+      "name": "gripday.tenancy.schema.prefix",
+      "type": "java.lang.String",
+      "description": "Prefix used for tenant schema names (e.g., 'tenant_' results in 'tenant_acme' for tenant 'acme'). Must start with lowercase letter and contain only lowercase letters, numbers, and underscores.",
+      "sourceType": "org.gripday.userservice.config.GripdayProperties$Tenancy$Schema",
+      "defaultValue": "tenant_"
+    },
+    {
+      "name": "gripday.tenancy.schema.default",
+      "type": "java.lang.String",
+      "description": "Default schema name used when no tenant context is set (typically 'public' for system-wide tables like tenants registry). Must start with lowercase letter and contain only lowercase letters, numbers, and underscores.",
+      "sourceType": "org.gripday.userservice.config.GripdayProperties$Tenancy$Schema",
+      "defaultValue": "public"
+    },
+    {
+      "name": "gripday.liquibase.system-change-log",
+      "type": "java.lang.String",
+      "description": "Classpath location of the Liquibase changelog for system-level migrations (public schema). Runs once on application startup for tables like tenants registry.",
+      "sourceType": "org.gripday.userservice.config.GripdayProperties$Liquibase",
+      "defaultValue": "classpath:db/changelog/system/master.xml"
+    },
+    {
+      "name": "gripday.liquibase.tenant-change-log",
+      "type": "java.lang.String",
+      "description": "Classpath location of the Liquibase changelog for tenant-level migrations. Runs per-tenant schema during tenant provisioning for tables like users, organizations, etc.",
+      "sourceType": "org.gripday.userservice.config.GripdayProperties$Liquibase",
+      "defaultValue": "classpath:db/changelog/tenant/master.xml"
     }
   ],
   "hints": [
@@ -685,6 +715,67 @@
         {
           "value": "json",
           "description": "Structured JSON format (production)"
+        }
+      ]
+    },
+    {
+      "name": "gripday.tenant-id-header",
+      "values": [
+        {
+          "value": "X-Tenant-ID",
+          "description": "Standard tenant ID header"
+        },
+        {
+          "value": "X-Organization-ID",
+          "description": "Alternative organization-based tenant header"
+        }
+      ]
+    },
+    {
+      "name": "gripday.tenancy.schema.prefix",
+      "values": [
+        {
+          "value": "tenant_",
+          "description": "Standard tenant schema prefix (e.g., tenant_acme)"
+        },
+        {
+          "value": "t_",
+          "description": "Short tenant schema prefix (e.g., t_acme)"
+        },
+        {
+          "value": "org_",
+          "description": "Organization-based schema prefix (e.g., org_acme)"
+        }
+      ]
+    },
+    {
+      "name": "gripday.tenancy.schema.default",
+      "values": [
+        {
+          "value": "public",
+          "description": "PostgreSQL default public schema"
+        },
+        {
+          "value": "system",
+          "description": "Custom system schema name"
+        }
+      ]
+    },
+    {
+      "name": "gripday.liquibase.system-change-log",
+      "values": [
+        {
+          "value": "classpath:db/changelog/system/master.xml",
+          "description": "Default system changelog location"
+        }
+      ]
+    },
+    {
+      "name": "gripday.liquibase.tenant-change-log",
+      "values": [
+        {
+          "value": "classpath:db/changelog/tenant/master.xml",
+          "description": "Default tenant changelog location"
         }
       ]
     }

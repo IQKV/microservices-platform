@@ -15,8 +15,8 @@ public class TenantLiquibaseRunner {
 
   public TenantLiquibaseRunner(
       final DataSource dataSource,
-      @Value("${app.liquibase.tenantChangeLog:classpath:db/changelog/tenant/master.xml}") final String tenantChangeLog,
-      @Value("${app.liquibase.systemChangeLog:classpath:db/changelog/system/master.xml}") final String systemChangeLog) {
+      @Value("${gripday.liquibase.tenantChangeLog:classpath:db/changelog/tenant/master.xml}") final String tenantChangeLog,
+      @Value("${gripday.liquibase.systemChangeLog:classpath:db/changelog/system/master.xml}") final String systemChangeLog) {
     this.dataSource = dataSource;
     this.tenantChangeLog = tenantChangeLog;
     this.systemChangeLog = systemChangeLog;
