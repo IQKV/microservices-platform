@@ -15,6 +15,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -130,10 +131,6 @@ public class ObservabilityConfig {
    */
   public static class CorrelationIdGlobalFilter implements GlobalFilter, Ordered {
 
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-    private static final String REQUEST_ID_HEADER = "X-Request-ID";
-    private static final String TENANT_ID_HEADER = "X-Tenant-ID";
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
       var request = exchange.getRequest();
@@ -142,29 +139,29 @@ public class ObservabilityConfig {
       // Generate or extract correlation ID
       var correlationId = getOrGenerateCorrelationId(request);
       var requestId = getOrGenerateRequestId(request);
-      var tenantId = request.getHeaders().getFirst(TENANT_ID_HEADER);
+      var tenantId = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
 
       // Add to response headers
-      response.getHeaders().add(CORRELATION_ID_HEADER, correlationId);
-      response.getHeaders().add(REQUEST_ID_HEADER, requestId);
+      response.getHeaders().add(GatewayConstants.Headers.X_CORRELATION_ID, correlationId);
+      response.getHeaders().add(GatewayConstants.Headers.X_REQUEST_ID, requestId);
 
       // Add to MDC for logging (reactive context)
       return chain.filter(exchange)
           .contextWrite(ctx -> {
-            ctx = ctx.put("correlationId", correlationId);
-            ctx = ctx.put("requestId", requestId);
+            ctx = ctx.put(GatewayConstants.MdcKeys.CORRELATION_ID, correlationId);
+            ctx = ctx.put(GatewayConstants.MdcKeys.REQUEST_ID, requestId);
             if (tenantId != null) {
-              ctx = ctx.put("tenantId", tenantId);
+              ctx = ctx.put(GatewayConstants.MdcKeys.TENANT_ID, tenantId);
             }
             return ctx;
           })
           .doOnEach(signal -> {
             if (signal.hasValue() || signal.hasError()) {
               // Set MDC for logging
-              MDC.put("correlationId", correlationId);
-              MDC.put("requestId", requestId);
+              MDC.put(GatewayConstants.MdcKeys.CORRELATION_ID, correlationId);
+              MDC.put(GatewayConstants.MdcKeys.REQUEST_ID, requestId);
               if (tenantId != null) {
-                MDC.put("tenantId", tenantId);
+                MDC.put(GatewayConstants.MdcKeys.TENANT_ID, tenantId);
               }
             }
           })
@@ -172,12 +169,12 @@ public class ObservabilityConfig {
     }
 
     private String getOrGenerateCorrelationId(org.springframework.http.server.reactive.ServerHttpRequest request) {
-      var correlationId = request.getHeaders().getFirst(CORRELATION_ID_HEADER);
+      var correlationId = request.getHeaders().getFirst(GatewayConstants.Headers.X_CORRELATION_ID);
       return correlationId != null ? correlationId : UUID.randomUUID().toString();
     }
 
     private String getOrGenerateRequestId(org.springframework.http.server.reactive.ServerHttpRequest request) {
-      var requestId = request.getHeaders().getFirst(REQUEST_ID_HEADER);
+      var requestId = request.getHeaders().getFirst(GatewayConstants.Headers.X_REQUEST_ID);
       return requestId != null ? requestId : "req-" + System.currentTimeMillis();
     }
 
@@ -199,13 +196,13 @@ public class ObservabilityConfig {
 
     public GatewayServiceMetrics(final MeterRegistry meterRegistry) {
       this.meterRegistry = meterRegistry;
-      this.requestTimer = Timer.builder("gripday.gateway.request.duration")
+      this.requestTimer = Timer.builder(GatewayConstants.Metrics.REQUEST_DURATION)
           .description("Time taken for gateway request processing")
           .register(meterRegistry);
-      this.authenticationTimer = Timer.builder("gripday.gateway.authentication.duration")
+      this.authenticationTimer = Timer.builder(GatewayConstants.Metrics.AUTHENTICATION_DURATION)
           .description("Time taken for authentication validation")
           .register(meterRegistry);
-      this.rateLimitTimer = Timer.builder("gripday.gateway.ratelimit.duration")
+      this.rateLimitTimer = Timer.builder(GatewayConstants.Metrics.RATE_LIMIT_DURATION)
           .description("Time taken for rate limit checking")
           .register(meterRegistry);
     }
@@ -215,19 +212,21 @@ public class ObservabilityConfig {
     }
 
     public void recordRequestSuccess(Timer.Sample sample, String route) {
-      sample.stop(Timer.builder("gripday.gateway.request.success")
-          .tag("route", route)
+      sample.stop(Timer.builder(GatewayConstants.Metrics.REQUEST_SUCCESS)
+          .tag(GatewayConstants.Metrics.TAG_ROUTE, route)
           .description("Successful gateway requests")
           .register(meterRegistry));
-      meterRegistry.counter("gripday.gateway.request.total", "result", "success", "route", route).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.REQUEST_TOTAL, 
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_SUCCESS, 
+          GatewayConstants.Metrics.TAG_ROUTE, route).increment();
     }
 
     public void recordRequestFailure(String route, String reason, int statusCode) {
-      meterRegistry.counter("gripday.gateway.request.total",
-          "result", "failure",
-          "route", route,
-          "reason", reason,
-          "status", String.valueOf(statusCode)).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.REQUEST_TOTAL,
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_FAILURE,
+          GatewayConstants.Metrics.TAG_ROUTE, route,
+          GatewayConstants.Metrics.TAG_REASON, reason,
+          GatewayConstants.Metrics.TAG_STATUS, String.valueOf(statusCode)).increment();
     }
 
     public Timer.Sample startAuthenticationTimer() {
@@ -236,75 +235,84 @@ public class ObservabilityConfig {
 
     public void recordAuthenticationSuccess(Timer.Sample sample) {
       sample.stop(authenticationTimer);
-      meterRegistry.counter("gripday.gateway.authentication.total", "result", "success").increment();
+      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL, 
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_SUCCESS).increment();
     }
 
     public void recordAuthenticationFailure(String reason) {
-      meterRegistry.counter("gripday.gateway.authentication.total", "result", "failure", "reason", reason).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL, 
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_FAILURE, 
+          GatewayConstants.Metrics.TAG_REASON, reason).increment();
     }
 
     public void recordRateLimitHit(String endpoint, String tenantId) {
-      meterRegistry.counter("gripday.gateway.ratelimit.hit",
-          "endpoint", endpoint,
-          "tenant", tenantId != null ? tenantId : "unknown").increment();
+      meterRegistry.counter(GatewayConstants.Metrics.RATE_LIMIT_HIT,
+          GatewayConstants.Metrics.TAG_ENDPOINT, endpoint,
+          GatewayConstants.Metrics.TAG_TENANT, tenantId != null ? tenantId : GatewayConstants.Metrics.TENANT_UNKNOWN).increment();
     }
 
     public void recordCircuitBreakerOpen(String service) {
-      meterRegistry.counter("gripday.gateway.circuitbreaker.open", "service", service).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_OPEN, 
+          GatewayConstants.Metrics.TAG_SERVICE, service).increment();
     }
 
     public void recordCircuitBreakerClosed(String service) {
-      meterRegistry.counter("gripday.gateway.circuitbreaker.closed", "service", service).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_CLOSED, 
+          GatewayConstants.Metrics.TAG_SERVICE, service).increment();
     }
 
     public void recordRouteLatency(String route, long latencyMs) {
-      meterRegistry.timer("gripday.gateway.route.latency", "route", route)
+      meterRegistry.timer(GatewayConstants.Metrics.ROUTE_LATENCY, 
+          GatewayConstants.Metrics.TAG_ROUTE, route)
           .record(Duration.ofMillis(latencyMs));
     }
 
     public void recordActiveConnections(int count) {
-      meterRegistry.gauge("gripday.gateway.connections.active", count);
+      meterRegistry.gauge(GatewayConstants.Metrics.CONNECTIONS_ACTIVE, count);
     }
 
     public void recordTotalRequests(String method, String route) {
-      meterRegistry.counter("gripday.gateway.requests.total", "method", method, "route", route).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.REQUESTS_TOTAL, 
+          GatewayConstants.Metrics.TAG_METHOD, method, 
+          GatewayConstants.Metrics.TAG_ROUTE, route).increment();
     }
 
     public void recordResponseStatus(int statusCode, String route) {
       var statusClass = getStatusClass(statusCode);
-      meterRegistry.counter("gripday.gateway.responses.total",
-          "status_code", String.valueOf(statusCode),
-          "status_class", statusClass,
-          "route", route).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.RESPONSES_TOTAL,
+          GatewayConstants.Metrics.TAG_STATUS_CODE, String.valueOf(statusCode),
+          GatewayConstants.Metrics.TAG_STATUS_CLASS, statusClass,
+          GatewayConstants.Metrics.TAG_ROUTE, route).increment();
     }
 
     public void recordTenantRequests(String tenantId, String endpoint) {
-      meterRegistry.counter("gripday.gateway.tenant.requests",
-          "tenant", tenantId != null ? tenantId : "unknown",
-          "endpoint", endpoint).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.TENANT_REQUESTS,
+          GatewayConstants.Metrics.TAG_TENANT, tenantId != null ? tenantId : GatewayConstants.Metrics.TENANT_UNKNOWN,
+          GatewayConstants.Metrics.TAG_ENDPOINT, endpoint).increment();
     }
 
     public void recordCorsRequests(String origin, String method) {
-      meterRegistry.counter("gripday.gateway.cors.requests",
-          "origin", origin != null ? origin : "unknown",
-          "method", method).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.CORS_REQUESTS,
+          GatewayConstants.Metrics.TAG_ORIGIN, origin != null ? origin : GatewayConstants.Metrics.ORIGIN_UNKNOWN,
+          GatewayConstants.Metrics.TAG_METHOD, method).increment();
     }
 
     public void recordTransformationTime(String type, long durationMs) {
-      meterRegistry.timer("gripday.gateway.transformation.duration", "type", type)
+      meterRegistry.timer(GatewayConstants.Metrics.TRANSFORMATION_DURATION, 
+          GatewayConstants.Metrics.TAG_TYPE, type)
           .record(Duration.ofMillis(durationMs));
     }
 
     public void recordLoadBalancingDecision(String service, String instance) {
-      meterRegistry.counter("gripday.gateway.loadbalancing.decisions",
-          "service", service,
-          "instance", instance).increment();
+      meterRegistry.counter(GatewayConstants.Metrics.LOAD_BALANCING_DECISIONS,
+          GatewayConstants.Metrics.TAG_SERVICE, service,
+          GatewayConstants.Metrics.TAG_INSTANCE, instance).increment();
     }
 
     public void recordHealthCheckResult(String service, boolean healthy) {
-      meterRegistry.counter("gripday.gateway.healthcheck.results",
-          "service", service,
-          "result", healthy ? "healthy" : "unhealthy").increment();
+      meterRegistry.counter(GatewayConstants.Metrics.HEALTH_CHECK_RESULTS,
+          GatewayConstants.Metrics.TAG_SERVICE, service,
+          GatewayConstants.Metrics.TAG_RESULT, healthy ? GatewayConstants.Metrics.RESULT_HEALTHY : GatewayConstants.Metrics.RESULT_UNHEALTHY).increment();
     }
 
     private String getStatusClass(int statusCode) {

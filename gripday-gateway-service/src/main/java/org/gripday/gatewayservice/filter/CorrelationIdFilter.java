@@ -2,6 +2,7 @@ package org.gripday.gatewayservice.filter;
 
 import java.util.UUID;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -21,9 +22,6 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(CorrelationIdFilter.class);
 
-  private static final String X_CORRELATION_ID_HEADER = "X-Correlation-ID";
-  private static final String CORRELATION_ID_ATTRIBUTE = "correlationId";
-
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     var request = exchange.getRequest();
@@ -32,14 +30,14 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
     var correlationId = getOrGenerateCorrelationId(request);
 
     // Add correlation ID to MDC for structured logging
-    MDC.put("correlationId", correlationId);
+    MDC.put(GatewayConstants.MdcKeys.CORRELATION_ID, correlationId);
 
     // Store correlation ID in exchange attributes
-    exchange.getAttributes().put(CORRELATION_ID_ATTRIBUTE, correlationId);
+    exchange.getAttributes().put(GatewayConstants.Attributes.CORRELATION_ID, correlationId);
 
     // Add correlation ID to request headers for downstream services
     var modifiedRequest = request.mutate()
-        .header(X_CORRELATION_ID_HEADER, correlationId)
+        .header(GatewayConstants.Headers.X_CORRELATION_ID, correlationId)
         .build();
 
     var modifiedExchange = exchange.mutate().request(modifiedRequest).build();
@@ -49,13 +47,13 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
     return chain.filter(modifiedExchange)
         .doFinally(signalType -> {
           // Clean up MDC after request processing
-          MDC.remove("correlationId");
+          MDC.remove(GatewayConstants.MdcKeys.CORRELATION_ID);
         });
   }
 
   private String getOrGenerateCorrelationId(org.springframework.http.server.reactive.ServerHttpRequest request) {
     // Check if correlation ID already exists in headers
-    var existingCorrelationId = request.getHeaders().getFirst(X_CORRELATION_ID_HEADER);
+    var existingCorrelationId = request.getHeaders().getFirst(GatewayConstants.Headers.X_CORRELATION_ID);
 
     if (StringUtils.hasText(existingCorrelationId)) {
       logger.debug("Using existing correlation ID: {}", existingCorrelationId);
@@ -77,6 +75,6 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
 
   @Override
   public int getOrder() {
-    return -300; // Execute before tenant extraction and authentication filters
+    return GatewayConstants.FilterOrder.CORRELATION_ID_FILTER;
   }
 }

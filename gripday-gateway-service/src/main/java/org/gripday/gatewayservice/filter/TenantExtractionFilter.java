@@ -1,5 +1,6 @@
 package org.gripday.gatewayservice.filter;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -20,9 +21,6 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(TenantExtractionFilter.class);
 
-  private static final String X_TENANT_ID_HEADER = "X-Tenant-ID";
-  private static final String TENANT_CONTEXT_ATTRIBUTE = "tenantContext";
-
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     var request = exchange.getRequest();
@@ -32,11 +30,11 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
 
     if (StringUtils.hasText(tenantId)) {
       // Add tenant context to MDC for structured logging
-      MDC.put("tenantId", tenantId);
+      MDC.put(GatewayConstants.MdcKeys.TENANT_ID, tenantId);
 
       // Store tenant context in exchange attributes for downstream filters
       var tenantContext = new TenantContext(tenantId);
-      exchange.getAttributes().put(TENANT_CONTEXT_ATTRIBUTE, tenantContext);
+      exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);
 
       logger.debug("Established tenant context: {}", tenantId);
     } else {
@@ -46,7 +44,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
     return chain.filter(exchange)
         .doFinally(signalType -> {
           // Clean up MDC after request processing
-          MDC.remove("tenantId");
+          MDC.remove(GatewayConstants.MdcKeys.TENANT_ID);
         });
   }
 
@@ -57,7 +55,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
     // 3. Query parameter (for development/testing)
 
     // 1. Check X-Tenant-ID header
-    var tenantIdHeader = request.getHeaders().getFirst(X_TENANT_ID_HEADER);
+    var tenantIdHeader = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
     if (StringUtils.hasText(tenantIdHeader)) {
       logger.debug("Tenant ID extracted from header: {}", tenantIdHeader);
       return tenantIdHeader;
@@ -71,7 +69,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
     }
 
     // 3. Check query parameter (for development/testing)
-    var queryTenant = request.getQueryParams().getFirst("tenantId");
+    var queryTenant = request.getQueryParams().getFirst(GatewayConstants.QueryParams.TENANT_ID);
     if (StringUtils.hasText(queryTenant)) {
       logger.debug("Tenant ID extracted from query parameter: {}", queryTenant);
       return queryTenant;
@@ -87,7 +85,9 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
       if (parts.length > 2) {
         var subdomain = parts[0];
         // Validate subdomain format (alphanumeric and hyphens only)
-        if (subdomain.matches("^[a-zA-Z0-9-]+$") && !subdomain.equals("www") && !subdomain.equals("api")) {
+        if (subdomain.matches(GatewayConstants.Subdomains.SUBDOMAIN_PATTERN) 
+            && !subdomain.equals(GatewayConstants.Subdomains.WWW) 
+            && !subdomain.equals(GatewayConstants.Subdomains.API)) {
           return subdomain;
         }
       }
@@ -97,7 +97,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
 
   @Override
   public int getOrder() {
-    return -200; // Execute before JWT authentication filter
+    return GatewayConstants.FilterOrder.TENANT_EXTRACTION_FILTER;
   }
 
   /**

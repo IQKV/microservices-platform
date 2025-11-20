@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +33,6 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-  private static final String X_TENANT_ID_HEADER = "X-Tenant-ID";
-  private static final String X_USER_ID_HEADER = "X-User-ID";
-  private static final String X_USERNAME_HEADER = "X-Username";
-  private static final String X_USER_ROLES_HEADER = "X-User-Roles";
-  private static final String X_CORRELATION_ID_HEADER = "X-Correlation-ID";
-
   private final GripdayProperties gripdayProperties;
 
   public JwtAuthenticationFilter(final GripdayProperties gripdayProperties) {
@@ -51,7 +46,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Generate correlation ID if not present
     var correlationId = getOrGenerateCorrelationId(request);
-    MDC.put("correlationId", correlationId);
+    MDC.put(GatewayConstants.MdcKeys.CORRELATION_ID, correlationId);
 
     // Skip authentication for public paths
     if (isPublicPath(path)) {
@@ -75,7 +70,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
             // Add tenant context to MDC for logging
             if (StringUtils.hasText(tenantContext.tenantId())) {
-              MDC.put("tenantId", tenantContext.tenantId());
+              MDC.put(GatewayConstants.MdcKeys.TENANT_ID, tenantContext.tenantId());
             }
 
             logger.debug("Authenticated user: {} for tenant: {}", userContext.username(), tenantContext.tenantId());
@@ -87,15 +82,15 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(modifiedExchange);
           } finally {
             // Clean up MDC
-            MDC.remove("correlationId");
-            MDC.remove("tenantId");
+            MDC.remove(GatewayConstants.MdcKeys.CORRELATION_ID);
+            MDC.remove(GatewayConstants.MdcKeys.TENANT_ID);
           }
         })
         .switchIfEmpty(addCorrelationIdAndContinue(exchange, chain, correlationId));
   }
 
   private String getOrGenerateCorrelationId(ServerHttpRequest request) {
-    var existingCorrelationId = request.getHeaders().getFirst(X_CORRELATION_ID_HEADER);
+    var existingCorrelationId = request.getHeaders().getFirst(GatewayConstants.Headers.X_CORRELATION_ID);
     return StringUtils.hasText(existingCorrelationId) ? existingCorrelationId : UUID.randomUUID().toString();
   }
 
@@ -134,7 +129,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private TenantContext extractTenantContext(ServerHttpRequest request, Jwt jwt) {
     // Priority: 1. X-Tenant-ID header, 2. JWT claims, 3. Subdomain extraction
-    var tenantId = request.getHeaders().getFirst(X_TENANT_ID_HEADER);
+    var tenantId = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
 
     if (!StringUtils.hasText(tenantId)) {
       tenantId = extractString(jwt.getClaims().get(JwtClaimNames.TENANT_ID));
@@ -202,18 +197,18 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     var builder = request.mutate();
 
     // Add correlation ID
-    builder.header(X_CORRELATION_ID_HEADER, correlationId);
+    builder.header(GatewayConstants.Headers.X_CORRELATION_ID, correlationId);
 
     // Add user context headers only if propagation is enabled
     if (gripdayProperties.gateway().security().authentication().enableUserContextPropagation()) {
       if (userContext.userId() != null) {
-        builder.header(X_USER_ID_HEADER, userContext.userId().toString());
+        builder.header(GatewayConstants.Headers.X_USER_ID, userContext.userId().toString());
       }
       if (StringUtils.hasText(userContext.username())) {
-        builder.header(X_USERNAME_HEADER, userContext.username());
+        builder.header(GatewayConstants.Headers.X_USERNAME, userContext.username());
       }
       if (!userContext.roles().isEmpty()) {
-        builder.header(X_USER_ROLES_HEADER, String.join(",", userContext.roles()));
+        builder.header(GatewayConstants.Headers.X_USER_ROLES, String.join(",", userContext.roles()));
       }
 
       logger.debug("User context propagated for user: {}", userContext.username());
@@ -223,7 +218,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Add tenant context headers
     if (StringUtils.hasText(tenantContext.tenantId())) {
-      builder.header(X_TENANT_ID_HEADER, tenantContext.tenantId());
+      builder.header(GatewayConstants.Headers.X_TENANT_ID, tenantContext.tenantId());
     }
 
     return builder.build();
@@ -231,7 +226,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   private Mono<Void> addCorrelationIdAndContinue(ServerWebExchange exchange, GatewayFilterChain chain, String correlationId) {
     var modifiedRequest = exchange.getRequest().mutate()
-        .header(X_CORRELATION_ID_HEADER, correlationId)
+        .header(GatewayConstants.Headers.X_CORRELATION_ID, correlationId)
         .build();
     var modifiedExchange = exchange.mutate().request(modifiedRequest).build();
     return chain.filter(modifiedExchange);
@@ -239,7 +234,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   @Override
   public int getOrder() {
-    return -100; // Execute before other filters
+    return GatewayConstants.FilterOrder.JWT_AUTHENTICATION_FILTER;
   }
 
   /**

@@ -3,6 +3,7 @@ package org.gripday.gatewayservice.filter;
 import java.util.List;
 import java.util.Map;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -29,27 +30,27 @@ public class ResponseTransformationFilter extends AbstractGatewayFilterFactory<R
     return (exchange, chain) -> {
       return chain.filter(exchange).then(Mono.fromRunnable(() -> {
         var response = exchange.getResponse();
-        var correlationId = MDC.get("correlationId");
-        var requestId = MDC.get("requestId");
+        var correlationId = MDC.get(GatewayConstants.MdcKeys.CORRELATION_ID);
+        var requestId = MDC.get(GatewayConstants.MdcKeys.REQUEST_ID);
 
         // Add security headers
         addSecurityHeaders(response);
 
         // Add correlation and request tracking headers
         if (correlationId != null) {
-          response.getHeaders().set("X-Correlation-ID", correlationId);
+          response.getHeaders().set(GatewayConstants.Headers.X_CORRELATION_ID, correlationId);
         }
 
         if (requestId != null) {
-          response.getHeaders().set("X-Request-ID", requestId);
+          response.getHeaders().set(GatewayConstants.Headers.X_REQUEST_ID, requestId);
         }
 
         // Add gateway identification
-        response.getHeaders().set("X-Gateway-Service", "gripday-gateway");
-        response.getHeaders().set("X-Response-Source", "gateway");
+        response.getHeaders().set(GatewayConstants.Headers.X_GATEWAY_SERVICE, GatewayConstants.ServiceInfo.SERVICE_NAME);
+        response.getHeaders().set(GatewayConstants.Headers.X_RESPONSE_SOURCE, GatewayConstants.ServiceInfo.RESPONSE_SOURCE_VALUE);
 
         // Add response timestamp for monitoring
-        response.getHeaders().set("X-Response-Timestamp", String.valueOf(System.currentTimeMillis()));
+        response.getHeaders().set(GatewayConstants.Headers.X_RESPONSE_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 
         // Remove internal headers that shouldn't be exposed
         removeInternalHeaders(response);
@@ -66,31 +67,30 @@ public class ResponseTransformationFilter extends AbstractGatewayFilterFactory<R
     var headers = response.getHeaders();
 
     // Content Security Policy
-    headers.set("Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+    headers.set(GatewayConstants.Headers.CONTENT_SECURITY_POLICY, GatewayConstants.SecurityHeaderValues.CSP_DEFAULT);
 
     // X-Frame-Options to prevent clickjacking
-    headers.set("X-Frame-Options", "DENY");
+    headers.set(GatewayConstants.Headers.X_FRAME_OPTIONS, GatewayConstants.SecurityHeaderValues.X_FRAME_OPTIONS_DENY);
 
     // X-Content-Type-Options to prevent MIME sniffing
-    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set(GatewayConstants.Headers.X_CONTENT_TYPE_OPTIONS, GatewayConstants.SecurityHeaderValues.X_CONTENT_TYPE_OPTIONS_NOSNIFF);
 
     // X-XSS-Protection
-    headers.set("X-XSS-Protection", "1; mode=block");
+    headers.set(GatewayConstants.Headers.X_XSS_PROTECTION, GatewayConstants.SecurityHeaderValues.X_XSS_PROTECTION_BLOCK);
 
     // Referrer Policy
-    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    headers.set(GatewayConstants.Headers.REFERRER_POLICY, GatewayConstants.SecurityHeaderValues.REFERRER_POLICY_STRICT);
 
     // Strict Transport Security (HTTPS only)
     if (isHttpsRequest()) {
-      headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+      headers.set(GatewayConstants.Headers.STRICT_TRANSPORT_SECURITY, GatewayConstants.SecurityHeaderValues.HSTS_MAX_AGE);
     }
 
     // Cache control for sensitive endpoints
     if (isSensitiveEndpoint()) {
-      headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
-      headers.set("Pragma", "no-cache");
-      headers.set("Expires", "0");
+      headers.set(GatewayConstants.Headers.CACHE_CONTROL, GatewayConstants.SecurityHeaderValues.CACHE_CONTROL_NO_CACHE);
+      headers.set(GatewayConstants.Headers.PRAGMA, GatewayConstants.SecurityHeaderValues.PRAGMA_NO_CACHE);
+      headers.set(GatewayConstants.Headers.EXPIRES, GatewayConstants.SecurityHeaderValues.EXPIRES_IMMEDIATE);
     }
   }
 
@@ -101,14 +101,14 @@ public class ResponseTransformationFilter extends AbstractGatewayFilterFactory<R
     var headers = response.getHeaders();
 
     // Remove internal service headers
-    headers.remove("X-Internal-Service");
-    headers.remove("X-Internal-Version");
-    headers.remove("X-Database-Query-Time");
-    headers.remove("X-Cache-Status-Internal");
+    headers.remove(GatewayConstants.Headers.X_INTERNAL_SERVICE);
+    headers.remove(GatewayConstants.Headers.X_INTERNAL_VERSION);
+    headers.remove(GatewayConstants.Headers.X_DATABASE_QUERY_TIME);
+    headers.remove(GatewayConstants.Headers.X_CACHE_STATUS_INTERNAL);
 
     // Remove server information for security
-    headers.remove("Server");
-    headers.remove("X-Powered-By");
+    headers.remove(GatewayConstants.Headers.SERVER);
+    headers.remove(GatewayConstants.Headers.X_POWERED_BY);
   }
 
   /**
@@ -125,11 +125,11 @@ public class ResponseTransformationFilter extends AbstractGatewayFilterFactory<R
    */
   private boolean isSensitiveEndpoint() {
     // Check if the endpoint contains sensitive data
-    var path = MDC.get("requestPath");
+    var path = MDC.get(GatewayConstants.MdcKeys.REQUEST_PATH);
     if (path != null) {
-      return path.contains("/auth/")
-             || path.contains("/users/")
-             || path.contains("/admin/");
+      return path.contains(GatewayConstants.SensitivePaths.AUTH_PATH)
+             || path.contains(GatewayConstants.SensitivePaths.USERS_PATH)
+             || path.contains(GatewayConstants.SensitivePaths.ADMIN_PATH);
     }
     return false;
   }

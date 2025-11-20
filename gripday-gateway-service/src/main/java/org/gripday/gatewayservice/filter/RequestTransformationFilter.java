@@ -1,5 +1,6 @@
 package org.gripday.gatewayservice.filter;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.gripday.gatewayservice.config.GripdayProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +37,9 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
 
     return (exchange, chain) -> {
       var request = exchange.getRequest();
-      var correlationId = MDC.get("correlationId");
-      var tenantId = MDC.get("tenantId");
-      var userId = MDC.get("userId");
+      var correlationId = MDC.get(GatewayConstants.MdcKeys.CORRELATION_ID);
+      var tenantId = MDC.get(GatewayConstants.MdcKeys.TENANT_ID);
+      var userId = MDC.get(GatewayConstants.MdcKeys.USER_ID);
 
       // Build transformed request with enriched headers
       var requestBuilder = request.mutate();
@@ -46,24 +47,24 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
       requestBuilder.headers(headers -> {
         // Add correlation ID for distributed tracing
         if (correlationId != null && transformationConfig.enableHeaderEnrichment()) {
-          headers.set("X-Correlation-ID", correlationId);
+          headers.set(GatewayConstants.Headers.X_CORRELATION_ID, correlationId);
         }
 
         // Add tenant context for multi-tenant support
         if (tenantId != null && transformationConfig.enableTenantContextPropagation()) {
-          headers.set("X-Tenant-ID", tenantId);
+          headers.set(GatewayConstants.Headers.X_TENANT_ID, tenantId);
         }
 
         // Add user context for authorization
         if (userId != null && transformationConfig.enableUserContextPropagation()) {
-          headers.set("X-User-ID", userId);
+          headers.set(GatewayConstants.Headers.X_USER_ID, userId);
         }
 
         // Add service identification headers
         if (transformationConfig.enableHeaderEnrichment()) {
-          headers.set("X-Gateway-Service", "gripday-gateway");
-          headers.set("X-Request-Source", "gateway");
-          headers.set("X-Request-Timestamp", String.valueOf(System.currentTimeMillis()));
+          headers.set(GatewayConstants.Headers.X_GATEWAY_SERVICE, GatewayConstants.ServiceInfo.SERVICE_NAME);
+          headers.set(GatewayConstants.Headers.X_REQUEST_SOURCE, GatewayConstants.ServiceInfo.REQUEST_SOURCE_VALUE);
+          headers.set(GatewayConstants.Headers.X_REQUEST_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         }
 
         // Remove sensitive headers that shouldn't be forwarded

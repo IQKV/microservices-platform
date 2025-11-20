@@ -1,5 +1,6 @@
 package org.gripday.gatewayservice.config;
 
+import org.gripday.gatewayservice.common.GatewayConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
@@ -62,11 +63,11 @@ public class CorsConfiguration {
     corsConfig.setMaxAge((long) corsProperties.maxAge());
 
     // Expose headers that clients might need
-    corsConfig.addExposedHeader("X-Correlation-ID");
-    corsConfig.addExposedHeader("X-Request-ID");
-    corsConfig.addExposedHeader("X-Total-Count");
-    corsConfig.addExposedHeader("X-Page-Number");
-    corsConfig.addExposedHeader("X-Page-Size");
+    corsConfig.addExposedHeader(GatewayConstants.Headers.X_CORRELATION_ID);
+    corsConfig.addExposedHeader(GatewayConstants.Headers.X_REQUEST_ID);
+    corsConfig.addExposedHeader(GatewayConstants.Headers.X_TOTAL_COUNT);
+    corsConfig.addExposedHeader(GatewayConstants.Headers.X_PAGE_NUMBER);
+    corsConfig.addExposedHeader(GatewayConstants.Headers.X_PAGE_SIZE);
 
     var source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfig);
