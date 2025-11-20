@@ -5,19 +5,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.gripday.userservice.tenancy.SchemaNameResolver;
+import org.gripday.userservice.tenancy.SchemaTenantIdentifierResolver;
 import org.gripday.userservice.tenancy.TenantContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.gripday.userservice.tenancy.SchemaNameResolver;
-import org.gripday.userservice.tenancy.SchemaTenantIdentifierResolver;
-import org.gripday.userservice.tenancy.SchemaPerTenantConnectionProvider;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)

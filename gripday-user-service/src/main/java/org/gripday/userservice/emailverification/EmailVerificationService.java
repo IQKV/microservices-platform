@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.gripday.userservice.shared.EmailOperations;
-import org.gripday.userservice.tenancy.TenantContext;
 import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
