@@ -2,11 +2,9 @@
 
 ## Architecture Standards
 
-### Three-Tier Architecture Pattern
+### Architecture Pattern
 
-- **Presentation Layer**: REST controllers in `presentation.web` package with "Resource" suffix
-- **Domain Layer**: Business logic services in `domain.service` package
-- **Infrastructure Layer**: Data repositories in `infrastructure.repository` package
+- **Presentation Layer**: REST controllers with "RestResource" suffix
 - Enforce layer separation with ArchUnit and Spring Modulith testing
 - Controllers can only depend on domain services, never infrastructure directly
 
@@ -14,9 +12,6 @@
 
 ```
 org.gripday.{servicename}/
-├── presentation/web/          # REST controllers (Resource suffix required)
-├── domain/service/           # Business logic services
-├── infrastructure/repository/ # Data access repositories
 └── {ServiceName}Application.java
 ```
 
@@ -63,9 +58,8 @@ private static final String FIND_USERS_QUERY = """
 
 ### Controller Naming and Structure
 
-- All @RestController classes must be in `presentation.web` package
-- All @RestController classes must have "Resource" suffix
-- Example: `AuthenticationResource`, `UserManagementResource`
+- All @RestController classes must have "RestResource" suffix
+- Example: `AuthenticationRestResource`, `UserManagementRestResource`
 
 ### HTTP Standards Implementation
 
@@ -243,4 +237,4 @@ public record UserContext(
 - Support dynamic service registry registration of new microservices
 - Centralized endpoint security for any connected microservice
 - Standardized user context propagation across all services
-- Consistent three-tier architecture and API standards for all services
+- Consistent API standards for all services
