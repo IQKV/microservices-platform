@@ -107,6 +107,38 @@ This is the authentication hub for the Gripday microservices platform. It centra
 - Token cleanup scheduled tasks
 - Soft deletes for audit trail
 
+### Tenancy Implementation
+
+- Strategy: Hibernate schema-per-tenant; each tenant's data isolated in its own schema
+- Context: `TenantContext` controls current tenant; repositories are tenant-agnostic
+- Service layer: cross-tenant operations run by iterating tenants and executing in context
+- No cross-tenant joins: removed `tenant_id`-based predicates from repositories and queries
+- H2 tests: service counting uses schema detection and a PUBLIC fallback to ensure test reliability
+- Liquibase: per-tenant constraints and indexes (e.g., `organizations` name unique per tenant; one-to-one `users.organization_id`)
+- Usage pattern:
+
+```java
+// Per-tenant operation
+var count = TenantContext.executeInTenantContext(tenantId, () -> userRepository.countByEnabledTrue());
+
+// Cross-tenant aggregation (service layer)
+var stats = tenantRepository
+  .findByEnabledTrue()
+  .stream()
+  .map((t) ->
+    new TenantStatistics(
+      t.getTenantId(),
+      t.getName(),
+      t.getEnabled(),
+      TenantContext.executeInTenantContext(t.getTenantId(), () -> userRepository.countByEnabledTrue()),
+      t.getMaxUsers(),
+      TenantStatistics.calculateUtilization(TenantContext.executeInTenantContext(t.getTenantId(), () -> userRepository.countByEnabledTrue()), t.getMaxUsers()),
+      t.getCreatedAt()
+    )
+  )
+  .toList();
+```
+
 ### Testing Approach
 
 - Unit tests with JUnit 5
