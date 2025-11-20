@@ -44,7 +44,7 @@ public class OrganizationManagementService {
     validateAdminAccess(currentUser, "LIST_ORGANIZATIONS");
 
     var tenantId = currentUser.tenantId();
-    var organizations = organizationRepository.findByTenantId(tenantId);
+    var organizations = org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.findAll());
 
     var organizationDtos = organizations.stream()
         .map(this::convertToDto)
@@ -78,7 +78,7 @@ public class OrganizationManagementService {
 
     var tenantId = currentUser.tenantId();
 
-    if (organizationRepository.existsByName(request.name())) {
+    if (org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.existsByName(request.name()))) {
       throw new OrganizationManagementException("Organization name already exists: " + request.name());
     }
 
@@ -104,7 +104,7 @@ public class OrganizationManagementService {
       organization.setOwner(owner);
     }
 
-    var savedOrganization = organizationRepository.save(organization);
+    var savedOrganization = org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.save(organization));
 
     logAuditEvent("CREATE_ORGANIZATION", "Created organization: " + savedOrganization.getName(), currentUser);
 
@@ -121,7 +121,7 @@ public class OrganizationManagementService {
     var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser.tenantId());
 
     if (request.name() != null && !request.name().equals(organization.getName())) {
-      if (organizationRepository.existsByName(request.name())) {
+      if (org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.existsByName(request.name()))) {
         throw new OrganizationManagementException("Organization name already exists: " + request.name());
       }
       organization.setName(request.name());
@@ -175,7 +175,7 @@ public class OrganizationManagementService {
       organization.setOwner(owner);
     }
 
-    var updatedOrganization = organizationRepository.save(organization);
+    var updatedOrganization = org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.save(organization));
 
     logAuditEvent("UPDATE_ORGANIZATION", "Updated organization: " + updatedOrganization.getName(), currentUser);
 
@@ -195,7 +195,7 @@ public class OrganizationManagementService {
       organization.getOwner().setOrganization(null);
     }
 
-    organizationRepository.delete(organization);
+    org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.delete(organization));
 
     logAuditEvent("DELETE_ORGANIZATION", "Deleted organization: " + organization.getName(), currentUser);
   }
@@ -207,8 +207,9 @@ public class OrganizationManagementService {
   }
 
   private Organization findOrganizationByIdWithTenantCheck(Long organizationId, String tenantId) {
-    var organization = organizationRepository.findById(organizationId)
-        .orElseThrow(() -> new OrganizationManagementException("Organization not found: " + organizationId));
+    var organization = org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.findById(organizationId)
+        .orElseThrow(() -> new OrganizationManagementException("Organization not found: " + organizationId))
+    );
 
     if (!organization.getTenantId().equals(tenantId)) {
       throw new AccessDeniedException("Organization not found in current tenant");
@@ -249,7 +250,7 @@ public class OrganizationManagementService {
           currentUser.tenantId()
       );
 
-      auditLogRepository.save(auditLog);
+      org.gripday.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> auditLogRepository.save(auditLog));
 
       logger.info("Organization management audit: {} - {} by user {} in tenant {}",
           action, details, currentUser.username(), currentUser.tenantId());

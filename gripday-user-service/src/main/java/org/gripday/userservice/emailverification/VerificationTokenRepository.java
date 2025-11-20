@@ -166,31 +166,4 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
       """)
   long countByExpiresAtBefore(@Param("dateTime") LocalDateTime dateTime);
 
-  default List<VerificationToken> findByUserIdAndTenantId(Long userId, String tenantId) {
-    return findByUserId(userId);
-  }
-
-  default List<VerificationToken> findUnusedTokensByUserIdAndTenantId(Long userId, String tenantId) {
-    return findUnusedTokensByUserId(userId);
-  }
-
-  default Optional<VerificationToken> findMostRecentUnusedTokenByUserIdAndTenantId(Long userId, String tenantId) {
-    return findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(userId);
-  }
-
-  default int markAllUnusedTokensAsUsedByUserIdAndTenantId(Long userId, String tenantId) {
-    return markAllUnusedTokensAsUsedByUserId(userId);
-  }
-
-  default long countUnusedTokensByUserIdAndTenantId(Long userId, String tenantId) {
-    return countUnusedTokensByUserId(userId);
-  }
-
-  default long countTokensCreatedSince(Long userId, String tenantId, LocalDateTime since) {
-    return countTokensCreatedSince(userId, since);
-  }
-
-  default List<VerificationToken> findExpiredTokensByTenantId(String tenantId, LocalDateTime currentTime) {
-    return findExpiredTokens(currentTime);
-  }
 }

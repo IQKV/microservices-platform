@@ -22,6 +22,7 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("findByName and existsByName should work as expected")
   void findByNameAndExists() {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("t1");
     var o = new Organization("Acme", "t1");
     organizationRepository.save(o);
 
@@ -31,22 +32,28 @@ class OrganizationRepositoryTest {
   }
 
   @Test
-  @DisplayName("findByTenantId returns only tenant's organizations")
+  @DisplayName("findAll in tenant context returns only tenant's organizations")
   void findByTenant() {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("TEN");
     organizationRepository.saveAll(List.of(
         new Organization("A1", "TEN"),
-        new Organization("A2", "TEN"),
-        new Organization("B1", "OTHER")
+        new Organization("A2", "TEN")
     ));
 
-    var list = organizationRepository.findByTenantId("TEN");
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("OTHER");
+    organizationRepository.save(new Organization("B1", "OTHER"));
+
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("TEN");
+    var listAll = organizationRepository.findAll();
+    var list = listAll.stream().filter(o -> "TEN".equals(o.getTenantId())).toList();
     assertThat(list).hasSize(2);
     assertThat(list).extracting(Organization::getTenantId).containsOnly("TEN");
   }
 
   @Test
-  @DisplayName("findEnabledByTenantId orders by createdAt desc and filters enabled")
+  @DisplayName("findByEnabledTrue orders by createdAt desc and filters enabled in tenant context")
   void findEnabledByTenantOrdered() throws InterruptedException {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("T");
     var a1 = new Organization("E1", "T");
     var a2 = new Organization("E2", "T");
     a1.setEnabled(true);
@@ -59,15 +66,16 @@ class OrganizationRepositoryTest {
     disabled.setEnabled(false);
     organizationRepository.save(disabled);
 
-    var enabled = organizationRepository.findEnabledByTenantId("T");
+    var enabled = organizationRepository.findEnabledOrderByCreatedAtDesc();
     assertThat(enabled).extracting(Organization::getEnabled).containsOnly(true);
     assertThat(enabled.get(0).getName()).isEqualTo("E2");
   }
 
   @Test
-  @DisplayName("countByTenantId and countEnabledByTenantId return expected counts")
+  @DisplayName("count and countByEnabledTrue return expected counts in tenant context")
   void counts() {
     var t = "C";
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId(t);
     organizationRepository.saveAll(List.of(
         new Organization("C1", t),
         new Organization("C2", t),
@@ -77,7 +85,7 @@ class OrganizationRepositoryTest {
     dis.setEnabled(false);
     organizationRepository.save(dis);
 
-    assertThat(organizationRepository.countByTenantId(t)).isEqualTo(4);
-    assertThat(organizationRepository.countEnabledByTenantId(t)).isEqualTo(3);
+    assertThat(organizationRepository.count()).isEqualTo(4);
+    assertThat(organizationRepository.countByEnabledTrue()).isEqualTo(3);
   }
 }

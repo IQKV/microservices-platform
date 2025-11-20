@@ -16,24 +16,16 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
 
   Optional<Organization> findByName(String name);
 
-  List<Organization> findByTenantId(String tenantId);
+  List<Organization> findByEnabledTrue();
 
   @Query("""
       SELECT o FROM Organization o 
-      WHERE o.tenantId = :tenantId 
-        AND o.enabled = true
+      WHERE o.enabled = true
       ORDER BY o.createdAt DESC
       """)
-  List<Organization> findEnabledByTenantId(@Param("tenantId") String tenantId);
+  List<Organization> findEnabledOrderByCreatedAtDesc();
 
   boolean existsByName(String name);
 
-  long countByTenantId(String tenantId);
-
-  @Query("""
-      SELECT COUNT(o) FROM Organization o 
-      WHERE o.tenantId = :tenantId 
-        AND o.enabled = true
-      """)
-  long countEnabledByTenantId(@Param("tenantId") String tenantId);
+  long countByEnabledTrue();
 }

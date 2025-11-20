@@ -84,43 +84,6 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
    */
   List<Tenant> findByCreatedBy(String createdBy);
 
-  /**
-   * Find tenants with user count within specified limits using custom query. This query joins with users table to count users per tenant.
-   *
-   * @param minUsers minimum user count
-   * @param maxUsers maximum user count
-   * @return list of tenants within user count limits
-   */
-  @Query("""
-      SELECT t FROM Tenant t 
-      WHERE t.enabled = true 
-      AND (
-          SELECT COUNT(u) FROM User u 
-          WHERE u.tenantId = t.tenantId 
-          AND u.enabled = true
-      ) BETWEEN :minUsers AND :maxUsers
-      ORDER BY t.createdAt DESC
-      """)
-  List<Tenant> findTenantsWithUserCountBetween(@Param("minUsers") long minUsers,
-      @Param("maxUsers") long maxUsers);
-
-  /**
-   * Find tenants that have exceeded their user quota using custom query.
-   *
-   * @return list of tenants that have exceeded user quota
-   */
-  @Query("""
-      SELECT t FROM Tenant t 
-      WHERE t.enabled = true 
-      AND t.maxUsers IS NOT NULL 
-      AND (
-          SELECT COUNT(u) FROM User u 
-          WHERE u.tenantId = t.tenantId 
-          AND u.enabled = true
-      ) > t.maxUsers
-      ORDER BY t.createdAt DESC
-      """)
-  List<Tenant> findTenantsExceedingUserQuota();
 
   /**
    * Find tenants by name containing specified text (case-insensitive).
@@ -144,19 +107,5 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
    */
   long countByEnabledFalse();
 
-  /**
-   * Get tenant statistics using custom query with text blocks. Returns tenant ID, name, user count, and enabled status.
-   *
-   * @return list of tenant statistics
-   */
-  @Query("""
-      SELECT t.tenantId, t.name, t.enabled, 
-             COALESCE(COUNT(u), 0) as userCount,
-             t.maxUsers, t.createdAt
-      FROM Tenant t 
-      LEFT JOIN User u ON u.tenantId = t.tenantId AND u.enabled = true
-      GROUP BY t.id, t.tenantId, t.name, t.enabled, t.maxUsers, t.createdAt
-      ORDER BY t.createdAt DESC
-      """)
-  List<Object[]> getTenantStatistics();
+  
 }

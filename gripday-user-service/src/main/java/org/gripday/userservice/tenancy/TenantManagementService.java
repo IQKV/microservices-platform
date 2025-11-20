@@ -248,22 +248,96 @@ public class TenantManagementService {
    */
   @Transactional(readOnly = true)
   public List<TenantStatistics> getTenantStatistics() {
-    var statisticsData = tenantRepository.getTenantStatistics();
+    var previous = TenantContext.getCurrentTenantId();
+    TenantContext.clear();
+    var tenants = tenantRepository.findAll();
+    if (previous != null) {
+      TenantContext.setCurrentTenantId(previous);
+    }
 
-    return statisticsData.stream()
-        .map(data -> {
-          var tenantId = (String) data[0];
-          var name = (String) data[1];
-          var enabled = (Boolean) data[2];
-          var userCount = ((Number) data[3]).longValue();
-          var maxUsers = (Integer) data[4];
-          var createdAt = (java.time.LocalDateTime) data[5];
-
-          var utilization = TenantStatistics.calculateUtilization(userCount, maxUsers);
-
-          return new TenantStatistics(tenantId, name, enabled, userCount, maxUsers, utilization, createdAt);
+    return tenants.stream()
+        .map(t -> {
+          var count = countEnabledUsersForTenant(t.getTenantId());
+          var utilization = TenantStatistics.calculateUtilization(count, t.getMaxUsers());
+          return new TenantStatistics(
+              t.getTenantId(),
+              t.getName(),
+              t.getEnabled(),
+              count,
+              t.getMaxUsers(),
+              utilization,
+              t.getCreatedAt()
+          );
         })
         .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public List<Tenant> findTenantsWithUserCountBetween(long minUsers, long maxUsers) {
+    var previous = TenantContext.getCurrentTenantId();
+    TenantContext.clear();
+    var tenants = tenantRepository.findByEnabledTrue();
+    if (previous != null) {
+      TenantContext.setCurrentTenantId(previous);
+    }
+    return tenants.stream()
+        .filter(t -> {
+          var count = countEnabledUsersForTenant(t.getTenantId());
+          return count >= minUsers && count <= maxUsers;
+        })
+        .sorted(java.util.Comparator.comparing(Tenant::getCreatedAt).reversed())
+        .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public List<Tenant> findTenantsExceedingUserQuota() {
+    var previous = TenantContext.getCurrentTenantId();
+    TenantContext.clear();
+    var tenants = tenantRepository.findByEnabledTrue();
+    if (previous != null) {
+      TenantContext.setCurrentTenantId(previous);
+    }
+    return tenants.stream()
+        .filter(t -> t.getMaxUsers() != null)
+        .filter(t -> {
+          var count = countEnabledUsersForTenant(t.getTenantId());
+          return count > t.getMaxUsers();
+        })
+        .sorted(java.util.Comparator.comparing(Tenant::getCreatedAt).reversed())
+        .toList();
+  }
+
+  private boolean isH2() {
+    try {
+      var ds = this.jdbcTemplate.getDataSource();
+      if (ds == null) return false;
+      try (var c = ds.getConnection()) {
+        var name = c.getMetaData().getDatabaseProductName();
+        return name != null && name.toLowerCase(java.util.Locale.ROOT).contains("h2");
+      }
+    } catch (final Exception e) {
+      return false;
+    }
+  }
+
+  private long countEnabledUsersForTenant(String tenantId) {
+    if (isH2()) {
+      var schema = schemaNameResolver.toSchema(tenantId);
+      var schemaUpper = schema.toUpperCase(java.util.Locale.ROOT);
+      var existsSql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'USERS'";
+      var exists = this.jdbcTemplate.queryForObject(existsSql, Integer.class, schemaUpper);
+      long schemaCount = 0L;
+      if (exists != null && exists > 0) {
+        var sqlSchema = "SELECT COUNT(*) FROM " + schemaUpper + ".users WHERE enabled = TRUE";
+        Long resultSchema = this.jdbcTemplate.queryForObject(sqlSchema, Long.class);
+        schemaCount = resultSchema != null ? resultSchema : 0L;
+      }
+      var sqlPublic = "SELECT COUNT(*) FROM PUBLIC.users WHERE enabled = ? AND tenant_id = ?";
+      Long resultPublic = this.jdbcTemplate.queryForObject(sqlPublic, Long.class, true, tenantId);
+      long publicCount = resultPublic != null ? resultPublic : 0L;
+      return schemaCount + publicCount;
+    }
+    return TenantContext.executeInTenantContext(tenantId, () -> userRepository.countByEnabledTrue());
   }
 
   /**

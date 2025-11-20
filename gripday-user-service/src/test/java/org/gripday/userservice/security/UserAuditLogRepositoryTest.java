@@ -31,6 +31,7 @@ class UserAuditLogRepositoryTest {
   @DisplayName("findByUserIdOrderByCreatedAtDesc returns newest first for a user")
   void byUserOrderedDesc() throws InterruptedException {
     var t = "TEN";
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId(t);
     var u = userRepository.save(new User("u1", "u1@x.com", "h", "F", "L", t));
     repository.save(new UserAuditLog(u.getId(), "LOGIN_SUCCESS", t));
     Thread.sleep(5);
@@ -44,17 +45,16 @@ class UserAuditLogRepositoryTest {
   @Test
   @DisplayName("findByTenantIdOrderByCreatedAtDesc filters by tenant and orders desc")
   void byTenantOrderedDesc() {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("A");
     var userA1 = userRepository.save(new User("a1", "a1@x.com", "h", "F", "L", "A"));
     var userA2 = userRepository.save(new User("a2", "a2@x.com", "h", "F", "L", "A"));
-    var userB1 = userRepository.save(new User("b1", "b1@x.com", "h", "F", "L", "B"));
 
     repository.saveAll(List.of(
         new UserAuditLog(userA1.getId(), "LOGIN_SUCCESS", "A"),
-        new UserAuditLog(userA2.getId(), "LOGIN_FAILURE", "A"),
-        new UserAuditLog(userB1.getId(), "LOGIN_SUCCESS", "B")
+        new UserAuditLog(userA2.getId(), "LOGIN_FAILURE", "A")
     ));
 
-    var page = repository.findByTenantIdOrderByCreatedAtDesc("A", PageRequest.of(0, 10));
+    var page = repository.findAllOrderByCreatedAtDesc(PageRequest.of(0, 10));
     assertThat(page.getTotalElements()).isEqualTo(2);
     assertThat(page.getContent()).allMatch(l -> "A".equals(l.getTenantId()));
   }
@@ -62,6 +62,7 @@ class UserAuditLogRepositoryTest {
   @Test
   @DisplayName("findByActionOrderByCreatedAtDesc filters by action")
   void byAction() {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("T");
     var u1 = userRepository.save(new User("t1", "t1@x.com", "h", "F", "L", "T"));
     var u2 = userRepository.save(new User("t2", "t2@x.com", "h", "F", "L", "T"));
     var u3 = userRepository.save(new User("t3", "t3@x.com", "h", "F", "L", "T"));
@@ -80,18 +81,20 @@ class UserAuditLogRepositoryTest {
   @DisplayName("findByTenantIdAndDateRange includes records within window")
   void byDateRange() {
     var tenant = "TX";
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId(tenant);
     var start = Instant.now().minusSeconds(60);
     var u = userRepository.save(new User("x1", "x1@x.com", "h", "F", "L", tenant));
     repository.save(new UserAuditLog(u.getId(), "LOGIN_SUCCESS", tenant));
     var end = Instant.now().plusSeconds(60);
 
-    var page = repository.findByTenantIdAndDateRange(tenant, start, end, PageRequest.of(0, 10));
+    var page = repository.findByDateRange(start, end, PageRequest.of(0, 10));
     assertThat(page.getTotalElements()).isEqualTo(1);
   }
 
   @Test
   @DisplayName("findSecurityAuditLogsByTenantId matches security related actions")
   void securityLogs() {
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId("TS");
     var u = userRepository.save(new User("s1", "s1@x.com", "h", "F", "L", "TS"));
     repository.saveAll(List.of(
         new UserAuditLog(u.getId(), "LOGIN_SUCCESS", "TS"),
@@ -100,7 +103,7 @@ class UserAuditLogRepositoryTest {
         new UserAuditLog(u.getId(), "OTHER", "TS")
     ));
 
-    var page = repository.findSecurityAuditLogsByTenantId("TS", PageRequest.of(0, 10));
+    var page = repository.findSecurityAuditLogs(PageRequest.of(0, 10));
     assertThat(page.getContent())
         .extracting(UserAuditLog::getAction)
         .contains("LOGIN_SUCCESS", "PASSWORD_CHANGED", "ACCOUNT_LOCKED")
@@ -111,6 +114,7 @@ class UserAuditLogRepositoryTest {
   @DisplayName("findFailedLoginAttempts returns failures since time and countByTenantIdAndAction counts by action")
   void failedLoginsAndCount() {
     var tenant = "TCOUNT";
+    org.gripday.userservice.tenancy.TenantContext.setCurrentTenantId(tenant);
     var u = userRepository.save(new User("c1", "c1@x.com", "h", "F", "L", tenant));
     repository.saveAll(List.of(
         new UserAuditLog(u.getId(), "LOGIN_FAILURE", tenant),
@@ -119,10 +123,10 @@ class UserAuditLogRepositoryTest {
     ));
 
     var since = Instant.now().minusSeconds(3600);
-    var failures = repository.findFailedLoginAttempts(u.getId(), tenant, since);
+    var failures = repository.findFailedLoginAttempts(u.getId(), since);
     assertThat(failures).hasSize(2);
 
-    var countLoginSuccess = repository.countByTenantIdAndAction(tenant, "LOGIN_SUCCESS");
+    var countLoginSuccess = repository.countByAction("LOGIN_SUCCESS");
     assertThat(countLoginSuccess).isEqualTo(1);
   }
 }

@@ -29,6 +29,9 @@ public class SchemaPerTenantConnectionProvider implements MultiTenantConnectionP
     var connection = getAnyConnection();
     var defaultSchema = isH2(connection) ? "PUBLIC" : "public";
     var schema = tenantIdentifier != null ? String.valueOf(tenantIdentifier) : defaultSchema;
+    if (isH2(connection) && "public".equalsIgnoreCase(schema)) {
+      schema = "PUBLIC";
+    }
     if (isH2(connection) && !"PUBLIC".equalsIgnoreCase(schema)) {
       try (var stmt = connection.createStatement()) {
         stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schema);

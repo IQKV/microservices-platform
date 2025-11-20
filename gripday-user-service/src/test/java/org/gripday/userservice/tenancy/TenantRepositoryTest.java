@@ -8,6 +8,9 @@ import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
+@Import({TenantRepositoryTest.TestConfig.class, TenantManagementService.class})
 class TenantRepositoryTest {
 
   @Autowired
@@ -23,6 +27,9 @@ class TenantRepositoryTest {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private TenantManagementService tenantManagementService;
 
   @Test
   @DisplayName("finders and exists checks: by tenantId, domain, subdomain")
@@ -70,9 +77,10 @@ class TenantRepositoryTest {
     tenantRepository.save(new Tenant("T1", "T1"));
     tenantRepository.save(new Tenant("T2", "T2"));
 
-    // Users: T1 has 1 enabled, T2 has 2 enabled, and one disabled should not count
+    TenantContext.setCurrentTenantId("T1");
     userRepository.save(new User("u1", "u1@x.com", "h", "F", "L", "T1"));
 
+    TenantContext.setCurrentTenantId("T2");
     var u21 = new User("u21", "u21@x.com", "h", "F", "L", "T2");
     u21.setEnabled(true);
     userRepository.save(u21);
@@ -83,11 +91,12 @@ class TenantRepositoryTest {
     u2d.setEnabled(false);
     userRepository.save(u2d);
 
-    var between1and2 = tenantRepository.findTenantsWithUserCountBetween(1, 2);
-    assertThat(between1and2).extracting(Tenant::getTenantId).contains("T1", "T2");
-
-    var between2and2 = tenantRepository.findTenantsWithUserCountBetween(2, 2);
-    assertThat(between2and2).extracting(Tenant::getTenantId).containsExactly("T2");
+    TenantContext.clear();
+    var stats = tenantManagementService.getTenantStatistics();
+    var s1 = stats.stream().filter(s -> s.tenantId().equals("T1")).findFirst().orElseThrow();
+    var s2 = stats.stream().filter(s -> s.tenantId().equals("T2")).findFirst().orElseThrow();
+    assertThat(s1.userCount()).isEqualTo(1L);
+    assertThat(s2.userCount()).isEqualTo(2L);
   }
 
   @Test
@@ -97,28 +106,45 @@ class TenantRepositoryTest {
     t.setMaxUsers(1);
     tenantRepository.save(t);
 
+    TenantContext.setCurrentTenantId("TQ");
     userRepository.save(new User("q1", "q1@x.com", "h", "F", "L", "TQ"));
     userRepository.save(new User("q2", "q2@x.com", "h", "F", "L", "TQ"));
 
-    var exceeding = tenantRepository.findTenantsExceedingUserQuota();
+    var exceeding = tenantManagementService.findTenantsExceedingUserQuota();
     assertThat(exceeding).extracting(Tenant::getTenantId).contains("TQ");
   }
 
   @Test
-  @DisplayName("getTenantStatistics returns aggregated rows per tenant")
+  @DisplayName("TenantManagementService.getTenantStatistics returns stats with per-tenant counts")
   void tenantStatistics() {
     var t = new Tenant("TS", "Stats");
     t.setMaxUsers(10);
     tenantRepository.save(t);
+    TenantContext.setCurrentTenantId("TS");
     userRepository.save(new User("s1", "s1@x.com", "h", "F", "L", "TS"));
 
-    var stats = tenantRepository.getTenantStatistics();
+    var stats = tenantManagementService.getTenantStatistics();
     assertThat(stats).isNotEmpty();
-    var row = stats.get(0);
-    assertThat(row).isInstanceOf(Object[].class);
-    var arr = (Object[]) row;
-    assertThat(arr).hasSize(6);
-    assertThat(arr[0]).isInstanceOf(String.class); // tenantId
-    assertThat(arr[1]).isInstanceOf(String.class); // name
+    var s = stats.stream().filter(x -> x.tenantId().equals("TS")).findFirst().orElseThrow();
+    assertThat(s.userCount()).isEqualTo(1L);
+    assertThat(s.maxUsers()).isEqualTo(10);
+  }
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    org.gripday.userservice.tenancy.SchemaNameResolver schemaNameResolver() {
+      return new org.gripday.userservice.tenancy.SchemaNameResolver("tenant_");
+    }
+
+    @Bean
+    org.gripday.userservice.tenancy.TenantLiquibaseRunner liquibaseRunner() {
+      return org.mockito.Mockito.mock(org.gripday.userservice.tenancy.TenantLiquibaseRunner.class);
+    }
+
+    @Bean
+    org.springframework.jdbc.core.JdbcTemplate jdbcTemplate(javax.sql.DataSource dataSource) {
+      return new org.springframework.jdbc.core.JdbcTemplate(dataSource);
+    }
   }
 }

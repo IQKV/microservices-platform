@@ -117,31 +117,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
       """)
   List<User> findUnverifiedUsers();
 
-  default List<User> findByTenantId(String tenantId) {
-    return findAll();
-  }
-
-  default List<User> findEnabledUsersByTenantId(String tenantId) {
-    return findEnabledUsersOrderByCreatedAtDesc();
-  }
-
-  default List<User> findByTenantIdAndAuthorityName(String tenantId, String authorityName) {
-    return findByAuthorityName(authorityName);
-  }
-
-  default long countByTenantId(String tenantId) {
-    return count();
-  }
-
-  default long countEnabledUsersByTenantId(String tenantId) {
-    return countEnabledUsers();
-  }
-
-  default long countByTenantIdAndEnabledTrue(String tenantId) {
-    return countByEnabledTrue();
-  }
-
-  default List<User> findUnverifiedUsersByTenantId(String tenantId) {
-    return findUnverifiedUsers();
-  }
 }
