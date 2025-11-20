@@ -31,6 +31,30 @@ spring:
       leak-detection-threshold: 60000  # Detect connection leaks
   
   # ============================================================================
+  # JPA Configuration - Staging
+  # ============================================================================
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # ============================================================================
+  # Liquibase Configuration - Staging
+  # ============================================================================
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+  
+  # ============================================================================
   # Redis Configuration - Staging Redis
   # ============================================================================
   data:
@@ -46,8 +70,10 @@ spring:
           min-idle: 2
   
   cache:
+    type: redis
     redis:
       time-to-live: 600000  # 10 minutes
+      cache-null-values: false
   
   # ============================================================================
   # Security Configuration - Staging User Service
@@ -64,6 +90,11 @@ spring:
 # ============================================================================
 server:
   port: ${SERVER_PORT:8081}
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
   shutdown: graceful
   
   # Graceful shutdown timeout
@@ -91,9 +122,73 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
+      base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
+      show-components: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[bookstore.books.search.duration]": true
+        "[bookstore.books.creation.duration]": true
+        "[bookstore.inventory.update.duration]": true
+    tags:
+      application: bookstore-service
+      environment: staging
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 60s
+        descriptions: true
+
+# ============================================================================
+# OpenAPI / Swagger Documentation - Staging
+# ============================================================================
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: false
+    filter: true
+    displayRequestDuration: true
+    displayOperationId: false
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    docExpansion: none
+  show-actuator: true
+  group-configs:
+    - group: 'bookstore-api-v1'
+      display-name: 'Bookstore API v1 (Current)'
+      paths-to-match: '/api/v1/bookstore/**'
+    - group: 'bookstore-api-all'
+      display-name: 'Bookstore API (All Versions)'
+      paths-to-match: '/api/**/bookstore/**'
+    - group: 'actuator'
+      display-name: 'Actuator Endpoints'
+      paths-to-match: '/actuator/**'
 
 # ============================================================================
 # CORS Configuration - Staging Frontend

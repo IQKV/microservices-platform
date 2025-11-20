@@ -40,6 +40,30 @@ spring:
       connection-test-query: SELECT 1  # Validate connections
   
   # ============================================================================
+  # JPA Configuration - Production
+  # ============================================================================
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # ============================================================================
+  # Liquibase Configuration - Production
+  # ============================================================================
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+  
+  # ============================================================================
   # Redis Configuration - Production Redis
   # ============================================================================
   data:
@@ -56,8 +80,10 @@ spring:
         shutdown-timeout: 100ms
   
   cache:
+    type: redis
     redis:
       time-to-live: 900000  # 15 minutes for production
+      cache-null-values: false
   
   # ============================================================================
   # Security Configuration - Production User Service
@@ -74,6 +100,11 @@ spring:
 # ============================================================================
 server:
   port: ${SERVER_PORT:8081}
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
   shutdown: graceful
   
   # Graceful shutdown timeout
@@ -112,13 +143,63 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus  # Only essential endpoints
+      base-path: /actuator
   endpoint:
     health:
       show-details: never  # Hide internal details
       show-components: never
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    diskspace:
+      enabled: true
   metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[bookstore.books.search.duration]": true
+        "[bookstore.books.creation.duration]": true
+        "[bookstore.inventory.update.duration]": true
     tags:
+      application: bookstore-service
       environment: production
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 60s
+        descriptions: true
+
+# ============================================================================
+# OpenAPI / Swagger Documentation - Production (Disabled)
+# ============================================================================
+springdoc:
+  api-docs:
+    enabled: false
+    path: /api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: false
+    filter: true
+    displayRequestDuration: true
+    displayOperationId: false
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    docExpansion: none
+  show-actuator: false
 
 # ============================================================================
 # CORS Configuration - Production Frontend Only

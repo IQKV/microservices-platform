@@ -29,11 +29,13 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         use_sql_comments: false
+        multiTenancy: SCHEMA
         generate_statistics: false
         jdbc:
           batch_size: 100
         order_inserts: true
         order_updates: true
+    open-in-view: false
 
   # Redis Configuration - Production Redis
   data:
@@ -54,7 +56,6 @@ spring:
   # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
     enabled: false
-    contexts: production
 
 # Gripday Configuration - Production Environment
 gripday:
@@ -123,20 +124,22 @@ gripday:
       password-reset-confirmed-template: "email/password-reset/confirmed.html"
       registration-confirmed-subject: "Welcome to Gripday - Email Verified!"
       registration-confirmed-template: "email/user-registration/email-confirmed.html"
-    security:
-      password:
-        encoder-strength: 14
-        require-special-chars: true
-        min-length: 12
-      rate-limiting:
-        login-attempts: 3
-        lockout-duration: PT30M
-      session:
-        timeout: PT2H
-        concurrent-sessions: 2
-    oauth2:
-      enabled: false
-      providers: { }
+  
+  security:
+    password:
+      encoder-strength: 14
+      require-special-chars: true
+      min-length: 12
+    rate-limiting:
+      login-attempts: 3
+      lockout-duration: PT30M
+    session:
+      timeout: PT2H
+      concurrent-sessions: 2
+  
+  oauth2:
+    enabled: false
+    providers: { }
 
   # Observability Configuration - Production
   observability:
@@ -172,6 +175,19 @@ gripday:
       enable-sql-logging: false
       enable-security-events: true
       enable-performance-logging: false
+  
+  tenant-id-header: X-Tenant-ID
+  
+  tenancy:
+    schema:
+      prefix: tenant_
+      default: public
+  
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml
+    # System changelog runs once on startup for public schema (tenants table, etc.)
+    # Tenant changelog runs per-tenant schema during tenant provisioning
 
 # Logging Configuration - Production
 logging:

@@ -339,9 +339,6 @@ management :
     prometheus :
       enabled : true
   metrics :
-    export :
-      prometheus :
-        enabled : true
     distribution :
       percentiles-histogram :
         http.server.requests : true
@@ -350,6 +347,10 @@ management :
   tracing :
     sampling :
       probability : 1.0  # Full tracing in development
+  prometheus :
+    metrics :
+      export :
+        enabled : true
 
 # SpringDoc Configuration - Development
 springdoc :

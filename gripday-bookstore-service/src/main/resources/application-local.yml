@@ -28,6 +28,30 @@ spring:
       connection-timeout: 20000
   
   # ============================================================================
+  # JPA Configuration - Local Development
+  # ============================================================================
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: true  # Show SQL in development
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  # ============================================================================
+  # Liquibase Configuration - Local
+  # ============================================================================
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+  
+  # ============================================================================
   # Redis Configuration - Local Redis
   # ============================================================================
   data:
@@ -36,10 +60,17 @@ spring:
       port: 6379
       password:  # No password for local development
       timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   
   cache:
+    type: redis
     redis:
       time-to-live: 300000  # 5 minutes for faster development feedback
+      cache-null-values: false
   
   # ============================================================================
   # Security Configuration - Local User Service
@@ -56,6 +87,12 @@ spring:
 # ============================================================================
 server:
   port: 8081  # Different from User Service (8080)
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+  shutdown: graceful
 
 # ============================================================================
 # Logging Configuration - Verbose for Development
@@ -80,6 +117,73 @@ management:
     web:
       exposure:
         include: "*"  # Expose all endpoints for debugging
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[bookstore.books.search.duration]": true
+        "[bookstore.books.creation.duration]": true
+        "[bookstore.inventory.update.duration]": true
+    tags:
+      application: bookstore-service
+      environment: local
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 60s
+        descriptions: true
+
+# ============================================================================
+# OpenAPI / Swagger Documentation - Development
+# ============================================================================
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+    displayRequestDuration: true
+    displayOperationId: true
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    docExpansion: none
+  show-actuator: true
+  group-configs:
+    - group: 'bookstore-api-v1'
+      display-name: 'Bookstore API v1 (Current)'
+      paths-to-match: '/api/v1/bookstore/**'
+    - group: 'bookstore-api-all'
+      display-name: 'Bookstore API (All Versions)'
+      paths-to-match: '/api/**/bookstore/**'
+    - group: 'actuator'
+      display-name: 'Actuator Endpoints'
+      paths-to-match: '/actuator/**'
 
 # ============================================================================
 # CORS Configuration - Permissive for Development

@@ -30,12 +30,12 @@ spring:
         format_sql: true
         use_sql_comments: true
         multiTenancy: SCHEMA
-        tenant_identifier_resolver: org.gripday.userservice.tenancy.SchemaTenantIdentifierResolver
         generate_statistics: true
         jdbc:
           batch_size: 20
         order_inserts: true
         order_updates: true
+    open-in-view: false
 
   # Redis Configuration - Local Redis
   data:
@@ -53,9 +53,9 @@ spring:
           max-wait: -1ms
 
   # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
     enabled: false
-    contexts: local,development
 
 # Gripday Configuration - Local Environment
 gripday:
@@ -124,20 +124,22 @@ gripday:
       password-reset-confirmed-template: "email/password-reset/confirmed.html"
       registration-confirmed-subject: "[LOCAL] Welcome to Gripday - Email Verified!"
       registration-confirmed-template: "email/user-registration/email-confirmed.html"
-    security:
-      password:
-        encoder-strength: 10  # Lower for faster development
-        require-special-chars: false  # Relaxed for development
-        min-length: 6  # Relaxed for development
-      rate-limiting:
-        login-attempts: 10  # More lenient for development
-        lockout-duration: PT5M  # Shorter lockout for development
-      session:
-        timeout: PT8H  # Extended for development
-        concurrent-sessions: 5
-    oauth2:
-      enabled: false  # Disabled for local development
-      providers: { }
+  
+  security:
+    password:
+      encoder-strength: 10  # Lower for faster development
+      require-special-chars: false  # Relaxed for development
+      min-length: 6  # Relaxed for development
+    rate-limiting:
+      login-attempts: 10  # More lenient for development
+      lockout-duration: PT5M  # Shorter lockout for development
+    session:
+      timeout: PT8H  # Extended for development
+      concurrent-sessions: 5
+  
+  oauth2:
+    enabled: false  # Disabled for local development
+    providers: { }
 
   # Observability Configuration - Development
   observability:
@@ -173,6 +175,19 @@ gripday:
       enable-sql-logging: true
       enable-security-events: true
       enable-performance-logging: true
+  
+  tenant-id-header: X-Tenant-ID
+  
+  tenancy:
+    schema:
+      prefix: tenant_
+      default: public
+  
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml
+    # System changelog runs once on startup for public schema (tenants table, etc.)
+    # Tenant changelog runs per-tenant schema during tenant provisioning
 
 # Logging Configuration - Development
 logging:

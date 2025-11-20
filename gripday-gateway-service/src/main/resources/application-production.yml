@@ -63,12 +63,22 @@ gripday :
           enabled : true
           connect-timeout : 5000
           response-timeout : 30000
+          openapi :
+            enabled : false
+            display-name : "User Service APIs"
+            description : "Authentication and user management APIs"
+            context-path : "user-service"
         bookstore-service :
           uri : ${GRIPDAY_GATEWAY_ROUTING_BOOKSTORE_SERVICE_URI}
           path : /v1/bookstore/**
           enabled : true
           connect-timeout : 5000
           response-timeout : 30000
+          openapi :
+            enabled : false
+            display-name : "Bookstore Service APIs"
+            description : "Bookstore management and inventory APIs"
+            context-path : "bookstore-service"
       enable-service-discovery : false
       load-balancing :
         strategy : round-robin
@@ -313,7 +323,7 @@ management :
     health :
       show-details : never
     prometheus :
-      access : read_only
+      enabled : true
   metrics :
     distribution :
       percentiles-histogram :
@@ -332,5 +342,8 @@ management :
 springdoc :
   api-docs :
     enabled : false  # Disabled in production
+    path : /api-docs
   swagger-ui :
     enabled : false  # Disabled in production
+    path : /swagger-ui.html
+    urls-primary-name : Gateway APIs
