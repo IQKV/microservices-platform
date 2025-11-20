@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="9.1" author="gripday">
+    <changeSet id="008.1-users-query-optimization" author="gripday">
         <comment>Add missing critical index for unverified users query optimization</comment>
 
         <createIndex indexName="idx_users_tenant_email_verified" tableName="users">
@@ -19,7 +19,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9.2" author="gripday">
+    <changeSet id="008.2-users-query-optimization" author="gripday">
         <comment>Add missing critical indexes for email verification token queries</comment>
 
         <!-- Index for finding unused tokens by user -->
@@ -58,7 +58,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9.3" author="gripday">
+    <changeSet id="008.3-users-query-optimization" author="gripday">
         <comment>Add missing critical indexes for user audit log queries</comment>
 
         <!-- Composite index for user-specific audit queries in multi-tenant context -->
@@ -73,7 +73,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9.4" author="gripday" dbms="postgresql">
+    <changeSet id="008.4-users-query-optimization" author="gripday" dbms="postgresql">
         <comment>Add partial index for failed login attempts (PostgreSQL only)</comment>
 
         <!-- Partial index for efficient failed login tracking and account lockout detection -->
@@ -88,7 +88,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9.5" author="gripday" dbms="!postgresql">
+    <changeSet id="008.5-users-query-optimization" author="gripday" dbms="!postgresql">
         <comment>Add regular index for failed login attempts (non-PostgreSQL databases)</comment>
 
         <!-- Regular composite index for databases that don't support partial indexes -->
@@ -104,7 +104,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9.6" author="gripday">
+    <changeSet id="008.6-users-query-optimization" author="gripday">
         <comment>Add missing critical index for organization queries</comment>
 
         <!-- Composite index for enabled organization queries by tenant -->

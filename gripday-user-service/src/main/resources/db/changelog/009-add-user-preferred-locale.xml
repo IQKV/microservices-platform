@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-  <changeSet id="010-add-user-preferred-locale" author="gripday">
+  <changeSet id="009-add-user-preferred-locale" author="gripday">
     <comment>Add preferred_locale column to users table for i18n support</comment>
 
     <addColumn tableName="users">

@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="8" author="gripday">
+    <changeSet id="007-create-organizations" author="gripday">
         <comment>Create organizations table with OneToOne relationship to users</comment>
 
         <createTable tableName="organizations">
@@ -67,7 +67,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="9" author="gripday">
+    <changeSet id="007.1-create-organizations" author="gripday">
         <comment>Add organization_id column to users table for OneToOne relationship</comment>
 
         <addColumn tableName="users">
@@ -91,7 +91,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="10" author="gripday">
+    <changeSet id="007.2-create-organizations" author="gripday">
         <comment>Add indexes for organizations table</comment>
 
         <createIndex indexName="idx_organizations_tenant_id" tableName="organizations">
@@ -123,7 +123,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="11" author="gripday">
+    <changeSet id="007.3-create-organizations" author="gripday">
         <comment>Enforce per-tenant organization name uniqueness and one-to-one user organization relation</comment>
 
         <addUniqueConstraint 

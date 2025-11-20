@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="1" author="gripday">
+    <changeSet id="001-create-users-table" author="gripday">
         <comment>Create users table for authentication and user management</comment>
 
         <createTable tableName="users">
