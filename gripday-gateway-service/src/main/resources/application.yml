@@ -45,20 +45,58 @@ spring:
             - Path=/.well-known/jwks.json
           filters:
             - StripPrefix=0
-        - id: bookstore-service
+        - id: bookstore-catalog
           uri: ${gripday.gateway.routing.services.bookstore-service.uri}
           predicates:
-            - Path=${gripday.gateway.routing.api-prefix.prefix}${gripday.gateway.routing.services.bookstore-service.path}
+            - Path=/api/v1/bookstore/books,/api/v1/bookstore/books/**
+          filters:
+            - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: 100
+                redis-rate-limiter.burst-capacity: 200
+            - name: CircuitBreaker
+              args:
+                name: bookstore-catalog-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore/catalog
+        - id: bookstore-inventory
+          uri: ${gripday.gateway.routing.services.bookstore-service.uri}
+          predicates:
+            - Path=/api/v1/bookstore/inventory,/api/v1/bookstore/inventory/**
+          filters:
+            - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: 50
+                redis-rate-limiter.burst-capacity: 100
+            - name: CircuitBreaker
+              args:
+                name: bookstore-inventory-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore/inventory
+        - id: bookstore-admin
+          uri: ${gripday.gateway.routing.services.bookstore-service.uri}
+          predicates:
+            - Path=/api/v1/bookstore/admin/**
+          filters:
+            - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: 50
+                redis-rate-limiter.burst-capacity: 100
+            - name: CircuitBreaker
+              args:
+                name: bookstore-admin-circuit-breaker
+                fallbackUri: forward:/fallback/bookstore/admin
+        - id: bookstore-info
+          uri: ${gripday.gateway.routing.services.bookstore-service.uri}
+          predicates:
+            - Path=/api/v1/bookstore/version,/api/v1/bookstore/health,/api/v1/bookstore
           filters:
             - StripPrefix=${gripday.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenish-rate: ${gripday.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${gripday.gateway.rate-limiting.policies.default-burst-capacity}
-            - name: CircuitBreaker
-              args:
-                name: bookstore-circuit-breaker
-                fallbackUri: forward:/fallback/bookstore
         - id: health-check
           uri: ${gripday.gateway.routing.services.user-service.uri}
           predicates:
@@ -112,8 +150,14 @@ gripday:
           openapi:
             enabled: true
             display-name: "Bookstore Service APIs"
-            description: "Bookstore management and inventory APIs"
+            description: "Bookstore management and inventory APIs - routed by domain (catalog, inventory, admin)"
             context-path: "bookstore-service"
+          # Note: Bookstore routes are split by domain for better control:
+          # - /api/v1/bookstore/books/** -> catalog operations
+          # - /api/v1/bookstore/inventory/** -> inventory operations
+          # - /api/v1/bookstore/admin/** -> admin operations
+          # - /api/v1/bookstore -> service info
+          # This allows independent rate limiting, circuit breaking, and future service splitting
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -218,19 +262,18 @@ gripday:
             requests-per-minute: 10
             burst-capacity: 15
             enable-tenant-quotas: true
-          "/api/v1/bookstore/books":
+          # Bookstore catalog endpoints - higher rate limit for public browsing
+          "/api/v1/bookstore/books/**":
             requests-per-minute: 100
             burst-capacity: 200
             enable-tenant-quotas: true
+          # Bookstore inventory endpoints - moderate rate limit
           "/api/v1/bookstore/inventory/**":
             requests-per-minute: 50
             burst-capacity: 100
             enable-tenant-quotas: true
-          "/api/v1/bookstore/admin/books/**":
-            requests-per-minute: 50
-            burst-capacity: 100
-            enable-tenant-quotas: true
-          "/api/v1/bookstore/admin/inventory/**":
+          # Bookstore admin endpoints - moderate rate limit with auth required
+          "/api/v1/bookstore/admin/**":
             requests-per-minute: 50
             burst-capacity: 100
             enable-tenant-quotas: true
