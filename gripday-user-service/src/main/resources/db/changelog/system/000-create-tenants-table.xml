@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="6.1" author="gripday">
+    <changeSet id="1.1" author="gripday">
         <comment>Create tenants table for multi-tenant architecture support</comment>
 
         <createTable tableName="tenants">
@@ -63,7 +63,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="6.2" author="gripday">
+    <changeSet id="1.2" author="gripday">
         <comment>Create indexes on tenants table for performance</comment>
 
         <createIndex indexName="idx_tenants_tenant_id" tableName="tenants">
@@ -91,7 +91,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="6.3" author="gripday">
+    <changeSet id="1.3" author="gripday">
         <comment>Insert default tenant for backward compatibility</comment>
 
         <insert tableName="tenants">
@@ -103,7 +103,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="6.4" author="gripday">
+    <changeSet id="1.4" author="gripday">
         <comment>Add check constraints for tenant configuration validation</comment>
 
         <addCheckConstraint tableName="tenants"
@@ -119,7 +119,7 @@
                             checkConstraint="api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute >= 0"/>
     </changeSet>
 
-    <changeSet id="6.5" author="gripday">
+    <changeSet id="1.5" author="gripday">
         <comment>Tenant ID format validation (PostgreSQL only)</comment>
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
@@ -134,7 +134,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="6.6" author="gripday">
+    <changeSet id="1.6" author="gripday">
         <comment>Add updated_at index for tenants</comment>
         <createIndex indexName="idx_tenants_updated_at" tableName="tenants">
             <column name="updated_at"/>
