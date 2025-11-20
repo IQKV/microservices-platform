@@ -83,7 +83,7 @@ public class User extends TenantAware {
   protected User() {
   }
 
-  // Constructor with required fields using Java 21 features
+  // Constructor with required fields
   public User(final String username, final String email, final String passwordHash,
       final String firstName, final String lastName, final String tenantId) {
     super(tenantId);
@@ -188,7 +188,7 @@ public class User extends TenantAware {
     this.organization = organization;
   }
 
-  // Utility methods using Java 21 features
+  // Utility methods
   public void addAuthority(Authority authority) {
     var currentAuthorities = this.authorities;
     currentAuthorities.add(authority);

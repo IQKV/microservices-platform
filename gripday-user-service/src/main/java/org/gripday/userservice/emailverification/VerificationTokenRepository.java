@@ -36,7 +36,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Find all verification tokens for a specific user within a tenant.
    *
    * @param userId   the user ID to search for
-   * @param tenantId the tenant identifier
    * @return List of tokens for the user in the tenant
    */
   List<VerificationToken> findByUserId(Long userId);
@@ -45,7 +44,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Find unused verification tokens for a specific user within a tenant.
    *
    * @param userId   the user ID to search for
-   * @param tenantId the tenant identifier
    * @return List of unused tokens for the user in the tenant
    */
   @Query("""
@@ -60,7 +58,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Find the most recent unused token for a user within a tenant.
    *
    * @param userId   the user ID to search for
-   * @param tenantId the tenant identifier
    * @return Optional containing the most recent unused token
    */
   Optional<VerificationToken> findFirstByUserIdAndUsedFalseOrderByCreatedAtDesc(Long userId);
@@ -82,7 +79,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Mark all unused tokens for a user as used. Used when invalidating existing tokens before generating new ones.
    *
    * @param userId   the user ID
-   * @param tenantId the tenant identifier
    * @return number of updated tokens
    */
   @Modifying
@@ -98,7 +94,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Count unused tokens for a specific user within a tenant.
    *
    * @param userId   the user ID
-   * @param tenantId the tenant identifier
    * @return number of unused tokens
    */
   @Query("""
@@ -112,7 +107,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
    * Count tokens created within a time period for a user (for rate limiting).
    *
    * @param userId   the user ID
-   * @param tenantId the tenant identifier
    * @param since    the start time for counting
    * @return number of tokens created since the specified time
    */
@@ -127,7 +121,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
   /**
    * Find all expired tokens within a tenant.
    *
-   * @param tenantId    the tenant identifier
    * @param currentTime the current time for comparison
    * @return List of expired tokens in the tenant
    */

@@ -43,7 +43,7 @@ public class VerificationToken extends TenantAware {
   protected VerificationToken() {
   }
 
-  // Constructor with required fields using Java 21 features
+  // Constructor with required fields
   public VerificationToken(final String token, final Long userId, final LocalDateTime expiresAt, final String tenantId) {
     super(tenantId);
     this.token = token;
@@ -92,7 +92,7 @@ public class VerificationToken extends TenantAware {
     this.used = used;
   }
 
-  // Utility methods using Java 21 features
+  // Utility methods
   public boolean isExpired() {
     var now = LocalDateTime.now();
     var expirationTime = this.expiresAt;

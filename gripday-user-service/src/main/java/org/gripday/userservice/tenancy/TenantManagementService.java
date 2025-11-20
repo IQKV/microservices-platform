@@ -76,7 +76,7 @@ public class TenantManagementService {
       }
     }
 
-    // Create tenant entity using Java 21 features
+    // Create tenant entity
     var tenant = new Tenant(request.tenantId(), request.name(), request.description(), createdBy);
     tenant.setDomain(request.domain());
     tenant.setSubdomain(request.subdomain());
@@ -310,7 +310,9 @@ public class TenantManagementService {
   private boolean isH2() {
     try {
       var ds = this.jdbcTemplate.getDataSource();
-      if (ds == null) return false;
+      if (ds == null) {
+        return false;
+      }
       try (var c = ds.getConnection()) {
         var name = c.getMetaData().getDatabaseProductName();
         return name != null && name.toLowerCase(java.util.Locale.ROOT).contains("h2");
@@ -337,11 +339,11 @@ public class TenantManagementService {
       long publicCount = resultPublic != null ? resultPublic : 0L;
       return schemaCount + publicCount;
     }
-    return TenantContext.executeInTenantContext(tenantId, () -> userRepository.countByEnabledTrue());
+    return TenantContext.executeInTenantContext(tenantId, userRepository::countByEnabledTrue);
   }
 
   /**
-   * Find tenant by domain or subdomain for tenant resolution.
+   * Find a tenant by domain or subdomain for tenant resolution.
    *
    * @param domain the domain to search for
    * @return optional tenant
@@ -352,13 +354,13 @@ public class TenantManagementService {
       return Optional.empty();
     }
 
-    // Try exact domain match first
+    // Try the exact domain match first
     var tenantByDomain = tenantRepository.findByDomain(domain);
     if (tenantByDomain.isPresent()) {
       return tenantByDomain;
     }
 
-    // Try subdomain match
+    // Try a subdomain match
     return tenantRepository.findBySubdomain(domain);
   }
 
@@ -397,7 +399,7 @@ public class TenantManagementService {
   }
 
   private TenantSummary mapToTenantSummary(Tenant tenant) {
-    var userCount = TenantContext.executeInTenantContext(tenant.getTenantId(), () -> userRepository.countByEnabledTrue());
+    var userCount = TenantContext.executeInTenantContext(tenant.getTenantId(), userRepository::countByEnabledTrue);
 
     return new TenantSummary(
         tenant.getTenantId(),

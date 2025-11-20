@@ -141,7 +141,7 @@ public class UserAuditLog extends TenantAware {
     this.user = user;
   }
 
-  // Utility methods using Java 21 features
+  // Utility methods
   public boolean isLoginAction() {
     var action = this.action;
     return "LOGIN_SUCCESS".equals(action) || "LOGIN_FAILURE".equals(action);

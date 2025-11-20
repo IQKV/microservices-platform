@@ -88,7 +88,7 @@ public class Authority {
     this.users = users;
   }
 
-  // Utility methods using Java 21 features
+  // Utility methods
   public void addUser(User user) {
     var currentUsers = this.users;
     currentUsers.add(user);

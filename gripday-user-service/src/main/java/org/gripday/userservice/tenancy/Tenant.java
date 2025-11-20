@@ -65,7 +65,7 @@ public class Tenant {
   protected Tenant() {
   }
 
-  // Constructor with required fields using Java 21 features
+  // Constructor with required fields
   public Tenant(final String tenantId, final String name) {
     this.tenantId = tenantId;
     this.name = name;
@@ -172,7 +172,7 @@ public class Tenant {
     this.createdBy = createdBy;
   }
 
-  // Utility methods using Java 21 features
+  // Utility methods
   public boolean isActive() {
     var enabled = this.enabled;
     return enabled != null && enabled;
