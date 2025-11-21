@@ -19,8 +19,8 @@ public record UserSummaryDto(
    * Create a UserSummaryDto from basic user information.
    */
   public static UserSummaryDto of(Long id, String username, String email,
-      String firstName, String lastName,
-      Boolean enabled, String tenantId) {
+                                  String firstName, String lastName,
+                                  Boolean enabled, String tenantId) {
     var displayName = createDisplayName(firstName, lastName, username);
     return new UserSummaryDto(id, username, email, displayName, enabled, tenantId, null);
   }
@@ -29,9 +29,9 @@ public record UserSummaryDto(
    * Create a UserSummaryDto with last activity information.
    */
   public static UserSummaryDto withActivity(Long id, String username, String email,
-      String firstName, String lastName,
-      Boolean enabled, String tenantId,
-      LocalDateTime lastActivity) {
+                                            String firstName, String lastName,
+                                            Boolean enabled, String tenantId,
+                                            LocalDateTime lastActivity) {
     var displayName = createDisplayName(firstName, lastName, username);
     return new UserSummaryDto(id, username, email, displayName, enabled, tenantId, lastActivity);
   }

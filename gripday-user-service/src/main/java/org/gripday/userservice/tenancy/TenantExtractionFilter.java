@@ -31,8 +31,8 @@ public class TenantExtractionFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+                                  HttpServletResponse response,
+                                  FilterChain filterChain) throws ServletException, IOException {
 
     try {
       // Extract tenant context from request
@@ -74,9 +74,9 @@ public class TenantExtractionFilter extends OncePerRequestFilter {
 
     // Skip tenant extraction for certain paths
     return requestURI.startsWith("/actuator/")
-        || requestURI.startsWith("/swagger-ui/")
-        || requestURI.startsWith("/v3/api-docs/")
-        || requestURI.equals("/favicon.ico")
-        || requestURI.equals("/error");
+           || requestURI.startsWith("/swagger-ui/")
+           || requestURI.startsWith("/v3/api-docs/")
+           || requestURI.equals("/favicon.ico")
+           || requestURI.equals("/error");
   }
 }

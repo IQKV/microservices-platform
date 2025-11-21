@@ -40,7 +40,7 @@ public class AdminKeyManagementRestResource {
   @PreAuthorize("hasRole('SUPER_ADMIN')")
   public ResponseEntity<Map<String, Object>> rotateKeys() {
     keyManagementService.rotateKeys();
-    
+
     return ResponseEntity.ok(Map.of(
         "message", "JWT keys rotated successfully",
         "currentKeyId", keyManagementService.getCurrentKeyId()
@@ -55,7 +55,7 @@ public class AdminKeyManagementRestResource {
   @PreAuthorize("hasRole('SUPER_ADMIN')")
   public ResponseEntity<Map<String, String>> cleanupTokens() {
     tokenCleanupService.cleanupExpiredTokens();
-    
+
     return ResponseEntity.ok(Map.of(
         "message", "Token cleanup completed successfully"
     ));

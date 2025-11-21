@@ -66,7 +66,7 @@ public class TokenCleanupService {
   private long cleanupExpiredRefreshTokens() {
     var pattern = "refresh:token:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -95,7 +95,7 @@ public class TokenCleanupService {
   private long cleanupOldRevocationRecords() {
     var pattern = "revoked:refresh:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -127,7 +127,7 @@ public class TokenCleanupService {
   private long cleanupExpiredSessions() {
     var pattern = "session:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }
@@ -155,7 +155,7 @@ public class TokenCleanupService {
   private long cleanupExpiredBlacklistEntries() {
     var pattern = "blacklist:token:*";
     var keys = redisTemplate.keys(pattern);
-    
+
     if (keys == null || keys.isEmpty()) {
       return 0;
     }

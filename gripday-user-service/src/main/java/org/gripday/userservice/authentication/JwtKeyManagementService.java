@@ -133,7 +133,7 @@ public final class JwtKeyManagementService {
     var cutoffTime = Instant.now().minusSeconds(KEY_ROTATION_GRACE_PERIOD_DAYS * 24 * 60 * 60);
 
     var removedKeys = new java.util.ArrayList<String>();
-    
+
     for (final var entry : keys.entrySet()) {
       if (!entry.getKey().equals(currentKeyId) && entry.getValue().createdAt().isBefore(cutoffTime)) {
         keys.remove(entry.getKey());

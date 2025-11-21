@@ -61,7 +61,7 @@ public class OrganizationManagementService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = "organizations", key = "#organizationId + '_' + #currentUser.tenantId()",
-      condition = "#currentUser != null && #currentUser.tenantId() != null")
+             condition = "#currentUser != null && #currentUser.tenantId() != null")
   public OrganizationDto getOrganizationById(Long organizationId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_ORGANIZATION");
 

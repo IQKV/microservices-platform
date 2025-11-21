@@ -27,7 +27,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).TITLE + #title + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).TITLE + #title + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> searchByTitle(String title, Pageable pageable) {
     logger.debug("Searching books by title: {}", title);
 
@@ -36,7 +36,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).AUTHOR + #author + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).AUTHOR + #author + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> searchByAuthor(String author, Pageable pageable) {
     logger.debug("Searching books by author: {}", author);
 
@@ -45,7 +45,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).CATEGORY + #category + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).CATEGORY + #category + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> searchByCategory(String category, Pageable pageable) {
     logger.debug("Searching books by category: {}", category);
 
@@ -61,7 +61,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> searchWithCriteria(BookSearchCriteria criteria, Pageable pageable) {
     logger.debug("Searching books with criteria: {}", criteria);
 
@@ -138,7 +138,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).FULLTEXT + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).FULLTEXT + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> fullTextSearch(String searchTerm, Pageable pageable) {
     logger.debug("Full-text searching books with term: {}", searchTerm);
 
@@ -147,7 +147,7 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).FUZZY + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).FUZZY + #searchTerm + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> fuzzySearch(String searchTerm, Pageable pageable) {
     logger.debug("Fuzzy searching books with term: {}", searchTerm);
 
@@ -156,9 +156,9 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).PRICE_RANGE + #minPrice + '_' + #maxPrice + '_' + #categoryId + '_' + #pageable.pageNumber")
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).PRICE_RANGE + #minPrice + '_' + #maxPrice + '_' + #categoryId + '_' + #pageable.pageNumber")
   public Page<BookDto> searchByPriceRangeAndCategory(BigDecimal minPrice, BigDecimal maxPrice,
-      Long categoryId, Pageable pageable) {
+                                                     Long categoryId, Pageable pageable) {
     logger.debug("Searching books by price range: {}-{} and category: {}", minPrice, maxPrice, categoryId);
 
     return bookRepository.findByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable)

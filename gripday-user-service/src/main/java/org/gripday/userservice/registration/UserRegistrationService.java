@@ -30,11 +30,11 @@ public class UserRegistrationService {
   private final EmailVerificationService emailVerificationService;
 
   public UserRegistrationService(final UserRepository userRepository,
-      final AuthorityRepository authorityRepository,
-      final PasswordEncoder passwordEncoder,
-      final SecurityAuditService securityAuditService,
-      final InputSanitizer inputSanitizer,
-      final EmailVerificationService emailVerificationService) {
+                                 final AuthorityRepository authorityRepository,
+                                 final PasswordEncoder passwordEncoder,
+                                 final SecurityAuditService securityAuditService,
+                                 final InputSanitizer inputSanitizer,
+                                 final EmailVerificationService emailVerificationService) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
     this.passwordEncoder = passwordEncoder;

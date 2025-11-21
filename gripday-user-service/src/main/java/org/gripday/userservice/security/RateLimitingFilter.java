@@ -30,8 +30,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
   );
 
   public RateLimitingFilter(final RateLimitingService rateLimitingService,
-      final SecurityAuditService securityAuditService,
-      final ObjectMapper objectMapper) {
+                            final SecurityAuditService securityAuditService,
+                            final ObjectMapper objectMapper) {
     this.rateLimitingService = rateLimitingService;
     this.securityAuditService = securityAuditService;
     this.objectMapper = objectMapper;
@@ -39,8 +39,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+                                  HttpServletResponse response,
+                                  FilterChain filterChain) throws ServletException, IOException {
 
     var requestPath = request.getRequestURI();
 

@@ -55,7 +55,7 @@ public abstract class TenantAware {
     if (currentTenantId != null && !currentTenantId.equals(this.tenantId)) {
       throw new IllegalStateException(
           "Tenant context mismatch: current=" + currentTenantId +
-              ", entity=" + this.tenantId
+          ", entity=" + this.tenantId
       );
     }
   }

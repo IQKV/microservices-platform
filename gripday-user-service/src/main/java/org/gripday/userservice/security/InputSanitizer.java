@@ -155,8 +155,8 @@ public class InputSanitizer {
     var lowerInput = input.toLowerCase(java.util.Locale.ROOT);
 
     return !SCRIPT_PATTERN.matcher(lowerInput).find()
-        && !JAVASCRIPT_PATTERN.matcher(lowerInput).find()
-        && !VBSCRIPT_PATTERN.matcher(lowerInput).find()
-        && !containsSqlInjection(input);
+           && !JAVASCRIPT_PATTERN.matcher(lowerInput).find()
+           && !VBSCRIPT_PATTERN.matcher(lowerInput).find()
+           && !containsSqlInjection(input);
   }
 }

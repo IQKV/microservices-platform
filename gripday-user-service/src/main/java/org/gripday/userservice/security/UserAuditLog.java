@@ -71,7 +71,7 @@ public class UserAuditLog extends TenantAware {
 
   // Full constructor
   public UserAuditLog(final Long userId, final String action, final String details,
-      final String ipAddress, final String userAgent, final String tenantId) {
+                      final String ipAddress, final String userAgent, final String tenantId) {
     super(tenantId);
     this.userId = userId;
     this.action = action;
@@ -145,17 +145,17 @@ public class UserAuditLog extends TenantAware {
   // Utility methods
   public boolean isLoginAction() {
     var action = this.action;
-    return UserServiceConstants.SecurityEvents.LOGIN_SUCCESS.equals(action) 
-        || UserServiceConstants.SecurityEvents.LOGIN_FAILURE.equals(action);
+    return UserServiceConstants.SecurityEvents.LOGIN_SUCCESS.equals(action)
+           || UserServiceConstants.SecurityEvents.LOGIN_FAILURE.equals(action);
   }
 
   public boolean isSecurityAction() {
     var action = this.action;
     return action != null && (
         action.startsWith(UserServiceConstants.SecurityEvents.LOGIN_PREFIX)
-            || action.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX)
-            || action.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX)
-            || action.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX));
+        || action.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX)
+        || action.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX)
+        || action.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX));
   }
 
   public String getActionCategory() {
@@ -165,16 +165,11 @@ public class UserAuditLog extends TenantAware {
     }
 
     return switch (action) {
-      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGIN_PREFIX) -> 
-          UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
-      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX) -> 
-          UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
-      case String a when a.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX) -> 
-          UserServiceConstants.SecurityEvents.CATEGORY_SECURITY;
-      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX) -> 
-          UserServiceConstants.SecurityEvents.CATEGORY_ACCOUNT_MANAGEMENT;
-      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ROLE_PREFIX) -> 
-          UserServiceConstants.SecurityEvents.CATEGORY_AUTHORIZATION;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGIN_PREFIX) -> UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX) -> UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX) -> UserServiceConstants.SecurityEvents.CATEGORY_SECURITY;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX) -> UserServiceConstants.SecurityEvents.CATEGORY_ACCOUNT_MANAGEMENT;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ROLE_PREFIX) -> UserServiceConstants.SecurityEvents.CATEGORY_AUTHORIZATION;
       default -> UserServiceConstants.SecurityEvents.CATEGORY_GENERAL;
     };
   }

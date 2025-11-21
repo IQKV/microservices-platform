@@ -31,9 +31,9 @@ public class SecurityAuditService {
    */
   public void logSuccessfulAuthentication(String username, String ipAddress, String userAgent) {
     var details = String.format("Authentication successful for user: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", username, ipAddress, userAgent, Instant.now());
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", username, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("AUTHENTICATION_SUCCESS", username, details, ipAddress, userAgent);
 
@@ -46,10 +46,10 @@ public class SecurityAuditService {
    */
   public void logFailedAuthentication(String username, String reason, String ipAddress, String userAgent) {
     var details = String.format("Authentication failed for user: %s%n" +
-        "Reason: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", username, reason, ipAddress, userAgent, Instant.now());
+                                "Reason: %s%n" +
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", username, reason, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("AUTHENTICATION_FAILURE", username, details, ipAddress, userAgent);
 
@@ -62,12 +62,12 @@ public class SecurityAuditService {
    */
   public void logAccountLockout(String username, int failedAttempts, String ipAddress, String userAgent) {
     var details = String.format("Account locked due to excessive failed login attempts%n" +
-        "User: %s%n" +
-        "Failed Attempts: %d%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Lockout Duration: 15 minutes%n" +
-        "Timestamp: %s%n", username, failedAttempts, ipAddress, userAgent, Instant.now());
+                                "User: %s%n" +
+                                "Failed Attempts: %d%n" +
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Lockout Duration: 15 minutes%n" +
+                                "Timestamp: %s%n", username, failedAttempts, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("ACCOUNT_LOCKOUT", username, details, ipAddress, userAgent);
 
@@ -80,9 +80,9 @@ public class SecurityAuditService {
    */
   public void logPasswordChange(String username, String ipAddress, String userAgent) {
     var details = String.format("Password changed for user: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", username, ipAddress, userAgent, Instant.now());
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", username, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent(UserServiceConstants.SecurityEvents.PASSWORD_CHANGE, username, details, ipAddress, userAgent);
 
@@ -95,11 +95,11 @@ public class SecurityAuditService {
    */
   public void logUserRegistration(String username, String email, String ipAddress, String userAgent) {
     var details = String.format("New user registration%n" +
-        "Username: %s%n" +
-        "Email: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", username, email, ipAddress, userAgent, Instant.now());
+                                "Username: %s%n" +
+                                "Email: %s%n" +
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", username, email, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("USER_REGISTRATION", username, details, ipAddress, userAgent);
 
@@ -112,10 +112,10 @@ public class SecurityAuditService {
    */
   public void logRateLimitExceeded(String ipAddress, String userAgent, String endpoint) {
     var details = String.format("Rate limit exceeded%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Endpoint: %s%n" +
-        "Timestamp: %s%n", ipAddress, userAgent, endpoint, Instant.now());
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Endpoint: %s%n" +
+                                "Timestamp: %s%n", ipAddress, userAgent, endpoint, Instant.now());
 
     logSecurityEvent("RATE_LIMIT_EXCEEDED", null, details, ipAddress, userAgent);
 
@@ -128,11 +128,11 @@ public class SecurityAuditService {
    */
   public void logSuspiciousActivity(String username, String activity, String ipAddress, String userAgent) {
     var details = String.format("Suspicious activity detected%n" +
-        "User: %s%n" +
-        "Activity: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", username, activity, ipAddress, userAgent, Instant.now());
+                                "User: %s%n" +
+                                "Activity: %s%n" +
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", username, activity, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("SUSPICIOUS_ACTIVITY", username, details, ipAddress, userAgent);
 
@@ -145,10 +145,10 @@ public class SecurityAuditService {
    */
   public void logTokenEvent(String username, String action, String ipAddress, String userAgent) {
     var details = String.format("JWT Token %s%n" +
-        "User: %s%n" +
-        "IP Address: %s%n" +
-        "User Agent: %s%n" +
-        "Timestamp: %s%n", action, username, ipAddress, userAgent, Instant.now());
+                                "User: %s%n" +
+                                "IP Address: %s%n" +
+                                "User Agent: %s%n" +
+                                "Timestamp: %s%n", action, username, ipAddress, userAgent, Instant.now());
 
     logSecurityEvent("TOKEN_" + action.toUpperCase(java.util.Locale.ROOT), username, details, ipAddress, userAgent);
 

@@ -201,7 +201,7 @@ public class Tenant {
 
     var tenant = (Tenant) obj;
     return Objects.equals(id, tenant.id)
-        && Objects.equals(tenantId, tenant.tenantId);
+           && Objects.equals(tenantId, tenant.tenantId);
   }
 
   @Override

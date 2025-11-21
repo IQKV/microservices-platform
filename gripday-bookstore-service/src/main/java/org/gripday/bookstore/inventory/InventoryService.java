@@ -29,7 +29,7 @@ public class InventoryService {
   private final BookstoreMetrics bookstoreMetrics;
 
   public InventoryService(final InventoryRepository inventoryRepository, final BookRepository bookRepository,
-      final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
+                          final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
     this.inventoryRepository = inventoryRepository;
     this.bookRepository = bookRepository;
     this.auditLogger = auditLogger;
@@ -63,7 +63,7 @@ public class InventoryService {
     if (request.quantity() < inventory.getReservedQuantity()) {
       throw new InsufficientInventoryException(
           "Cannot set quantity below reserved amount. Reserved: " + inventory.getReservedQuantity() +
-              ", Requested: " + request.quantity()
+          ", Requested: " + request.quantity()
       );
     }
 

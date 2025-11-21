@@ -4,7 +4,7 @@ package org.gripday.userservice.shared;
  * Common constants used across the User Service.
  * Centralizes repeatable strings for HTTP headers, MDC keys, security events,
  * tenant resolution, and other shared values to ensure consistency and maintainability.
- * 
+ * <p>
  * Note: JWT claim names are maintained in {@link JwtClaimNames} for backward compatibility.
  */
 public final class UserServiceConstants {
@@ -187,13 +187,13 @@ public final class UserServiceConstants {
 
     // Subdomain extraction pattern
     public static final String SUBDOMAIN_EXTRACTION = "^([a-zA-Z0-9-]+)\\.";
-    
+
     // Subdomain validation pattern
     public static final String SUBDOMAIN_VALIDATION = "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$";
-    
+
     // IP address pattern
     public static final String IP_ADDRESS = "^\\d+\\.\\d+\\.\\d+\\.\\d+";
-    
+
     // Localhost pattern
     public static final String LOCALHOST = "^localhost";
   }

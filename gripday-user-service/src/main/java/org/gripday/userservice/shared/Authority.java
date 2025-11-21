@@ -123,7 +123,7 @@ public class Authority {
 
     var authority = (Authority) obj;
     return Objects.equals(id, authority.id)
-        && Objects.equals(name, authority.name);
+           && Objects.equals(name, authority.name);
   }
 
   @Override

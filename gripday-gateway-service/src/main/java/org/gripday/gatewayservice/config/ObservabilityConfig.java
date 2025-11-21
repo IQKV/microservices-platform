@@ -216,8 +216,8 @@ public class ObservabilityConfig {
           .tag(GatewayConstants.Metrics.TAG_ROUTE, route)
           .description("Successful gateway requests")
           .register(meterRegistry));
-      meterRegistry.counter(GatewayConstants.Metrics.REQUEST_TOTAL, 
-          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_SUCCESS, 
+      meterRegistry.counter(GatewayConstants.Metrics.REQUEST_TOTAL,
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_SUCCESS,
           GatewayConstants.Metrics.TAG_ROUTE, route).increment();
     }
 
@@ -235,13 +235,13 @@ public class ObservabilityConfig {
 
     public void recordAuthenticationSuccess(Timer.Sample sample) {
       sample.stop(authenticationTimer);
-      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL, 
+      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL,
           GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_SUCCESS).increment();
     }
 
     public void recordAuthenticationFailure(String reason) {
-      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL, 
-          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_FAILURE, 
+      meterRegistry.counter(GatewayConstants.Metrics.AUTHENTICATION_TOTAL,
+          GatewayConstants.Metrics.TAG_RESULT, GatewayConstants.Metrics.RESULT_FAILURE,
           GatewayConstants.Metrics.TAG_REASON, reason).increment();
     }
 
@@ -252,18 +252,18 @@ public class ObservabilityConfig {
     }
 
     public void recordCircuitBreakerOpen(String service) {
-      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_OPEN, 
+      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_OPEN,
           GatewayConstants.Metrics.TAG_SERVICE, service).increment();
     }
 
     public void recordCircuitBreakerClosed(String service) {
-      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_CLOSED, 
+      meterRegistry.counter(GatewayConstants.Metrics.CIRCUIT_BREAKER_CLOSED,
           GatewayConstants.Metrics.TAG_SERVICE, service).increment();
     }
 
     public void recordRouteLatency(String route, long latencyMs) {
-      meterRegistry.timer(GatewayConstants.Metrics.ROUTE_LATENCY, 
-          GatewayConstants.Metrics.TAG_ROUTE, route)
+      meterRegistry.timer(GatewayConstants.Metrics.ROUTE_LATENCY,
+              GatewayConstants.Metrics.TAG_ROUTE, route)
           .record(Duration.ofMillis(latencyMs));
     }
 
@@ -272,8 +272,8 @@ public class ObservabilityConfig {
     }
 
     public void recordTotalRequests(String method, String route) {
-      meterRegistry.counter(GatewayConstants.Metrics.REQUESTS_TOTAL, 
-          GatewayConstants.Metrics.TAG_METHOD, method, 
+      meterRegistry.counter(GatewayConstants.Metrics.REQUESTS_TOTAL,
+          GatewayConstants.Metrics.TAG_METHOD, method,
           GatewayConstants.Metrics.TAG_ROUTE, route).increment();
     }
 
@@ -298,8 +298,8 @@ public class ObservabilityConfig {
     }
 
     public void recordTransformationTime(String type, long durationMs) {
-      meterRegistry.timer(GatewayConstants.Metrics.TRANSFORMATION_DURATION, 
-          GatewayConstants.Metrics.TAG_TYPE, type)
+      meterRegistry.timer(GatewayConstants.Metrics.TRANSFORMATION_DURATION,
+              GatewayConstants.Metrics.TAG_TYPE, type)
           .record(Duration.ofMillis(durationMs));
     }
 

@@ -134,7 +134,7 @@ public record AuthConfigurationProperties(
        */
       public OAuth2ProviderProperties {
         if (enabled && (clientId == null || clientId.isBlank()
-            || clientSecret == null || clientSecret.isBlank())) {
+                        || clientSecret == null || clientSecret.isBlank())) {
           throw new IllegalArgumentException("OAuth2 provider requires both clientId and clientSecret when enabled");
         }
       }

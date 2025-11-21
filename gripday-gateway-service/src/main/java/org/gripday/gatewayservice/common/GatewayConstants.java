@@ -218,7 +218,6 @@ public final class GatewayConstants {
   }
 
 
-
   /**
    * Filter order constants.
    */

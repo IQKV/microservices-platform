@@ -189,7 +189,7 @@ public class Organization extends TenantAware {
 
     var organization = (Organization) obj;
     return Objects.equals(id, organization.id)
-        && Objects.equals(name, organization.name);
+           && Objects.equals(name, organization.name);
   }
 
   @Override

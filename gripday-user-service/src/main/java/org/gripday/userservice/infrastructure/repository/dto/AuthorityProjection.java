@@ -24,7 +24,7 @@ public record AuthorityProjection(
    * Create an AuthorityProjection with user count.
    */
   public static AuthorityProjection withUserCount(Long id, String name, String description,
-      LocalDateTime createdAt, Long userCount) {
+                                                  LocalDateTime createdAt, Long userCount) {
     return new AuthorityProjection(id, name, description, createdAt, userCount);
   }
 

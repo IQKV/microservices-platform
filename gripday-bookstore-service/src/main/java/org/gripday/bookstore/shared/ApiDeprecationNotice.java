@@ -17,8 +17,8 @@ public class ApiDeprecationNotice {
    * Add deprecation headers to the response for deprecated API versions
    */
   public void addDeprecationHeaders(HttpServletResponse response, String version,
-      LocalDate deprecationDate, LocalDate sunsetDate,
-      String migrationInfo) {
+                                    LocalDate deprecationDate, LocalDate sunsetDate,
+                                    String migrationInfo) {
 
     // RFC 8594 Deprecation header
     if (deprecationDate != null) {

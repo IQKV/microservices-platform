@@ -150,7 +150,7 @@ public class StructuredLoggingConfig {
     private static final Logger securityLogger = LoggerFactory.getLogger("org.gripday.userservice.security");
 
     public void logSecurityEvent(String eventType, String username, String action, String result,
-        String ipAddress, String userAgent, Map<String, String> additionalContext) {
+                                 String ipAddress, String userAgent, Map<String, String> additionalContext) {
       try {
         MDC.put("securityEvent", eventType);
         MDC.put("username", username);

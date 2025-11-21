@@ -28,7 +28,7 @@ public class JwkSetRestResource {
   @Operation(
       summary = "Get JWK Set",
       description = "Returns the JSON Web Key Set containing public keys for JWT validation. " +
-          "Downstream services use this endpoint to dynamically fetch public keys."
+                    "Downstream services use this endpoint to dynamically fetch public keys."
   )
   @GetMapping("/jwks.json")
   public Map<String, Object> jwkSet() {

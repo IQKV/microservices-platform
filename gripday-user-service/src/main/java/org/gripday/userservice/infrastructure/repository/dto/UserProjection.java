@@ -23,9 +23,9 @@ public record UserProjection(
    * Create a UserProjection with basic user information.
    */
   public static UserProjection of(Long id, String username, String email,
-      String firstName, String lastName,
-      Boolean enabled, Boolean emailVerified,
-      LocalDateTime createdAt, String tenantId) {
+                                  String firstName, String lastName,
+                                  Boolean enabled, Boolean emailVerified,
+                                  LocalDateTime createdAt, String tenantId) {
     return new UserProjection(id, username, email, firstName, lastName,
         enabled, emailVerified, createdAt, tenantId, Set.of());
   }
@@ -34,10 +34,10 @@ public record UserProjection(
    * Create a UserProjection with authorities.
    */
   public static UserProjection withAuthorities(Long id, String username, String email,
-      String firstName, String lastName,
-      Boolean enabled, Boolean emailVerified,
-      LocalDateTime createdAt, String tenantId,
-      Set<String> authorityNames) {
+                                               String firstName, String lastName,
+                                               Boolean enabled, Boolean emailVerified,
+                                               LocalDateTime createdAt, String tenantId,
+                                               Set<String> authorityNames) {
     return new UserProjection(id, username, email, firstName, lastName,
         enabled, emailVerified, createdAt, tenantId, authorityNames);
   }

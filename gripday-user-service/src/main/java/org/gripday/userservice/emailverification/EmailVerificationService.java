@@ -127,7 +127,7 @@ public class EmailVerificationService {
         });
 
     // Verify tenant context matches
-    
+
 
     // Check if user is already verified
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
@@ -189,7 +189,7 @@ public class EmailVerificationService {
         .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
 
     // Check tenant context
-    
+
 
     // Check if user is already verified
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
@@ -280,7 +280,7 @@ public class EmailVerificationService {
         .orElseThrow(() -> new EmailVerificationException("User not found with email: " + email));
 
     // Check tenant context
-    
+
 
     var isVerified = user.getEmailVerified() != null && user.getEmailVerified();
     var message = isVerified

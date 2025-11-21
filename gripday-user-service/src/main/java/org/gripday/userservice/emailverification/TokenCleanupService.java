@@ -54,7 +54,7 @@ public class TokenCleanupService {
           metricsService.updateExpiredTokensCount(expiredCount);
           var deletedCount = tokenRepository.deleteByExpiresAtBefore(cutoffTime);
           metricsService.recordTokensCleanedUp(deletedCount);
-          return new long[]{expiredCount, deletedCount};
+          return new long[] {expiredCount, deletedCount};
         });
         totalExpired += perTenant[0];
         totalDeleted += perTenant[1];

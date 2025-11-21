@@ -34,8 +34,7 @@ public class BookResource {
   private final SearchService searchService;
   private final BookCatalogResponseBuilder responseBuilder;
 
-  public BookResource(final CatalogService catalogService, final SearchService searchService,
-      final BookCatalogResponseBuilder responseBuilder) {
+  public BookResource(final CatalogService catalogService, final SearchService searchService, final BookCatalogResponseBuilder responseBuilder) {
     this.catalogService = catalogService;
     this.searchService = searchService;
     this.responseBuilder = responseBuilder;

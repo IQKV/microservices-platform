@@ -43,7 +43,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
          OR u.email = :email
       """)
   Optional<User> findByUsernameOrEmail(@Param("username") String username,
-      @Param("email") String email);
+                                       @Param("email") String email);
 
   /**
    * Check if username already exists.

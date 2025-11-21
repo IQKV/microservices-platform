@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 /**
- * JWT configuration for token generation and validation. 
+ * JWT configuration for token generation and validation.
  * Uses RSA256 algorithm with key rotation support.
  */
 @Configuration

@@ -60,27 +60,27 @@ public class PasswordResetService {
 
   /**
    * Validate if a reset token is valid and not expired.
-   * 
+   *
    * @param resetToken the token to validate
    * @return true if token is valid, false otherwise
    */
   public boolean isResetTokenValid(@NotBlank String resetToken) {
     try {
       var sanitizedToken = inputSanitizer.sanitizeInput(resetToken);
-      
+
       if (!inputSanitizer.isInputSafe(sanitizedToken)) {
         return false;
       }
 
       var tokenKey = "password-reset:token:" + sanitizedToken;
       Object userIdObj = redisService.get(tokenKey);
-      
+
       if (userIdObj == null) {
         return false;
       }
 
       Long userId = (userIdObj instanceof Number n) ? n.longValue() : Long.parseLong(String.valueOf(userIdObj));
-      
+
       // Verify user still exists
       return userRepository.findById(userId).isPresent();
     } catch (final Exception e) {

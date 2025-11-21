@@ -33,7 +33,7 @@ public class TenantExtractionService {
    * @return tenant resolution result with tenant ID and resolution method
    */
   public TenantResolutionResult extractTenantFromRequest(HttpServletRequest request,
-      Authentication authentication) {
+                                                         Authentication authentication) {
 
     // Strategy 1: Extract from JWT token claims
     if (authentication != null) {
@@ -99,7 +99,6 @@ public class TenantExtractionService {
   }
 
 
-
   /**
    * Set tenant context from resolution result.
    *
@@ -121,7 +120,7 @@ public class TenantExtractionService {
    * @return true if tenant context was successfully set
    */
   public boolean extractAndSetTenantContext(HttpServletRequest request,
-      Authentication authentication) {
+                                            Authentication authentication) {
     var resolutionResult = extractTenantFromRequest(request, authentication);
 
     if (resolutionResult.isValid()) {

@@ -42,13 +42,13 @@ public class AuthenticationService {
   private final MeterRegistry meterRegistry;
 
   public AuthenticationService(final UserRepository userRepository,
-      final PasswordEncoder passwordEncoder,
-      final JwtService jwtService,
-      final AccountLockoutService accountLockoutService,
-      final SecurityAuditService securityAuditService,
-      final InputSanitizer inputSanitizer,
-      final TenantAwareSessionService sessionService,
-      final MeterRegistry meterRegistry) {
+                               final PasswordEncoder passwordEncoder,
+                               final JwtService jwtService,
+                               final AccountLockoutService accountLockoutService,
+                               final SecurityAuditService securityAuditService,
+                               final InputSanitizer inputSanitizer,
+                               final TenantAwareSessionService sessionService,
+                               final MeterRegistry meterRegistry) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -84,7 +84,7 @@ public class AuthenticationService {
         securityAuditService.logFailedAuthentication(
             sanitizedUsername, "Account locked", ipAddress, userAgent);
         throw new AccountLockedException("Account is locked. Try again in " +
-            timeUntilUnlock.toMinutes() + " minutes");
+                                         timeUntilUnlock.toMinutes() + " minutes");
       }
 
       // Find user by username or email using var

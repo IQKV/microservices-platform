@@ -40,9 +40,6 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
    */
   Page<UserAuditLog> findByActionOrderByCreatedAtDesc(String action, Pageable pageable);
 
-  
-
-  
 
   @Query("""
       SELECT al FROM UserAuditLog al 
@@ -51,8 +48,8 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
       ORDER BY al.createdAt DESC
       """)
   Page<UserAuditLog> findByDateRange(@Param("startDate") Instant startDate,
-      @Param("endDate") Instant endDate,
-      Pageable pageable);
+                                     @Param("endDate") Instant endDate,
+                                     Pageable pageable);
 
   @Query("""
       SELECT al FROM UserAuditLog al 
@@ -72,7 +69,7 @@ public interface UserAuditLogRepository extends JpaRepository<UserAuditLog, Long
       ORDER BY al.createdAt DESC
       """)
   List<UserAuditLog> findFailedLoginAttempts(@Param("userId") Long userId,
-      @Param("since") Instant since);
+                                             @Param("since") Instant since);
 
   long countByAction(String action);
 

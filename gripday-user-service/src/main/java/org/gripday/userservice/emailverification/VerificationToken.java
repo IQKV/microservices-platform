@@ -126,8 +126,8 @@ public class VerificationToken extends TenantAware {
 
     var that = (VerificationToken) obj;
     return Objects.equals(id, that.id)
-        && Objects.equals(token, that.token)
-        && Objects.equals(userId, that.userId);
+           && Objects.equals(token, that.token)
+           && Objects.equals(userId, that.userId);
   }
 
   @Override

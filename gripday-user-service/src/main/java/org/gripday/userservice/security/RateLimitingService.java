@@ -73,12 +73,12 @@ public class RateLimitingService {
 
     try {
       var currentCount = redisTemplate.opsForZSet().count(key, windowStart, currentTime);
-      
+
       // Null check for count result
       if (currentCount == null) {
         return MAX_ATTEMPTS_PER_MINUTE;
       }
-      
+
       return Math.max(0, MAX_ATTEMPTS_PER_MINUTE - currentCount.intValue());
     } catch (final Exception e) {
       return MAX_ATTEMPTS_PER_MINUTE;

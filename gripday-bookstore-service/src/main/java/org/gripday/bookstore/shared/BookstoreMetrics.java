@@ -35,7 +35,7 @@ public class BookstoreMetrics {
   private final AtomicLong outOfStockBooksCount = new AtomicLong(0);
 
   public BookstoreMetrics(final MeterRegistry meterRegistry, final BookRepository bookRepository,
-      final InventoryRepository inventoryRepository) {
+                          final InventoryRepository inventoryRepository) {
     this.meterRegistry = meterRegistry;
     this.bookRepository = bookRepository;
     this.inventoryRepository = inventoryRepository;

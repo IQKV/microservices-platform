@@ -80,9 +80,9 @@ public class LoggingConfiguration {
     var encoder = new PatternLayoutEncoder();
     encoder.setContext(loggerContext);
     encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{"
-        + BookstoreConstants.MdcKeys.CORRELATION_ID + "}] [%X{"
-        + BookstoreConstants.MdcKeys.USER_ID + "}:%X{"
-        + BookstoreConstants.MdcKeys.USERNAME + "}] %logger{36} - %msg%n");
+                       + BookstoreConstants.MdcKeys.CORRELATION_ID + "}] [%X{"
+                       + BookstoreConstants.MdcKeys.USER_ID + "}:%X{"
+                       + BookstoreConstants.MdcKeys.USERNAME + "}] %logger{36} - %msg%n");
     encoder.start();
 
     consoleAppender.setEncoder(encoder);

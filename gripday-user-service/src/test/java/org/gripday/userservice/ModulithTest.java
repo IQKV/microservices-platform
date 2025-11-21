@@ -7,14 +7,14 @@ import org.springframework.modulith.docs.Documenter;
 
 /**
  * Spring Modulith tests to verify modular structure.
- * 
+ *
  * <p>Current Status: Tests are disabled due to architectural issues that need to be fixed:
  * <ul>
  *   <li>Cyclic dependencies between modules (passwordmanagement -> security -> shared -> tenancy -> usermanagement -> passwordmanagement)</li>
  *   <li>Non-exposed types from infrastructure module being accessed by tenancy module</li>
  *   <li>Shared module has bidirectional dependencies with multiple modules</li>
  * </ul>
- * 
+ *
  * <p>To fix these issues:
  * <ul>
  *   <li>Create package-info.java files with @ApplicationModule annotations to define module boundaries</li>

@@ -141,7 +141,7 @@ public class HealthCheckConfig {
       try {
         // Test JWT service functionality by checking if we can access JWT configuration
         var jwtSecretPresent = System.getenv("GRIPDAY_AUTH_JWT_SECRET") != null
-            || System.getProperty("gripday.auth.jwt.secret-key") != null;
+                               || System.getProperty("gripday.auth.jwt.secret-key") != null;
 
         if (jwtSecretPresent) {
           return Health.up()

@@ -76,7 +76,7 @@ public class SecurityConfiguration {
   private final CorsConfiguration corsConfiguration;
 
   public SecurityConfiguration(final JwtAuthenticationFilter jwtAuthenticationFilter,
-      final CorsConfiguration corsConfiguration) {
+                               final CorsConfiguration corsConfiguration) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     this.corsConfiguration = corsConfiguration;
   }

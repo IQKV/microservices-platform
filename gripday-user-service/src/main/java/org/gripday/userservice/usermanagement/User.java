@@ -85,7 +85,7 @@ public class User extends TenantAware {
 
   // Constructor with required fields
   public User(final String username, final String email, final String passwordHash,
-      final String firstName, final String lastName, final String tenantId) {
+              final String firstName, final String lastName, final String tenantId) {
     super(tenantId);
     this.username = username;
     this.email = email;
@@ -231,8 +231,8 @@ public class User extends TenantAware {
 
     var user = (User) obj;
     return Objects.equals(id, user.id)
-        && Objects.equals(username, user.username)
-        && Objects.equals(email, user.email);
+           && Objects.equals(username, user.username)
+           && Objects.equals(email, user.email);
   }
 
   @Override

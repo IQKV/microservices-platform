@@ -14,7 +14,7 @@ public class AuditLogger {
   private static final Logger auditLog = LoggerFactory.getLogger(BookstoreConstants.Loggers.AUDIT);
 
   public void logAdminOperation(String operation, String resourceType, String resourceId,
-      UserContext userContext, Map<String, Object> details) {
+                                UserContext userContext, Map<String, Object> details) {
 
     // Add audit-specific MDC entries
     MDC.put(BookstoreConstants.MdcKeys.AUDIT_EVENT, BookstoreConstants.AuditEvents.ADMIN_OPERATION);
@@ -47,27 +47,27 @@ public class AuditLogger {
   }
 
   public void logBookCreation(Long bookId, String title, UserContext userContext) {
-    logAdminOperation(BookstoreConstants.Operations.CREATE, BookstoreConstants.ResourceTypes.BOOK, 
+    logAdminOperation(BookstoreConstants.Operations.CREATE, BookstoreConstants.ResourceTypes.BOOK,
         String.valueOf(bookId), userContext, Map.of("title", title));
   }
 
   public void logBookUpdate(Long bookId, String title, UserContext userContext) {
-    logAdminOperation(BookstoreConstants.Operations.UPDATE, BookstoreConstants.ResourceTypes.BOOK, 
+    logAdminOperation(BookstoreConstants.Operations.UPDATE, BookstoreConstants.ResourceTypes.BOOK,
         String.valueOf(bookId), userContext, Map.of("title", title));
   }
 
   public void logBookDeletion(Long bookId, String title, UserContext userContext) {
-    logAdminOperation(BookstoreConstants.Operations.DELETE, BookstoreConstants.ResourceTypes.BOOK, 
+    logAdminOperation(BookstoreConstants.Operations.DELETE, BookstoreConstants.ResourceTypes.BOOK,
         String.valueOf(bookId), userContext, Map.of("title", title));
   }
 
   public void logInventoryUpdate(Long bookId, int oldQuantity, int newQuantity, UserContext userContext) {
-    logAdminOperation(BookstoreConstants.Operations.UPDATE, BookstoreConstants.ResourceTypes.INVENTORY, 
+    logAdminOperation(BookstoreConstants.Operations.UPDATE, BookstoreConstants.ResourceTypes.INVENTORY,
         String.valueOf(bookId), userContext, Map.of("oldQuantity", oldQuantity, "newQuantity", newQuantity));
   }
 
   public void logBulkInventoryUpdate(int recordsUpdated, UserContext userContext) {
-    logAdminOperation(BookstoreConstants.Operations.BULK_UPDATE, BookstoreConstants.ResourceTypes.INVENTORY, 
+    logAdminOperation(BookstoreConstants.Operations.BULK_UPDATE, BookstoreConstants.ResourceTypes.INVENTORY,
         "MULTIPLE", userContext, Map.of("recordsUpdated", recordsUpdated));
   }
 

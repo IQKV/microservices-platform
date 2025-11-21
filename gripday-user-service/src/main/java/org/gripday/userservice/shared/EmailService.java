@@ -30,10 +30,10 @@ public class EmailService implements EmailOperations {
   private final MessageService messageService;
 
   public EmailService(final JavaMailSender mailSender,
-      final TemplateEngine templateEngine,
-      final GripdayProperties gripdayProperties,
-      final VerificationMetrics metricsService,
-      final MessageService messageService) {
+                      final TemplateEngine templateEngine,
+                      final GripdayProperties gripdayProperties,
+                      final VerificationMetrics metricsService,
+                      final MessageService messageService) {
     this.mailSender = mailSender;
     this.templateEngine = templateEngine;
     this.gripdayProperties = gripdayProperties;
@@ -68,7 +68,7 @@ public class EmailService implements EmailOperations {
       context.setVariable("user", user);
       context.setVariable("verificationUrl", verificationUrl);
       context.setVariable("fromName", senderConfig.fromName());
-      context.setVariable("greeting", messageService.getMessage("email.verification.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("greeting", messageService.getMessage("email.verification.greeting", new Object[] {user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.verification.body", userLocale));
       context.setVariable("buttonText", messageService.getMessage("email.verification.button", userLocale));
       context.setVariable("linkText", messageService.getMessage("email.verification.link.text", userLocale));
@@ -147,7 +147,7 @@ public class EmailService implements EmailOperations {
       context.setVariable("user", user);
       context.setVariable("resetUrl", resetUrl);
       context.setVariable("fromName", senderConfig.fromName());
-      context.setVariable("greeting", messageService.getMessage("email.password.reset.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("greeting", messageService.getMessage("email.password.reset.greeting", new Object[] {user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.password.reset.body", userLocale));
       context.setVariable("buttonText", messageService.getMessage("email.password.reset.button", userLocale));
       context.setVariable("linkText", messageService.getMessage("email.password.reset.link.text", userLocale));
@@ -230,7 +230,7 @@ public class EmailService implements EmailOperations {
       context.setVariable("user", user);
       context.setVariable("dashboardUrl", dashboardUrl);
       context.setVariable("fromName", senderConfig.fromName());
-      context.setVariable("greeting", messageService.getMessage("email.registration.confirmed.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("greeting", messageService.getMessage("email.registration.confirmed.greeting", new Object[] {user.getFirstName()}, userLocale));
       context.setVariable("body", messageService.getMessage("email.registration.confirmed.body", userLocale));
       context.setVariable("nextSteps", messageService.getMessage("email.registration.confirmed.next.steps", userLocale));
       context.setVariable("step1", messageService.getMessage("email.registration.confirmed.step1", userLocale));
@@ -311,7 +311,7 @@ public class EmailService implements EmailOperations {
       context.setVariable("user", user);
       context.setVariable("loginUrl", loginUrl);
       context.setVariable("fromName", senderConfig.fromName());
-      context.setVariable("greeting", messageService.getMessage("email.password.reset.confirmed.greeting", new Object[]{user.getFirstName()}, userLocale));
+      context.setVariable("greeting", messageService.getMessage("email.password.reset.confirmed.greeting", new Object[] {user.getFirstName()}, userLocale));
       context.setVariable("title", messageService.getMessage("email.password.reset.confirmed.title", userLocale));
       context.setVariable("body", messageService.getMessage("email.password.reset.confirmed.body", userLocale));
       context.setVariable("confirmation", messageService.getMessage("email.password.reset.confirmed.confirmation", userLocale));

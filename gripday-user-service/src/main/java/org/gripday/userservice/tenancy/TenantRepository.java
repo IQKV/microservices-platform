@@ -89,5 +89,5 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
    */
   long countByEnabledFalse();
 
-  
+
 }

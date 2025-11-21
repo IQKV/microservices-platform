@@ -79,7 +79,7 @@ public class UserManagementService {
    */
   @Transactional(readOnly = true)
   @Cacheable(value = "users", key = "#userId + '_' + #currentUser.tenantId()",
-      condition = "#currentUser != null && #currentUser.tenantId() != null")
+             condition = "#currentUser != null && #currentUser.tenantId() != null")
   public UserDto getUserById(Long userId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_USER");
 

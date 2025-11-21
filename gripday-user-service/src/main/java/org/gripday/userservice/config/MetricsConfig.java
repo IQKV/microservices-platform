@@ -58,8 +58,8 @@ public class MetricsConfig {
         // Filter out noisy metrics in production
         if ("production".equals(getActiveProfile())) {
           return name.startsWith("jvm.gc.pause")
-              || name.startsWith("process.")
-              || name.startsWith("system.cpu.count");
+                 || name.startsWith("process.")
+                 || name.startsWith("system.cpu.count");
         }
         return false;
       }));

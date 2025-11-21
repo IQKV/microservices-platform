@@ -172,7 +172,6 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   }
 
 
-
   private ServerHttpRequest propagateContextHeaders(
       ServerHttpRequest request,
       UserContext userContext,
