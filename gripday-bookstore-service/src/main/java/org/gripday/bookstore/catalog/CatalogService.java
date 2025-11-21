@@ -172,7 +172,7 @@ public class CatalogService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfig.BOOK_CACHE, key = "'isbn_' + #isbn")
+  @Cacheable(value = CacheConfig.BOOK_CACHE, key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).ISBN + #isbn")
   public Optional<BookDto> findBookByIsbn(String isbn) {
     logger.debug("Finding book by ISBN: {}", isbn);
 
@@ -182,7 +182,7 @@ public class CatalogService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = CacheConfig.POPULAR_BOOKS_CACHE,
-      key = "'available_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).AVAILABLE + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> findAvailableBooks(Pageable pageable) {
     logger.debug("Finding available books");
 
@@ -192,7 +192,7 @@ public class CatalogService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = CacheConfig.POPULAR_BOOKS_CACHE,
-      key = "'in_stock_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).IN_STOCK + #pageable.pageNumber + '_' + #pageable.pageSize")
   public Page<BookDto> findBooksInStock(Pageable pageable) {
     logger.debug("Finding books in stock");
 
@@ -202,7 +202,7 @@ public class CatalogService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-      key = "'catalog_response_' + #criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+      key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).CATALOG_RESPONSE + #criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
   public BookCatalogResponse findBooksWithCatalogResponse(BookSearchCriteria criteria, Pageable pageable) {
     logger.debug("Finding books with catalog response for criteria: {}", criteria);
 

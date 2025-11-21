@@ -32,8 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Generate correlation ID for request tracing
     var correlationId = generateCorrelationId(request);
-    MDC.put("correlationId", correlationId);
-    response.setHeader("X-Correlation-ID", correlationId);
+    MDC.put(BookstoreConstants.MdcKeys.CORRELATION_ID, correlationId);
+    response.setHeader(BookstoreConstants.Headers.X_CORRELATION_ID, correlationId);
 
     try {
       // Extract user context from JWT if authenticated
@@ -41,11 +41,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       if (authentication instanceof JwtAuthenticationToken jwtToken) {
         try {
           var userContext = userContextExtractor.extractFromJwt(jwtToken.getToken());
-          request.setAttribute("userContext", userContext);
+          request.setAttribute(BookstoreConstants.Attributes.USER_CONTEXT, userContext);
 
           // Add user info to MDC for logging
-          MDC.put("userId", String.valueOf(userContext.userId()));
-          MDC.put("username", userContext.username());
+          MDC.put(BookstoreConstants.MdcKeys.USER_ID, String.valueOf(userContext.userId()));
+          MDC.put(BookstoreConstants.MdcKeys.USERNAME, userContext.username());
 
           logger.debug("User context extracted for user: {} with roles: {}",
               userContext.username(), userContext.roles());
@@ -60,15 +60,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     } finally {
       // Clean up MDC
-      MDC.remove("correlationId");
-      MDC.remove("userId");
-      MDC.remove("username");
+      MDC.remove(BookstoreConstants.MdcKeys.CORRELATION_ID);
+      MDC.remove(BookstoreConstants.MdcKeys.USER_ID);
+      MDC.remove(BookstoreConstants.MdcKeys.USERNAME);
     }
   }
 
   private String generateCorrelationId(HttpServletRequest request) {
     // Check if correlation ID is already provided in headers
-    var existingCorrelationId = request.getHeader("X-Correlation-ID");
+    var existingCorrelationId = request.getHeader(BookstoreConstants.Headers.X_CORRELATION_ID);
     if (existingCorrelationId != null && !existingCorrelationId.trim().isEmpty()) {
       return existingCorrelationId;
     }

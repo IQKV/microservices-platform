@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-@Order(2)
+@Order(BookstoreConstants.FilterOrder.USER_CONTEXT_MDC_FILTER)
 public class UserContextMdcFilter extends OncePerRequestFilter {
 
   private final UserContextExtractor userContextExtractor;
@@ -42,28 +42,28 @@ public class UserContextMdcFilter extends OncePerRequestFilter {
       var jwt = jwtToken.getToken();
       var userContext = userContextExtractor.extractFromJwt(jwt);
 
-      MDC.put("userId", String.valueOf(userContext.userId()));
-      MDC.put("username", userContext.username());
-      MDC.put("userRoles", String.join(",", userContext.roles()));
+      MDC.put(BookstoreConstants.MdcKeys.USER_ID, String.valueOf(userContext.userId()));
+      MDC.put(BookstoreConstants.MdcKeys.USERNAME, userContext.username());
+      MDC.put(BookstoreConstants.MdcKeys.USER_ROLES, String.join(",", userContext.roles()));
 
       if (userContext.department() != null) {
-        MDC.put("department", userContext.department());
+        MDC.put(BookstoreConstants.MdcKeys.DEPARTMENT, userContext.department());
       }
       if (userContext.organizationId() != null) {
-        MDC.put("organizationId", userContext.organizationId());
+        MDC.put(BookstoreConstants.MdcKeys.ORGANIZATION_ID, userContext.organizationId());
       }
     } else {
-      MDC.put("userId", "anonymous");
-      MDC.put("username", "anonymous");
-      MDC.put("userRoles", "NONE");
+      MDC.put(BookstoreConstants.MdcKeys.USER_ID, BookstoreConstants.AnonymousUser.USER_ID);
+      MDC.put(BookstoreConstants.MdcKeys.USERNAME, BookstoreConstants.AnonymousUser.USERNAME);
+      MDC.put(BookstoreConstants.MdcKeys.USER_ROLES, BookstoreConstants.AnonymousUser.ROLES);
     }
   }
 
   private void clearUserContextFromMdc() {
-    MDC.remove("userId");
-    MDC.remove("username");
-    MDC.remove("userRoles");
-    MDC.remove("department");
-    MDC.remove("organizationId");
+    MDC.remove(BookstoreConstants.MdcKeys.USER_ID);
+    MDC.remove(BookstoreConstants.MdcKeys.USERNAME);
+    MDC.remove(BookstoreConstants.MdcKeys.USER_ROLES);
+    MDC.remove(BookstoreConstants.MdcKeys.DEPARTMENT);
+    MDC.remove(BookstoreConstants.MdcKeys.ORGANIZATION_ID);
   }
 }

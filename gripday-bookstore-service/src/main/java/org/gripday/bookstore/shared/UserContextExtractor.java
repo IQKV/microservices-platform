@@ -110,9 +110,9 @@ public class UserContextExtractor {
   }
 
   private Long extractUserId(Map<String, Object> claims) {
-    var userIdClaim = claims.get("userId");
+    var userIdClaim = claims.get(BookstoreConstants.JwtClaims.USER_ID);
     if (userIdClaim == null) {
-      userIdClaim = claims.get("sub");
+      userIdClaim = claims.get(BookstoreConstants.JwtClaims.SUBJECT);
     }
 
     if (userIdClaim instanceof Number number) {
@@ -130,32 +130,32 @@ public class UserContextExtractor {
   }
 
   private String extractUsername(Map<String, Object> claims) {
-    var username = (String) claims.get("username");
+    var username = (String) claims.get(BookstoreConstants.JwtClaims.USERNAME);
     if (username == null) {
-      username = (String) claims.get("preferred_username");
+      username = (String) claims.get(BookstoreConstants.JwtClaims.PREFERRED_USERNAME);
     }
     if (username == null) {
-      username = (String) claims.get("sub");
+      username = (String) claims.get(BookstoreConstants.JwtClaims.SUBJECT);
     }
     return username;
   }
 
   private String extractEmail(Map<String, Object> claims) {
-    return (String) claims.get("email");
+    return (String) claims.get(BookstoreConstants.JwtClaims.EMAIL);
   }
 
   @SuppressWarnings("unchecked")
   private Set<String> extractRoles(Map<String, Object> claims) {
     // Try different claim names for roles
-    var rolesObj = claims.get("roles");
+    var rolesObj = claims.get(BookstoreConstants.JwtClaims.ROLES);
     if (rolesObj == null) {
-      rolesObj = claims.get("authorities");
+      rolesObj = claims.get(BookstoreConstants.JwtClaims.AUTHORITIES);
     }
     if (rolesObj == null) {
       // Check realm_access for Keycloak
-      var realmAccess = (Map<String, Object>) claims.get("realm_access");
+      var realmAccess = (Map<String, Object>) claims.get(BookstoreConstants.JwtClaims.REALM_ACCESS);
       if (realmAccess != null) {
-        rolesObj = realmAccess.get("roles");
+        rolesObj = realmAccess.get(BookstoreConstants.JwtClaims.ROLES);
       }
     }
 
@@ -174,9 +174,9 @@ public class UserContextExtractor {
 
   @SuppressWarnings("unchecked")
   private Set<String> extractPermissions(Map<String, Object> claims) {
-    var permissionsObj = claims.get("permissions");
+    var permissionsObj = claims.get(BookstoreConstants.JwtClaims.PERMISSIONS);
     if (permissionsObj == null) {
-      permissionsObj = claims.get("scope");
+      permissionsObj = claims.get(BookstoreConstants.JwtClaims.SCOPE);
     }
 
     if (permissionsObj instanceof String scopeString) {
@@ -197,11 +197,11 @@ public class UserContextExtractor {
   }
 
   private String extractDepartment(Map<String, Object> claims) {
-    return (String) claims.get("department");
+    return (String) claims.get(BookstoreConstants.JwtClaims.DEPARTMENT);
   }
 
   private String extractOrganizationId(Map<String, Object> claims) {
-    return (String) claims.get("organizationId");
+    return (String) claims.get(BookstoreConstants.JwtClaims.ORGANIZATION_ID);
   }
 
   private Map<String, Object> extractCustomClaims(Map<String, Object> claims) {
@@ -209,10 +209,24 @@ public class UserContextExtractor {
 
     // Standard JWT claims to exclude
     var standardClaims = Set.of(
-        "iss", "sub", "aud", "exp", "nbf", "iat", "jti",
-        "userId", "username", "preferred_username", "email",
-        "roles", "authorities", "permissions", "scope",
-        "department", "organizationId", "realm_access"
+        BookstoreConstants.JwtClaims.ISSUER,
+        BookstoreConstants.JwtClaims.SUBJECT,
+        BookstoreConstants.JwtClaims.AUDIENCE,
+        BookstoreConstants.JwtClaims.EXPIRATION,
+        BookstoreConstants.JwtClaims.NOT_BEFORE,
+        BookstoreConstants.JwtClaims.ISSUED_AT,
+        BookstoreConstants.JwtClaims.JWT_ID,
+        BookstoreConstants.JwtClaims.USER_ID,
+        BookstoreConstants.JwtClaims.USERNAME,
+        BookstoreConstants.JwtClaims.PREFERRED_USERNAME,
+        BookstoreConstants.JwtClaims.EMAIL,
+        BookstoreConstants.JwtClaims.ROLES,
+        BookstoreConstants.JwtClaims.AUTHORITIES,
+        BookstoreConstants.JwtClaims.PERMISSIONS,
+        BookstoreConstants.JwtClaims.SCOPE,
+        BookstoreConstants.JwtClaims.DEPARTMENT,
+        BookstoreConstants.JwtClaims.ORGANIZATION_ID,
+        BookstoreConstants.JwtClaims.REALM_ACCESS
     );
 
     claims.entrySet().stream()

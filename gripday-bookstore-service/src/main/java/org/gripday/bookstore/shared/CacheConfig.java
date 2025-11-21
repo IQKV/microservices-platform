@@ -24,11 +24,12 @@ public class CacheConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(CacheConfig.class);
 
-  public static final String BOOK_CACHE = "books";
-  public static final String BOOK_SEARCH_CACHE = "book-search";
-  public static final String CATEGORY_CACHE = "categories";
-  public static final String AUTHOR_CACHE = "authors";
-  public static final String POPULAR_BOOKS_CACHE = "popular-books";
+  // Cache names are now centralized in BookstoreConstants.CacheNames
+  public static final String BOOK_CACHE = BookstoreConstants.CacheNames.BOOK_CACHE;
+  public static final String BOOK_SEARCH_CACHE = BookstoreConstants.CacheNames.BOOK_SEARCH_CACHE;
+  public static final String CATEGORY_CACHE = BookstoreConstants.CacheNames.CATEGORY_CACHE;
+  public static final String AUTHOR_CACHE = BookstoreConstants.CacheNames.AUTHOR_CACHE;
+  public static final String POPULAR_BOOKS_CACHE = BookstoreConstants.CacheNames.POPULAR_BOOKS_CACHE;
 
   @Bean
   public RedisCacheConfiguration redisCacheConfiguration() {

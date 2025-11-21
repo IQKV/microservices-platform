@@ -13,11 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-@Order(1)
+@Order(BookstoreConstants.FilterOrder.CORRELATION_ID_FILTER)
 public class CorrelationIdFilter extends OncePerRequestFilter {
-
-  private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-  private static final String CORRELATION_ID_MDC_KEY = "correlationId";
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -26,16 +23,16 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     var correlationId = extractOrGenerateCorrelationId(request);
 
     try {
-      MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
-      response.setHeader(CORRELATION_ID_HEADER, correlationId);
+      MDC.put(BookstoreConstants.MdcKeys.CORRELATION_ID, correlationId);
+      response.setHeader(BookstoreConstants.Headers.X_CORRELATION_ID, correlationId);
       filterChain.doFilter(request, response);
     } finally {
-      MDC.remove(CORRELATION_ID_MDC_KEY);
+      MDC.remove(BookstoreConstants.MdcKeys.CORRELATION_ID);
     }
   }
 
   private String extractOrGenerateCorrelationId(HttpServletRequest request) {
-    var correlationId = request.getHeader(CORRELATION_ID_HEADER);
+    var correlationId = request.getHeader(BookstoreConstants.Headers.X_CORRELATION_ID);
     if (correlationId == null || correlationId.trim().isEmpty()) {
       correlationId = UUID.randomUUID().toString();
     }

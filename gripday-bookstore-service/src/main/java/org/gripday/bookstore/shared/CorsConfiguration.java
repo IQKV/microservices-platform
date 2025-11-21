@@ -52,11 +52,11 @@ public class CorsConfiguration {
 
     // Expose headers that clients might need
     configuration.setExposedHeaders(List.of(
-        "X-Correlation-ID",
-        "X-Total-Count",
-        "X-Page-Number",
-        "X-Page-Size",
-        "Authorization"
+        BookstoreConstants.Headers.X_CORRELATION_ID,
+        BookstoreConstants.Headers.X_TOTAL_COUNT,
+        BookstoreConstants.Headers.X_PAGE_NUMBER,
+        BookstoreConstants.Headers.X_PAGE_SIZE,
+        BookstoreConstants.Headers.AUTHORIZATION
     ));
 
     var source = new UrlBasedCorsConfigurationSource();

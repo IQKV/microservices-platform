@@ -41,62 +41,62 @@ public class BookstoreMetrics {
     this.inventoryRepository = inventoryRepository;
 
     // Initialize counters
-    this.bookCreatedCounter = Counter.builder("bookstore.books.created")
-        .description("Number of books created")
+    this.bookCreatedCounter = Counter.builder(BookstoreConstants.Metrics.BOOKS_CREATED)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_CREATED)
         .register(meterRegistry);
 
-    this.bookUpdatedCounter = Counter.builder("bookstore.books.updated")
-        .description("Number of books updated")
+    this.bookUpdatedCounter = Counter.builder(BookstoreConstants.Metrics.BOOKS_UPDATED)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_UPDATED)
         .register(meterRegistry);
 
-    this.bookDeletedCounter = Counter.builder("bookstore.books.deleted")
-        .description("Number of books deleted")
+    this.bookDeletedCounter = Counter.builder(BookstoreConstants.Metrics.BOOKS_DELETED)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_DELETED)
         .register(meterRegistry);
 
-    this.inventoryUpdatedCounter = Counter.builder("bookstore.inventory.updated")
-        .description("Number of inventory updates")
+    this.inventoryUpdatedCounter = Counter.builder(BookstoreConstants.Metrics.INVENTORY_UPDATED)
+        .description(BookstoreConstants.Metrics.DESC_INVENTORY_UPDATED)
         .register(meterRegistry);
 
-    this.bookSearchCounter = Counter.builder("bookstore.books.searched")
-        .description("Number of book searches performed")
+    this.bookSearchCounter = Counter.builder(BookstoreConstants.Metrics.BOOKS_SEARCHED)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_SEARCHED)
         .register(meterRegistry);
 
-    this.unauthorizedAccessCounter = Counter.builder("bookstore.security.unauthorized_access")
-        .description("Number of unauthorized access attempts")
+    this.unauthorizedAccessCounter = Counter.builder(BookstoreConstants.Metrics.UNAUTHORIZED_ACCESS)
+        .description(BookstoreConstants.Metrics.DESC_UNAUTHORIZED_ACCESS)
         .register(meterRegistry);
 
     // Initialize timers
-    this.bookSearchTimer = Timer.builder("bookstore.books.search.duration")
-        .description("Time taken for book searches")
+    this.bookSearchTimer = Timer.builder(BookstoreConstants.Metrics.BOOK_SEARCH_DURATION)
+        .description(BookstoreConstants.Metrics.DESC_BOOK_SEARCH_DURATION)
         .register(meterRegistry);
 
-    this.bookCreationTimer = Timer.builder("bookstore.books.creation.duration")
-        .description("Time taken for book creation")
+    this.bookCreationTimer = Timer.builder(BookstoreConstants.Metrics.BOOK_CREATION_DURATION)
+        .description(BookstoreConstants.Metrics.DESC_BOOK_CREATION_DURATION)
         .register(meterRegistry);
 
-    this.inventoryUpdateTimer = Timer.builder("bookstore.inventory.update.duration")
-        .description("Time taken for inventory updates")
+    this.inventoryUpdateTimer = Timer.builder(BookstoreConstants.Metrics.INVENTORY_UPDATE_DURATION)
+        .description(BookstoreConstants.Metrics.DESC_INVENTORY_UPDATE_DURATION)
         .register(meterRegistry);
 
     // Initialize gauges
-    Gauge.builder("bookstore.books.total", this, BookstoreMetrics::getTotalBooks)
-        .description("Total number of books in catalog")
+    Gauge.builder(BookstoreConstants.Metrics.BOOKS_TOTAL, this, BookstoreMetrics::getTotalBooks)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_TOTAL)
         .register(meterRegistry);
 
-    Gauge.builder("bookstore.books.available", this, BookstoreMetrics::getAvailableBooks)
-        .description("Number of available books")
+    Gauge.builder(BookstoreConstants.Metrics.BOOKS_AVAILABLE, this, BookstoreMetrics::getAvailableBooks)
+        .description(BookstoreConstants.Metrics.DESC_BOOKS_AVAILABLE)
         .register(meterRegistry);
 
-    Gauge.builder("bookstore.inventory.low_stock", lowStockBooksCount, AtomicLong::get)
-        .description("Number of books with low stock")
+    Gauge.builder(BookstoreConstants.Metrics.INVENTORY_LOW_STOCK, lowStockBooksCount, AtomicLong::get)
+        .description(BookstoreConstants.Metrics.DESC_INVENTORY_LOW_STOCK)
         .register(meterRegistry);
 
-    Gauge.builder("bookstore.inventory.out_of_stock", outOfStockBooksCount, AtomicLong::get)
-        .description("Number of books out of stock")
+    Gauge.builder(BookstoreConstants.Metrics.INVENTORY_OUT_OF_STOCK, outOfStockBooksCount, AtomicLong::get)
+        .description(BookstoreConstants.Metrics.DESC_INVENTORY_OUT_OF_STOCK)
         .register(meterRegistry);
 
-    Gauge.builder("bookstore.inventory.total_quantity", this, BookstoreMetrics::getTotalInventoryQuantity)
-        .description("Total inventory quantity across all books")
+    Gauge.builder(BookstoreConstants.Metrics.INVENTORY_TOTAL_QUANTITY, this, BookstoreMetrics::getTotalInventoryQuantity)
+        .description(BookstoreConstants.Metrics.DESC_INVENTORY_TOTAL_QUANTITY)
         .register(meterRegistry);
   }
 
