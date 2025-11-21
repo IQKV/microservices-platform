@@ -33,10 +33,6 @@
                 <constraints nullable="true" unique="true"/>
             </column>
 
-            <column name="subdomain" type="VARCHAR(100)">
-                <constraints nullable="true" unique="true"/>
-            </column>
-
             <column name="max_users" type="INTEGER">
                 <constraints nullable="true"/>
             </column>
@@ -76,10 +72,6 @@
 
         <createIndex indexName="idx_tenants_domain" tableName="tenants">
             <column name="domain"/>
-        </createIndex>
-
-        <createIndex indexName="idx_tenants_subdomain" tableName="tenants">
-            <column name="subdomain"/>
         </createIndex>
 
         <createIndex indexName="idx_tenants_created_at" tableName="tenants">
