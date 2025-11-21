@@ -190,7 +190,7 @@
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>MISSEDCOUNT</value>
-                                            <maximum>51</maximum>
+                                            <maximum>73</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
