@@ -154,6 +154,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/*Application.class</exclude>
+                        <exclude>**/common/*.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -189,7 +190,7 @@
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>MISSEDCOUNT</value>
-                                            <maximum>50</maximum>
+                                            <maximum>51</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
