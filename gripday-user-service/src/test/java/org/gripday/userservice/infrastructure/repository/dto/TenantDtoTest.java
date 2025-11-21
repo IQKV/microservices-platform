@@ -30,7 +30,6 @@ class TenantDtoTest {
         "Acme Corp",
         "A great company",
         "acme.com",
-        "acme",
         100,
         50,
         1000
@@ -48,7 +47,6 @@ class TenantDtoTest {
         "Acme Corp",
         "Description",
         "acme.com",
-        "acme",
         100,
         50,
         1000
@@ -65,7 +63,6 @@ class TenantDtoTest {
         "Acme Corp",
         "Description",
         "acme.com",
-        "acme",
         100,
         50,
         1000
@@ -82,7 +79,6 @@ class TenantDtoTest {
         "",
         "Description",
         "acme.com",
-        "acme",
         100,
         50,
         1000
@@ -99,7 +95,6 @@ class TenantDtoTest {
         "Acme Corp",
         "Description",
         "acme.com",
-        "acme",
         0,
         50,
         1000
@@ -134,7 +129,6 @@ class TenantDtoTest {
         null,
         null,
         null,
-        null,
         null
     );
 
@@ -154,7 +148,6 @@ class TenantDtoTest {
         "A great company",
         true,
         "acme.com",
-        "acme",
         100,
         50,
         1000,
@@ -300,25 +293,6 @@ class TenantDtoTest {
         "Acme Corp",
         longDescription,
         "acme.com",
-        "acme",
-        100,
-        50,
-        1000
-    );
-
-    Set<ConstraintViolation<TenantDto.CreateTenantRequest>> violations = validator.validate(request);
-    assertFalse(violations.isEmpty());
-  }
-
-  @Test
-  void shouldValidateDomainLength() {
-    var longDomain = "a".repeat(256);
-    var request = new TenantDto.CreateTenantRequest(
-        "tenant-123",
-        "Acme Corp",
-        "Description",
-        longDomain,
-        "acme",
         100,
         50,
         1000
@@ -350,7 +324,6 @@ class TenantDtoTest {
     var request = new TenantDto.CreateTenantRequest(
         "tenant-123",
         "Acme Corp",
-        null,
         null,
         null,
         null,
