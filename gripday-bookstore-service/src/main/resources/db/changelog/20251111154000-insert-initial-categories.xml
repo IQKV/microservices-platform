@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
-    <changeSet id="004-insert-initial-categories" author="bookstore-service">
+    <changeSet id="20251111154000-insert-initial-categories" author="bookstore-service">
         <insert tableName="categories">
             <column name="name" value="Fiction"/>
             <column name="description" value="Fictional literature including novels, short stories, and novellas"/>

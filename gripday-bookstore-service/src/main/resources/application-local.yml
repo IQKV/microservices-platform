@@ -48,7 +48,7 @@ spring:
   # Liquibase Configuration - Local
   # ============================================================================
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    change-log: classpath:db/changelog/master.xml
     enabled: true
   
   # ============================================================================
