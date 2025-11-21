@@ -69,17 +69,9 @@ public class TenantManagementService {
       }
     }
 
-    // Validate subdomain uniqueness if provided
-    if (request.subdomain() != null && !request.subdomain().trim().isEmpty()) {
-      if (tenantRepository.existsBySubdomain(request.subdomain())) {
-        throw new IllegalArgumentException("Tenant with subdomain '" + request.subdomain() + "' already exists");
-      }
-    }
-
     // Create tenant entity
     var tenant = new Tenant(request.tenantId(), request.name(), request.description(), createdBy);
     tenant.setDomain(request.domain());
-    tenant.setSubdomain(request.subdomain());
     tenant.setMaxUsers(request.maxUsers());
     tenant.setStorageQuotaGb(request.storageQuotaGb());
     tenant.setApiRateLimitPerMinute(request.apiRateLimitPerMinute());
@@ -129,14 +121,6 @@ public class TenantManagementService {
         throw new IllegalArgumentException("Tenant with domain '" + request.domain() + "' already exists");
       }
       tenant.setDomain(request.domain().trim().isEmpty() ? null : request.domain().trim());
-    }
-
-    // Validate subdomain uniqueness if changing
-    if (request.subdomain() != null && !request.subdomain().equals(tenant.getSubdomain())) {
-      if (!request.subdomain().trim().isEmpty() && tenantRepository.existsBySubdomain(request.subdomain())) {
-        throw new IllegalArgumentException("Tenant with subdomain '" + request.subdomain() + "' already exists");
-      }
-      tenant.setSubdomain(request.subdomain().trim().isEmpty() ? null : request.subdomain().trim());
     }
 
     if (request.maxUsers() != null) {
@@ -343,7 +327,7 @@ public class TenantManagementService {
   }
 
   /**
-   * Find a tenant by domain or subdomain for tenant resolution.
+   * Find a tenant by domain for tenant resolution.
    *
    * @param domain the domain to search for
    * @return optional tenant
@@ -354,14 +338,7 @@ public class TenantManagementService {
       return Optional.empty();
     }
 
-    // Try the exact domain match first
-    var tenantByDomain = tenantRepository.findByDomain(domain);
-    if (tenantByDomain.isPresent()) {
-      return tenantByDomain;
-    }
-
-    // Try a subdomain match
-    return tenantRepository.findBySubdomain(domain);
+    return tenantRepository.findByDomain(domain);
   }
 
   /**
@@ -388,7 +365,6 @@ public class TenantManagementService {
         tenant.getDescription(),
         tenant.getEnabled(),
         tenant.getDomain(),
-        tenant.getSubdomain(),
         tenant.getMaxUsers(),
         tenant.getStorageQuotaGb(),
         tenant.getApiRateLimitPerMinute(),

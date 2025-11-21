@@ -115,7 +115,6 @@ class TenantDtoTest {
         "Updated Name",
         "Updated description",
         "newdomain.com",
-        "newsubdomain",
         200,
         100,
         2000,
@@ -269,14 +268,14 @@ class TenantDtoTest {
   void shouldCreateTenantResolutionResult() {
     var result = new TenantDto.TenantResolutionResult(
         "tenant-123",
-        "subdomain",
-        "acme",
+        "JWT",
+        "tenant-123",
         true
     );
 
     assertEquals("tenant-123", result.tenantId());
-    assertEquals("subdomain", result.resolutionMethod());
-    assertEquals("acme", result.sourceValue());
+    assertEquals("JWT", result.resolutionMethod());
+    assertEquals("tenant-123", result.sourceValue());
     assertTrue(result.isValid());
   }
 
@@ -330,14 +329,13 @@ class TenantDtoTest {
   }
 
   @Test
-  void shouldValidateSubdomainLength() {
-    var longSubdomain = "a".repeat(101);
+  void shouldValidateDomainLength() {
+    var longDomain = "a".repeat(256);
     var request = new TenantDto.CreateTenantRequest(
         "tenant-123",
         "Acme Corp",
         "Description",
-        "acme.com",
-        longSubdomain,
+        longDomain,
         100,
         50,
         1000

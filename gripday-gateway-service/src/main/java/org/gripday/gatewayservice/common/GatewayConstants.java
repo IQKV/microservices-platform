@@ -217,19 +217,7 @@ public final class GatewayConstants {
     public static final String TENANT_ID = "tenantId";
   }
 
-  /**
-   * Subdomain patterns for tenant extraction.
-   */
-  public static final class Subdomains {
 
-    private Subdomains() {
-      throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
-    }
-
-    public static final String WWW = "www";
-    public static final String API = "api";
-    public static final String SUBDOMAIN_PATTERN = "^[a-zA-Z0-9-]+$";
-  }
 
   /**
    * Filter order constants.

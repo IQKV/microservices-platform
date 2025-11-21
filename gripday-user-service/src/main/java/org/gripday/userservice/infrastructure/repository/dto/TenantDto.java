@@ -28,9 +28,6 @@ public final class TenantDto {
       @Size(max = 255, message = "Domain cannot exceed 255 characters")
       String domain,
 
-      @Size(max = 100, message = "Subdomain cannot exceed 100 characters")
-      String subdomain,
-
       @Min(value = 1, message = "Max users must be at least 1")
       Integer maxUsers,
 
@@ -56,9 +53,6 @@ public final class TenantDto {
       @Size(max = 255, message = "Domain cannot exceed 255 characters")
       String domain,
 
-      @Size(max = 100, message = "Subdomain cannot exceed 100 characters")
-      String subdomain,
-
       @Min(value = 1, message = "Max users must be at least 1")
       Integer maxUsers,
 
@@ -83,7 +77,6 @@ public final class TenantDto {
       String description,
       Boolean enabled,
       String domain,
-      String subdomain,
       Integer maxUsers,
       Integer storageQuotaGb,
       Integer apiRateLimitPerMinute,

@@ -29,14 +29,6 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
   Optional<Tenant> findByDomain(String domain);
 
   /**
-   * Find tenant by subdomain.
-   *
-   * @param subdomain the subdomain to search for
-   * @return Optional containing the tenant if found
-   */
-  Optional<Tenant> findBySubdomain(String subdomain);
-
-  /**
    * Check if tenant exists by tenant ID.
    *
    * @param tenantId the tenant ID to check
@@ -51,14 +43,6 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
    * @return true if tenant exists, false otherwise
    */
   boolean existsByDomain(String domain);
-
-  /**
-   * Check if tenant exists by subdomain.
-   *
-   * @param subdomain the subdomain to check
-   * @return true if tenant exists, false otherwise
-   */
-  boolean existsBySubdomain(String subdomain);
 
   /**
    * Find all enabled tenants.

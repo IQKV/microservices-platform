@@ -32,20 +32,17 @@ class TenantRepositoryTest {
   private TenantManagementService tenantManagementService;
 
   @Test
-  @DisplayName("finders and exists checks: by tenantId, domain, subdomain")
+  @DisplayName("finders and exists checks: by tenantId and domain")
   void basicFindersAndExists() {
     var t = new Tenant("TEN-1", "Tenant One", "desc", "creator");
     t.setDomain("example.com");
-    t.setSubdomain("acme");
     tenantRepository.save(t);
 
     assertThat(tenantRepository.findByTenantId("TEN-1")).isPresent();
     assertThat(tenantRepository.findByDomain("example.com")).isPresent();
-    assertThat(tenantRepository.findBySubdomain("acme")).isPresent();
 
     assertThat(tenantRepository.existsByTenantId("TEN-1")).isTrue();
     assertThat(tenantRepository.existsByDomain("example.com")).isTrue();
-    assertThat(tenantRepository.existsBySubdomain("acme")).isTrue();
   }
 
   @Test

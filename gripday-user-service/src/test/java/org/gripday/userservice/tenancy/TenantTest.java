@@ -62,14 +62,12 @@ class TenantTest {
     var t = new Tenant("tid", "Name");
     t.setDescription("desc");
     t.setDomain("example.com");
-    t.setSubdomain("acme");
     t.setCreatedBy("system");
 
     assertEquals("tid", t.getTenantId());
     assertEquals("Name", t.getName());
     assertEquals("desc", t.getDescription());
     assertEquals("example.com", t.getDomain());
-    assertEquals("acme", t.getSubdomain());
     assertEquals("system", t.getCreatedBy());
   }
 }

@@ -128,15 +128,11 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   }
 
   private TenantContext extractTenantContext(ServerHttpRequest request, Jwt jwt) {
-    // Priority: 1. X-Tenant-ID header, 2. JWT claims, 3. Subdomain extraction
-    var tenantId = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
+    // Priority: 1. JWT claims, 2. X-Tenant-ID header
+    var tenantId = extractString(jwt.getClaims().get(JwtClaimNames.TENANT_ID));
 
     if (!StringUtils.hasText(tenantId)) {
-      tenantId = extractString(jwt.getClaims().get(JwtClaimNames.TENANT_ID));
-    }
-
-    if (!StringUtils.hasText(tenantId)) {
-      tenantId = extractTenantFromSubdomain(request);
+      tenantId = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
     }
 
     return new TenantContext(tenantId);
@@ -176,17 +172,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     };
   }
 
-  private String extractTenantFromSubdomain(ServerHttpRequest request) {
-    var host = request.getHeaders().getFirst(HttpHeaders.HOST);
-    if (StringUtils.hasText(host)) {
-      var parts = host.split("\\.");
-      if (parts.length > 2) {
-        // Extract subdomain as tenant ID (e.g., tenant1.api.gripday.com -> tenant1)
-        return parts[0];
-      }
-    }
-    return null;
-  }
+
 
   private ServerHttpRequest propagateContextHeaders(
       ServerHttpRequest request,
@@ -253,7 +239,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
   }
 
   /**
-   * Tenant context extracted from headers, JWT claims, or subdomain.
+   * Tenant context extracted from JWT claims or headers.
    */
   public record TenantContext(
       String tenantId

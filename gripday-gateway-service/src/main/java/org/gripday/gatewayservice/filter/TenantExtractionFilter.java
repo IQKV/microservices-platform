@@ -14,7 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * Early tenant context establishment filter that extracts tenant information from various sources and establishes tenant context for downstream processing.
+ * Early tenant context establishment filter that extracts tenant information from headers and query parameters for downstream processing.
  */
 @Component
 public class TenantExtractionFilter implements GlobalFilter, Ordered {
@@ -51,8 +51,7 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
   private String extractTenantId(org.springframework.http.server.reactive.ServerHttpRequest request) {
     // Priority order for tenant extraction:
     // 1. X-Tenant-ID header (explicit tenant specification)
-    // 2. Subdomain extraction (tenant1.api.gripday.com -> tenant1)
-    // 3. Query parameter (for development/testing)
+    // 2. Query parameter (for development/testing)
 
     // 1. Check X-Tenant-ID header
     var tenantIdHeader = request.getHeaders().getFirst(GatewayConstants.Headers.X_TENANT_ID);
@@ -61,37 +60,13 @@ public class TenantExtractionFilter implements GlobalFilter, Ordered {
       return tenantIdHeader;
     }
 
-    // 2. Extract from subdomain
-    var subdomainTenant = extractTenantFromSubdomain(request);
-    if (StringUtils.hasText(subdomainTenant)) {
-      logger.debug("Tenant ID extracted from subdomain: {}", subdomainTenant);
-      return subdomainTenant;
-    }
-
-    // 3. Check query parameter (for development/testing)
+    // 2. Check query parameter (for development/testing)
     var queryTenant = request.getQueryParams().getFirst(GatewayConstants.QueryParams.TENANT_ID);
     if (StringUtils.hasText(queryTenant)) {
       logger.debug("Tenant ID extracted from query parameter: {}", queryTenant);
       return queryTenant;
     }
 
-    return null;
-  }
-
-  private String extractTenantFromSubdomain(org.springframework.http.server.reactive.ServerHttpRequest request) {
-    var host = request.getHeaders().getFirst(HttpHeaders.HOST);
-    if (StringUtils.hasText(host)) {
-      var parts = host.split("\\.");
-      if (parts.length > 2) {
-        var subdomain = parts[0];
-        // Validate subdomain format (alphanumeric and hyphens only)
-        if (subdomain.matches(GatewayConstants.Subdomains.SUBDOMAIN_PATTERN) 
-            && !subdomain.equals(GatewayConstants.Subdomains.WWW) 
-            && !subdomain.equals(GatewayConstants.Subdomains.API)) {
-          return subdomain;
-        }
-      }
-    }
     return null;
   }
 

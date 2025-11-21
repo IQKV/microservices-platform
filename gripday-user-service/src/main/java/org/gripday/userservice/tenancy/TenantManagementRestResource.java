@@ -61,7 +61,7 @@ public class TenantManagementRestResource {
       @ApiResponse(responseCode = "201", description = "Tenant created successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid request data or tenant already exists"),
       @ApiResponse(responseCode = "403", description = "Access denied - SUPER_ADMIN role required"),
-      @ApiResponse(responseCode = "409", description = "Tenant with same ID, domain, or subdomain already exists")
+      @ApiResponse(responseCode = "409", description = "Tenant with same ID or domain already exists")
   })
   public ResponseEntity<TenantResponse> createTenant(
       @Valid @RequestBody CreateTenantRequest request,
@@ -149,7 +149,7 @@ public class TenantManagementRestResource {
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
       @ApiResponse(responseCode = "403", description = "Access denied - SUPER_ADMIN role required"),
       @ApiResponse(responseCode = "404", description = "Tenant not found"),
-      @ApiResponse(responseCode = "409", description = "Domain or subdomain already exists")
+      @ApiResponse(responseCode = "409", description = "Domain already exists")
   })
   public ResponseEntity<TenantResponse> updateTenant(
       @Parameter(description = "Tenant ID", required = true)

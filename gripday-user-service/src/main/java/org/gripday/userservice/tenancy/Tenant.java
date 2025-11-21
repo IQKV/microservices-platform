@@ -39,9 +39,6 @@ public class Tenant {
   @Column(name = "domain", length = 255)
   private String domain;
 
-  @Column(name = "subdomain", length = 100)
-  private String subdomain;
-
   @Column(name = "max_users")
   private Integer maxUsers;
 
@@ -123,14 +120,6 @@ public class Tenant {
 
   public void setDomain(String domain) {
     this.domain = domain;
-  }
-
-  public String getSubdomain() {
-    return subdomain;
-  }
-
-  public void setSubdomain(String subdomain) {
-    this.subdomain = subdomain;
   }
 
   public Integer getMaxUsers() {
@@ -229,7 +218,6 @@ public class Tenant {
         .append(", name='").append(name).append('\'')
         .append(", enabled=").append(enabled)
         .append(", domain='").append(domain).append('\'')
-        .append(", subdomain='").append(subdomain).append('\'')
         .append(", createdAt=").append(createdAt)
         .append('}');
     return sb.toString();
