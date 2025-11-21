@@ -71,7 +71,6 @@ Domain service demonstrating catalog and inventory management.
 
 **Key Patterns:**
 
-- Three-tier architecture
 - Repository and service layers
 - Cache-aside pattern with Redis
 - Optimistic locking for concurrency
@@ -168,7 +167,7 @@ Domain service demonstrating catalog and inventory management.
 - Consistent error response format (RFC 7807)
 - Architecture validation with ArchUnit
 - Integration tests with Testcontainers
-- Clear separation of concerns with three-tier architecture
+- Clear separation of concerns
 
 ## Architecture Patterns
 
