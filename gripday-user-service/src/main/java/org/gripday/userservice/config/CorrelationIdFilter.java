@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.slf4j.MDC;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -18,11 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @Order(1)
 public class CorrelationIdFilter extends OncePerRequestFilter {
-
-  private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
-  private static final String REQUEST_ID_HEADER = "X-Request-ID";
-  private static final String CORRELATION_ID_MDC_KEY = "correlationId";
-  private static final String REQUEST_ID_MDC_KEY = "requestId";
 
   @Override
   protected void doFilterInternal(
@@ -36,20 +32,20 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
       var requestId = generateRequestId();
 
       // Add to MDC for logging
-      MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
-      MDC.put(REQUEST_ID_MDC_KEY, requestId);
+      MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
+      MDC.put(UserServiceConstants.MDC.REQUEST_ID, requestId);
 
       // Add to response headers
-      response.setHeader(CORRELATION_ID_HEADER, correlationId);
-      response.setHeader(REQUEST_ID_HEADER, requestId);
+      response.setHeader(UserServiceConstants.Headers.X_CORRELATION_ID, correlationId);
+      response.setHeader(UserServiceConstants.Headers.X_REQUEST_ID, requestId);
 
       // Continue filter chain
       filterChain.doFilter(request, response);
 
     } finally {
       // Clean up MDC
-      MDC.remove(CORRELATION_ID_MDC_KEY);
-      MDC.remove(REQUEST_ID_MDC_KEY);
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
+      MDC.remove(UserServiceConstants.MDC.REQUEST_ID);
     }
   }
 
@@ -57,7 +53,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
    * Get correlation ID from request header or generate new one.
    */
   private String getOrGenerateCorrelationId(HttpServletRequest request) {
-    var correlationId = request.getHeader(CORRELATION_ID_HEADER);
+    var correlationId = request.getHeader(UserServiceConstants.Headers.X_CORRELATION_ID);
 
     if (correlationId == null || correlationId.trim().isEmpty()) {
       correlationId = generateCorrelationId();

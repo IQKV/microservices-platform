@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantResolutionResult;
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -17,10 +18,6 @@ import org.springframework.stereotype.Service;
 public class TenantExtractionService {
 
   private static final Logger logger = LoggerFactory.getLogger(TenantExtractionService.class);
-
-  private static final String TENANT_HEADER = "X-Tenant-ID";
-  private static final String TENANT_JWT_CLAIM = "tenant_id";
-  private static final String TENANT_SUBDOMAIN_PATTERN = "^([a-zA-Z0-9-]+)\\.";
 
   private final TenantManagementService tenantManagementService;
 
@@ -90,7 +87,7 @@ public class TenantExtractionService {
 
     // Handle JWT authentication
     if (authentication.getPrincipal() instanceof Jwt jwt) {
-      var tenantClaim = jwt.getClaimAsString(TENANT_JWT_CLAIM);
+      var tenantClaim = jwt.getClaimAsString(UserServiceConstants.JwtClaims.TENANT_ID);
       if (tenantClaim != null && !tenantClaim.trim().isEmpty()) {
         return Optional.of(tenantClaim.trim());
       }
@@ -106,7 +103,7 @@ public class TenantExtractionService {
    * @return optional tenant ID from header
    */
   public Optional<String> extractTenantFromHeader(HttpServletRequest request) {
-    var tenantHeader = request.getHeader(TENANT_HEADER);
+    var tenantHeader = request.getHeader(UserServiceConstants.Headers.X_TENANT_ID);
     if (tenantHeader != null && !tenantHeader.trim().isEmpty()) {
       return Optional.of(tenantHeader.trim());
     }
@@ -186,7 +183,7 @@ public class TenantExtractionService {
    * @return the tenant header name
    */
   public static String getTenantHeaderName() {
-    return TENANT_HEADER;
+    return UserServiceConstants.Headers.X_TENANT_ID;
   }
 
   /**
@@ -195,7 +192,7 @@ public class TenantExtractionService {
    * @return the JWT claim name
    */
   public static String getTenantJwtClaim() {
-    return TENANT_JWT_CLAIM;
+    return UserServiceConstants.JwtClaims.TENANT_ID;
   }
 
   // Private helper methods

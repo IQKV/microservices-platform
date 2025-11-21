@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import org.gripday.userservice.shared.TenantAware;
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.gripday.userservice.usermanagement.User;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -144,31 +145,37 @@ public class UserAuditLog extends TenantAware {
   // Utility methods
   public boolean isLoginAction() {
     var action = this.action;
-    return "LOGIN_SUCCESS".equals(action) || "LOGIN_FAILURE".equals(action);
+    return UserServiceConstants.SecurityEvents.LOGIN_SUCCESS.equals(action) 
+        || UserServiceConstants.SecurityEvents.LOGIN_FAILURE.equals(action);
   }
 
   public boolean isSecurityAction() {
     var action = this.action;
     return action != null && (
-        action.startsWith("LOGIN_")
-            || action.startsWith("LOGOUT_")
-            || action.startsWith("PASSWORD_")
-            || action.startsWith("ACCOUNT_"));
+        action.startsWith(UserServiceConstants.SecurityEvents.LOGIN_PREFIX)
+            || action.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX)
+            || action.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX)
+            || action.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX));
   }
 
   public String getActionCategory() {
     var action = this.action;
     if (action == null) {
-      return "UNKNOWN";
+      return UserServiceConstants.SecurityEvents.CATEGORY_UNKNOWN;
     }
 
     return switch (action) {
-      case String a when a.startsWith("LOGIN_") -> "AUTHENTICATION";
-      case String a when a.startsWith("LOGOUT_") -> "AUTHENTICATION";
-      case String a when a.startsWith("PASSWORD_") -> "SECURITY";
-      case String a when a.startsWith("ACCOUNT_") -> "ACCOUNT_MANAGEMENT";
-      case String a when a.startsWith("ROLE_") -> "AUTHORIZATION";
-      default -> "GENERAL";
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGIN_PREFIX) -> 
+          UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.LOGOUT_PREFIX) -> 
+          UserServiceConstants.SecurityEvents.CATEGORY_AUTHENTICATION;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.PASSWORD_PREFIX) -> 
+          UserServiceConstants.SecurityEvents.CATEGORY_SECURITY;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ACCOUNT_PREFIX) -> 
+          UserServiceConstants.SecurityEvents.CATEGORY_ACCOUNT_MANAGEMENT;
+      case String a when a.startsWith(UserServiceConstants.SecurityEvents.ROLE_PREFIX) -> 
+          UserServiceConstants.SecurityEvents.CATEGORY_AUTHORIZATION;
+      default -> UserServiceConstants.SecurityEvents.CATEGORY_GENERAL;
     };
   }
 

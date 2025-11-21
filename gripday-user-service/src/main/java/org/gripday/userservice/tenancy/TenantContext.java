@@ -1,15 +1,12 @@
 package org.gripday.userservice.tenancy;
 
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.slf4j.MDC;
 
 /**
  * ThreadLocal-based tenant context management for multi-tenant architecture. Provides tenant isolation and context propagation throughout the application.
  */
 public final class TenantContext {
-
-  private static final String TENANT_ID_KEY = "tenantId";
-  private static final String MDC_TENANT_KEY = "tenant.id";
-  private static final String DEFAULT_TENANT_ID = "default";
 
   private static final ThreadLocal<String> TENANT_CONTEXT = new ThreadLocal<>();
 
@@ -31,7 +28,7 @@ public final class TenantContext {
     TENANT_CONTEXT.set(normalizedTenantId);
 
     // Add tenant context to MDC for structured logging
-    MDC.put(MDC_TENANT_KEY, normalizedTenantId);
+    MDC.put(UserServiceConstants.MDC.TENANT_ID, normalizedTenantId);
   }
 
   /**
@@ -50,7 +47,7 @@ public final class TenantContext {
    */
   public static String getCurrentTenantIdOrDefault() {
     var tenantId = TENANT_CONTEXT.get();
-    return tenantId != null ? tenantId : DEFAULT_TENANT_ID;
+    return tenantId != null ? tenantId : UserServiceConstants.Defaults.DEFAULT_TENANT_ID;
   }
 
   /**
@@ -78,7 +75,7 @@ public final class TenantContext {
    */
   public static void clear() {
     TENANT_CONTEXT.remove();
-    MDC.remove(MDC_TENANT_KEY);
+    MDC.remove(UserServiceConstants.MDC.TENANT_ID);
   }
 
   /**
@@ -129,7 +126,7 @@ public final class TenantContext {
    * @return the default tenant ID
    */
   public static String getDefaultTenantId() {
-    return DEFAULT_TENANT_ID;
+    return UserServiceConstants.Defaults.DEFAULT_TENANT_ID;
   }
 
   /**

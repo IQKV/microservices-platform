@@ -9,6 +9,7 @@ import org.gripday.userservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.userservice.security.InputSanitizer;
 import org.gripday.userservice.security.SecurityAuditService;
 import org.gripday.userservice.shared.EmailService;
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class PasswordResetService {
    */
   public void resetPassword(@NotBlank String resetToken, @NotBlank String newPassword, String clientIp) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
     try {
       var sanitizedToken = inputSanitizer.sanitizeInput(resetToken);
       var sanitizedPassword = inputSanitizer.sanitizeInput(newPassword);
@@ -158,7 +159,7 @@ public class PasswordResetService {
     } catch (final Exception e) {
       throw new PasswordResetException("Password reset failed", e);
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -167,7 +168,7 @@ public class PasswordResetService {
    */
   public void initiatePasswordReset(String email, String ipAddress, String userAgent) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
     try {
       var sanitizedEmail = inputSanitizer.sanitizeInput(email);
       // Basic sanity check
@@ -206,7 +207,7 @@ public class PasswordResetService {
       // Intentionally do not leak errors to caller; log and return
       logger.error("Error initiating password reset: {}", e.getMessage());
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 

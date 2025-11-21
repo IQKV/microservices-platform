@@ -9,6 +9,7 @@ import org.gripday.userservice.config.RedisConfig.TenantAwareSessionService;
 import org.gripday.userservice.security.AccountLockoutService;
 import org.gripday.userservice.security.InputSanitizer;
 import org.gripday.userservice.security.SecurityAuditService;
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserContext;
 import org.gripday.userservice.usermanagement.UserRepository;
@@ -63,7 +64,7 @@ public class AuthenticationService {
    */
   public TokenResponse authenticateUser(LoginRequest request, String ipAddress, String userAgent) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
 
     try {
       // Sanitize input to prevent injection attacks
@@ -168,7 +169,7 @@ public class AuthenticationService {
           request.username(), "System error: " + e.getMessage(), ipAddress, userAgent);
       throw new AuthenticationException("Authentication failed", e);
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -178,7 +179,7 @@ public class AuthenticationService {
    */
   public void changePassword(Long userId, String currentPassword, String newPassword, String clientIp) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
     try {
       // Sanitize inputs
       var sanitizedCurrentPassword = inputSanitizer.sanitizeInput(currentPassword);
@@ -229,7 +230,7 @@ public class AuthenticationService {
     } catch (final Exception e) {
       throw new AuthenticationException("Password change failed", e);
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -238,7 +239,7 @@ public class AuthenticationService {
    */
   public TokenResponse refreshToken(RefreshTokenRequest request) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
 
     try {
       // Validate refresh token
@@ -288,7 +289,7 @@ public class AuthenticationService {
     } catch (final Exception e) {
       throw new AuthenticationException("Token refresh failed", e);
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -298,7 +299,7 @@ public class AuthenticationService {
   @CacheEvict(value = "jwt-blacklist", key = "#accessToken")
   public void logoutUser(String accessToken, String sessionId) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
 
     try {
       // Invalidate the access token
@@ -323,7 +324,7 @@ public class AuthenticationService {
       // Log error but don't throw exception for logout
       System.err.println("Error during logout: " + e.getMessage());
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -333,7 +334,7 @@ public class AuthenticationService {
   @CacheEvict(value = {"jwt-blacklist", "users"}, allEntries = true)
   public void logoutAllUserSessions(Long userId) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
 
     try {
       // Invalidate all sessions for the user
@@ -348,7 +349,7 @@ public class AuthenticationService {
     } catch (final Exception e) {
       System.err.println("Error during logout from all devices: " + e.getMessage());
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 
@@ -357,7 +358,7 @@ public class AuthenticationService {
    */
   public void logoutFromAllDevices(Long userId) {
     var correlationId = generateCorrelationId();
-    MDC.put("correlationId", correlationId);
+    MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
 
     try {
       // Revoke all refresh tokens for the user
@@ -376,7 +377,7 @@ public class AuthenticationService {
     } catch (final Exception e) {
       System.err.println("Error during logout from all devices: " + e.getMessage());
     } finally {
-      MDC.remove("correlationId");
+      MDC.remove(UserServiceConstants.MDC.CORRELATION_ID);
     }
   }
 

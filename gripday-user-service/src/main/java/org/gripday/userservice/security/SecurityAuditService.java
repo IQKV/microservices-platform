@@ -2,6 +2,7 @@ package org.gripday.userservice.security;
 
 import java.time.Instant;
 
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.gripday.userservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class SecurityAuditService {
         "User Agent: %s%n" +
         "Timestamp: %s%n", username, ipAddress, userAgent, Instant.now());
 
-    logSecurityEvent("PASSWORD_CHANGE", username, details, ipAddress, userAgent);
+    logSecurityEvent(UserServiceConstants.SecurityEvents.PASSWORD_CHANGE, username, details, ipAddress, userAgent);
 
     securityLogger.info("PASSWORD_CHANGE: user={}, ip={}, userAgent={}",
         username, ipAddress, userAgent);
@@ -161,9 +162,9 @@ public class SecurityAuditService {
   private void logSecurityEvent(String action, String username, String details, String ipAddress, String userAgent) {
     try {
       // Set correlation ID for tracing
-      var correlationId = MDC.get("correlationId");
+      var correlationId = MDC.get(UserServiceConstants.MDC.CORRELATION_ID);
       if (correlationId != null) {
-        MDC.put("correlationId", correlationId);
+        MDC.put(UserServiceConstants.MDC.CORRELATION_ID, correlationId);
       }
 
       // Create audit log entry

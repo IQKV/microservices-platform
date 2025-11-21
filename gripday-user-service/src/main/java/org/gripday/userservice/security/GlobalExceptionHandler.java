@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.gripday.userservice.authentication.AuthenticationService;
 import org.gripday.userservice.emailverification.EmailVerificationService;
 import org.gripday.userservice.registration.UserRegistrationService;
+import org.gripday.userservice.shared.UserServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
     pd.setInstance(java.net.URI.create(request.getRequestURI()));
     pd.setProperty("path", request.getRequestURI());
     pd.setProperty("method", request.getMethod());
-    pd.setProperty("correlationId", MDC.get("correlationId"));
+    pd.setProperty("correlationId", MDC.get(UserServiceConstants.MDC.CORRELATION_ID));
     pd.setProperty("requestId", generateRequestId());
     return pd;
   }
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler {
         request);
     pd.setProperty("code", "VALIDATION_ERROR");
     pd.setProperty("fields", fieldErrors);
-    logger.warn("Validation error: {} - {}", MDC.get("correlationId"), ex.getMessage());
+    logger.warn("Validation error: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
@@ -109,7 +110,7 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request);
     pd.setProperty("code", errorCode);
-    logger.warn("Authentication failed: {} - {}", MDC.get("correlationId"), ex.getMessage());
+    logger.warn("Authentication failed: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
   }
 
@@ -146,7 +147,7 @@ public class GlobalExceptionHandler {
         "/api/v1/auth/email/resend",
         "/api/v1/auth/email/status"
     ));
-    logger.warn("Email verification required: {} - {}", MDC.get("correlationId"), ex.getMessage());
+    logger.warn("Email verification required: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
   }
 
@@ -181,7 +182,7 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request);
     pd.setProperty("code", "AUTH_INSUFFICIENT_PERMISSIONS");
-    logger.warn("Access denied: {} - {}", MDC.get("correlationId"), ex.getMessage());
+    logger.warn("Access denied: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd);
   }
 
@@ -219,7 +220,7 @@ public class GlobalExceptionHandler {
         ex.getMessage(),
         request);
     pd.setProperty("code", errorCode);
-    logger.warn("Email verification failed: {} - {}", MDC.get("correlationId"), ex.getMessage());
+    logger.warn("Email verification failed: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(status).body(pd);
   }
 
