@@ -79,6 +79,9 @@ public class User extends TenantAware {
   @JoinColumn(name = "organization_id")
   private Organization organization;
 
+  @OneToOne(mappedBy = "user")
+  private UserPreference preference;
+
   // Default constructor for JPA
   protected User() {
   }
@@ -186,6 +189,14 @@ public class User extends TenantAware {
 
   public void setOrganization(Organization organization) {
     this.organization = organization;
+  }
+
+  public UserPreference getPreference() {
+    return preference;
+  }
+
+  public void setPreference(UserPreference preference) {
+    this.preference = preference;
   }
 
   // Utility methods

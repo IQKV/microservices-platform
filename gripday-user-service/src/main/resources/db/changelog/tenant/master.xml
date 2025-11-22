@@ -6,5 +6,7 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <include file="db/changelog/20251110154500-initial-user-schema.xml"/>
+    <include file="db/changelog/20251122000000-organization-preferences-schema.xml"/>
+    <include file="db/changelog/20251122000100-user-preferences-schema.xml"/>
 
 </databaseChangeLog>

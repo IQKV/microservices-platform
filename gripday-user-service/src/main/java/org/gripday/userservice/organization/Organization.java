@@ -56,6 +56,9 @@ public class Organization extends TenantAware {
   @OneToOne(mappedBy = "organization")
   private User owner;
 
+  @OneToOne(mappedBy = "organization")
+  private OrganizationPreference preference;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -154,6 +157,14 @@ public class Organization extends TenantAware {
 
   public void setOwner(User owner) {
     this.owner = owner;
+  }
+
+  public OrganizationPreference getPreference() {
+    return preference;
+  }
+
+  public void setPreference(OrganizationPreference preference) {
+    this.preference = preference;
   }
 
   public LocalDateTime getCreatedAt() {
