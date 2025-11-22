@@ -293,6 +293,10 @@ gripday :
             requests-per-minute : 100
             burst-capacity : 150
             enable-tenant-quotas : true
+          "/api/v1/admin/organization-preferences/**" :
+            requests-per-minute : 100
+            burst-capacity : 150
+            enable-tenant-quotas : true
           "/api/v1/admin/tenants/**" :
             requests-per-minute : 50
             burst-capacity : 75
@@ -304,6 +308,10 @@ gripday :
           "/api/v1/users/me/password" :
             requests-per-minute : 5
             burst-capacity : 10
+            enable-tenant-quotas : true
+          "/api/v1/users/me/preferences" :
+            requests-per-minute : 100
+            burst-capacity : 150
             enable-tenant-quotas : true
       tenant-quotas :
         enabled : true

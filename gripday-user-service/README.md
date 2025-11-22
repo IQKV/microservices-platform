@@ -10,7 +10,10 @@ An identity and access management service that handles:
 - **User Registration** - Self-service account creation with email verification and strong password enforcement
 - **Account Security** - Password reset flows, account lockout protection, and multi-device session management
 - **User Management** - Admin-controlled user CRUD operations with role-based permissions
-- **Multi-Tenancy** - Tenant isolation ensuring data segregation across organizations
+- **User Preferences** - Self-service preference management for personalization (locale, theme, notifications, profile)
+- **Organization Management** - Organization CRUD with owner assignment and tenant isolation
+- **Organization Preferences** - Organization-wide settings for security policies, defaults, and configurations
+- **Multi-Tenancy** - Tenant isolation ensuring data segregation across organizations with schema-per-tenant strategy
 - **Email Verification** - Token-based email verification with rate limiting and expiration handling
 
 ## Overview
@@ -27,6 +30,8 @@ This is the authentication hub for the Gripday microservices platform. It centra
 - Role-based access control (RBAC)
 - Method-level security with @PreAuthorize
 - User context extraction and propagation
+- Self-service user preference management
+- Admin-controlled organization settings
 
 ### 📧 Email Verification Patterns
 
@@ -183,13 +188,18 @@ var stats = tenantRepository
 - Change password for authenticated users
 - Password strength validation
 
-### User Profile
+### User Profile & Preferences
 
 - Get current user context
 - Update own password
 - User context propagation via JWT
+- Manage personal preferences (locale, timezone, theme, notifications)
+- Profile customization (photo, phone, bio)
+- Personal security settings (2FA preferences)
 
 ### Administrative Functions
+
+#### User Management
 
 - List users (paginated, tenant-scoped)
 - Get user by ID
@@ -198,6 +208,33 @@ var stats = tenantRepository
 - Delete user (with self-deletion prevention)
 - Role assignment and management
 - Audit logging for admin actions
+
+#### Organization Management
+
+- List organizations (paginated, tenant-scoped)
+- Get organization by ID
+- Create new organization
+- Update organization details
+- Delete organization
+- Assign organization owner
+
+#### Organization Preference Management
+
+- Configure organization-wide settings
+- Set password policies (min length, complexity)
+- Define security settings (session timeout, login attempts, lockout)
+- Configure two-factor authentication policies
+- Set localization defaults (locale, timezone, currency)
+- Manage registration and verification policies
+
+#### Tenant Management
+
+- List tenants with statistics
+- Create new tenant with schema provisioning
+- Update tenant configuration
+- Enable/disable tenants
+- View tenant utilization and user counts
+- Tenant-scoped data isolation
 
 ## API Examples
 
@@ -221,10 +258,45 @@ var stats = tenantRepository
 
 ### Admin Endpoints (Requires ADMIN/SUPER_ADMIN Role)
 
+#### User Management
+
 - `GET /api/v1/admin/users` - List users
+- `GET /api/v1/admin/users/{id}` - Get user by ID
 - `POST /api/v1/admin/users` - Create user
 - `PUT /api/v1/admin/users/{id}` - Update user
 - `DELETE /api/v1/admin/users/{id}` - Delete user
+
+#### Organization Management
+
+- `GET /api/v1/admin/organizations` - List organizations
+- `GET /api/v1/admin/organizations/{id}` - Get organization by ID
+- `POST /api/v1/admin/organizations` - Create organization
+- `PUT /api/v1/admin/organizations/{id}` - Update organization
+- `DELETE /api/v1/admin/organizations/{id}` - Delete organization
+
+#### Organization Preference Management
+
+- `GET /api/v1/admin/organization-preferences` - List organization preferences
+- `GET /api/v1/admin/organization-preferences/{id}` - Get preference by ID
+- `GET /api/v1/admin/organization-preferences/organization/{orgId}` - Get preference by organization
+- `POST /api/v1/admin/organization-preferences` - Create organization preference
+- `PUT /api/v1/admin/organization-preferences/{id}` - Update organization preference
+- `DELETE /api/v1/admin/organization-preferences/{id}` - Delete organization preference
+
+#### Tenant Management
+
+- `GET /api/v1/admin/tenants` - List tenants
+- `GET /api/v1/admin/tenants/{id}` - Get tenant by ID
+- `POST /api/v1/admin/tenants` - Create tenant
+- `PUT /api/v1/admin/tenants/{id}` - Update tenant
+- `DELETE /api/v1/admin/tenants/{id}` - Delete tenant
+- `GET /api/v1/admin/tenants/statistics` - Get tenant statistics
+
+### User Preference Endpoints (Self-Service)
+
+- `GET /api/v1/users/me/preferences` - Get my preferences
+- `PATCH /api/v1/users/me/preferences` - Update my preferences
+- `DELETE /api/v1/users/me/preferences` - Delete my preferences (reset to defaults)
 
 ### Monitoring Endpoints
 
@@ -232,7 +304,7 @@ var stats = tenantRepository
 - `/actuator/metrics` - Application metrics
 - `/actuator/prometheus` - Prometheus metrics
 - `/swagger-ui.html` - API documentation
-- `/api/v1/auth/.well-known/jwks.json` - JWK Set for token validation
+- `/.well-known/jwks.json` - JWK Set for token validation
 
 ## Learning Points
 
