@@ -100,6 +100,169 @@ gripday-{service-name}/
 
 ## 🤖 AI Agent Guidelines
 
+### AI Communication Standards
+
+**CRITICAL: Agents must communicate concisely and avoid unnecessary verbosity.**
+
+#### Response Length Guidelines
+
+```yaml
+summaries:
+  max_length: "2-3 sentences"
+  focus: "What was done, not how it was done"
+  avoid: "Bullet point lists, detailed recaps, obvious statements"
+
+explanations:
+  when_detailed: "Complex technical concepts, architecture decisions, security implications"
+  when_brief: "Simple changes, routine operations, status updates"
+
+verification:
+  format: "Minimal wording - state outcome only"
+  example: "Tests pass. Coverage at 65%."
+  avoid: "Lengthy descriptions of what was verified"
+```
+
+#### Prohibited Outputs
+
+**NEVER create these files:**
+
+- ❌ `SUMMARY.md` - Auto-generated work summaries
+- ❌ `CHANGES.md` - Change documentation (use commit messages)
+- ❌ `REVIEW.md` - Code review summaries
+- ❌ `ANALYSIS.md` - Analysis reports (communicate directly)
+- ❌ Any markdown file documenting agent work unless explicitly requested
+
+**Why:** These files create noise, clutter the repository, and provide no value. Use commit messages and direct communication instead.
+
+#### Concise vs Verbose Examples
+
+**❌ VERBOSE (Don't do this):**
+
+```
+I have successfully completed the implementation of the new user authentication
+endpoint. Here's a comprehensive summary of everything I did:
+
+• Created a new UserAuthenticationController class
+• Implemented the login method with proper validation
+• Added JWT token generation logic
+• Created comprehensive unit tests
+• Updated the OpenAPI documentation
+• Modified the security configuration
+• Added error handling for invalid credentials
+• Implemented rate limiting
+• Updated the README with new endpoint information
+
+The implementation follows all best practices and includes:
+- Proper input validation using Bean Validation
+- Secure password handling with BCrypt
+- JWT token generation with RSA256
+- Comprehensive error handling
+- Full test coverage
+
+All tests are passing successfully and the code is ready for review.
+```
+
+**✅ CONCISE (Do this):**
+
+```
+Added user authentication endpoint with JWT token generation. Tests pass, coverage at 68%.
+```
+
+**❌ VERBOSE verification:**
+
+```
+I have thoroughly verified the implementation and can confirm that:
+- All unit tests are passing (15/15)
+- Integration tests are passing (8/8)
+- Code coverage meets the threshold at 68%
+- Checkstyle validation passes with no violations
+- The application builds successfully
+- No security vulnerabilities detected
+```
+
+**✅ CONCISE verification:**
+
+```
+Verified: tests pass (23/23), coverage 68%, no violations.
+```
+
+#### When to Be Detailed
+
+Provide detailed explanations ONLY for:
+
+1. **Complex Architecture Decisions**
+
+   ```
+   ✅ "Using schema-per-tenant isolation instead of row-level because it provides
+   stronger data separation and better performance for our multi-tenant model.
+   Trade-off: more complex migrations but eliminates cross-tenant query risks."
+   ```
+
+2. **Security Implications**
+
+   ```
+   ✅ "Switching to RSA256 requires key pair management. Public key exposed via
+   JWK Set endpoint, private key must be secured in Kubernetes secrets. Existing
+   HS256 tokens will be invalidated."
+   ```
+
+3. **Breaking Changes**
+
+   ```
+   ✅ "This changes the API contract. Clients must update to send tenant-id in
+   headers instead of query params. Backward compatibility maintained for 2 weeks
+   via deprecated endpoint."
+   ```
+
+4. **Non-Obvious Technical Choices**
+   ```
+   ✅ "Using reactive Redis operations in gateway because blocking calls would
+   defeat WebFlux's non-blocking model. Requires Lettuce driver instead of Jedis."
+   ```
+
+#### Response Templates
+
+**For Simple Changes:**
+
+```
+Changed X to Y. Tests pass.
+```
+
+**For Bug Fixes:**
+
+```
+Fixed [issue]. Root cause: [brief explanation]. Added regression test.
+```
+
+**For New Features:**
+
+```
+Implemented [feature]. Includes [key components]. Tests pass, coverage [X]%.
+```
+
+**For Refactoring:**
+
+```
+Refactored [component] to [improvement]. No behavior changes. Tests pass.
+```
+
+**For Analysis/Recommendations:**
+
+```
+Issue: [problem]
+Recommendation: [solution]
+Impact: [brief assessment]
+```
+
+#### Communication Principles
+
+1. **Action-Oriented**: Focus on what was done, not the process
+2. **Results-First**: State the outcome immediately
+3. **No Redundancy**: Don't repeat what's obvious from the code
+4. **No Meta-Commentary**: Don't describe your own actions ("I have analyzed...", "I will now...")
+5. **Trust the User**: They can read code; don't explain obvious changes
+6. **Verification is Brief**: "Tests pass" is sufficient, not a detailed test report
+
 ### Technology Stack Context
 
 Before making recommendations, agents should understand the platform's technology stack:
@@ -593,6 +756,181 @@ tokens after deployment.
 - Automated via GitHub Actions on push and PR
 - Pre-commit hook with Husky and commitlint
 - PR title must follow the same format
+
+### AI Commit Message Generation
+
+**When AI Should Generate Commit Messages:**
+
+AI agents should automatically generate and present commit messages after:
+
+- Completing multi-file changes (3+ files modified)
+- Implementing new features or bug fixes
+- Performing refactoring across multiple components
+- Making configuration or infrastructure changes
+- Any complex task requiring user approval before committing
+
+**AI Workflow for Commit Message Generation:**
+
+```yaml
+after_completing_changes:
+  1. analyze_changes: "Review all modified files and understand the scope"
+  2. identify_type: "Determine the appropriate commit type (feat, fix, refactor, etc.)"
+  3. determine_scope: "Identify the affected service or component"
+  4. craft_subject: "Write concise subject line (imperative mood, 6-220 chars)"
+  5. add_body_if_needed: "Include body for complex changes, breaking changes, or context"
+  6. present_to_user: "Show the generated commit message for review"
+  7. wait_for_approval: "User can accept, modify, or reject"
+```
+
+**Commit Message Structure for AI:**
+
+```
+type(scope): concise subject line describing the change
+
+[Optional body with more context]
+- Key change 1
+- Key change 2
+- Key change 3
+
+[Optional footer]
+Closes #issue-number
+BREAKING CHANGE: description (if applicable)
+```
+
+**AI Commit Message Examples:**
+
+**Example 1: Simple Feature Addition**
+
+```
+feat(user-service): add password reset endpoint
+
+Implements password reset flow with email token verification.
+Includes rate limiting (3 requests/hour) and token expiration (1 hour).
+```
+
+**Example 2: Bug Fix**
+
+```
+fix(gateway): correct rate limit counter reset logic
+
+The sliding window algorithm was not properly removing expired
+entries from Redis sorted set, causing rate limits to persist
+beyond the configured window. Updated cleanup logic to use
+ZREMRANGEBYSCORE with current timestamp.
+
+Closes #156
+```
+
+**Example 3: Multi-Service Refactoring**
+
+```
+refactor(services): extract common JWT validation to shared utility
+
+- Move JWT validation logic from user-service and gateway-service to shared module
+- Consolidate RSA key loading and token parsing
+- Update both services to use shared JwtValidator class
+- No behavior changes, all tests pass
+```
+
+**Example 4: Configuration Change**
+
+```
+chore(docker): update PostgreSQL to version 16
+
+Upgrade from PostgreSQL 15 to 16 for improved performance.
+Updated docker-compose.yml and all service configurations.
+Tested migrations on local and staging environments.
+```
+
+**Example 5: Breaking Change**
+
+```
+feat(auth)!: implement multi-tenant authentication
+
+BREAKING CHANGE: Authentication endpoints now require X-Tenant-ID
+header. JWT tokens include tenantId claim. Existing tokens will be
+invalidated on deployment.
+
+Migration guide:
+- Clients must send X-Tenant-ID header with all requests
+- Re-authenticate to obtain new tokens with tenant context
+- Update API calls to include tenant header
+
+Closes #234
+```
+
+**Example 6: Documentation Update**
+
+```
+docs(agents): add AI communication standards and commit message guidelines
+
+- Define concise output requirements for AI responses
+- Prohibit auto-generated summary markdown files
+- Add commit message generation workflow for AI agents
+- Include examples of verbose vs concise communication
+```
+
+**Best Practices for AI-Generated Commit Messages:**
+
+```yaml
+do:
+  - Use imperative mood: "add feature" not "added feature"
+  - Be specific: "fix JWT expiration check" not "fix bug"
+  - Include scope: "feat(user-service)" not just "feat"
+  - Add body for complex changes (3+ files, breaking changes)
+  - Reference issue numbers: "Closes #123"
+  - Explain WHY for non-obvious changes
+  - Keep subject under 72 characters (ideally 50)
+  - Use body to explain WHAT and WHY, not HOW
+
+dont:
+  - Use vague subjects: "update code", "fix issue", "make changes"
+  - Include file names in subject: "update UserService.java"
+  - Write in past tense: "added", "fixed", "updated"
+  - Exceed 220 character limit for subject
+  - Add unnecessary details in subject line
+  - Forget to specify scope when applicable
+  - Use generic commit messages for complex changes
+```
+
+**AI Presentation Format:**
+
+When presenting a commit message to the user, use this format:
+
+```
+I've completed the changes. Here's the suggested commit message:
+
+---
+feat(user-service): add email verification endpoint
+
+Implements email verification flow with token-based validation.
+Includes rate limiting (3 emails/hour) and 24-hour token expiration.
+Added comprehensive tests and updated API documentation.
+---
+
+Would you like me to use this commit message, or would you prefer to modify it?
+```
+
+**Scope Guidelines:**
+
+```yaml
+service_scopes:
+  - user-service: "Authentication, user management, tenants"
+  - gateway-service: "Routing, rate limiting, circuit breaker"
+  - bookstore-service: "Books, inventory, catalog"
+  - agents: "AGENTS.md, agent guidelines"
+  - docker: "Docker, docker-compose, containerization"
+  - k8s: "Kubernetes manifests, Helm charts"
+  - ci: "GitHub Actions, workflows"
+  - deps: "Dependency updates"
+  - config: "Configuration files, application.yml"
+
+cross_cutting_scopes:
+  - security: "Security changes across services"
+  - observability: "Logging, metrics, tracing"
+  - testing: "Test infrastructure, test utilities"
+  - docs: "Documentation, README files"
+```
 
 ### Code Quality Standards
 
