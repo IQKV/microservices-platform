@@ -27,10 +27,10 @@ public class InventoryResource {
 
   private static final Logger logger = LoggerFactory.getLogger(InventoryResource.class);
 
-  private final InventoryService inventoryService;
+  private final InventoryApplicationService inventoryApplicationService;
 
-  public InventoryResource(final InventoryService inventoryService) {
-    this.inventoryService = inventoryService;
+  public InventoryResource(final InventoryApplicationService inventoryApplicationService) {
+    this.inventoryApplicationService = inventoryApplicationService;
   }
 
   @Operation(
@@ -76,7 +76,7 @@ public class InventoryResource {
       @PathVariable Long bookId) {
     logger.debug("Getting inventory for book ID: {}", bookId);
 
-    var inventory = inventoryService.getInventory(bookId);
+    var inventory = inventoryApplicationService.getInventory(bookId);
     return ResponseEntity.ok(inventory);
   }
 
@@ -87,7 +87,7 @@ public class InventoryResource {
 
     logger.debug("Checking availability for book ID: {} quantity: {}", bookId, quantity);
 
-    var available = inventoryService.isBookAvailable(bookId, quantity);
+    var available = inventoryApplicationService.isBookAvailable(bookId, quantity);
     return ResponseEntity.ok(available);
   }
 
@@ -95,7 +95,7 @@ public class InventoryResource {
   public ResponseEntity<List<InventoryDto>> getLowStockInventory() {
     logger.debug("Getting low stock inventory");
 
-    var lowStockItems = inventoryService.getLowStockInventory();
+    var lowStockItems = inventoryApplicationService.getLowStockInventory();
     return ResponseEntity.ok(lowStockItems);
   }
 
@@ -103,7 +103,7 @@ public class InventoryResource {
   public ResponseEntity<List<InventoryDto>> getOutOfStockInventory() {
     logger.debug("Getting out of stock inventory");
 
-    var outOfStockItems = inventoryService.getOutOfStockInventory();
+    var outOfStockItems = inventoryApplicationService.getOutOfStockInventory();
     return ResponseEntity.ok(outOfStockItems);
   }
 
@@ -111,7 +111,7 @@ public class InventoryResource {
   public ResponseEntity<Long> getTotalInventoryCount() {
     logger.debug("Getting total inventory count");
 
-    var totalCount = inventoryService.getTotalInventoryCount();
+    var totalCount = inventoryApplicationService.getTotalInventoryCount();
     return ResponseEntity.ok(totalCount);
   }
 
@@ -119,7 +119,7 @@ public class InventoryResource {
   public ResponseEntity<Long> getTotalReservedCount() {
     logger.debug("Getting total reserved count");
 
-    var reservedCount = inventoryService.getTotalReservedCount();
+    var reservedCount = inventoryApplicationService.getTotalReservedCount();
     return ResponseEntity.ok(reservedCount);
   }
 
@@ -127,7 +127,7 @@ public class InventoryResource {
   public ResponseEntity<Long> getLowStockCount() {
     logger.debug("Getting low stock count");
 
-    var lowStockCount = inventoryService.countLowStockItems();
+    var lowStockCount = inventoryApplicationService.countLowStockItems();
     return ResponseEntity.ok(lowStockCount);
   }
 
@@ -135,7 +135,7 @@ public class InventoryResource {
   public ResponseEntity<Long> getOutOfStockCount() {
     logger.debug("Getting out of stock count");
 
-    var outOfStockCount = inventoryService.countOutOfStockItems();
+    var outOfStockCount = inventoryApplicationService.countOutOfStockItems();
     return ResponseEntity.ok(outOfStockCount);
   }
 }

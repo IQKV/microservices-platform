@@ -1,7 +1,7 @@
 package org.gripday.bookstore.shared;
 
-import org.gripday.bookstore.catalog.CatalogService;
-import org.gripday.bookstore.catalog.SearchService;
+import org.gripday.bookstore.catalog.CatalogApplicationService;
+import org.gripday.bookstore.catalog.SearchApplicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -18,13 +18,13 @@ public class CacheWarmupService {
 
   private static final Logger logger = LoggerFactory.getLogger(CacheWarmupService.class);
 
-  private final SearchService searchService;
-  private final CatalogService catalogService;
+  private final SearchApplicationService searchApplicationService;
+  private final CatalogApplicationService catalogApplicationService;
   private final CacheManager cacheManager;
 
-  public CacheWarmupService(final SearchService searchService, final CatalogService catalogService, final CacheManager cacheManager) {
-    this.searchService = searchService;
-    this.catalogService = catalogService;
+  public CacheWarmupService(final SearchApplicationService searchApplicationService, final CatalogApplicationService catalogApplicationService, final CacheManager cacheManager) {
+    this.searchApplicationService = searchApplicationService;
+    this.catalogApplicationService = catalogApplicationService;
     this.cacheManager = cacheManager;
   }
 
@@ -63,24 +63,24 @@ public class CacheWarmupService {
     var pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
 
     // Warm up available books (most commonly accessed)
-    catalogService.findAvailableBooks(pageable);
+    catalogApplicationService.findAvailableBooks(pageable);
     logger.debug("Warmed up available books cache");
 
     // Warm up books in stock
-    catalogService.findBooksInStock(pageable);
+    catalogApplicationService.findBooksInStock(pageable);
     logger.debug("Warmed up books in stock cache");
 
     // Warm up recent books
-    searchService.findRecentBooks(pageable);
+    searchApplicationService.findRecentBooks(pageable);
     logger.debug("Warmed up recent books cache");
   }
 
   private void warmupFilterOptions() {
     // Warm up distinct authors and categories for filter dropdowns
-    searchService.getDistinctAuthors();
+    searchApplicationService.getDistinctAuthors();
     logger.debug("Warmed up distinct authors cache");
 
-    searchService.getDistinctCategories();
+    searchApplicationService.getDistinctCategories();
     logger.debug("Warmed up distinct categories cache");
   }
 
@@ -124,7 +124,7 @@ public class CacheWarmupService {
 
   public void warmupSpecificBook(Long bookId) {
     try {
-      catalogService.findBookById(bookId);
+      catalogApplicationService.findBookById(bookId);
       logger.debug("Warmed up cache for book ID: {}", bookId);
     } catch (final Exception e) {
       logger.warn("Failed to warm up cache for book ID: {}", bookId, e);

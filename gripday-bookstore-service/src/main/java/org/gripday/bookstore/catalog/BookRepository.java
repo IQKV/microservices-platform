@@ -20,7 +20,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
   Page<Book> findByCategoryName(String categoryName, Pageable pageable);
 
-  Page<Book> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+  @Query("SELECT b FROM Book b WHERE b.price.amount BETWEEN :minPrice AND :maxPrice")
+  Page<Book> findByPriceBetween(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
 
   @Query("SELECT b FROM Book b WHERE b.available = true")
   Page<Book> findAvailableBooks(Pageable pageable);
@@ -34,8 +35,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
       AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
       AND (:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%')))
       AND (:categoryName IS NULL OR b.category.name = :categoryName)
-      AND (:minPrice IS NULL OR b.price >= :minPrice)
-      AND (:maxPrice IS NULL OR b.price <= :maxPrice)
+      AND (:minPrice IS NULL OR b.price.amount >= :minPrice)
+      AND (:maxPrice IS NULL OR b.price.amount <= :maxPrice)
       ORDER BY b.available DESC, b.createdAt DESC
       """)
   Page<Book> findBooksWithCriteria(
@@ -57,8 +58,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
       AND (:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%')))
       AND (:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%')))
       AND (:categoryName IS NULL OR c.name = :categoryName)
-      AND (:minPrice IS NULL OR b.price >= :minPrice)
-      AND (:maxPrice IS NULL OR b.price <= :maxPrice)
+      AND (:minPrice IS NULL OR b.price.amount >= :minPrice)
+      AND (:maxPrice IS NULL OR b.price.amount <= :maxPrice)
       ORDER BY b.available DESC, i.quantity DESC, b.createdAt DESC
       """)
   Page<Book> findBooksWithInventoryFilter(
@@ -71,12 +72,13 @@ public interface BookRepository extends JpaRepository<Book, Long> {
       Pageable pageable
   );
 
-  Optional<Book> findByIsbn(String isbn);
+  @Query("SELECT b FROM Book b WHERE b.isbn.value = :isbn")
+  Optional<Book> findByIsbn(@Param("isbn") String isbn);
 
   @Query("SELECT b FROM Book b WHERE b.category.id = :categoryId AND b.available = true")
   Page<Book> findAvailableBooksByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 
-  @Query("SELECT b FROM Book b WHERE b.price <= :maxPrice AND b.available = true ORDER BY b.price ASC")
+  @Query("SELECT b FROM Book b WHERE b.price.amount <= :maxPrice AND b.available = true ORDER BY b.price.amount ASC")
   Page<Book> findAffordableBooks(@Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
 
   @Query("SELECT b FROM Book b WHERE b.available = true ORDER BY b.createdAt DESC")
@@ -126,9 +128,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
   @Query("""
       SELECT b FROM Book b 
       WHERE b.available = true 
-      AND b.price BETWEEN :minPrice AND :maxPrice
+      AND b.price.amount BETWEEN :minPrice AND :maxPrice
       AND (:categoryId IS NULL OR b.category.id = :categoryId)
-      ORDER BY b.price ASC
+      ORDER BY b.price.amount ASC
       """)
   Page<Book> findByPriceRangeAndCategory(
       @Param("minPrice") BigDecimal minPrice,

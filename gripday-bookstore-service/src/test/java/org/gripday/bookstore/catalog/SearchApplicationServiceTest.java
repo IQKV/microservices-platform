@@ -20,13 +20,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class SearchServiceTest {
+class SearchApplicationServiceTest {
 
   @Mock
   private BookRepository bookRepository;
 
+  @Mock
+  private BookCatalogResponseBuilder responseBuilder;
+
   @InjectMocks
-  private SearchService searchService;
+  private SearchApplicationService searchApplicationService;
 
   private Book testBook1;
   private Book testBook2;
@@ -44,7 +47,7 @@ class SearchServiceTest {
     testBook1.setId(1L);
     testBook1.setTitle("Java Programming");
     testBook1.setAuthor("John Doe");
-    testBook1.setIsbn("978-0123456789");
+    testBook1.setIsbn("9780134685991");
     testBook1.setDescription("A Java guide");
     testBook1.setPrice(new BigDecimal("39.99"));
     testBook1.setCategory(testCategory);
@@ -52,7 +55,7 @@ class SearchServiceTest {
     testBook1.setCreatedAt(LocalDateTime.now());
     testBook1.setUpdatedAt(LocalDateTime.now());
 
-    var inventory1 = new Inventory(testBook1, 15);
+    var inventory1 = Inventory.create(testBook1, 15);
     inventory1.setId(1L);
     testBook1.setInventory(inventory1);
 
@@ -60,7 +63,7 @@ class SearchServiceTest {
     testBook2.setId(2L);
     testBook2.setTitle("Spring Boot Guide");
     testBook2.setAuthor("Jane Smith");
-    testBook2.setIsbn("978-9876543210");
+    testBook2.setIsbn("9780596009205");
     testBook2.setDescription("Spring Boot development");
     testBook2.setPrice(new BigDecimal("29.99"));
     testBook2.setCategory(testCategory);
@@ -68,7 +71,7 @@ class SearchServiceTest {
     testBook2.setCreatedAt(LocalDateTime.now());
     testBook2.setUpdatedAt(LocalDateTime.now());
 
-    var inventory2 = new Inventory(testBook2, 8);
+    var inventory2 = Inventory.create(testBook2, 8);
     inventory2.setId(2L);
     testBook2.setInventory(inventory2);
 
@@ -85,7 +88,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.searchByTitle("Java", pageable);
+    var result = searchApplicationService.searchByTitle("Java", pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -105,7 +108,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.searchByAuthor("John", pageable);
+    var result = searchApplicationService.searchByAuthor("John", pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -125,7 +128,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.searchByCategory("Fiction", pageable);
+    var result = searchApplicationService.searchByCategory("Fiction", pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -147,7 +150,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.searchByPriceRange(minPrice, maxPrice, pageable);
+    var result = searchApplicationService.searchByPriceRange(minPrice, maxPrice, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -158,9 +161,9 @@ class SearchServiceTest {
   }
 
   @Test
-  void searchWithCriteria_ShouldApplyAllFilters() {
+  void searchWithQuery_ShouldApplyAllFilters() {
     // Given
-    var criteria = new BookSearchCriteria(
+    var query = new BookSearchQuery(
         "Java", "John", "Fiction",
         new BigDecimal("30.00"), new BigDecimal("50.00"), true
     );
@@ -174,7 +177,7 @@ class SearchServiceTest {
     )).thenReturn(page);
 
     // When
-    var result = searchService.searchWithCriteria(criteria, pageable);
+    var result = searchApplicationService.searchWithQuery(query, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -191,7 +194,7 @@ class SearchServiceTest {
   @Test
   void searchAvailableBooksWithInventory_ShouldReturnAvailableBooks() {
     // Given
-    var criteria = new BookSearchCriteria(
+    var query = new BookSearchQuery(
         null, null, null, null, null, true
     );
     var books = List.of(testBook1, testBook2);
@@ -202,7 +205,7 @@ class SearchServiceTest {
     )).thenReturn(page);
 
     // When
-    var result = searchService.searchAvailableBooksWithInventory(criteria, pageable);
+    var result = searchApplicationService.searchAvailableBooksWithInventory(query, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -225,7 +228,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.findAffordableBooks(maxPrice, pageable);
+    var result = searchApplicationService.findAffordableBooks(maxPrice, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -244,7 +247,7 @@ class SearchServiceTest {
     when(bookRepository.findRecentBooks(pageable)).thenReturn(page);
 
     // When
-    var result = searchService.findRecentBooks(pageable);
+    var result = searchApplicationService.findRecentBooks(pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -264,7 +267,7 @@ class SearchServiceTest {
         .thenReturn(page);
 
     // When
-    var result = searchService.findAvailableBooksByCategory(categoryId, pageable);
+    var result = searchApplicationService.findAvailableBooksByCategory(categoryId, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -281,7 +284,7 @@ class SearchServiceTest {
     when(bookRepository.findDistinctAuthors()).thenReturn(authors);
 
     // When
-    var result = searchService.getDistinctAuthors();
+    var result = searchApplicationService.getDistinctAuthors();
 
     // Then
     assertThat(result).isNotNull();
@@ -298,7 +301,7 @@ class SearchServiceTest {
     when(bookRepository.findDistinctCategoryNames()).thenReturn(categories);
 
     // When
-    var result = searchService.getDistinctCategories();
+    var result = searchApplicationService.getDistinctCategories();
 
     // Then
     assertThat(result).isNotNull();
@@ -314,7 +317,7 @@ class SearchServiceTest {
     when(bookRepository.countAvailableBooks()).thenReturn(25L);
 
     // When
-    var result = searchService.countAvailableBooks();
+    var result = searchApplicationService.countAvailableBooks();
 
     // Then
     assertThat(result).isEqualTo(25L);
@@ -329,7 +332,7 @@ class SearchServiceTest {
     when(bookRepository.countBooksByCategory(categoryName)).thenReturn(15L);
 
     // When
-    var result = searchService.countBooksByCategory(categoryName);
+    var result = searchApplicationService.countBooksByCategory(categoryName);
 
     // Then
     assertThat(result).isEqualTo(15L);

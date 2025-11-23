@@ -29,7 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class CatalogServiceTest {
+class CatalogApplicationServiceTest {
 
   @Mock
   private BookRepository bookRepository;
@@ -43,17 +43,23 @@ class CatalogServiceTest {
   @Mock
   private org.gripday.bookstore.shared.BookstoreMetrics bookstoreMetrics;
 
+  @Mock
+  private DuplicateIsbnChecker duplicateIsbnChecker;
+
+  @Mock
+  private BookCatalogResponseBuilder responseBuilder;
+
   @InjectMocks
-  private CatalogService catalogService;
+  private CatalogApplicationService catalogApplicationService;
 
   private UserContext adminUser;
   private UserContext regularUser;
   private Book testBook;
   private Category testCategory;
   private Inventory testInventory;
-  private CreateBookRequest createBookRequest;
-  private UpdateBookRequest updateBookRequest;
-  private BookSearchCriteria searchCriteria;
+  private CreateBookCommand createBookCommand;
+  private UpdateBookCommand updateBookCommand;
+  private BookSearchQuery searchQuery;
 
   @BeforeEach
   void setUp() {
@@ -78,7 +84,7 @@ class CatalogServiceTest {
     testBook.setId(1L);
     testBook.setTitle("Test Book");
     testBook.setAuthor("Test Author");
-    testBook.setIsbn("978-0123456789");
+    testBook.setIsbn("9780134685991");
     testBook.setDescription("A test book");
     testBook.setPrice(new BigDecimal("29.99"));
     testBook.setCategory(testCategory);
@@ -86,21 +92,21 @@ class CatalogServiceTest {
     testBook.setCreatedAt(LocalDateTime.now());
     testBook.setUpdatedAt(LocalDateTime.now());
 
-    testInventory = new Inventory(testBook, 10);
+    testInventory = Inventory.create(testBook, 10);
     testInventory.setId(1L);
     testBook.setInventory(testInventory);
 
-    createBookRequest = new CreateBookRequest(
-        "New Book", "New Author", "978-9876543210",
+    createBookCommand = new CreateBookCommand(
+        "New Book", "New Author", "9780596009205",
         "A new book", new BigDecimal("39.99"), 1L, 5
     );
 
-    updateBookRequest = new UpdateBookRequest(
+    updateBookCommand = new UpdateBookCommand(
         "Updated Book", "Updated Author", "Updated description",
         new BigDecimal("49.99"), 1L
     );
 
-    searchCriteria = new BookSearchCriteria(
+    searchQuery = new BookSearchQuery(
         "Test", "Author", "Fiction",
         new BigDecimal("10.00"), new BigDecimal("50.00"), true
     );
@@ -124,7 +130,7 @@ class CatalogServiceTest {
     )).thenReturn(page);
 
     // When
-    var result = catalogService.findBooks(searchCriteria, pageable);
+    var result = catalogApplicationService.findBooks(searchQuery, pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -144,7 +150,7 @@ class CatalogServiceTest {
     when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
 
     // When
-    var result = catalogService.findBookById(1L);
+    var result = catalogApplicationService.findBookById(1L);
 
     // Then
     assertThat(result).isPresent();
@@ -159,7 +165,7 @@ class CatalogServiceTest {
     when(bookRepository.findById(1L)).thenReturn(Optional.empty());
 
     // When
-    var result = catalogService.findBookById(1L);
+    var result = catalogApplicationService.findBookById(1L);
 
     // Then
     assertThat(result).isEmpty();
@@ -169,11 +175,10 @@ class CatalogServiceTest {
   void createBook_WithAdminUser_ShouldCreateBook() {
     // Given
     when(categoryRepository.findById(1L)).thenReturn(Optional.of(testCategory));
-    when(bookRepository.findByIsbn("978-9876543210")).thenReturn(Optional.empty());
     when(bookRepository.save(any(Book.class))).thenReturn(testBook);
 
     // When
-    var result = catalogService.createBook(createBookRequest, adminUser);
+    var result = catalogApplicationService.createBook(createBookCommand, adminUser);
 
     // Then
     assertThat(result).isNotNull();
@@ -182,27 +187,24 @@ class CatalogServiceTest {
     verify(bookRepository).save(any(Book.class));
   }
 
-  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
-  // Integration tests should verify authorization with proper Spring Security context
-
   @Test
   void createBook_WithDuplicateIsbn_ShouldThrowDuplicateIsbnException() {
     // Given
-    when(bookRepository.findByIsbn("978-9876543210")).thenReturn(Optional.of(testBook));
+    org.mockito.Mockito.doThrow(new DuplicateIsbnException("9780596009205"))
+        .when(duplicateIsbnChecker).ensureUnique("9780596009205");
 
     // When & Then
-    assertThatThrownBy(() -> catalogService.createBook(createBookRequest, adminUser))
+    assertThatThrownBy(() -> catalogApplicationService.createBook(createBookCommand, adminUser))
         .isInstanceOf(DuplicateIsbnException.class);
   }
 
   @Test
   void createBook_WithInvalidCategory_ShouldThrowCategoryNotFoundException() {
     // Given
-    when(bookRepository.findByIsbn("978-9876543210")).thenReturn(Optional.empty());
     when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> catalogService.createBook(createBookRequest, adminUser))
+    assertThatThrownBy(() -> catalogApplicationService.createBook(createBookCommand, adminUser))
         .isInstanceOf(CategoryNotFoundException.class);
   }
 
@@ -214,15 +216,12 @@ class CatalogServiceTest {
     when(bookRepository.save(any(Book.class))).thenReturn(testBook);
 
     // When
-    var result = catalogService.updateBook(1L, updateBookRequest, adminUser);
+    var result = catalogApplicationService.updateBook(1L, updateBookCommand, adminUser);
 
     // Then
     assertThat(result).isNotNull();
     verify(bookRepository).save(testBook);
   }
-
-  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
-  // Integration tests should verify authorization with proper Spring Security context
 
   @Test
   void updateBook_WithInvalidBookId_ShouldThrowBookNotFoundException() {
@@ -230,7 +229,7 @@ class CatalogServiceTest {
     when(bookRepository.findById(1L)).thenReturn(Optional.empty());
 
     // When & Then
-    assertThatThrownBy(() -> catalogService.updateBook(1L, updateBookRequest, adminUser))
+    assertThatThrownBy(() -> catalogApplicationService.updateBook(1L, updateBookCommand, adminUser))
         .isInstanceOf(BookNotFoundException.class);
   }
 
@@ -241,27 +240,24 @@ class CatalogServiceTest {
     when(bookRepository.save(any(Book.class))).thenReturn(testBook);
 
     // When
-    catalogService.deleteBook(1L, adminUser);
+    catalogApplicationService.deleteBook(1L, adminUser);
 
     // Then
     assertThat(testBook.isAvailable()).isFalse();
     verify(bookRepository).save(testBook);
   }
 
-  // Authorization test removed - now handled by @PreAuthorize at Spring Security level
-  // Integration tests should verify authorization with proper Spring Security context
-
   @Test
   void findBookByIsbn_WhenBookExists_ShouldReturnBookDto() {
     // Given
-    when(bookRepository.findByIsbn("978-0123456789")).thenReturn(Optional.of(testBook));
+    when(bookRepository.findByIsbn("9780134685991")).thenReturn(Optional.of(testBook));
 
     // When
-    var result = catalogService.findBookByIsbn("978-0123456789");
+    var result = catalogApplicationService.findBookByIsbn("9780134685991");
 
     // Then
     assertThat(result).isPresent();
-    assertThat(result.get().isbn()).isEqualTo("978-0123456789");
+    assertThat(result.get().isbn()).isEqualTo("9780134685991");
   }
 
   @Test
@@ -274,7 +270,7 @@ class CatalogServiceTest {
     when(bookRepository.findAvailableBooks(pageable)).thenReturn(page);
 
     // When
-    var result = catalogService.findAvailableBooks(pageable);
+    var result = catalogApplicationService.findAvailableBooks(pageable);
 
     // Then
     assertThat(result).isNotNull();
@@ -292,7 +288,7 @@ class CatalogServiceTest {
     when(bookRepository.findBooksInStock(pageable)).thenReturn(page);
 
     // When
-    var result = catalogService.findBooksInStock(pageable);
+    var result = catalogApplicationService.findBooksInStock(pageable);
 
     // Then
     assertThat(result).isNotNull();

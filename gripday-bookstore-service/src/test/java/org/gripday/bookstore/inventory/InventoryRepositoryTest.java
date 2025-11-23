@@ -45,13 +45,13 @@ class InventoryRepositoryTest {
     entityManager.persistAndFlush(scienceCategory);
 
     // Create books
-    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"), null, fictionCategory);
+    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "9780134685991", new BigDecimal("15.99"), null, fictionCategory);
 
-    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"), null, fictionCategory);
+    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "9780596009205", new BigDecimal("12.50"), null, fictionCategory);
 
-    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"), null, scienceCategory);
+    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "9781617294945", new BigDecimal("18.99"), null, scienceCategory);
 
-    book4 = Book.create("Unavailable Book", "Test Author", "978-0-123-45678-9", new BigDecimal("20.00"), null, scienceCategory);
+    book4 = Book.create("Unavailable Book", "Test Author", "9780132350884", new BigDecimal("20.00"), null, scienceCategory);
     book4.setAvailable(false);
 
     entityManager.persistAndFlush(book1);
@@ -60,19 +60,19 @@ class InventoryRepositoryTest {
     entityManager.persistAndFlush(book4);
 
     // Create inventory records
-    inventory1 = new Inventory(book1, 15); // Normal stock
+    inventory1 = Inventory.create(book1, 15); // Normal stock
     inventory1.setLowStockThreshold(5);
     inventory1.setReservedQuantity(2);
 
-    inventory2 = new Inventory(book2, 3); // Low stock
+    inventory2 = Inventory.create(book2, 3); // Low stock
     inventory2.setLowStockThreshold(5);
     inventory2.setReservedQuantity(1);
 
-    inventory3 = new Inventory(book3, 0); // Out of stock
+    inventory3 = Inventory.create(book3, 0); // Out of stock
     inventory3.setLowStockThreshold(5);
     inventory3.setReservedQuantity(0);
 
-    inventory4 = new Inventory(book4, 10); // Unavailable book with stock
+    inventory4 = Inventory.create(book4, 10); // Unavailable book with stock
     inventory4.setLowStockThreshold(3);
     inventory4.setReservedQuantity(0);
 
@@ -97,7 +97,7 @@ class InventoryRepositoryTest {
   @Test
   void findByBookIsbn_ShouldReturnInventoryForBookWithIsbn() {
     // When
-    var result = inventoryRepository.findByBookIsbn("978-0-7432-7356-5");
+    var result = inventoryRepository.findByBookIsbn("9780134685991");
 
     // Then
     assertThat(result).isPresent();

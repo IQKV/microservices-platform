@@ -41,11 +41,11 @@ class BookRepositoryTest {
     entityManager.persistAndFlush(scienceCategory);
 
     // Create books
-    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"), "A classic American novel", fictionCategory);
+    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "9780134685991", new BigDecimal("15.99"), "A classic American novel", fictionCategory);
 
-    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"), "A gripping tale of racial injustice", fictionCategory);
+    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "9780596009205", new BigDecimal("12.50"), "A gripping tale of racial injustice", fictionCategory);
 
-    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"), "Cosmology for the general reader", scienceCategory);
+    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "9781617294945", new BigDecimal("18.99"), "Cosmology for the general reader", scienceCategory);
     book3.setAvailable(false); // Unavailable book for testing
 
     entityManager.persistAndFlush(book1);
@@ -53,15 +53,15 @@ class BookRepositoryTest {
     entityManager.persistAndFlush(book3);
 
     // Create inventory records
-    inventory1 = new Inventory(book1, 10);
+    inventory1 = Inventory.create(book1, 10);
     inventory1.setLowStockThreshold(3);
     book1.setInventory(inventory1);
 
-    inventory2 = new Inventory(book2, 2); // Low stock
+    inventory2 = Inventory.create(book2, 2); // Low stock
     inventory2.setLowStockThreshold(5);
     book2.setInventory(inventory2);
 
-    inventory3 = new Inventory(book3, 0); // Out of stock
+    inventory3 = Inventory.create(book3, 0); // Out of stock
     inventory3.setLowStockThreshold(5);
     book3.setInventory(inventory3);
 
@@ -189,7 +189,7 @@ class BookRepositoryTest {
   @Test
   void findByIsbn_ShouldReturnBookWithMatchingIsbn() {
     // When
-    var result = bookRepository.findByIsbn("978-0-7432-7356-5");
+    var result = bookRepository.findByIsbn("9780134685991");
 
     // Then
     assertThat(result).isPresent();
@@ -222,7 +222,7 @@ class BookRepositoryTest {
     // Then
     assertThat(result.getContent()).hasSize(2);
     assertThat(result.getContent())
-        .allMatch(book -> book.getPrice().compareTo(maxPrice) <= 0);
+        .allMatch(book -> book.getPrice().getAmount().compareTo(maxPrice) <= 0);
   }
 
   @Test
@@ -305,7 +305,7 @@ class BookRepositoryTest {
   @Test
   void relationshipMapping_ShouldLoadCategoryAndInventory() {
     // When
-    var book = bookRepository.findByIsbn("978-0-7432-7356-5").orElseThrow();
+    var book = bookRepository.findByIsbn("9780134685991").orElseThrow();
 
     // Then
     assertThat(book.getCategory()).isNotNull();

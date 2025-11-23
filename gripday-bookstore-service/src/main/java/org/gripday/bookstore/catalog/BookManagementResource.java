@@ -32,10 +32,10 @@ public class BookManagementResource {
 
   private static final Logger logger = LoggerFactory.getLogger(BookManagementResource.class);
 
-  private final CatalogService catalogService;
+  private final CatalogApplicationService catalogApplicationService;
 
-  public BookManagementResource(final CatalogService catalogService) {
-    this.catalogService = catalogService;
+  public BookManagementResource(final CatalogApplicationService catalogApplicationService) {
+    this.catalogApplicationService = catalogApplicationService;
   }
 
   @Operation(
@@ -88,13 +88,13 @@ public class BookManagementResource {
   @PostMapping
   public ResponseEntity<BookDto> createBook(
       @Parameter(description = "Book creation request data", required = true)
-      @Valid @RequestBody CreateBookRequest request,
+      @Valid @RequestBody CreateBookCommand command,
       @Parameter(hidden = true)
       @RequestAttribute("userContext") UserContext userContext) {
 
-    logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
+    logger.info("Creating book with title: {} by user: {}", command.title(), userContext.username());
 
-    var createdBook = catalogService.createBook(request, userContext);
+    var createdBook = catalogApplicationService.createBook(command, userContext);
     return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
   }
 
@@ -150,13 +150,13 @@ public class BookManagementResource {
       @Parameter(description = "Unique identifier of the book to update", required = true, example = "1")
       @PathVariable Long id,
       @Parameter(description = "Book update request data", required = true)
-      @Valid @RequestBody UpdateBookRequest request,
+      @Valid @RequestBody UpdateBookCommand command,
       @Parameter(hidden = true)
       @RequestAttribute("userContext") UserContext userContext) {
 
     logger.info("Updating book ID: {} by user: {}", id, userContext.username());
 
-    var updatedBook = catalogService.updateBook(id, request, userContext);
+    var updatedBook = catalogApplicationService.updateBook(id, command, userContext);
     return ResponseEntity.ok(updatedBook);
   }
 
@@ -204,7 +204,7 @@ public class BookManagementResource {
 
     logger.info("Deleting book ID: {} by user: {}", id, userContext.username());
 
-    catalogService.deleteBook(id, userContext);
+    catalogApplicationService.deleteBook(id, userContext);
     return ResponseEntity.noContent().build();
   }
 }

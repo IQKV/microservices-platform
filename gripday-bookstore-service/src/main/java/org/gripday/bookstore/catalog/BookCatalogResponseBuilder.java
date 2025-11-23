@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BookCatalogResponseBuilder {
 
-  public BookCatalogResponse build(Page<BookDto> books, BookSearchCriteria criteria) {
+  public BookCatalogResponse build(Page<BookDto> books, BookSearchQuery criteria) {
     var pagination = buildPaginationMetadata(books);
     var filters = buildFilterMetadata(criteria, books);
     var search = buildSearchMetadata(criteria, books);
@@ -23,7 +23,7 @@ public class BookCatalogResponseBuilder {
     );
   }
 
-  public BookCatalogResponse buildWithUrls(Page<BookDto> books, BookSearchCriteria criteria, String baseUrl) {
+  public BookCatalogResponse buildWithUrls(Page<BookDto> books, BookSearchQuery criteria, String baseUrl) {
     var pagination = buildPaginationMetadataWithUrls(books, baseUrl);
     var filters = buildFilterMetadata(criteria, books);
     var search = buildSearchMetadata(criteria, books);
@@ -73,7 +73,7 @@ public class BookCatalogResponseBuilder {
     );
   }
 
-  private FilterMetadata buildFilterMetadata(BookSearchCriteria criteria, Page<BookDto> books) {
+  private FilterMetadata buildFilterMetadata(BookSearchQuery criteria, Page<BookDto> books) {
     List<CategoryFilter> categories = extractCategoryFilters(books);
     List<AuthorFilter> authors = extractAuthorFilters(books);
     PriceRangeFilter priceRange = extractPriceRangeFilter(criteria, books);
@@ -99,7 +99,7 @@ public class BookCatalogResponseBuilder {
         .collect(Collectors.toList());
   }
 
-  private PriceRangeFilter extractPriceRangeFilter(BookSearchCriteria criteria, Page<BookDto> books) {
+  private PriceRangeFilter extractPriceRangeFilter(BookSearchQuery criteria, Page<BookDto> books) {
     if (books.isEmpty()) {
       return null;
     }
@@ -129,7 +129,7 @@ public class BookCatalogResponseBuilder {
     return new AvailabilityFilter(totalBooks, availableBooks, outOfStockBooks);
   }
 
-  private SearchMetadata buildSearchMetadata(BookSearchCriteria criteria, Page<BookDto> books) {
+  private SearchMetadata buildSearchMetadata(BookSearchQuery criteria, Page<BookDto> books) {
     String query = buildQueryString(criteria);
     String searchType = determineSearchType(criteria);
 
@@ -141,7 +141,7 @@ public class BookCatalogResponseBuilder {
     );
   }
 
-  private String buildQueryString(BookSearchCriteria criteria) {
+  private String buildQueryString(BookSearchQuery criteria) {
     if (criteria.title() != null) {
       return criteria.title();
     }
@@ -154,7 +154,7 @@ public class BookCatalogResponseBuilder {
     return null;
   }
 
-  private String determineSearchType(BookSearchCriteria criteria) {
+  private String determineSearchType(BookSearchQuery criteria) {
     if (criteria.title() != null) {
       return "title";
     }

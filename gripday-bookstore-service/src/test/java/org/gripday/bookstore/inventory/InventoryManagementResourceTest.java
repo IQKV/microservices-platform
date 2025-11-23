@@ -39,7 +39,7 @@ class InventoryManagementResourceTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private InventoryService inventoryService;
+  private InventoryApplicationService InventoryApplicationService;
 
   private InventoryDto createTestInventoryDto() {
     return new InventoryDto(
@@ -82,11 +82,11 @@ class InventoryManagementResourceTest {
 
   @Test
   void updateInventory_WithValidRequestAndAdminUser_ShouldUpdateInventory() throws Exception {
-    var request = new UpdateInventoryRequest(75, 15);
+    var request = new UpdateInventoryCommand(75, 15);
     var updatedInventory = createTestInventoryDto();
     var userContext = createAdminUserContext();
 
-    when(inventoryService.updateInventory(eq(1L), any(UpdateInventoryRequest.class), any(UserContext.class)))
+    when(InventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
         .thenReturn(updatedInventory);
 
     mockMvc.perform(put("/api/v1/bookstore/admin/inventory/1")
@@ -100,7 +100,7 @@ class InventoryManagementResourceTest {
 
   @Test
   void updateInventory_WithInvalidRequest_ShouldReturn400() throws Exception {
-    var invalidRequest = new UpdateInventoryRequest(-10, -5);
+    var invalidRequest = new UpdateInventoryCommand(-10, -5);
     var userContext = createAdminUserContext();
 
     mockMvc.perform(put("/api/v1/bookstore/admin/inventory/1")
@@ -113,10 +113,10 @@ class InventoryManagementResourceTest {
 
   @Test
   void updateInventory_WithUnauthorizedUser_ShouldReturn403() throws Exception {
-    var request = new UpdateInventoryRequest(75, 15);
+    var request = new UpdateInventoryCommand(75, 15);
     var userContext = createRegularUserContext();
 
-    when(inventoryService.updateInventory(eq(1L), any(UpdateInventoryRequest.class), any(UserContext.class)))
+    when(InventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
         .thenThrow(new UnauthorizedOperationException("Insufficient privileges"));
 
     mockMvc.perform(put("/api/v1/bookstore/admin/inventory/1")
@@ -130,13 +130,13 @@ class InventoryManagementResourceTest {
   @Test
   void bulkUpdateInventory_WithValidRequestAndAdminUser_ShouldUpdateInventories() throws Exception {
     var requests = List.of(
-        new BulkInventoryRequest(1L, 50, 10),
-        new BulkInventoryRequest(2L, 30, 5)
+        new BulkInventoryCommand(1L, 50, 10),
+        new BulkInventoryCommand(2L, 30, 5)
     );
     var updatedInventories = List.of(createTestInventoryDto());
     var userContext = createAdminUserContext();
 
-    when(inventoryService.bulkUpdateInventory(anyList(), any(UserContext.class)))
+    when(InventoryApplicationService.bulkUpdateInventory(anyList(), any(UserContext.class)))
         .thenReturn(updatedInventories);
 
     mockMvc.perform(post("/api/v1/bookstore/admin/inventory/bulk-update")
@@ -163,7 +163,7 @@ class InventoryManagementResourceTest {
     var userContext = createAdminUserContext();
 
     doThrow(new InsufficientInventoryException(1L, 100, 45))
-        .when(inventoryService).reserveQuantity(eq(1L), eq(100), any(UserContext.class));
+        .when(InventoryApplicationService).reserveQuantity(eq(1L), eq(100), any(UserContext.class));
 
     mockMvc.perform(post("/api/v1/bookstore/admin/inventory/1/reserve")
             .param("quantity", "100")

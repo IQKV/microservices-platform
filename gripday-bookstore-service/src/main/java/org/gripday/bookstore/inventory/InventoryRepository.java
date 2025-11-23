@@ -14,7 +14,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
   Optional<Inventory> findByBookId(Long bookId);
 
-  @Query("SELECT i FROM Inventory i WHERE i.book.isbn = :isbn")
+  @Query("SELECT i FROM Inventory i WHERE i.book.isbn.value = :isbn")
   Optional<Inventory> findByBookIsbn(@Param("isbn") String isbn);
 
   @Query("SELECT i FROM Inventory i WHERE i.quantity <= i.lowStockThreshold")

@@ -23,10 +23,15 @@ public record CreateBookCommand(
     @Size(max = 255, message = "Author must not exceed 255 characters")
     String author,
 
-    @Schema(description = "ISBN-13 of the book", example = "978-0-7432-7356-5", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(
+        description = "ISBN-13 of the book",
+        example = "978-0-7432-7356-5",
+        requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "ISBN is required")
     @Pattern(
-        regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$",
+        regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})"
+            + "[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)"
+            + "(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$",
         message = "Invalid ISBN format")
     String isbn,
 

@@ -30,13 +30,13 @@ public class BookResource {
 
   private static final Logger logger = LoggerFactory.getLogger(BookResource.class);
 
-  private final CatalogService catalogService;
-  private final SearchService searchService;
+  private final CatalogApplicationService catalogApplicationService;
+  private final SearchApplicationService searchApplicationService;
   private final BookCatalogResponseBuilder responseBuilder;
 
-  public BookResource(final CatalogService catalogService, final SearchService searchService, final BookCatalogResponseBuilder responseBuilder) {
-    this.catalogService = catalogService;
-    this.searchService = searchService;
+  public BookResource(final CatalogApplicationService catalogApplicationService, final SearchApplicationService searchApplicationService, final BookCatalogResponseBuilder responseBuilder) {
+    this.catalogApplicationService = catalogApplicationService;
+    this.searchApplicationService = searchApplicationService;
     this.responseBuilder = responseBuilder;
   }
 
@@ -133,8 +133,8 @@ public class BookResource {
 
     logger.debug("Getting books with filters - title: {}, author: {}, category: {}", title, author, category);
 
-    var criteria = new BookSearchCriteria(title, author, category, minPrice, maxPrice, availableOnly);
-    var books = catalogService.findBooks(criteria, pageable);
+    var criteria = new BookSearchQuery(title, author, category, minPrice, maxPrice, availableOnly);
+    var books = catalogApplicationService.findBooks(criteria, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
 
@@ -169,7 +169,7 @@ public class BookResource {
       @PathVariable Long id) {
     logger.debug("Getting book by ID: {}", id);
 
-    return catalogService.findBookById(id)
+    return catalogApplicationService.findBookById(id)
         .map(book -> ResponseEntity.ok(book))
         .orElse(ResponseEntity.notFound().build());
   }
@@ -178,7 +178,7 @@ public class BookResource {
   public ResponseEntity<BookDto> getBookByIsbn(@PathVariable String isbn) {
     logger.debug("Getting book by ISBN: {}", isbn);
 
-    return catalogService.findBookByIsbn(isbn)
+    return catalogApplicationService.findBookByIsbn(isbn)
         .map(book -> ResponseEntity.ok(book))
         .orElse(ResponseEntity.notFound().build());
   }
@@ -187,8 +187,8 @@ public class BookResource {
   public ResponseEntity<BookCatalogResponse> getAvailableBooks(@PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Getting available books");
 
-    var books = catalogService.findAvailableBooks(pageable);
-    var criteria = new BookSearchCriteria(null, null, null, null, null, true);
+    var books = catalogApplicationService.findAvailableBooks(pageable);
+    var criteria = new BookSearchQuery(null, null, null, null, null, true);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);
@@ -198,8 +198,8 @@ public class BookResource {
   public ResponseEntity<BookCatalogResponse> getBooksInStock(@PageableDefault(size = 20) Pageable pageable) {
     logger.debug("Getting books in stock");
 
-    var books = catalogService.findBooksInStock(pageable);
-    var criteria = new BookSearchCriteria(null, null, null, null, null, true);
+    var books = catalogApplicationService.findBooksInStock(pageable);
+    var criteria = new BookSearchQuery(null, null, null, null, null, true);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);
@@ -217,8 +217,8 @@ public class BookResource {
 
     logger.debug("Searching books with criteria");
 
-    var criteria = new BookSearchCriteria(title, author, category, minPrice, maxPrice, availableOnly);
-    var books = searchService.searchWithCriteria(criteria, pageable);
+    var criteria = new BookSearchQuery(title, author, category, minPrice, maxPrice, availableOnly);
+    var books = searchApplicationService.searchWithQuery(criteria, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
 
@@ -232,8 +232,8 @@ public class BookResource {
 
     logger.debug("Searching books by title: {}", title);
 
-    var criteria = new BookSearchCriteria(title, null, null, null, null, null);
-    var books = searchService.searchByTitle(title, pageable);
+    var criteria = new BookSearchQuery(title, null, null, null, null, null);
+    var books = searchApplicationService.searchByTitle(title, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);
@@ -246,8 +246,8 @@ public class BookResource {
 
     logger.debug("Searching books by author: {}", author);
 
-    var criteria = new BookSearchCriteria(null, author, null, null, null, null);
-    var books = searchService.searchByAuthor(author, pageable);
+    var criteria = new BookSearchQuery(null, author, null, null, null, null);
+    var books = searchApplicationService.searchByAuthor(author, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);
@@ -260,8 +260,8 @@ public class BookResource {
 
     logger.debug("Searching books by category: {}", category);
 
-    var criteria = new BookSearchCriteria(null, null, category, null, null, null);
-    var books = searchService.searchByCategory(category, pageable);
+    var criteria = new BookSearchQuery(null, null, category, null, null, null);
+    var books = searchApplicationService.searchByCategory(category, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);
@@ -275,8 +275,8 @@ public class BookResource {
 
     logger.debug("Searching books by price range: {} - {}", minPrice, maxPrice);
 
-    var criteria = new BookSearchCriteria(null, null, null, minPrice, maxPrice, null);
-    var books = searchService.searchByPriceRange(minPrice, maxPrice, pageable);
+    var criteria = new BookSearchQuery(null, null, null, minPrice, maxPrice, null);
+    var books = searchApplicationService.searchByPriceRange(minPrice, maxPrice, pageable);
     var baseUrl = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
     var response = responseBuilder.buildWithUrls(books, criteria, baseUrl);
     return ResponseEntity.ok(response);

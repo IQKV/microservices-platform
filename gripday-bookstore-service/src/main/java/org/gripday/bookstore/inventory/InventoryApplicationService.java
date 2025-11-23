@@ -17,18 +17,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Application Service for Inventory use cases.
+ * Orchestrates domain logic, manages transactions, and handles DTO conversions.
+ */
 @Service
 @Transactional
-public class InventoryService {
+public class InventoryApplicationService {
 
-  private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(InventoryApplicationService.class);
 
   private final InventoryRepository inventoryRepository;
   private final BookRepository bookRepository;
   private final AuditLogger auditLogger;
   private final BookstoreMetrics bookstoreMetrics;
 
-  public InventoryService(final InventoryRepository inventoryRepository, final BookRepository bookRepository,
+  public InventoryApplicationService(final InventoryRepository inventoryRepository, final BookRepository bookRepository,
                           final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
     this.inventoryRepository = inventoryRepository;
     this.bookRepository = bookRepository;
@@ -52,7 +56,7 @@ public class InventoryService {
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true)
   })
-  public InventoryDto updateInventory(Long bookId, UpdateInventoryRequest request, UserContext userContext) {
+  public InventoryDto updateInventory(Long bookId, UpdateInventoryCommand command, UserContext userContext) {
     logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
 
     var timer = bookstoreMetrics.startInventoryUpdateTimer();
@@ -60,17 +64,17 @@ public class InventoryService {
     var inventory = inventoryRepository.findByBookId(bookId)
         .orElseThrow(() -> new BookNotFoundException(bookId));
 
-    if (request.quantity() < inventory.getReservedQuantity()) {
+    if (command.quantity() < inventory.getReservedQuantity()) {
       throw new InsufficientInventoryException(
           "Cannot set quantity below reserved amount. Reserved: " + inventory.getReservedQuantity() +
-          ", Requested: " + request.quantity()
+          ", Requested: " + command.quantity()
       );
     }
 
-    inventory.setQuantity(request.quantity());
+    inventory.setQuantity(command.quantity());
 
-    if (request.lowStockThreshold() != null) {
-      inventory.setLowStockThreshold(request.lowStockThreshold());
+    if (command.lowStockThreshold() != null) {
+      inventory.setLowStockThreshold(command.lowStockThreshold());
     }
 
     var book = inventory.getBook();
@@ -79,7 +83,7 @@ public class InventoryService {
     var oldQuantity = inventory.getQuantity();
     var updatedInventory = inventoryRepository.save(inventory);
 
-    auditLogger.logInventoryUpdate(bookId, oldQuantity, request.quantity(), userContext);
+    auditLogger.logInventoryUpdate(bookId, oldQuantity, command.quantity(), userContext);
 
     bookstoreMetrics.incrementInventoryUpdated();
     bookstoreMetrics.recordInventoryUpdateTime(timer);
@@ -95,26 +99,26 @@ public class InventoryService {
       @CacheEvict(value = CacheConfig.BOOK_SEARCH_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true)
   })
-  public List<InventoryDto> bulkUpdateInventory(List<BulkInventoryRequest> requests, UserContext userContext) {
-    logger.info("Bulk updating inventory for {} books by user: {}", requests.size(), userContext.username());
+  public List<InventoryDto> bulkUpdateInventory(List<BulkInventoryCommand> commands, UserContext userContext) {
+    logger.info("Bulk updating inventory for {} books by user: {}", commands.size(), userContext.username());
 
     var results = new ArrayList<InventoryDto>();
 
-    for (final var request : requests) {
+    for (final var command : commands) {
       try {
-        var inventory = inventoryRepository.findByBookId(request.bookId())
-            .orElseThrow(() -> new BookNotFoundException(request.bookId()));
+        var inventory = inventoryRepository.findByBookId(command.bookId())
+            .orElseThrow(() -> new BookNotFoundException(command.bookId()));
 
-        if (request.quantity() < inventory.getReservedQuantity()) {
+        if (command.quantity() < inventory.getReservedQuantity()) {
           logger.warn("Skipping book ID {} - quantity {} below reserved amount {}",
-              request.bookId(), request.quantity(), inventory.getReservedQuantity());
+              command.bookId(), command.quantity(), inventory.getReservedQuantity());
           continue;
         }
 
-        inventory.setQuantity(request.quantity());
+        inventory.setQuantity(command.quantity());
 
-        if (request.lowStockThreshold() != null) {
-          inventory.setLowStockThreshold(request.lowStockThreshold());
+        if (command.lowStockThreshold() != null) {
+          inventory.setLowStockThreshold(command.lowStockThreshold());
         }
 
         var book = inventory.getBook();
@@ -124,14 +128,14 @@ public class InventoryService {
         results.add(convertToDto(updatedInventory));
 
       } catch (final Exception e) {
-        logger.error("Failed to update inventory for book ID: {}", request.bookId(), e);
+        logger.error("Failed to update inventory for book ID: {}", command.bookId(), e);
       }
     }
 
     auditLogger.logBulkInventoryUpdate(results.size(), userContext);
 
     logger.info("Successfully bulk updated {} out of {} inventory records by user: {}",
-        results.size(), requests.size(), userContext.username());
+        results.size(), commands.size(), userContext.username());
 
     return results;
   }

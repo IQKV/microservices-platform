@@ -6,8 +6,6 @@ import org.gripday.bookstore.inventory.Inventory;
 import org.gripday.bookstore.shared.AuditLogger;
 import org.gripday.bookstore.shared.BookstoreMetrics;
 import org.gripday.bookstore.shared.CacheConfig;
-import org.gripday.bookstore.shared.ISBN;
-import org.gripday.bookstore.shared.Money;
 import org.gripday.bookstore.shared.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

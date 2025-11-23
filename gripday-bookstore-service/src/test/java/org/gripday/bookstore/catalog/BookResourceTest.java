@@ -31,10 +31,10 @@ class BookResourceTest {
   private MockMvc mockMvc;
 
   @MockBean
-  private CatalogService catalogService;
+  private CatalogApplicationService CatalogApplicationService;
 
   @MockBean
-  private SearchService searchService;
+  private SearchApplicationService SearchApplicationService;
 
   private BookDto createTestBookDto() {
     return new BookDto(
@@ -57,7 +57,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(catalogService.findBooks(any(BookSearchCriteria.class), any())).thenReturn(page);
+    when(CatalogApplicationService.findBooks(any(BookSearchQuery.class), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books"))
         .andExpect(status().isOk())
@@ -71,7 +71,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(catalogService.findBooks(any(BookSearchCriteria.class), any())).thenReturn(page);
+    when(CatalogApplicationService.findBooks(any(BookSearchQuery.class), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books")
             .param("title", "Test")
@@ -86,7 +86,7 @@ class BookResourceTest {
   @Test
   void getBookById_WhenBookExists_ShouldReturnBook() throws Exception {
     var book = createTestBookDto();
-    when(catalogService.findBookById(1L)).thenReturn(Optional.of(book));
+    when(CatalogApplicationService.findBookById(1L)).thenReturn(Optional.of(book));
 
     mockMvc.perform(get("/api/v1/bookstore/books/1"))
         .andExpect(status().isOk())
@@ -96,7 +96,7 @@ class BookResourceTest {
 
   @Test
   void getBookById_WhenBookNotFound_ShouldReturn404() throws Exception {
-    when(catalogService.findBookById(999L)).thenReturn(Optional.empty());
+    when(CatalogApplicationService.findBookById(999L)).thenReturn(Optional.empty());
 
     mockMvc.perform(get("/api/v1/bookstore/books/999"))
         .andExpect(status().isNotFound());
@@ -107,7 +107,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(searchService.searchWithCriteria(any(BookSearchCriteria.class), any())).thenReturn(page);
+    when(SearchApplicationService.searchWithQuery(any(BookSearchQuery.class), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/search")
             .param("title", "Test"))
@@ -121,7 +121,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(searchService.searchByTitle(eq("Test"), any())).thenReturn(page);
+    when(SearchApplicationService.searchByTitle(eq("Test"), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/search/title")
             .param("title", "Test"))
@@ -135,7 +135,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(searchService.searchByAuthor(eq("Test Author"), any())).thenReturn(page);
+    when(SearchApplicationService.searchByAuthor(eq("Test Author"), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/search/author")
             .param("author", "Test Author"))
@@ -149,7 +149,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(searchService.searchByCategory(eq("Fiction"), any())).thenReturn(page);
+    when(SearchApplicationService.searchByCategory(eq("Fiction"), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/search/category")
             .param("category", "Fiction"))
@@ -163,7 +163,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(searchService.searchByPriceRange(any(BigDecimal.class), any(BigDecimal.class), any()))
+    when(SearchApplicationService.searchByPriceRange(any(BigDecimal.class), any(BigDecimal.class), any()))
         .thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/search/price-range")
@@ -179,7 +179,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(catalogService.findAvailableBooks(any())).thenReturn(page);
+    when(CatalogApplicationService.findAvailableBooks(any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/available"))
         .andExpect(status().isOk())
@@ -192,7 +192,7 @@ class BookResourceTest {
     var books = List.of(createTestBookDto());
     var page = new PageImpl<>(books, PageRequest.of(0, 20), 1);
 
-    when(catalogService.findBooksInStock(any())).thenReturn(page);
+    when(CatalogApplicationService.findBooksInStock(any())).thenReturn(page);
 
     mockMvc.perform(get("/api/v1/bookstore/books/in-stock"))
         .andExpect(status().isOk())

@@ -32,10 +32,10 @@ public class InventoryManagementResource {
 
   private static final Logger logger = LoggerFactory.getLogger(InventoryManagementResource.class);
 
-  private final InventoryService inventoryService;
+  private final InventoryApplicationService inventoryApplicationService;
 
-  public InventoryManagementResource(final InventoryService inventoryService) {
-    this.inventoryService = inventoryService;
+  public InventoryManagementResource(final InventoryApplicationService inventoryApplicationService) {
+    this.inventoryApplicationService = inventoryApplicationService;
   }
 
   @Operation(
@@ -90,13 +90,13 @@ public class InventoryManagementResource {
       @Parameter(description = "Unique identifier of the book", required = true, example = "1")
       @PathVariable Long bookId,
       @Parameter(description = "Inventory update request data", required = true)
-      @Valid @RequestBody UpdateInventoryRequest request,
+      @Valid @RequestBody UpdateInventoryCommand command,
       @Parameter(hidden = true)
       @RequestAttribute("userContext") UserContext userContext) {
 
     logger.info("Updating inventory for book ID: {} by user: {}", bookId, userContext.username());
 
-    var updatedInventory = inventoryService.updateInventory(bookId, request, userContext);
+    var updatedInventory = inventoryApplicationService.updateInventory(bookId, command, userContext);
     return ResponseEntity.ok(updatedInventory);
   }
 
@@ -142,13 +142,13 @@ public class InventoryManagementResource {
   @PostMapping("/bulk-update")
   public ResponseEntity<List<InventoryDto>> bulkUpdateInventory(
       @Parameter(description = "List of inventory update requests", required = true)
-      @Valid @RequestBody List<BulkInventoryRequest> requests,
+      @Valid @RequestBody List<BulkInventoryCommand> commands,
       @Parameter(hidden = true)
       @RequestAttribute("userContext") UserContext userContext) {
 
-    logger.info("Bulk updating inventory for {} books by user: {}", requests.size(), userContext.username());
+    logger.info("Bulk updating inventory for {} books by user: {}", commands.size(), userContext.username());
 
-    var updatedInventories = inventoryService.bulkUpdateInventory(requests, userContext);
+    var updatedInventories = inventoryApplicationService.bulkUpdateInventory(commands, userContext);
     return ResponseEntity.ok(updatedInventories);
   }
 
@@ -206,7 +206,7 @@ public class InventoryManagementResource {
 
     logger.info("Reserving {} units for book ID: {} by user: {}", quantity, bookId, userContext.username());
 
-    inventoryService.reserveQuantity(bookId, quantity, userContext);
+    inventoryApplicationService.reserveQuantity(bookId, quantity, userContext);
     return ResponseEntity.ok().build();
   }
 
@@ -264,7 +264,7 @@ public class InventoryManagementResource {
 
     logger.info("Releasing {} reserved units for book ID: {} by user: {}", quantity, bookId, userContext.username());
 
-    inventoryService.releaseReservedQuantity(bookId, quantity, userContext);
+    inventoryApplicationService.releaseReservedQuantity(bookId, quantity, userContext);
     return ResponseEntity.ok().build();
   }
 
@@ -322,7 +322,7 @@ public class InventoryManagementResource {
 
     logger.info("Adjusting inventory by {} for book ID: {} by user: {}", adjustment, bookId, userContext.username());
 
-    inventoryService.adjustInventoryQuantity(bookId, adjustment, userContext);
+    inventoryApplicationService.adjustInventoryQuantity(bookId, adjustment, userContext);
     return ResponseEntity.ok().build();
   }
 }
