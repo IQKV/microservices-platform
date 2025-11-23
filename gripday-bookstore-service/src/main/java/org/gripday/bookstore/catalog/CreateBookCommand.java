@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Request to create a new book in the catalog")
-public record CreateBookRequest(
+@Schema(description = "Command to create a new book in the catalog")
+public record CreateBookCommand(
     @Schema(description = "Title of the book", example = "The Great Gatsby", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Title is required")
     @Size(max = 255, message = "Title must not exceed 255 characters")
@@ -26,8 +26,7 @@ public record CreateBookRequest(
     @Schema(description = "ISBN-13 of the book", example = "978-0-7432-7356-5", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "ISBN is required")
     @Pattern(
-        regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- "
-                 + "]?[0-9]+[- ]?[0-9X]$",
+        regexp = "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$",
         message = "Invalid ISBN format")
     String isbn,
 

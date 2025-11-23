@@ -6,6 +6,8 @@ import org.gripday.bookstore.inventory.Inventory;
 import org.gripday.bookstore.shared.AuditLogger;
 import org.gripday.bookstore.shared.BookstoreMetrics;
 import org.gripday.bookstore.shared.CacheConfig;
+import org.gripday.bookstore.shared.ISBN;
+import org.gripday.bookstore.shared.Money;
 import org.gripday.bookstore.shared.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,23 +20,33 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Application Service for Catalog use cases.
+ * Orchestrates domain logic, manages transactions, and handles DTO conversions.
+ */
 @Service
 @Transactional
-public class CatalogService {
+public class CatalogApplicationService {
 
-  private static final Logger logger = LoggerFactory.getLogger(CatalogService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CatalogApplicationService.class);
 
   private final BookRepository bookRepository;
   private final CategoryRepository categoryRepository;
+  private final DuplicateIsbnChecker duplicateIsbnChecker;
   private final AuditLogger auditLogger;
   private final BookstoreMetrics bookstoreMetrics;
   private final BookCatalogResponseBuilder responseBuilder;
 
-  public CatalogService(final BookRepository bookRepository, final CategoryRepository categoryRepository,
-                        final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics,
-                        final BookCatalogResponseBuilder responseBuilder) {
+  public CatalogApplicationService(
+      final BookRepository bookRepository,
+      final CategoryRepository categoryRepository,
+      final DuplicateIsbnChecker duplicateIsbnChecker,
+      final AuditLogger auditLogger,
+      final BookstoreMetrics bookstoreMetrics,
+      final BookCatalogResponseBuilder responseBuilder) {
     this.bookRepository = bookRepository;
     this.categoryRepository = categoryRepository;
+    this.duplicateIsbnChecker = duplicateIsbnChecker;
     this.auditLogger = auditLogger;
     this.bookstoreMetrics = bookstoreMetrics;
     this.responseBuilder = responseBuilder;
@@ -42,19 +54,19 @@ public class CatalogService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-             key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-  public Page<BookDto> findBooks(BookSearchCriteria criteria, Pageable pageable) {
-    logger.debug("Finding books with criteria: {}", criteria);
+             key = "#query.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+  public Page<BookDto> findBooks(BookSearchQuery query, Pageable pageable) {
+    logger.debug("Finding books with query: {}", query);
 
     var timer = bookstoreMetrics.startBookSearchTimer();
     try {
       var books = bookRepository.findBooksWithInventoryFilter(
-          criteria.title(),
-          criteria.author(),
-          criteria.category(),
-          criteria.minPrice(),
-          criteria.maxPrice(),
-          criteria.availableOnly() != null ? criteria.availableOnly() : false,
+          query.title(),
+          query.author(),
+          query.category(),
+          query.minPrice(),
+          query.maxPrice(),
+          query.availableOnly() != null ? query.availableOnly() : false,
           pageable
       );
 
@@ -80,28 +92,29 @@ public class CatalogService {
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.AUTHOR_CACHE, allEntries = true)
   })
-  public BookDto createBook(CreateBookRequest request, UserContext userContext) {
-    logger.info("Creating book with title: {} by user: {}", request.title(), userContext.username());
+  public BookDto createBook(CreateBookCommand command, UserContext userContext) {
+    logger.info("Creating book with title: {} by user: {}", command.title(), userContext.username());
 
     var timer = bookstoreMetrics.startBookCreationTimer();
 
-    if (bookRepository.findByIsbn(request.isbn()).isPresent()) {
-      throw new DuplicateIsbnException(request.isbn());
-    }
+    // Use domain service to check ISBN uniqueness
+    duplicateIsbnChecker.ensureUnique(command.isbn());
 
-    var category = categoryRepository.findById(request.categoryId())
-        .orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
+    var category = categoryRepository.findById(command.categoryId())
+        .orElseThrow(() -> new CategoryNotFoundException(command.categoryId()));
 
-    var book = new Book();
-    book.setTitle(request.title());
-    book.setAuthor(request.author());
-    book.setIsbn(request.isbn());
-    book.setDescription(request.description());
-    book.setPrice(request.price());
-    book.setCategory(category);
-    book.setAvailable(true);
+    // Use factory method to create book with value objects
+    var book = Book.create(
+        command.title(),
+        command.author(),
+        command.isbn(),
+        command.price(),
+        command.description(),
+        category
+    );
 
-    var inventory = new Inventory(book, request.initialQuantity());
+    // Create inventory using factory method
+    var inventory = Inventory.create(book, command.initialQuantity());
     book.setInventory(inventory);
 
     var savedBook = bookRepository.save(book);
@@ -123,19 +136,19 @@ public class CatalogService {
       @CacheEvict(value = CacheConfig.POPULAR_BOOKS_CACHE, allEntries = true),
       @CacheEvict(value = CacheConfig.AUTHOR_CACHE, allEntries = true)
   })
-  public BookDto updateBook(Long id, UpdateBookRequest request, UserContext userContext) {
+  public BookDto updateBook(Long id, UpdateBookCommand command, UserContext userContext) {
     logger.info("Updating book ID: {} by user: {}", id, userContext.username());
 
     var book = bookRepository.findById(id)
         .orElseThrow(() -> new BookNotFoundException(id));
 
-    var category = categoryRepository.findById(request.categoryId())
-        .orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
+    var category = categoryRepository.findById(command.categoryId())
+        .orElseThrow(() -> new CategoryNotFoundException(command.categoryId()));
 
-    book.setTitle(request.title());
-    book.setAuthor(request.author());
-    book.setDescription(request.description());
-    book.setPrice(request.price());
+    book.setTitle(command.title());
+    book.setAuthor(command.author());
+    book.setDescription(command.description());
+    book.setPrice(command.price());
     book.setCategory(category);
 
     var updatedBook = bookRepository.save(book);
@@ -172,7 +185,8 @@ public class CatalogService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(value = CacheConfig.BOOK_CACHE, key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).ISBN + #isbn")
+  @Cacheable(value = CacheConfig.BOOK_CACHE,
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).ISBN + #isbn")
   public Optional<BookDto> findBookByIsbn(String isbn) {
     logger.debug("Finding book by ISBN: {}", isbn);
 
@@ -202,12 +216,12 @@ public class CatalogService {
 
   @Transactional(readOnly = true)
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).CATALOG_RESPONSE + #criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-  public BookCatalogResponse findBooksWithCatalogResponse(BookSearchCriteria criteria, Pageable pageable) {
-    logger.debug("Finding books with catalog response for criteria: {}", criteria);
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).CATALOG_RESPONSE + #query.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+  public BookCatalogResponse findBooksWithCatalogResponse(BookSearchQuery query, Pageable pageable) {
+    logger.debug("Finding books with catalog response for query: {}", query);
 
-    var books = findBooks(criteria, pageable);
-    return responseBuilder.build(books, criteria);
+    var books = findBooks(query, pageable);
+    return responseBuilder.build(books, query);
   }
 
   private BookDto convertToDto(Book book) {
@@ -222,9 +236,9 @@ public class CatalogService {
         book.getId(),
         book.getTitle(),
         book.getAuthor(),
-        book.getIsbn(),
+        book.getIsbn().getValue(),
         book.getDescription(),
-        book.getPrice(),
+        book.getPrice().getAmount(),
         categoryName,
         book.isAvailable(),
         availableQuantity,

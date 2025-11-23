@@ -39,12 +39,33 @@ public class Category {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  public Category() {
+  protected Category() {
+    // For JPA only
   }
 
-  public Category(final String name, final String description) {
+  private Category(final String name, final String description) {
+    validateName(name);
     this.name = name;
     this.description = description;
+  }
+
+  /**
+   * Factory method to create a new Category following DDD principles.
+   * Encapsulates creation logic and ensures invariants are maintained.
+   *
+   * @param name the category name (required, must not be blank)
+   * @param description the category description (optional)
+   * @return a new Category instance
+   * @throws IllegalArgumentException if name is null or blank
+   */
+  public static Category create(final String name, final String description) {
+    return new Category(name, description);
+  }
+
+  private void validateName(final String name) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("Category name must not be null or blank");
+    }
   }
 
   public Long getId() {

@@ -35,25 +35,17 @@ class BookRepositoryTest {
   @BeforeEach
   void setUp() {
     // Create categories
-    fictionCategory = new Category("Fiction", "Fiction books");
-    scienceCategory = new Category("Science", "Science books");
+    fictionCategory = Category.create("Fiction", "Fiction books");
+    scienceCategory = Category.create("Science", "Science books");
     entityManager.persistAndFlush(fictionCategory);
     entityManager.persistAndFlush(scienceCategory);
 
     // Create books
-    book1 = new Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"));
-    book1.setDescription("A classic American novel");
-    book1.setCategory(fictionCategory);
-    book1.setAvailable(true);
+    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"), "A classic American novel", fictionCategory);
 
-    book2 = new Book("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"));
-    book2.setDescription("A gripping tale of racial injustice");
-    book2.setCategory(fictionCategory);
-    book2.setAvailable(true);
+    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"), "A gripping tale of racial injustice", fictionCategory);
 
-    book3 = new Book("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"));
-    book3.setDescription("Cosmology for the general reader");
-    book3.setCategory(scienceCategory);
+    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"), "Cosmology for the general reader", scienceCategory);
     book3.setAvailable(false); // Unavailable book for testing
 
     entityManager.persistAndFlush(book1);

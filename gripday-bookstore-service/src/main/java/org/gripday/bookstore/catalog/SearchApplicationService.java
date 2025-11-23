@@ -12,16 +12,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Application Service for Search use cases.
+ * Handles various search operations and query patterns.
+ */
 @Service
 @Transactional(readOnly = true)
-public class SearchService {
+public class SearchApplicationService {
 
-  private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+  private static final Logger logger = LoggerFactory.getLogger(SearchApplicationService.class);
 
   private final BookRepository bookRepository;
   private final BookCatalogResponseBuilder responseBuilder;
 
-  public SearchService(final BookRepository bookRepository, final BookCatalogResponseBuilder responseBuilder) {
+  public SearchApplicationService(
+      final BookRepository bookRepository,
+      final BookCatalogResponseBuilder responseBuilder) {
     this.bookRepository = bookRepository;
     this.responseBuilder = responseBuilder;
   }
@@ -61,31 +67,31 @@ public class SearchService {
   }
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
-             key = "#criteria.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
-  public Page<BookDto> searchWithCriteria(BookSearchCriteria criteria, Pageable pageable) {
-    logger.debug("Searching books with criteria: {}", criteria);
+             key = "#query.toString() + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+  public Page<BookDto> searchWithQuery(BookSearchQuery query, Pageable pageable) {
+    logger.debug("Searching books with query: {}", query);
 
     return bookRepository.findBooksWithCriteria(
-        criteria.title(),
-        criteria.author(),
-        criteria.category(),
-        criteria.minPrice(),
-        criteria.maxPrice(),
-        criteria.availableOnly() != null ? criteria.availableOnly() : false,
+        query.title(),
+        query.author(),
+        query.category(),
+        query.minPrice(),
+        query.maxPrice(),
+        query.availableOnly() != null ? query.availableOnly() : false,
         pageable
     ).map(this::convertToDto);
   }
 
-  public Page<BookDto> searchAvailableBooksWithInventory(BookSearchCriteria criteria, Pageable pageable) {
-    logger.debug("Searching available books with inventory filter: {}", criteria);
+  public Page<BookDto> searchAvailableBooksWithInventory(BookSearchQuery query, Pageable pageable) {
+    logger.debug("Searching available books with inventory filter: {}", query);
 
     return bookRepository.findBooksWithInventoryFilter(
-        criteria.title(),
-        criteria.author(),
-        criteria.category(),
-        criteria.minPrice(),
-        criteria.maxPrice(),
-        criteria.availableOnly() != null ? criteria.availableOnly() : true,
+        query.title(),
+        query.author(),
+        query.category(),
+        query.minPrice(),
+        query.maxPrice(),
+        query.availableOnly() != null ? query.availableOnly() : true,
         pageable
     ).map(this::convertToDto);
   }
@@ -111,14 +117,16 @@ public class SearchService {
         .map(this::convertToDto);
   }
 
-  @Cacheable(value = CacheConfig.AUTHOR_CACHE, key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).DISTINCT_AUTHORS")
+  @Cacheable(value = CacheConfig.AUTHOR_CACHE,
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).DISTINCT_AUTHORS")
   public List<String> getDistinctAuthors() {
     logger.debug("Getting distinct authors");
 
     return bookRepository.findDistinctAuthors();
   }
 
-  @Cacheable(value = CacheConfig.CATEGORY_CACHE, key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).DISTINCT_CATEGORIES")
+  @Cacheable(value = CacheConfig.CATEGORY_CACHE,
+             key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).DISTINCT_CATEGORIES")
   public List<String> getDistinctCategories() {
     logger.debug("Getting distinct categories");
 
@@ -157,8 +165,11 @@ public class SearchService {
 
   @Cacheable(value = CacheConfig.BOOK_SEARCH_CACHE,
              key = "T(org.gripday.bookstore.shared.BookstoreConstants.CacheKeyPrefixes).PRICE_RANGE + #minPrice + '_' + #maxPrice + '_' + #categoryId + '_' + #pageable.pageNumber")
-  public Page<BookDto> searchByPriceRangeAndCategory(BigDecimal minPrice, BigDecimal maxPrice,
-                                                     Long categoryId, Pageable pageable) {
+  public Page<BookDto> searchByPriceRangeAndCategory(
+      BigDecimal minPrice,
+      BigDecimal maxPrice,
+      Long categoryId,
+      Pageable pageable) {
     logger.debug("Searching books by price range: {}-{} and category: {}", minPrice, maxPrice, categoryId);
 
     return bookRepository.findByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable)
@@ -171,11 +182,11 @@ public class SearchService {
     return bookRepository.isBookAvailableWithQuantity(bookId, requestedQuantity);
   }
 
-  public BookCatalogResponse searchWithCatalogResponse(BookSearchCriteria criteria, Pageable pageable) {
-    logger.debug("Searching books with criteria and building catalog response: {}", criteria);
+  public BookCatalogResponse searchWithCatalogResponse(BookSearchQuery query, Pageable pageable) {
+    logger.debug("Searching books with query and building catalog response: {}", query);
 
-    var books = searchWithCriteria(criteria, pageable);
-    return responseBuilder.build(books, criteria);
+    var books = searchWithQuery(query, pageable);
+    return responseBuilder.build(books, query);
   }
 
   private BookDto convertToDto(Book book) {
@@ -190,9 +201,9 @@ public class SearchService {
         book.getId(),
         book.getTitle(),
         book.getAuthor(),
-        book.getIsbn(),
+        book.getIsbn().getValue(),
         book.getDescription(),
-        book.getPrice(),
+        book.getPrice().getAmount(),
         categoryName,
         book.isAvailable(),
         availableQuantity,

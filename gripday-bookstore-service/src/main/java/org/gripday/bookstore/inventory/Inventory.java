@@ -42,18 +42,63 @@ public class Inventory {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  public Inventory() {
+  protected Inventory() {
+    // For JPA only
   }
 
-  public Inventory(final Book book, final int quantity) {
-    this.book = book;
-    this.quantity = quantity;
-  }
+  private Inventory(final Book book, final int quantity, final int lowStockThreshold) {
+    validateBook(book);
+    validateQuantity(quantity);
+    validateLowStockThreshold(lowStockThreshold);
 
-  public Inventory(final Book book, final int quantity, final int lowStockThreshold) {
     this.book = book;
     this.quantity = quantity;
     this.lowStockThreshold = lowStockThreshold;
+    this.reservedQuantity = 0;
+  }
+
+  /**
+   * Factory method to create a new Inventory following DDD principles.
+   * Encapsulates creation logic and ensures invariants are maintained.
+   *
+   * @param book the book for this inventory (required, must not be null)
+   * @param quantity the initial quantity (required, must not be negative)
+   * @param lowStockThreshold the low stock threshold (optional, defaults to 5 if not provided)
+   * @return a new Inventory instance
+   * @throws IllegalArgumentException if any required field is invalid
+   */
+  public static Inventory create(final Book book, final int quantity, final Integer lowStockThreshold) {
+    return new Inventory(book, quantity, lowStockThreshold != null ? lowStockThreshold : 5);
+  }
+
+  /**
+   * Factory method to create a new Inventory with default low stock threshold.
+   *
+   * @param book the book for this inventory (required, must not be null)
+   * @param quantity the initial quantity (required, must not be negative)
+   * @return a new Inventory instance with default low stock threshold of 5
+   * @throws IllegalArgumentException if any required field is invalid
+   */
+  public static Inventory create(final Book book, final int quantity) {
+    return create(book, quantity, null);
+  }
+
+  private void validateBook(final Book book) {
+    if (book == null) {
+      throw new IllegalArgumentException("Book must not be null");
+    }
+  }
+
+  private void validateQuantity(final int quantity) {
+    if (quantity < 0) {
+      throw new IllegalArgumentException("Inventory quantity must not be negative");
+    }
+  }
+
+  private void validateLowStockThreshold(final int lowStockThreshold) {
+    if (lowStockThreshold < 0) {
+      throw new IllegalArgumentException("Low stock threshold must not be negative");
+    }
   }
 
   public Long getId() {

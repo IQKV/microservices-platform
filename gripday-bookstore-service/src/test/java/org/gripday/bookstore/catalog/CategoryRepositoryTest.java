@@ -33,25 +33,20 @@ class CategoryRepositoryTest {
   @BeforeEach
   void setUp() {
     // Create categories
-    fictionCategory = new Category("Fiction", "Fiction books");
-    scienceCategory = new Category("Science", "Science books");
-    emptyCategory = new Category("Empty", "Category with no books");
+    fictionCategory = Category.create("Fiction", "Fiction books");
+    scienceCategory = Category.create("Science", "Science books");
+    emptyCategory = Category.create("Empty", "Category with no books");
 
     entityManager.persistAndFlush(fictionCategory);
     entityManager.persistAndFlush(scienceCategory);
     entityManager.persistAndFlush(emptyCategory);
 
     // Create books
-    book1 = new Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"));
-    book1.setCategory(fictionCategory);
-    book1.setAvailable(true);
+    book1 = Book.create("The Great Gatsby", "F. Scott Fitzgerald", "978-0-7432-7356-5", new BigDecimal("15.99"), null, fictionCategory);
 
-    book2 = new Book("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"));
-    book2.setCategory(fictionCategory);
-    book2.setAvailable(true);
+    book2 = Book.create("To Kill a Mockingbird", "Harper Lee", "978-0-06-112008-4", new BigDecimal("12.50"), null, fictionCategory);
 
-    book3 = new Book("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"));
-    book3.setCategory(scienceCategory);
+    book3 = Book.create("A Brief History of Time", "Stephen Hawking", "978-0-553-38016-3", new BigDecimal("18.99"), null, scienceCategory);
     book3.setAvailable(false); // Unavailable book
 
     entityManager.persistAndFlush(book1);
@@ -214,9 +209,8 @@ class CategoryRepositoryTest {
   @Test
   void cascadeOperations_ShouldWorkCorrectly() {
     // Given
-    var newCategory = new Category("Mystery", "Mystery novels");
-    var newBook = new Book("The Maltese Falcon", "Dashiell Hammett", "978-0-679-72264-7", new BigDecimal("14.99"));
-    newBook.setAvailable(true);
+    var newCategory = Category.create("Mystery", "Mystery novels");
+    var newBook = Book.create("The Maltese Falcon", "Dashiell Hammett", "978-0-679-72264-7", new BigDecimal("14.99"), null, null);
 
     // When
     newCategory.addBook(newBook);
@@ -235,8 +229,7 @@ class CategoryRepositoryTest {
   void helperMethods_ShouldMaintainBidirectionalRelationship() {
     // Given
     var category = categoryRepository.findByNameIgnoreCase("Fiction").orElseThrow();
-    var newBook = new Book("1984", "George Orwell", "978-0-452-28423-4", new BigDecimal("13.99"));
-    newBook.setAvailable(true);
+    var newBook = Book.create("1984", "George Orwell", "978-0-452-28423-4", new BigDecimal("13.99"), null, null);
 
     var initialBookCount = category.getBooks().size();
 

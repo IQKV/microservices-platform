@@ -7,5 +7,6 @@
 
     <include file="db/changelog/20251111153000-initial-bookstore-schema.xml"/>
     <include file="db/changelog/20251111154000-insert-initial-categories.xml"/>
+    <include file="db/changelog/20251123000000-add-currency-column.xml"/>
 
 </databaseChangeLog>
