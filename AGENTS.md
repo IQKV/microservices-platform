@@ -940,7 +940,7 @@ cross_cutting_scopes:
 
 ```java
 // Records for immutable DTOs
-public record UserCreateRequest(@NotBlank @Size(max = 100) String username, @Email String email, @NotBlank String password) {}
+public record UserCreateCommand(@NotBlank @Size(max = 100) String username, @Email String email, @NotBlank String password) {}
 
 // Records for configuration properties
 @ConfigurationProperties(prefix = "gripday.auth.jwt")
@@ -985,11 +985,11 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
   @Transactional
-  public UserDto createUser(UserCreateRequest request) {
-    log.info("Creating user with username: {}", request.username());
+  public UserDto createUser(UserCreateCommand command) {
+    log.info("Creating user with username: {}", command.username());
 
     // Business logic
-    var user = User.builder().username(request.username()).email(request.email()).password(passwordEncoder.encode(request.password())).enabled(false).build();
+    var user = User.builder().username(command.username()).email(command.email()).password(command.encode(command.password())).enabled(false).build();
 
     var savedUser = userRepository.save(user);
     return UserMapper.toDto(savedUser);
@@ -1050,14 +1050,14 @@ class UserServiceTest {
   @DisplayName("Should create user with encoded password")
   void shouldCreateUserWithEncodedPassword() {
     // Arrange
-    var request = new UserCreateRequest("john.doe", "john@example.com", "password123");
+    var command = new UserCreateCommand("john.doe", "john@example.com", "password123");
     var encodedPassword = "encoded_password";
 
-    when(passwordEncoder.encode(request.password())).thenReturn(encodedPassword);
+    when(passwordEncoder.encode(command.password())).thenReturn(encodedPassword);
     when(userRepository.save(any(User.class))).thenAnswer((i) -> i.getArgument(0));
 
     // Act
-    var result = userService.createUser(request);
+    var result = userService.createUser(command);
 
     // Assert
     assertThat(result.username()).isEqualTo("john.doe");
@@ -2249,8 +2249,8 @@ public class UserResource {
   @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(schema = @Schema(implementation = UserDto.class)))
   @ApiResponse(responseCode = "400", description = "Invalid input data")
   @ApiResponse(responseCode = "409", description = "User already exists")
-  public ResponseEntity<UserDto> createUser(@Parameter(description = "User creation request", required = true) @Valid @RequestBody UserCreateRequest request) {
-    var user = userService.createUser(request);
+  public ResponseEntity<UserDto> createUser(@Parameter(description = "User creation request", required = true) @Valid @RequestBody UserCreateCommand command) {
+    var user = userService.createUser(command);
     return ResponseEntity.status(HttpStatus.CREATED).body(user);
   }
 }
@@ -2581,13 +2581,13 @@ rollback_capability:
 
 ```java
 // 1. Define DTO (record)
-public record BookCreateRequest(@NotBlank String title, @NotBlank String author) {}
+public record BookCreateCommand(@NotBlank String title, @NotBlank String author) {}
 
 // 2. Add service method
 @Service
 public class BookService {
 
-  public BookDto createBook(BookCreateRequest request) {
+  public BookDto createBook(BookCreateCommand command) {
     /* ... */
   }
 }
@@ -2599,8 +2599,8 @@ public class BookResource {
 
   @PostMapping
   @Operation(summary = "Create new book")
-  public ResponseEntity<BookDto> createBook(@Valid @RequestBody BookCreateRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(request));
+  public ResponseEntity<BookDto> createBook(@Valid @RequestBody BookCreateCommand command) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(command));
   }
 }
 
