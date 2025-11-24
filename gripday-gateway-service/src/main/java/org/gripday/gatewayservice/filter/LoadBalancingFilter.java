@@ -29,10 +29,10 @@ public class LoadBalancingFilter extends AbstractGatewayFilterFactory<LoadBalanc
       var serviceName = config.getServiceName();
 
       if (serviceName != null && config.isEnableLoadBalancing()) {
-        // Get next available service instance
-        var serviceUri = loadBalancingService.getNextServiceInstance(serviceName);
+        try {
+          // Get next available service instance (throws NoHealthyInstancesException if none available)
+          var serviceUri = loadBalancingService.getNextServiceInstance(serviceName);
 
-        if (serviceUri != null) {
           // Modify the request URI to point to the selected instance
           var modifiedRequest = request.mutate()
               .uri(serviceUri)
@@ -47,9 +47,10 @@ public class LoadBalancingFilter extends AbstractGatewayFilterFactory<LoadBalanc
                 logger.error("Request failed for service {} at URI {}, marking as unhealthy",
                     serviceName, serviceUri, throwable);
               });
-        } else {
-          logger.error("No healthy instances available for service: {}", serviceName);
-          // Continue with original request if no instances available
+        } catch (final Exception e) {
+          // Propagate NoHealthyInstancesException to global exception handler
+          logger.error("Load balancing failed for service: {}", serviceName, e);
+          throw e;
         }
       }
 

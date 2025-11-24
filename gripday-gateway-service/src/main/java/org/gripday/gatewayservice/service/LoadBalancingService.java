@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.gripday.gatewayservice.exception.NoHealthyInstancesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,14 @@ public class LoadBalancingService {
 
   /**
    * Get the next available service instance using round-robin strategy.
+   *
+   * @throws NoHealthyInstancesException if no healthy instances are available
    */
   public URI getNextServiceInstance(String serviceName) {
     var instances = serviceInstances.get(serviceName);
     if (instances == null || instances.isEmpty()) {
-      logger.warn("No instances available for service: {}", serviceName);
-      return null;
+      logger.warn("No instances registered for service: {}", serviceName);
+      throw new NoHealthyInstancesException(serviceName, 0);
     }
 
     // Filter healthy instances
@@ -40,7 +43,7 @@ public class LoadBalancingService {
 
     if (healthyInstances.isEmpty()) {
       logger.warn("No healthy instances available for service: {}", serviceName);
-      return null;
+      throw new NoHealthyInstancesException(serviceName, instances.size());
     }
 
     // Round-robin selection

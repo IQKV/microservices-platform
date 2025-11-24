@@ -1,23 +1,17 @@
 package org.gripday.gatewayservice.filter;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gripday.gatewayservice.config.GripdayProperties;
+import org.gripday.gatewayservice.exception.RateLimitExceededException;
 import org.gripday.gatewayservice.service.TenantQuotaMonitoringService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,16 +30,13 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
   private final GripdayProperties gripdayProperties;
   private final ReactiveStringRedisTemplate redisTemplate;
   private final TenantQuotaMonitoringService quotaMonitoringService;
-  private final ObjectMapper objectMapper;
 
   public TenantRateLimitingFilter(final GripdayProperties gripdayProperties,
                                   final ReactiveStringRedisTemplate redisTemplate,
-                                  final TenantQuotaMonitoringService quotaMonitoringService,
-                                  final ObjectMapper objectMapper) {
+                                  final TenantQuotaMonitoringService quotaMonitoringService) {
     this.gripdayProperties = gripdayProperties;
     this.redisTemplate = redisTemplate;
     this.quotaMonitoringService = quotaMonitoringService;
-    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -80,7 +71,8 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
           if (!globalAllowed) {
             logger.warn("Global rate limit exceeded for IP: {}, Path: {}", clientIp, path);
             return quotaMonitoringService.recordTenantRequest(tenantId, path, true)
-                .then(handleRateLimitExceeded(exchange, "Global rate limit exceeded", tenantId));
+                .then(Mono.error(new RateLimitExceededException(tenantId, path, 
+                    RateLimitExceededException.RateLimitType.GLOBAL, 60)));
           }
 
           // Check tenant-specific rate limit if enabled
@@ -91,7 +83,8 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
                   if (!tenantAllowed) {
                     logger.warn("Tenant rate limit exceeded for tenant: {}, Path: {}", tenantId, path);
                     return quotaMonitoringService.recordTenantRequest(tenantId, path, true)
-                        .then(handleRateLimitExceeded(exchange, "Tenant rate limit exceeded", tenantId));
+                        .then(Mono.error(new RateLimitExceededException(tenantId, path, 
+                            RateLimitExceededException.RateLimitType.TENANT, 60)));
                   }
                   return quotaMonitoringService.recordTenantRequest(tenantId, path, false)
                       .then(chain.filter(exchange));
@@ -102,6 +95,10 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
               .then(chain.filter(exchange));
         })
         .onErrorResume(error -> {
+          // Propagate RateLimitExceededException
+          if (error instanceof RateLimitExceededException) {
+            return Mono.error(error);
+          }
           logger.error("Rate limiting error for path: {}, tenant: {}", path, tenantId, error);
           // Continue processing on Redis errors to avoid blocking requests
           return chain.filter(exchange);
@@ -203,50 +200,6 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
             return Mono.just(false);
           }
         });
-  }
-
-  private Mono<Void> handleRateLimitExceeded(ServerWebExchange exchange, String message, String tenantId) {
-    var response = exchange.getResponse();
-    var request = exchange.getRequest();
-    response.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
-    response.getHeaders().setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-
-    // Add rate limit headers
-    response.getHeaders().add("X-RateLimit-Limit", "60");
-    response.getHeaders().add("X-RateLimit-Remaining", "0");
-    response.getHeaders().add("X-RateLimit-Reset", String.valueOf(Instant.now().plusSeconds(60).getEpochSecond()));
-    response.getHeaders().add("Retry-After", "60");
-
-    var correlationId = MDC.get("correlationId");
-
-    ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, message);
-    pd.setTitle(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
-    pd.setType(URI.create("/problems/rate_limit_exceeded"));
-    pd.setInstance(URI.create(request.getPath().value()));
-    pd.setProperty("code", "RATE_LIMIT_EXCEEDED");
-    pd.setProperty("timestamp", Instant.now().toString());
-    pd.setProperty("retryAfter", 60);
-    if (correlationId != null) {
-      pd.setProperty("correlationId", correlationId);
-    }
-    if (tenantId != null) {
-      pd.setProperty("tenantId", tenantId);
-    }
-
-    try {
-      byte[] body = objectMapper.writeValueAsBytes(pd);
-      var buffer = response.bufferFactory().wrap(body);
-      return response.writeWith(Mono.just(buffer));
-    } catch (final Exception e) {
-      var fallback = ("{\n  \"type\": \"" + pd.getType() + "\",\n" +
-                      "  \"title\": \"" + pd.getTitle() + "\",\n" +
-                      "  \"status\": " + pd.getStatus() + ",\n" +
-                      "  \"detail\": \"" + message + "\",\n" +
-                      "  \"instance\": \"" + request.getPath().value() + "\"\n}")
-          .getBytes(StandardCharsets.UTF_8);
-      var buffer = response.bufferFactory().wrap(fallback);
-      return response.writeWith(Mono.just(buffer));
-    }
   }
 
   @Override
