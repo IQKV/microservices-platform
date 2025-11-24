@@ -14,15 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
  * Service for scheduled cleanup of expired email verification tokens. Runs daily to remove tokens older than 48 hours to maintain database hygiene.
  */
 @Service
-public class TokenCleanupService {
+public class EmailVerificationTokenCleanupService {
 
-  private static final Logger logger = LoggerFactory.getLogger(TokenCleanupService.class);
+  private static final Logger logger = LoggerFactory.getLogger(EmailVerificationTokenCleanupService.class);
 
   private final VerificationTokenRepository tokenRepository;
   private final VerificationMetrics metricsService;
   private final TenantRepository tenantRepository;
 
-  public TokenCleanupService(final VerificationTokenRepository tokenRepository,
+  public EmailVerificationTokenCleanupService(final VerificationTokenRepository tokenRepository,
                              final VerificationMetrics metricsService,
                              final TenantRepository tenantRepository) {
     this.tokenRepository = tokenRepository;

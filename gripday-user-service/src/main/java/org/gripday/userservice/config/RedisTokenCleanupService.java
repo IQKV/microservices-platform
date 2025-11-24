@@ -14,14 +14,14 @@ import org.springframework.stereotype.Service;
  * Prevents Redis memory bloat by removing stale data.
  */
 @Service
-public class TokenCleanupService {
+public class RedisTokenCleanupService {
 
-  private static final Logger logger = LoggerFactory.getLogger(TokenCleanupService.class);
+  private static final Logger logger = LoggerFactory.getLogger(RedisTokenCleanupService.class);
 
   private final RedisTemplate<String, String> redisTemplate;
   private final MeterRegistry meterRegistry;
 
-  public TokenCleanupService(
+  public RedisTokenCleanupService(
       final RedisTemplate<String, String> redisTemplate,
       final MeterRegistry meterRegistry) {
     this.redisTemplate = redisTemplate;

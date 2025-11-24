@@ -5,7 +5,7 @@ import java.util.Map;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.gripday.userservice.config.TokenCleanupService;
+import org.gripday.userservice.config.RedisTokenCleanupService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminKeyManagementRestResource {
 
   private final JwtKeyManagementService keyManagementService;
-  private final TokenCleanupService tokenCleanupService;
+  private final RedisTokenCleanupService tokenCleanupService;
 
   public AdminKeyManagementRestResource(
       final JwtKeyManagementService keyManagementService,
-      final TokenCleanupService tokenCleanupService) {
+      final RedisTokenCleanupService tokenCleanupService) {
     this.keyManagementService = keyManagementService;
     this.tokenCleanupService = tokenCleanupService;
   }
