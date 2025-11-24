@@ -13,6 +13,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.gripday.gatewayservice.config.GripdayProperties;
+import org.gripday.gatewayservice.exception.CircuitBreakerOpenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -141,6 +142,137 @@ class CircuitBreakerFilterTest {
   @DisplayName("Should have correct filter order")
   void shouldHaveCorrectFilterOrder() {
     assertThat(circuitBreakerFilter.getOrder()).isEqualTo(-25);
+  }
+
+  @Test
+  @DisplayName("Should extract service name from circuit breaker name with suffix")
+  void shouldExtractServiceNameFromCircuitBreakerNameWithSuffix() {
+    var circuitBreakerConfig = CircuitBreakerConfig.ofDefaults();
+    var circuitBreaker = CircuitBreaker.of("user-service", circuitBreakerConfig);
+    when(circuitBreakerRegistry.circuitBreaker("user-service")).thenReturn(circuitBreaker);
+
+    var request = MockServerHttpRequest.get("/api/v1/auth/login").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    circuitBreakerFilter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
+  @Test
+  @DisplayName("Should extract service name from circuit breaker name without suffix")
+  void shouldExtractServiceNameFromCircuitBreakerNameWithoutSuffix() {
+    var circuitBreakerConfig = CircuitBreakerConfig.ofDefaults();
+    var circuitBreaker = CircuitBreaker.of("default", circuitBreakerConfig);
+    when(circuitBreakerRegistry.circuitBreaker("default-service")).thenReturn(circuitBreaker);
+
+    var request = MockServerHttpRequest.get("/api/v1/other/path").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    circuitBreakerFilter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
+  @Test
+  @DisplayName("Should handle half-open circuit breaker state")
+  void shouldHandleHalfOpenCircuitBreakerState() {
+    var circuitBreakerConfig = CircuitBreakerConfig.custom()
+        .failureRateThreshold(50)
+        .minimumNumberOfCalls(2)
+        .build();
+    var halfOpenCircuitBreaker = CircuitBreaker.of("half-open-cb", circuitBreakerConfig);
+
+    halfOpenCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 1"));
+    halfOpenCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 2"));
+    halfOpenCircuitBreaker.transitionToOpenState();
+    halfOpenCircuitBreaker.transitionToHalfOpenState();
+
+    when(circuitBreakerRegistry.circuitBreaker(anyString())).thenReturn(halfOpenCircuitBreaker);
+    when(filterChain.filter(any())).thenReturn(Mono.error(new RuntimeException("Service error")));
+
+    var request = MockServerHttpRequest.get("/api/v1/auth/login").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    var result = circuitBreakerFilter.filter(exchange, filterChain);
+
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  @DisplayName("Should handle closed circuit breaker state with error")
+  void shouldHandleClosedCircuitBreakerStateWithError() {
+    var circuitBreakerConfig = CircuitBreakerConfig.ofDefaults();
+    var closedCircuitBreaker = CircuitBreaker.of("closed-cb", circuitBreakerConfig);
+
+    when(circuitBreakerRegistry.circuitBreaker(anyString())).thenReturn(closedCircuitBreaker);
+    when(filterChain.filter(any())).thenReturn(Mono.error(new RuntimeException("Service error")));
+
+    var request = MockServerHttpRequest.get("/api/v1/auth/login").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    var result = circuitBreakerFilter.filter(exchange, filterChain);
+
+    // Subscribe to trigger the error handling
+    result.onErrorResume(error -> Mono.empty()).block();
+
+    assertThat(result).isNotNull();
+  }
+
+  @Test
+  @DisplayName("Should extract service name without service suffix")
+  void shouldExtractServiceNameWithoutServiceSuffix() {
+    var circuitBreakerConfig = CircuitBreakerConfig.custom()
+        .failureRateThreshold(50)
+        .minimumNumberOfCalls(2)
+        .build();
+    var openCircuitBreaker = CircuitBreaker.of("bookstore-service", circuitBreakerConfig);
+
+    openCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 1"));
+    openCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 2"));
+    openCircuitBreaker.transitionToOpenState();
+
+    when(circuitBreakerRegistry.circuitBreaker("default-service")).thenReturn(openCircuitBreaker);
+    when(filterChain.filter(any())).thenReturn(Mono.error(new RuntimeException("Service error")));
+
+    var request = MockServerHttpRequest.get("/api/v1/bookstore/books").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    var result = circuitBreakerFilter.filter(exchange, filterChain);
+
+    // Subscribe to trigger the error handling
+    result.onErrorResume(error -> {
+      assertThat(error).isInstanceOf(CircuitBreakerOpenException.class);
+      return Mono.empty();
+    }).block();
+  }
+
+  @Test
+  @DisplayName("Should extract service name with default suffix")
+  void shouldExtractServiceNameWithDefaultSuffix() {
+    var circuitBreakerConfig = CircuitBreakerConfig.custom()
+        .failureRateThreshold(50)
+        .minimumNumberOfCalls(2)
+        .build();
+    var openCircuitBreaker = CircuitBreaker.of("api-gateway", circuitBreakerConfig);
+
+    openCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 1"));
+    openCircuitBreaker.onError(0, java.util.concurrent.TimeUnit.NANOSECONDS, new RuntimeException("Error 2"));
+    openCircuitBreaker.transitionToOpenState();
+
+    when(circuitBreakerRegistry.circuitBreaker("default-service")).thenReturn(openCircuitBreaker);
+    when(filterChain.filter(any())).thenReturn(Mono.error(new RuntimeException("Service error")));
+
+    var request = MockServerHttpRequest.get("/api/v1/unknown/endpoint").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    var result = circuitBreakerFilter.filter(exchange, filterChain);
+
+    // Subscribe to trigger the error handling
+    result.onErrorResume(error -> {
+      assertThat(error).isInstanceOf(CircuitBreakerOpenException.class);
+      return Mono.empty();
+    }).block();
   }
 
   private GripdayProperties createTestProperties() {

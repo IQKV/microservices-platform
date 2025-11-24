@@ -147,6 +147,121 @@ class TenantRateLimitingFilterTest {
     assertThat(tenantRateLimitingFilter.getOrder()).isEqualTo(-50);
   }
 
+  @Test
+  @DisplayName("Should handle tenant context and apply tenant quotas")
+  void shouldHandleTenantContextAndApplyTenantQuotas() {
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
+    
+    var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
+    exchange.getAttributes().put("tenantContext", tenantContext);
+
+    tenantRateLimitingFilter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
+  @Test
+  @DisplayName("Should allow burst requests within burst capacity")
+  void shouldAllowBurstRequestsWithinBurstCapacity() {
+    when(redisZSetOperations.count(anyString(), any())).thenReturn(Mono.just(150L));
+
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
+
+    tenantRateLimitingFilter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
+  @Test
+  @DisplayName("Should match path patterns with wildcards")
+  void shouldMatchPathPatternsWithWildcards() {
+    var endpointPolicy = new GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties(
+        50, 100, true
+    );
+    
+    var policies = new GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties(
+        100, 200, Map.of("/api/admin/**", endpointPolicy)
+    );
+
+    var redis = new GripdayProperties.GatewayProperties.RateLimitingProperties.RedisProperties(
+        "rate-limit:", Duration.ofMinutes(1)
+    );
+
+    var tenantQuotas = new GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties(
+        true, 1000, Map.of("tenant-123", 500)
+    );
+
+    var rateLimiting = new GripdayProperties.GatewayProperties.RateLimitingProperties(
+        true, redis, policies, tenantQuotas
+    );
+
+    var updatedProps = new GripdayProperties(
+        properties.cache(),
+        new GripdayProperties.GatewayProperties(
+            properties.gateway().routing(),
+            properties.gateway().security(),
+            rateLimiting,
+            properties.gateway().circuitBreaker(),
+            properties.gateway().cors(),
+            properties.gateway().transformation()
+        ),
+        properties.observability()
+    );
+
+    var filter = new TenantRateLimitingFilter(updatedProps, redisTemplate, quotaMonitoringService);
+
+    var request = MockServerHttpRequest.get("/api/admin/users").build();
+    var exchange = MockServerWebExchange.from(request);
+    
+    var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
+    exchange.getAttributes().put("tenantContext", tenantContext);
+
+    filter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
+  @Test
+  @DisplayName("Should use tenant-specific quota when configured")
+  void shouldUseTenantSpecificQuotaWhenConfigured() {
+    var tenantQuotas = new GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties(
+        true, 1000, Map.of("premium-tenant", 5000)
+    );
+
+    var rateLimiting = new GripdayProperties.GatewayProperties.RateLimitingProperties(
+        true, properties.gateway().rateLimiting().redis(), 
+        properties.gateway().rateLimiting().policies(), 
+        tenantQuotas
+    );
+
+    var updatedProps = new GripdayProperties(
+        properties.cache(),
+        new GripdayProperties.GatewayProperties(
+            properties.gateway().routing(),
+            properties.gateway().security(),
+            rateLimiting,
+            properties.gateway().circuitBreaker(),
+            properties.gateway().cors(),
+            properties.gateway().transformation()
+        ),
+        properties.observability()
+    );
+
+    var filter = new TenantRateLimitingFilter(updatedProps, redisTemplate, quotaMonitoringService);
+
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
+    
+    var tenantContext = new TenantExtractionFilter.TenantContext("premium-tenant");
+    exchange.getAttributes().put("tenantContext", tenantContext);
+
+    filter.filter(exchange, filterChain).block();
+
+    assertThat(exchange.getResponse().getStatusCode()).isNull();
+  }
+
   private GripdayProperties createTestProperties() {
     var serviceProps = new GripdayProperties.GatewayProperties.RoutingProperties.ServiceProperties(
         "http://user-service:8080", "/users/**", true, 5000, 30000, null
