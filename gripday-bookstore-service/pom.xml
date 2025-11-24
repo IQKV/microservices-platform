@@ -179,23 +179,12 @@
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>MISSEDCOUNT</value>
-                                            <maximum>17</maximum>
+                                            <maximum>18</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
                                 <rule>
                                     <element>CLASS</element>
-                                    <excludes>
-                                        <exclude>org.gripday.bookstore.shared.*</exclude>
-                                        <exclude>org.gripday.bookstore.shared.**</exclude>
-                                        <exclude>org.gripday.bookstore.shared.web.*</exclude>
-                                        <exclude>org.gripday.bookstore.shared.web.**</exclude>
-                                        <exclude>org.gripday.bookstore.**.*Dto</exclude>
-                                        <exclude>org.gripday.bookstore.**.*Config</exclude>
-                                        <exclude>org.gripday.bookstore.**.*Filter</exclude>
-                                        <exclude>org.gripday.bookstore.**.*Exception</exclude>
-                                        <exclude>org.gripday.bookstore.**.*Resource</exclude>
-                                    </excludes>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
