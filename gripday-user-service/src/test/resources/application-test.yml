@@ -115,6 +115,8 @@ gripday :
       verification-template : "email/user-registration/email-verification.html"
       password-reset-subject : "Reset your Gripday password"
       password-reset-template : "email/password-reset/initiate.html"
+      password-reset-confirmed-subject : "Password Reset Successful - Gripday"
+      password-reset-confirmed-template : "email/password-reset/confirmed.html"
       registration-confirmed-subject : "Welcome to Gripday - Email Verified!"
       registration-confirmed-template : "email/user-registration/email-confirmed.html"
 
@@ -149,6 +151,17 @@ gripday :
       enable-sql-logging : false
       enable-security-events : false
       enable-performance-logging : false
+
+  tenant-id-header : X-Tenant-ID
+
+  tenancy :
+    schema :
+      prefix : tenant_
+      default : public
+
+  liquibase :
+    systemChangeLog : classpath:db/changelog/system/master.xml
+    tenantChangeLog : classpath:db/changelog/tenant/master.xml
 
 logging :
   level :
