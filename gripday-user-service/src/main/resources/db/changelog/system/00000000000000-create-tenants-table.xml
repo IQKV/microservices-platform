@@ -98,28 +98,38 @@
     <changeSet id="00000000000004" author="gripday">
         <comment>Add check constraints for tenant configuration validation</comment>
 
-        <addCheckConstraint tableName="tenants"
-                            constraintName="chk_tenants_max_users_non_negative"
-                            checkConstraint="max_users IS NULL OR max_users >= 0"/>
+        <sql>
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_max_users_non_negative
+                    CHECK (max_users IS NULL OR max_users >= 0);
 
-        <addCheckConstraint tableName="tenants"
-                            constraintName="chk_tenants_storage_quota_non_negative"
-                            checkConstraint="storage_quota_gb IS NULL OR storage_quota_gb >= 0"/>
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_storage_quota_non_negative
+                    CHECK (storage_quota_gb IS NULL OR storage_quota_gb >= 0);
 
-        <addCheckConstraint tableName="tenants"
-                            constraintName="chk_tenants_rate_limit_non_negative"
-                            checkConstraint="api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute >= 0"/>
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_rate_limit_non_negative
+                    CHECK (api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute >= 0);
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_max_users_non_negative;
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_storage_quota_non_negative;
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_rate_limit_non_negative;
+            </sql>
+        </rollback>
     </changeSet>
 
     <changeSet id="00000000000005" author="gripday">
-        <comment>Tenant ID format validation (PostgreSQL only)</comment>
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
         </preConditions>
+        <comment>Tenant ID format validation (PostgreSQL only)</comment>
         <sql>
             ALTER TABLE tenants
                 ADD CONSTRAINT chk_tenants_tenant_id_format
-                    CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH (tenant_id) >= 3);
+                    CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH(tenant_id) >= 3);
         </sql>
         <rollback>
             <sql>ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_tenant_id_format;</sql>
