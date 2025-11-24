@@ -61,8 +61,8 @@ public class Inventory {
    * Factory method to create a new Inventory following DDD principles.
    * Encapsulates creation logic and ensures invariants are maintained.
    *
-   * @param book the book for this inventory (required, must not be null)
-   * @param quantity the initial quantity (required, must not be negative)
+   * @param book              the book for this inventory (required, must not be null)
+   * @param quantity          the initial quantity (required, must not be negative)
    * @param lowStockThreshold the low stock threshold (optional, defaults to 5 if not provided)
    * @return a new Inventory instance
    * @throws IllegalArgumentException if any required field is invalid
@@ -74,7 +74,7 @@ public class Inventory {
   /**
    * Factory method to create a new Inventory with default low stock threshold.
    *
-   * @param book the book for this inventory (required, must not be null)
+   * @param book     the book for this inventory (required, must not be null)
    * @param quantity the initial quantity (required, must not be negative)
    * @return a new Inventory instance with default low stock threshold of 5
    * @throws IllegalArgumentException if any required field is invalid

@@ -53,7 +53,7 @@ public class Category {
    * Factory method to create a new Category following DDD principles.
    * Encapsulates creation logic and ensures invariants are maintained.
    *
-   * @param name the category name (required, must not be blank)
+   * @param name        the category name (required, must not be blank)
    * @param description the category description (optional)
    * @return a new Category instance
    * @throws IllegalArgumentException if name is null or blank

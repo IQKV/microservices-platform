@@ -33,7 +33,7 @@ public class InventoryApplicationService {
   private final BookstoreMetrics bookstoreMetrics;
 
   public InventoryApplicationService(final InventoryRepository inventoryRepository, final BookRepository bookRepository,
-                          final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
+                                     final AuditLogger auditLogger, final BookstoreMetrics bookstoreMetrics) {
     this.inventoryRepository = inventoryRepository;
     this.bookRepository = bookRepository;
     this.auditLogger = auditLogger;

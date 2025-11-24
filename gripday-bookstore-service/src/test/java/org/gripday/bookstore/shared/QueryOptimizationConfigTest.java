@@ -3,6 +3,7 @@ package org.gripday.bookstore.shared;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
+
 import org.hibernate.cfg.AvailableSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

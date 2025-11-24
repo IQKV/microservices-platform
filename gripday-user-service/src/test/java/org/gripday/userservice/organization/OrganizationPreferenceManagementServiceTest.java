@@ -1,6 +1,7 @@
 package org.gripday.userservice.organization;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -185,5 +186,303 @@ class OrganizationPreferenceManagementServiceTest {
 
     // Assert
     verify(preferenceRepository).delete(testPreference);
+  }
+
+  @Test
+  @DisplayName("Should retrieve preference by organization ID")
+  void shouldGetPreferenceByOrganizationId() {
+    // Arrange
+    when(organizationRepository.findById(anyLong())).thenReturn(Optional.of(testOrganization));
+    when(preferenceRepository.findByOrganizationId(anyLong())).thenReturn(Optional.of(testPreference));
+
+    // Act
+    var result = service.getPreferenceByOrganizationId(1L, adminUser);
+
+    // Assert
+    assertThat(result).isNotNull();
+    assertThat(result.defaultLocale()).isEqualTo("en");
+    verify(preferenceRepository).findByOrganizationId(1L);
+  }
+
+  @Test
+  @DisplayName("Should throw exception when creating duplicate preference")
+  void shouldThrowExceptionWhenCreatingDuplicatePreference() {
+    // Arrange
+    var request = new CreateOrganizationPreferenceRequest(
+        1L,
+        "en",
+        "UTC",
+        "USD",
+        null,
+        null,
+        true,
+        true,
+        8,
+        true,
+        true,
+        true,
+        true,
+        30,
+        5,
+        15,
+        false,
+        false,
+        null,
+        null,
+        null
+    );
+
+    when(organizationRepository.findById(anyLong())).thenReturn(Optional.of(testOrganization));
+    when(preferenceRepository.existsByOrganizationId(anyLong())).thenReturn(true);
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.createPreference(request, adminUser))
+        .isInstanceOf(OrganizationPreferenceManagementService.OrganizationPreferenceManagementException.class)
+        .hasMessageContaining("Preference already exists");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when preference not found")
+  void shouldThrowExceptionWhenPreferenceNotFound() {
+    // Arrange
+    when(preferenceRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.getPreferenceById(1L, adminUser))
+        .isInstanceOf(OrganizationPreferenceManagementService.OrganizationPreferenceManagementException.class)
+        .hasMessageContaining("Preference not found");
+  }
+
+  @Test
+  @DisplayName("Should throw exception when organization not found for preference")
+  void shouldThrowExceptionWhenOrganizationNotFoundForPreference() {
+    // Arrange
+    var request = new CreateOrganizationPreferenceRequest(
+        1L,
+        "en",
+        "UTC",
+        "USD",
+        null,
+        null,
+        true,
+        true,
+        8,
+        true,
+        true,
+        true,
+        true,
+        30,
+        5,
+        15,
+        false,
+        false,
+        null,
+        null,
+        null
+    );
+
+    when(organizationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.createPreference(request, adminUser))
+        .isInstanceOf(OrganizationPreferenceManagementService.OrganizationPreferenceManagementException.class)
+        .hasMessageContaining("Organization not found");
+  }
+
+  @Test
+  @DisplayName("Should deny access to non-admin user for create operation")
+  void shouldDenyAccessToNonAdminForCreate() {
+    // Arrange
+    var regularUser = new UserContext(
+        2L,
+        "user",
+        "user@test.com",
+        Set.of("USER"),
+        Set.of(),
+        "Regular",
+        "User",
+        "tenant-123",
+        null
+    );
+
+    var request = new CreateOrganizationPreferenceRequest(
+        1L,
+        "en",
+        "UTC",
+        "USD",
+        null,
+        null,
+        true,
+        true,
+        8,
+        true,
+        true,
+        true,
+        true,
+        30,
+        5,
+        15,
+        false,
+        false,
+        null,
+        null,
+        null
+    );
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.createPreference(request, regularUser))
+        .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+        .hasMessageContaining("Insufficient permissions");
+  }
+
+  @Test
+  @DisplayName("Should deny access to non-admin user for read operation")
+  void shouldDenyAccessToNonAdminForRead() {
+    // Arrange
+    var regularUser = new UserContext(
+        2L,
+        "user",
+        "user@test.com",
+        Set.of("USER"),
+        Set.of(),
+        "Regular",
+        "User",
+        "tenant-123",
+        null
+    );
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.getPreferenceById(1L, regularUser))
+        .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+        .hasMessageContaining("Insufficient permissions");
+  }
+
+  @Test
+  @DisplayName("Should deny access to non-admin user for update operation")
+  void shouldDenyAccessToNonAdminForUpdate() {
+    // Arrange
+    var regularUser = new UserContext(
+        2L,
+        "user",
+        "user@test.com",
+        Set.of("USER"),
+        Set.of(),
+        "Regular",
+        "User",
+        "tenant-123",
+        null
+    );
+
+    var request = new UpdateOrganizationPreferenceRequest(
+        "fr",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.updatePreference(1L, request, regularUser))
+        .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+        .hasMessageContaining("Insufficient permissions");
+  }
+
+  @Test
+  @DisplayName("Should deny access to non-admin user for delete operation")
+  void shouldDenyAccessToNonAdminForDelete() {
+    // Arrange
+    var regularUser = new UserContext(
+        2L,
+        "user",
+        "user@test.com",
+        Set.of("USER"),
+        Set.of(),
+        "Regular",
+        "User",
+        "tenant-123",
+        null
+    );
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.deletePreference(1L, regularUser))
+        .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+        .hasMessageContaining("Insufficient permissions");
+  }
+
+  @Test
+  @DisplayName("Should deny access to non-admin user for list operation")
+  void shouldDenyAccessToNonAdminForList() {
+    // Arrange
+    var regularUser = new UserContext(
+        2L,
+        "user",
+        "user@test.com",
+        Set.of("USER"),
+        Set.of(),
+        "Regular",
+        "User",
+        "tenant-123",
+        null
+    );
+
+    var pageable = PageRequest.of(0, 20);
+
+    // Act & Assert
+    assertThatThrownBy(() -> service.getAllPreferences(pageable, regularUser))
+        .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+        .hasMessageContaining("Insufficient permissions");
+  }
+
+  @Test
+  @DisplayName("Should update preference with all fields")
+  void shouldUpdatePreferenceWithAllFields() {
+    // Arrange
+    var request = new UpdateOrganizationPreferenceRequest(
+        "es",
+        "America/New_York",
+        "EUR",
+        "dd/MM/yyyy",
+        "HH:mm",
+        false,
+        false,
+        12,
+        false,
+        false,
+        false,
+        false,
+        60,
+        3,
+        30,
+        true,
+        true,
+        "new-notify@test.com",
+        "new-support@test.com",
+        "{\"key\":\"value\"}"
+    );
+
+    when(preferenceRepository.findById(anyLong())).thenReturn(Optional.of(testPreference));
+    when(preferenceRepository.save(any(OrganizationPreference.class))).thenReturn(testPreference);
+
+    // Act
+    var result = service.updatePreference(1L, request, adminUser);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(preferenceRepository).save(any(OrganizationPreference.class));
   }
 }

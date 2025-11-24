@@ -45,7 +45,7 @@ public class DuplicateIsbnChecker {
   /**
    * Checks if an ISBN is already in use by a book other than the specified one.
    *
-   * @param isbn the ISBN to check
+   * @param isbn          the ISBN to check
    * @param excludeBookId the book ID to exclude from the check
    * @return true if the ISBN is used by another book, false otherwise
    */
@@ -90,7 +90,7 @@ public class DuplicateIsbnChecker {
   /**
    * Validates that an ISBN is not used by another book (excluding the specified book).
    *
-   * @param isbn the ISBN to validate
+   * @param isbn          the ISBN to validate
    * @param excludeBookId the book ID to exclude from the check
    * @throws DuplicateIsbnException if the ISBN is used by another book
    */

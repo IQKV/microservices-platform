@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+
 import org.gripday.bookstore.inventory.Inventory;
 import org.gripday.bookstore.inventory.InventoryRepository;
 import org.junit.jupiter.api.BeforeEach;

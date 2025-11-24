@@ -43,7 +43,7 @@ public class BookAvailabilityChecker {
   /**
    * Checks if a specific quantity of a book can be sold.
    *
-   * @param bookId the book ID to check
+   * @param bookId   the book ID to check
    * @param quantity the quantity requested
    * @return true if the requested quantity can be sold, false otherwise
    */
@@ -163,9 +163,9 @@ public class BookAvailabilityChecker {
   /**
    * Validates that a specific quantity of a book can be sold.
    *
-   * @param bookId the book ID to validate
+   * @param bookId   the book ID to validate
    * @param quantity the quantity requested
-   * @throws BookNotAvailableException if the book cannot be sold
+   * @throws BookNotAvailableException  if the book cannot be sold
    * @throws InsufficientStockException if there is not enough stock
    */
   public void ensureCanBeSold(final Long bookId, final int quantity) {

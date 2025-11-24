@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+
 import org.gripday.bookstore.catalog.CatalogApplicationService;
 import org.gripday.bookstore.catalog.SearchApplicationService;
 import org.junit.jupiter.api.BeforeEach;

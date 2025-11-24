@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+
 import org.gripday.bookstore.inventory.Inventory;
 import org.gripday.bookstore.shared.ISBN;
 import org.gripday.bookstore.shared.Money;

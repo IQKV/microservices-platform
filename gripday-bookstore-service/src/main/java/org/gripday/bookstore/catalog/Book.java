@@ -92,12 +92,12 @@ public class Book extends AggregateRoot<Long> {
    * Factory method to create a new Book following DDD principles.
    * Encapsulates creation logic and ensures invariants are maintained.
    *
-   * @param title the book title (required, must not be blank)
-   * @param author the book author (required, must not be blank)
-   * @param isbn the book ISBN (required, must be valid ISBN-10 or ISBN-13)
-   * @param price the book price (required, must be positive)
+   * @param title       the book title (required, must not be blank)
+   * @param author      the book author (required, must not be blank)
+   * @param isbn        the book ISBN (required, must be valid ISBN-10 or ISBN-13)
+   * @param price       the book price (required, must be positive)
    * @param description the book description (optional)
-   * @param category the book category (optional)
+   * @param category    the book category (optional)
    * @return a new Book instance
    * @throws IllegalArgumentException if any required field is invalid
    */
@@ -121,12 +121,12 @@ public class Book extends AggregateRoot<Long> {
   /**
    * Factory method to create a new Book with value objects.
    *
-   * @param title the book title (required, must not be blank)
-   * @param author the book author (required, must not be blank)
-   * @param isbn the ISBN value object
-   * @param price the Money value object
+   * @param title       the book title (required, must not be blank)
+   * @param author      the book author (required, must not be blank)
+   * @param isbn        the ISBN value object
+   * @param price       the Money value object
    * @param description the book description (optional)
-   * @param category the book category (optional)
+   * @param category    the book category (optional)
    * @return a new Book instance
    * @throws IllegalArgumentException if any required field is invalid
    */
@@ -252,10 +252,10 @@ public class Book extends AggregateRoot<Long> {
    * Updates the book details with validation.
    * Business method that encapsulates the logic for updating book information.
    *
-   * @param title the new title
-   * @param author the new author
+   * @param title       the new title
+   * @param author      the new author
    * @param description the new description
-   * @param price the new price
+   * @param price       the new price
    * @throws IllegalArgumentException if any parameter is invalid
    */
   public void updateDetails(
@@ -279,10 +279,10 @@ public class Book extends AggregateRoot<Long> {
   /**
    * Updates the book details with BigDecimal price (convenience method).
    *
-   * @param title the new title
-   * @param author the new author
+   * @param title       the new title
+   * @param author      the new author
    * @param description the new description
-   * @param price the new price as BigDecimal
+   * @param price       the new price as BigDecimal
    * @throws IllegalArgumentException if any parameter is invalid
    */
   public void updateDetails(
