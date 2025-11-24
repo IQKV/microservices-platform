@@ -36,7 +36,7 @@ class TenantRateLimitingFilterTest {
   private ReactiveStringRedisTemplate redisTemplate;
 
   @Mock(lenient = true)
-  private ReactiveZSetOperations<String, String> zSetOperations;
+  private ReactiveZSetOperations<String, String> redisZSetOperations;
 
   @Mock(lenient = true)
   private TenantQuotaMonitoringService quotaMonitoringService;
@@ -53,10 +53,10 @@ class TenantRateLimitingFilterTest {
         properties, redisTemplate, quotaMonitoringService, objectMapper
     );
     when(filterChain.filter(any())).thenReturn(Mono.empty());
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
-    when(zSetOperations.removeRangeByScore(anyString(), any())).thenReturn(Mono.just(0L));
-    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(0L));
-    when(zSetOperations.add(anyString(), anyString(), any(Double.class))).thenReturn(Mono.just(true));
+    when(redisTemplate.opsForZSet()).thenReturn(redisZSetOperations);
+    when(redisZSetOperations.removeRangeByScore(anyString(), any())).thenReturn(Mono.just(0L));
+    when(redisZSetOperations.count(anyString(), any())).thenReturn(Mono.just(0L));
+    when(redisZSetOperations.add(anyString(), anyString(), any(Double.class))).thenReturn(Mono.just(true));
     when(redisTemplate.expire(anyString(), any(Duration.class))).thenReturn(Mono.just(true));
     when(quotaMonitoringService.recordTenantRequest(anyString(), anyString(), any(Boolean.class)))
         .thenReturn(Mono.empty());
@@ -92,7 +92,7 @@ class TenantRateLimitingFilterTest {
   @Test
   @DisplayName("Should handle rate limit exceeded")
   void shouldHandleRateLimitExceeded() {
-    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(200L));
+    when(redisZSetOperations.count(anyString(), any())).thenReturn(Mono.just(200L));
 
     var request = MockServerHttpRequest.get("/api/test").build();
     var exchange = MockServerWebExchange.from(request);
@@ -131,7 +131,7 @@ class TenantRateLimitingFilterTest {
   @Test
   @DisplayName("Should handle Redis errors gracefully")
   void shouldHandleRedisErrorsGracefully() {
-    when(zSetOperations.removeRangeByScore(anyString(), any()))
+    when(redisZSetOperations.removeRangeByScore(anyString(), any()))
         .thenReturn(Mono.error(new RuntimeException("Redis error")));
 
     var request = MockServerHttpRequest.get("/api/test").build();

@@ -29,7 +29,7 @@ class TenantQuotaMonitoringServiceTest {
   private ReactiveStringRedisTemplate redisTemplate;
 
   @Mock(lenient = true)
-  private ReactiveZSetOperations<String, String> zSetOperations;
+  private ReactiveZSetOperations<String, String> redisZSetOperations;
 
   private TenantQuotaMonitoringService tenantQuotaMonitoringService;
   private GripdayProperties properties;
@@ -38,7 +38,7 @@ class TenantQuotaMonitoringServiceTest {
   void setUp() {
     properties = createTestProperties();
     tenantQuotaMonitoringService = new TenantQuotaMonitoringService(properties, redisTemplate);
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(redisZSetOperations);
   }
 
   @Test
@@ -91,7 +91,7 @@ class TenantQuotaMonitoringServiceTest {
   @DisplayName("Should check if tenant is approaching quota")
   void shouldCheckIfTenantIsApproachingQuota() {
     when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1", "key2"));
-    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(850L));
+    when(redisZSetOperations.count(anyString(), any())).thenReturn(Mono.just(850L));
 
     var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
 
@@ -102,7 +102,7 @@ class TenantQuotaMonitoringServiceTest {
   @DisplayName("Should return false when tenant is not approaching quota")
   void shouldReturnFalseWhenTenantIsNotApproachingQuota() {
     when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1"));
-    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(100L));
+    when(redisZSetOperations.count(anyString(), any())).thenReturn(Mono.just(100L));
 
     var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
 
