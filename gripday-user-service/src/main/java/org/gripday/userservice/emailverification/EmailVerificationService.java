@@ -48,7 +48,7 @@ public class EmailVerificationService {
    *
    * @param user The user to generate verification token for
    * @return The generated verification token
-   * @throws EmailVerificationException.AlreadyVerifiedException if user already verified
+   * @throws EmailVerificationException.AlreadyVerifiedException   if user already verified
    * @throws EmailVerificationException.RateLimitExceededException if rate limit exceeded
    */
   public String generateVerificationToken(User user) {
@@ -103,7 +103,7 @@ public class EmailVerificationService {
    *
    * @param token The verification token to validate
    * @return EmailVerificationResponse with verification result
-   * @throws EmailVerificationException.InvalidTokenException if token is invalid, expired, or already used
+   * @throws EmailVerificationException.InvalidTokenException    if token is invalid, expired, or already used
    * @throws EmailVerificationException.AlreadyVerifiedException if user already verified
    */
   @Transactional
@@ -184,8 +184,8 @@ public class EmailVerificationService {
    * @param email     The email address to resend verification to
    * @param ipAddress The IP address of the request for rate limiting
    * @return EmailVerificationResponse with resend result
-   * @throws EmailVerificationException if user not found
-   * @throws EmailVerificationException.AlreadyVerifiedException if already verified
+   * @throws EmailVerificationException                            if user not found
+   * @throws EmailVerificationException.AlreadyVerifiedException   if already verified
    * @throws EmailVerificationException.RateLimitExceededException if rate limited
    */
   public VerificationResponse resendVerificationEmail(String email, String ipAddress) {

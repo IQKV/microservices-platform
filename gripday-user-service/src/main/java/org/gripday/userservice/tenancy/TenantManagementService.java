@@ -101,7 +101,7 @@ public class TenantManagementService {
    * @param tenantId the tenant ID to update
    * @param request  the update request
    * @return the updated tenant response
-   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws TenantManagementException.TenantNotFoundException      if tenant not found
    * @throws TenantManagementException.DomainAlreadyExistsException if domain already exists
    */
   @Caching(evict = {
