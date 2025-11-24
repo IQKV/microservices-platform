@@ -13,7 +13,7 @@ public class UnsupportedApiVersionException extends ResponseStatusException {
   private final String requestedVersion;
   private final List<String> supportedVersions;
 
-  public UnsupportedApiVersionException(String requestedVersion, List<String> supportedVersions) {
+  public UnsupportedApiVersionException(final String requestedVersion, final List<String> supportedVersions) {
     super(HttpStatus.BAD_REQUEST,
         String.format("Unsupported API version: %s. Supported versions: %s",
             requestedVersion, String.join(", ", supportedVersions)));

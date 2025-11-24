@@ -11,14 +11,14 @@ public class NoHealthyInstancesException extends ResponseStatusException {
   private final String serviceName;
   private final int totalInstances;
 
-  public NoHealthyInstancesException(String serviceName, int totalInstances) {
+  public NoHealthyInstancesException(final String serviceName, final int totalInstances) {
     super(HttpStatus.SERVICE_UNAVAILABLE,
         String.format("No healthy instances available for service: %s (total instances: %d)", serviceName, totalInstances));
     this.serviceName = serviceName;
     this.totalInstances = totalInstances;
   }
 
-  public NoHealthyInstancesException(String serviceName) {
+  public NoHealthyInstancesException(final String serviceName) {
     this(serviceName, 0);
   }
 

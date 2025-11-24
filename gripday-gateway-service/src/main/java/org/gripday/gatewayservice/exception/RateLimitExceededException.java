@@ -13,7 +13,7 @@ public class RateLimitExceededException extends ResponseStatusException {
   private final RateLimitType type;
   private final int retryAfterSeconds;
 
-  public RateLimitExceededException(String tenantId, String path, RateLimitType type, int retryAfterSeconds) {
+  public RateLimitExceededException(final String tenantId, final String path, final RateLimitType type, final int retryAfterSeconds) {
     super(HttpStatus.TOO_MANY_REQUESTS, buildMessage(tenantId, type));
     this.tenantId = tenantId;
     this.path = path;

@@ -11,13 +11,13 @@ public class InvalidJwtTokenException extends ResponseStatusException {
   private final String reason;
   private final TokenErrorType errorType;
 
-  public InvalidJwtTokenException(String reason, TokenErrorType errorType) {
+  public InvalidJwtTokenException(final String reason, final TokenErrorType errorType) {
     super(HttpStatus.UNAUTHORIZED, buildMessage(reason, errorType));
     this.reason = reason;
     this.errorType = errorType;
   }
 
-  public InvalidJwtTokenException(String reason) {
+  public InvalidJwtTokenException(final String reason) {
     this(reason, TokenErrorType.INVALID);
   }
 

@@ -12,7 +12,7 @@ public class CircuitBreakerOpenException extends ResponseStatusException {
   private final String serviceName;
   private final int retryAfterSeconds;
 
-  public CircuitBreakerOpenException(String circuitBreakerName, String serviceName, int retryAfterSeconds) {
+  public CircuitBreakerOpenException(final String circuitBreakerName, final String serviceName, final int retryAfterSeconds) {
     super(HttpStatus.SERVICE_UNAVAILABLE,
         String.format("Circuit breaker '%s' is open for service: %s. Service temporarily unavailable",
             circuitBreakerName, serviceName));

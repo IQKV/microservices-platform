@@ -11,14 +11,14 @@ public class MissingTenantContextException extends ResponseStatusException {
   private final String path;
   private final String reason;
 
-  public MissingTenantContextException(String path, String reason) {
+  public MissingTenantContextException(final String path, final String reason) {
     super(HttpStatus.BAD_REQUEST,
         String.format("Missing tenant context for path: %s. %s", path, reason));
     this.path = path;
     this.reason = reason;
   }
 
-  public MissingTenantContextException(String path) {
+  public MissingTenantContextException(final String path) {
     this(path, "X-Tenant-ID header or tenant query parameter is required");
   }
 
