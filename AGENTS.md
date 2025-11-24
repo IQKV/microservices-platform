@@ -601,7 +601,7 @@ When reviewing code, agents should verify:
 
 #### Automated Quality Gates
 
-```yaml
+````yaml
 quality_gates:
   code_coverage:
     user_service: ">= 18% (instruction), >= 48% (line), >= 30% (branch)"
@@ -629,11 +629,65 @@ quality_gates:
     max_length: 220
     min_length: 6
 
+#### Maven Command Best Practices for AI Agents
+
+**STRICT RECOMMENDATION: Always use `-Dcheckstyle.skip=true` when running Maven commands during development.**
+
+```yaml
+maven_commands:
+  development_phase:
+    recommended: "mvn clean verify -Dcheckstyle.skip=true"
+    reason: "Focus on functionality and tests without style blocking"
+
+  testing_phase:
+    recommended: "mvn test -Dcheckstyle.skip=true"
+    reason: "Rapid test iteration without style checks"
+
+  integration_testing:
+    recommended: "mvn verify -DskipUnitTests -Dcheckstyle.skip=true"
+    reason: "Integration tests without style overhead"
+
+  style_check_phase:
+    explicit: "mvn checkstyle:check"
+    when: "Before committing, during code review, or when explicitly requested"
+
+workflow:
+  1. develop: "Implement features with -Dcheckstyle.skip=true"
+  2. test: "Run tests with -Dcheckstyle.skip=true"
+  3. verify: "Ensure functionality works correctly"
+  4. style: "Run mvn checkstyle:check separately"
+  5. fix_style: "Address Checkstyle violations in focused pass"
+  6. commit: "CI/CD enforces Checkstyle automatically"
+
+rationale:
+  - "Checkstyle violations should not block functional development"
+  - "Style issues are better addressed in dedicated cleanup phase"
+  - "CI/CD pipeline enforces style checks before merge"
+  - "Faster iteration cycle for AI-assisted development"
+  - "Separation of concerns: functionality first, style second"
+````
+
+**Example Commands:**
+
+```bash
+# ✅ RECOMMENDED: Development and testing
+mvn clean verify -Dcheckstyle.skip=true
+mvn test -Dcheckstyle.skip=true
+mvn clean install -Dcheckstyle.skip=true
+
+# ✅ RECOMMENDED: Explicit style check when ready
+mvn checkstyle:check
+
+# ❌ NOT RECOMMENDED: Running verify without skip during active development
+mvn clean verify  # May fail due to style issues, blocking progress
+```
+
 ## 📋 Development Standards
 
 ### Branch Strategy
 
 The project uses a simplified Git workflow with the following branches:
+
 ```
 
 dev (main development branch)
@@ -646,7 +700,7 @@ dev (main development branch)
 ├── hotfix/_ (production fixes)
 └── rfc/\* (request for comments)
 
-````
+```
 
 ### Branch Naming Conventions
 
@@ -675,7 +729,7 @@ hotfix/production-data-fix
 # RFC (Request for Comments)
 rfc/new-authentication-flow
 rfc/service-mesh-migration
-````
+```
 
 ### Commit Message Format (Conventional Commits)
 
@@ -1824,6 +1878,37 @@ mvn test -Dtest=ArchitectureTest
 # Security scan
 mvn org.owasp:dependency-check-maven:check
 ```
+
+**Maven Checkstyle Skip Flag (AI Agent Recommendation):**
+
+**CRITICAL: AI agents should use `-Dcheckstyle.skip=true` flag when running Maven commands during development and testing.**
+
+```bash
+# Recommended Maven commands for AI agents (skip Checkstyle during development)
+mvn clean verify -Dcheckstyle.skip=true
+mvn test -Dcheckstyle.skip=true
+mvn verify -DskipUnitTests -Dcheckstyle.skip=true
+mvn clean install -Dcheckstyle.skip=true
+
+# Why skip Checkstyle during AI-assisted development:
+# - Checkstyle violations should be addressed in a separate, focused pass
+# - Allows faster iteration on functional changes and tests
+# - Prevents build failures from style issues during active development
+# - Style checks are enforced in CI/CD pipeline and pre-commit hooks
+# - Developers can run 'mvn checkstyle:check' explicitly when ready
+
+# When to run Checkstyle:
+# - Before committing code: mvn checkstyle:check
+# - During final code review
+# - In CI/CD pipeline (automatically enforced)
+```
+
+**Rationale:**
+
+- **Faster Development Cycle**: Skipping Checkstyle during active development allows AI agents to focus on functionality, tests, and logic without being blocked by style violations.
+- **Separation of Concerns**: Style issues can be addressed in a dedicated cleanup phase after functional requirements are met.
+- **CI/CD Enforcement**: Checkstyle is automatically enforced in the CI/CD pipeline, ensuring code quality before merge.
+- **Explicit Style Checks**: Developers and AI agents can run `mvn checkstyle:check` explicitly when ready to address style issues.
 
 **Code Formatting:**
 
