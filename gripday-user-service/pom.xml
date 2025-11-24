@@ -235,13 +235,6 @@
                         
                         <!-- Loggers -->
                         <exclude>**/*Logger.class</exclude>
-                        
-                        <!-- Services without tests -->
-                        <exclude>**/shared/EmailService.class</exclude>
-                        <exclude>**/tenancy/TenantExtractionService.class</exclude>
-                        <exclude>**/tenancy/TenantManagementService.class</exclude>
-                        <exclude>**/tenancy/SchemaPerTenantConnectionProvider.class</exclude>
-                        <exclude>**/config/RedisTokenCleanupService.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
