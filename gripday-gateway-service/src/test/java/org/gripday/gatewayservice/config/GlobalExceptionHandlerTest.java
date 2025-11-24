@@ -1,5 +1,7 @@
 package org.gripday.gatewayservice.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,13 +15,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.test.StepVerifier;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("GlobalExceptionHandler Tests")
 class GlobalExceptionHandlerTest {

@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-
 import org.gripday.gatewayservice.config.GripdayProperties;
 import org.gripday.gatewayservice.service.TenantQuotaMonitoringService;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,7 +96,7 @@ class TenantRateLimitingFilterTest {
 
     // Rate limit exceeded, should throw RateLimitExceededException
     var result = tenantRateLimitingFilter.filter(exchange, filterChain);
-    
+
     // Verify the result is not null (exception will be thrown when subscribed)
     assertThat(result).isNotNull();
   }

@@ -1,5 +1,8 @@
 package org.gripday.gatewayservice.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.net.URI;
 import java.util.List;
 
@@ -7,9 +10,6 @@ import org.gripday.gatewayservice.exception.NoHealthyInstancesException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("LoadBalancingService Tests")
 class LoadBalancingServiceTest {

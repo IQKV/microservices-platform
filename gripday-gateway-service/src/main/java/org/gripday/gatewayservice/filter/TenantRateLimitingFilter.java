@@ -71,7 +71,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
           if (!globalAllowed) {
             logger.warn("Global rate limit exceeded for IP: {}, Path: {}", clientIp, path);
             return quotaMonitoringService.recordTenantRequest(tenantId, path, true)
-                .then(Mono.error(new RateLimitExceededException(tenantId, path, 
+                .then(Mono.error(new RateLimitExceededException(tenantId, path,
                     RateLimitExceededException.RateLimitType.GLOBAL, 60)));
           }
 
@@ -83,7 +83,7 @@ public class TenantRateLimitingFilter implements GlobalFilter, Ordered {
                   if (!tenantAllowed) {
                     logger.warn("Tenant rate limit exceeded for tenant: {}, Path: {}", tenantId, path);
                     return quotaMonitoringService.recordTenantRequest(tenantId, path, true)
-                        .then(Mono.error(new RateLimitExceededException(tenantId, path, 
+                        .then(Mono.error(new RateLimitExceededException(tenantId, path,
                             RateLimitExceededException.RateLimitType.TENANT, 60)));
                   }
                   return quotaMonitoringService.recordTenantRequest(tenantId, path, false)

@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -84,7 +83,7 @@ class CircuitBreakerFilterTest {
 
     // Circuit breaker will propagate the error
     var result = circuitBreakerFilter.filter(exchange, filterChain);
-    
+
     // Verify error is propagated through circuit breaker
     assertThat(result).isNotNull();
   }
@@ -133,7 +132,7 @@ class CircuitBreakerFilterTest {
 
     // Circuit breaker is open, should throw CircuitBreakerOpenException
     var result = circuitBreakerFilter.filter(exchange, filterChain);
-    
+
     // Verify the result is not null (exception will be thrown when subscribed)
     assertThat(result).isNotNull();
   }

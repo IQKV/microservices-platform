@@ -73,7 +73,7 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
       var waitDuration = gripdayProperties.gateway().circuitBreaker().waitDurationInOpenState();
       var retryAfterSeconds = (int) waitDuration.getSeconds();
       logger.warn("Circuit breaker '{}' is OPEN, rejecting request", circuitBreakerName);
-      return Mono.error(new CircuitBreakerOpenException(circuitBreakerName, 
+      return Mono.error(new CircuitBreakerOpenException(circuitBreakerName,
           extractServiceName(circuitBreakerName), retryAfterSeconds));
     } else {
       logger.error("Service failure for circuit breaker '{}'", circuitBreakerName, throwable);

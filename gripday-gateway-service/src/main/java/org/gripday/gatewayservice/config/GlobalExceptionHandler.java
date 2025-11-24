@@ -63,7 +63,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       response.getHeaders().add("X-RateLimit-Limit", "60");
       response.getHeaders().add("X-RateLimit-Remaining", "0");
       response.getHeaders().add("Retry-After", String.valueOf(rateLimitEx.getRetryAfterSeconds()));
-      logger.warn("Rate limit exceeded - Type: {}, Tenant: {}, Path: {}", 
+      logger.warn("Rate limit exceeded - Type: {}, Tenant: {}, Path: {}",
           rateLimitEx.getType(), rateLimitEx.getTenantId(), rateLimitEx.getPath());
     } else if (ex instanceof NoHealthyInstancesException noInstancesEx) {
       status = HttpStatus.SERVICE_UNAVAILABLE;
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       pd = createProblemDetail(status, message, errorCode, request.getPath().value(), correlationId, tenantId);
       pd.setProperty("serviceName", noInstancesEx.getServiceName());
       pd.setProperty("totalInstances", noInstancesEx.getTotalInstances());
-      logger.error("No healthy instances - Service: {}, Total: {}", 
+      logger.error("No healthy instances - Service: {}, Total: {}",
           noInstancesEx.getServiceName(), noInstancesEx.getTotalInstances());
     } else if (ex instanceof UnsupportedApiVersionException versionEx) {
       status = HttpStatus.BAD_REQUEST;
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       pd = createProblemDetail(status, message, errorCode, request.getPath().value(), correlationId, tenantId);
       pd.setProperty("requestedVersion", versionEx.getRequestedVersion());
       pd.setProperty("supportedVersions", versionEx.getSupportedVersions());
-      logger.warn("Unsupported API version - Requested: {}, Supported: {}", 
+      logger.warn("Unsupported API version - Requested: {}, Supported: {}",
           versionEx.getRequestedVersion(), versionEx.getSupportedVersions());
     } else if (ex instanceof MissingTenantContextException tenantEx) {
       status = HttpStatus.BAD_REQUEST;
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
       pd.setProperty("retryAfter", circuitEx.getRetryAfterSeconds());
       response.getHeaders().add("X-Circuit-Breaker", circuitEx.getCircuitBreakerName());
       response.getHeaders().add("Retry-After", String.valueOf(circuitEx.getRetryAfterSeconds()));
-      logger.warn("Circuit breaker open - Name: {}, Service: {}", 
+      logger.warn("Circuit breaker open - Name: {}, Service: {}",
           circuitEx.getCircuitBreakerName(), circuitEx.getServiceName());
     } else if (ex instanceof ResponseStatusException rse) {
       status = HttpStatus.valueOf(rse.getStatusCode().value());
@@ -154,7 +154,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     }
   }
 
-  private ProblemDetail createProblemDetail(HttpStatus status, String message, String errorCode, 
+  private ProblemDetail createProblemDetail(HttpStatus status, String message, String errorCode,
                                             String path, String correlationId, String tenantId) {
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, message);
     pd.setTitle(status.getReasonPhrase());
