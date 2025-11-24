@@ -141,6 +141,8 @@ gripday:
       prefix: gripday_user
       include-host-tag: true
       include-application-tag: true
+      include-environment-tag: false
+      custom-tags: {}
     logging:
       include-correlation-id: true
       include-trace-id: true
