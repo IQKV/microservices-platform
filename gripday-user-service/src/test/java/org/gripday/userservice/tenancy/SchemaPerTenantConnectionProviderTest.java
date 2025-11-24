@@ -43,9 +43,10 @@ class SchemaPerTenantConnectionProviderTest {
   @DisplayName("Should get any connection from data source")
   void shouldGetAnyConnection() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
-    var result = provider.getAnyConnection();
-    assertThat(result).isNotNull();
-    verify(dataSource).getConnection();
+    try (var result = provider.getAnyConnection()) {
+      assertThat(result).isNotNull();
+      verify(dataSource).getConnection();
+    }
   }
 
   @Test
@@ -98,6 +99,7 @@ class SchemaPerTenantConnectionProviderTest {
     var result = provider.getConnection("tenant_123");
     assertThat(result).isNotNull();
     verify(statement).execute("CREATE SCHEMA IF NOT EXISTS tenant_123");
+    verify(statement).close();
     verify(connection).setSchema("tenant_123");
   }
 
