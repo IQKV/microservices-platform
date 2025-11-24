@@ -29,11 +29,11 @@ public class ISBN implements Serializable {
    *
    * @param value the ISBN string (ISBN-10 or ISBN-13)
    * @return a new ISBN instance
-   * @throws IllegalArgumentException if the ISBN is invalid
+   * @throws InvalidIsbnFormatException if the ISBN is invalid
    */
   public static ISBN of(final String value) {
     if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException("ISBN must not be null or blank");
+      throw new InvalidIsbnFormatException(value != null ? value : "null", "ISBN must not be null or blank");
     }
     return new ISBN(value);
   }
@@ -45,7 +45,7 @@ public class ISBN implements Serializable {
 
   private void validate(final String isbn) {
     if (!isValidISBN10(isbn) && !isValidISBN13(isbn)) {
-      throw new IllegalArgumentException("Invalid ISBN format: " + isbn);
+      throw new InvalidIsbnFormatException(isbn);
     }
   }
 

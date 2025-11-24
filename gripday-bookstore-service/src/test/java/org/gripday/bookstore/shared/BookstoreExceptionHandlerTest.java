@@ -15,11 +15,19 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gripday.bookstore.catalog.BookNotFoundException;
 import org.gripday.bookstore.catalog.CatalogApplicationService;
+import org.gripday.bookstore.catalog.CategoryInUseException;
 import org.gripday.bookstore.catalog.CategoryNotFoundException;
 import org.gripday.bookstore.catalog.CreateBookCommand;
+import org.gripday.bookstore.catalog.DuplicateCategoryException;
 import org.gripday.bookstore.catalog.DuplicateIsbnException;
+import org.gripday.bookstore.catalog.InvalidPriceRangeException;
 import org.gripday.bookstore.catalog.SearchApplicationService;
+import org.gripday.bookstore.inventory.BulkOperationException;
 import org.gripday.bookstore.inventory.InsufficientInventoryException;
+import org.gripday.bookstore.inventory.InvalidInventoryAdjustmentException;
+import org.gripday.bookstore.inventory.InvalidInventoryQuantityException;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -285,5 +293,210 @@ class BookstoreExceptionHandlerTest {
         .andExpect(jsonPath("$.code").value("SYSTEM_INTERNAL_ERROR"))
         .andExpect(jsonPath("$.title").value("An unexpected error occurred"))
         .andExpect(jsonPath("$.detail").value("Please try again later or contact support if the problem persists"));
+  }
+
+  @Test
+  void handleInvalidInventoryQuantityException_ShouldReturn400WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new InvalidInventoryQuantityException(1L, 5, 10));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567838", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("DOMAIN_INVALID_INVENTORY_QUANTITY"))
+        .andExpect(jsonPath("$.title").value("Cannot set inventory quantity below reserved amount"))
+        .andExpect(jsonPath("$.bookId").value(1))
+        .andExpect(jsonPath("$.requestedQuantity").value(5))
+        .andExpect(jsonPath("$.reservedQuantity").value(10));
+  }
+
+  @Test
+  void handleInvalidInventoryAdjustmentException_ShouldReturn400WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new InvalidInventoryAdjustmentException(1L, 10, -15));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567821", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("DOMAIN_INVALID_INVENTORY_ADJUSTMENT"))
+        .andExpect(jsonPath("$.title").value("Inventory adjustment would result in invalid state"))
+        .andExpect(jsonPath("$.bookId").value(1))
+        .andExpect(jsonPath("$.currentQuantity").value(10))
+        .andExpect(jsonPath("$.adjustment").value(-15));
+  }
+
+  @Test
+  void handleInvalidPriceRangeException_ShouldReturn400WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new InvalidPriceRangeException(new BigDecimal("50.00"), new BigDecimal("20.00")));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567814", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("VALIDATION_INVALID_PRICE_RANGE"))
+        .andExpect(jsonPath("$.title").value("Invalid price range specified"))
+        .andExpect(jsonPath("$.minPrice").value(50.00))
+        .andExpect(jsonPath("$.maxPrice").value(20.00));
+  }
+
+  @Test
+  void handleInvalidIsbnFormatException_ShouldReturn400WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new InvalidIsbnFormatException("123456789"));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567807", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("VALIDATION_INVALID_ISBN"))
+        .andExpect(jsonPath("$.title").value("The provided ISBN format is invalid"))
+        .andExpect(jsonPath("$.isbn").value("123456789"));
+  }
+
+  @Test
+  void handleBulkOperationException_ShouldReturn207WithProblemDetail() throws Exception {
+    var failures = List.of(
+        new BulkOperationException.BulkOperationFailure(1L, "Quantity below reserved", null),
+        new BulkOperationException.BulkOperationFailure(2L, "Book not found", null)
+    );
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new BulkOperationException(5, 3, failures));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567791", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isMultiStatus())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("DOMAIN_BULK_OPERATION_PARTIAL_FAILURE"))
+        .andExpect(jsonPath("$.title").value("Bulk operation completed with some failures"))
+        .andExpect(jsonPath("$.totalRequested").value(5))
+        .andExpect(jsonPath("$.successCount").value(3))
+        .andExpect(jsonPath("$.failureCount").value(2))
+        .andExpect(jsonPath("$.failures").isArray())
+        .andExpect(jsonPath("$.failures[0].bookId").value(1))
+        .andExpect(jsonPath("$.failures[0].reason").value("Quantity below reserved"));
+  }
+
+  @Test
+  void handleCategoryInUseException_ShouldReturn409WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new CategoryInUseException(1L, "Fiction", 5));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567784", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isConflict())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("DOMAIN_CATEGORY_IN_USE"))
+        .andExpect(jsonPath("$.title").value("Cannot delete category that has books associated with it"))
+        .andExpect(jsonPath("$.categoryId").value(1))
+        .andExpect(jsonPath("$.categoryName").value("Fiction"))
+        .andExpect(jsonPath("$.bookCount").value(5));
+  }
+
+  @Test
+  void handleDuplicateCategoryException_ShouldReturn409WithProblemDetail() throws Exception {
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+        .thenThrow(new DuplicateCategoryException("Fiction"));
+
+    var request = new CreateBookCommand(
+        "Test Book",
+        "Test Author",
+        "9781234567777", // Valid ISBN-13
+        "Description",
+        new BigDecimal("29.99"),
+        1L,
+        5
+    );
+    var userContext = createAdminUserContext();
+
+    mockMvc.perform(post("/api/v1/bookstore/admin/books")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request))
+            .requestAttr("userContext", userContext))
+        .andExpect(status().isConflict())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+        .andExpect(jsonPath("$.code").value("DOMAIN_DUPLICATE_CATEGORY"))
+        .andExpect(jsonPath("$.title").value("A category with this name already exists"))
+        .andExpect(jsonPath("$.categoryName").value("Fiction"));
   }
 }

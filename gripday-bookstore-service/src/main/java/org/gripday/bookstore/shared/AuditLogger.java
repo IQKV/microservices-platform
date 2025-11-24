@@ -71,6 +71,21 @@ public class AuditLogger {
         "MULTIPLE", userContext, Map.of("recordsUpdated", recordsUpdated));
   }
 
+  public void logCategoryCreation(Long categoryId, String name, UserContext userContext) {
+    logAdminOperation(BookstoreConstants.Operations.CREATE, BookstoreConstants.ResourceTypes.CATEGORY,
+        String.valueOf(categoryId), userContext, Map.of("name", name));
+  }
+
+  public void logCategoryUpdate(Long categoryId, String name, UserContext userContext) {
+    logAdminOperation(BookstoreConstants.Operations.UPDATE, BookstoreConstants.ResourceTypes.CATEGORY,
+        String.valueOf(categoryId), userContext, Map.of("name", name));
+  }
+
+  public void logCategoryDeletion(Long categoryId, String name, UserContext userContext) {
+    logAdminOperation(BookstoreConstants.Operations.DELETE, BookstoreConstants.ResourceTypes.CATEGORY,
+        String.valueOf(categoryId), userContext, Map.of("name", name));
+  }
+
   public void logUnauthorizedAccess(String operation, String resourceType, UserContext userContext) {
     // Add security audit MDC entries
     MDC.put(BookstoreConstants.MdcKeys.AUDIT_EVENT, BookstoreConstants.AuditEvents.UNAUTHORIZED_ACCESS_ATTEMPT);

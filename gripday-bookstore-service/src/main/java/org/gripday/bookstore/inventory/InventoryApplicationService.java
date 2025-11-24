@@ -65,10 +65,10 @@ public class InventoryApplicationService {
         .orElseThrow(() -> new BookNotFoundException(bookId));
 
     if (command.quantity() < inventory.getReservedQuantity()) {
-      throw new InsufficientInventoryException(
-          "Cannot set quantity below reserved amount. Reserved: " + inventory.getReservedQuantity() +
-          ", Requested: " + command.quantity()
-      );
+      throw new InvalidInventoryQuantityException(
+          bookId,
+          command.quantity(),
+          inventory.getReservedQuantity());
     }
 
     inventory.setQuantity(command.quantity());
@@ -103,6 +103,7 @@ public class InventoryApplicationService {
     logger.info("Bulk updating inventory for {} books by user: {}", commands.size(), userContext.username());
 
     var results = new ArrayList<InventoryDto>();
+    var failures = new ArrayList<BulkOperationException.BulkOperationFailure>();
 
     for (final var command : commands) {
       try {
@@ -110,8 +111,11 @@ public class InventoryApplicationService {
             .orElseThrow(() -> new BookNotFoundException(command.bookId()));
 
         if (command.quantity() < inventory.getReservedQuantity()) {
-          logger.warn("Skipping book ID {} - quantity {} below reserved amount {}",
-              command.bookId(), command.quantity(), inventory.getReservedQuantity());
+          var reason = String.format("Quantity %d below reserved amount %d",
+              command.quantity(), inventory.getReservedQuantity());
+          failures.add(new BulkOperationException.BulkOperationFailure(
+              command.bookId(), reason, null));
+          logger.warn("Skipping book ID {} - {}", command.bookId(), reason);
           continue;
         }
 
@@ -129,6 +133,8 @@ public class InventoryApplicationService {
 
       } catch (final Exception e) {
         logger.error("Failed to update inventory for book ID: {}", command.bookId(), e);
+        failures.add(new BulkOperationException.BulkOperationFailure(
+            command.bookId(), e.getMessage(), e));
       }
     }
 
@@ -136,6 +142,10 @@ public class InventoryApplicationService {
 
     logger.info("Successfully bulk updated {} out of {} inventory records by user: {}",
         results.size(), commands.size(), userContext.username());
+
+    if (!failures.isEmpty()) {
+      throw new BulkOperationException(commands.size(), results.size(), failures);
+    }
 
     return results;
   }

@@ -56,6 +56,11 @@ public class CatalogApplicationService {
   public Page<BookDto> findBooks(BookSearchQuery query, Pageable pageable) {
     logger.debug("Finding books with query: {}", query);
 
+    if (query.minPrice() != null && query.maxPrice() != null &&
+        query.minPrice().compareTo(query.maxPrice()) > 0) {
+      throw new InvalidPriceRangeException(query.minPrice(), query.maxPrice());
+    }
+
     var timer = bookstoreMetrics.startBookSearchTimer();
     try {
       var books = bookRepository.findBooksWithInventoryFilter(

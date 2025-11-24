@@ -175,14 +175,19 @@ public class Inventory {
 
   public void reserveQuantity(int quantityToReserve) {
     if (!canReserve(quantityToReserve)) {
-      throw new IllegalArgumentException("Insufficient inventory to reserve " + quantityToReserve + " items");
+      throw new InsufficientInventoryException(
+          this.book != null ? this.book.getId() : null,
+          quantityToReserve,
+          getAvailableQuantity());
     }
     this.reservedQuantity += quantityToReserve;
   }
 
   public void releaseReservedQuantity(int quantityToRelease) {
     if (quantityToRelease > this.reservedQuantity) {
-      throw new IllegalArgumentException("Cannot release more than reserved quantity");
+      throw new InvalidInventoryAdjustmentException(
+          "Cannot release more than reserved quantity: requested " + quantityToRelease +
+          ", reserved " + this.reservedQuantity);
     }
     this.reservedQuantity -= quantityToRelease;
   }
@@ -190,7 +195,10 @@ public class Inventory {
   public void adjustQuantity(int adjustment) {
     var newQuantity = this.quantity + adjustment;
     if (newQuantity < 0) {
-      throw new IllegalArgumentException("Inventory quantity cannot be negative");
+      throw new InvalidInventoryAdjustmentException(
+          this.book != null ? this.book.getId() : null,
+          this.quantity,
+          adjustment);
     }
     this.quantity = newQuantity;
   }

@@ -149,8 +149,8 @@ class InventoryApplicationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> inventoryApplicationService.updateInventory(1L, command, testUserContext))
-          .isInstanceOf(InsufficientInventoryException.class)
-          .hasMessageContaining("Cannot set quantity below reserved amount");
+          .isInstanceOf(InvalidInventoryQuantityException.class)
+          .hasMessageContaining("Cannot set inventory quantity");
 
       verify(inventoryRepository, never()).save(any());
     }
@@ -209,11 +209,10 @@ class InventoryApplicationServiceTest {
       when(inventoryRepository.findByBookId(1L)).thenReturn(Optional.of(testInventory));
       when(inventoryRepository.save(any(Inventory.class))).thenReturn(testInventory);
 
-      // Act
-      var results = inventoryApplicationService.bulkUpdateInventory(commands, testUserContext);
-
-      // Assert
-      assertThat(results).hasSize(1);
+      // Act & Assert
+      assertThatThrownBy(() -> inventoryApplicationService.bulkUpdateInventory(commands, testUserContext))
+          .isInstanceOf(BulkOperationException.class)
+          .hasMessageContaining("Bulk operation completed with failures");
     }
   }
 

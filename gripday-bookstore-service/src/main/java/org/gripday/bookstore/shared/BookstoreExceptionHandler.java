@@ -8,9 +8,16 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.gripday.bookstore.catalog.BookNotFoundException;
+import org.gripday.bookstore.catalog.CategoryInUseException;
 import org.gripday.bookstore.catalog.CategoryNotFoundException;
+import org.gripday.bookstore.catalog.DuplicateCategoryException;
 import org.gripday.bookstore.catalog.DuplicateIsbnException;
+import org.gripday.bookstore.catalog.InvalidPriceRangeException;
+import org.gripday.bookstore.inventory.BulkOperationException;
 import org.gripday.bookstore.inventory.InsufficientInventoryException;
+import org.gripday.bookstore.inventory.InvalidInventoryAdjustmentException;
+import org.gripday.bookstore.inventory.InvalidInventoryQuantityException;
+import org.gripday.bookstore.shared.InvalidIsbnFormatException;
 import org.gripday.bookstore.shared.UnauthorizedOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +92,21 @@ public class BookstoreExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
   }
 
+  @ExceptionHandler(DuplicateCategoryException.class)
+  public ResponseEntity<ProblemDetail> handleDuplicateCategory(
+      DuplicateCategoryException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Duplicate category: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.CONFLICT,
+        "A category with this name already exists",
+        ex.getMessage(),
+        request,
+        "DOMAIN_DUPLICATE_CATEGORY");
+    problem.setProperty("categoryName", ex.getCategoryName());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+  }
+
   @ExceptionHandler(UnauthorizedOperationException.class)
   public ResponseEntity<ProblemDetail> handleUnauthorizedOperation(
       UnauthorizedOperationException ex,
@@ -97,6 +119,111 @@ public class BookstoreExceptionHandler {
         request,
         "AUTH_INSUFFICIENT_PRIVILEGES");
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+  }
+
+  @ExceptionHandler(InvalidInventoryQuantityException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidInventoryQuantity(
+      InvalidInventoryQuantityException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Invalid inventory quantity: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.BAD_REQUEST,
+        "Cannot set inventory quantity below reserved amount",
+        ex.getMessage(),
+        request,
+        "DOMAIN_INVALID_INVENTORY_QUANTITY");
+    problem.setProperty("bookId", ex.getBookId());
+    problem.setProperty("requestedQuantity", ex.getRequestedQuantity());
+    problem.setProperty("reservedQuantity", ex.getReservedQuantity());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(InvalidInventoryAdjustmentException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidInventoryAdjustment(
+      InvalidInventoryAdjustmentException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Invalid inventory adjustment: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.BAD_REQUEST,
+        "Inventory adjustment would result in invalid state",
+        ex.getMessage(),
+        request,
+        "DOMAIN_INVALID_INVENTORY_ADJUSTMENT");
+    if (ex.getBookId() != null) {
+      problem.setProperty("bookId", ex.getBookId());
+      problem.setProperty("currentQuantity", ex.getCurrentQuantity());
+      problem.setProperty("adjustment", ex.getAdjustment());
+      problem.setProperty("resultingQuantity", ex.getResultingQuantity());
+    }
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(InvalidPriceRangeException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidPriceRange(
+      InvalidPriceRangeException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Invalid price range: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.BAD_REQUEST,
+        "Invalid price range specified",
+        ex.getMessage(),
+        request,
+        "VALIDATION_INVALID_PRICE_RANGE");
+    problem.setProperty("minPrice", ex.getMinPrice());
+    problem.setProperty("maxPrice", ex.getMaxPrice());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(InvalidIsbnFormatException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidIsbnFormat(
+      InvalidIsbnFormatException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Invalid ISBN format: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.BAD_REQUEST,
+        "The provided ISBN format is invalid",
+        ex.getMessage(),
+        request,
+        "VALIDATION_INVALID_ISBN");
+    problem.setProperty("isbn", ex.getIsbn());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+  }
+
+  @ExceptionHandler(BulkOperationException.class)
+  public ResponseEntity<ProblemDetail> handleBulkOperation(
+      BulkOperationException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Bulk operation completed with failures: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.MULTI_STATUS,
+        "Bulk operation completed with some failures",
+        ex.getMessage(),
+        request,
+        "DOMAIN_BULK_OPERATION_PARTIAL_FAILURE");
+    problem.setProperty("totalRequested", ex.getTotalRequested());
+    problem.setProperty("successCount", ex.getSuccessCount());
+    problem.setProperty("failureCount", ex.getFailureCount());
+    problem.setProperty("failures", ex.getFailures().stream()
+        .map(f -> new FailureDetail(f.getBookId(), f.getReason()))
+        .toList());
+    return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(problem);
+  }
+
+  @ExceptionHandler(CategoryInUseException.class)
+  public ResponseEntity<ProblemDetail> handleCategoryInUse(
+      CategoryInUseException ex,
+      HttpServletRequest request) {
+
+    logger.warn("Category in use: {}", ex.getMessage());
+    var problem = baseProblem(HttpStatus.CONFLICT,
+        "Cannot delete category that has books associated with it",
+        ex.getMessage(),
+        request,
+        "DOMAIN_CATEGORY_IN_USE");
+    problem.setProperty("categoryId", ex.getCategoryId());
+    problem.setProperty("categoryName", ex.getCategoryName());
+    problem.setProperty("bookCount", ex.getBookCount());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -230,6 +357,10 @@ public class BookstoreExceptionHandler {
   }
 
   private static record FieldErrorEntry(String field, Object rejectedValue, String message) {
+
+  }
+
+  private static record FailureDetail(Long bookId, String reason) {
 
   }
 }

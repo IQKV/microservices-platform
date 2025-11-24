@@ -68,8 +68,8 @@ class ISBNTest {
   void shouldThrowExceptionForNullISBN() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of(null))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("ISBN must not be null or blank");
+        .isInstanceOf(InvalidIsbnFormatException.class)
+        .hasMessageContaining("ISBN must not be null or blank");
   }
 
   @Test
@@ -77,8 +77,8 @@ class ISBNTest {
   void shouldThrowExceptionForBlankISBN() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("   "))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("ISBN must not be null or blank");
+        .isInstanceOf(InvalidIsbnFormatException.class)
+        .hasMessageContaining("ISBN must not be null or blank");
   }
 
   @Test
@@ -86,8 +86,8 @@ class ISBNTest {
   void shouldThrowExceptionForEmptyISBN() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of(""))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("ISBN must not be null or blank");
+        .isInstanceOf(InvalidIsbnFormatException.class)
+        .hasMessageContaining("ISBN must not be null or blank");
   }
 
   @Test
@@ -95,7 +95,7 @@ class ISBNTest {
   void shouldThrowExceptionForInvalidISBN10() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("0306406153"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(InvalidIsbnFormatException.class)
         .hasMessageContaining("Invalid ISBN format");
   }
 
@@ -104,7 +104,7 @@ class ISBNTest {
   void shouldThrowExceptionForInvalidISBN13() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("9780306406158"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(InvalidIsbnFormatException.class)
         .hasMessageContaining("Invalid ISBN format");
   }
 
@@ -113,7 +113,7 @@ class ISBNTest {
   void shouldThrowExceptionForISBNWithInvalidLength() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("123456789"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(InvalidIsbnFormatException.class)
         .hasMessageContaining("Invalid ISBN format");
   }
 
@@ -122,7 +122,7 @@ class ISBNTest {
   void shouldThrowExceptionForISBNWithLetters() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("030640615A"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(InvalidIsbnFormatException.class)
         .hasMessageContaining("Invalid ISBN format");
   }
 
@@ -264,7 +264,7 @@ class ISBNTest {
   void shouldHandleISBN10WithInvalidCharacters() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("030640615@"))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(InvalidIsbnFormatException.class);
   }
 
   @Test
@@ -272,7 +272,7 @@ class ISBNTest {
   void shouldHandleISBN13WithInvalidCharacters() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("978030640615@"))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(InvalidIsbnFormatException.class);
   }
 
   @Test
@@ -280,7 +280,7 @@ class ISBNTest {
   void shouldRejectISBN10WithIncorrectChecksum() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("0306406151"))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(InvalidIsbnFormatException.class);
   }
 
   @Test
@@ -288,6 +288,6 @@ class ISBNTest {
   void shouldRejectISBN13WithIncorrectChecksum() {
     // Act & Assert
     assertThatThrownBy(() -> ISBN.of("9780306406156"))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(InvalidIsbnFormatException.class);
   }
 }

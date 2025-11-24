@@ -62,6 +62,10 @@ public class SearchApplicationService {
   public Page<BookDto> searchByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
     logger.debug("Searching books by price range: {} - {}", minPrice, maxPrice);
 
+    if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+      throw new InvalidPriceRangeException(minPrice, maxPrice);
+    }
+
     return bookRepository.findByPriceBetween(minPrice, maxPrice, pageable)
         .map(this::convertToDto);
   }
@@ -171,6 +175,10 @@ public class SearchApplicationService {
       Long categoryId,
       Pageable pageable) {
     logger.debug("Searching books by price range: {}-{} and category: {}", minPrice, maxPrice, categoryId);
+
+    if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+      throw new InvalidPriceRangeException(minPrice, maxPrice);
+    }
 
     return bookRepository.findByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable)
         .map(this::convertToDto);

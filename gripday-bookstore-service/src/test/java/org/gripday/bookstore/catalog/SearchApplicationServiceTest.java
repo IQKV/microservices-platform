@@ -1,6 +1,12 @@
 package org.gripday.bookstore.catalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -9,17 +15,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.gripday.bookstore.inventory.Inventory;
+import org.gripday.bookstore.shared.ISBN;
+import org.gripday.bookstore.shared.Money;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("SearchApplicationService Tests")
 class SearchApplicationServiceTest {
 
   @Mock
@@ -28,315 +38,492 @@ class SearchApplicationServiceTest {
   @Mock
   private BookCatalogResponseBuilder responseBuilder;
 
-  @InjectMocks
-  private SearchApplicationService searchApplicationService;
+  @Mock
+  private BookCatalogResponse catalogResponse;
 
-  private Book testBook1;
-  private Book testBook2;
+  private SearchApplicationService searchService;
+
+  private Book testBook;
   private Category testCategory;
+  private Inventory testInventory;
   private Pageable pageable;
 
   @BeforeEach
   void setUp() {
-    testCategory = new Category();
-    testCategory.setId(1L);
-    testCategory.setName("Fiction");
-    testCategory.setDescription("Fiction books");
-
-    testBook1 = new Book();
-    testBook1.setId(1L);
-    testBook1.setTitle("Java Programming");
-    testBook1.setAuthor("John Doe");
-    testBook1.setIsbn("9780134685991");
-    testBook1.setDescription("A Java guide");
-    testBook1.setPrice(new BigDecimal("39.99"));
-    testBook1.setCategory(testCategory);
-    testBook1.setAvailable(true);
-    testBook1.setCreatedAt(LocalDateTime.now());
-    testBook1.setUpdatedAt(LocalDateTime.now());
-
-    var inventory1 = Inventory.create(testBook1, 15);
-    inventory1.setId(1L);
-    testBook1.setInventory(inventory1);
-
-    testBook2 = new Book();
-    testBook2.setId(2L);
-    testBook2.setTitle("Spring Boot Guide");
-    testBook2.setAuthor("Jane Smith");
-    testBook2.setIsbn("9780596009205");
-    testBook2.setDescription("Spring Boot development");
-    testBook2.setPrice(new BigDecimal("29.99"));
-    testBook2.setCategory(testCategory);
-    testBook2.setAvailable(true);
-    testBook2.setCreatedAt(LocalDateTime.now());
-    testBook2.setUpdatedAt(LocalDateTime.now());
-
-    var inventory2 = Inventory.create(testBook2, 8);
-    inventory2.setId(2L);
-    testBook2.setInventory(inventory2);
-
+    searchService = new SearchApplicationService(bookRepository, responseBuilder);
     pageable = PageRequest.of(0, 10);
+
+    testCategory = Category.create("Fiction", "Fiction books");
+    testCategory.setId(1L);
+
+    testBook = Book.create(
+        "Test Book",
+        "Test Author",
+        ISBN.of("978-0-7432-7356-5"),
+        Money.usd(new BigDecimal("19.99")),
+        "Test Description",
+        testCategory
+    );
+    testBook.setId(1L);
+    testBook.setCreatedAt(LocalDateTime.now());
+    testBook.setUpdatedAt(LocalDateTime.now());
+
+    testInventory = Inventory.create(testBook, 10, 0);
+    testBook.setInventory(testInventory);
   }
 
   @Test
-  void searchByTitle_ShouldReturnMatchingBooks() {
-    // Given
-    var books = List.of(testBook1);
-    var page = new PageImpl<>(books, pageable, 1);
+  @DisplayName("Should search by title")
+  void shouldSearchByTitle() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findByTitleContainingIgnoreCase("Java", pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.searchByTitle("Test", pageable);
 
-    // When
-    var result = searchApplicationService.searchByTitle("Java", pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).title()).contains("Java");
-
-    verify(bookRepository).findByTitleContainingIgnoreCase("Java", pageable);
+    verify(bookRepository).findByTitleContainingIgnoreCase("Test", pageable);
   }
 
   @Test
-  void searchByAuthor_ShouldReturnMatchingBooks() {
-    // Given
-    var books = List.of(testBook1);
-    var page = new PageImpl<>(books, pageable, 1);
+  @DisplayName("Should search by author")
+  void shouldSearchByAuthor() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByAuthorContainingIgnoreCase(anyString(), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findByAuthorContainingIgnoreCase("John", pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.searchByAuthor("Author", pageable);
 
-    // When
-    var result = searchApplicationService.searchByAuthor("John", pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).author()).contains("John");
-
-    verify(bookRepository).findByAuthorContainingIgnoreCase("John", pageable);
+    verify(bookRepository).findByAuthorContainingIgnoreCase("Author", pageable);
   }
 
   @Test
-  void searchByCategory_ShouldReturnMatchingBooks() {
-    // Given
-    var books = List.of(testBook1, testBook2);
-    var page = new PageImpl<>(books, pageable, 2);
+  @DisplayName("Should search by category")
+  void shouldSearchByCategory() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByCategoryName(anyString(), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findByCategoryName("Fiction", pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.searchByCategory("Fiction", pageable);
 
-    // When
-    var result = searchApplicationService.searchByCategory("Fiction", pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(2);
-    assertThat(result.getContent().get(0).categoryName()).isEqualTo("Fiction");
-
+    assertThat(result.getContent()).hasSize(1);
     verify(bookRepository).findByCategoryName("Fiction", pageable);
   }
 
   @Test
-  void searchByPriceRange_ShouldReturnBooksInRange() {
-    // Given
-    var minPrice = new BigDecimal("25.00");
-    var maxPrice = new BigDecimal("35.00");
-    var books = List.of(testBook2);
-    var page = new PageImpl<>(books, pageable, 1);
+  @DisplayName("Should search by price range with valid range")
+  void shouldSearchByPriceRangeWithValidRange() {
+    // Arrange
+    var minPrice = new BigDecimal("10.00");
+    var maxPrice = new BigDecimal("30.00");
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByPriceBetween(any(BigDecimal.class), any(BigDecimal.class), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findByPriceBetween(minPrice, maxPrice, pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.searchByPriceRange(minPrice, maxPrice, pageable);
 
-    // When
-    var result = searchApplicationService.searchByPriceRange(minPrice, maxPrice, pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).price()).isBetween(minPrice, maxPrice);
-
     verify(bookRepository).findByPriceBetween(minPrice, maxPrice, pageable);
   }
 
   @Test
-  void searchWithQuery_ShouldApplyAllFilters() {
-    // Given
-    var query = new BookSearchQuery(
-        "Java", "John", "Fiction",
-        new BigDecimal("30.00"), new BigDecimal("50.00"), true
-    );
-    var books = List.of(testBook1);
-    var page = new PageImpl<>(books, pageable, 1);
+  @DisplayName("Should throw exception when min price greater than max price")
+  void shouldThrowExceptionWhenMinPriceGreaterThanMaxPrice() {
+    // Arrange
+    var minPrice = new BigDecimal("30.00");
+    var maxPrice = new BigDecimal("10.00");
 
+    // Act & Assert
+    assertThatThrownBy(() -> searchService.searchByPriceRange(minPrice, maxPrice, pageable))
+        .isInstanceOf(InvalidPriceRangeException.class);
+  }
+
+  @Test
+  @DisplayName("Should search by price range with null min price")
+  void shouldSearchByPriceRangeWithNullMinPrice() {
+    // Arrange
+    var maxPrice = new BigDecimal("30.00");
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByPriceBetween(any(), any(BigDecimal.class), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByPriceRange(null, maxPrice, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findByPriceBetween(null, maxPrice, pageable);
+  }
+
+  @Test
+  @DisplayName("Should search by price range with null max price")
+  void shouldSearchByPriceRangeWithNullMaxPrice() {
+    // Arrange
+    var minPrice = new BigDecimal("10.00");
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByPriceBetween(any(BigDecimal.class), any(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByPriceRange(minPrice, null, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findByPriceBetween(minPrice, null, pageable);
+  }
+
+  @Test
+  @DisplayName("Should search with query when availableOnly is null")
+  void shouldSearchWithQueryWhenAvailableOnlyIsNull() {
+    // Arrange
+    var query = new BookSearchQuery("Test", "Author", "Fiction", null, null, null);
+    var books = new PageImpl<>(List.of(testBook));
     when(bookRepository.findBooksWithCriteria(
-        "Java", "John", "Fiction",
-        new BigDecimal("30.00"), new BigDecimal("50.00"),
-        true, pageable
-    )).thenReturn(page);
+        anyString(), anyString(), anyString(), any(), any(), eq(false), any(Pageable.class)))
+        .thenReturn(books);
 
-    // When
-    var result = searchApplicationService.searchWithQuery(query, pageable);
+    // Act
+    var result = searchService.searchWithQuery(query, pageable);
 
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).title()).contains("Java");
-
     verify(bookRepository).findBooksWithCriteria(
-        "Java", "John", "Fiction",
-        new BigDecimal("30.00"), new BigDecimal("50.00"),
-        true, pageable
-    );
+        "Test", "Author", "Fiction", null, null, false, pageable);
   }
 
   @Test
-  void searchAvailableBooksWithInventory_ShouldReturnAvailableBooks() {
-    // Given
-    var query = new BookSearchQuery(
-        null, null, null, null, null, true
-    );
-    var books = List.of(testBook1, testBook2);
-    var page = new PageImpl<>(books, pageable, 2);
+  @DisplayName("Should search with query when availableOnly is true")
+  void shouldSearchWithQueryWhenAvailableOnlyIsTrue() {
+    // Arrange
+    var query = new BookSearchQuery("Test", "Author", "Fiction", null, null, true);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findBooksWithCriteria(
+        anyString(), anyString(), anyString(), any(), any(), eq(true), any(Pageable.class)))
+        .thenReturn(books);
 
+    // Act
+    var result = searchService.searchWithQuery(query, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findBooksWithCriteria(
+        "Test", "Author", "Fiction", null, null, true, pageable);
+  }
+
+  @Test
+  @DisplayName("Should search available books with inventory when availableOnly is null")
+  void shouldSearchAvailableBooksWithInventoryWhenAvailableOnlyIsNull() {
+    // Arrange
+    var query = new BookSearchQuery("Test", null, null, null, null, null);
+    var books = new PageImpl<>(List.of(testBook));
     when(bookRepository.findBooksWithInventoryFilter(
-        null, null, null, null, null, true, pageable
-    )).thenReturn(page);
+        anyString(), any(), any(), any(), any(), eq(true), any(Pageable.class)))
+        .thenReturn(books);
 
-    // When
-    var result = searchApplicationService.searchAvailableBooksWithInventory(query, pageable);
+    // Act
+    var result = searchService.searchAvailableBooksWithInventory(query, pageable);
 
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(2);
-    assertThat(result.getContent()).allMatch(book -> book.available());
-
     verify(bookRepository).findBooksWithInventoryFilter(
-        null, null, null, null, null, true, pageable
-    );
+        "Test", null, null, null, null, true, pageable);
   }
 
   @Test
-  void findAffordableBooks_ShouldReturnBooksUnderMaxPrice() {
-    // Given
-    var maxPrice = new BigDecimal("35.00");
-    var books = List.of(testBook2);
-    var page = new PageImpl<>(books, pageable, 1);
+  @DisplayName("Should search available books with inventory when availableOnly is false")
+  void shouldSearchAvailableBooksWithInventoryWhenAvailableOnlyIsFalse() {
+    // Arrange
+    var query = new BookSearchQuery("Test", null, null, null, null, false);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findBooksWithInventoryFilter(
+        anyString(), any(), any(), any(), any(), eq(false), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findAffordableBooks(maxPrice, pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.searchAvailableBooksWithInventory(query, pageable);
 
-    // When
-    var result = searchApplicationService.findAffordableBooks(maxPrice, pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(1);
-    assertThat(result.getContent().get(0).price()).isLessThanOrEqualTo(maxPrice);
+    verify(bookRepository).findBooksWithInventoryFilter(
+        "Test", null, null, null, null, false, pageable);
+  }
 
+  @Test
+  @DisplayName("Should find affordable books")
+  void shouldFindAffordableBooks() {
+    // Arrange
+    var maxPrice = new BigDecimal("25.00");
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findAffordableBooks(any(BigDecimal.class), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.findAffordableBooks(maxPrice, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
     verify(bookRepository).findAffordableBooks(maxPrice, pageable);
   }
 
   @Test
-  void findRecentBooks_ShouldReturnRecentlyAddedBooks() {
-    // Given
-    var books = List.of(testBook1, testBook2);
-    var page = new PageImpl<>(books, pageable, 2);
+  @DisplayName("Should find recent books")
+  void shouldFindRecentBooks() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findRecentBooks(any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findRecentBooks(pageable)).thenReturn(page);
+    // Act
+    var result = searchService.findRecentBooks(pageable);
 
-    // When
-    var result = searchApplicationService.findRecentBooks(pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(2);
-
     verify(bookRepository).findRecentBooks(pageable);
   }
 
   @Test
-  void findAvailableBooksByCategory_ShouldReturnCategoryBooks() {
-    // Given
+  @DisplayName("Should find available books by category")
+  void shouldFindAvailableBooksByCategory() {
+    // Arrange
     var categoryId = 1L;
-    var books = List.of(testBook1, testBook2);
-    var page = new PageImpl<>(books, pageable, 2);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findAvailableBooksByCategory(anyLong(), any(Pageable.class)))
+        .thenReturn(books);
 
-    when(bookRepository.findAvailableBooksByCategory(categoryId, pageable))
-        .thenReturn(page);
+    // Act
+    var result = searchService.findAvailableBooksByCategory(categoryId, pageable);
 
-    // When
-    var result = searchApplicationService.findAvailableBooksByCategory(categoryId, pageable);
-
-    // Then
+    // Assert
     assertThat(result).isNotNull();
-    assertThat(result.getContent()).hasSize(2);
-    assertThat(result.getContent()).allMatch(book -> book.available());
-
     verify(bookRepository).findAvailableBooksByCategory(categoryId, pageable);
   }
 
   @Test
-  void getDistinctAuthors_ShouldReturnAuthorList() {
-    // Given
-    var authors = List.of("John Doe", "Jane Smith");
+  @DisplayName("Should get distinct authors")
+  void shouldGetDistinctAuthors() {
+    // Arrange
+    var authors = List.of("Author 1", "Author 2");
     when(bookRepository.findDistinctAuthors()).thenReturn(authors);
 
-    // When
-    var result = searchApplicationService.getDistinctAuthors();
+    // Act
+    var result = searchService.getDistinctAuthors();
 
-    // Then
-    assertThat(result).isNotNull();
+    // Assert
     assertThat(result).hasSize(2);
-    assertThat(result).contains("John Doe", "Jane Smith");
-
     verify(bookRepository).findDistinctAuthors();
   }
 
   @Test
-  void getDistinctCategories_ShouldReturnCategoryList() {
-    // Given
+  @DisplayName("Should get distinct categories")
+  void shouldGetDistinctCategories() {
+    // Arrange
     var categories = List.of("Fiction", "Non-Fiction");
     when(bookRepository.findDistinctCategoryNames()).thenReturn(categories);
 
-    // When
-    var result = searchApplicationService.getDistinctCategories();
+    // Act
+    var result = searchService.getDistinctCategories();
 
-    // Then
-    assertThat(result).isNotNull();
+    // Assert
     assertThat(result).hasSize(2);
-    assertThat(result).contains("Fiction", "Non-Fiction");
-
     verify(bookRepository).findDistinctCategoryNames();
   }
 
   @Test
-  void countAvailableBooks_ShouldReturnCount() {
-    // Given
-    when(bookRepository.countAvailableBooks()).thenReturn(25L);
+  @DisplayName("Should count available books")
+  void shouldCountAvailableBooks() {
+    // Arrange
+    when(bookRepository.countAvailableBooks()).thenReturn(10L);
 
-    // When
-    var result = searchApplicationService.countAvailableBooks();
+    // Act
+    var result = searchService.countAvailableBooks();
 
-    // Then
-    assertThat(result).isEqualTo(25L);
-
+    // Assert
+    assertThat(result).isEqualTo(10L);
     verify(bookRepository).countAvailableBooks();
   }
 
   @Test
-  void countBooksByCategory_ShouldReturnCategoryCount() {
-    // Given
-    var categoryName = "Fiction";
-    when(bookRepository.countBooksByCategory(categoryName)).thenReturn(15L);
+  @DisplayName("Should count books by category")
+  void shouldCountBooksByCategory() {
+    // Arrange
+    when(bookRepository.countBooksByCategory(anyString())).thenReturn(5L);
 
-    // When
-    var result = searchApplicationService.countBooksByCategory(categoryName);
+    // Act
+    var result = searchService.countBooksByCategory("Fiction");
 
-    // Then
-    assertThat(result).isEqualTo(15L);
+    // Assert
+    assertThat(result).isEqualTo(5L);
+    verify(bookRepository).countBooksByCategory("Fiction");
+  }
 
-    verify(bookRepository).countBooksByCategory(categoryName);
+  @Test
+  @DisplayName("Should perform full text search")
+  void shouldPerformFullTextSearch() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByFullTextSearch(anyString(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.fullTextSearch("search term", pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findByFullTextSearch("search term", pageable);
+  }
+
+  @Test
+  @DisplayName("Should perform fuzzy search")
+  void shouldPerformFuzzySearch() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByFuzzySearch(anyString(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.fuzzySearch("fuzzy term", pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findByFuzzySearch("fuzzy term", pageable);
+  }
+
+  @Test
+  @DisplayName("Should search by price range and category with valid range")
+  void shouldSearchByPriceRangeAndCategoryWithValidRange() {
+    // Arrange
+    var minPrice = new BigDecimal("10.00");
+    var maxPrice = new BigDecimal("30.00");
+    var categoryId = 1L;
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByPriceRangeAndCategory(
+        any(BigDecimal.class), any(BigDecimal.class), anyLong(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(bookRepository).findByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable);
+  }
+
+  @Test
+  @DisplayName("Should throw exception in searchByPriceRangeAndCategory when min price greater than max")
+  void shouldThrowExceptionInSearchByPriceRangeAndCategoryWhenMinGreaterThanMax() {
+    // Arrange
+    var minPrice = new BigDecimal("30.00");
+    var maxPrice = new BigDecimal("10.00");
+    var categoryId = 1L;
+
+    // Act & Assert
+    assertThatThrownBy(() ->
+        searchService.searchByPriceRangeAndCategory(minPrice, maxPrice, categoryId, pageable))
+        .isInstanceOf(InvalidPriceRangeException.class);
+  }
+
+  @Test
+  @DisplayName("Should check book availability with quantity")
+  void shouldCheckBookAvailabilityWithQuantity() {
+    // Arrange
+    when(bookRepository.isBookAvailableWithQuantity(anyLong(), any(int.class)))
+        .thenReturn(true);
+
+    // Act
+    var result = searchService.isBookAvailableWithQuantity(1L, 5);
+
+    // Assert
+    assertThat(result).isTrue();
+    verify(bookRepository).isBookAvailableWithQuantity(1L, 5);
+  }
+
+  @Test
+  @DisplayName("Should search with catalog response")
+  void shouldSearchWithCatalogResponse() {
+    // Arrange
+    var query = new BookSearchQuery("Test", null, null, null, null, null);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findBooksWithCriteria(
+        anyString(), any(), any(), any(), any(), anyBoolean(), any(Pageable.class)))
+        .thenReturn(books);
+    when(responseBuilder.build(any(Page.class), any(BookSearchQuery.class)))
+        .thenReturn(catalogResponse);
+
+    // Act
+    var result = searchService.searchWithCatalogResponse(query, pageable);
+
+    // Assert
+    assertThat(result).isNotNull();
+    verify(responseBuilder).build(any(Page.class), eq(query));
+  }
+
+  @Test
+  @DisplayName("Should convert book to DTO with inventory")
+  void shouldConvertBookToDtoWithInventory() {
+    // Arrange
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByTitle("Test", pageable);
+
+    // Assert
+    assertThat(result.getContent()).hasSize(1);
+    var dto = result.getContent().get(0);
+    assertThat(dto.availableQuantity()).isEqualTo(10);
+    assertThat(dto.categoryName()).isEqualTo("Fiction");
+  }
+
+  @Test
+  @DisplayName("Should convert book to DTO with null inventory")
+  void shouldConvertBookToDtoWithNullInventory() {
+    // Arrange
+    testBook.setInventory(null);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByTitle("Test", pageable);
+
+    // Assert
+    assertThat(result.getContent()).hasSize(1);
+    var dto = result.getContent().get(0);
+    assertThat(dto.availableQuantity()).isZero();
+  }
+
+  @Test
+  @DisplayName("Should convert book to DTO with null category")
+  void shouldConvertBookToDtoWithNullCategory() {
+    // Arrange
+    testBook.setCategory(null);
+    var books = new PageImpl<>(List.of(testBook));
+    when(bookRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class)))
+        .thenReturn(books);
+
+    // Act
+    var result = searchService.searchByTitle("Test", pageable);
+
+    // Assert
+    assertThat(result.getContent()).hasSize(1);
+    var dto = result.getContent().get(0);
+    assertThat(dto.categoryName()).isNull();
   }
 }
