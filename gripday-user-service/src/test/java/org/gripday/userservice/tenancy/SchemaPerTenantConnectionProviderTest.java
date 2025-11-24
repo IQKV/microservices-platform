@@ -59,35 +59,41 @@ class SchemaPerTenantConnectionProviderTest {
 
   @Test
   @DisplayName("Should get connection with tenant schema for PostgreSQL")
+  @SuppressWarnings("try")
   void shouldGetConnectionWithTenantSchemaForPostgreSQL() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
     when(connection.getMetaData()).thenReturn(metaData);
     when(metaData.getDatabaseProductName()).thenReturn("PostgreSQL");
-    var result = provider.getConnection("tenant_123");
-    assertThat(result).isNotNull();
-    verify(connection).setSchema("tenant_123");
+    try (var result = provider.getConnection("tenant_123")) {
+      assertThat(result).isNotNull();
+      verify(connection).setSchema("tenant_123");
+    }
   }
 
   @Test
   @DisplayName("Should get connection with default schema when tenant is null")
+  @SuppressWarnings("try")
   void shouldGetConnectionWithDefaultSchemaWhenTenantIsNull() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
     when(connection.getMetaData()).thenReturn(metaData);
     when(metaData.getDatabaseProductName()).thenReturn("PostgreSQL");
-    var result = provider.getConnection(null);
-    assertThat(result).isNotNull();
-    verify(connection).setSchema("public");
+    try (var result = provider.getConnection(null)) {
+      assertThat(result).isNotNull();
+      verify(connection).setSchema("public");
+    }
   }
 
   @Test
   @DisplayName("Should get connection with PUBLIC schema for H2")
+  @SuppressWarnings("try")
   void shouldGetConnectionWithPublicSchemaForH2() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
     when(connection.getMetaData()).thenReturn(metaData);
     when(metaData.getDatabaseProductName()).thenReturn("H2");
-    var result = provider.getConnection("public");
-    assertThat(result).isNotNull();
-    verify(connection).setSchema("PUBLIC");
+    try (var result = provider.getConnection("public")) {
+      assertThat(result).isNotNull();
+      verify(connection).setSchema("PUBLIC");
+    }
   }
 
   @Test
@@ -99,8 +105,7 @@ class SchemaPerTenantConnectionProviderTest {
     when(metaData.getDatabaseProductName()).thenReturn("H2");
     when(connection.createStatement()).thenReturn(statement);
     
-    try (var ignored = statement) {
-      var result = provider.getConnection("tenant_123");
+    try (var ignored = statement; var result = provider.getConnection("tenant_123")) {
       assertThat(result).isNotNull();
       verify(statement).execute("CREATE SCHEMA IF NOT EXISTS tenant_123");
       verify(connection).setSchema("tenant_123");
