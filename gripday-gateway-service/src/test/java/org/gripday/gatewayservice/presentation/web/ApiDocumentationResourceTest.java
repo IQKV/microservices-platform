@@ -1,17 +1,17 @@
 package org.gripday.gatewayservice.presentation.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
 import org.gripday.gatewayservice.config.GripdayProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ApiDocumentationResource Tests")
 class ApiDocumentationResourceTest {
