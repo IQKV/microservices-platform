@@ -29,6 +29,7 @@ public class SpringDocConfiguration {
    * This runs at application startup to configure the Swagger UI dropdown.
    */
   @Bean
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(SwaggerUiConfigParameters.class)
   public CommandLineRunner openApiUrlsRegistrar(SwaggerUiConfigParameters swaggerUiConfig) {
     return args -> {
       var services = properties.gateway().routing().services();

@@ -49,6 +49,20 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-rxjava3</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring6</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
 
         <!-- JWT -->
         <dependency>
@@ -155,6 +169,9 @@
                     <excludes>
                         <exclude>**/*Application.class</exclude>
                         <exclude>**/common/*.class</exclude>
+                        <exclude>**/ResponseTransformationFilter.class</exclude>
+                        <exclude>**/*Config.class</exclude>
+                        <exclude>**/*Config*.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -185,75 +202,27 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.27</minimum>
+                                            <minimum>0.8</minimum>
                                         </limit>
                                         <limit>
                                             <counter>CLASS</counter>
                                             <value>MISSEDCOUNT</value>
-                                            <maximum>73</maximum>
+                                            <maximum>0</maximum>
                                         </limit>
                                     </limits>
                                 </rule>
                                 <rule>
-                                    <element>CLASS</element>
-                                    <excludes>
-                                        <exclude>org.gripday.gatewayservice.service.TenantQuotaMonitoringService</exclude>
-                                        <exclude>org.gripday.gatewayservice.service.TenantQuotaMonitoringService.TenantUsageStats</exclude>
-                                        <exclude>org.gripday.gatewayservice.security.JwtAuthenticationFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.security.JwtAuthenticationFilter.UserContext</exclude>
-                                        <exclude>org.gripday.gatewayservice.security.JwtAuthenticationFilter.TenantContext</exclude>
-                                        <exclude>org.gripday.gatewayservice.presentation.web.ApiDocumentationResource</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.RedisProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.MetricsConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.ServiceRegistryInitializer</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.SecurityProperties.JwtProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties.ServiceProperties.OpenApiProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties.ServiceProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.HealthCheckConfig.UserServiceHealthIndicator</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GatewayConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.SecurityProperties.AuthenticationProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.ObservabilityProperties.TracingProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.ObservabilityProperties.MetricsProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.RedisConfiguration</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.CircuitBreakerConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties.LoadBalancingProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.SecurityConfiguration</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.SecurityProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.ApiPrefixConfigurationLogger</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties
-                                        </exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.HealthCheckConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.DynamicOpenApiRoutesConfiguration</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.OpenApiConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.CircuitBreakerProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RoutingProperties.ApiPrefixProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.TenantRateLimitingFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.ResponseTransformationFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.TenantExtractionFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.LoadBalancingFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.CorrelationIdFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.TenantExtractionFilter.TenantContext</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.LoadBalancingFilter.Config</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.ResponseTransformationFilter.Config</exclude>
-                                        <exclude>org.gripday.gatewayservice.filter.CircuitBreakerFilter</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.CorsConfiguration</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.CorsProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.ObservabilityProperties.LoggingProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.HealthCheckConfig.ReactiveRedisHealthIndicator</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.SpringDocConfiguration</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.ObservabilityConfig</exclude>
-                                        <exclude>org.gripday.gatewayservice.config.GlobalExceptionHandler</exclude>
-                                        <exclude>org.gripday.gatewayservice.security.JwtClaimNames</exclude>
-                                    </excludes>
+                                    <element>CLASS</element>                                    
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.01</minimum>
+                                            <minimum>0.6</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.5</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

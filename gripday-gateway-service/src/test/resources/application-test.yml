@@ -153,7 +153,8 @@ gripday :
       include-host-tag : false
       include-application-tag : false
       include-environment-tag : false
-      custom-tags : { }
+      custom-tags :
+        test : "true"
       enabled-metrics : [ ]
     logging :
       level : DEBUG
