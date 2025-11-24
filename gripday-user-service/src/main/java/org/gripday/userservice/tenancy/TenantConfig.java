@@ -19,15 +19,9 @@ public class TenantConfig {
    * Custom tenant identifier resolver for Hibernate multi-tenancy. Resolves tenant ID from ThreadLocal context.
    */
   @Bean
-  public SchemaTenantIdentifierResolver schemaTenantIdentifierResolver(
+  public CurrentTenantIdentifierResolver currentTenantIdentifierResolver(
       SchemaNameResolver schemaNameResolver) {
     return new SchemaTenantIdentifierResolver(schemaNameResolver);
-  }
-
-  @Bean
-  public CurrentTenantIdentifierResolver currentTenantIdentifierResolver(
-      SchemaTenantIdentifierResolver resolver) {
-    return resolver;
   }
 
   @Bean
