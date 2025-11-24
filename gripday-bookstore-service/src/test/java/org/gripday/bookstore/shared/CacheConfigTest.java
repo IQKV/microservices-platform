@@ -1,46 +1,54 @@
 package org.gripday.bookstore.shared;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
+import java.time.Duration;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Import({TestJwtConfiguration.class, TestCacheConfiguration.class})
+@DisplayName("CacheConfig Tests")
 class CacheConfigTest {
 
-  @Autowired
-  private CacheManager cacheManager;
-
   @Test
-  void shouldConfigureCacheManager() {
-    assertThat(cacheManager).isNotNull();
+  @DisplayName("Should create Redis cache configuration with default TTL")
+  void shouldCreateRedisCacheConfigurationWithDefaultTtl() {
+    // Arrange
+    var config = new CacheConfig();
 
-    // Verify cache names are configured
-    var cacheNames = cacheManager.getCacheNames();
-    assertThat(cacheNames).contains(
-        CacheConfig.BOOK_CACHE,
-        CacheConfig.BOOK_SEARCH_CACHE,
-        CacheConfig.CATEGORY_CACHE,
-        CacheConfig.AUTHOR_CACHE,
-        CacheConfig.POPULAR_BOOKS_CACHE
-    );
+    // Act
+    var cacheConfig = config.redisCacheConfiguration();
+
+    // Assert
+    assertThat(cacheConfig).isNotNull();
+    assertThat(cacheConfig.getTtl()).isEqualTo(Duration.ofMinutes(10));
   }
 
   @Test
-  void shouldCreateCacheInstances() {
-    var bookCache = cacheManager.getCache(CacheConfig.BOOK_CACHE);
-    assertThat(bookCache).isNotNull();
+  @DisplayName("Should create Redis template with connection factory")
+  void shouldCreateRedisTemplateWithConnectionFactory() {
+    // Arrange
+    var config = new CacheConfig();
+    var connectionFactory = mock(RedisConnectionFactory.class);
 
-    var searchCache = cacheManager.getCache(CacheConfig.BOOK_SEARCH_CACHE);
-    assertThat(searchCache).isNotNull();
+    // Act
+    var redisTemplate = config.redisTemplate(connectionFactory);
 
-    var categoryCache = cacheManager.getCache(CacheConfig.CATEGORY_CACHE);
-    assertThat(categoryCache).isNotNull();
+    // Assert
+    assertThat(redisTemplate).isNotNull();
+    assertThat(redisTemplate.getConnectionFactory()).isEqualTo(connectionFactory);
+  }
+
+  @Test
+  @DisplayName("Should verify cache name constants")
+  void shouldVerifyCacheNameConstants() {
+    // Assert
+    assertThat(CacheConfig.BOOK_CACHE).isEqualTo("books");
+    assertThat(CacheConfig.BOOK_SEARCH_CACHE).isEqualTo("book-search");
+    assertThat(CacheConfig.CATEGORY_CACHE).isEqualTo("categories");
+    assertThat(CacheConfig.AUTHOR_CACHE).isEqualTo("authors");
+    assertThat(CacheConfig.POPULAR_BOOKS_CACHE).isEqualTo("popular-books");
   }
 }

@@ -27,7 +27,9 @@ public class ApiDeprecationNotice {
 
     // RFC 8594 Sunset header
     if (sunsetDate != null) {
-      response.setHeader(SUNSET_HEADER, sunsetDate.format(DateTimeFormatter.RFC_1123_DATE_TIME));
+      response.setHeader(SUNSET_HEADER, 
+          sunsetDate.atStartOfDay(java.time.ZoneOffset.UTC)
+              .format(DateTimeFormatter.RFC_1123_DATE_TIME));
     }
 
     // Warning header with migration information
