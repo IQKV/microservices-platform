@@ -35,7 +35,7 @@ class JwtConfigurationTest {
 
       // Assert
       assertThat(jwtDecoder).isNotNull();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to test JwtDecoder creation", e);
     }
   }

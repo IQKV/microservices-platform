@@ -41,10 +41,10 @@ class BookstoreExceptionHandlerTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private CatalogApplicationService CatalogApplicationService;
+  private CatalogApplicationService catalogApplicationService;
 
   @MockBean
-  private SearchApplicationService SearchApplicationService;
+  private SearchApplicationService searchApplicationService;
 
   private UserContext createAdminUserContext() {
     return new UserContext(
@@ -61,7 +61,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleBookNotFoundException_ShouldReturn404WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new BookNotFoundException(999L));
 
     var request = new CreateBookCommand(
@@ -92,7 +92,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleCategoryNotFoundException_ShouldReturn404WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new CategoryNotFoundException(999L));
 
     var request = new CreateBookCommand(
@@ -118,7 +118,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleInsufficientInventoryException_ShouldReturn409WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new InsufficientInventoryException(1L, 100, 5));
 
     var request = new CreateBookCommand(
@@ -144,7 +144,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleDuplicateIsbnException_ShouldReturn409WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new DuplicateIsbnException("9781234567876"));
 
     var request = new CreateBookCommand(
@@ -170,7 +170,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleUnauthorizedOperationException_ShouldReturn403WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new UnauthorizedOperationException("Insufficient privileges"));
 
     var request = new CreateBookCommand(
@@ -235,7 +235,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleIllegalArgumentException_ShouldReturn400WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new IllegalArgumentException("Invalid argument provided"));
 
     var request = new CreateBookCommand(
@@ -262,7 +262,7 @@ class BookstoreExceptionHandlerTest {
 
   @Test
   void handleGenericException_ShouldReturn500WithProblemDetail() throws Exception {
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new RuntimeException("Unexpected system error"));
 
     var request = new CreateBookCommand(

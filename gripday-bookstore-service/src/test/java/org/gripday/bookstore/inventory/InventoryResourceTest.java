@@ -27,7 +27,7 @@ class InventoryResourceTest {
   private MockMvc mockMvc;
 
   @MockBean
-  private InventoryApplicationService InventoryApplicationService;
+  private InventoryApplicationService inventoryApplicationService;
 
   private InventoryDto createTestInventoryDto() {
     return new InventoryDto(
@@ -45,7 +45,7 @@ class InventoryResourceTest {
   @Test
   void getInventory_WhenInventoryExists_ShouldReturnInventory() throws Exception {
     var inventory = createTestInventoryDto();
-    when(InventoryApplicationService.getInventory(1L)).thenReturn(inventory);
+    when(inventoryApplicationService.getInventory(1L)).thenReturn(inventory);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/1"))
         .andExpect(status().isOk())
@@ -57,7 +57,7 @@ class InventoryResourceTest {
 
   @Test
   void getInventory_WhenBookNotFound_ShouldReturn404() throws Exception {
-    when(InventoryApplicationService.getInventory(999L))
+    when(inventoryApplicationService.getInventory(999L))
         .thenThrow(new BookNotFoundException(999L));
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/999"))
@@ -67,7 +67,7 @@ class InventoryResourceTest {
 
   @Test
   void checkAvailability_WhenAvailable_ShouldReturnTrue() throws Exception {
-    when(InventoryApplicationService.isBookAvailable(1L, 5)).thenReturn(true);
+    when(inventoryApplicationService.isBookAvailable(1L, 5)).thenReturn(true);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/1/availability")
             .param("quantity", "5"))
@@ -77,7 +77,7 @@ class InventoryResourceTest {
 
   @Test
   void checkAvailability_WhenNotAvailable_ShouldReturnFalse() throws Exception {
-    when(InventoryApplicationService.isBookAvailable(1L, 100)).thenReturn(false);
+    when(inventoryApplicationService.isBookAvailable(1L, 100)).thenReturn(false);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/1/availability")
             .param("quantity", "100"))
@@ -87,7 +87,7 @@ class InventoryResourceTest {
 
   @Test
   void checkAvailability_WithDefaultQuantity_ShouldUseOne() throws Exception {
-    when(InventoryApplicationService.isBookAvailable(1L, 1)).thenReturn(true);
+    when(inventoryApplicationService.isBookAvailable(1L, 1)).thenReturn(true);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/1/availability"))
         .andExpect(status().isOk())
@@ -97,7 +97,7 @@ class InventoryResourceTest {
   @Test
   void getLowStockInventory_ShouldReturnLowStockItems() throws Exception {
     var lowStockInventory = createTestInventoryDto();
-    when(InventoryApplicationService.getLowStockInventory()).thenReturn(List.of(lowStockInventory));
+    when(inventoryApplicationService.getLowStockInventory()).thenReturn(List.of(lowStockInventory));
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/low-stock"))
         .andExpect(status().isOk())
@@ -108,7 +108,7 @@ class InventoryResourceTest {
   @Test
   void getOutOfStockInventory_ShouldReturnOutOfStockItems() throws Exception {
     var outOfStockInventory = createTestInventoryDto();
-    when(InventoryApplicationService.getOutOfStockInventory()).thenReturn(List.of(outOfStockInventory));
+    when(inventoryApplicationService.getOutOfStockInventory()).thenReturn(List.of(outOfStockInventory));
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/out-of-stock"))
         .andExpect(status().isOk())
@@ -118,7 +118,7 @@ class InventoryResourceTest {
 
   @Test
   void getTotalInventoryCount_ShouldReturnTotalCount() throws Exception {
-    when(InventoryApplicationService.getTotalInventoryCount()).thenReturn(1000L);
+    when(inventoryApplicationService.getTotalInventoryCount()).thenReturn(1000L);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/stats/total-count"))
         .andExpect(status().isOk())
@@ -127,7 +127,7 @@ class InventoryResourceTest {
 
   @Test
   void getTotalReservedCount_ShouldReturnReservedCount() throws Exception {
-    when(InventoryApplicationService.getTotalReservedCount()).thenReturn(50L);
+    when(inventoryApplicationService.getTotalReservedCount()).thenReturn(50L);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/stats/reserved-count"))
         .andExpect(status().isOk())
@@ -136,7 +136,7 @@ class InventoryResourceTest {
 
   @Test
   void getLowStockCount_ShouldReturnLowStockCount() throws Exception {
-    when(InventoryApplicationService.countLowStockItems()).thenReturn(15L);
+    when(inventoryApplicationService.countLowStockItems()).thenReturn(15L);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/stats/low-stock-count"))
         .andExpect(status().isOk())
@@ -145,7 +145,7 @@ class InventoryResourceTest {
 
   @Test
   void getOutOfStockCount_ShouldReturnOutOfStockCount() throws Exception {
-    when(InventoryApplicationService.countOutOfStockItems()).thenReturn(3L);
+    when(inventoryApplicationService.countOutOfStockItems()).thenReturn(3L);
 
     mockMvc.perform(get("/api/v1/bookstore/inventory/stats/out-of-stock-count"))
         .andExpect(status().isOk())

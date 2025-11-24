@@ -137,7 +137,7 @@ class CorrelationIdFilterTest {
     // Act & Assert
     try {
       filter.doFilterInternal(request, response, filterChain);
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       // Expected
     }
     assertThat(MDC.get(BookstoreConstants.MdcKeys.CORRELATION_ID)).isNull();

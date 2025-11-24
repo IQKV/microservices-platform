@@ -197,7 +197,7 @@ class JwtAuthenticationFilterTest {
     // Act & Assert
     try {
       jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       // Expected
     }
 

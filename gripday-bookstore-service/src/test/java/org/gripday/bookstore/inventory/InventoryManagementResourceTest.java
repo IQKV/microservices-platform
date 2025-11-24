@@ -39,7 +39,7 @@ class InventoryManagementResourceTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private InventoryApplicationService InventoryApplicationService;
+  private InventoryApplicationService inventoryApplicationService;
 
   private InventoryDto createTestInventoryDto() {
     return new InventoryDto(
@@ -86,7 +86,7 @@ class InventoryManagementResourceTest {
     var updatedInventory = createTestInventoryDto();
     var userContext = createAdminUserContext();
 
-    when(InventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
+    when(inventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
         .thenReturn(updatedInventory);
 
     mockMvc.perform(put("/api/v1/bookstore/admin/inventory/1")
@@ -116,7 +116,7 @@ class InventoryManagementResourceTest {
     var request = new UpdateInventoryCommand(75, 15);
     var userContext = createRegularUserContext();
 
-    when(InventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
+    when(inventoryApplicationService.updateInventory(eq(1L), any(UpdateInventoryCommand.class), any(UserContext.class)))
         .thenThrow(new UnauthorizedOperationException("Insufficient privileges"));
 
     mockMvc.perform(put("/api/v1/bookstore/admin/inventory/1")
@@ -136,7 +136,7 @@ class InventoryManagementResourceTest {
     var updatedInventories = List.of(createTestInventoryDto());
     var userContext = createAdminUserContext();
 
-    when(InventoryApplicationService.bulkUpdateInventory(anyList(), any(UserContext.class)))
+    when(inventoryApplicationService.bulkUpdateInventory(anyList(), any(UserContext.class)))
         .thenReturn(updatedInventories);
 
     mockMvc.perform(post("/api/v1/bookstore/admin/inventory/bulk-update")
@@ -163,7 +163,7 @@ class InventoryManagementResourceTest {
     var userContext = createAdminUserContext();
 
     doThrow(new InsufficientInventoryException(1L, 100, 45))
-        .when(InventoryApplicationService).reserveQuantity(eq(1L), eq(100), any(UserContext.class));
+        .when(inventoryApplicationService).reserveQuantity(eq(1L), eq(100), any(UserContext.class));
 
     mockMvc.perform(post("/api/v1/bookstore/admin/inventory/1/reserve")
             .param("quantity", "100")

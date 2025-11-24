@@ -39,7 +39,7 @@ class BookManagementResourceTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private CatalogApplicationService CatalogApplicationService;
+  private CatalogApplicationService catalogApplicationService;
 
   private BookDto createTestBookDto() {
     return new BookDto(
@@ -97,7 +97,7 @@ class BookManagementResourceTest {
     var createdBook = createTestBookDto();
     var userContext = createAdminUserContext();
 
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenReturn(createdBook);
 
     mockMvc.perform(post("/api/v1/bookstore/admin/books")
@@ -142,7 +142,7 @@ class BookManagementResourceTest {
     );
     var userContext = createAdminUserContext();
 
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new DuplicateIsbnException("9780123456786"));
 
     mockMvc.perform(post("/api/v1/bookstore/admin/books")
@@ -166,7 +166,7 @@ class BookManagementResourceTest {
     );
     var userContext = createRegularUserContext();
 
-    when(CatalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.createBook(any(CreateBookCommand.class), any(UserContext.class)))
         .thenThrow(new UnauthorizedOperationException("Insufficient privileges"));
 
     mockMvc.perform(post("/api/v1/bookstore/admin/books")
@@ -189,7 +189,7 @@ class BookManagementResourceTest {
     var updatedBook = createTestBookDto();
     var userContext = createAdminUserContext();
 
-    when(CatalogApplicationService.updateBook(eq(1L), any(UpdateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.updateBook(eq(1L), any(UpdateBookCommand.class), any(UserContext.class)))
         .thenReturn(updatedBook);
 
     mockMvc.perform(put("/api/v1/bookstore/admin/books/1")
@@ -211,7 +211,7 @@ class BookManagementResourceTest {
     );
     var userContext = createAdminUserContext();
 
-    when(CatalogApplicationService.updateBook(eq(999L), any(UpdateBookCommand.class), any(UserContext.class)))
+    when(catalogApplicationService.updateBook(eq(999L), any(UpdateBookCommand.class), any(UserContext.class)))
         .thenThrow(new BookNotFoundException(999L));
 
     mockMvc.perform(put("/api/v1/bookstore/admin/books/999")
@@ -236,7 +236,7 @@ class BookManagementResourceTest {
     var userContext = createAdminUserContext();
 
     doThrow(new BookNotFoundException(999L))
-        .when(CatalogApplicationService).deleteBook(eq(999L), any(UserContext.class));
+        .when(catalogApplicationService).deleteBook(eq(999L), any(UserContext.class));
 
     mockMvc.perform(delete("/api/v1/bookstore/admin/books/999")
             .requestAttr("userContext", userContext))

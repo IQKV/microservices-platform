@@ -12,7 +12,7 @@ class AggregateRootTest {
   static class TestAggregate extends AggregateRoot<Long> {
     private Long id;
 
-    public TestAggregate(Long id) {
+    public TestAggregate(final Long id) {
       this.id = id;
     }
 

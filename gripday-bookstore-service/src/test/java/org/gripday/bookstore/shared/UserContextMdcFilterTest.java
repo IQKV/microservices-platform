@@ -234,7 +234,7 @@ class UserContextMdcFilterTest {
     // Act & Assert
     try {
       filter.doFilterInternal(request, response, filterChain);
-    } catch (RuntimeException e) {
+    } catch (final RuntimeException e) {
       // Expected exception
     }
 

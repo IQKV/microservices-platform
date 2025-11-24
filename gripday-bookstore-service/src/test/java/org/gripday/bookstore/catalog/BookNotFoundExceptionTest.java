@@ -79,7 +79,7 @@ class BookNotFoundExceptionTest {
     // Act & Assert
     try {
       throw new BookNotFoundException(bookId);
-    } catch (BookNotFoundException e) {
+    } catch (final BookNotFoundException e) {
       assertThat(e.getMessage()).contains("999");
     }
   }
