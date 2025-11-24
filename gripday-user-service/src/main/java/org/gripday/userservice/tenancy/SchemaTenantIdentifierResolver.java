@@ -1,9 +1,7 @@
 package org.gripday.userservice.tenancy;
 
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
-import org.springframework.stereotype.Component;
 
-@Component
 public class SchemaTenantIdentifierResolver implements CurrentTenantIdentifierResolver {
 
   private final SchemaNameResolver schemaNameResolver;
