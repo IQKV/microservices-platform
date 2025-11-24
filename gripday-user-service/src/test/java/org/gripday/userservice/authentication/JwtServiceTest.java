@@ -322,7 +322,7 @@ class JwtServiceTest {
       Field idField = User.class.getDeclaredField("id");
       idField.setAccessible(true);
       idField.set(user, id);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to set user ID", e);
     }
   }

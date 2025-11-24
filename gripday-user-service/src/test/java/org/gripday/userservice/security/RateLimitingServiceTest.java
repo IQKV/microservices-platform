@@ -29,7 +29,7 @@ class RateLimitingServiceTest {
   private RedisTemplate<String, String> redisTemplate;
 
   @Mock
-  private ZSetOperations<String, String> zSetOperations;
+  private ZSetOperations<String, String> zsetOperations;
 
   @InjectMocks
   private RateLimitingService rateLimitingService;
@@ -42,26 +42,26 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("isWithinRateLimit returns true when no previous requests exist")
   void withinRateLimitNoRequests() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(0L);
-    when(zSetOperations.add(anyString(), anyString(), anyDouble())).thenReturn(true);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(0L);
+    when(zsetOperations.add(anyString(), anyString(), anyDouble())).thenReturn(true);
 
     var result = rateLimitingService.isWithinRateLimit(ipAddress);
 
     assertThat(result).isTrue();
-    verify(zSetOperations).removeRangeByScore(eq("rate_limit:" + ipAddress), anyDouble(), anyDouble());
-    verify(zSetOperations).add(eq("rate_limit:" + ipAddress), anyString(), anyDouble());
+    verify(zsetOperations).removeRangeByScore(eq("rate_limit:" + ipAddress), anyDouble(), anyDouble());
+    verify(zsetOperations).add(eq("rate_limit:" + ipAddress), anyString(), anyDouble());
     verify(redisTemplate).expire(eq("rate_limit:" + ipAddress), anyLong(), eq(TimeUnit.SECONDS));
   }
 
   @Test
   @DisplayName("isWithinRateLimit returns true when under the limit")
   void withinRateLimitUnderLimit() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.2";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(3L);
-    when(zSetOperations.add(anyString(), anyString(), anyDouble())).thenReturn(true);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(3L);
+    when(zsetOperations.add(anyString(), anyString(), anyDouble())).thenReturn(true);
 
     var result = rateLimitingService.isWithinRateLimit(ipAddress);
 
@@ -71,9 +71,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("isWithinRateLimit returns false when limit is exceeded")
   void exceedsRateLimit() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.3";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(5L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(5L);
 
     var result = rateLimitingService.isWithinRateLimit(ipAddress);
 
@@ -83,9 +83,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("isWithinRateLimit returns true when Redis returns null count")
   void withinRateLimitNullCount() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.4";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
 
     var result = rateLimitingService.isWithinRateLimit(ipAddress);
 
@@ -95,9 +95,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("isWithinRateLimit returns true on Redis exception (fail open)")
   void withinRateLimitRedisException() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.5";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble()))
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble()))
         .thenThrow(new RuntimeException("Redis connection failed"));
 
     var result = rateLimitingService.isWithinRateLimit(ipAddress);
@@ -108,9 +108,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getRemainingAttempts returns correct count")
   void remainingAttempts() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.6";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(2L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(2L);
 
     var remaining = rateLimitingService.getRemainingAttempts(ipAddress);
 
@@ -120,9 +120,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getRemainingAttempts returns max when count is null")
   void remainingAttemptsNullCount() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.7";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
 
     var remaining = rateLimitingService.getRemainingAttempts(ipAddress);
 
@@ -132,9 +132,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getRemainingAttempts returns zero when limit exceeded")
   void remainingAttemptsExceeded() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.8";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(7L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(7L);
 
     var remaining = rateLimitingService.getRemainingAttempts(ipAddress);
 
@@ -144,9 +144,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getRemainingAttempts returns max on exception")
   void remainingAttemptsException() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.9";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble()))
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble()))
         .thenThrow(new RuntimeException("Redis error"));
 
     var remaining = rateLimitingService.getRemainingAttempts(ipAddress);
@@ -157,10 +157,10 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getTimeUntilReset returns correct duration")
   void timeUntilReset() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.10";
     var oldestRequestTime = String.valueOf(System.currentTimeMillis() - 30000);
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenReturn(Set.of(oldestRequestTime));
 
     var duration = rateLimitingService.getTimeUntilReset(ipAddress);
@@ -172,9 +172,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getTimeUntilReset returns zero when no requests")
   void timeUntilResetNoRequests() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.11";
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenReturn(Set.of());
 
     var duration = rateLimitingService.getTimeUntilReset(ipAddress);
@@ -185,9 +185,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getTimeUntilReset returns zero when rangeByScore returns null")
   void timeUntilResetNull() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.12";
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenReturn(null);
 
     var duration = rateLimitingService.getTimeUntilReset(ipAddress);
@@ -198,9 +198,9 @@ class RateLimitingServiceTest {
   @Test
   @DisplayName("getTimeUntilReset returns zero on exception")
   void timeUntilResetException() {
-    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
     var ipAddress = "192.168.1.13";
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenThrow(new RuntimeException("Redis error"));
 
     var duration = rateLimitingService.getTimeUntilReset(ipAddress);
