@@ -1,6 +1,7 @@
 package org.gripday.userservice.tenancy;
 
 import org.gripday.userservice.shared.UserServiceConstants;
+import org.gripday.userservice.shared.exception.TenantContextException;
 import org.slf4j.MDC;
 
 /**
@@ -18,10 +19,11 @@ public final class TenantContext {
    * Set the current tenant ID for the current thread. Also adds tenant information to MDC for structured logging.
    *
    * @param tenantId the tenant ID to set
+   * @throws TenantContextException.InvalidTenantIdException if tenant ID is null or empty
    */
   public static void setCurrentTenantId(String tenantId) {
     if (tenantId == null || tenantId.trim().isEmpty()) {
-      throw new IllegalArgumentException("Tenant ID cannot be null or empty");
+      throw new TenantContextException.InvalidTenantIdException("Tenant ID cannot be null or empty");
     }
 
     var normalizedTenantId = tenantId.trim();

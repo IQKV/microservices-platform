@@ -2,6 +2,7 @@ package org.gripday.userservice.emailverification;
 
 import java.time.LocalDateTime;
 
+import org.gripday.userservice.shared.exception.EmailVerificationException;
 import org.gripday.userservice.tenancy.TenantContext;
 import org.gripday.userservice.tenancy.TenantRepository;
 import org.slf4j.Logger;
@@ -106,7 +107,7 @@ public class EmailVerificationTokenCleanupService {
 
     } catch (final Exception e) {
       logger.error("Error during manual cleanup of expired verification tokens", e);
-      throw new RuntimeException("Failed to perform manual cleanup", e);
+      throw new EmailVerificationException("Failed to perform manual cleanup", e);
     } finally {
       timerSample.stop(metricsService.getCleanupTimer());
     }

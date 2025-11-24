@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.gripday.userservice.shared.EmailOperations;
+import org.gripday.userservice.shared.exception.EmailVerificationException;
 import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
@@ -47,11 +48,12 @@ public class EmailVerificationService {
    *
    * @param user The user to generate verification token for
    * @return The generated verification token
-   * @throws EmailVerificationException if rate limit exceeded or user already verified
+   * @throws EmailVerificationException.AlreadyVerifiedException if user already verified
+   * @throws EmailVerificationException.RateLimitExceededException if rate limit exceeded
    */
   public String generateVerificationToken(User user) {
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
-      throw new EmailVerificationException("User email is already verified");
+      throw new EmailVerificationException.AlreadyVerifiedException("User email is already verified");
     }
 
     var userId = user.getId();
@@ -61,7 +63,11 @@ public class EmailVerificationService {
     var recentTokenCount = tokenRepository.countTokensCreatedSince(userId, oneHourAgo);
 
     if (recentTokenCount >= MAX_EMAILS_PER_HOUR) {
-      throw new EmailVerificationException("Rate limit exceeded. Maximum " + MAX_EMAILS_PER_HOUR + " verification emails per hour");
+      throw new EmailVerificationException.RateLimitExceededException(
+          "Rate limit exceeded. Maximum " + MAX_EMAILS_PER_HOUR + " verification emails per hour",
+          MAX_EMAILS_PER_HOUR,
+          (int) recentTokenCount
+      );
     }
 
     // Invalidate any existing unused tokens for this user
@@ -86,7 +92,7 @@ public class EmailVerificationService {
       // Mark token as used since email failed to send
       verificationToken.markAsUsed();
       tokenRepository.save(verificationToken);
-      throw new EmailVerificationException("Failed to send verification email", e);
+      throw new EmailVerificationException.EmailSendFailedException("Failed to send verification email", e);
     }
 
     return token;
@@ -97,33 +103,34 @@ public class EmailVerificationService {
    *
    * @param token The verification token to validate
    * @return EmailVerificationResponse with verification result
-   * @throws EmailVerificationException if token is invalid, expired, or already used
+   * @throws EmailVerificationException.InvalidTokenException if token is invalid, expired, or already used
+   * @throws EmailVerificationException.AlreadyVerifiedException if user already verified
    */
   @Transactional
   public VerificationResponse verifyEmail(String token) {
     if (token == null || token.trim().isEmpty()) {
       metricsService.recordVerificationFailed();
-      throw new EmailVerificationException("Verification token cannot be null or empty");
+      throw new EmailVerificationException.InvalidTokenException("Verification token cannot be null or empty");
     }
 
     // Find the verification token
     var verificationToken = tokenRepository.findByTokenAndUsedFalse(token)
         .orElseThrow(() -> {
           metricsService.recordVerificationFailed();
-          return new EmailVerificationException("Invalid or already used verification token");
+          return new EmailVerificationException.InvalidTokenException("Invalid or already used verification token");
         });
 
     // Check if token is expired
     if (verificationToken.isExpired()) {
       metricsService.recordVerificationFailed();
-      throw new EmailVerificationException("Verification token has expired");
+      throw new EmailVerificationException.InvalidTokenException("Verification token has expired");
     }
 
     // Get the user
     var user = userRepository.findById(verificationToken.getUserId())
         .orElseThrow(() -> {
           metricsService.recordVerificationFailed();
-          return new EmailVerificationException("User not found for verification token");
+          return new EmailVerificationException.InvalidTokenException("User not found for verification token");
         });
 
     // Verify tenant context matches
@@ -135,7 +142,7 @@ public class EmailVerificationService {
       verificationToken.markAsUsed();
       tokenRepository.save(verificationToken);
       metricsService.recordVerificationFailed();
-      throw new EmailVerificationException("User email is already verified");
+      throw new EmailVerificationException.AlreadyVerifiedException("User email is already verified");
     }
 
     // Mark token as used
@@ -177,7 +184,9 @@ public class EmailVerificationService {
    * @param email     The email address to resend verification to
    * @param ipAddress The IP address of the request for rate limiting
    * @return EmailVerificationResponse with resend result
-   * @throws EmailVerificationException if user not found, already verified, or rate limited
+   * @throws EmailVerificationException if user not found
+   * @throws EmailVerificationException.AlreadyVerifiedException if already verified
+   * @throws EmailVerificationException.RateLimitExceededException if rate limited
    */
   public VerificationResponse resendVerificationEmail(String email, String ipAddress) {
     if (email == null || email.trim().isEmpty()) {
@@ -193,7 +202,7 @@ public class EmailVerificationService {
 
     // Check if user is already verified
     if (user.getEmailVerified() != null && user.getEmailVerified()) {
-      throw new EmailVerificationException("User email is already verified");
+      throw new EmailVerificationException.AlreadyVerifiedException("User email is already verified");
     }
 
     // Generate new verification token (this includes rate limiting check)
@@ -295,17 +304,4 @@ public class EmailVerificationService {
     );
   }
 
-  /**
-   * Custom exception for email verification operations.
-   */
-  public static class EmailVerificationException extends RuntimeException {
-
-    public EmailVerificationException(final String message) {
-      super(message);
-    }
-
-    public EmailVerificationException(final String message, final Throwable cause) {
-      super(message, cause);
-    }
-  }
 }

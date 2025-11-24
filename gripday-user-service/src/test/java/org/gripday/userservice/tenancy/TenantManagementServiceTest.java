@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.UpdateTenantRequest;
+import org.gripday.userservice.shared.exception.TenantManagementException;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,7 +108,7 @@ class TenantManagementServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.createTenant(request, "admin"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(TenantManagementException.TenantAlreadyExistsException.class)
         .hasMessageContaining("already exists");
   }
 
@@ -130,7 +131,7 @@ class TenantManagementServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.createTenant(request, "admin"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(TenantManagementException.DomainAlreadyExistsException.class)
         .hasMessageContaining("domain");
   }
 
@@ -178,7 +179,7 @@ class TenantManagementServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.updateTenant("tenant-123", request))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(TenantManagementException.TenantNotFoundException.class)
         .hasMessageContaining("not found");
   }
 
@@ -205,7 +206,7 @@ class TenantManagementServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.getTenant("tenant-123"))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(TenantManagementException.TenantNotFoundException.class)
         .hasMessageContaining("not found");
   }
 
@@ -263,7 +264,7 @@ class TenantManagementServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.deleteTenant("tenant-123"))
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(TenantManagementException.TenantHasUsersException.class)
         .hasMessageContaining("existing users");
   }
 

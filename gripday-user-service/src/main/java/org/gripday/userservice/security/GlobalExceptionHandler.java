@@ -8,9 +8,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.gripday.userservice.authentication.AuthenticationService;
-import org.gripday.userservice.emailverification.EmailVerificationService;
 import org.gripday.userservice.registration.UserRegistrationService;
 import org.gripday.userservice.shared.UserServiceConstants;
+import org.gripday.userservice.shared.exception.EmailVerificationException;
+import org.gripday.userservice.shared.exception.TenantContextException;
+import org.gripday.userservice.shared.exception.TenantContextMismatchException;
+import org.gripday.userservice.shared.exception.TenantManagementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -201,7 +204,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(status).body(pd);
   }
 
-  @ExceptionHandler(EmailVerificationService.EmailVerificationException.class)
+  @ExceptionHandler(EmailVerificationException.class)
   @ApiResponse(
       responseCode = "400",
       description = "Email verification failed - invalid token, rate limit, or already verified",
@@ -211,7 +214,7 @@ public class GlobalExceptionHandler {
       )
   )
   public ResponseEntity<ProblemDetail> handleEmailVerificationException(
-      EmailVerificationService.EmailVerificationException ex, HttpServletRequest request) {
+      EmailVerificationException ex, HttpServletRequest request) {
     var errorCode = determineEmailVerificationErrorCode(ex.getMessage());
     var status = determineEmailVerificationStatus(errorCode);
     var pd = problem("https://problems.gripday.com/email-verification",
@@ -222,6 +225,76 @@ public class GlobalExceptionHandler {
     pd.setProperty("code", errorCode);
     logger.warn("Email verification failed: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
     return ResponseEntity.status(status).body(pd);
+  }
+
+  @ExceptionHandler(TenantManagementException.class)
+  @ApiResponse(
+      responseCode = "400",
+      description = "Tenant management operation failed",
+      content = @Content(
+          mediaType = "application/problem+json",
+          schema = @Schema(implementation = ProblemDetail.class)
+      )
+  )
+  public ResponseEntity<ProblemDetail> handleTenantManagementException(
+      TenantManagementException ex, HttpServletRequest request) {
+    var errorCode = determineTenantManagementErrorCode(ex);
+    var status = determineTenantManagementStatus(ex);
+    var pd = problem("https://problems.gripday.com/tenant-management",
+        "Tenant management failed",
+        status,
+        ex.getMessage(),
+        request);
+    pd.setProperty("code", errorCode);
+    logger.warn("Tenant management failed: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
+    return ResponseEntity.status(status).body(pd);
+  }
+
+  @ExceptionHandler(TenantContextException.class)
+  @ApiResponse(
+      responseCode = "400",
+      description = "Tenant context operation failed",
+      content = @Content(
+          mediaType = "application/problem+json",
+          schema = @Schema(implementation = ProblemDetail.class)
+      )
+  )
+  public ResponseEntity<ProblemDetail> handleTenantContextException(
+      TenantContextException ex, HttpServletRequest request) {
+    var pd = problem("https://problems.gripday.com/tenant-context",
+        "Tenant context error",
+        HttpStatus.BAD_REQUEST,
+        ex.getMessage(),
+        request);
+    pd.setProperty("code", "TENANT_CONTEXT_INVALID");
+    logger.warn("Tenant context error: {} - {}", MDC.get(UserServiceConstants.MDC.CORRELATION_ID), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
+  }
+
+  @ExceptionHandler(TenantContextMismatchException.class)
+  @ApiResponse(
+      responseCode = "403",
+      description = "Tenant context mismatch - security violation",
+      content = @Content(
+          mediaType = "application/problem+json",
+          schema = @Schema(implementation = ProblemDetail.class)
+      )
+  )
+  public ResponseEntity<ProblemDetail> handleTenantContextMismatchException(
+      TenantContextMismatchException ex, HttpServletRequest request) {
+    var pd = problem("https://problems.gripday.com/tenant-context-mismatch",
+        "Tenant context mismatch",
+        HttpStatus.FORBIDDEN,
+        ex.getMessage(),
+        request);
+    pd.setProperty("code", "TENANT_CONTEXT_MISMATCH");
+    pd.setProperty("currentTenant", ex.getCurrentTenantId());
+    pd.setProperty("entityTenant", ex.getEntityTenantId());
+    logger.error("Tenant context mismatch: {} - current: {}, entity: {}",
+        MDC.get(UserServiceConstants.MDC.CORRELATION_ID),
+        ex.getCurrentTenantId(),
+        ex.getEntityTenantId());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd);
   }
 
   @ExceptionHandler(Exception.class)
@@ -301,6 +374,34 @@ public class GlobalExceptionHandler {
       case "USER_NOT_FOUND" -> HttpStatus.NOT_FOUND;
       case "EMAIL_RESEND_RATE_LIMITED" -> HttpStatus.TOO_MANY_REQUESTS;
       case "EMAIL_SEND_FAILED" -> HttpStatus.INTERNAL_SERVER_ERROR;
+      default -> HttpStatus.BAD_REQUEST;
+    };
+  }
+
+  /**
+   * Determine tenant management error code using switch expression.
+   */
+  private String determineTenantManagementErrorCode(TenantManagementException ex) {
+    return switch (ex) {
+      case TenantManagementException.TenantAlreadyExistsException e -> "TENANT_ALREADY_EXISTS";
+      case TenantManagementException.TenantNotFoundException e -> "TENANT_NOT_FOUND";
+      case TenantManagementException.DomainAlreadyExistsException e -> "TENANT_DOMAIN_ALREADY_EXISTS";
+      case TenantManagementException.TenantHasUsersException e -> "TENANT_HAS_USERS";
+      case TenantManagementException.SchemaProvisioningException e -> "TENANT_SCHEMA_PROVISIONING_FAILED";
+      default -> "TENANT_MANAGEMENT_FAILED";
+    };
+  }
+
+  /**
+   * Determine HTTP status for tenant management errors.
+   */
+  private HttpStatus determineTenantManagementStatus(TenantManagementException ex) {
+    return switch (ex) {
+      case TenantManagementException.TenantNotFoundException e -> HttpStatus.NOT_FOUND;
+      case TenantManagementException.TenantAlreadyExistsException e -> HttpStatus.CONFLICT;
+      case TenantManagementException.DomainAlreadyExistsException e -> HttpStatus.CONFLICT;
+      case TenantManagementException.TenantHasUsersException e -> HttpStatus.CONFLICT;
+      case TenantManagementException.SchemaProvisioningException e -> HttpStatus.INTERNAL_SERVER_ERROR;
       default -> HttpStatus.BAD_REQUEST;
     };
   }

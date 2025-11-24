@@ -8,6 +8,7 @@ import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantRes
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantStatistics;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.TenantSummary;
 import org.gripday.userservice.infrastructure.repository.dto.TenantDto.UpdateTenantRequest;
+import org.gripday.userservice.shared.exception.TenantManagementException;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,8 @@ public class TenantManagementService {
    * @param request   the tenant creation request
    * @param createdBy the user creating the tenant
    * @return the created tenant response
-   * @throws IllegalArgumentException if tenant already exists or validation fails
+   * @throws TenantManagementException.TenantAlreadyExistsException if tenant already exists
+   * @throws TenantManagementException.DomainAlreadyExistsException if domain already exists
    */
   @CacheEvict(value = "tenants", allEntries = true)
   public TenantResponse createTenant(CreateTenantRequest request, String createdBy) {
@@ -59,13 +61,19 @@ public class TenantManagementService {
 
     // Validate tenant doesn't already exist
     if (tenantRepository.existsByTenantId(request.tenantId())) {
-      throw new IllegalArgumentException("Tenant with ID '" + request.tenantId() + "' already exists");
+      throw new TenantManagementException.TenantAlreadyExistsException(
+          "Tenant with ID '" + request.tenantId() + "' already exists",
+          request.tenantId()
+      );
     }
 
     // Validate domain uniqueness if provided
     if (request.domain() != null && !request.domain().trim().isEmpty()) {
       if (tenantRepository.existsByDomain(request.domain())) {
-        throw new IllegalArgumentException("Tenant with domain '" + request.domain() + "' already exists");
+        throw new TenantManagementException.DomainAlreadyExistsException(
+            "Tenant with domain '" + request.domain() + "' already exists",
+            request.domain()
+        );
       }
     }
 
@@ -93,7 +101,8 @@ public class TenantManagementService {
    * @param tenantId the tenant ID to update
    * @param request  the update request
    * @return the updated tenant response
-   * @throws IllegalArgumentException if tenant not found or validation fails
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws TenantManagementException.DomainAlreadyExistsException if domain already exists
    */
   @Caching(evict = {
       @CacheEvict(value = "tenants", key = "#tenantId"),
@@ -104,7 +113,10 @@ public class TenantManagementService {
     logger.info("Updating tenant: {}", tenantId);
 
     var tenant = tenantRepository.findByTenantId(tenantId)
-        .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
 
     // Update fields if provided using pattern matching and modern syntax
     if (request.name() != null && !request.name().trim().isEmpty()) {
@@ -118,7 +130,10 @@ public class TenantManagementService {
     // Validate domain uniqueness if changing
     if (request.domain() != null && !request.domain().equals(tenant.getDomain())) {
       if (!request.domain().trim().isEmpty() && tenantRepository.existsByDomain(request.domain())) {
-        throw new IllegalArgumentException("Tenant with domain '" + request.domain() + "' already exists");
+        throw new TenantManagementException.DomainAlreadyExistsException(
+            "Tenant with domain '" + request.domain() + "' already exists",
+            request.domain()
+        );
       }
       tenant.setDomain(request.domain().trim().isEmpty() ? null : request.domain().trim());
     }
@@ -151,13 +166,16 @@ public class TenantManagementService {
    *
    * @param tenantId the tenant ID
    * @return the tenant response
-   * @throws IllegalArgumentException if tenant not found
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
    */
   @Transactional(readOnly = true)
   @Cacheable(value = "tenants", key = "#tenantId")
   public TenantResponse getTenant(String tenantId) {
     var tenant = tenantRepository.findByTenantId(tenantId)
-        .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
 
     return mapToTenantResponse(tenant);
   }
@@ -182,19 +200,27 @@ public class TenantManagementService {
    * Delete a tenant and all associated data. Evicts all tenant-related cache entries.
    *
    * @param tenantId the tenant ID to delete
-   * @throws IllegalArgumentException if tenant not found
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws TenantManagementException.TenantHasUsersException if tenant has existing users
    */
   @CacheEvict(value = "tenants", allEntries = true)
   public void deleteTenant(String tenantId) {
     logger.warn("Deleting tenant: {}", tenantId);
 
     var tenant = tenantRepository.findByTenantId(tenantId)
-        .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
 
     // Check if tenant has users
     var userCount = TenantContext.executeInTenantContext(tenantId, () -> userRepository.count());
     if (userCount > 0) {
-      throw new IllegalStateException("Cannot delete tenant with existing users. User count: " + userCount);
+      throw new TenantManagementException.TenantHasUsersException(
+          "Cannot delete tenant with existing users. User count: " + userCount,
+          tenantId,
+          userCount
+      );
     }
 
     // Delete tenant
@@ -212,12 +238,16 @@ public class TenantManagementService {
    * @param tenantId the tenant ID
    * @param enabled  the enabled status
    * @return the updated tenant response
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
    */
   public TenantResponse setTenantEnabled(String tenantId, boolean enabled) {
     logger.info("Setting tenant {} enabled status to: {}", tenantId, enabled);
 
     var tenant = tenantRepository.findByTenantId(tenantId)
-        .orElseThrow(() -> new IllegalArgumentException("Tenant not found: " + tenantId));
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
 
     tenant.setEnabled(enabled);
     var updatedTenant = tenantRepository.save(tenant);
@@ -393,7 +423,11 @@ public class TenantManagementService {
     try {
       liquibaseRunner.runTenantChangelog(schema);
     } catch (final Exception e) {
-      throw new IllegalStateException("Failed to apply tenant changelog for schema: " + schema, e);
+      throw new TenantManagementException.SchemaProvisioningException(
+          "Failed to apply tenant changelog for schema: " + schema,
+          schema,
+          e
+      );
     }
     logger.info("Provisioned schema {} for tenant: {}", schema, tenantId);
   }

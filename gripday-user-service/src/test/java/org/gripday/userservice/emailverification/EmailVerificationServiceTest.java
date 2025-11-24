@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.gripday.userservice.shared.EmailOperations;
+import org.gripday.userservice.shared.exception.EmailVerificationException;
 import org.gripday.userservice.usermanagement.User;
 import org.gripday.userservice.usermanagement.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +84,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.generateVerificationToken(testUser))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("already verified");
 
     verify(tokenRepository, never()).save(any());
@@ -97,7 +98,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.generateVerificationToken(testUser))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("Rate limit exceeded");
 
     verify(tokenRepository, never()).save(any());
@@ -127,7 +128,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.generateVerificationToken(testUser))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("Failed to send verification email");
 
     // Verify save was called twice: once to create token, once to mark as used
@@ -164,7 +165,7 @@ class EmailVerificationServiceTest {
   void shouldThrowExceptionForNullToken() {
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail(null))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("cannot be null or empty");
 
     verify(metricsService).recordVerificationFailed();
@@ -175,7 +176,7 @@ class EmailVerificationServiceTest {
   void shouldThrowExceptionForEmptyToken() {
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail("  "))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("cannot be null or empty");
 
     verify(metricsService).recordVerificationFailed();
@@ -189,7 +190,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail("invalid-token"))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("Invalid or already used");
 
     verify(metricsService).recordVerificationFailed();
@@ -206,7 +207,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail(token))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("expired");
 
     verify(metricsService).recordVerificationFailed();
@@ -224,7 +225,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail(token))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("User not found");
 
     verify(metricsService).recordVerificationFailed();
@@ -243,7 +244,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.verifyEmail(token))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("already verified");
 
     verify(tokenRepository).save(verificationToken);
@@ -293,7 +294,7 @@ class EmailVerificationServiceTest {
   void shouldThrowExceptionWhenResendingToNullEmail() {
     // Act & Assert
     assertThatThrownBy(() -> service.resendVerificationEmail(null, "127.0.0.1"))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("cannot be null or empty");
   }
 
@@ -305,7 +306,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.resendVerificationEmail("unknown@example.com", "127.0.0.1"))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("User not found");
   }
 
@@ -318,7 +319,7 @@ class EmailVerificationServiceTest {
 
     // Act & Assert
     assertThatThrownBy(() -> service.resendVerificationEmail("test@example.com", "127.0.0.1"))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("already verified");
   }
 
@@ -424,7 +425,7 @@ class EmailVerificationServiceTest {
   void shouldThrowExceptionWhenGettingStatusForNullEmail() {
     // Act & Assert
     assertThatThrownBy(() -> service.getVerificationStatus(null))
-        .isInstanceOf(EmailVerificationService.EmailVerificationException.class)
+        .isInstanceOf(EmailVerificationException.class)
         .hasMessageContaining("cannot be null or empty");
   }
 }

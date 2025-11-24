@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.gripday.userservice.authentication.AuthenticationService;
-import org.gripday.userservice.emailverification.EmailVerificationService;
 import org.gripday.userservice.registration.UserRegistrationService;
+import org.gripday.userservice.shared.exception.EmailVerificationException;
 import org.gripday.userservice.usermanagement.UserManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -207,7 +207,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleEmailVerificationException returns 400 for invalid token")
   void handleEmailVerificationExceptionInvalidToken() {
-    var exception = new EmailVerificationService.EmailVerificationException("Invalid verification token");
+    var exception = new EmailVerificationException("Invalid verification token");
     var response = exceptionHandler.handleEmailVerificationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -218,7 +218,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleEmailVerificationException returns 429 for rate limit")
   void handleEmailVerificationExceptionRateLimit() {
-    var exception = new EmailVerificationService.EmailVerificationException("Rate limit exceeded");
+    var exception = new EmailVerificationException("Rate limit exceeded");
     var response = exceptionHandler.handleEmailVerificationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
@@ -229,7 +229,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleEmailVerificationException returns 404 for user not found")
   void handleEmailVerificationExceptionUserNotFound() {
-    var exception = new EmailVerificationService.EmailVerificationException("User not found");
+    var exception = new EmailVerificationException("User not found");
     var response = exceptionHandler.handleEmailVerificationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

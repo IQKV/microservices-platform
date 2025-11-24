@@ -5,6 +5,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
+import org.gripday.userservice.shared.exception.TenantContextMismatchException;
 import org.gripday.userservice.tenancy.TenantContext;
 
 /**
@@ -48,14 +49,17 @@ public abstract class TenantAware {
 
   /**
    * Validate tenant context before updating entity. Ensures that updates are only performed within the correct tenant context.
+   *
+   * @throws TenantContextMismatchException if current tenant context doesn't match entity tenant
    */
   @PreUpdate
   protected void validateTenantContext() {
     var currentTenantId = TenantContext.getCurrentTenantId();
     if (currentTenantId != null && !currentTenantId.equals(this.tenantId)) {
-      throw new IllegalStateException(
-          "Tenant context mismatch: current=" + currentTenantId +
-          ", entity=" + this.tenantId
+      throw new TenantContextMismatchException(
+          "Tenant context mismatch during entity update",
+          currentTenantId,
+          this.tenantId
       );
     }
   }
