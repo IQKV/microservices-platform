@@ -49,8 +49,10 @@ public class MetricsConfig {
       }
 
       // Add custom tags from configuration
-      metricsProps.customTags().forEach((key, value) ->
-          registry.config().commonTags(key, value));
+      if (metricsProps.customTags() != null) {
+        metricsProps.customTags().forEach((key, value) ->
+            registry.config().commonTags(key, value));
+      }
 
       // Add metric filters for performance
       registry.config().meterFilter(MeterFilter.deny(id -> {

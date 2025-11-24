@@ -172,6 +172,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Embedded Redis for testing -->
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.gripday.userservice.config.RedisTokenCleanupService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +28,7 @@ public class AdminKeyManagementRestResource {
 
   public AdminKeyManagementRestResource(
       final JwtKeyManagementService keyManagementService,
-      final RedisTokenCleanupService tokenCleanupService) {
+      @Autowired(required = false) final RedisTokenCleanupService tokenCleanupService) {
     this.keyManagementService = keyManagementService;
     this.tokenCleanupService = tokenCleanupService;
   }
@@ -54,6 +55,12 @@ public class AdminKeyManagementRestResource {
   @PostMapping("/cleanup")
   @PreAuthorize("hasRole('SUPER_ADMIN')")
   public ResponseEntity<Map<String, String>> cleanupTokens() {
+    if (tokenCleanupService == null) {
+      return ResponseEntity.ok(Map.of(
+          "message", "Token cleanup service is not available (Redis not configured)"
+      ));
+    }
+
     tokenCleanupService.cleanupExpiredTokens();
 
     return ResponseEntity.ok(Map.of(

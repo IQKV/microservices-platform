@@ -21,18 +21,20 @@ spring :
   
   data :
     redis :
+      host : localhost
+      port : 6379
       repositories :
-        enabled : false
+        enabled : true
   
   session :
-    store-type : none
+    store-type : redis
   
   cache :
-    type : none
+    type : redis
   
   redis :
-    cache :
-      enabled : false
+    host : localhost
+    port : 6379
   
   mail :
     host : localhost
@@ -136,7 +138,7 @@ gripday :
       include-host-tag : false
       include-application-tag : false
       include-environment-tag : false
-      custom-tags : { }
+      custom-tags : {} 
     logging :
       level : DEBUG
       format : console

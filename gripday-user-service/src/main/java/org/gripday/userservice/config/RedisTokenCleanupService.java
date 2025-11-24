@@ -5,6 +5,7 @@ import java.time.Instant;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
  * Prevents Redis memory bloat by removing stale data.
  */
 @Service
+@ConditionalOnBean(RedisTemplate.class)
 public class RedisTokenCleanupService {
 
   private static final Logger logger = LoggerFactory.getLogger(RedisTokenCleanupService.class);
@@ -22,7 +24,7 @@ public class RedisTokenCleanupService {
   private final MeterRegistry meterRegistry;
 
   public RedisTokenCleanupService(
-      final RedisTemplate<String, String> redisTemplate,
+      @org.springframework.beans.factory.annotation.Autowired(required = false) final RedisTemplate<String, String> redisTemplate,
       final MeterRegistry meterRegistry) {
     this.redisTemplate = redisTemplate;
     this.meterRegistry = meterRegistry;
@@ -33,6 +35,11 @@ public class RedisTokenCleanupService {
    */
   @Scheduled(cron = "0 0 2 * * *")
   public void cleanupExpiredTokens() {
+    if (redisTemplate == null) {
+      logger.debug("Redis not configured, skipping token cleanup");
+      return;
+    }
+
     logger.info("Starting token cleanup job");
     var startTime = Instant.now();
 
