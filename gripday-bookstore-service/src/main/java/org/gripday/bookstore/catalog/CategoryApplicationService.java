@@ -79,8 +79,8 @@ public class CategoryApplicationService {
     var category = categoryRepository.findById(id)
         .orElseThrow(() -> new CategoryNotFoundException(id));
 
-    if (!category.getName().equalsIgnoreCase(name) &&
-        categoryRepository.existsByNameIgnoreCase(name)) {
+    if (!category.getName().equalsIgnoreCase(name)
+        && categoryRepository.existsByNameIgnoreCase(name)) {
       throw new DuplicateCategoryException(name);
     }
 
