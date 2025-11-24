@@ -119,9 +119,9 @@ class PasswordResetServiceTest {
     // Assert - should not throw exception or send email
     verify(emailService, never()).sendPasswordResetEmail(any(), anyString());
     verify(securityAuditService).logSuspiciousActivity(
-        eq(null), 
-        eq("Password reset requested for unknown email"), 
-        eq("127.0.0.1"), 
+        eq(null),
+        eq("Password reset requested for unknown email"),
+        eq("127.0.0.1"),
         eq("Mozilla/5.0")
     );
   }
@@ -190,7 +190,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
     when(passwordEncoder.encode(newPassword)).thenReturn("new-hashed-password");
@@ -213,7 +213,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "invalid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:invalid-token")).thenReturn(null);
 
     // Act & Assert
@@ -230,7 +230,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "unsafe-token";
     var newPassword = "newPassword123";
-    
+
     when(inputSanitizer.isInputSafe("unsafe-token")).thenReturn(false);
 
     // Act & Assert
@@ -247,7 +247,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -265,7 +265,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "short";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
@@ -283,7 +283,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
     when(passwordEncoder.encode(newPassword)).thenReturn("new-hashed-password");
@@ -304,7 +304,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
     when(passwordEncoder.encode(newPassword)).thenReturn("new-hashed-password");
@@ -392,7 +392,7 @@ class PasswordResetServiceTest {
     // Arrange
     var token = "valid-token";
     var newPassword = "newPassword123";
-    
+
     when(redisService.get("password-reset:token:valid-token")).thenReturn(1L);
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
     when(passwordEncoder.encode(newPassword)).thenReturn("new-hashed-password");

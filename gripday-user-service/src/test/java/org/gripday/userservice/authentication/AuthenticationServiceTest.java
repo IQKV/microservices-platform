@@ -95,7 +95,7 @@ class AuthenticationServiceTest {
     setUserId(testUser, 1L);
     testUser.setEnabled(true);
     testUser.setEmailVerified(true);
-    
+
     var authority = new Authority("ROLE_USER", "User role");
     testUser.setAuthorities(Set.of(authority));
 
@@ -133,7 +133,7 @@ class AuthenticationServiceTest {
       assertThat(response.user().username()).isEqualTo("testuser");
       assertThat(response.user().email()).isEqualTo("test@example.com");
       assertThat(response.user().tenantId()).isEqualTo("tenant-123");
-      
+
       // Verify security operations
       verify(inputSanitizer).sanitizeInput("testuser");
       verify(inputSanitizer).isInputSafe("testuser");
@@ -165,7 +165,7 @@ class AuthenticationServiceTest {
 
       // Assert
       assertThat(response.expiresIn()).isEqualTo(604800L); // 7 days
-      
+
       // Verify session timeout is extended for remember me
       var durationCaptor = ArgumentCaptor.forClass(Duration.class);
       verify(sessionService).storeSession(anyString(), any(), durationCaptor.capture());
@@ -185,9 +185,9 @@ class AuthenticationServiceTest {
           .hasMessageContaining("Invalid input detected");
 
       verify(securityAuditService).logSuspiciousActivity(
-          eq("testuser"), 
-          eq("Potential injection attempt in username"), 
-          eq("127.0.0.1"), 
+          eq("testuser"),
+          eq("Potential injection attempt in username"),
+          eq("127.0.0.1"),
           eq("Mozilla/5.0")
       );
       verifyNoInteractions(userRepository);
@@ -385,9 +385,9 @@ class AuthenticationServiceTest {
           .hasMessageContaining("Current password is incorrect");
 
       verify(securityAuditService).logFailedAuthentication(
-          eq("testuser"), 
-          eq("Invalid current password during password change"), 
-          eq("127.0.0.1"), 
+          eq("testuser"),
+          eq("Invalid current password during password change"),
+          eq("127.0.0.1"),
           eq("web")
       );
       verify(userRepository, never()).save(any());
@@ -453,7 +453,7 @@ class AuthenticationServiceTest {
       // Arrange
       var refreshRequest = new RefreshTokenRequest("refresh-token");
       var mockJwt = createMockJwt("1", "refresh", Instant.now());
-      
+
       when(jwtService.validateToken("refresh-token")).thenReturn(mockJwt);
       when(jwtService.isUserRefreshRevoked("1", mockJwt.getIssuedAt())).thenReturn(false);
       when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -469,7 +469,7 @@ class AuthenticationServiceTest {
       assertThat(response.expiresIn()).isEqualTo(900L);
       assertThat(response.user()).isNotNull();
       assertThat(response.user().username()).isEqualTo("testuser");
-      
+
       verify(jwtService).validateToken("refresh-token");
       verify(jwtService).isUserRefreshRevoked("1", mockJwt.getIssuedAt());
       verify(jwtService).generateAccessToken(testUser);
@@ -481,7 +481,7 @@ class AuthenticationServiceTest {
       // Arrange
       var refreshRequest = new RefreshTokenRequest("access-token");
       var mockJwt = createMockJwt("1", "access", Instant.now());
-      
+
       when(jwtService.validateToken("access-token")).thenReturn(mockJwt);
 
       // Act & Assert
@@ -500,7 +500,7 @@ class AuthenticationServiceTest {
       // Arrange
       var refreshRequest = new RefreshTokenRequest("refresh-token");
       var mockJwt = createMockJwt("1", "refresh", Instant.now());
-      
+
       when(jwtService.validateToken("refresh-token")).thenReturn(mockJwt);
       when(jwtService.isUserRefreshRevoked("1", mockJwt.getIssuedAt())).thenReturn(true);
 
@@ -521,7 +521,7 @@ class AuthenticationServiceTest {
       testUser.setEnabled(false);
       var refreshRequest = new RefreshTokenRequest("refresh-token");
       var mockJwt = createMockJwt("1", "refresh", Instant.now());
-      
+
       when(jwtService.validateToken("refresh-token")).thenReturn(mockJwt);
       when(jwtService.isUserRefreshRevoked("1", mockJwt.getIssuedAt())).thenReturn(false);
       when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -541,7 +541,7 @@ class AuthenticationServiceTest {
       // Arrange
       var refreshRequest = new RefreshTokenRequest("refresh-token");
       var mockJwt = createMockJwt("999", "refresh", Instant.now());
-      
+
       when(jwtService.validateToken("refresh-token")).thenReturn(mockJwt);
       when(jwtService.isUserRefreshRevoked("999", mockJwt.getIssuedAt())).thenReturn(false);
       when(userRepository.findById(999L)).thenReturn(Optional.empty());
@@ -567,7 +567,7 @@ class AuthenticationServiceTest {
       var accessToken = "access-token";
       var sessionId = "session-123";
       var mockJwt = createMockJwt("1", "access", Instant.now());
-      
+
       when(jwtService.validateToken(accessToken)).thenReturn(mockJwt);
 
       // Act
@@ -641,7 +641,7 @@ class AuthenticationServiceTest {
 
       // Assert
       assertThat(isValid).isTrue();
-      
+
       var durationCaptor = ArgumentCaptor.forClass(Duration.class);
       verify(sessionService).extendSession(eq(sessionId), durationCaptor.capture());
       assertThat(durationCaptor.getValue()).isEqualTo(Duration.ofMinutes(30));

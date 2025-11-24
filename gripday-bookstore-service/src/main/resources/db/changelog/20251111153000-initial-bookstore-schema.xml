@@ -252,7 +252,8 @@
         </sql>
 
         <sql dbms="postgresql">
-            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE
+            EXTENSION IF NOT EXISTS pg_trgm;
         </sql>
 
         <sql dbms="postgresql">
@@ -335,8 +336,7 @@
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_inventory_updated_at_desc ON inventory (updated_at DESC)
-                WHERE updated_at IS NOT NULL;
+            CREATE INDEX idx_inventory_updated_at_desc ON inventory (updated_at DESC) WHERE updated_at IS NOT NULL;
         </sql>
 
         <createIndex tableName="inventory" indexName="idx_inventory_book_id_quantity">
@@ -356,25 +356,21 @@
         </createIndex>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_recent_available ON books (created_at DESC, id)
-                WHERE available = true;
+            CREATE INDEX idx_books_recent_available ON books (created_at DESC, id) WHERE available = true;
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_in_stock ON books (id, title, author, price, category_id)
-                WHERE available = true AND EXISTS (
+            CREATE INDEX idx_books_in_stock ON books (id, title, author, price, category_id) WHERE available = true AND EXISTS (
                     SELECT 1 FROM inventory i WHERE i.book_id = books.id AND i.quantity > 0
                 );
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_title_available_lower ON books (LOWER(title), available, id)
-                WHERE available = true;
+            CREATE INDEX idx_books_title_available_lower ON books (LOWER(title), available, id) WHERE available = true;
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_author_available_lower ON books (LOWER(author), available, id)
-                WHERE available = true;
+            CREATE INDEX idx_books_author_available_lower ON books (LOWER(author), available, id) WHERE available = true;
         </sql>
     </changeSet>
 
@@ -398,13 +394,11 @@
         <comment>Optimize ISBN lookups which are unique and frequently used</comment>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_isbn_covering ON books (isbn, id, title, author, price, available)
-                WHERE isbn IS NOT NULL;
+            CREATE INDEX idx_books_isbn_covering ON books (isbn, id, title, author, price, available) WHERE isbn IS NOT NULL;
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_inventory_book_isbn ON inventory (book_id)
-                INCLUDE (quantity, reserved_quantity, low_stock_threshold);
+            CREATE INDEX idx_inventory_book_isbn ON inventory (book_id) INCLUDE (quantity, reserved_quantity, low_stock_threshold);
         </sql>
     </changeSet>
 
@@ -412,18 +406,15 @@
         <comment>Add indexes for count and sum aggregation queries</comment>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_books_available_count ON books (available)
-                WHERE available = true;
+            CREATE INDEX idx_books_available_count ON books (available) WHERE available = true;
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_inventory_reserved_count ON inventory (reserved_quantity)
-                WHERE reserved_quantity > 0;
+            CREATE INDEX idx_inventory_reserved_count ON inventory (reserved_quantity) WHERE reserved_quantity > 0;
         </sql>
 
         <sql dbms="postgresql">
-            CREATE INDEX idx_inventory_quantity_sum ON inventory (quantity)
-                WHERE quantity > 0;
+            CREATE INDEX idx_inventory_quantity_sum ON inventory (quantity) WHERE quantity > 0;
         </sql>
     </changeSet>
 

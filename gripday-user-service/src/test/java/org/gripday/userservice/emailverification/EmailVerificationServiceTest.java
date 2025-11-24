@@ -140,7 +140,7 @@ class EmailVerificationServiceTest {
     // Arrange
     var token = "valid-token";
     var verificationToken = new VerificationToken(token, 1L, LocalDateTime.now().plusHours(24), "tenant-123");
-    
+
     when(tokenRepository.findByTokenAndUsedFalse(token)).thenReturn(Optional.of(verificationToken));
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
@@ -152,7 +152,7 @@ class EmailVerificationServiceTest {
     assertThat(response.success()).isTrue();
     assertThat(response.message()).contains("verified successfully");
     assertThat(response.username()).isEqualTo("testuser");
-    
+
     verify(tokenRepository).save(verificationToken);
     verify(userRepository).save(testUser);
     verify(metricsService).recordVerificationSuccess();
@@ -201,7 +201,7 @@ class EmailVerificationServiceTest {
     // Arrange
     var token = "expired-token";
     var verificationToken = new VerificationToken(token, 1L, LocalDateTime.now().minusHours(1), "tenant-123");
-    
+
     when(tokenRepository.findByTokenAndUsedFalse(token)).thenReturn(Optional.of(verificationToken));
 
     // Act & Assert
@@ -218,7 +218,7 @@ class EmailVerificationServiceTest {
     // Arrange
     var token = "valid-token";
     var verificationToken = new VerificationToken(token, 1L, LocalDateTime.now().plusHours(24), "tenant-123");
-    
+
     when(tokenRepository.findByTokenAndUsedFalse(token)).thenReturn(Optional.of(verificationToken));
     when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -237,7 +237,7 @@ class EmailVerificationServiceTest {
     var token = "valid-token";
     var verificationToken = new VerificationToken(token, 1L, LocalDateTime.now().plusHours(24), "tenant-123");
     testUser.setEmailVerified(true);
-    
+
     when(tokenRepository.findByTokenAndUsedFalse(token)).thenReturn(Optional.of(verificationToken));
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
@@ -256,7 +256,7 @@ class EmailVerificationServiceTest {
     // Arrange
     var token = "valid-token";
     var verificationToken = new VerificationToken(token, 1L, LocalDateTime.now().plusHours(24), "tenant-123");
-    
+
     when(tokenRepository.findByTokenAndUsedFalse(token)).thenReturn(Optional.of(verificationToken));
     when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
     doThrow(new RuntimeException("Email service unavailable"))

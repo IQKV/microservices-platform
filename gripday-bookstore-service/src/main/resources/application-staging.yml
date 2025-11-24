@@ -14,190 +14,190 @@
 #   java -jar bookstore-service.jar --spring.profiles.active=staging
 # ============================================================================
 
-spring:
+spring :
   # ============================================================================
   # Database Configuration - Staging PostgreSQL
   # ============================================================================
-  datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    hikari:
-      maximum-pool-size: 15
-      minimum-idle: 3
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000  # Detect connection leaks
+  datasource :
+    url : jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username : ${DB_USERNAME}
+    password : ${DB_PASSWORD}
+    hikari :
+      maximum-pool-size : 15
+      minimum-idle : 3
+      connection-timeout : 30000
+      idle-timeout : 600000
+      max-lifetime : 1800000
+      leak-detection-threshold : 60000  # Detect connection leaks
   
   # ============================================================================
   # JPA Configuration - Staging
   # ============================================================================
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
+  jpa :
+    open-in-view : false
+    hibernate :
+      ddl-auto : validate
+    show-sql : false
+    properties :
+      hibernate :
+        dialect : org.hibernate.dialect.PostgreSQLDialect
+        format_sql : true
+        jdbc :
+          batch_size : 20
+        order_inserts : true
+        order_updates : true
   
   # ============================================================================
   # Liquibase Configuration - Staging
   # ============================================================================
-  liquibase:
-    change-log: classpath:db/changelog/master.xml
-    enabled: true
+  liquibase :
+    change-log : classpath:db/changelog/master.xml
+    enabled : true
   
   # ============================================================================
   # Redis Configuration - Staging Redis
   # ============================================================================
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD}
-      timeout: 3000ms
-      lettuce:
-        pool:
-          max-active: 16
-          max-idle: 8
-          min-idle: 2
+  data :
+    redis :
+      host : ${REDIS_HOST}
+      port : ${REDIS_PORT:6379}
+      password : ${REDIS_PASSWORD}
+      timeout : 3000ms
+      lettuce :
+        pool :
+          max-active : 16
+          max-idle : 8
+          min-idle : 2
   
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000  # 10 minutes
-      cache-null-values: false
+  cache :
+    type : redis
+    redis :
+      time-to-live : 600000  # 10 minutes
+      cache-null-values : false
   
   # ============================================================================
   # Security Configuration - Staging User Service
   # ============================================================================
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${JWT_ISSUER_URI}
-          jwk-set-uri: ${JWT_JWK_SET_URI}
+  security :
+    oauth2 :
+      resourceserver :
+        jwt :
+          issuer-uri : ${JWT_ISSUER_URI}
+          jwk-set-uri : ${JWT_JWK_SET_URI}
 
 # ============================================================================
 # Server Configuration - Staging Port
 # ============================================================================
-server:
-  port: ${SERVER_PORT:8081}
-  servlet:
-    context-path: /
-  error:
-    include-message: always
-    include-binding-errors: always
-  shutdown: graceful
+server :
+  port : ${SERVER_PORT:8081}
+  servlet :
+    context-path : /
+  error :
+    include-message : always
+    include-binding-errors : always
+  shutdown : graceful
   
   # Graceful shutdown timeout
-  lifecycle:
-    timeout-per-shutdown-phase: 30s
+  lifecycle :
+    timeout-per-shutdown-phase : 30s
 
 # ============================================================================
 # Logging Configuration - Balanced for Staging
 # ============================================================================
-logging:
-  level:
-    org.gripday.bookstore: INFO
-    org.springframework.security: INFO
-    org.springframework.cache: INFO
-    org.hibernate.SQL: INFO
-    AUDIT: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
+logging :
+  level :
+    org.gripday.bookstore : INFO
+    org.springframework.security : INFO
+    org.springframework.cache : INFO
+    org.hibernate.SQL : INFO
+    AUDIT : INFO
+  pattern :
+    console : "%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
 
 # ============================================================================
 # Actuator Configuration - Limited Exposure
 # ============================================================================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: when-authorized
-      show-components: always
-      probes:
-        enabled: true
-    metrics:
-      enabled: true
-    prometheus:
-      enabled: true
-  health:
-    defaults:
-      enabled: true
-    db:
-      enabled: true
-    redis:
-      enabled: true
-    diskspace:
-      enabled: true
-  metrics:
-    distribution:
-      percentiles-histogram:
-        "[http.server.requests]": true
-        "[bookstore.books.search.duration]": true
-        "[bookstore.books.creation.duration]": true
-        "[bookstore.inventory.update.duration]": true
-    tags:
-      application: bookstore-service
-      environment: staging
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-        step: 60s
-        descriptions: true
+management :
+  endpoints :
+    web :
+      exposure :
+        include : health,info,metrics,prometheus
+      base-path : /actuator
+  endpoint :
+    health :
+      show-details : when-authorized
+      show-components : always
+      probes :
+        enabled : true
+    metrics :
+      enabled : true
+    prometheus :
+      enabled : true
+  health :
+    defaults :
+      enabled : true
+    db :
+      enabled : true
+    redis :
+      enabled : true
+    diskspace :
+      enabled : true
+  metrics :
+    distribution :
+      percentiles-histogram :
+        "[http.server.requests]" : true
+        "[bookstore.books.search.duration]" : true
+        "[bookstore.books.creation.duration]" : true
+        "[bookstore.inventory.update.duration]" : true
+    tags :
+      application : bookstore-service
+      environment : staging
+  prometheus :
+    metrics :
+      export :
+        enabled : true
+        step : 60s
+        descriptions : true
 
 # ============================================================================
 # OpenAPI / Swagger Documentation - Staging
 # ============================================================================
-springdoc:
-  api-docs:
-    enabled: true
-    path: /api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    operationsSorter: method
-    tagsSorter: alpha
-    tryItOutEnabled: false
-    filter: true
-    displayRequestDuration: true
-    displayOperationId: false
-    defaultModelsExpandDepth: 1
-    defaultModelExpandDepth: 1
-    docExpansion: none
-  show-actuator: true
-  group-configs:
-    - group: 'bookstore-api-v1'
-      display-name: 'Bookstore API v1 (Current)'
-      paths-to-match: '/api/v1/bookstore/**'
-    - group: 'bookstore-api-all'
-      display-name: 'Bookstore API (All Versions)'
-      paths-to-match: '/api/**/bookstore/**'
-    - group: 'actuator'
-      display-name: 'Actuator Endpoints'
-      paths-to-match: '/actuator/**'
+springdoc :
+  api-docs :
+    enabled : true
+    path : /api-docs
+  swagger-ui :
+    enabled : true
+    path : /swagger-ui.html
+    operationsSorter : method
+    tagsSorter : alpha
+    tryItOutEnabled : false
+    filter : true
+    displayRequestDuration : true
+    displayOperationId : false
+    defaultModelsExpandDepth : 1
+    defaultModelExpandDepth : 1
+    docExpansion : none
+  show-actuator : true
+  group-configs :
+    - group : 'bookstore-api-v1'
+      display-name : 'Bookstore API v1 (Current)'
+      paths-to-match : '/api/v1/bookstore/**'
+    - group : 'bookstore-api-all'
+      display-name : 'Bookstore API (All Versions)'
+      paths-to-match : '/api/**/bookstore/**'
+    - group : 'actuator'
+      display-name : 'Actuator Endpoints'
+      paths-to-match : '/actuator/**'
 
 # ============================================================================
 # CORS Configuration - Staging Frontend
 # ============================================================================
-gripday:
-  bookstore:
-    cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:https://staging.bookstore.gripday.com}
-      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
-      allowed-headers: "*"
-      allow-credentials: true
-      max-age: 3600
+gripday :
+  bookstore :
+    cors :
+      allowed-origins : ${CORS_ALLOWED_ORIGINS:https://staging.bookstore.gripday.com}
+      allowed-methods : "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers : "*"
+      allow-credentials : true
+      max-age : 3600

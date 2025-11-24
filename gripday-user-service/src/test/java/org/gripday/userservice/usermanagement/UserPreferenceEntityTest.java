@@ -72,7 +72,7 @@ class UserPreferenceEntityTest {
   void shouldHandleEqualsAndHashCode() {
     var user1 = new User("user1", "user1@example.com", "hash", "User", "One", "tenant-123");
     var user2 = new User("user2", "user2@example.com", "hash", "User", "Two", "tenant-123");
-    
+
     var pref1 = new UserPreference(user1, "tenant-123");
     var pref2 = new UserPreference(user1, "tenant-123");
     var pref3 = new UserPreference(user2, "tenant-123");
@@ -82,7 +82,7 @@ class UserPreferenceEntityTest {
     assertThat(pref1).isNotEqualTo(pref3);
     assertThat(pref1).isNotEqualTo(null);
     assertThat(pref1).isNotEqualTo(new Object());
-    
+
     assertThat(pref1.hashCode()).isEqualTo(pref2.hashCode());
   }
 
@@ -93,7 +93,7 @@ class UserPreferenceEntityTest {
     var preference = new UserPreference(user, "tenant-123");
 
     var toString = preference.toString();
-    
+
     assertThat(toString).contains("UserPreference");
     assertThat(toString).contains("locale='en'");
     assertThat(toString).contains("timezone='UTC'");

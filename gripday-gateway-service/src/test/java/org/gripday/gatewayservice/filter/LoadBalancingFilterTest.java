@@ -23,58 +23,58 @@ import reactor.core.publisher.Mono;
 @DisplayName("LoadBalancingFilter Tests")
 class LoadBalancingFilterTest {
 
-    @Mock(lenient = true)
-    private LoadBalancingService loadBalancingService;
+  @Mock(lenient = true)
+  private LoadBalancingService loadBalancingService;
 
-    @Mock(lenient = true)
-    private GatewayFilterChain filterChain;
+  @Mock(lenient = true)
+  private GatewayFilterChain filterChain;
 
-    private LoadBalancingFilter loadBalancingFilter;
+  private LoadBalancingFilter loadBalancingFilter;
 
-    @BeforeEach
-    void setUp() {
-        loadBalancingFilter = new LoadBalancingFilter(loadBalancingService);
-        when(filterChain.filter(any())).thenReturn(Mono.empty());
-    }
+  @BeforeEach
+  void setUp() {
+    loadBalancingFilter = new LoadBalancingFilter(loadBalancingService);
+    when(filterChain.filter(any())).thenReturn(Mono.empty());
+  }
 
-    @Test
-    @DisplayName("Should apply load balancing when enabled")
-    void shouldApplyLoadBalancingWhenEnabled() {
-        var config = new LoadBalancingFilter.Config();
-        config.setServiceName("user-service");
-        config.setEnableLoadBalancing(true);
+  @Test
+  @DisplayName("Should apply load balancing when enabled")
+  void shouldApplyLoadBalancingWhenEnabled() {
+    var config = new LoadBalancingFilter.Config();
+    config.setServiceName("user-service");
+    config.setEnableLoadBalancing(true);
 
-        var serviceUri = URI.create("http://user-service-1:8080");
-        when(loadBalancingService.getNextServiceInstance(eq("user-service"))).thenReturn(serviceUri);
+    var serviceUri = URI.create("http://user-service-1:8080");
+    when(loadBalancingService.getNextServiceInstance(eq("user-service"))).thenReturn(serviceUri);
 
-        var request = MockServerHttpRequest.get("/api/users").build();
-        var exchange = MockServerWebExchange.from(request);
+    var request = MockServerHttpRequest.get("/api/users").build();
+    var exchange = MockServerWebExchange.from(request);
 
-        var filter = loadBalancingFilter.apply(config);
-        filter.filter(exchange, filterChain).block();
+    var filter = loadBalancingFilter.apply(config);
+    filter.filter(exchange, filterChain).block();
 
-        assertThat(config.getServiceName()).isEqualTo("user-service");
-    }
+    assertThat(config.getServiceName()).isEqualTo("user-service");
+  }
 
-    @Test
-    @DisplayName("Config should have default values")
-    void configShouldHaveDefaultValues() {
-        var config = new LoadBalancingFilter.Config();
+  @Test
+  @DisplayName("Config should have default values")
+  void configShouldHaveDefaultValues() {
+    var config = new LoadBalancingFilter.Config();
 
-        assertThat(config.isEnableLoadBalancing()).isTrue();
-        assertThat(config.getStrategy()).isEqualTo("round-robin");
-    }
+    assertThat(config.isEnableLoadBalancing()).isTrue();
+    assertThat(config.getStrategy()).isEqualTo("round-robin");
+  }
 
-    @Test
-    @DisplayName("Config should allow setting values")
-    void configShouldAllowSettingValues() {
-        var config = new LoadBalancingFilter.Config();
-        config.setServiceName("test-service");
-        config.setEnableLoadBalancing(false);
-        config.setStrategy("weighted");
+  @Test
+  @DisplayName("Config should allow setting values")
+  void configShouldAllowSettingValues() {
+    var config = new LoadBalancingFilter.Config();
+    config.setServiceName("test-service");
+    config.setEnableLoadBalancing(false);
+    config.setStrategy("weighted");
 
-        assertThat(config.getServiceName()).isEqualTo("test-service");
-        assertThat(config.isEnableLoadBalancing()).isFalse();
-        assertThat(config.getStrategy()).isEqualTo("weighted");
-    }
+    assertThat(config.getServiceName()).isEqualTo("test-service");
+    assertThat(config.isEnableLoadBalancing()).isFalse();
+    assertThat(config.getStrategy()).isEqualTo("weighted");
+  }
 }

@@ -310,7 +310,7 @@ class UserManagementServiceTest {
     var idField = User.class.getDeclaredField("id");
     idField.setAccessible(true);
     idField.set(userToDelete, 2L);
-    
+
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(userToDelete));
 
     // Act
@@ -328,7 +328,7 @@ class UserManagementServiceTest {
     var idField = User.class.getDeclaredField("id");
     idField.setAccessible(true);
     idField.set(selfUser, 1L);
-    
+
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(selfUser));
 
     // Act & Assert

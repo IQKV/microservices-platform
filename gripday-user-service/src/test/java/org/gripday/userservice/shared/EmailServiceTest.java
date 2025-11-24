@@ -158,7 +158,8 @@ class EmailServiceTest {
     when(messageService.getMessage(anyString(), any(Locale.class))).thenReturn("Test Message");
     when(messageService.getMessage(anyString(), any(Object[].class), any(Locale.class))).thenReturn("Test Message");
     when(templateEngine.process(anyString(), any(Context.class))).thenReturn("<html>Test Email</html>");
-    doThrow(new MailException("SMTP error") {}).when(mailSender).send(any(MimeMessage.class));
+    doThrow(new MailException("SMTP error") {
+    }).when(mailSender).send(any(MimeMessage.class));
 
     // Act & Assert
     assertThatThrownBy(() -> emailService.sendVerificationEmail(testUser, token))

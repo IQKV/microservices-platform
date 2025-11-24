@@ -25,252 +25,252 @@ import reactor.core.publisher.Mono;
 @DisplayName("TenantQuotaMonitoringService Tests")
 class TenantQuotaMonitoringServiceTest {
 
-    @Mock(lenient = true)
-    private ReactiveStringRedisTemplate redisTemplate;
+  @Mock(lenient = true)
+  private ReactiveStringRedisTemplate redisTemplate;
 
-    @Mock(lenient = true)
-    private ReactiveZSetOperations<String, String> zSetOperations;
+  @Mock(lenient = true)
+  private ReactiveZSetOperations<String, String> zSetOperations;
 
-    private TenantQuotaMonitoringService tenantQuotaMonitoringService;
-    private GripdayProperties properties;
+  private TenantQuotaMonitoringService tenantQuotaMonitoringService;
+  private GripdayProperties properties;
 
-    @BeforeEach
-    void setUp() {
-        properties = createTestProperties();
-        tenantQuotaMonitoringService = new TenantQuotaMonitoringService(properties, redisTemplate);
-        when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
-    }
+  @BeforeEach
+  void setUp() {
+    properties = createTestProperties();
+    tenantQuotaMonitoringService = new TenantQuotaMonitoringService(properties, redisTemplate);
+    when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+  }
 
-    @Test
-    @DisplayName("Should record tenant request")
-    void shouldRecordTenantRequest() {
-        var result = tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false);
+  @Test
+  @DisplayName("Should record tenant request")
+  void shouldRecordTenantRequest() {
+    var result = tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false);
 
-        assertThat(result).isNotNull();
-        result.block();
-    }
+    assertThat(result).isNotNull();
+    result.block();
+  }
 
-    @Test
-    @DisplayName("Should get tenant usage stats")
-    void shouldGetTenantUsageStats() {
-        tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
+  @Test
+  @DisplayName("Should get tenant usage stats")
+  void shouldGetTenantUsageStats() {
+    tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
 
-        var stats = tenantQuotaMonitoringService.getTenantUsageStats("tenant-123").block();
+    var stats = tenantQuotaMonitoringService.getTenantUsageStats("tenant-123").block();
 
-        assertThat(stats).isNotNull();
-        assertThat(stats.getTenantId()).isEqualTo("tenant-123");
-        assertThat(stats.getTotalRequests()).isEqualTo(1);
-    }
+    assertThat(stats).isNotNull();
+    assertThat(stats.getTenantId()).isEqualTo("tenant-123");
+    assertThat(stats.getTotalRequests()).isEqualTo(1);
+  }
 
-    @Test
-    @DisplayName("Should get all tenant usage stats")
-    void shouldGetAllTenantUsageStats() {
-        tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
-        tenantQuotaMonitoringService.recordTenantRequest("tenant-456", "/api/orders", false).block();
+  @Test
+  @DisplayName("Should get all tenant usage stats")
+  void shouldGetAllTenantUsageStats() {
+    tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
+    tenantQuotaMonitoringService.recordTenantRequest("tenant-456", "/api/orders", false).block();
 
-        var allStats = tenantQuotaMonitoringService.getAllTenantUsageStats().block();
+    var allStats = tenantQuotaMonitoringService.getAllTenantUsageStats().block();
 
-        assertThat(allStats).isNotNull();
-        assertThat(allStats).hasSize(2);
-        assertThat(allStats).containsKeys("tenant-123", "tenant-456");
-    }
+    assertThat(allStats).isNotNull();
+    assertThat(allStats).hasSize(2);
+    assertThat(allStats).containsKeys("tenant-123", "tenant-456");
+  }
 
-    @Test
-    @DisplayName("Should reset tenant usage stats")
-    void shouldResetTenantUsageStats() {
-        tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
-        tenantQuotaMonitoringService.resetTenantUsageStats("tenant-123").block();
+  @Test
+  @DisplayName("Should reset tenant usage stats")
+  void shouldResetTenantUsageStats() {
+    tenantQuotaMonitoringService.recordTenantRequest("tenant-123", "/api/users", false).block();
+    tenantQuotaMonitoringService.resetTenantUsageStats("tenant-123").block();
 
-        var stats = tenantQuotaMonitoringService.getTenantUsageStats("tenant-123").block();
+    var stats = tenantQuotaMonitoringService.getTenantUsageStats("tenant-123").block();
 
-        assertThat(stats).isNotNull();
-        assertThat(stats.getTotalRequests()).isEqualTo(0);
-    }
+    assertThat(stats).isNotNull();
+    assertThat(stats.getTotalRequests()).isEqualTo(0);
+  }
 
-    @Test
-    @DisplayName("Should check if tenant is approaching quota")
-    void shouldCheckIfTenantIsApproachingQuota() {
-        when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1", "key2"));
-        when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(850L));
+  @Test
+  @DisplayName("Should check if tenant is approaching quota")
+  void shouldCheckIfTenantIsApproachingQuota() {
+    when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1", "key2"));
+    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(850L));
 
-        var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
+    var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
 
-        assertThat(isApproaching).isTrue();
-    }
+    assertThat(isApproaching).isTrue();
+  }
 
-    @Test
-    @DisplayName("Should return false when tenant is not approaching quota")
-    void shouldReturnFalseWhenTenantIsNotApproachingQuota() {
-        when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1"));
-        when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(100L));
+  @Test
+  @DisplayName("Should return false when tenant is not approaching quota")
+  void shouldReturnFalseWhenTenantIsNotApproachingQuota() {
+    when(redisTemplate.keys(anyString())).thenReturn(Flux.just("key1"));
+    when(zSetOperations.count(anyString(), any())).thenReturn(Mono.just(100L));
 
-        var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
+    var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
 
-        assertThat(isApproaching).isFalse();
-    }
+    assertThat(isApproaching).isFalse();
+  }
 
-    @Test
-    @DisplayName("Should return false when no usage data exists")
-    void shouldReturnFalseWhenNoUsageDataExists() {
-        when(redisTemplate.keys(anyString())).thenReturn(Flux.empty());
+  @Test
+  @DisplayName("Should return false when no usage data exists")
+  void shouldReturnFalseWhenNoUsageDataExists() {
+    when(redisTemplate.keys(anyString())).thenReturn(Flux.empty());
 
-        var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
+    var isApproaching = tenantQuotaMonitoringService.isTenantApproachingQuota("tenant-123").block();
 
-        assertThat(isApproaching).isFalse();
-    }
+    assertThat(isApproaching).isFalse();
+  }
 
-    @Test
-    @DisplayName("TenantUsageStats should track requests correctly")
-    void tenantUsageStatsShouldTrackRequestsCorrectly() {
-        var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
+  @Test
+  @DisplayName("TenantUsageStats should track requests correctly")
+  void tenantUsageStatsShouldTrackRequestsCorrectly() {
+    var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
 
-        stats.recordRequest("/api/users", false);
-        stats.recordRequest("/api/orders", false);
-        stats.recordRequest("/api/users", true);
+    stats.recordRequest("/api/users", false);
+    stats.recordRequest("/api/orders", false);
+    stats.recordRequest("/api/users", true);
 
-        assertThat(stats.getTenantId()).isEqualTo("tenant-123");
-        assertThat(stats.getTotalRequests()).isEqualTo(3);
-        assertThat(stats.getRateLimitedRequests()).isEqualTo(1);
-        assertThat(stats.getEndpointCounts()).hasSize(2);
-        assertThat(stats.getEndpointCounts().get("/api/users")).isEqualTo(2);
-        assertThat(stats.getEndpointCounts().get("/api/orders")).isEqualTo(1);
-    }
+    assertThat(stats.getTenantId()).isEqualTo("tenant-123");
+    assertThat(stats.getTotalRequests()).isEqualTo(3);
+    assertThat(stats.getRateLimitedRequests()).isEqualTo(1);
+    assertThat(stats.getEndpointCounts()).hasSize(2);
+    assertThat(stats.getEndpointCounts().get("/api/users")).isEqualTo(2);
+    assertThat(stats.getEndpointCounts().get("/api/orders")).isEqualTo(1);
+  }
 
-    @Test
-    @DisplayName("TenantUsageStats should calculate rate limited percentage")
-    void tenantUsageStatsShouldCalculateRateLimitedPercentage() {
-        var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
+  @Test
+  @DisplayName("TenantUsageStats should calculate rate limited percentage")
+  void tenantUsageStatsShouldCalculateRateLimitedPercentage() {
+    var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
 
-        stats.recordRequest("/api/users", false);
-        stats.recordRequest("/api/users", false);
-        stats.recordRequest("/api/users", true);
-        stats.recordRequest("/api/users", true);
+    stats.recordRequest("/api/users", false);
+    stats.recordRequest("/api/users", false);
+    stats.recordRequest("/api/users", true);
+    stats.recordRequest("/api/users", true);
 
-        assertThat(stats.getRateLimitedPercentage()).isEqualTo(50.0);
-    }
+    assertThat(stats.getRateLimitedPercentage()).isEqualTo(50.0);
+  }
 
-    @Test
-    @DisplayName("TenantUsageStats should return zero percentage when no requests")
-    void tenantUsageStatsShouldReturnZeroPercentageWhenNoRequests() {
-        var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
+  @Test
+  @DisplayName("TenantUsageStats should return zero percentage when no requests")
+  void tenantUsageStatsShouldReturnZeroPercentageWhenNoRequests() {
+    var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
 
-        assertThat(stats.getRateLimitedPercentage()).isEqualTo(0.0);
-    }
+    assertThat(stats.getRateLimitedPercentage()).isEqualTo(0.0);
+  }
 
-    @Test
-    @DisplayName("TenantUsageStats should track uptime")
-    void tenantUsageStatsShouldTrackUptime() {
-        var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
+  @Test
+  @DisplayName("TenantUsageStats should track uptime")
+  void tenantUsageStatsShouldTrackUptime() {
+    var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
 
-        var uptime = stats.getUptime();
+    var uptime = stats.getUptime();
 
-        assertThat(uptime).isNotNull();
-        assertThat(uptime.toMillis()).isGreaterThanOrEqualTo(0);
-    }
+    assertThat(uptime).isNotNull();
+    assertThat(uptime.toMillis()).isGreaterThanOrEqualTo(0);
+  }
 
-    @Test
-    @DisplayName("TenantUsageStats should have immutable endpoint counts")
-    void tenantUsageStatsShouldHaveImmutableEndpointCounts() {
-        var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
-        stats.recordRequest("/api/users", false);
+  @Test
+  @DisplayName("TenantUsageStats should have immutable endpoint counts")
+  void tenantUsageStatsShouldHaveImmutableEndpointCounts() {
+    var stats = new TenantQuotaMonitoringService.TenantUsageStats("tenant-123");
+    stats.recordRequest("/api/users", false);
 
-        var endpointCounts = stats.getEndpointCounts();
+    var endpointCounts = stats.getEndpointCounts();
 
-        assertThat(endpointCounts).isUnmodifiable();
-    }
+    assertThat(endpointCounts).isUnmodifiable();
+  }
 
-    private GripdayProperties createTestProperties() {
-        var serviceProps = new GripdayProperties.GatewayProperties.RoutingProperties.ServiceProperties(
-            "http://user-service:8080", "/users/**", true, 5000, 30000, null
-        );
-        
-        var apiPrefix = new GripdayProperties.GatewayProperties.RoutingProperties.ApiPrefixProperties(
-            true, "/api", 0
-        );
-        
-        var loadBalancing = new GripdayProperties.GatewayProperties.RoutingProperties.LoadBalancingProperties(
-            "round-robin", true, Duration.ofSeconds(30)
-        );
-        
-        var routing = new GripdayProperties.GatewayProperties.RoutingProperties(
-            apiPrefix, Map.of("user-service", serviceProps), true, loadBalancing
-        );
-        
-        var jwt = new GripdayProperties.GatewayProperties.SecurityProperties.JwtProperties(
-            Duration.ofMinutes(15), Duration.ofDays(7), "issuer", "audience", "RS256", "http://jwks"
-        );
-        
-        var auth = new GripdayProperties.GatewayProperties.SecurityProperties.AuthenticationProperties(
-            true, "http://user-service", Duration.ofSeconds(5), true
-        );
-        
-        var security = new GripdayProperties.GatewayProperties.SecurityProperties(
-            jwt, auth, List.of("/health", "/actuator/**")
-        );
-        
-        var redis = new GripdayProperties.GatewayProperties.RateLimitingProperties.RedisProperties(
-            "rate-limit:", Duration.ofMinutes(1)
-        );
-        
-        var policies = new GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties(
-            100, 200, Map.of()
-        );
-        
-        var tenantQuotas = new GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties(
-            true, 1000, Map.of()
-        );
-        
-        var rateLimiting = new GripdayProperties.GatewayProperties.RateLimitingProperties(
-            true, redis, policies, tenantQuotas
-        );
-        
-        var circuitBreaker = new GripdayProperties.GatewayProperties.CircuitBreakerProperties(
-            true, 50, 50, Duration.ofSeconds(5), 10, Duration.ofSeconds(60), 100, "COUNT_BASED"
-        );
-        
-        var cors = new GripdayProperties.GatewayProperties.CorsProperties(
-            true, List.of("*"), List.of("GET"), List.of("*"), true, 3600
-        );
-        
-        var requestTransform = new GripdayProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
-            true, true, true, true, List.of(), Map.of()
-        );
-        
-        var responseTransform = new GripdayProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
-            true, true, true, true, List.of()
-        );
-        
-        var transformation = new GripdayProperties.GatewayProperties.TransformationProperties(
-            requestTransform, responseTransform
-        );
-        
-        var gateway = new GripdayProperties.GatewayProperties(
-            routing, security, rateLimiting, circuitBreaker, cors, transformation
-        );
-        
-        var cacheRedis = new GripdayProperties.CacheProperties.RedisProperties(
-            "localhost", 6379, null, 0, Duration.ofSeconds(5),
-            new GripdayProperties.CacheProperties.RedisProperties.PoolProperties(10, 5, 2, Duration.ofSeconds(3)),
-            "cache:", Duration.ofMinutes(10), false
-        );
-        
-        var cache = new GripdayProperties.CacheProperties(cacheRedis);
-        
-        var tracing = new GripdayProperties.ObservabilityProperties.TracingProperties(
-            true, "gateway", 0.1, "http://jaeger", Duration.ofSeconds(5), Duration.ofSeconds(10), 100
-        );
-        
-        var metrics = new GripdayProperties.ObservabilityProperties.MetricsProperties(
-            true, "/metrics", "gateway", true, true, true, Map.of(), List.of()
-        );
-        
-        var logging = new GripdayProperties.ObservabilityProperties.LoggingProperties(
-            "INFO", "json", true, true, true, true, true, true, true,
-            "X-Correlation-ID", "X-Request-ID", "X-Tenant-ID"
-        );
-        
-        var observability = new GripdayProperties.ObservabilityProperties(tracing, metrics, logging);
-        
-        return new GripdayProperties(cache, gateway, observability);
-    }
+  private GripdayProperties createTestProperties() {
+    var serviceProps = new GripdayProperties.GatewayProperties.RoutingProperties.ServiceProperties(
+        "http://user-service:8080", "/users/**", true, 5000, 30000, null
+    );
+
+    var apiPrefix = new GripdayProperties.GatewayProperties.RoutingProperties.ApiPrefixProperties(
+        true, "/api", 0
+    );
+
+    var loadBalancing = new GripdayProperties.GatewayProperties.RoutingProperties.LoadBalancingProperties(
+        "round-robin", true, Duration.ofSeconds(30)
+    );
+
+    var routing = new GripdayProperties.GatewayProperties.RoutingProperties(
+        apiPrefix, Map.of("user-service", serviceProps), true, loadBalancing
+    );
+
+    var jwt = new GripdayProperties.GatewayProperties.SecurityProperties.JwtProperties(
+        Duration.ofMinutes(15), Duration.ofDays(7), "issuer", "audience", "RS256", "http://jwks"
+    );
+
+    var auth = new GripdayProperties.GatewayProperties.SecurityProperties.AuthenticationProperties(
+        true, "http://user-service", Duration.ofSeconds(5), true
+    );
+
+    var security = new GripdayProperties.GatewayProperties.SecurityProperties(
+        jwt, auth, List.of("/health", "/actuator/**")
+    );
+
+    var redis = new GripdayProperties.GatewayProperties.RateLimitingProperties.RedisProperties(
+        "rate-limit:", Duration.ofMinutes(1)
+    );
+
+    var policies = new GripdayProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties(
+        100, 200, Map.of()
+    );
+
+    var tenantQuotas = new GripdayProperties.GatewayProperties.RateLimitingProperties.TenantQuotasProperties(
+        true, 1000, Map.of()
+    );
+
+    var rateLimiting = new GripdayProperties.GatewayProperties.RateLimitingProperties(
+        true, redis, policies, tenantQuotas
+    );
+
+    var circuitBreaker = new GripdayProperties.GatewayProperties.CircuitBreakerProperties(
+        true, 50, 50, Duration.ofSeconds(5), 10, Duration.ofSeconds(60), 100, "COUNT_BASED"
+    );
+
+    var cors = new GripdayProperties.GatewayProperties.CorsProperties(
+        true, List.of("*"), List.of("GET"), List.of("*"), true, 3600
+    );
+
+    var requestTransform = new GripdayProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
+        true, true, true, true, List.of(), Map.of()
+    );
+
+    var responseTransform = new GripdayProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
+        true, true, true, true, List.of()
+    );
+
+    var transformation = new GripdayProperties.GatewayProperties.TransformationProperties(
+        requestTransform, responseTransform
+    );
+
+    var gateway = new GripdayProperties.GatewayProperties(
+        routing, security, rateLimiting, circuitBreaker, cors, transformation
+    );
+
+    var cacheRedis = new GripdayProperties.CacheProperties.RedisProperties(
+        "localhost", 6379, null, 0, Duration.ofSeconds(5),
+        new GripdayProperties.CacheProperties.RedisProperties.PoolProperties(10, 5, 2, Duration.ofSeconds(3)),
+        "cache:", Duration.ofMinutes(10), false
+    );
+
+    var cache = new GripdayProperties.CacheProperties(cacheRedis);
+
+    var tracing = new GripdayProperties.ObservabilityProperties.TracingProperties(
+        true, "gateway", 0.1, "http://jaeger", Duration.ofSeconds(5), Duration.ofSeconds(10), 100
+    );
+
+    var metrics = new GripdayProperties.ObservabilityProperties.MetricsProperties(
+        true, "/metrics", "gateway", true, true, true, Map.of(), List.of()
+    );
+
+    var logging = new GripdayProperties.ObservabilityProperties.LoggingProperties(
+        "INFO", "json", true, true, true, true, true, true, true,
+        "X-Correlation-ID", "X-Request-ID", "X-Tenant-ID"
+    );
+
+    var observability = new GripdayProperties.ObservabilityProperties(tracing, metrics, logging);
+
+    return new GripdayProperties(cache, gateway, observability);
+  }
 }

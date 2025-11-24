@@ -11,54 +11,54 @@
 # See: docs/auth/authentication-architecture.md
 # ============================================================================
 
-spring:
-  application:
-    name: bookstore-service
+spring :
+  application :
+    name : bookstore-service
   
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+  profiles :
+    active : ${SPRING_PROFILES_ACTIVE:local}
   
   # ============================================================================
   # Database Configuration (JPA + Liquibase)
   # ============================================================================
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate  # Use Liquibase for schema management
-    show-sql: false       # Override in profile-specific configs
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
+  jpa :
+    open-in-view : false
+    hibernate :
+      ddl-auto : validate  # Use Liquibase for schema management
+    show-sql : false       # Override in profile-specific configs
+    properties :
+      hibernate :
+        dialect : org.hibernate.dialect.PostgreSQLDialect
+        format_sql : true
+        jdbc :
+          batch_size : 20
+        order_inserts : true
+        order_updates : true
   
-  liquibase:
-    change-log: classpath:db/changelog/master.xml
-    enabled: true
+  liquibase :
+    change-log : classpath:db/changelog/master.xml
+    enabled : true
   
   # ============================================================================
   # Redis Cache Configuration
   # ============================================================================
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000  # 10 minutes (override per environment)
-      cache-null-values: false
+  cache :
+    type : redis
+    redis :
+      time-to-live : 600000  # 10 minutes (override per environment)
+      cache-null-values : false
   
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+  data :
+    redis :
+      host : ${REDIS_HOST:localhost}
+      port : ${REDIS_PORT:6379}
+      password : ${REDIS_PASSWORD:}
+      timeout : 2000ms
+      lettuce :
+        pool :
+          max-active : 8
+          max-idle : 8
+          min-idle : 0
   
   # ============================================================================
   # Security Configuration - JWT Validation (RSA256 via JWK)
@@ -73,71 +73,71 @@ spring:
   # - No shared secrets required
   # - Spring Security caches keys (5 minutes default)
   # ============================================================================
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
+  security :
+    oauth2 :
+      resourceserver :
+        jwt :
           # User Service issuer URI (validates 'iss' claim)
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+          issuer-uri : ${JWT_ISSUER_URI:http://localhost:8080}
           # JWK endpoint for RSA256 public key fetching
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
+          jwk-set-uri : ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
 
 # ============================================================================
 # Server Configuration
 # ============================================================================
-server:
-  port: ${SERVER_PORT:8081}  # Default port for downstream services
-  servlet:
-    context-path: /
-  error:
-    include-message: always
-    include-binding-errors: always
-  shutdown: graceful  # Graceful shutdown for zero-downtime deployments
+server :
+  port : ${SERVER_PORT:8081}  # Default port for downstream services
+  servlet :
+    context-path : /
+  error :
+    include-message : always
+    include-binding-errors : always
+  shutdown : graceful  # Graceful shutdown for zero-downtime deployments
 
 # ============================================================================
 # Actuator & Monitoring Configuration
 # ============================================================================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus,env,configprops
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: when-authorized
-      show-components: always
-      probes:
-        enabled: true
-    metrics:
-      enabled: true
-    prometheus:
-      enabled: true
-  health:
-    defaults:
-      enabled: true
-    db:
-      enabled: true
-    redis:
-      enabled: true
-    diskspace:
-      enabled: true
-  metrics:
-    distribution:
-      percentiles-histogram:
-        "[http.server.requests]": true
-        "[bookstore.books.search.duration]": true
-        "[bookstore.books.creation.duration]": true
-        "[bookstore.inventory.update.duration]": true
-    tags:
-      application: bookstore-service
-      environment: ${spring.profiles.active:local}
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-        step: 60s
-        descriptions: true
+management :
+  endpoints :
+    web :
+      exposure :
+        include : health,info,metrics,prometheus,env,configprops
+      base-path : /actuator
+  endpoint :
+    health :
+      show-details : when-authorized
+      show-components : always
+      probes :
+        enabled : true
+    metrics :
+      enabled : true
+    prometheus :
+      enabled : true
+  health :
+    defaults :
+      enabled : true
+    db :
+      enabled : true
+    redis :
+      enabled : true
+    diskspace :
+      enabled : true
+  metrics :
+    distribution :
+      percentiles-histogram :
+        "[http.server.requests]" : true
+        "[bookstore.books.search.duration]" : true
+        "[bookstore.books.creation.duration]" : true
+        "[bookstore.inventory.update.duration]" : true
+    tags :
+      application : bookstore-service
+      environment : ${spring.profiles.active:local}
+  prometheus :
+    metrics :
+      export :
+        enabled : true
+        step : 60s
+        descriptions : true
 
 # ============================================================================
 # Logging Configuration
@@ -145,65 +145,65 @@ management:
 # Includes correlation ID and user context in all logs for distributed tracing
 # Pattern: [correlationId] [userId:username] message
 # ============================================================================
-logging:
-  level:
-    org.gripday.bookstore: INFO
-    org.springframework.security: INFO  # Set to DEBUG for auth troubleshooting
-    org.springframework.cache: INFO
-    org.hibernate.SQL: INFO             # Set to DEBUG to see SQL queries
-    org.hibernate.type.descriptor.sql.BasicBinder: INFO
-    AUDIT: INFO                         # Security audit events
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
+logging :
+  level :
+    org.gripday.bookstore : INFO
+    org.springframework.security : INFO  # Set to DEBUG for auth troubleshooting
+    org.springframework.cache : INFO
+    org.hibernate.SQL : INFO             # Set to DEBUG to see SQL queries
+    org.hibernate.type.descriptor.sql.BasicBinder : INFO
+    AUDIT : INFO                         # Security audit events
+  pattern :
+    console : "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId}] [%X{userId}:%X{username}] %logger{36} - %msg%n"
 
 # ============================================================================
 # OpenAPI / Swagger Documentation
 # ============================================================================
-springdoc:
-  api-docs:
-    enabled: true
-    path: /api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    operationsSorter: method
-    tagsSorter: alpha
-    tryItOutEnabled: true
-    filter: true
-    displayRequestDuration: true
-    displayOperationId: false
-    defaultModelsExpandDepth: 1
-    defaultModelExpandDepth: 1
-    docExpansion: none
-  show-actuator: true
-  group-configs:
-    - group: 'bookstore-api-v1'
-      display-name: 'Bookstore API v1 (Current)'
-      paths-to-match: '/api/v1/bookstore/**'
-    - group: 'bookstore-api-all'
-      display-name: 'Bookstore API (All Versions)'
-      paths-to-match: '/api/**/bookstore/**'
-    - group: 'actuator'
-      display-name: 'Actuator Endpoints'
-      paths-to-match: '/actuator/**'
-  version-configs:
-    v1:
-      description: 'Current stable version of the Bookstore API'
-      deprecated: false
-    v2:
-      description: 'Future version (not yet implemented)'
-      deprecated: false
+springdoc :
+  api-docs :
+    enabled : true
+    path : /api-docs
+  swagger-ui :
+    enabled : true
+    path : /swagger-ui.html
+    operationsSorter : method
+    tagsSorter : alpha
+    tryItOutEnabled : true
+    filter : true
+    displayRequestDuration : true
+    displayOperationId : false
+    defaultModelsExpandDepth : 1
+    defaultModelExpandDepth : 1
+    docExpansion : none
+  show-actuator : true
+  group-configs :
+    - group : 'bookstore-api-v1'
+      display-name : 'Bookstore API v1 (Current)'
+      paths-to-match : '/api/v1/bookstore/**'
+    - group : 'bookstore-api-all'
+      display-name : 'Bookstore API (All Versions)'
+      paths-to-match : '/api/**/bookstore/**'
+    - group : 'actuator'
+      display-name : 'Actuator Endpoints'
+      paths-to-match : '/actuator/**'
+  version-configs :
+    v1 :
+      description : 'Current stable version of the Bookstore API'
+      deprecated : false
+    v2 :
+      description : 'Future version (not yet implemented)'
+      deprecated : false
 
 # ============================================================================
 # Gripday Bookstore Service Configuration
 # ============================================================================
-gripday:
-  bookstore:
+gripday :
+  bookstore :
     # CORS Configuration for frontend applications
     # Override per environment for security
-    cors:
-      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
-      allowed-headers: "*"
-      allow-credentials: true
-      max-age: 3600
+    cors :
+      allowed-origins : ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+      allowed-methods : "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers : "*"
+      allow-credentials : true
+      max-age : 3600

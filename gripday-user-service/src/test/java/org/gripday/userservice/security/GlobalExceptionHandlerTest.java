@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
   @DisplayName("handleValidationException returns 400 with field errors")
   void handleValidationException() throws Exception {
     var bindingResult = mock(BindingResult.class);
-    var fieldError = new FieldError("user", "email", "invalid@", false, new String[]{"Email"}, new Object[0], "Email must be valid");
+    var fieldError = new FieldError("user", "email", "invalid@", false, new String[] {"Email"}, new Object[0], "Email must be valid");
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
 
     // Create a proper MethodParameter for the exception

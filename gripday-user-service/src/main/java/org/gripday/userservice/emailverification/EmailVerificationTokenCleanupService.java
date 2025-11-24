@@ -23,8 +23,8 @@ public class EmailVerificationTokenCleanupService {
   private final TenantRepository tenantRepository;
 
   public EmailVerificationTokenCleanupService(final VerificationTokenRepository tokenRepository,
-                             final VerificationMetrics metricsService,
-                             final TenantRepository tenantRepository) {
+                                              final VerificationMetrics metricsService,
+                                              final TenantRepository tenantRepository) {
     this.tokenRepository = tokenRepository;
     this.metricsService = metricsService;
     this.tenantRepository = tenantRepository;

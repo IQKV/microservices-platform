@@ -94,7 +94,7 @@ class UserRegistrationServiceTest {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
@@ -127,9 +127,9 @@ class UserRegistrationServiceTest {
         .hasMessageContaining("Invalid input detected");
 
     verify(securityAuditService).logSuspiciousActivity(
-        eq("testuser"), 
-        eq("Potential XSS/injection attempt in registration"), 
-        eq("127.0.0.1"), 
+        eq("testuser"),
+        eq("Potential XSS/injection attempt in registration"),
+        eq("127.0.0.1"),
         eq("Mozilla/5.0")
     );
     verify(userRepository, never()).save(any());
@@ -147,9 +147,9 @@ class UserRegistrationServiceTest {
         .hasMessageContaining("Invalid input detected");
 
     verify(securityAuditService).logSuspiciousActivity(
-        eq("testuser"), 
-        eq("SQL injection attempt in registration"), 
-        eq("127.0.0.1"), 
+        eq("testuser"),
+        eq("SQL injection attempt in registration"),
+        eq("127.0.0.1"),
         eq("Mozilla/5.0")
     );
     verify(userRepository, never()).save(any());
@@ -167,9 +167,9 @@ class UserRegistrationServiceTest {
         .hasMessageContaining("Username already exists");
 
     verify(securityAuditService).logFailedAuthentication(
-        "testuser", 
-        "Registration failed - username exists", 
-        "127.0.0.1", 
+        "testuser",
+        "Registration failed - username exists",
+        "127.0.0.1",
         "Mozilla/5.0"
     );
     verify(userRepository, never()).save(any());
@@ -188,9 +188,9 @@ class UserRegistrationServiceTest {
         .hasMessageContaining("Email already exists");
 
     verify(securityAuditService).logFailedAuthentication(
-        "test@example.com", 
-        "Registration failed - email exists", 
-        "127.0.0.1", 
+        "test@example.com",
+        "Registration failed - email exists",
+        "127.0.0.1",
         "Mozilla/5.0"
     );
     verify(userRepository, never()).save(any());
@@ -205,7 +205,7 @@ class UserRegistrationServiceTest {
     when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.empty());
     when(authorityRepository.save(any(Authority.class))).thenReturn(userRole);
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
@@ -225,7 +225,7 @@ class UserRegistrationServiceTest {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
     when(emailVerificationService.generateVerificationToken(any(User.class)))
@@ -248,7 +248,7 @@ class UserRegistrationServiceTest {
     when(userRepository.existsByEmail(anyString())).thenReturn(false);
     when(passwordEncoder.encode(anyString())).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
@@ -270,7 +270,7 @@ class UserRegistrationServiceTest {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     savedUser.setEmailVerified(false);
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
@@ -290,7 +290,7 @@ class UserRegistrationServiceTest {
     when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
     when(authorityRepository.findByName("USER")).thenReturn(Optional.of(userRole));
-    
+
     var savedUser = new User("testuser", "test@example.com", "hashed-password", "Test", "User", "tenant-123");
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
 

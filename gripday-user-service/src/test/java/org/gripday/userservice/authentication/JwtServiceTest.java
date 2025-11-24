@@ -63,13 +63,13 @@ class JwtServiceTest {
     org.mockito.Mockito.lenient().when(jwtConfiguration.getAccessTokenExpiry()).thenReturn(Duration.ofMinutes(15));
     org.mockito.Mockito.lenient().when(jwtConfiguration.getRefreshTokenExpiry()).thenReturn(Duration.ofDays(7));
     org.mockito.Mockito.lenient().when(jwtConfiguration.getIssuer()).thenReturn("test-issuer");
-    
+
     service = new JwtService(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate);
 
     // Setup test user
     testUser = new User("testuser", "test@example.com", "hash", "Test", "User", "tenant-123");
     setUserId(testUser, 1L);
-    
+
     var authority = new Authority("ROLE_USER", "User role");
     testUser.setAuthorities(Set.of(authority));
   }
@@ -307,7 +307,7 @@ class JwtServiceTest {
     claims.put("firstName", "Test");
     claims.put("lastName", "User");
     claims.put("tenant_id", "tenant-123");  // Use underscore, not camelCase
-    
+
     return new Jwt(
         "token-value",
         Instant.now(),

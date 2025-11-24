@@ -20,47 +20,47 @@ import reactor.core.publisher.Mono;
 @DisplayName("CorrelationIdFilter Tests")
 class CorrelationIdFilterTest {
 
-    @Mock(lenient = true)
-    private GatewayFilterChain filterChain;
+  @Mock(lenient = true)
+  private GatewayFilterChain filterChain;
 
-    private CorrelationIdFilter correlationIdFilter;
+  private CorrelationIdFilter correlationIdFilter;
 
-    @BeforeEach
-    void setUp() {
-        correlationIdFilter = new CorrelationIdFilter();
-        when(filterChain.filter(any())).thenReturn(Mono.empty());
-    }
+  @BeforeEach
+  void setUp() {
+    correlationIdFilter = new CorrelationIdFilter();
+    when(filterChain.filter(any())).thenReturn(Mono.empty());
+  }
 
-    @Test
-    @DisplayName("Should generate correlation ID when not present")
-    void shouldGenerateCorrelationIdWhenNotPresent() {
-        var request = MockServerHttpRequest.get("/api/test").build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should generate correlation ID when not present")
+  void shouldGenerateCorrelationIdWhenNotPresent() {
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
 
-        correlationIdFilter.filter(exchange, filterChain).block();
+    correlationIdFilter.filter(exchange, filterChain).block();
 
-        assertThat(exchange.getAttributes()).containsKey(GatewayConstants.Attributes.CORRELATION_ID);
-    }
+    assertThat(exchange.getAttributes()).containsKey(GatewayConstants.Attributes.CORRELATION_ID);
+  }
 
-    @Test
-    @DisplayName("Should use existing correlation ID when present")
-    void shouldUseExistingCorrelationIdWhenPresent() {
-        var existingId = "existing-correlation-id";
-        var request = MockServerHttpRequest.get("/api/test")
-            .header(GatewayConstants.Headers.X_CORRELATION_ID, existingId)
-            .build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should use existing correlation ID when present")
+  void shouldUseExistingCorrelationIdWhenPresent() {
+    var existingId = "existing-correlation-id";
+    var request = MockServerHttpRequest.get("/api/test")
+        .header(GatewayConstants.Headers.X_CORRELATION_ID, existingId)
+        .build();
+    var exchange = MockServerWebExchange.from(request);
 
-        correlationIdFilter.filter(exchange, filterChain).block();
+    correlationIdFilter.filter(exchange, filterChain).block();
 
-        var correlationId = exchange.getAttributes().get(GatewayConstants.Attributes.CORRELATION_ID);
-        assertThat(correlationId).isEqualTo(existingId);
-    }
+    var correlationId = exchange.getAttributes().get(GatewayConstants.Attributes.CORRELATION_ID);
+    assertThat(correlationId).isEqualTo(existingId);
+  }
 
-    @Test
-    @DisplayName("Should have correct filter order")
-    void shouldHaveCorrectFilterOrder() {
-        assertThat(correlationIdFilter.getOrder())
-            .isEqualTo(GatewayConstants.FilterOrder.CORRELATION_ID_FILTER);
-    }
+  @Test
+  @DisplayName("Should have correct filter order")
+  void shouldHaveCorrectFilterOrder() {
+    assertThat(correlationIdFilter.getOrder())
+        .isEqualTo(GatewayConstants.FilterOrder.CORRELATION_ID_FILTER);
+  }
 }

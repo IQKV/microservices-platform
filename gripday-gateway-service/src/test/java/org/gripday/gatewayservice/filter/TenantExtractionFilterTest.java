@@ -20,63 +20,63 @@ import reactor.core.publisher.Mono;
 @DisplayName("TenantExtractionFilter Tests")
 class TenantExtractionFilterTest {
 
-    @Mock(lenient = true)
-    private GatewayFilterChain filterChain;
+  @Mock(lenient = true)
+  private GatewayFilterChain filterChain;
 
-    private TenantExtractionFilter tenantExtractionFilter;
+  private TenantExtractionFilter tenantExtractionFilter;
 
-    @BeforeEach
-    void setUp() {
-        tenantExtractionFilter = new TenantExtractionFilter();
-        when(filterChain.filter(any())).thenReturn(Mono.empty());
-    }
+  @BeforeEach
+  void setUp() {
+    tenantExtractionFilter = new TenantExtractionFilter();
+    when(filterChain.filter(any())).thenReturn(Mono.empty());
+  }
 
-    @Test
-    @DisplayName("Should extract tenant ID from header")
-    void shouldExtractTenantIdFromHeader() {
-        var tenantId = "tenant-123";
-        var request = MockServerHttpRequest.get("/api/test")
-            .header(GatewayConstants.Headers.X_TENANT_ID, tenantId)
-            .build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should extract tenant ID from header")
+  void shouldExtractTenantIdFromHeader() {
+    var tenantId = "tenant-123";
+    var request = MockServerHttpRequest.get("/api/test")
+        .header(GatewayConstants.Headers.X_TENANT_ID, tenantId)
+        .build();
+    var exchange = MockServerWebExchange.from(request);
 
-        tenantExtractionFilter.filter(exchange, filterChain).block();
+    tenantExtractionFilter.filter(exchange, filterChain).block();
 
-        var tenantContext = (TenantExtractionFilter.TenantContext)
-            exchange.getAttributes().get(GatewayConstants.Attributes.TENANT_CONTEXT);
-        assertThat(tenantContext).isNotNull();
-        assertThat(tenantContext.tenantId()).isEqualTo(tenantId);
-    }
+    var tenantContext = (TenantExtractionFilter.TenantContext)
+        exchange.getAttributes().get(GatewayConstants.Attributes.TENANT_CONTEXT);
+    assertThat(tenantContext).isNotNull();
+    assertThat(tenantContext.tenantId()).isEqualTo(tenantId);
+  }
 
-    @Test
-    @DisplayName("Should extract tenant ID from query parameter")
-    void shouldExtractTenantIdFromQueryParameter() {
-        var tenantId = "tenant-456";
-        var request = MockServerHttpRequest.get("/api/test?tenantId=" + tenantId).build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should extract tenant ID from query parameter")
+  void shouldExtractTenantIdFromQueryParameter() {
+    var tenantId = "tenant-456";
+    var request = MockServerHttpRequest.get("/api/test?tenantId=" + tenantId).build();
+    var exchange = MockServerWebExchange.from(request);
 
-        tenantExtractionFilter.filter(exchange, filterChain).block();
+    tenantExtractionFilter.filter(exchange, filterChain).block();
 
-        var tenantContext = (TenantExtractionFilter.TenantContext)
-            exchange.getAttributes().get(GatewayConstants.Attributes.TENANT_CONTEXT);
-        assertThat(tenantContext).isNotNull();
-        assertThat(tenantContext.tenantId()).isEqualTo(tenantId);
-    }
+    var tenantContext = (TenantExtractionFilter.TenantContext)
+        exchange.getAttributes().get(GatewayConstants.Attributes.TENANT_CONTEXT);
+    assertThat(tenantContext).isNotNull();
+    assertThat(tenantContext.tenantId()).isEqualTo(tenantId);
+  }
 
-    @Test
-    @DisplayName("TenantContext should check if present")
-    void tenantContextShouldCheckIfPresent() {
-        var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
-        assertThat(tenantContext.isPresent()).isTrue();
+  @Test
+  @DisplayName("TenantContext should check if present")
+  void tenantContextShouldCheckIfPresent() {
+    var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
+    assertThat(tenantContext.isPresent()).isTrue();
 
-        var emptyContext = new TenantExtractionFilter.TenantContext(null);
-        assertThat(emptyContext.isPresent()).isFalse();
-    }
+    var emptyContext = new TenantExtractionFilter.TenantContext(null);
+    assertThat(emptyContext.isPresent()).isFalse();
+  }
 
-    @Test
-    @DisplayName("Should have correct filter order")
-    void shouldHaveCorrectFilterOrder() {
-        assertThat(tenantExtractionFilter.getOrder())
-            .isEqualTo(GatewayConstants.FilterOrder.TENANT_EXTRACTION_FILTER);
-    }
+  @Test
+  @DisplayName("Should have correct filter order")
+  void shouldHaveCorrectFilterOrder() {
+    assertThat(tenantExtractionFilter.getOrder())
+        .isEqualTo(GatewayConstants.FilterOrder.TENANT_EXTRACTION_FILTER);
+  }
 }

@@ -63,7 +63,7 @@ class EmailVerificationTokenCleanupServiceTest {
     tenant1.setEnabled(true);
     var tenant2 = new Tenant("tenant-2", "Tenant 2");
     tenant2.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L, 3L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5, 3);
@@ -96,7 +96,7 @@ class EmailVerificationTokenCleanupServiceTest {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
     tenant1.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5);
@@ -133,7 +133,7 @@ class EmailVerificationTokenCleanupServiceTest {
     tenant1.setEnabled(true);
     var tenant2 = new Tenant("tenant-2", "Tenant 2");
     tenant2.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L, 3L);
 
@@ -178,7 +178,7 @@ class EmailVerificationTokenCleanupServiceTest {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
     tenant1.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5);
@@ -201,7 +201,7 @@ class EmailVerificationTokenCleanupServiceTest {
     tenant2.setEnabled(true);
     var tenant3 = new Tenant("tenant-3", "Tenant 3");
     tenant3.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2, tenant3));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(2L, 3L, 1L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(2, 3, 1);
@@ -219,7 +219,7 @@ class EmailVerificationTokenCleanupServiceTest {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
     tenant1.setEnabled(true);
-    
+
     when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(0L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(0);

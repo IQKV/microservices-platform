@@ -30,7 +30,7 @@ public class TestRedisConfiguration {
           .port(redisPort)
           .setting("maxmemory 128M")
           .build();
-      
+
       redisServer.start();
       log.info("Embedded Redis server started on port {}", redisPort);
     } catch (final Exception e) {

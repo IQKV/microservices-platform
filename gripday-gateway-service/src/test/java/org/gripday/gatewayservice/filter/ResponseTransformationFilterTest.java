@@ -22,101 +22,101 @@ import reactor.core.publisher.Mono;
 @DisplayName("ResponseTransformationFilter Tests")
 class ResponseTransformationFilterTest {
 
-    @Mock(lenient = true)
-    private GatewayFilterChain filterChain;
+  @Mock(lenient = true)
+  private GatewayFilterChain filterChain;
 
-    private ResponseTransformationFilter responseTransformationFilter;
+  private ResponseTransformationFilter responseTransformationFilter;
 
-    @BeforeEach
-    void setUp() {
-        responseTransformationFilter = new ResponseTransformationFilter();
-        when(filterChain.filter(any())).thenReturn(Mono.empty());
-    }
+  @BeforeEach
+  void setUp() {
+    responseTransformationFilter = new ResponseTransformationFilter();
+    when(filterChain.filter(any())).thenReturn(Mono.empty());
+  }
 
-    @Test
-    @DisplayName("Should apply response transformation")
-    void shouldApplyResponseTransformation() {
-        var config = new ResponseTransformationFilter.Config();
-        var request = MockServerHttpRequest.get("/api/test").build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should apply response transformation")
+  void shouldApplyResponseTransformation() {
+    var config = new ResponseTransformationFilter.Config();
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
 
-        var filter = responseTransformationFilter.apply(config);
-        filter.filter(exchange, filterChain).block();
+    var filter = responseTransformationFilter.apply(config);
+    filter.filter(exchange, filterChain).block();
 
-        assertThat(config.isEnableSecurityHeaders()).isTrue();
-    }
+    assertThat(config.isEnableSecurityHeaders()).isTrue();
+  }
 
-    @Test
-    @DisplayName("Should apply response transformation with security headers disabled")
-    void shouldApplyResponseTransformationWithSecurityHeadersDisabled() {
-        var config = new ResponseTransformationFilter.Config();
-        config.setEnableSecurityHeaders(false);
-        
-        var request = MockServerHttpRequest.get("/api/test").build();
-        var exchange = MockServerWebExchange.from(request);
+  @Test
+  @DisplayName("Should apply response transformation with security headers disabled")
+  void shouldApplyResponseTransformationWithSecurityHeadersDisabled() {
+    var config = new ResponseTransformationFilter.Config();
+    config.setEnableSecurityHeaders(false);
 
-        var filter = responseTransformationFilter.apply(config);
-        filter.filter(exchange, filterChain).block();
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
 
-        assertThat(config.isEnableSecurityHeaders()).isFalse();
-    }
+    var filter = responseTransformationFilter.apply(config);
+    filter.filter(exchange, filterChain).block();
 
-    @Test
-    @DisplayName("Should apply response transformation with correlation headers disabled")
-    void shouldApplyResponseTransformationWithCorrelationHeadersDisabled() {
-        var config = new ResponseTransformationFilter.Config();
-        config.setEnableCorrelationHeaders(false);
-        
-        var request = MockServerHttpRequest.get("/api/test").build();
-        var exchange = MockServerWebExchange.from(request);
+    assertThat(config.isEnableSecurityHeaders()).isFalse();
+  }
 
-        var filter = responseTransformationFilter.apply(config);
-        filter.filter(exchange, filterChain).block();
+  @Test
+  @DisplayName("Should apply response transformation with correlation headers disabled")
+  void shouldApplyResponseTransformationWithCorrelationHeadersDisabled() {
+    var config = new ResponseTransformationFilter.Config();
+    config.setEnableCorrelationHeaders(false);
 
-        assertThat(config.isEnableCorrelationHeaders()).isFalse();
-    }
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
 
-    @Test
-    @DisplayName("Should apply response transformation with internal headers removal disabled")
-    void shouldApplyResponseTransformationWithInternalHeadersRemovalDisabled() {
-        var config = new ResponseTransformationFilter.Config();
-        config.setRemoveInternalHeaders(false);
-        
-        var request = MockServerHttpRequest.get("/api/test").build();
-        var exchange = MockServerWebExchange.from(request);
+    var filter = responseTransformationFilter.apply(config);
+    filter.filter(exchange, filterChain).block();
 
-        var filter = responseTransformationFilter.apply(config);
-        filter.filter(exchange, filterChain).block();
+    assertThat(config.isEnableCorrelationHeaders()).isFalse();
+  }
 
-        assertThat(config.isRemoveInternalHeaders()).isFalse();
-    }
+  @Test
+  @DisplayName("Should apply response transformation with internal headers removal disabled")
+  void shouldApplyResponseTransformationWithInternalHeadersRemovalDisabled() {
+    var config = new ResponseTransformationFilter.Config();
+    config.setRemoveInternalHeaders(false);
 
-    @Test
-    @DisplayName("Config should have default values")
-    void configShouldHaveDefaultValues() {
-        var config = new ResponseTransformationFilter.Config();
+    var request = MockServerHttpRequest.get("/api/test").build();
+    var exchange = MockServerWebExchange.from(request);
 
-        assertThat(config.isEnableSecurityHeaders()).isTrue();
-        assertThat(config.isEnableCorrelationHeaders()).isTrue();
-        assertThat(config.isRemoveInternalHeaders()).isTrue();
-        assertThat(config.getAdditionalHeadersToRemove()).isEmpty();
-        assertThat(config.getAdditionalHeaders()).isEmpty();
-    }
+    var filter = responseTransformationFilter.apply(config);
+    filter.filter(exchange, filterChain).block();
 
-    @Test
-    @DisplayName("Config should allow setting values")
-    void configShouldAllowSettingValues() {
-        var config = new ResponseTransformationFilter.Config();
-        config.setEnableSecurityHeaders(false);
-        config.setEnableCorrelationHeaders(false);
-        config.setRemoveInternalHeaders(false);
-        config.setAdditionalHeadersToRemove(List.of("X-Custom-Header"));
-        config.setAdditionalHeaders(Map.of("X-New-Header", "value"));
+    assertThat(config.isRemoveInternalHeaders()).isFalse();
+  }
 
-        assertThat(config.isEnableSecurityHeaders()).isFalse();
-        assertThat(config.isEnableCorrelationHeaders()).isFalse();
-        assertThat(config.isRemoveInternalHeaders()).isFalse();
-        assertThat(config.getAdditionalHeadersToRemove()).containsExactly("X-Custom-Header");
-        assertThat(config.getAdditionalHeaders()).containsEntry("X-New-Header", "value");
-    }
+  @Test
+  @DisplayName("Config should have default values")
+  void configShouldHaveDefaultValues() {
+    var config = new ResponseTransformationFilter.Config();
+
+    assertThat(config.isEnableSecurityHeaders()).isTrue();
+    assertThat(config.isEnableCorrelationHeaders()).isTrue();
+    assertThat(config.isRemoveInternalHeaders()).isTrue();
+    assertThat(config.getAdditionalHeadersToRemove()).isEmpty();
+    assertThat(config.getAdditionalHeaders()).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Config should allow setting values")
+  void configShouldAllowSettingValues() {
+    var config = new ResponseTransformationFilter.Config();
+    config.setEnableSecurityHeaders(false);
+    config.setEnableCorrelationHeaders(false);
+    config.setRemoveInternalHeaders(false);
+    config.setAdditionalHeadersToRemove(List.of("X-Custom-Header"));
+    config.setAdditionalHeaders(Map.of("X-New-Header", "value"));
+
+    assertThat(config.isEnableSecurityHeaders()).isFalse();
+    assertThat(config.isEnableCorrelationHeaders()).isFalse();
+    assertThat(config.isRemoveInternalHeaders()).isFalse();
+    assertThat(config.getAdditionalHeadersToRemove()).containsExactly("X-Custom-Header");
+    assertThat(config.getAdditionalHeaders()).containsEntry("X-New-Header", "value");
+  }
 }

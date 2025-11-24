@@ -89,7 +89,7 @@ class OrganizationPreferenceEntityTest {
   void shouldHandleEqualsAndHashCode() {
     var org1 = new Organization("Org 1", "tenant-123");
     var org2 = new Organization("Org 2", "tenant-123");
-    
+
     var pref1 = new OrganizationPreference(org1, "tenant-123");
     var pref2 = new OrganizationPreference(org1, "tenant-123");
     var pref3 = new OrganizationPreference(org2, "tenant-123");
@@ -99,7 +99,7 @@ class OrganizationPreferenceEntityTest {
     assertThat(pref1).isNotEqualTo(pref3);
     assertThat(pref1).isNotEqualTo(null);
     assertThat(pref1).isNotEqualTo(new Object());
-    
+
     assertThat(pref1.hashCode()).isEqualTo(pref2.hashCode());
   }
 
@@ -110,7 +110,7 @@ class OrganizationPreferenceEntityTest {
     var preference = new OrganizationPreference(org, "tenant-123");
 
     var toString = preference.toString();
-    
+
     assertThat(toString).contains("OrganizationPreference");
     assertThat(toString).contains("defaultLocale='en'");
     assertThat(toString).contains("defaultTimezone='UTC'");

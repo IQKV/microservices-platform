@@ -32,11 +32,11 @@ class EmbeddedRedisIntegrationTest extends AbstractIntegrationTest {
   void shouldHandleRedisOperations() {
     // Given
     String hashKey = "test:hash";
-    
+
     // When
     redisTemplate.opsForHash().put(hashKey, "field1", "value1");
     redisTemplate.opsForHash().put(hashKey, "field2", "value2");
-    
+
     // Then
     assertThat(redisTemplate.opsForHash().get(hashKey, "field1")).isEqualTo("value1");
     assertThat(redisTemplate.opsForHash().get(hashKey, "field2")).isEqualTo("value2");
