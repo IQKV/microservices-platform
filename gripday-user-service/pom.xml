@@ -237,15 +237,6 @@
                         <exclude>**/*Logger.class</exclude>
                         
                         <!-- Services without tests -->
-                        <exclude>**/organization/OrganizationManagementService.class</exclude>
-                        <exclude>**/organization/OrganizationPreference.class</exclude>
-                        <exclude>**/usermanagement/UserManagementService.class</exclude>
-                        <exclude>**/usermanagement/UserPreference.class</exclude>
-                        <exclude>**/security/RateLimitingService.class</exclude>
-                        <exclude>**/security/SecurityAuditService.class</exclude>
-                        <exclude>**/security/AccountLockoutService.class</exclude>
-                        <exclude>**/security/GlobalExceptionHandler.class</exclude>
-                        <exclude>**/security/GlobalExceptionHandler$*.class</exclude>
                         <exclude>**/shared/EmailService.class</exclude>
                         <exclude>**/tenancy/TenantExtractionService.class</exclude>
                         <exclude>**/tenancy/TenantManagementService.class</exclude>
