@@ -41,11 +41,13 @@ class SchemaPerTenantConnectionProviderTest {
 
   @Test
   @DisplayName("Should get any connection from data source")
+  @SuppressWarnings("try")
   void shouldGetAnyConnection() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
-    var result = provider.getAnyConnection();
-    assertThat(result).isNotNull();
-    verify(dataSource).getConnection();
+    try (var result = provider.getAnyConnection()) {
+      assertThat(result).isNotNull();
+      verify(dataSource).getConnection();
+    }
   }
 
   @Test
@@ -90,18 +92,19 @@ class SchemaPerTenantConnectionProviderTest {
 
   @Test
   @DisplayName("Should create schema for H2 when tenant is not PUBLIC")
+  @SuppressWarnings("try")
   void shouldCreateSchemaForH2WhenTenantIsNotPublic() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
     when(connection.getMetaData()).thenReturn(metaData);
     when(metaData.getDatabaseProductName()).thenReturn("H2");
     when(connection.createStatement()).thenReturn(statement);
     
-    var result = provider.getConnection("tenant_123");
-    
-    assertThat(result).isNotNull();
-    verify(statement).execute("CREATE SCHEMA IF NOT EXISTS tenant_123");
-    verify(statement).close();
-    verify(connection).setSchema("tenant_123");
+    try (var ignored = statement) {
+      var result = provider.getConnection("tenant_123");
+      assertThat(result).isNotNull();
+      verify(statement).execute("CREATE SCHEMA IF NOT EXISTS tenant_123");
+      verify(connection).setSchema("tenant_123");
+    }
   }
 
   @Test
