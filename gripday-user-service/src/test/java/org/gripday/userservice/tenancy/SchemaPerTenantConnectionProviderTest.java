@@ -41,7 +41,7 @@ class SchemaPerTenantConnectionProviderTest {
 
   @Test
   @DisplayName("Should get any connection from data source")
-  @SuppressWarnings("try")
+  @SuppressWarnings({"try", "java:S2095"})
   void shouldGetAnyConnection() throws SQLException {
     when(dataSource.getConnection()).thenReturn(connection);
     try (var result = provider.getAnyConnection()) {
