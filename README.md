@@ -4,7 +4,7 @@
 
 ## Business Purpose
 
-A comprehensive microservices ecosystem that provides:
+A microservices ecosystem that provides:
 
 - **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
 - **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
@@ -21,20 +21,21 @@ Centralized authentication and identity management hub.
 
 **Core Capabilities:**
 
-- JWT-based authentication with token rotation
-- User registration with email verification
+- JWT-based authentication with RSA256 (JwtEncoder/JwtDecoder)
+- User registration with email verification (UUID tokens, 24h expiry)
 - Password reset and account security
-- Role-based access control (RBAC)
-- Multi-tenant data isolation
-- Admin user management
+- Role-based access control (RBAC) with @PreAuthorize
+- Schema-per-tenant isolation with Hibernate MultiTenantConnectionProvider
+- Admin user management with organization preferences
 
 **Key Patterns:**
 
-- Token blacklisting with Redis
-- Account lockout protection
-- Email verification workflows
-- Security audit logging
-- User context propagation
+- JTI-based token blacklisting with Redis TTL
+- Account lockout (5 attempts, 15min) with sliding window
+- Email verification with rate limiting (3/hour)
+- Security audit logging with UserAuditLog entity
+- User context propagation with full JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
+- Pattern matching for claim extraction (Java 21)
 
 ### 🌐 [Gateway Service](gripday-gateway-service/README.md)
 
@@ -43,38 +44,42 @@ Reactive API gateway providing unified entry point for all services.
 **Core Capabilities:**
 
 - Intelligent routing to downstream services
-- JWT validation and context propagation
-- Redis-backed distributed rate limiting
-- Circuit breaker fault tolerance
-- Multi-tenant request routing
-- Correlation ID tracking
+- JWT validation with ReactiveSecurityContextHolder
+- Redis-backed distributed rate limiting with ZSET
+- Circuit breaker with Resilience4j (per-service)
+- Multi-tenant request routing with priority-based extraction
+- Correlation ID generation and tracking
 
 **Key Patterns:**
 
-- Reactive programming with WebFlux
-- Sliding window rate limiting
-- Request/response transformation
+- Reactive programming with WebFlux (Mono/Flux)
+- Sliding window log algorithm with Redis sorted sets
+- Dual-layer rate limiting (global IP + tenant-specific)
+- Request/response transformation with GlobalFilter chain
 - API versioning (path and header-based)
-- Graceful degradation
+- Type-safe configuration with Java records (GripdayProperties)
 
 ### 📚 [Bookstore Service](gripday-bookstore-service/README.md)
 
-Domain service demonstrating catalog and inventory management.
+Domain service demonstrating catalog and inventory management with DDD patterns.
 
 **Core Capabilities:**
 
-- Book catalog management
+- Book catalog management with rich domain models
 - Inventory tracking with reservations
 - Multi-criteria search and filtering
-- Stock level monitoring
+- Stock level monitoring with low-stock alerts
 - Admin operations with audit trail
 
 **Key Patterns:**
 
-- Repository and service layers
+- Domain-Driven Design with value objects (ISBN, Money, BookId)
+- Aggregate roots with business logic (Book, Category, Inventory)
+- Factory methods for object creation
+- Repository and service layers with clear boundaries
 - Cache-aside pattern with Redis
 - Optimistic locking for concurrency
-- Domain-driven design
+- Modular package structure (catalog, inventory, shared)
 
 ## Architecture Overview
 
@@ -121,26 +126,30 @@ Domain service demonstrating catalog and inventory management.
 
 ### Technology Stack
 
-- **Runtime:** Java 21 with modern features (records, var, text blocks, pattern matching)
-- **Framework:** Spring Boot 3.5.6, Spring Cloud 2025.0.0
-- **Database:** PostgreSQL 15+ with Liquibase migrations
-- **Caching:** Redis for distributed caching and rate limiting
-- **Security:** JWT with RSA256, Spring Security OAuth2 Resource Server
-- **Observability:** OpenTelemetry, Prometheus, Grafana, Loki
+- **Runtime:** Java 21 with modern features (records, var, text blocks, pattern matching, switch expressions)
+- **Framework:** Spring Boot 3.5.6, Spring Cloud 2025.0.0, Spring Cloud Gateway (reactive)
+- **Database:** PostgreSQL 15+ with Liquibase migrations, Hibernate multi-tenancy
+- **Caching:** Redis for distributed caching, rate limiting (ZSET), and token blacklisting
+- **Security:** JWT with RSA256 (JwtEncoder/JwtDecoder), Spring Security OAuth2 Resource Server
+- **Resilience:** Resilience4j for circuit breaker, rate limiting, and fault tolerance
+- **Observability:** OpenTelemetry, Prometheus, Grafana, Loki, structured JSON logging
 - **API Documentation:** SpringDoc OpenAPI with Swagger UI
-- **Testing:** JUnit 5, Testcontainers, ArchUnit, Spring Modulith
-- **Containerization:** Docker with service-specific Dockerfiles
+- **Testing:** JUnit 5, Testcontainers, ArchUnit, Spring Modulith, Reactor Test
+- **Containerization:** Docker with multi-stage builds, Docker Compose for local development
 
 ## Key Features
 
 ### Security & Authentication
 
-- Centralized JWT-based authentication through User Service
-- Token validation at Gateway with context propagation
-- Role-based access control across all services
-- Account security (lockout, rate limiting, password policies)
-- Email verification and password reset flows
-- Security audit logging with correlation IDs
+- Centralized JWT-based authentication with RSA256 through User Service
+- JTI-based token blacklisting with Redis TTL for logout
+- Token validation at Gateway with ReactiveSecurityContextHolder
+- User context propagation via headers (X-User-ID, X-Username, X-User-Roles)
+- Role-based access control with @PreAuthorize across all services
+- Account security (5 failed attempts → 15min lockout with sliding window)
+- Email verification with UUID tokens and rate limiting (3/hour)
+- Password reset flows with secure time-limited tokens
+- Security audit logging with UserAuditLog entity and correlation IDs
 
 ### Operational Excellence
 
@@ -153,16 +162,18 @@ Domain service demonstrating catalog and inventory management.
 
 ### Performance & Scalability
 
-- Reactive programming for high-throughput scenarios
-- Multi-level caching with Redis
-- Database query optimization and connection pooling
-- Circuit breaker patterns for fault tolerance
-- Distributed rate limiting for API protection
-- Independent service scaling
+- Reactive programming with WebFlux (Mono/Flux) for high-throughput scenarios
+- Multi-level caching with Redis (cache-aside pattern)
+- Sliding window log algorithm with Redis ZSET for rate limiting
+- Database query optimization with proper indexing and connection pooling
+- Circuit breaker with Resilience4j (per-service, configurable thresholds)
+- Distributed rate limiting with dual-layer (global IP + tenant-specific)
+- Schema-per-tenant isolation for multi-tenancy
+- Independent service scaling with stateless design
 
 ### Developer Experience
 
-- Comprehensive OpenAPI documentation
+- OpenAPI documentation with Swagger UI
 - Docker Compose for local development
 - Consistent error response format (RFC 7807)
 - Architecture validation with ArchUnit
@@ -260,11 +271,14 @@ This platform demonstrates:
 
 ### Modern Java Development
 
-- Java 21 features (records, var, text blocks, pattern matching)
-- Reactive programming with WebFlux
-- Spring Boot 3.x best practices
-- Clean architecture principles
-- Test-driven development
+- Java 21 features (records, var, text blocks, pattern matching, switch expressions)
+- Value objects and immutable DTOs with records
+- Pattern matching for claim extraction and type handling
+- Reactive programming with WebFlux and Project Reactor
+- Spring Boot 3.x best practices with type-safe configuration
+- Domain-Driven Design with tactical patterns (aggregates, value objects, factories)
+- Clean architecture with clear layer separation
+- Test-driven development with unit, integration, and architecture tests
 
 ## Adapting for Your Domain
 
