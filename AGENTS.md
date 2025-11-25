@@ -1027,6 +1027,103 @@ var users = userRepository.findAll();
 var response = ResponseEntity.ok(userDto);
 ```
 
+**Import Order (Checkstyle Enforced):**
+
+All Java files must follow the import order:
+
+```java
+// 1. Static imports (alphabetically sorted)
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+// 2. Standard Java/Jakarta packages (alphabetically sorted)
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.gripday.userservice.domain.User;
+import org.gripday.userservice.repository.UserRepository;
+import org.gripday.userservice.service.UserService;
+// 3. Special imports: tech.*, expert.*, android.*, dev.*, build.* (alphabetically sorted)
+// (if applicable)
+
+// 4. Third-party packages (alphabetically sorted)
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+```
+
+**Import Order Rules:**
+
+```yaml
+import_order:
+  groups:
+    1: "STATIC imports (all static imports, alphabetically sorted)"
+    2: "STANDARD_JAVA_PACKAGE (jakarta.*, java.*, javax.*, alphabetically sorted)"
+    3: "SPECIAL_IMPORTS (tech.*, expert.*, android.*, dev.*, build.*, alphabetically sorted)"
+    4: "THIRD_PARTY_PACKAGE (all other imports, alphabetically sorted)"
+
+  formatting:
+    - "Separate each group with a blank line"
+    - "Sort imports alphabetically within each group"
+    - "No wildcard imports (import java.util.*) - use explicit imports"
+    - "No unused imports"
+    - "Package and import statements must not be line-wrapped"
+
+  checkstyle_modules:
+    CustomImportOrder:
+      sortImportsInGroupAlphabetically: true
+      separateLineBetweenGroups: true
+      customImportOrderRules: "STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE"
+      standardPackageRegExp: "^(jakarta|java|javax)\\."
+      specialImportsRegExp: "^(tech|expert|android|dev|build)\\."
+
+    AvoidStarImport:
+      description: "Prohibits wildcard imports (import java.util.*)"
+      enforcement: "Build fails on star imports"
+
+    UnusedImports:
+      description: "Detects and removes unused import statements"
+      processJavadoc: false
+    standardPackageRegExp: "^(java|javax|jakarta)\\."
+    specialImportsRegExp: "^(tech|expert|android|dev|build)\\."
+
+  violations:
+    - "Build fails if import order is incorrect"
+    - "Run 'mvn checkstyle:check' to validate"
+    - "IDEs should be configured to follow this order"
+```
+
+**IDE Configuration:**
+
+IntelliJ IDEA import order settings:
+
+```
+1. import static all other imports
+   <blank line>
+2. import jakarta.*
+3. import java.*
+4. import javax.*
+   <blank line>
+5. import tech.*
+6. import expert.*
+7. import android.*
+8. import dev.*
+9. import build.*
+   <blank line>
+10. import all other imports
+```
+
 **Service Layer Pattern:**
 
 ```java
