@@ -136,12 +136,6 @@
             <artifactId>spring-modulith-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- SpotBugs annotations for suppressing warnings -->
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
