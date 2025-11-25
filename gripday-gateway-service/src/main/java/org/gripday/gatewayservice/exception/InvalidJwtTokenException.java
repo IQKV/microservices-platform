@@ -6,7 +6,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Exception thrown when JWT token is invalid or malformed.
  */
-public class InvalidJwtTokenException extends ResponseStatusException {
+public final class InvalidJwtTokenException extends ResponseStatusException {
 
   private final String reason;
   private final TokenErrorType errorType;

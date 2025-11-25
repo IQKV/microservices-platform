@@ -35,6 +35,7 @@ class ApiDocumentationResourceTest {
     assertThat(response.getBody()).isNotNull();
 
     var body = response.getBody();
+    assertThat(body).isNotNull();
     assertThat(body).containsKeys("gateway", "services", "totalServices", "message");
 
     @SuppressWarnings("unchecked")
@@ -48,6 +49,7 @@ class ApiDocumentationResourceTest {
   void shouldIncludeEnabledServicesWithOpenApiConfiguration() {
     var response = apiDocumentationResource.getApiDocumentation();
     var body = response.getBody();
+    assertThat(body).isNotNull();
 
     @SuppressWarnings("unchecked")
     var services = (List<Map<String, Object>>) body.get("services");
