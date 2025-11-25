@@ -1,6 +1,6 @@
-# 📚 Gripday Bookstore
+# 📚 Gripday Bookstore Service
 
-> Reference implementation for building microservices with Spring Boot, demonstrating best practices for catalog and inventory management.
+> Reference implementation demonstrating Domain-Driven Design, tactical patterns, and production-ready microservice architecture with Spring Boot 3.x and Java 21.
 
 ## Business Purpose
 
@@ -14,93 +14,224 @@ A bookstore management system that handles:
 
 ## Overview
 
-This is an exemplary Spring Boot microservice that showcases how to build a production-ready bookstore application. It demonstrates patterns and practices for developing similar microservices in your organization.
+This is an exemplary Spring Boot microservice showcasing production-ready patterns for building domain-rich applications. It demonstrates tactical Domain-Driven Design patterns, value objects, rich domain models, and modern Java 21 features in a real-world catalog and inventory management context.
 
 ## What It Demonstrates
 
-### 📖 Domain-Driven Design
+### 📖 Domain-Driven Design (Tactical Patterns)
 
-- Clean separation of presentation, domain, and infrastructure layers
-- Entity modeling with JPA (Book, Category, Inventory)
-- Rich domain logic with business rules
-- DTO pattern for API contracts
+**Value Objects**
 
-### 🔍 Advanced Query Patterns
+- `ISBN` - Self-validating ISBN-10/ISBN-13 with format validation and normalization
+- `Money` - Immutable monetary amounts with currency validation and arithmetic operations
+- `BookId` - Type-safe identifier wrapper preventing primitive obsession
 
-- Multi-criteria search with dynamic filtering
-- Fuzzy search implementation
-- Full-text search capabilities
-- Pagination and sorting
-- Query optimization with caching
+**Aggregate Roots**
+
+- `Book` - Rich domain model with business methods (markAsAvailable, updateDetails, changeCategory)
+- `Category` - Category aggregate with book relationship management
+- `Inventory` - Inventory aggregate with reservation and availability logic
+
+**Domain Services**
+
+- `DuplicateIsbnChecker` - Ensures ISBN uniqueness across catalog
+- `BookAvailabilityChecker` - Complex availability calculation logic
+
+**Factory Methods**
+
+- `Book.create()` - Encapsulates creation logic with invariant validation
+- `Inventory.create()` - Ensures proper inventory initialization
+
+**Business Logic in Domain**
+
+- `Book.canBeSold()` - Combines availability and stock checks
+- `Book.isInPriceRange()` - Price range validation
+- `Inventory.reserve()` - Reservation with insufficient stock protection
+- `Inventory.getAvailableQuantity()` - Calculated property (quantity - reserved)
+
+### 🔍 Advanced Query & Search Patterns
+
+**Multi-Criteria Search**
+
+- Dynamic filtering with `BookSearchQuery` record
+- Composite queries (title + author + category + price range + availability)
+- Pagination with Spring Data
+- Query optimization with strategic caching
+
+**Filter Pattern Implementation**
+
+- `AuthorFilter`, `CategoryFilter`, `PriceRangeFilter`, `AvailabilityFilter`
+- Composable filters for flexible search
+- `FilterMetadata` for search result context
+
+**Response Builders**
+
+- `BookCatalogResponseBuilder` - Enriched responses with metadata
+- `SearchMetadata`, `PaginationMetadata` - Structured search context
 
 ### 📦 Inventory Management Patterns
 
-- Real-time stock tracking
-- Reserved quantity handling for order workflows
-- Low stock threshold monitoring
-- Bulk update operations
-- Availability calculation logic
+**Reservation System**
+
+- Reserve inventory for pending orders
+- Release reserved inventory on cancellation
+- Prevent overselling with optimistic locking
+- Bulk operations for efficiency
+
+**Stock Monitoring**
+
+- Low stock threshold alerts
+- Out-of-stock detection
+- Available quantity calculation (quantity - reserved)
+- Real-time inventory statistics
 
 ### 🎯 Observability & Monitoring
 
-- Structured logging with correlation IDs
-- Prometheus metrics integration
-- Custom business metrics
-- Health checks and actuator endpoints
-- Audit logging for critical operations
+**Structured Logging**
+
+- Correlation ID propagation via `CorrelationIdFilter`
+- User context in MDC via `UserContextMdcFilter`
+- JSON logging with Logback
+- Audit logging for admin operations via `AuditLogger`
+
+**Metrics & Monitoring**
+
+- Custom business metrics via `BookstoreMetrics`
+- Prometheus integration
+- Operation timing (book creation, search, inventory updates)
+- Cache hit/miss tracking
+
+**Health & Actuator**
+
+- Database health checks
+- Redis health checks
+- Custom health indicators
+- Graceful shutdown support
 
 ### 🔐 Security Implementation
 
-- JWT-based authentication
-- Role-based access control (RBAC)
-- Clear separation of public and admin endpoints
-- User context extraction and propagation
+**JWT Authentication**
+
+- JWT validation via `JwtAuthenticationFilter`
+- User context extraction via `UserContextExtractor`
+- RSA256 signature verification
+- Token-based stateless authentication
+
+**Authorization**
+
+- Method-level security with `@PreAuthorize`
+- Role-based access control (ADMIN, SUPERADMIN)
+- Public vs admin endpoint separation
 - Audit trail for administrative actions
-- Admin operations require ADMIN or SUPERADMIN role
+
+**Security Configuration**
+
+- CORS configuration per environment
+- Secure headers (HSTS, CSP, X-Frame-Options)
+- CSRF protection
+- OAuth2 Resource Server integration
 
 ## Architecture Patterns
 
+### Modular Package Structure
+
+The service is organized into bounded contexts following DDD principles:
+
+```
+org.gripday.bookstore/
+├── catalog/              # Book catalog bounded context
+│   ├── Book.java         # Aggregate root with rich domain logic
+│   ├── Category.java     # Category aggregate
+│   ├── CatalogApplicationService.java  # Use case orchestration
+│   ├── BookRepository.java             # Data access
+│   ├── BookResource.java               # Public REST API
+│   ├── BookManagementResource.java     # Admin REST API
+│   └── *Filter.java      # Search filter implementations
+├── inventory/            # Inventory bounded context
+│   ├── Inventory.java    # Aggregate root
+│   ├── InventoryApplicationService.java
+│   ├── InventoryRepository.java
+│   ├── InventoryResource.java
+│   └── InventoryManagementResource.java
+└── shared/               # Shared kernel
+    ├── ISBN.java         # Value object
+    ├── Money.java        # Value object
+    ├── BookId.java       # Value object
+    ├── AggregateRoot.java # Base class
+    ├── UserContext.java   # Security context
+    └── *Config.java       # Infrastructure configuration
+```
+
 ### Key Design Patterns
 
+**Domain Layer**
+
+- Aggregate pattern with clear boundaries
+- Value objects for type safety (ISBN, Money)
+- Factory methods for object creation
+- Domain services for cross-aggregate logic
+- Rich domain models (not anemic)
+
+**Application Layer**
+
+- Application services orchestrate use cases
+- DTO pattern for API boundaries (Java records)
+- Command pattern for write operations (CreateBookCommand, UpdateBookCommand)
+- Query pattern for read operations (BookSearchQuery)
+
+**Infrastructure Layer**
+
 - Repository pattern for data access
-- Service layer for business logic
-- DTO pattern for API boundaries
 - Cache-aside pattern with Redis
 - Optimistic locking for concurrency
+- Correlation ID propagation
+- Structured logging with MDC
 
 ### API Design
 
-- RESTful endpoints with proper HTTP methods
-- Clear endpoint organization (public vs admin subpackages)
-- Versioning support (URL, header, content negotiation)
-- OpenAPI/Swagger documentation with security schemes
-- Problem Details (RFC 7807) for errors
-- Pagination with Spring Data
+**RESTful Principles**
+
+- Proper HTTP methods (GET, POST, PUT, DELETE)
+- Resource-oriented URLs
+- HTTP status codes (200, 201, 204, 400, 404, 409)
+- Content negotiation
+- HATEOAS-ready structure
+
+**Versioning Strategy**
+
+- URL versioning (`/api/v1/bookstore/...`)
+- Header-based versioning support via `ApiVersionInterceptor`
+- Content negotiation versioning
+- Deprecation notices via `@ApiDeprecationNotice`
+
+**Documentation**
+
+- OpenAPI 3.0 with SpringDoc
+- Swagger UI for interactive testing
+- Security schemes documented
+- Request/response examples
+- Error response documentation (RFC 7807 Problem Details)
 
 ### Endpoint Organization Pattern
 
-The service follows a clear separation between public and administrative endpoints:
+**Public Resources** (No Authentication)
 
-**Public Resources**
+- `BookResource` - Catalog browsing and search
+- `InventoryResource` - Inventory information and availability
+- `ApiInfoResource` - API version and capabilities
 
-- `BookResource` - Public catalog browsing and search operations
-- `InventoryResource` - Public inventory information and availability checks
-- `ApiInfoResource` - API version and capability information
-- No authentication required, accessible to all users
+**Admin Resources** (ADMIN/SUPERADMIN Required)
 
-**Admin Resources**
+- `BookManagementResource` - Book CRUD operations
+- `InventoryManagementResource` - Inventory management
 
-- `BookManagementResource` - Administrative book CRUD operations
-- `InventoryManagementResource` - Administrative inventory management
-- Requires JWT authentication with ADMIN or SUPERADMIN role
-- All operations are audited with user context
+**Benefits:**
 
-This pattern provides:
-
-- Clear security boundaries at the package level
-- Easy-to-configure gateway routing rules
+- Clear security boundaries at package level
+- Easy gateway routing configuration
 - Simplified access control policies
 - Better code organization and maintainability
+- Testability (separate test suites for public vs admin)
 
 ## Technical Highlights
 
