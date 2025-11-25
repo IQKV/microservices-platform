@@ -24,39 +24,50 @@ This is the authentication hub for the Gripday microservices platform. It centra
 
 ### 🔐 Authentication & Authorization
 
-- JWT-based stateless authentication
-- Access tokens (15min) and refresh tokens (7 days)
-- Token rotation and blacklisting
-- Role-based access control (RBAC)
-- Method-level security with @PreAuthorize
-- User context extraction and propagation
+- JWT-based stateless authentication with RSA256 (JwtEncoder/JwtDecoder)
+- Access tokens (15min) and refresh tokens (7 days) with configurable expiry
+- Token rotation and Redis-backed blacklisting with TTL
+- JTI (JWT ID) for unique token identification
+- Role-based access control (RBAC) with method-level @PreAuthorize
+- User context extraction with pattern matching (Java 21)
+- Comprehensive JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
 - Self-service user preference management
 - Admin-controlled organization settings
 
 ### 📧 Email Verification Patterns
 
-- Token-based email verification (24h expiry)
-- Single-use token enforcement
-- Rate limiting (3 emails/hour per user)
+- UUID-based verification tokens (24h expiry, 48h cleanup)
+- Single-use token enforcement with database flag
+- Rate limiting (3 emails/hour per user) with sliding window
+- Token invalidation on new generation
 - Transactional email templates with Thymeleaf
 - Multi-language support with i18n
+- Scheduled cleanup with @Scheduled (daily at 2 AM)
+- Metrics tracking for verification success/failure
 
 ### 🛡️ Security Implementation
 
-- Account lockout after 5 failed attempts (15min duration)
-- Password strength validation
+- Account lockout after 5 failed attempts (15min duration) with Redis state
+- Failed attempts counter with 30min sliding window
+- Password strength validation with custom annotations (@ValidPassword)
+- Username validation with custom annotations (@ValidUsername)
 - Input sanitization (SQL injection, XSS prevention)
 - IP-based rate limiting (5 attempts/min)
-- Security audit logging with correlation IDs
-- Redis-backed token blacklist
+- Security audit logging with correlation IDs and UserAuditLog entity
+- Redis-backed token blacklist with automatic TTL expiration
+- Fail-open strategy for Redis unavailability (availability over strict security)
 
 ### 🏢 Multi-Tenancy Patterns
 
-- Tenant context extraction from JWT
-- Tenant-scoped data isolation
-- Tenant ID propagation to downstream services
-- Organization-level user management
-- Cross-tenant access prevention
+- Schema-per-tenant isolation with Hibernate MultiTenantConnectionProvider
+- SchemaPerTenantConnectionProvider with dynamic schema switching
+- TenantContext for thread-local tenant management
+- Tenant extraction from JWT claims and headers via TenantExtractionFilter
+- Per-tenant Liquibase migrations with TenantLiquibaseRunner
+- H2 test support with automatic schema creation
+- Cross-tenant operations via TenantContext.executeInTenantContext()
+- Tenant-scoped repositories (no tenant_id predicates needed)
+- Organization-level user management within tenant boundaries
 
 ### 🎯 Observability & Monitoring
 
@@ -90,11 +101,13 @@ This is the authentication hub for the Gripday microservices platform. It centra
 ### Security Features
 
 - Strong password requirements (8+ chars, mixed case, numbers, special chars)
-- Progressive account lockout protection
-- Token-based email verification
-- Secure password reset flow
-- Session management across devices
-- Audit logging for security events
+- Progressive account lockout with Redis-backed state (5 attempts, 15min lockout)
+- Failed attempts tracking with 30min sliding window
+- Token-based email verification with UUID generation
+- Secure password reset flow with time-limited tokens
+- Session management across devices with refresh token revocation
+- Audit logging for security events (UserAuditLog entity)
+- JTI-based token blacklisting with automatic cleanup
 
 ### Performance Optimization
 
