@@ -23,43 +23,47 @@ handling cross-cutting concerns like authentication, rate limiting, and observab
 ### 🌐 Reactive Gateway Patterns
 
 - Spring Cloud Gateway with WebFlux for non-blocking I/O
-- Reactive filter chains for request/response processing
+- Reactive filter chains with ordered execution (GlobalFilter + Ordered)
 - Backpressure handling for high-throughput scenarios
-- Async Redis operations for rate limiting
-- Reactive JWT validation with OAuth2 Resource Server
+- Reactive Redis operations with ReactiveStringRedisTemplate
+- Reactive JWT validation with OAuth2 Resource Server (RSA256)
 
 ### 🔐 Authentication & Authorization
 
 - JWT validation using RSA256 with JWK Set endpoint
-- User context extraction from validated tokens
-- Context propagation via headers to downstream services
-- Public path configuration for unauthenticated endpoints
-- Role-based routing decisions
+- User context extraction (userId, username, email, roles, permissions, department, organizationId)
+- Context propagation via headers (X-User-ID, X-Username, X-User-Roles)
+- Public path pattern matching (exact and wildcard /\*\*)
+- Configurable user context propagation toggle
+- MDC logging with user and tenant context
 
 ### 🚦 Rate Limiting Patterns
 
-- Redis-backed sliding window algorithm
-- Endpoint-specific rate limit policies
-- Tenant-aware quota management
-- Burst capacity handling for traffic spikes
-- IP-based and tenant-based rate limiting
+- Redis-backed sliding window log algorithm with sorted sets (ZSET)
+- Dual-layer rate limiting (global IP-based + tenant-specific)
+- Endpoint-specific rate limit policies with pattern matching
+- Burst capacity handling (2x quota) for traffic spikes
+- Configurable quotas per tenant via GripdayProperties
 - Rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After)
+- Automatic cleanup of expired entries with TTL
 
 ### 🔄 Circuit Breaker Implementation
 
-- Resilience4j integration for fault tolerance
-- Configurable failure rate thresholds
-- Slow call detection and handling
+- Resilience4j with reactive CircuitBreakerOperator
+- Path-based circuit breaker selection (per service)
+- Configurable failure rate and slow call thresholds
 - Automatic state transitions (closed → open → half-open)
-- Fallback responses for degraded services
+- Fallback responses with retry-after headers
+- Sliding window for failure tracking (count-based or time-based)
 
 ### 🏢 Multi-Tenancy Support
 
-- Tenant extraction from X-Tenant-ID header
-- JWT claim-based tenant identification
-- Subdomain-based tenant routing
-- Tenant-specific rate limit quotas
-- Tenant context propagation to services
+- Priority-based tenant extraction (JWT claims → X-Tenant-ID header)
+- Tenant-specific rate limit quotas with default fallback
+- Tenant context stored in exchange attributes
+- Tenant ID propagation via X-Tenant-ID header
+- Tenant-scoped Redis keys for isolation
+- Tenant quota monitoring service for analytics
 
 ### 🎯 Observability & Monitoring
 
@@ -107,11 +111,12 @@ Request Flow:
 
 ### Reactive Programming
 
-- Non-blocking I/O with Project Reactor
-- Reactive Redis operations for rate limiting
-- Reactive JWT validation
+- Non-blocking I/O with Project Reactor (Mono/Flux)
+- Reactive Redis operations with ReactiveStringRedisTemplate
+- ReactiveSecurityContextHolder for JWT validation
 - Backpressure support for high load
-- Efficient resource utilization
+- Efficient resource utilization (no thread blocking)
+- Reactive filter chains with transformDeferred and flatMap
 
 ### Performance Optimization
 
@@ -131,11 +136,12 @@ Request Flow:
 
 ### Configuration Management
 
-- Type-safe configuration with Java records
+- Type-safe configuration with Java records (GripdayProperties)
+- Nested record structure for organized config hierarchy
+- Bean Validation annotations (@Min, @Max, @NotBlank, @Pattern)
 - Environment-specific profiles (local, staging, production)
-- Validation annotations on configuration properties
 - Externalized service routing configuration
-- Redis-backed distributed state
+- Redis-backed distributed state with connection pooling
 
 ### Operational Features
 
