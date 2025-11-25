@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -220,6 +221,7 @@ class MoneyTest {
 
   @Test
   @DisplayName("Should throw exception when multiplying by null factor")
+  @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_INFERRED", justification = "Testing exception throwing, return value intentionally ignored")
   void shouldThrowExceptionWhenMultiplyingByNullFactor() {
     // Arrange
     var money = Money.usd(new BigDecimal("100.00"));
@@ -232,6 +234,7 @@ class MoneyTest {
 
   @Test
   @DisplayName("Should throw exception when multiplying by negative factor")
+  @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_INFERRED", justification = "Testing exception throwing, return value intentionally ignored")
   void shouldThrowExceptionWhenMultiplyingByNegativeFactor() {
     // Arrange
     var money = Money.usd(new BigDecimal("100.00"));
@@ -244,6 +247,7 @@ class MoneyTest {
 
   @Test
   @DisplayName("Should throw exception when multiplying by negative quantity")
+  @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_INFERRED", justification = "Testing exception throwing, return value intentionally ignored")
   void shouldThrowExceptionWhenMultiplyingByNegativeQuantity() {
     // Arrange
     var money = Money.usd(new BigDecimal("100.00"));
