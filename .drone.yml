@@ -113,9 +113,8 @@ steps:
       - pmd check --minimum-priority High -d ./gripday-gateway-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
 
       # SpotBugs analysis with custom exclusions
-      - wget -O ./spotbugs-exclude.xml https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/spotbugs-exclude.xml
-      - cat /drone/spotbugs-exclude.xml
-      - mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.4.0:check -s /drone/maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD  -Dspotbugs.xmlOutput=true -Dspotbugs.failOnError=true -Dspotbugs.excludeFilterFile=/drone/spotbugs-exclude.xml -Dspotbugs.includeTests=true -Dstyle.color=always
+      - wget -O /drone/spotbugs-exclude.xml https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/spotbugs-exclude.xml
+      - mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check -s /drone/maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD  -Dspotbugs.xmlOutput=true -Dspotbugs.failOnError=true -Dspotbugs.excludeFilterFile=/drone/spotbugs-exclude.xml -Dspotbugs.includeTests=true -Dstyle.color=always
 
   # --------------------------------------------------------------------------
   # Step 3: Slack Notification (Failure Only)
