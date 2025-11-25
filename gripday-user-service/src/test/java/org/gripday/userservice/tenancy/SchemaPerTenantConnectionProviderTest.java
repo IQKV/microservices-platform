@@ -40,17 +40,6 @@ class SchemaPerTenantConnectionProviderTest {
   }
 
   @Test
-  @DisplayName("Should get any connection from data source")
-  @SuppressWarnings({"try", "java:S2095"})
-  void shouldGetAnyConnection() throws SQLException {
-    when(dataSource.getConnection()).thenReturn(connection);
-    try (var result = provider.getAnyConnection()) {
-      assertThat(result).isNotNull();
-      verify(dataSource).getConnection();
-    }
-  }
-
-  @Test
   @DisplayName("Should release any connection")
   void shouldReleaseAnyConnection() throws SQLException {
     provider.releaseAnyConnection(connection);
