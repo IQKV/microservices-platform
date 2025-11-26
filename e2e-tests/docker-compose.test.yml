@@ -1,182 +1,182 @@
-version : "3.8"
+version: "3.8"
 
-services :
+services:
   # PostgreSQL Database for User Service Testing
-  postgres-user-test :
-    image : postgres:15-alpine
-    container_name : iqscaffold-postgres-user-test
-    environment :
-      POSTGRES_DB : iqscaffold_user_test
-      POSTGRES_USER : iqscaffold_test_user
-      POSTGRES_PASSWORD : iqscaffold_test_password
-    ports :
+  postgres-user-test:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-user-test
+    environment:
+      POSTGRES_DB: iqscaffold_user_test
+      POSTGRES_USER: iqscaffold_test_user
+      POSTGRES_PASSWORD: iqscaffold_test_password
+    ports:
       - "5434:5432"
-    volumes :
+    volumes:
       - postgres_auth_test_data:/var/lib/postgresql/data
       - ../docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
-    networks :
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD-SHELL", "pg_isready -U iqscaffold_test_user -d iqscaffold_user_test" ]
-      interval : 5s
-      timeout : 3s
-      retries : 10
-      start_period : 20s
-    tmpfs :
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_test_user -d iqscaffold_user_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    tmpfs:
       - /var/lib/postgresql/data:noexec,nosuid,size=100m
 
   # PostgreSQL Database for Bookstore Service Testing
-  postgres-bookstore-test :
-    image : postgres:15-alpine
-    container_name : iqscaffold-postgres-bookstore-test
-    environment :
-      POSTGRES_DB : iqscaffold_bookstore_test
-      POSTGRES_USER : iqscaffold_test_user
-      POSTGRES_PASSWORD : iqscaffold_test_password
-    ports :
+  postgres-bookstore-test:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-bookstore-test
+    environment:
+      POSTGRES_DB: iqscaffold_bookstore_test
+      POSTGRES_USER: iqscaffold_test_user
+      POSTGRES_PASSWORD: iqscaffold_test_password
+    ports:
       - "5435:5432"
-    volumes :
+    volumes:
       - postgres_bookstore_test_data:/var/lib/postgresql/data
       - ../docker/postgres/init-bookstore.sql:/docker-entrypoint-initdb.d/init-bookstore.sql
-    networks :
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD-SHELL", "pg_isready -U iqscaffold_test_user -d iqscaffold_bookstore_test" ]
-      interval : 5s
-      timeout : 3s
-      retries : 10
-      start_period : 20s
-    tmpfs :
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_test_user -d iqscaffold_bookstore_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    tmpfs:
       - /var/lib/postgresql/data:noexec,nosuid,size=100m
 
   # Redis for Testing - Caching and Sessions
-  redis-test :
-    image : redis:7-alpine
-    container_name : iqscaffold-redis-test
-    ports :
+  redis-test:
+    image: redis:7-alpine
+    container_name: iqscaffold-redis-test
+    ports:
       - "6380:6379"
-    networks :
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD", "redis-cli", "ping" ]
-      interval : 5s
-      timeout : 3s
-      retries : 10
-      start_period : 10s
-    command : redis-server --appendonly no --save ""
-    tmpfs :
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    command: redis-server --appendonly no --save ""
+    tmpfs:
       - /data:noexec,nosuid,size=50m
 
   # User Service for Testing
-  user-service-test :
-    build :
-      context : ..
-      dockerfile : iqscaffold-user-service/Dockerfile
-    container_name : iqscaffold-user-service-test
-    environment :
-      SPRING_PROFILES_ACTIVE : test
-      SPRING_DATASOURCE_URL : jdbc:postgresql://postgres-user-test:5432/iqscaffold_user_test
-      SPRING_DATASOURCE_USERNAME : iqscaffold_test_user
-      SPRING_DATASOURCE_PASSWORD : iqscaffold_test_password
-      SPRING_DATA_REDIS_HOST : redis-test
-      SPRING_DATA_REDIS_PORT : 6379
-      IQSCAFFOLD_AUTH_JWT_SECRET : test-256-bit-secret-key-for-testing-only-not-production
-      IQSCAFFOLD_AUTH_JWT_EXPIRATION : 900
-      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION : 604800
-      LOGGING_LEVEL_ORG_IQSCAFFOLD : DEBUG
-      LOGGING_LEVEL_ROOT : INFO
-    ports :
+  user-service-test:
+    build:
+      context: ..
+      dockerfile: iqscaffold-user-service/Dockerfile
+    container_name: iqscaffold-user-service-test
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user-test:5432/iqscaffold_user_test
+      SPRING_DATASOURCE_USERNAME: iqscaffold_test_user
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_test_password
+      SPRING_DATA_REDIS_HOST: redis-test
+      SPRING_DATA_REDIS_PORT: 6379
+      IQSCAFFOLD_AUTH_JWT_SECRET: test-256-bit-secret-key-for-testing-only-not-production
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      LOGGING_LEVEL_ORG_IQSCAFFOLD: DEBUG
+      LOGGING_LEVEL_ROOT: INFO
+    ports:
       - "8091:8080"
-    depends_on :
-      postgres-user-test :
-        condition : service_healthy
-      redis-test :
-        condition : service_healthy
-    networks :
+    depends_on:
+      postgres-user-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval : 10s
-      timeout : 5s
-      retries : 15
-      start_period : 45s
-    restart : "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 45s
+    restart: "no"
 
   # Bookstore Service for Testing
-  bookstore-service-test :
-    build :
-      context : ..
-      dockerfile : iqscaffold-bookstore-service/Dockerfile
-    container_name : iqscaffold-bookstore-service-test
-    environment :
-      SPRING_PROFILES_ACTIVE : test
-      SPRING_DATASOURCE_URL : jdbc:postgresql://postgres-bookstore-test:5432/iqscaffold_bookstore_test
-      SPRING_DATASOURCE_USERNAME : iqscaffold_test_user
-      SPRING_DATASOURCE_PASSWORD : iqscaffold_test_password
-      SPRING_DATA_REDIS_HOST : redis-test
-      SPRING_DATA_REDIS_PORT : 6379
-      JWT_ISSUER_URI : http://gateway-service-test:8080/auth/realms/iqscaffold
-      LOGGING_LEVEL_ORG_IQSCAFFOLD : DEBUG
-      LOGGING_LEVEL_ROOT : INFO
-    ports :
+  bookstore-service-test:
+    build:
+      context: ..
+      dockerfile: iqscaffold-bookstore-service/Dockerfile
+    container_name: iqscaffold-bookstore-service-test
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-bookstore-test:5432/iqscaffold_bookstore_test
+      SPRING_DATASOURCE_USERNAME: iqscaffold_test_user
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_test_password
+      SPRING_DATA_REDIS_HOST: redis-test
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_ISSUER_URI: http://gateway-service-test:8080/auth/realms/iqscaffold
+      LOGGING_LEVEL_ORG_IQSCAFFOLD: DEBUG
+      LOGGING_LEVEL_ROOT: INFO
+    ports:
       - "8092:8080"
-    depends_on :
-      postgres-bookstore-test :
-        condition : service_healthy
-      redis-test :
-        condition : service_healthy
-    networks :
+    depends_on:
+      postgres-bookstore-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval : 10s
-      timeout : 5s
-      retries : 15
-      start_period : 45s
-    restart : "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 45s
+    restart: "no"
 
   # Gateway Service for Testing
-  gateway-service-test :
-    build :
-      context : ..
-      dockerfile : iqscaffold-gateway-service/Dockerfile
-    container_name : iqscaffold-gateway-service-test
-    environment :
-      SPRING_PROFILES_ACTIVE : test
-      SPRING_DATA_REDIS_HOST : redis-test
-      SPRING_DATA_REDIS_PORT : 6379
-      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL : http://user-service-test:8080
-      IQSCAFFOLD_GATEWAY_BOOKSTORE_SERVICE_URL : http://bookstore-service-test:8080
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED : true
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE : 1000
-      LOGGING_LEVEL_ORG_IQSCAFFOLD : DEBUG
-      LOGGING_LEVEL_ROOT : INFO
-    ports :
+  gateway-service-test:
+    build:
+      context: ..
+      dockerfile: iqscaffold-gateway-service/Dockerfile
+    container_name: iqscaffold-gateway-service-test
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATA_REDIS_HOST: redis-test
+      SPRING_DATA_REDIS_PORT: 6379
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service-test:8080
+      IQSCAFFOLD_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service-test:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 1000
+      LOGGING_LEVEL_ORG_IQSCAFFOLD: DEBUG
+      LOGGING_LEVEL_ROOT: INFO
+    ports:
       - "8090:8080"
-    depends_on :
-      user-service-test :
-        condition : service_healthy
-      bookstore-service-test :
-        condition : service_healthy
-      redis-test :
-        condition : service_healthy
-    networks :
+    depends_on:
+      user-service-test:
+        condition: service_healthy
+      bookstore-service-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
       - iqscaffold-test-network
-    healthcheck :
-      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval : 10s
-      timeout : 5s
-      retries : 15
-      start_period : 60s
-    restart : "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+    restart: "no"
 
-networks :
-  iqscaffold-test-network :
-    driver : bridge
-    name : iqscaffold-test-network
+networks:
+  iqscaffold-test-network:
+    driver: bridge
+    name: iqscaffold-test-network
 
-volumes :
-  postgres_auth_test_data :
-    name : iqscaffold_postgres_auth_test_data
-  postgres_bookstore_test_data :
-    name : iqscaffold_postgres_bookstore_test_data
+volumes:
+  postgres_auth_test_data:
+    name: iqscaffold_postgres_auth_test_data
+  postgres_bookstore_test_data:
+    name: iqscaffold_postgres_bookstore_test_data
