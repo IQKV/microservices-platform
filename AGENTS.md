@@ -2027,7 +2027,7 @@ pnpm prettier:write
 
 - Triggers: Push to `dev`, `wip` branches; PRs to `dev`
 - Node version: 22.x
-- Package manager: pnpm 10.20.0
+- Package manager: pnpm 10.23.0
 - Checks: Prettier formatting
 
 **2. Commit Message Check (check-commit-message.yml)**

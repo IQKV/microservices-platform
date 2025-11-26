@@ -2682,7 +2682,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
-          version: 10.20.0
+          version: 10.23.0
 
       - name: Get PNPM store directory
         id: pnpm-cache
