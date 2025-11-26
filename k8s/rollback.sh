@@ -13,10 +13,10 @@ warn() { echo "$(tput setaf 3)[WARN]$(tput sgr0) $1"; }
 
 command -v kubectl > /dev/null || err "kubectl not found"
 
-NS="gripday-dev-env"
-[ "$ENV" = "staging" ] && NS="gripday-staging-env"
-[ "$ENV" = "test" ] && NS="gripday-test-env"
-[ "$ENV" = "production" ] && NS="gripday-production-env"
+NS="iqscaffold-dev-env"
+[ "$ENV" = "staging" ] && NS="iqscaffold-staging-env"
+[ "$ENV" = "test" ] && NS="iqscaffold-test-env"
+[ "$ENV" = "production" ] && NS="iqscaffold-production-env"
 
 if [ "$ENV" = "production" ]; then
     warn "⚠️  PRODUCTION ROLLBACK WARNING ⚠️"

@@ -2,11 +2,11 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: bookstore-service-hpa
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -69,9 +69,9 @@ metadata:
   name: bookstore-service-hpa-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
     environment: staging
 spec:
   scaleTargetRef:
@@ -112,11 +112,11 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: bookstore-service-hpa-production
-  namespace: gripday-production-env
+  namespace: iqscaffold-production-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
     environment: production
 spec:
   scaleTargetRef:

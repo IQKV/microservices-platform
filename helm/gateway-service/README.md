@@ -1,10 +1,10 @@
 # Gateway Service Helm Chart
 
-Production-ready Helm chart for deploying the Gripday Gateway Service with Redis on Kubernetes.
+Production-ready Helm chart for deploying the IQ Scaffold Gateway Service with Redis on Kubernetes.
 
 ## Overview
 
-The Gateway Service is the **single public entry point** for the Gripday microservices platform. Built on Spring Cloud Gateway, it provides intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and request transformation.
+The Gateway Service is the **single public entry point** for the IQ Scaffold microservices platform. Built on Spring Cloud Gateway, it provides intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and request transformation.
 
 **Architecture**: Gateway is the only service with public ingress. All other services (User, Bookstore) are internal-only with ClusterIP services.
 
@@ -34,15 +34,15 @@ The Gateway Service is the **single public entry point** for the Gripday microse
 ```bash
 # Install with default values (dev environment)
 helm install gateway-service ./helm/gateway-service \
-  --namespace gripday-dev-env \
+  --namespace iqscaffold-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-dev-env
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-gateway-service
+kubectl get pods -n iqscaffold-dev-env
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-gateway-service
 
 # Check ingress
-kubectl get ingress -n gripday-dev-env
+kubectl get ingress -n iqscaffold-dev-env
 ```
 
 **Note**: Default values are optimized for k3s single-node development with 1 replica, HPA disabled, and local-path storage.
@@ -52,14 +52,14 @@ kubectl get ingress -n gripday-dev-env
 ```bash
 # Create secrets first
 kubectl create secret generic gateway-service-secrets \
-  --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
-  --from-literal=GRIPDAY_CACHE_REDIS_PASSWORD=redis_password \
-  -n gripday-test-env
+  --from-literal=IQSCAFFOLD_AUTH_JWT_SECRET=jwt_secret_key \
+  --from-literal=IQSCAFFOLD_CACHE_REDIS_PASSWORD=redis_password \
+  -n iqscaffold-test-env
 
 # Install with test configuration
 helm install gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-test.yaml \
-  --namespace gripday-test-env \
+  --namespace iqscaffold-test-env \
   --create-namespace
 ```
 
@@ -68,14 +68,14 @@ helm install gateway-service ./helm/gateway-service \
 ```bash
 # Create secrets first
 kubectl create secret generic gateway-service-secrets \
-  --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
-  --from-literal=GRIPDAY_CACHE_REDIS_PASSWORD=redis_password \
-  -n gripday-staging-env
+  --from-literal=IQSCAFFOLD_AUTH_JWT_SECRET=jwt_secret_key \
+  --from-literal=IQSCAFFOLD_CACHE_REDIS_PASSWORD=redis_password \
+  -n iqscaffold-staging-env
 
 # Install with staging configuration
 helm install gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-staging.yaml \
-  --namespace gripday-staging-env \
+  --namespace iqscaffold-staging-env \
   --create-namespace
 ```
 
@@ -86,7 +86,7 @@ helm install gateway-service ./helm/gateway-service \
 # Then install with production configuration
 helm install gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-production.yaml \
-  --namespace gripday-production-env \
+  --namespace iqscaffold-production-env \
   --create-namespace
 ```
 
@@ -94,10 +94,10 @@ helm install gateway-service ./helm/gateway-service \
 
 | Environment | Domain              | Namespace              | Values File            |
 | ----------- | ------------------- | ---------------------- | ---------------------- |
-| Development | api.gripday.site    | gripday-dev-env        | values.yaml            |
-| Test        | api.gripday.website | gripday-test-env       | values-test.yaml       |
-| Staging     | api.gripday.space   | gripday-staging-env    | values-staging.yaml    |
-| Production  | api.gripday.com     | gripday-production-env | values-production.yaml |
+| Development | api.iqscaffold.site    | iqscaffold-dev-env        | values.yaml            |
+| Test        | api.iqscaffold.website | iqscaffold-test-env       | values-test.yaml       |
+| Staging     | api.iqscaffold.space   | iqscaffold-staging-env    | values-staging.yaml    |
+| Production  | api.iqscaffold.com     | iqscaffold-production-env | values-production.yaml |
 
 ## Configuration
 
@@ -106,7 +106,7 @@ helm install gateway-service ./helm/gateway-service \
 | Parameter                 | Description                | Default                   |
 | ------------------------- | -------------------------- | ------------------------- |
 | `replicaCount`            | Number of gateway replicas | `1`                       |
-| `image.repository`        | Image repository           | `gripday/gripday-gateway-service` |
+| `image.repository`        | Image repository           | `iqscaffold/iqscaffold-gateway-service` |
 | `image.tag`               | Image tag                  | `1.0.0`                   |
 | `service.port`            | Service port               | `80`                      |
 | `service.targetPort`      | Container port             | `8080`                    |
@@ -130,7 +130,7 @@ helm install gateway-service ./helm/gateway-service \
 - Human-readable console logging
 - Full tracing (100% sampling)
 - 2Gi Redis storage with local-path storage class
-- Domain: api.gripday.site
+- Domain: api.iqscaffold.site
 - TLS disabled by default
 - No affinity/topology constraints
 
@@ -140,7 +140,7 @@ helm install gateway-service ./helm/gateway-service \
 - PDB enabled (minAvailable: 2)
 - High priority class
 - External secret management required
-- Test domain: api.gripday.website
+- Test domain: api.iqscaffold.website
 - JSON structured logging
 - Full tracing (100% sampling)
 - 5Gi Redis storage with standard storage class
@@ -152,7 +152,7 @@ helm install gateway-service ./helm/gateway-service \
 - PDB enabled (minAvailable: 3)
 - High priority class
 - External secret management required
-- Staging domain: api.gripday.space
+- Staging domain: api.iqscaffold.space
 - JSON structured logging
 - Full tracing (100% sampling)
 - 5Gi Redis storage with fast-ssd storage class
@@ -164,7 +164,7 @@ helm install gateway-service ./helm/gateway-service \
 - PDB enabled (minAvailable: 7)
 - Critical priority class
 - External secret management required (AWS Secrets Manager, Vault)
-- Production domain: api.gripday.com
+- Production domain: api.iqscaffold.com
 - JSON structured logging
 - Reduced tracing (10% sampling)
 - 10Gi Redis storage with fast-ssd storage class
@@ -237,7 +237,7 @@ helm install gateway-service ./helm/gateway-service \
 
 - Prometheus metrics exposed at `/actuator/prometheus`
 - Annotations for automatic scraping
-- Custom metrics prefix: `gripday_gateway`
+- Custom metrics prefix: `iqscaffold_gateway`
 - Distribution percentiles: 0.5, 0.95, 0.99
 
 ### Logging
@@ -291,33 +291,33 @@ curl http://gateway-service:8080/actuator/prometheus | grep gateway
 
 ```bash
 # Pod status (adjust namespace as needed)
-kubectl get pods -n gripday-dev-env -l app.kubernetes.io/name=gripday-gateway-service
+kubectl get pods -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-gateway-service
 
 # Deployment status
-kubectl rollout status deployment/gateway-service -n gripday-dev-env
+kubectl rollout status deployment/gateway-service -n iqscaffold-dev-env
 
 # HPA status (if enabled)
-kubectl get hpa -n gripday-dev-env
+kubectl get hpa -n iqscaffold-dev-env
 ```
 
 ### View Logs
 
 ```bash
 # Application logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-gateway-service
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-gateway-service
 
 # Redis logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gateway-redis
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=gateway-redis
 
 # Previous container logs (if crashed)
-kubectl logs -n gripday-dev-env <pod-name> --previous
+kubectl logs -n iqscaffold-dev-env <pod-name> --previous
 ```
 
 ### Test Routing
 
 ```bash
 # Port forward
-kubectl port-forward -n gripday-dev-env svc/gateway-service 8080:80
+kubectl port-forward -n iqscaffold-dev-env svc/gateway-service 8080:80
 
 # Test User Service route
 curl http://localhost:8080/api/v1/auth/health
@@ -345,15 +345,15 @@ curl -I http://localhost:8080/api/v1/auth/login
 
 ```bash
 # Connect to Redis
-kubectl exec -it -n gripday-dev-env \
-  $(kubectl get pod -n gripday-dev-env -l app.kubernetes.io/name=gateway-redis -o jsonpath='{.items[0].metadata.name}') \
+kubectl exec -it -n iqscaffold-dev-env \
+  $(kubectl get pod -n iqscaffold-dev-env -l app.kubernetes.io/name=gateway-redis -o jsonpath='{.items[0].metadata.name}') \
   -- redis-cli
 
 # Check rate limiting keys
-KEYS "gripday:gateway:rate-limit:*"
+KEYS "iqscaffold:gateway:rate-limit:*"
 
 # Check key TTL
-TTL "gripday:gateway:rate-limit:user:123"
+TTL "iqscaffold:gateway:rate-limit:user:123"
 ```
 
 ### Common Issues
@@ -388,17 +388,17 @@ TTL "gripday:gateway:rate-limit:user:123"
 # Upgrade with new values (adjust namespace and values file as needed)
 helm upgrade gateway-service ./helm/gateway-service \
   -f ./helm/gateway-service/values-production.yaml \
-  --namespace gripday-production-env
+  --namespace iqscaffold-production-env
 
 # Rollback if needed
-helm rollback gateway-service --namespace gripday-production-env
+helm rollback gateway-service --namespace iqscaffold-production-env
 ```
 
 ## Uninstalling
 
 ```bash
 # Adjust namespace as needed
-helm uninstall gateway-service --namespace gripday-dev-env
+helm uninstall gateway-service --namespace iqscaffold-dev-env
 ```
 
 ## Security
@@ -428,8 +428,8 @@ The chart includes network policies that:
 
 Required secrets:
 
-- `GRIPDAY_AUTH_JWT_SECRET`: JWT signing secret
-- `GRIPDAY_CACHE_REDIS_PASSWORD`: Redis password (optional in dev)
+- `IQSCAFFOLD_AUTH_JWT_SECRET`: JWT signing secret
+- `IQSCAFFOLD_CACHE_REDIS_PASSWORD`: Redis password (optional in dev)
 
 ## Java Configuration
 
@@ -505,6 +505,6 @@ The Helm chart creates the following Kubernetes resources:
 
 ## Support
 
-- GitHub Issues: https://github.com/gripday/gripday-gateway-service
-- Platform Team: platform@gripday.site
-- Documentation: https://docs.gripday.site
+- GitHub Issues: https://github.com/iqscaffold/iqscaffold-gateway-service
+- Platform Team: platform@iqscaffold.site
+- Documentation: https://docs.iqscaffold.site

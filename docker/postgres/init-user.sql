@@ -5,16 +5,16 @@
 CREATE SCHEMA IF NOT EXISTS auth;
 
 -- Set default search path
-ALTER DATABASE gripday_user SET search_path TO public, auth;
+ALTER DATABASE iqscaffold_user SET search_path TO public, auth;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE gripday_user TO gripday_user;
-GRANT ALL PRIVILEGES ON SCHEMA public TO gripday_user;
-GRANT ALL PRIVILEGES ON SCHEMA auth TO gripday_user;
+GRANT ALL PRIVILEGES ON DATABASE iqscaffold_user TO iqscaffold_user;
+GRANT ALL PRIVILEGES ON SCHEMA public TO iqscaffold_user;
+GRANT ALL PRIVILEGES ON SCHEMA auth TO iqscaffold_user;
 
 -- Create audit function for tracking changes
 CREATE OR REPLACE FUNCTION update_updated_at_column()

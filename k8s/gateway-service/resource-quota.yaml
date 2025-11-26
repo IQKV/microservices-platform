@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: gateway-service-quota
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/name: iqscaffold-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   hard:
     # Compute resources (gateway needs more for traffic handling)
@@ -36,11 +36,11 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: gateway-service-limits
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-gateway-service
+    app.kubernetes.io/name: iqscaffold-gateway-service
     app.kubernetes.io/component: gateway
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   limits:
     # Container limits (gateway needs more resources)

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251122000100-000000-user-preferences-table" author="iqscaffold">
+        <comment>Create user_preferences table with one-to-one relationship to users</comment>
+
+        <createTable tableName="user_preferences">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="locale" type="VARCHAR(10)" defaultValue="en">
+                <constraints nullable="true"/>
+            </column>
+            <column name="timezone" type="VARCHAR(50)" defaultValue="UTC">
+                <constraints nullable="true"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)" defaultValue="USD">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_format" type="VARCHAR(50)" defaultValue="yyyy-MM-dd">
+                <constraints nullable="true"/>
+            </column>
+            <column name="time_format" type="VARCHAR(50)" defaultValue="HH:mm:ss">
+                <constraints nullable="true"/>
+            </column>
+            <column name="theme" type="VARCHAR(20)" defaultValue="light">
+                <constraints nullable="true"/>
+            </column>
+            <column name="profile_photo_url" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="bio" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="notification_email" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_sms" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_push" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="two_factor_enabled" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="two_factor_method" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="custom_settings" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_preferences"
+                baseColumnNames="user_id"
+                constraintName="fk_user_preferences_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <addUniqueConstraint 
+                tableName="user_preferences" 
+                columnNames="user_id" 
+                constraintName="uq_user_preferences_user_id"/>
+
+        <createIndex indexName="idx_user_preferences_user_id" tableName="user_preferences">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_user_preferences_tenant_id" tableName="user_preferences">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_user_preferences_created_at" tableName="user_preferences">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_user_preferences_tenant_user" tableName="user_preferences">
+            <column name="tenant_id"/>
+            <column name="user_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="user_preferences"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

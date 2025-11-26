@@ -26,15 +26,15 @@ log "Deploying to production (tag: $TAG)..."
 # Backup databases
 log "Creating database backups..."
 for svc in user bookstore; do
-    kubectl exec -n gripday-production-env deployment/${svc}-postgres -- \
-        pg_dump -U gripday_${svc}_prod gripday_${svc}_production > /tmp/${svc}_backup_$(date +%Y%m%d_%H%M%S).sql || warn "Backup failed for $svc"
+    kubectl exec -n iqscaffold-production-env deployment/${svc}-postgres -- \
+        pg_dump -U iqscaffold_${svc}_prod iqscaffold_${svc}_production > /tmp/${svc}_backup_$(date +%Y%m%d_%H%M%S).sql || warn "Backup failed for $svc"
 done
 
 # Update image tags
 for svc in user gateway bookstore; do
-    sed "s|gripday/${svc}-service:latest|gripday/${svc}-service:$TAG|g" \
+    sed "s|iqscaffold/${svc}-service:latest|iqscaffold/${svc}-service:$TAG|g" \
         ${svc}-service/${svc}-service-deployment.yaml | \
-    sed 's/namespace: gripday-dev-env/namespace: gripday-production-env/g' | \
+    sed 's/namespace: iqscaffold-dev-env/namespace: iqscaffold-production-env/g' | \
     sed 's/replicas: 2/replicas: 3/g' | \
     kubectl apply -f -
 done
@@ -44,9 +44,9 @@ kubectl apply -f priority-classes.yaml
 
 # Wait for rollout
 for svc in user gateway bookstore; do
-    kubectl rollout status deployment/${svc}-service -n gripday-production-env --timeout=600s
-    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-${svc}-service -n gripday-production-env --timeout=300s
+    kubectl rollout status deployment/${svc}-service -n iqscaffold-production-env --timeout=600s
+    kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-${svc}-service -n iqscaffold-production-env --timeout=300s
 done
 
 log "Production deployment complete"
-log "Gateway: https://api.gripday.com"
+log "Gateway: https://api.iqscaffold.com"

@@ -21,22 +21,22 @@ const environments = {
     workers: 4,
   },
   staging: {
-    baseURL: "https://api.gripday.website",
+    baseURL: "https://api.iqscaffold.website",
     services: {
-      gateway: "https://api.gripday.website",
-      user: "https://user.gripday.website",
-      bookstore: "https://bookstore.gripday.website",
+      gateway: "https://api.iqscaffold.website",
+      user: "https://user.iqscaffold.website",
+      bookstore: "https://bookstore.iqscaffold.website",
     },
     timeout: 60000,
     retries: 2,
     workers: 2,
   },
   production: {
-    baseURL: "https://api.gripday.com",
+    baseURL: "https://api.iqscaffold.com",
     services: {
-      gateway: "https://api.gripday.com",
-      user: "https://user.gripday.com",
-      bookstore: "https://bookstore.gripday.com",
+      gateway: "https://api.iqscaffold.com",
+      user: "https://user.iqscaffold.com",
+      bookstore: "https://bookstore.iqscaffold.com",
     },
     timeout: 90000,
     retries: 3,
@@ -47,7 +47,7 @@ const environments = {
 const config = environments[testEnv as keyof typeof environments] || environments.local;
 
 /**
- * Playwright configuration for Gripday API testing
+ * Playwright configuration for iqscaffold API testing
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
@@ -108,7 +108,7 @@ export default defineConfig({
     extraHTTPHeaders: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      "User-Agent": "Gripday-E2E-Tests/1.0.0",
+      "User-Agent": "iqscaffold-E2E-Tests/1.0.0",
     },
 
     /* API request timeout */

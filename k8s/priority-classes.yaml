@@ -5,7 +5,7 @@ kind: PriorityClass
 metadata:
   name: high-priority
   labels:
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 value: 1000000
 globalDefault: false
 description: "High priority for critical platform services like gateway and auth"
@@ -16,7 +16,7 @@ kind: PriorityClass
 metadata:
   name: medium-priority
   labels:
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 value: 500000
 globalDefault: false
 description: "Medium priority for business services like bookstore"
@@ -27,7 +27,7 @@ kind: PriorityClass
 metadata:
   name: low-priority
   labels:
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 value: 100000
 globalDefault: false
 description: "Low priority for batch jobs and non-critical workloads"
@@ -38,7 +38,7 @@ kind: PriorityClass
 metadata:
   name: infrastructure-priority
   labels:
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 value: 900000
 globalDefault: false
 description: "Priority for infrastructure components like databases and caches"

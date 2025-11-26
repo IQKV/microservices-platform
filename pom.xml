@@ -9,12 +9,12 @@
         <artifactId>boot-parent-pom</artifactId>
         <version>0.25.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.gripday</groupId>
-    <artifactId>gripday</artifactId>
+    <groupId>com.iqscaffold</groupId>
+    <artifactId>iqscaffold</artifactId>
     <version>0.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     
-    <name>Gripday Microservices Platform</name>
+    <name>IQ Scaffold Microservices Platform</name>
     <description>Extensible microservices platform with centralized authentication and gateway</description>
     
     <properties>
@@ -28,9 +28,9 @@
     </properties>
     
     <modules>
-        <module>gripday-user-service</module>
-        <module>gripday-gateway-service</module>
-        <module>gripday-bookstore-service</module>
+        <module>iqscaffold-user-service</module>
+        <module>iqscaffold-gateway-service</module>
+        <module>iqscaffold-bookstore-service</module>
     </modules>    
 
     <build>

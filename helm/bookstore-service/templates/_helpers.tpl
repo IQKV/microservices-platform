@@ -45,7 +45,7 @@ app.kubernetes.io/part-of: {{ .Values.global.platform }}
 Selector labels
 */}}
 {{- define "bookstore-service.selectorLabels" -}}
-app.kubernetes.io/name: gripday-bookstore-service
+app.kubernetes.io/name: iqscaffold-bookstore-service
 app.kubernetes.io/component: bookstore
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

@@ -1,6 +1,6 @@
 # API Client Framework
 
-This directory contains the core API client framework for Playwright API testing of the Gripday microservices platform.
+This directory contains the core API client framework for Playwright API testing of the IQ Scaffold microservices platform.
 
 ## Overview
 

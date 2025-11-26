@@ -2,11 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: bookstore-service-config
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 data:
   application.yml: |
     server:
@@ -14,7 +14,7 @@ data:
 
     spring:
       application:
-        name: gripday-bookstore-service
+        name: iqscaffold-bookstore-service
       profiles:
         active: local
       
@@ -105,8 +105,8 @@ data:
         sampling:
           probability: 1.0
 
-    # Gripday-specific configuration properties
-    gripday:
+    # IQ Scaffold-specific configuration properties
+    iqscaffold:
       bookstore:
         cache:
           book-catalog-ttl: PT2H      # 2 hours for book catalog
@@ -128,7 +128,7 @@ data:
         metrics:
           enabled: true
           path: /actuator/prometheus
-          prefix: gripday_bookstore
+          prefix: iqscaffold_bookstore
           include-host-tag: true
           include-application-tag: true
         logging:
@@ -147,9 +147,9 @@ metadata:
   name: bookstore-service-config-staging
   namespace: staging-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
     environment: staging
 data:
   application-staging.yml: |
@@ -172,7 +172,7 @@ data:
         sampling:
           probability: 0.1
 
-    gripday:
+    iqscaffold:
       observability:
         tracing:
           sampling-rate: 0.1
@@ -187,11 +187,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: bookstore-service-config-production
-  namespace: gripday-production-env
+  namespace: iqscaffold-production-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
     environment: production
 data:
   application-production.yml: |
@@ -214,7 +214,7 @@ data:
         sampling:
           probability: 0.01
 
-    gripday:
+    iqscaffold:
       observability:
         tracing:
           sampling-rate: 0.01

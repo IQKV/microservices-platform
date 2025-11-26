@@ -1,11 +1,11 @@
-# Gripday Platform - Minikube Ingress Configuration
+# IQ Scaffold Platform - Minikube Ingress Configuration
 #
 # This file provides ingress configuration for minikube that mirrors production setup
 # while keeping direct NodePort access available for debugging
 #
 # Enable ingress addon: minikube addons enable ingress
 # Add to /etc/hosts:
-#   $(minikube ip) api.gripday.site app.gripday.site user.gripday.site
+#   $(minikube ip) api.iqscaffold.site app.iqscaffold.site user.iqscaffold.site
 #
 ---
 # Gateway Service Ingress (Main API Entry Point)
@@ -13,7 +13,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gateway-service-ingress
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: gateway-service
     component: gateway
@@ -27,7 +27,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.gripday.site
+    - host: api.iqscaffold.site
       http:
         paths:
           - path: /
@@ -46,7 +46,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: user-service-ingress
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: user-service
     component: authentication
@@ -58,7 +58,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: user.gripday.site
+    - host: user.iqscaffold.site
       http:
         paths:
           - path: /
@@ -77,7 +77,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: bookstore-service-ingress
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: bookstore-service
     component: bookstore
@@ -89,7 +89,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: bookstore.gripday.site
+    - host: bookstore.iqscaffold.site
       http:
         paths:
           - path: /
@@ -106,13 +106,13 @@ spec:
 # This ingress configuration provides TWO ways to access services:
 #
 # 1. PRODUCTION-LIKE (API Gateway Pattern):
-#    - http://api.gripday.site/api/v1/auth/login    → Gateway → User Service
-#    - http://api.gripday.site/api/v1/bookstore/*   → Gateway → Bookstore Service
+#    - http://api.iqscaffold.site/api/v1/auth/login    → Gateway → User Service
+#    - http://api.iqscaffold.site/api/v1/bookstore/*   → Gateway → Bookstore Service
 #    - This mirrors production/staging architecture
 #
 # 2. DIRECT ACCESS (Development/Debugging):
-#    - http://user.gripday.site/api/v1/auth/login   → User Service (direct)
-#    - http://bookstore.gripday.site/api/v1/books   → Bookstore Service (direct)
+#    - http://user.iqscaffold.site/api/v1/auth/login   → User Service (direct)
+#    - http://bookstore.iqscaffold.site/api/v1/books   → Bookstore Service (direct)
 #    - This bypasses the gateway for easier debugging
 #
 # Additionally, NodePort access is still available:

@@ -39,7 +39,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "bookstore-service.fullname" . }}-secrets
-              key: GRIPDAY_CACHE_REDIS_PASSWORD
+              key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
               optional: true
         command:
         - redis-server

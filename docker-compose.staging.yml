@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database for User Service - Staging
   postgres-user:
     environment:
-      POSTGRES_DB: gripday_user_staging
+      POSTGRES_DB: iqscaffold_user_staging
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -34,12 +34,12 @@ services:
   user-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/gripday_user_staging
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user_staging
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      GRIPDAY_AUTH_JWT_SECRET: ${JWT_SECRET}
-      GRIPDAY_AUTH_JWT_EXPIRATION: 900
-      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      IQSCAFFOLD_AUTH_JWT_SECRET: ${JWT_SECRET}
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
       JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
     deploy:
       resources:
@@ -58,8 +58,8 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: staging
-      GRIPDAY_GATEWAY_USER_SERVICE_URL: http://user-service:8080
-      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
       JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
     deploy:
       resources:
@@ -99,8 +99,8 @@ services:
 
 volumes:
   postgres_auth_staging_data:
-    name: gripday_postgres_auth_staging_data
+    name: iqscaffold_postgres_auth_staging_data
   prometheus_staging_data:
-    name: gripday_prometheus_staging_data
+    name: iqscaffold_prometheus_staging_data
   grafana_staging_data:
-    name: gripday_grafana_staging_data
+    name: iqscaffold_grafana_staging_data

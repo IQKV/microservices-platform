@@ -1,6 +1,6 @@
-# Gripday Platform Observability Stack
+# IQ Scaffold Platform Observability Stack
 
-This directory contains the complete observability stack for the Gripday microservices platform, including distributed tracing, metrics collection, log aggregation, and visualization.
+This directory contains the complete observability stack for the IQ Scaffold microservices platform, including distributed tracing, metrics collection, log aggregation, and visualization.
 
 ## Components
 
@@ -44,11 +44,11 @@ This directory contains the complete observability stack for the Gripday microse
 
    ```bash
    # Terminal 1 - User Service
-   cd gripday-user-service
+   cd iqscaffold-user-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
 
    # Terminal 2 - Gateway Service
-   cd gripday-gateway-service
+   cd iqscaffold-gateway-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
    ```
 
@@ -95,20 +95,20 @@ This directory contains the complete observability stack for the Gripday microse
 
 ### User Service Metrics
 
-- `gripday_user_authentication_duration`: Authentication request duration
-- `gripday_user_authentication_total`: Total authentication attempts (success/failure)
-- `gripday_user_registration_duration`: User registration duration
-- `gripday_user_registration_total`: Total registration attempts
-- `gripday_user_token_refresh_duration`: Token refresh duration
-- `gripday_user_token_refresh_total`: Total token refresh attempts
+- `iqscaffold_user_authentication_duration`: Authentication request duration
+- `iqscaffold_user_authentication_total`: Total authentication attempts (success/failure)
+- `iqscaffold_user_registration_duration`: User registration duration
+- `iqscaffold_user_registration_total`: Total registration attempts
+- `iqscaffold_user_token_refresh_duration`: Token refresh duration
+- `iqscaffold_user_token_refresh_total`: Total token refresh attempts
 
 ### Gateway Service Metrics
 
-- `gripday_gateway_request_duration`: Gateway request processing time
-- `gripday_gateway_request_total`: Total gateway requests
-- `gripday_gateway_authentication_duration`: Authentication validation time
-- `gripday_gateway_ratelimit_hit`: Rate limit violations
-- `gripday_gateway_circuitbreaker_open`: Circuit breaker state changes
+- `iqscaffold_gateway_request_duration`: Gateway request processing time
+- `iqscaffold_gateway_request_total`: Total gateway requests
+- `iqscaffold_gateway_authentication_duration`: Authentication validation time
+- `iqscaffold_gateway_ratelimit_hit`: Rate limit violations
+- `iqscaffold_gateway_circuitbreaker_open`: Circuit breaker state changes
 
 ## Structured Logging
 
@@ -117,7 +117,7 @@ This directory contains the complete observability stack for the Gripday microse
 - `timestamp`: ISO 8601 timestamp in UTC
 - `level`: Log level (DEBUG, INFO, WARN, ERROR)
 - `message`: Log message
-- `service`: Service name (gripday-user-service, gripday-gateway-service)
+- `service`: Service name (iqscaffold-user-service, iqscaffold-gateway-service)
 - `correlationId`: Request correlation ID
 - `traceId`: OpenTelemetry trace ID
 - `spanId`: OpenTelemetry span ID

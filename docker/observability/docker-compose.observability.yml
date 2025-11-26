@@ -4,7 +4,7 @@ services:
   # Jaeger for distributed tracing
   jaeger:
     image: jaegertracing/all-in-one:1.60
-    container_name: gripday-jaeger
+    container_name: iqscaffold-jaeger
     ports:
       - "16686:16686" # Jaeger UI
       - "14250:14250" # gRPC
@@ -14,7 +14,7 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
       - JAEGER_DISABLED=false
     networks:
-      - gripday-observability
+      - iqscaffold-observability
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
@@ -25,7 +25,7 @@ services:
   # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:v2.54.1
-    container_name: gripday-prometheus
+    container_name: iqscaffold-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -39,7 +39,7 @@ services:
       - "--storage.tsdb.retention.time=200h"
       - "--web.enable-lifecycle"
     networks:
-      - gripday-observability
+      - iqscaffold-observability
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
@@ -50,7 +50,7 @@ services:
   # Grafana for dashboards and visualization
   grafana:
     image: grafana/grafana:11.3.0
-    container_name: gripday-grafana
+    container_name: iqscaffold-grafana
     ports:
       - "3000:3000"
     volumes:
@@ -63,7 +63,7 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     networks:
-      - gripday-observability
+      - iqscaffold-observability
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
@@ -74,7 +74,7 @@ services:
   # Loki for log aggregation
   loki:
     image: grafana/loki:3.2.0
-    container_name: gripday-loki
+    container_name: iqscaffold-loki
     ports:
       - "3100:3100"
     volumes:
@@ -82,7 +82,7 @@ services:
       - loki-data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
-      - gripday-observability
+      - iqscaffold-observability
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
@@ -93,27 +93,27 @@ services:
   # Promtail for log shipping
   promtail:
     image: grafana/promtail:3.2.0
-    container_name: gripday-promtail
+    container_name: iqscaffold-promtail
     volumes:
       - ./promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     command: -config.file=/etc/promtail/config.yml
     networks:
-      - gripday-observability
+      - iqscaffold-observability
     restart: unless-stopped
     depends_on:
       - loki
 
 networks:
-  gripday-observability:
+  iqscaffold-observability:
     driver: bridge
-    name: gripday-observability
+    name: iqscaffold-observability
 
 volumes:
   prometheus-data:
-    name: gripday-prometheus-data
+    name: iqscaffold-prometheus-data
   grafana-data:
-    name: gripday-grafana-data
+    name: iqscaffold-grafana-data
   loki-data:
-    name: gripday-loki-data
+    name: iqscaffold-loki-data

@@ -20,18 +20,18 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
       user: {
         host: 'localhost',
         port: 5434,
-        database: 'gripday_user_test',
-        username: 'gripday_test_user',
-        password: 'gripday_test_password',
-        url: 'postgresql://gripday_test_user:gripday_test_password@localhost:5434/gripday_user_test'
+        database: 'iqscaffold_user_test',
+        username: 'iqscaffold_test_user',
+        password: 'iqscaffold_test_password',
+        url: 'postgresql://iqscaffold_test_user:iqscaffold_test_password@localhost:5434/iqscaffold_user_test'
       },
       bookstore: {
         host: 'localhost',
         port: 5435,
-        database: 'gripday_bookstore_test',
-        username: 'gripday_test_user',
-        password: 'gripday_test_password',
-        url: 'postgresql://gripday_test_user:gripday_test_password@localhost:5435/gripday_bookstore_test'
+        database: 'iqscaffold_bookstore_test',
+        username: 'iqscaffold_test_user',
+        password: 'iqscaffold_test_password',
+        url: 'postgresql://iqscaffold_test_user:iqscaffold_test_password@localhost:5435/iqscaffold_bookstore_test'
       }
     },
     redis: {
@@ -63,34 +63,34 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
 
   staging: {
     name: 'staging',
-    baseUrl: 'https://api.gripday.website',
+    baseUrl: 'https://api.iqscaffold.website',
     services: {
-      gateway: 'https://api.gripday.website',
-      user: 'https://user.gripday.website',
-      bookstore: 'https://bookstore.gripday.website'
+      gateway: 'https://api.iqscaffold.website',
+      user: 'https://user.iqscaffold.website',
+      bookstore: 'https://bookstore.iqscaffold.website'
     },
     databases: {
       user: {
-        host: 'staging-postgres-user.gripday.com',
+        host: 'staging-postgres-user.iqscaffold.com',
         port: 5432,
-        database: 'gripday_user_staging',
-        username: 'gripday_staging_user',
+        database: 'iqscaffold_user_staging',
+        username: 'iqscaffold_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-user.gripday.com:5432/gripday_user_staging`
+        url: `postgresql://iqscaffold_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-user.iqscaffold.com:5432/iqscaffold_user_staging`
       },
       bookstore: {
-        host: 'staging-postgres-bookstore.gripday.com',
+        host: 'staging-postgres-bookstore.iqscaffold.com',
         port: 5432,
-        database: 'gripday_bookstore_staging',
-        username: 'gripday_staging_user',
+        database: 'iqscaffold_bookstore_staging',
+        username: 'iqscaffold_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://gripday_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-bookstore.gripday.com:5432/gripday_bookstore_staging`
+        url: `postgresql://iqscaffold_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-bookstore.iqscaffold.com:5432/iqscaffold_bookstore_staging`
       }
     },
     redis: {
-      host: 'staging-redis.gripday.com',
+      host: 'staging-redis.iqscaffold.com',
       port: 6379,
-      url: `redis://${process.env.STAGING_REDIS_PASSWORD ? `:${process.env.STAGING_REDIS_PASSWORD}@` : ''}staging-redis.gripday.com:6379`
+      url: `redis://${process.env.STAGING_REDIS_PASSWORD ? `:${process.env.STAGING_REDIS_PASSWORD}@` : ''}staging-redis.iqscaffold.com:6379`
     },
     timeouts: {
       request: 45000,
@@ -116,34 +116,34 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
 
   production: {
     name: 'production',
-    baseUrl: 'https://api.gripday.com',
+    baseUrl: 'https://api.iqscaffold.com',
     services: {
-      gateway: 'https://api.gripday.com',
-      user: 'https://user.gripday.com',
-      bookstore: 'https://bookstore.gripday.com'
+      gateway: 'https://api.iqscaffold.com',
+      user: 'https://user.iqscaffold.com',
+      bookstore: 'https://bookstore.iqscaffold.com'
     },
     databases: {
       user: {
-        host: 'prod-postgres-user.gripday.com',
+        host: 'prod-postgres-user.iqscaffold.com',
         port: 5432,
-        database: 'gripday_user_prod',
-        username: 'gripday_prod_user',
+        database: 'iqscaffold_user_prod',
+        username: 'iqscaffold_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-user.gripday.com:5432/gripday_user_prod`
+        url: `postgresql://iqscaffold_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-user.iqscaffold.com:5432/iqscaffold_user_prod`
       },
       bookstore: {
-        host: 'prod-postgres-bookstore.gripday.com',
+        host: 'prod-postgres-bookstore.iqscaffold.com',
         port: 5432,
-        database: 'gripday_bookstore_prod',
-        username: 'gripday_prod_user',
+        database: 'iqscaffold_bookstore_prod',
+        username: 'iqscaffold_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://gripday_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-bookstore.gripday.com:5432/gripday_bookstore_prod`
+        url: `postgresql://iqscaffold_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-bookstore.iqscaffold.com:5432/iqscaffold_bookstore_prod`
       }
     },
     redis: {
-      host: 'prod-redis.gripday.com',
+      host: 'prod-redis.iqscaffold.com',
       port: 6379,
-      url: `redis://${process.env.PROD_REDIS_PASSWORD ? `:${process.env.PROD_REDIS_PASSWORD}@` : ''}prod-redis.gripday.com:6379`
+      url: `redis://${process.env.PROD_REDIS_PASSWORD ? `:${process.env.PROD_REDIS_PASSWORD}@` : ''}prod-redis.iqscaffold.com:6379`
     },
     timeouts: {
       request: 60000,

@@ -2,16 +2,16 @@
 
 ## Overview
 
-This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the Gripday microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
+This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the IQ Scaffold microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
 
-The Gripday platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
+The IQ Scaffold platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
 ## 🏛️ Repository Structure & Organization
 
 ### Microservices Architecture Layout
 
 ```
-gripday/
+iqscaffold/
 ├── .github/                          # GitHub workflows and automation
 │   └── workflows/                    # CI/CD pipeline definitions
 ├── docker/                           # Docker configurations for infrastructure
@@ -24,7 +24,7 @@ gripday/
 ├── helm/                             # Kubernetes Helm charts
 ├── k8s/                              # Kubernetes manifests
 ├── scripts/                          # Build, deployment, and utility scripts
-├── gripday-user-service/             # Authentication & identity management
+├── iqscaffold-user-service/             # Authentication & identity management
 │   ├── src/main/java/                # Java source code
 │   ├── src/main/resources/           # Configuration and migrations
 │   ├── src/test/                     # Unit and integration tests
@@ -32,7 +32,7 @@ gripday/
 │   ├── Dockerfile                    # Container image definition
 │   ├── docker-compose.yml            # Local development setup
 │   └── pom.xml                       # Maven build configuration
-├── gripday-gateway-service/          # API Gateway with routing & rate limiting
+├── iqscaffold-gateway-service/          # API Gateway with routing & rate limiting
 │   ├── src/main/java/                # Reactive gateway implementation
 │   ├── src/main/resources/           # Gateway routing configuration
 │   ├── src/test/                     # Gateway tests
@@ -40,7 +40,7 @@ gripday/
 │   ├── Dockerfile                    # Container image definition
 │   ├── docker-compose.yml            # Local development setup
 │   └── pom.xml                       # Maven build configuration
-├── gripday-bookstore-service/        # Domain service (catalog & inventory)
+├── iqscaffold-bookstore-service/        # Domain service (catalog & inventory)
 │   ├── src/main/java/                # Domain implementation
 │   ├── src/main/resources/           # Configuration and migrations
 │   ├── src/test/                     # Domain tests
@@ -60,8 +60,8 @@ gripday/
 Each microservice follows a consistent internal structure:
 
 ```
-gripday-{service-name}/
-├── src/main/java/org/gripday/{service}/
+iqscaffold-{service-name}/
+├── src/main/java/com/iqscaffold/{service}/
 │   ├── config/                       # Spring configuration classes
 │   ├── domain/                       # Domain entities and business logic
 │   ├── repository/                   # Data access layer (JPA repositories)
@@ -92,9 +92,9 @@ gripday-{service-name}/
 
 <!-- Platform modules -->
 <modules>
-    <module>gripday-user-service</module>
-    <module>gripday-gateway-service</module>
-    <module>gripday-bookstore-service</module>
+    <module>iqscaffold-user-service</module>
+    <module>iqscaffold-gateway-service</module>
+    <module>iqscaffold-bookstore-service</module>
 </modules>
 ```
 
@@ -997,7 +997,7 @@ cross_cutting_scopes:
 public record UserCreateCommand(@NotBlank @Size(max = 100) String username, @Email String email, @NotBlank String password) {}
 
 // Records for configuration properties
-@ConfigurationProperties(prefix = "gripday.auth.jwt")
+@ConfigurationProperties(prefix = "iqscaffold.auth.jwt")
 public record JwtProperties(String secret, long expiration, long refreshExpiration) {}
 
 // Pattern matching with switch expressions
@@ -1018,7 +1018,7 @@ var emailTemplate = """
   %s
 
   Best regards,
-  Gripday Team
+  IQ Scaffold Team
   """.formatted(user.getUsername(), verificationLink);
 
 // var for local variables (when type is obvious)
@@ -1036,6 +1036,9 @@ All Java files must follow the import order:
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.iqscaffold.userservice.domain.User;
+import com.iqscaffold.userservice.repository.UserRepository;
+import com.iqscaffold.userservice.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -1045,9 +1048,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gripday.userservice.domain.User;
-import org.gripday.userservice.repository.UserRepository;
-import org.gripday.userservice.service.UserService;
 // 3. Special imports: tech.*, expert.*, android.*, dev.*, build.* (alphabetically sorted)
 // (if applicable)
 
@@ -1249,7 +1249,7 @@ class UserServiceIntegrationTest {
 **Architecture Tests with ArchUnit:**
 
 ```java
-@AnalyzeClasses(packages = "org.gripday.userservice")
+@AnalyzeClasses(packages = "com.iqscaffold.userservice")
 class ArchitectureTest {
 
   @ArchTest
@@ -1284,7 +1284,7 @@ class UserResourceSecurityTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
   private UserService userService;
 
   @Test
@@ -1541,18 +1541,18 @@ git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 
 # Build and push Docker images
-docker build -t gripday/user-service:1.0.0 -f gripday-user-service/Dockerfile .
-docker build -t gripday/gateway-service:1.0.0 -f gripday-gateway-service/Dockerfile .
-docker build -t gripday/bookstore-service:1.0.0 -f gripday-bookstore-service/Dockerfile .
+docker build -t iqscaffold/user-service:1.0.0 -f iqscaffold-user-service/Dockerfile .
+docker build -t iqscaffold/gateway-service:1.0.0 -f iqscaffold-gateway-service/Dockerfile .
+docker build -t iqscaffold/bookstore-service:1.0.0 -f iqscaffold-bookstore-service/Dockerfile .
 
-docker push gripday/user-service:1.0.0
-docker push gripday/gateway-service:1.0.0
-docker push gripday/bookstore-service:1.0.0
+docker push iqscaffold/user-service:1.0.0
+docker push iqscaffold/gateway-service:1.0.0
+docker push iqscaffold/bookstore-service:1.0.0
 
 # Deploy to production
 kubectl apply -f k8s/production/
 # or
-helm upgrade gripday ./helm/gripday --namespace production
+helm upgrade iqscaffold ./helm/iqscaffold --namespace production
 ```
 
 **3. Post-Release Phase**
@@ -1727,10 +1727,10 @@ logging_security:
 
 ```bash
 # Use .env files (gitignored)
-# Example: gripday-user-service/.env.local
+# Example: iqscaffold-user-service/.env.local
 
 SPRING_DATASOURCE_PASSWORD=local_password
-GRIPDAY_AUTH_JWT_SECRET=your-256-bit-secret-key-here
+IQSCAFFOLD_AUTH_JWT_SECRET=your-256-bit-secret-key-here
 SPRING_DATA_REDIS_PASSWORD=redis_password
 SPRING_MAIL_PASSWORD=mail_password
 ```
@@ -1759,7 +1759,7 @@ env:
 ```bash
 # Spring Boot property mapping
 SPRING_DATASOURCE_PASSWORD → spring.datasource.password
-GRIPDAY_AUTH_JWT_SECRET → gripday.auth.jwt.secret
+IQSCAFFOLD_AUTH_JWT_SECRET → iqscaffold.auth.jwt.secret
 SPRING_DATA_REDIS_PASSWORD → spring.data.redis.password
 ```
 
@@ -2050,7 +2050,7 @@ pnpm prettier:write
 ### Recommended CI/CD Pipeline (To Implement)
 
 ```yaml
-name: Gripday Platform CI/CD
+name: IQ Scaffold Platform CI/CD
 
 on:
   push:
@@ -2077,13 +2077,13 @@ jobs:
 
       - name: Build and Test ${{ matrix.service }}
         run: |
-          cd gripday-${{ matrix.service }}
+          cd iqscaffold-${{ matrix.service }}
           mvn clean verify
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:
-          files: gripday-${{ matrix.service }}/target/site/jacoco/jacoco.xml
+          files: iqscaffold-${{ matrix.service }}/target/site/jacoco/jacoco.xml
           flags: ${{ matrix.service }}
 
       - name: Archive Test Results
@@ -2091,7 +2091,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.service }}
-          path: gripday-${{ matrix.service }}/target/surefire-reports/
+          path: iqscaffold-${{ matrix.service }}/target/surefire-reports/
 
   # Job 2: Code Quality Checks
   code-quality:
@@ -2151,12 +2151,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t gripday/${{ matrix.service }}:${{ github.sha }} \
-            -f gripday-${{ matrix.service }}/Dockerfile .
+          docker build -t iqscaffold/${{ matrix.service }}:${{ github.sha }} \
+            -f iqscaffold-${{ matrix.service }}/Dockerfile .
 
       - name: Save Docker Image
         run: |
-          docker save gripday/${{ matrix.service }}:${{ github.sha }} \
+          docker save iqscaffold/${{ matrix.service }}:${{ github.sha }} \
             -o ${{ matrix.service }}.tar
 
       - name: Upload Image Artifact
@@ -2264,7 +2264,7 @@ scaling: Horizontal pod autoscaling
 docker-compose up
 
 # Start specific service
-cd gripday-user-service
+cd iqscaffold-user-service
 docker-compose up
 ```
 
@@ -2272,9 +2272,9 @@ docker-compose up
 
 ```bash
 # Deploy with Helm
-helm upgrade --install gripday ./helm/gripday \
+helm upgrade --install iqscaffold ./helm/iqscaffold \
   --namespace staging \
-  --values helm/gripday/values-staging.yaml
+  --values helm/iqscaffold/values-staging.yaml
 
 # Or with kubectl
 kubectl apply -f k8s/staging/
@@ -2284,9 +2284,9 @@ kubectl apply -f k8s/staging/
 
 ```bash
 # Deploy with Helm
-helm upgrade --install gripday ./helm/gripday \
+helm upgrade --install iqscaffold ./helm/iqscaffold \
   --namespace production \
-  --values helm/gripday/values-production.yaml \
+  --values helm/iqscaffold/values-production.yaml \
   --wait \
   --timeout 10m
 
@@ -2463,16 +2463,16 @@ public record UserDto(
 @Configuration
 @OpenAPIDefinition(
   info = @Info(
-    title = "Gripday User Service API",
+    title = "IQ Scaffold User Service API",
     version = "1.0.0",
     description = "Authentication and user management microservice",
-    contact = @Contact(name = "Gripday Team", email = "support@gripday.com"),
+    contact = @Contact(name = "IQ Scaffold Team", email = "support@iqscaffold.com"),
     license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")
   ),
   servers = {
     @Server(url = "http://localhost:8080", description = "Local development"),
-    @Server(url = "https://api-staging.gripday.com", description = "Staging"),
-    @Server(url = "https://api.gripday.com", description = "Production"),
+    @Server(url = "https://api-staging.iqscaffold.com", description = "Staging"),
+    @Server(url = "https://api.iqscaffold.com", description = "Production"),
   },
   security = @SecurityRequirement(name = "bearer-jwt")
 )
@@ -2833,4 +2833,4 @@ public class BookService {
 
 ---
 
-This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual Gripday platform implementation and represent production-ready approaches to building scalable distributed systems.
+This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual IQ Scaffold platform implementation and represent production-ready approaches to building scalable distributed systems.

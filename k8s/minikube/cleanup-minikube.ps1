@@ -1,4 +1,4 @@
-# Gripday Platform - Minikube Cleanup (PowerShell)
+# IQ Scaffold Platform - Minikube Cleanup (PowerShell)
 param(
     [switch]$Force,
     [switch]$Help
@@ -26,36 +26,36 @@ if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) { err "minikube n
 $minikubeStatus = minikube status 2>&1
 if ($LASTEXITCODE -ne 0) { warn "minikube not running"; exit 0 }
 
-$namespaceExists = kubectl get namespace gripday-dev-env 2>&1
+$namespaceExists = kubectl get namespace iqscaffold-dev-env 2>&1
 if ($LASTEXITCODE -ne 0) {
     log "Namespace doesn't exist. Nothing to clean."
     exit 0
 }
 
 log "Resources to delete:"
-kubectl get all -n gripday-dev-env 2>$null
+kubectl get all -n iqscaffold-dev-env 2>$null
 Write-Host ""
 
 if (-not $Force) {
-    $confirmation = Read-Host "Delete all resources in gripday-dev-env? (yes/no)"
+    $confirmation = Read-Host "Delete all resources in iqscaffold-dev-env? (yes/no)"
     if ($confirmation -ne "yes") {
         log "Cancelled"
         exit 0
     }
 }
 
-log "Deleting namespace gripday-dev-env..."
-kubectl delete namespace gripday-dev-env --timeout=60s
+log "Deleting namespace iqscaffold-dev-env..."
+kubectl delete namespace iqscaffold-dev-env --timeout=60s
 
 log "Waiting for termination..."
 $timeout = 60
 $counter = 0
-while ((kubectl get namespace gripday-dev-env 2>&1 | Out-Null; $LASTEXITCODE -eq 0) -and ($counter -lt $timeout)) {
+while ((kubectl get namespace iqscaffold-dev-env 2>&1 | Out-Null; $LASTEXITCODE -eq 0) -and ($counter -lt $timeout)) {
     Start-Sleep -Seconds 2
     $counter += 2
 }
 
-$namespaceCheck = kubectl get namespace gripday-dev-env 2>&1
+$namespaceCheck = kubectl get namespace iqscaffold-dev-env 2>&1
 if ($LASTEXITCODE -ne 0) {
     ok "Namespace terminated"
 } else {

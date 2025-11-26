@@ -1,5 +1,5 @@
 # ============================================================================
-# Gripday Microservices Platform - Drone CI/CD Pipeline
+# IQ Scaffold Microservices Platform - Drone CI/CD Pipeline
 # ============================================================================
 # Pipeline Flow:
 #   1. VerifyCode        - Code quality, tests, and static analysis
@@ -108,9 +108,9 @@ steps:
       - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.2.0.4988:sonar '-Dsonar.java.libraries=target/dependency/*.jar' '-Dsonar.java.test.libraries=target/classes,target/dependency/*.jar' -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300 -Dsonar.host.url=$SONAR_HOST -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dsonar.projectName=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dstyle.color=always -Dmaven.javadoc.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
 
       # PMD analysis for each microservice (High priority violations only)
-      - pmd check --minimum-priority High -d ./gripday-user-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
-      - pmd check --minimum-priority High -d ./gripday-bookstore-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
-      - pmd check --minimum-priority High -d ./gripday-gateway-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
+      - pmd check --minimum-priority High -d ./iqscaffold-user-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
+      - pmd check --minimum-priority High -d ./iqscaffold-bookstore-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
+      - pmd check --minimum-priority High -d ./iqscaffold-gateway-service -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
 
       # SpotBugs analysis with custom exclusions
       - wget -O /drone/spotbugs-exclude.xml https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/spotbugs-exclude.xml
@@ -350,19 +350,19 @@ steps:
   # --------------------------------------------------------------------------
   # User Service (Feature)
   # --------------------------------------------------------------------------
-  - name: build-container-with-feature-for-gripday-user-service
+  - name: build-container-with-feature-for-iqscaffold-user-service
     depends_on:
       - package-jar
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-user-service/
+      context: ./iqscaffold-user-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-user-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-user-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -378,19 +378,19 @@ steps:
   # --------------------------------------------------------------------------
   # Gateway Service (Feature)
   # --------------------------------------------------------------------------
-  - name: build-container-with-feature-for-gripday-gateway-service
+  - name: build-container-with-feature-for-iqscaffold-gateway-service
     depends_on:
-      - build-container-with-feature-for-gripday-user-service
+      - build-container-with-feature-for-iqscaffold-user-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-gateway-service/
+      context: ./iqscaffold-gateway-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-gateway-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-gateway-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -406,19 +406,19 @@ steps:
   # --------------------------------------------------------------------------
   # Bookstore Service (Feature)
   # --------------------------------------------------------------------------
-  - name: build-container-with-feature-for-gripday-bookstore-service
+  - name: build-container-with-feature-for-iqscaffold-bookstore-service
     depends_on:
-      - build-container-with-feature-for-gripday-gateway-service
+      - build-container-with-feature-for-iqscaffold-gateway-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-bookstore-service/
+      context: ./iqscaffold-bookstore-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-bookstore-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-bookstore-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -441,19 +441,19 @@ steps:
   # --------------------------------------------------------------------------
   # User Service (Release)
   # --------------------------------------------------------------------------
-  - name: build-container-release-gripday-user-service
+  - name: build-container-release-iqscaffold-user-service
     depends_on:
       - package-jar
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-user-service/
+      context: ./iqscaffold-user-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-user-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-user-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -468,19 +468,19 @@ steps:
   # --------------------------------------------------------------------------
   # Gateway Service (Release)
   # --------------------------------------------------------------------------
-  - name: build-container-release-gripday-gateway-service
+  - name: build-container-release-iqscaffold-gateway-service
     depends_on:
-      - build-container-release-gripday-user-service
+      - build-container-release-iqscaffold-user-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-gateway-service/
+      context: ./iqscaffold-gateway-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-gateway-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-gateway-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -495,19 +495,19 @@ steps:
   # --------------------------------------------------------------------------
   # Bookstore Service (Release)
   # --------------------------------------------------------------------------
-  - name: build-container-release-gripday-bookstore-service
+  - name: build-container-release-iqscaffold-bookstore-service
     depends_on:
-      - build-container-release-gripday-gateway-service
+      - build-container-release-iqscaffold-gateway-service
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
-      context: ./gripday-bookstore-service/
+      context: ./iqscaffold-bookstore-service/
       storage_driver: vfs
       username:
         from_secret: SVC_CONTAINER_REGISTRY_USERNAME
       password:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
-      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/gripday-bookstore-service
+      repo: know-how.download/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}/iqscaffold-bookstore-service
       registry: know-how.download
       force_tag: true
       build_args:
@@ -553,7 +553,7 @@ steps:
     commands:
       - git clone ${HELM_CHARTS_REPOSITORY} charts && cd charts/IQKV/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./${DRONE_DEPLOY_TO}-values.yaml --set image.tag=${DRONE_BRANCH:8} -n gripday-${DRONE_DEPLOY_TO}-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./${DRONE_DEPLOY_TO}-values.yaml --set image.tag=${DRONE_BRANCH:8} -n iqscaffold-${DRONE_DEPLOY_TO}-env
 
   # --------------------------------------------------------------------------
   # Slack Notification
@@ -605,7 +605,7 @@ steps:
         from_secret: HELM_CHARTS_REPOSITORY
     commands:
       - git clone ${HELM_CHARTS_REPOSITORY} charts && cd charts/IQKV/${DRONE_REPO_NAME}
-      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n gripday-${DRONE_DEPLOY_TO}-env
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqscaffold-${DRONE_DEPLOY_TO}-env
 
 ---
 # ============================================================================
@@ -643,7 +643,7 @@ steps:
     commands:
       - git clone ${HELM_CHARTS_REPOSITORY} charts && cd charts/IQKV/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./${DRONE_DEPLOY_TO}-values.yaml --set image.tag=${DRONE_TAG} -n gripday-${DRONE_DEPLOY_TO}-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./${DRONE_DEPLOY_TO}-values.yaml --set image.tag=${DRONE_TAG} -n iqscaffold-${DRONE_DEPLOY_TO}-env
 
   # --------------------------------------------------------------------------
   # Slack Notification
@@ -696,7 +696,7 @@ steps:
         from_secret: HELM_CHARTS_REPOSITORY
     commands:
       - git clone ${HELM_CHARTS_REPOSITORY} charts && cd charts/IQKV/${DRONE_REPO_NAME}
-      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n gripday-${DRONE_DEPLOY_TO}-env
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqscaffold-${DRONE_DEPLOY_TO}-env
 
 ---
 # ============================================================================

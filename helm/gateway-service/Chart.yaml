@@ -1,6 +1,6 @@
 apiVersion: v2
 name: gateway-service
-description: A Helm chart for Gripday Gateway Service (API Gateway)
+description: A Helm chart for IQ Scaffold Gateway Service (API Gateway)
 type: application
 version: 1.0.0
 appVersion: "1.0.0"
@@ -8,10 +8,10 @@ keywords:
   - api-gateway
   - gateway
   - microservices
-  - gripday
+  - iqscaffold
 maintainers:
-  - name: Gripday Platform Team
-home: https://gripday.site
+  - name: IQ Scaffold Platform Team
+home: https://iqscaffold.site
 sources:
-  - https://github.com/gripday/gripday-gateway-service
+  - https://github.com/iqscaffold/iqscaffold-gateway-service
 dependencies: []

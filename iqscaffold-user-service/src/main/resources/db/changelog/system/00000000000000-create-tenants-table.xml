@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="00000000000001" author="iqscaffold">
+        <comment>Create tenants table for multi-tenant architecture support</comment>
+
+        <createTable tableName="tenants">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="domain" type="VARCHAR(255)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+
+            <column name="max_users" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="storage_quota_gb" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="api_rate_limit_per_minute" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="00000000000002" author="iqscaffold">
+        <comment>Create indexes on tenants table for performance</comment>
+
+        <createIndex indexName="idx_tenants_tenant_id" tableName="tenants">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_enabled" tableName="tenants">
+            <column name="enabled"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_domain" tableName="tenants">
+            <column name="domain"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_created_at" tableName="tenants">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_created_by" tableName="tenants">
+            <column name="created_by"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00000000000003" author="iqscaffold">
+        <comment>Insert default tenant for backward compatibility</comment>
+
+        <insert tableName="tenants">
+            <column name="tenant_id" value="default"/>
+            <column name="name" value="Default Tenant"/>
+            <column name="description" value="Default tenant for backward compatibility and system operations"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="00000000000004" author="iqscaffold">
+        <comment>Add check constraints for tenant configuration validation</comment>
+
+        <sql>
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_max_users_non_negative
+                    CHECK (max_users IS NULL OR max_users >= 0);
+
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_storage_quota_non_negative
+                    CHECK (storage_quota_gb IS NULL OR storage_quota_gb >= 0);
+
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_rate_limit_non_negative
+                    CHECK (api_rate_limit_per_minute IS NULL OR api_rate_limit_per_minute >= 0);
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_max_users_non_negative;
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_storage_quota_non_negative;
+                ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_rate_limit_non_negative;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00000000000005" author="iqscaffold">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <comment>Tenant ID format validation (PostgreSQL only)</comment>
+        <sql>
+            ALTER TABLE tenants
+                ADD CONSTRAINT chk_tenants_tenant_id_format
+                    CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH(tenant_id) >= 3);
+        </sql>
+        <rollback>
+            <sql>ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_tenant_id_format;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00000000000006" author="iqscaffold">
+        <comment>Add updated_at index for tenants</comment>
+        <createIndex indexName="idx_tenants_updated_at" tableName="tenants">
+            <column name="updated_at"/>
+        </createIndex>
+        <rollback>
+            <dropIndex indexName="idx_tenants_updated_at" tableName="tenants"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

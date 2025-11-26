@@ -1,4 +1,4 @@
-# Gripday Platform - Minikube Deployment
+# IQ Scaffold Platform - Minikube Deployment
 
 Quick local Kubernetes deployment using Minikube for development and testing.
 
@@ -48,10 +48,10 @@ minikube start --memory=4096 --cpus=2
 minikube addons enable ingress
 
 # Add to /etc/hosts (Linux/macOS) or C:\Windows\System32\drivers\etc\hosts (Windows)
-$(minikube ip) api.gripday.site user.gripday.site bookstore.gripday.site
+$(minikube ip) api.iqscaffold.site user.iqscaffold.site bookstore.iqscaffold.site
 
 # Access via domain names
-curl http://api.gripday.site/actuator/health
+curl http://api.iqscaffold.site/actuator/health
 ```
 
 ## Deployment Options
@@ -76,11 +76,11 @@ Then run services locally with:
 
 ```bash
 # User Service
-cd gripday-user-service
+cd iqscaffold-user-service
 mvn spring-boot:run -Dspring.profiles.active=local
 
 # Gateway Service
-cd gripday-gateway-service
+cd iqscaffold-gateway-service
 mvn spring-boot:run -Dspring.profiles.active=local
 ```
 
@@ -89,53 +89,53 @@ mvn spring-boot:run -Dspring.profiles.active=local
 ### View Resources
 
 ```bash
-kubectl get all -n gripday-dev-env
-kubectl get pods -n gripday-dev-env
-kubectl get services -n gripday-dev-env
+kubectl get all -n iqscaffold-dev-env
+kubectl get pods -n iqscaffold-dev-env
+kubectl get services -n iqscaffold-dev-env
 ```
 
 ### View Logs
 
 ```bash
-kubectl logs -f deployment/gateway-service -n gripday-dev-env
-kubectl logs -f deployment/user-service -n gripday-dev-env
-kubectl logs -f deployment/bookstore-service -n gripday-dev-env
+kubectl logs -f deployment/gateway-service -n iqscaffold-dev-env
+kubectl logs -f deployment/user-service -n iqscaffold-dev-env
+kubectl logs -f deployment/bookstore-service -n iqscaffold-dev-env
 ```
 
 ### Port Forwarding (Alternative to NodePort)
 
 ```bash
-kubectl port-forward -n gripday-dev-env svc/gateway-service 8080:8080
-kubectl port-forward -n gripday-dev-env svc/user-service 8081:8080
+kubectl port-forward -n iqscaffold-dev-env svc/gateway-service 8080:8080
+kubectl port-forward -n iqscaffold-dev-env svc/user-service 8081:8080
 ```
 
 ### Database Access
 
 ```bash
 # PostgreSQL (User Service)
-kubectl port-forward -n gripday-dev-env svc/postgres-user 5432:5432
-psql -h localhost -U gripday_user -d gripday_user
+kubectl port-forward -n iqscaffold-dev-env svc/postgres-user 5432:5432
+psql -h localhost -U iqscaffold_user -d iqscaffold_user
 
 # PostgreSQL (Bookstore Service)
-kubectl port-forward -n gripday-dev-env svc/postgres-bookstore 5433:5432
-psql -h localhost -p 5433 -U gripday_user -d gripday_bookstore
+kubectl port-forward -n iqscaffold-dev-env svc/postgres-bookstore 5433:5432
+psql -h localhost -p 5433 -U iqscaffold_user -d iqscaffold_bookstore
 
 # Redis
-kubectl port-forward -n gripday-dev-env svc/redis 6379:6379
+kubectl port-forward -n iqscaffold-dev-env svc/redis 6379:6379
 redis-cli -h localhost
 ```
 
 ### Restart Services
 
 ```bash
-kubectl rollout restart deployment/gateway-service -n gripday-dev-env
-kubectl rollout restart deployment/user-service -n gripday-dev-env
+kubectl rollout restart deployment/gateway-service -n iqscaffold-dev-env
+kubectl rollout restart deployment/user-service -n iqscaffold-dev-env
 ```
 
 ### Scale Services
 
 ```bash
-kubectl scale deployment/gateway-service --replicas=2 -n gripday-dev-env
+kubectl scale deployment/gateway-service --replicas=2 -n iqscaffold-dev-env
 ```
 
 ## Cleanup
@@ -157,7 +157,7 @@ kubectl scale deployment/gateway-service --replicas=2 -n gripday-dev-env
 Or manually:
 
 ```bash
-kubectl delete namespace gripday-dev-env
+kubectl delete namespace iqscaffold-dev-env
 ```
 
 ## Testing the API
@@ -201,13 +201,13 @@ curl http://$(minikube ip):30082/actuator/health
 
 ```bash
 # Check pod status
-kubectl get pods -n gripday-dev-env
+kubectl get pods -n iqscaffold-dev-env
 
 # View pod logs
-kubectl logs <pod-name> -n gripday-dev-env
+kubectl logs <pod-name> -n iqscaffold-dev-env
 
 # Describe pod for events
-kubectl describe pod <pod-name> -n gripday-dev-env
+kubectl describe pod <pod-name> -n iqscaffold-dev-env
 ```
 
 ### Image Pull Errors
@@ -246,7 +246,7 @@ kubectl get pods -n ingress-nginx
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Minikube Cluster                      │
-│                  (gripday-dev-env namespace)             │
+│                  (iqscaffold-dev-env namespace)             │
 ├─────────────────────────────────────────────────────────┤
 │                                                           │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
@@ -277,8 +277,8 @@ kubectl get pods -n ingress-nginx
 
 ### Default Credentials
 
-- **Database User**: `gripday_user`
-- **Database Password**: `gripday_password`
+- **Database User**: `iqscaffold_user`
+- **Database Password**: `iqscaffold_password`
 - **JWT Secret**: `local-dev-secret-key-change-in-production`
 
 ### Resource Limits

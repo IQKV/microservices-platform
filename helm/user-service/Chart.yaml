@@ -1,16 +1,16 @@
 apiVersion: v2
 name: user-service
-description: A Helm chart for Gripday User Service
+description: A Helm chart for IQ Scaffold User Service
 type: application
 version: 1.0.0
 appVersion: "1.0.0"
 keywords:
   - authentication
   - microservices
-  - gripday
+  - iqscaffold
 maintainers:
-  - name: Gripday Platform Team
-home: https://gripday.site
+  - name: IQ Scaffold Platform Team
+home: https://iqscaffold.site
 sources:
-  - https://github.com/gripday/gripday-user-service
+  - https://github.com/iqscaffold/iqscaffold-user-service
 dependencies: []

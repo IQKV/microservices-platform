@@ -1,4 +1,4 @@
-# Gripday Platform - Design Document
+# IQ Scaffold Platform - Design Document
 
 > **Version:** 1.0.0  
 > **Last Updated:** November 25, 2025  
@@ -6,7 +6,7 @@
 
 ## 📋 Document Purpose
 
-This design document provides architectural decisions, design patterns, technical implementation details, and rationale for the Gripday platform. It serves as a reference for developers and AI assistants (like Kiro) to understand the "why" behind implementation choices.
+This design document provides architectural decisions, design patterns, technical implementation details, and rationale for the IQ Scaffold platform. It serves as a reference for developers and AI assistants (like Kiro) to understand the "why" behind implementation choices.
 
 ---
 
@@ -127,7 +127,7 @@ JwtClaimsSet claims = JwtClaimsSet.builder()
     .claim("roles", user.getRoles())
     .claim("tenantId", user.getTenantId())
     .claim("type", "access")
-    .issuer("gripday-user-service")
+    .issuer("iqscaffold-user-service")
     .issuedAt(Instant.now())
     .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
     .id(UUID.randomUUID().toString()) // JTI for blacklisting
@@ -1454,7 +1454,7 @@ export function DataFetcher<T>({
   "lastName": "Doe",
   "tenantId": "tenant-123",
   "type": "access",
-  "iss": "gripday-user-service",
+  "iss": "iqscaffold-user-service",
   "iat": 1634567890,
   "exp": 1634568790,
   "jti": "unique-token-id" // For blacklisting
@@ -2228,7 +2228,7 @@ class UserControllerIntegrationTest {
 
 ```java
 // ArchUnit tests for architecture compliance
-@AnalyzeClasses(packages = "org.gripday.user")
+@AnalyzeClasses(packages = "com.iqscaffold.user")
 class ArchitectureTest {
 
   @ArchTest
@@ -2238,7 +2238,7 @@ class ArchitectureTest {
   static final ArchRule repositoriesOnlyAccessedByServices = classes().that().resideInAPackage("..repository..").should().onlyBeAccessed().byAnyPackage("..service..", "..repository..");
 
   @ArchTest
-  static final ArchRule noCyclicDependencies = slices().matching("org.gripday.user.(*)..").should().beFreeOfCycles();
+  static final ArchRule noCyclicDependencies = slices().matching("com.iqscaffold.user.(*)..").should().beFreeOfCycles();
 
   @ArchTest
   static final ArchRule controllersAnnotatedWithRestController = classes().that().resideInAPackage("..presentation.web..").should().beAnnotatedWith(RestController.class);
@@ -2626,24 +2626,24 @@ jobs:
         run: |
           cd backend
           mvn sonar:sonar \
-            -Dsonar.projectKey=gripday-backend \
+            -Dsonar.projectKey=iqscaffold-backend \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
 
       - name: Build Docker images
         if: github.ref == 'refs/heads/main'
         run: |
           cd backend
-          docker build -t gripday/user-service:${{ github.sha }} ./gripday-user-service
-          docker build -t gripday/gateway-service:${{ github.sha }} ./gripday-gateway-service
-          docker build -t gripday/bookstore-service:${{ github.sha }} ./gripday-bookstore-service
+          docker build -t iqscaffold/user-service:${{ github.sha }} ./iqscaffold-user-service
+          docker build -t iqscaffold/gateway-service:${{ github.sha }} ./iqscaffold-gateway-service
+          docker build -t iqscaffold/bookstore-service:${{ github.sha }} ./iqscaffold-bookstore-service
 
       - name: Push to registry
         if: github.ref == 'refs/heads/main'
         run: |
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push gripday/user-service:${{ github.sha }}
-          docker push gripday/gateway-service:${{ github.sha }}
-          docker push gripday/bookstore-service:${{ github.sha }}
+          docker push iqscaffold/user-service:${{ github.sha }}
+          docker push iqscaffold/gateway-service:${{ github.sha }}
+          docker push iqscaffold/bookstore-service:${{ github.sha }}
 ```
 
 **Frontend CI:**
@@ -2655,13 +2655,13 @@ on:
   push:
     branches: [dev, main]
     paths:
-      - "auth.gripday.com/**"
-      - "app.gripday.com/**"
+      - "auth.iqscaffold.com/**"
+      - "app.iqscaffold.com/**"
   pull_request:
     branches: [dev, main]
     paths:
-      - "auth.gripday.com/**"
-      - "app.gripday.com/**"
+      - "auth.iqscaffold.com/**"
+      - "app.iqscaffold.com/**"
 
 jobs:
   build-and-test:
@@ -2669,7 +2669,7 @@ jobs:
 
     strategy:
       matrix:
-        app: [auth.gripday.com, app.gripday.com]
+        app: [auth.iqscaffold.com, app.iqscaffold.com]
 
     steps:
       - uses: actions/checkout@v4
@@ -2753,13 +2753,13 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           cd ${{ matrix.app }}
-          docker build -t gripday/${{ matrix.app }}:${{ github.sha }} .
+          docker build -t iqscaffold/${{ matrix.app }}:${{ github.sha }} .
 
       - name: Push to registry
         if: github.ref == 'refs/heads/main'
         run: |
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker push gripday/${{ matrix.app }}:${{ github.sha }}
+          docker push iqscaffold/${{ matrix.app }}:${{ github.sha }}
 ```
 
 ### Deployment Strategy
@@ -2796,7 +2796,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
-  namespace: gripday
+  namespace: iqscaffold
 spec:
   replicas: 3
   strategy:
@@ -2815,7 +2815,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: gripday/user-service:latest
+          image: iqscaffold/user-service:latest
           ports:
             - containerPort: 8080
           env:
@@ -3099,7 +3099,7 @@ spec:
 
 ## 🎯 Conclusion
 
-This design document captures the architectural decisions, patterns, and rationale behind the Gripday platform. It serves as a reference for:
+This design document captures the architectural decisions, patterns, and rationale behind the IQ Scaffold platform. It serves as a reference for:
 
 - **Developers:** Understanding why things are built this way
 - **AI Assistants (Kiro):** Context for making informed suggestions

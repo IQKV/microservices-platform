@@ -244,5 +244,5 @@ export const TEST_HEADERS = {
   ACCEPT_JSON: 'application/json',
   TENANT_ID_HEADER: 'X-Tenant-ID',
   CORRELATION_ID_HEADER: 'X-Correlation-ID',
-  USER_AGENT: 'Gripday-E2E-Tests/1.0.0'
+  USER_AGENT: 'iqscaffold-E2E-Tests/1.0.0'
 } as const;

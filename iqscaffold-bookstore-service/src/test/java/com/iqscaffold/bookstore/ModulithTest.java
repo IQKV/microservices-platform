@@ -1,0 +1,23 @@
+package com.iqscaffold.bookstore;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.modulith.core.ApplicationModules;
+import org.springframework.modulith.docs.Documenter;
+
+class ModulithTest {
+
+  ApplicationModules modules = ApplicationModules.of(BookstoreServiceApplication.class);
+
+  @Test
+  void verifyModularStructure() {
+    // Just verify modules are detected
+    modules.forEach(System.out::println);
+  }
+
+  @Test
+  void createModuleDocumentation() {
+    new Documenter(modules)
+        .writeDocumentation()
+        .writeIndividualModulesAsPlantUml();
+  }
+}

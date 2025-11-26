@@ -17,9 +17,9 @@ log "Deploying to test environment (tag: $TAG)..."
 
 # Update image tags
 for svc in user gateway bookstore; do
-    sed "s|gripday/${svc}-service:latest|gripday/${svc}-service:$TAG|g" \
+    sed "s|iqscaffold/${svc}-service:latest|iqscaffold/${svc}-service:$TAG|g" \
         ${svc}-service/${svc}-service-deployment.yaml | \
-    sed 's/namespace: gripday-dev-env/namespace: gripday-test-env/g' | \
+    sed 's/namespace: iqscaffold-dev-env/namespace: iqscaffold-test-env/g' | \
     kubectl apply -f -
 done
 
@@ -31,8 +31,8 @@ kubectl apply -f priority-classes.yaml
 
 # Wait for rollout
 for svc in user gateway bookstore; do
-    kubectl rollout status deployment/${svc}-service -n gripday-test-env --timeout=600s
+    kubectl rollout status deployment/${svc}-service -n iqscaffold-test-env --timeout=600s
 done
 
 log "Test deployment complete"
-log "Gateway: https://api-test.gripday.com"
+log "Gateway: https://api-test.iqscaffold.com"

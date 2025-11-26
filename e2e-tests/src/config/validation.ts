@@ -233,7 +233,7 @@ export async function checkServiceHealth(
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'Gripday-E2E-Health-Check/1.0.0'
+        'User-Agent': 'iqscaffold-E2E-Health-Check/1.0.0'
       },
       signal: controller.signal
     });

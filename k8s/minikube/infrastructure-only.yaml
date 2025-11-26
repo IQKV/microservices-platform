@@ -1,4 +1,4 @@
-# Gripday Platform - Infrastructure Only
+# IQ Scaffold Platform - Infrastructure Only
 # Deploy just databases and Redis for local development
 # Useful when running services locally but want databases in Kubernetes
 
@@ -7,9 +7,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-dev-env
+  name: iqscaffold-dev-env
   labels:
-    name: gripday-dev-env
+    name: iqscaffold-dev-env
     environment: local
 
 ---
@@ -17,8 +17,8 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gripday-infra-config
-  namespace: gripday-dev-env
+  name: iqscaffold-infra-config
+  namespace: iqscaffold-dev-env
 data:
   REDIS_PORT: "6379"
 
@@ -27,13 +27,13 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: gripday-infra-secrets
-  namespace: gripday-dev-env
+  name: iqscaffold-infra-secrets
+  namespace: iqscaffold-dev-env
 type: Opaque
 data:
-  # gripday_user
+  # iqscaffold_user
   DB_USERNAME: Z3JpcGRheV91c2Vy
-  # gripday_password
+  # iqscaffold_password
   DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
 
 ---
@@ -42,7 +42,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-user
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-user
     component: database
@@ -64,16 +64,16 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_user
+              value: iqscaffold_user
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: gripday-infra-secrets
+                  name: iqscaffold-infra-secrets
                   key: DB_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-infra-secrets
+                  name: iqscaffold-infra-secrets
                   key: DB_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -92,7 +92,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
@@ -100,7 +100,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:
@@ -112,7 +112,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-user
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-user
 spec:
@@ -130,7 +130,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-bookstore
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-bookstore
     component: database
@@ -152,16 +152,16 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_bookstore
+              value: iqscaffold_bookstore
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: gripday-infra-secrets
+                  name: iqscaffold-infra-secrets
                   key: DB_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-infra-secrets
+                  name: iqscaffold-infra-secrets
                   key: DB_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -180,7 +180,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
@@ -188,7 +188,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:
@@ -200,7 +200,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-bookstore
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-bookstore
 spec:
@@ -218,7 +218,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: redis
     component: cache
@@ -275,7 +275,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: redis
 spec:

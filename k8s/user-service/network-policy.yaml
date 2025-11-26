@@ -2,15 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: user-service-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-user-service
+    app.kubernetes.io/name: iqscaffold-user-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: gripday-user-service
+      app.kubernetes.io/name: iqscaffold-user-service
       app.kubernetes.io/component: authentication
   policyTypes:
     - Ingress
@@ -21,10 +21,10 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday
+              app.kubernetes.io/part-of: iqscaffold
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-gateway-service
+              app.kubernetes.io/name: iqscaffold-gateway-service
       ports:
         - protocol: TCP
           port: 8080
@@ -96,11 +96,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: user-postgres-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
@@ -115,7 +115,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
               app.kubernetes.io/component: authentication
       ports:
         - protocol: TCP
@@ -141,11 +141,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: user-redis-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: user-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
@@ -160,7 +160,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
               app.kubernetes.io/component: authentication
       ports:
         - protocol: TCP

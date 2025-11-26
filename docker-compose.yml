@@ -4,20 +4,20 @@ services:
   # PostgreSQL Database for User Service
   postgres-user:
     image: postgres:15-alpine
-    container_name: gripday-postgres-user
+    container_name: iqscaffold-postgres-user
     environment:
-      POSTGRES_DB: gripday_user
-      POSTGRES_USER: gripday_user
-      POSTGRES_PASSWORD: gripday_password
+      POSTGRES_DB: iqscaffold_user
+      POSTGRES_USER: iqscaffold_user
+      POSTGRES_PASSWORD: iqscaffold_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_user_data:/var/lib/postgresql/data
       - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_user"]
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_user"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,20 +26,20 @@ services:
   # PostgreSQL Database for Bookstore Service
   postgres-bookstore:
     image: postgres:15-alpine
-    container_name: gripday-postgres-bookstore
+    container_name: iqscaffold-postgres-bookstore
     environment:
-      POSTGRES_DB: gripday_bookstore
-      POSTGRES_USER: gripday_user
-      POSTGRES_PASSWORD: gripday_password
+      POSTGRES_DB: iqscaffold_bookstore
+      POSTGRES_USER: iqscaffold_user
+      POSTGRES_PASSWORD: iqscaffold_password
     ports:
       - "5433:5432"
     volumes:
       - postgres_bookstore_data:/var/lib/postgresql/data
       - ./docker/postgres/init-bookstore.sql:/docker-entrypoint-initdb.d/init-bookstore.sql
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gripday_user -d gripday_bookstore"]
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_bookstore"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,13 +48,13 @@ services:
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
-    container_name: gripday-redis
+    container_name: iqscaffold-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -67,18 +67,18 @@ services:
   user-service:
     build:
       context: .
-      dockerfile: gripday-user-service/Dockerfile
-    container_name: gripday-user-service
+      dockerfile: iqscaffold-user-service/Dockerfile
+    container_name: iqscaffold-user-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/gripday_user
-      SPRING_DATASOURCE_USERNAME: gripday_user
-      SPRING_DATASOURCE_PASSWORD: gripday_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user
+      SPRING_DATASOURCE_USERNAME: iqscaffold_user
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
-      GRIPDAY_AUTH_JWT_EXPIRATION: 900
-      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
     ports:
       - "8080:8080"
     depends_on:
@@ -87,7 +87,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -100,16 +100,16 @@ services:
   bookstore-service:
     build:
       context: .
-      dockerfile: gripday-bookstore-service/Dockerfile
-    container_name: gripday-bookstore-service
+      dockerfile: iqscaffold-bookstore-service/Dockerfile
+    container_name: iqscaffold-bookstore-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-bookstore:5432/gripday_bookstore
-      SPRING_DATASOURCE_USERNAME: gripday_user
-      SPRING_DATASOURCE_PASSWORD: gripday_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-bookstore:5432/iqscaffold_bookstore
+      SPRING_DATASOURCE_USERNAME: iqscaffold_user
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      JWT_ISSUER_URI: http://gateway-service:8080/auth/realms/gripday
+      JWT_ISSUER_URI: http://gateway-service:8080/auth/realms/iqscaffold
     ports:
       - "8080:8080"
     depends_on:
@@ -118,7 +118,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -131,16 +131,16 @@ services:
   gateway-service:
     build:
       context: .
-      dockerfile: gripday-gateway-service/Dockerfile
-    container_name: gripday-gateway-service
+      dockerfile: iqscaffold-gateway-service/Dockerfile
+    container_name: iqscaffold-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      GRIPDAY_GATEWAY_USER_SERVICE_URL: http://user-service:8080
-      GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8080
-      GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED: true
-      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
+      IQSCAFFOLD_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:
       - "8080:8080"
     depends_on:
@@ -151,7 +151,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - gripday-network
+      - iqscaffold-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -163,14 +163,14 @@ services:
   # Observability Stack - Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: gripday-prometheus
+    container_name: iqscaffold-prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
-      - gripday-network
+      - iqscaffold-network
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -182,7 +182,7 @@ services:
   # Observability Stack - Grafana
   grafana:
     image: grafana/grafana:latest
-    container_name: gripday-grafana
+    container_name: iqscaffold-grafana
     ports:
       - "3000:3000"
     environment:
@@ -191,52 +191,52 @@ services:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
     networks:
-      - gripday-network
+      - iqscaffold-network
     depends_on:
       - prometheus
 
   # Observability Stack - Loki
   loki:
     image: grafana/loki:latest
-    container_name: gripday-loki
+    container_name: iqscaffold-loki
     ports:
       - "3100:3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
     networks:
-      - gripday-network
+      - iqscaffold-network
     command: -config.file=/etc/loki/local-config.yaml
 
   # Observability Stack - Promtail
   promtail:
     image: grafana/promtail:latest
-    container_name: gripday-promtail
+    container_name: iqscaffold-promtail
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
-      - gripday-network
+      - iqscaffold-network
     depends_on:
       - loki
     command: -config.file=/etc/promtail/config.yml
 
 networks:
-  gripday-network:
+  iqscaffold-network:
     driver: bridge
-    name: gripday-network
+    name: iqscaffold-network
 
 volumes:
   postgres_user_data:
-    name: gripday_postgres_user_data
+    name: iqscaffold_postgres_user_data
   postgres_bookstore_data:
-    name: gripday_postgres_bookstore_data
+    name: iqscaffold_postgres_bookstore_data
   redis_data:
-    name: gripday_redis_data
+    name: iqscaffold_redis_data
   prometheus_data:
-    name: gripday_prometheus_data
+    name: iqscaffold_prometheus_data
   grafana_data:
-    name: gripday_grafana_data
+    name: iqscaffold_grafana_data
   loki_data:
-    name: gripday_loki_data
+    name: iqscaffold_loki_data

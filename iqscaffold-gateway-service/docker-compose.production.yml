@@ -1,0 +1,191 @@
+version: "3.8"
+
+services:
+  # Redis for Gateway Service - Production Environment
+  redis-gateway:
+    image: redis:7-alpine
+    container_name: iqscaffold-gateway-redis-production
+    environment:
+      REDIS_PASSWORD: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+    ports:
+      - "${REDIS_GATEWAY_PORT:-6380}:6379"
+    volumes:
+      - redis_gateway_data_production:/data
+      - ./scripts/redis-gateway-production.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - gateway-network-production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${IQSCAFFOLD_CACHE_REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+        labels: "service=redis-gateway,environment=production"
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+      --requirepass ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1.5G
+        reservations:
+          cpus: "1.0"
+          memory: 768M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 300s
+
+  # Gateway Service - Production Environment
+  gateway-service:
+    build:
+      context: ..
+      dockerfile: iqscaffold-gateway-service/Dockerfile
+    image: iqscaffold/iqscaffold-gateway-service:production
+    container_name: iqscaffold-gateway-service-production
+    env_file:
+      - .env.production
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_APPLICATION_NAME: iqscaffold-gateway-service
+
+      # Redis Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis-gateway
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+      IQSCAFFOLD_CACHE_REDIS_TIMEOUT: 5000ms
+      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+
+      # Gateway Configuration
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: ${IQSCAFFOLD_GATEWAY_USER_SERVICE_URL}
+      IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS: ${IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS}
+      IQSCAFFOLD_GATEWAY_CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      IQSCAFFOLD_GATEWAY_CORS_ALLOWED_HEADERS: "*"
+      IQSCAFFOLD_GATEWAY_CORS_ALLOW_CREDENTIALS: true
+
+      # Rate Limiting Configuration
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: ${IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE:-500}
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_BURST_CAPACITY: ${IQSCAFFOLD_GATEWAY_RATE_LIMITING_BURST_CAPACITY:-1000}
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REPLENISH_RATE: ${IQSCAFFOLD_GATEWAY_RATE_LIMITING_REPLENISH_RATE:-250}
+
+      # Circuit Breaker Configuration
+      IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_ENABLED: true
+      IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD: ${IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_FAILURE_RATE_THRESHOLD:-30}
+      IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_WAIT_DURATION_IN_OPEN_STATE: ${IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_WAIT_DURATION:-60s}
+      IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE: ${IQSCAFFOLD_GATEWAY_CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE:-50}
+
+      # Observability Configuration
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
+      IQSCAFFOLD_OBSERVABILITY_METRICS_ENABLED: true
+      IQSCAFFOLD_OBSERVABILITY_LOGGING_LEVEL: WARN
+
+      # Reactive Configuration
+      SPRING_WEBFLUX_MULTIPART_MAX_IN_MEMORY_SIZE: 5MB
+      SPRING_WEBFLUX_MULTIPART_MAX_DISK_USAGE_PER_PART: 50MB
+      SPRING_WEBFLUX_MULTIPART_MAX_PARTS: 512
+
+      # JVM Configuration for production reactive workloads
+      JAVA_OPTS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -XX:+OptimizeStringConcat
+        -XX:+UseCompressedOops
+        -XX:+UseCompressedClassPointers
+        -XX:+UnlockExperimentalVMOptions
+        -XX:+UseTransparentHugePages
+        -XX:G1HeapRegionSize=16m
+        -XX:G1NewSizePercent=30
+        -XX:G1MaxNewSizePercent=40
+        -XX:G1MixedGCCountTarget=8
+        -XX:InitiatingHeapOccupancyPercent=15
+        -Dreactor.netty.ioWorkerCount=16
+        -Dreactor.netty.pool.maxConnections=2000
+        -Dspring.reactor.netty.shutdown-quiet-period=5s
+        -Djava.security.egd=file:/dev/./urandom
+        -Dspring.profiles.active=production
+        -Dlogging.level.com.iqscaffold=WARN
+        -Dlogging.config=classpath:logback-spring.xml
+        -Dfile.encoding=UTF-8
+        -Djava.awt.headless=true
+    ports:
+      - "${GATEWAY_SERVICE_PORT:-8080}:8080"
+    depends_on:
+      redis-gateway:
+        condition: service_healthy
+    networks:
+      - gateway-network-production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 180s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "10"
+        labels: "service=gateway-service,environment=production"
+    volumes:
+      - gateway_logs_production:/app/logs
+      - gateway_tmp_production:/app/tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 3G
+        reservations:
+          cpus: "2.0"
+          memory: 1.5G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 300s
+
+networks:
+  gateway-network-production:
+    driver: bridge
+    name: iqscaffold-gateway-network-production
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: br-gateway-production
+
+volumes:
+  redis_gateway_data_production:
+    name: iqscaffold_gateway_redis_data_production
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/redis-gateway-production
+  gateway_logs_production:
+    name: iqscaffold_gateway_logs_production
+    driver: local
+  gateway_tmp_production:
+    name: iqscaffold_gateway_tmp_production
+    driver: local

@@ -1,4 +1,4 @@
-# Gripday Platform - Development Tasks
+# IQ Scaffold Platform - Development Tasks
 
 > **Version:** 1.0.0  
 > **Last Updated:** November 25, 2025  
@@ -6,7 +6,7 @@
 
 ## 📋 Document Purpose
 
-This document provides a comprehensive breakdown of development tasks for building the Gripday platform. Each task is designed to be:
+This document provides a comprehensive breakdown of development tasks for building the IQ Scaffold platform. Each task is designed to be:
 
 - **Actionable:** Clear acceptance criteria and implementation steps
 - **Testable:** Specific test requirements
@@ -166,8 +166,8 @@ Set up environment configuration files for all services.
 **Files to Create:**
 
 - `backend/.env.example`
-- `auth.gripday.com/.env.example`
-- `app.gripday.com/.env.example`
+- `auth.iqscaffold.com/.env.example`
+- `app.iqscaffold.com/.env.example`
 
 ---
 
@@ -191,7 +191,7 @@ Initialize User Service Spring Boot project with dependencies and configuration.
 
 **Implementation Steps:**
 
-1. Create `gripday-user-service` module
+1. Create `iqscaffold-user-service` module
 2. Configure `pom.xml` with dependencies:
    - Spring Boot Starter Web
    - Spring Boot Starter Data JPA
@@ -216,10 +216,10 @@ Initialize User Service Spring Boot project with dependencies and configuration.
 
 **Files to Create:**
 
-- `gripday-user-service/pom.xml`
-- `gripday-user-service/src/main/resources/application.yml`
-- `gripday-user-service/src/main/resources/application-local.yml`
-- `gripday-user-service/src/main/java/org/gripday/user/UserServiceApplication.java`
+- `iqscaffold-user-service/pom.xml`
+- `iqscaffold-user-service/src/main/resources/application.yml`
+- `iqscaffold-user-service/src/main/resources/application-local.yml`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/UserServiceApplication.java`
 
 ---
 
@@ -263,12 +263,12 @@ Create database schema and Liquibase migrations for User Service.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/resources/db/changelog/db.changelog-master.yaml`
-- `gripday-user-service/src/main/resources/db/changelog/001-create-users-table.yaml`
-- `gripday-user-service/src/main/resources/db/changelog/002-create-roles-tables.yaml`
-- `gripday-user-service/src/main/resources/db/changelog/003-create-organizations.yaml`
-- `gripday-user-service/src/main/resources/db/changelog/004-create-tokens-tables.yaml`
-- `gripday-user-service/src/main/resources/db/changelog/005-seed-default-roles.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/db.changelog-master.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/001-create-users-table.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/002-create-roles-tables.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/003-create-organizations.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/004-create-tokens-tables.yaml`
+- `iqscaffold-user-service/src/main/resources/db/changelog/005-seed-default-roles.yaml`
 
 ---
 
@@ -318,15 +318,15 @@ Create JPA entities for User Service domain model.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/domain/User.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/Role.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/Permission.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/Organization.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/Tenant.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/EmailVerificationToken.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/PasswordResetToken.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/UserAuditLog.java`
-- `gripday-user-service/src/main/java/org/gripday/user/domain/UserPreferences.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/User.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/Role.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/Permission.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/Organization.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/Tenant.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/EmailVerificationToken.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/PasswordResetToken.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/UserAuditLog.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/domain/UserPreferences.java`
 
 ---
 
@@ -369,9 +369,9 @@ Create Spring Data JPA repositories for all entities.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/repository/UserRepository.java`
-- `gripday-user-service/src/main/java/org/gripday/user/repository/RoleRepository.java`
-- `gripday-user-service/src/main/java/org/gripday/user/repository/PermissionRepository.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/repository/UserRepository.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/repository/RoleRepository.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/repository/PermissionRepository.java`
 - (and others...)
 
 ---
@@ -419,11 +419,11 @@ Implement JWT token generation and validation with RSA256.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/security/JwtTokenService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/security/JwtConfig.java`
-- `gripday-user-service/src/main/java/org/gripday/user/presentation/web/JwkSetController.java`
-- `gripday-user-service/src/main/resources/keys/private-key.pem`
-- `gripday-user-service/src/main/resources/keys/public-key.pem`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/security/JwtTokenService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/security/JwtConfig.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/presentation/web/JwkSetController.java`
+- `iqscaffold-user-service/src/main/resources/keys/private-key.pem`
+- `iqscaffold-user-service/src/main/resources/keys/public-key.pem`
 
 ---
 
@@ -470,10 +470,10 @@ Implement authentication service with login, logout, and token refresh.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/service/AuthenticationService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/AccountLockoutService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/TokenBlacklistService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/AuditLogService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/AuthenticationService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/AccountLockoutService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/TokenBlacklistService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/AuditLogService.java`
 
 ---
 
@@ -522,10 +522,10 @@ Implement user registration with email verification workflow.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/service/UserRegistrationService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/EmailVerificationService.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/EmailService.java`
-- `gripday-user-service/src/main/resources/templates/email-verification.html`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/UserRegistrationService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/EmailVerificationService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/EmailService.java`
+- `iqscaffold-user-service/src/main/resources/templates/email-verification.html`
 
 ---
 
@@ -571,8 +571,8 @@ Implement forgot password and reset password functionality.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/service/PasswordResetService.java`
-- `gripday-user-service/src/main/resources/templates/password-reset.html`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/PasswordResetService.java`
+- `iqscaffold-user-service/src/main/resources/templates/password-reset.html`
 
 ---
 
@@ -618,12 +618,12 @@ Implement schema-per-tenant multi-tenancy with Hibernate.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/multitenancy/TenantContext.java`
-- `gripday-user-service/src/main/java/org/gripday/user/multitenancy/SchemaPerTenantConnectionProvider.java`
-- `gripday-user-service/src/main/java/org/gripday/user/multitenancy/CurrentTenantIdentifierResolver.java`
-- `gripday-user-service/src/main/java/org/gripday/user/multitenancy/TenantExtractionFilter.java`
-- `gripday-user-service/src/main/java/org/gripday/user/multitenancy/TenantLiquibaseRunner.java`
-- `gripday-user-service/src/main/java/org/gripday/user/service/TenantService.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/multitenancy/TenantContext.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/multitenancy/SchemaPerTenantConnectionProvider.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/multitenancy/CurrentTenantIdentifierResolver.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/multitenancy/TenantExtractionFilter.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/multitenancy/TenantLiquibaseRunner.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/service/TenantService.java`
 
 ---
 
@@ -673,11 +673,11 @@ Create REST API controllers for all User Service endpoints.
 
 **Files to Create:**
 
-- `gripday-user-service/src/main/java/org/gripday/user/presentation/web/AuthController.java`
-- `gripday-user-service/src/main/java/org/gripday/user/presentation/web/UserController.java`
-- `gripday-user-service/src/main/java/org/gripday/user/presentation/admin/AdminUserController.java`
-- `gripday-user-service/src/main/java/org/gripday/user/presentation/dto/*`
-- `gripday-user-service/src/main/java/org/gripday/user/exception/GlobalExceptionHandler.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/presentation/web/AuthController.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/presentation/web/UserController.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/presentation/admin/AdminUserController.java`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/presentation/dto/*`
+- `iqscaffold-user-service/src/main/java/com/iqscaffold/user/exception/GlobalExceptionHandler.java`
 
 ---
 
@@ -701,7 +701,7 @@ Initialize Gateway Service with Spring Cloud Gateway and reactive dependencies.
 
 **Implementation Steps:**
 
-1. Create `gripday-gateway-service` module
+1. Create `iqscaffold-gateway-service` module
 2. Configure `pom.xml` with dependencies:
    - Spring Cloud Gateway
    - Spring Boot Starter WebFlux
@@ -722,9 +722,9 @@ Initialize Gateway Service with Spring Cloud Gateway and reactive dependencies.
 
 **Files to Create:**
 
-- `gripday-gateway-service/pom.xml`
-- `gripday-gateway-service/src/main/resources/application.yml`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/GatewayServiceApplication.java`
+- `iqscaffold-gateway-service/pom.xml`
+- `iqscaffold-gateway-service/src/main/resources/application.yml`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/GatewayServiceApplication.java`
 
 ---
 
@@ -768,8 +768,8 @@ Implement reactive JWT validation filter for gateway.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/security/JwtAuthenticationFilter.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/security/SecurityConfig.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/security/JwtAuthenticationFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/security/SecurityConfig.java`
 
 ---
 
@@ -815,9 +815,9 @@ Implement reactive rate limiting with Redis sliding window algorithm.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/ratelimit/RateLimitingService.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/ratelimit/TenantRateLimitingFilter.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/ratelimit/RateLimitConfig.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/ratelimit/RateLimitingService.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/ratelimit/TenantRateLimitingFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/ratelimit/RateLimitConfig.java`
 
 ---
 
@@ -859,8 +859,8 @@ Implement circuit breaker pattern with Resilience4j for fault tolerance.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/circuitbreaker/CircuitBreakerFilter.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/circuitbreaker/CircuitBreakerConfig.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/circuitbreaker/CircuitBreakerFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/circuitbreaker/CircuitBreakerConfig.java`
 
 ---
 
@@ -903,8 +903,8 @@ Implement tenant context extraction from multiple sources.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/tenant/TenantExtractionFilter.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/tenant/TenantValidator.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/tenant/TenantExtractionFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/tenant/TenantValidator.java`
 
 ---
 
@@ -944,7 +944,7 @@ Implement correlation ID generation and propagation for distributed tracing.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/tracing/CorrelationIdFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/tracing/CorrelationIdFilter.java`
 
 ---
 
@@ -985,8 +985,8 @@ Implement request and response transformation filters.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/transform/RequestTransformationFilter.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/transform/ResponseTransformationFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/transform/RequestTransformationFilter.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/transform/ResponseTransformationFilter.java`
 
 ---
 
@@ -1027,8 +1027,8 @@ Implement global error handling with RFC 9457 Problem Details.
 
 **Files to Create:**
 
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/exception/GlobalErrorHandler.java`
-- `gripday-gateway-service/src/main/java/org/gripday/gateway/exception/ProblemDetail.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/exception/GlobalErrorHandler.java`
+- `iqscaffold-gateway-service/src/main/java/com/iqscaffold/gateway/exception/ProblemDetail.java`
 
 ---
 
@@ -1051,7 +1051,7 @@ Initialize Bookstore Service with DDD structure.
 
 **Implementation Steps:**
 
-1. Create `gripday-bookstore-service` module
+1. Create `iqscaffold-bookstore-service` module
 2. Configure `pom.xml` with dependencies
 3. Create DDD package structure
 4. Create `application.yml`
@@ -1067,9 +1067,9 @@ Initialize Bookstore Service with DDD structure.
 
 **Files to Create:**
 
-- `gripday-bookstore-service/pom.xml`
-- `gripday-bookstore-service/src/main/resources/application.yml`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/BookstoreServiceApplication.java`
+- `iqscaffold-bookstore-service/pom.xml`
+- `iqscaffold-bookstore-service/src/main/resources/application.yml`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/BookstoreServiceApplication.java`
 
 ---
 
@@ -1109,9 +1109,9 @@ Create value objects for domain model (ISBN, Money, BookId).
 
 **Files to Create:**
 
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/shared/ISBN.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/shared/Money.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/shared/BookId.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/shared/ISBN.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/shared/Money.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/shared/BookId.java`
 
 ---
 
@@ -1152,9 +1152,9 @@ Create aggregate roots (Book, Category, Inventory) with business logic.
 
 **Files to Create:**
 
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/catalog/Book.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/catalog/Category.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/inventory/Inventory.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/catalog/Book.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/catalog/Category.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/inventory/Inventory.java`
 
 ---
 
@@ -1193,9 +1193,9 @@ Create repositories and application services for bookstore.
 
 **Files to Create:**
 
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/catalog/BookRepository.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/catalog/CatalogApplicationService.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/inventory/InventoryApplicationService.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/catalog/BookRepository.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/catalog/CatalogApplicationService.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/inventory/InventoryApplicationService.java`
 
 ---
 
@@ -1235,8 +1235,8 @@ Create REST controllers for public and admin endpoints.
 
 **Files to Create:**
 
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/presentation/web/BookResource.java`
-- `gripday-bookstore-service/src/main/java/org/gripday/bookstore/presentation/admin/BookManagementResource.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/presentation/web/BookResource.java`
+- `iqscaffold-bookstore-service/src/main/java/com/iqscaffold/bookstore/presentation/admin/BookManagementResource.java`
 
 ---
 
@@ -1260,7 +1260,7 @@ Initialize Auth Portal React application with Vite and dependencies.
 
 **Implementation Steps:**
 
-1. Create `auth.gripday.com` directory
+1. Create `auth.iqscaffold.com` directory
 2. Initialize Vite project with React-SWC template
 3. Configure `package.json` with all dependencies
 4. Create FSD folder structure (app, processes, pages, widgets, features, entities, shared)
@@ -1281,12 +1281,12 @@ Initialize Auth Portal React application with Vite and dependencies.
 
 **Files to Create:**
 
-- `auth.gripday.com/package.json`
-- `auth.gripday.com/vite.config.ts`
-- `auth.gripday.com/tsconfig.json`
-- `auth.gripday.com/eslint.config.js`
-- `auth.gripday.com/.prettierrc`
-- `auth.gripday.com/src/app/theme.ts`
+- `auth.iqscaffold.com/package.json`
+- `auth.iqscaffold.com/vite.config.ts`
+- `auth.iqscaffold.com/tsconfig.json`
+- `auth.iqscaffold.com/eslint.config.js`
+- `auth.iqscaffold.com/.prettierrc`
+- `auth.iqscaffold.com/src/app/theme.ts`
 
 ---
 
@@ -1329,11 +1329,11 @@ Set up shared layer with API client, utilities, and UI components.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/shared/lib/client.ts`
-- `auth.gripday.com/src/shared/lib/http-error.ts`
-- `auth.gripday.com/src/shared/lib/notifications.ts`
-- `auth.gripday.com/src/shared/lib/use-form-mutation.ts`
-- `auth.gripday.com/src/shared/ui/form-field/form-field.tsx`
+- `auth.iqscaffold.com/src/shared/lib/client.ts`
+- `auth.iqscaffold.com/src/shared/lib/http-error.ts`
+- `auth.iqscaffold.com/src/shared/lib/notifications.ts`
+- `auth.iqscaffold.com/src/shared/lib/use-form-mutation.ts`
+- `auth.iqscaffold.com/src/shared/ui/form-field/form-field.tsx`
 
 ---
 
@@ -1375,9 +1375,9 @@ Implement authentication process with Zustand store and token management.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/processes/auth/model/auth-store.ts`
-- `auth.gripday.com/src/processes/auth/lib/token-manager.ts`
-- `auth.gripday.com/src/processes/auth/model/auth-selectors.ts`
+- `auth.iqscaffold.com/src/processes/auth/model/auth-store.ts`
+- `auth.iqscaffold.com/src/processes/auth/lib/token-manager.ts`
+- `auth.iqscaffold.com/src/processes/auth/model/auth-selectors.ts`
 
 ---
 
@@ -1422,10 +1422,10 @@ Implement sign-in form feature with validation.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/features/signin-form/model/validation.ts`
-- `auth.gripday.com/src/features/signin-form/model/types.ts`
-- `auth.gripday.com/src/features/signin-form/ui/signin-form-feature.tsx`
-- `auth.gripday.com/src/features/signin-form/index.ts`
+- `auth.iqscaffold.com/src/features/signin-form/model/validation.ts`
+- `auth.iqscaffold.com/src/features/signin-form/model/types.ts`
+- `auth.iqscaffold.com/src/features/signin-form/ui/signin-form-feature.tsx`
+- `auth.iqscaffold.com/src/features/signin-form/index.ts`
 
 ---
 
@@ -1468,9 +1468,9 @@ Implement sign-up form feature with validation.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/features/signup-form/model/validation.ts`
-- `auth.gripday.com/src/features/signup-form/ui/signup-form-feature.tsx`
-- `auth.gripday.com/src/features/signup-form/index.ts`
+- `auth.iqscaffold.com/src/features/signup-form/model/validation.ts`
+- `auth.iqscaffold.com/src/features/signup-form/ui/signup-form-feature.tsx`
+- `auth.iqscaffold.com/src/features/signup-form/index.ts`
 
 ---
 
@@ -1508,9 +1508,9 @@ Implement forgot password form feature.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/features/forgot-password-form/model/validation.ts`
-- `auth.gripday.com/src/features/forgot-password-form/ui/forgot-password-form-feature.tsx`
-- `auth.gripday.com/src/features/forgot-password-form/index.ts`
+- `auth.iqscaffold.com/src/features/forgot-password-form/model/validation.ts`
+- `auth.iqscaffold.com/src/features/forgot-password-form/ui/forgot-password-form-feature.tsx`
+- `auth.iqscaffold.com/src/features/forgot-password-form/index.ts`
 
 ---
 
@@ -1553,9 +1553,9 @@ Implement reset password form feature with token validation.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/features/reset-password-form/model/validation.ts`
-- `auth.gripday.com/src/features/reset-password-form/ui/reset-password-form-feature.tsx`
-- `auth.gripday.com/src/features/reset-password-form/index.ts`
+- `auth.iqscaffold.com/src/features/reset-password-form/model/validation.ts`
+- `auth.iqscaffold.com/src/features/reset-password-form/ui/reset-password-form-feature.tsx`
+- `auth.iqscaffold.com/src/features/reset-password-form/index.ts`
 
 ---
 
@@ -1599,12 +1599,12 @@ Create pages and configure TanStack Router.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/pages/__root.tsx`
-- `auth.gripday.com/src/pages/login.tsx`
-- `auth.gripday.com/src/pages/register.tsx`
-- `auth.gripday.com/src/pages/forgot-password.tsx`
-- `auth.gripday.com/src/pages/reset-password.tsx`
-- `auth.gripday.com/src/pages/404.tsx`
+- `auth.iqscaffold.com/src/pages/__root.tsx`
+- `auth.iqscaffold.com/src/pages/login.tsx`
+- `auth.iqscaffold.com/src/pages/register.tsx`
+- `auth.iqscaffold.com/src/pages/forgot-password.tsx`
+- `auth.iqscaffold.com/src/pages/reset-password.tsx`
+- `auth.iqscaffold.com/src/pages/404.tsx`
 
 ---
 
@@ -1642,8 +1642,8 @@ Create auth layout widget for consistent page structure.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/widgets/auth-layout/ui/auth-layout.tsx`
-- `auth.gripday.com/src/widgets/auth-layout/index.ts`
+- `auth.iqscaffold.com/src/widgets/auth-layout/ui/auth-layout.tsx`
+- `auth.iqscaffold.com/src/widgets/auth-layout/index.ts`
 
 ---
 
@@ -1680,7 +1680,7 @@ Implement FSD architecture compliance tests.
 
 **Files to Create:**
 
-- `auth.gripday.com/src/architecture.test.ts`
+- `auth.iqscaffold.com/src/architecture.test.ts`
 
 ---
 
@@ -1703,7 +1703,7 @@ Initialize Main Application React project with all dependencies.
 
 **Implementation Steps:**
 
-1. Create `app.gripday.com` directory
+1. Create `app.iqscaffold.com` directory
 2. Initialize Vite project
 3. Install all dependencies
 4. Create FSD folder structure
@@ -1721,10 +1721,10 @@ Initialize Main Application React project with all dependencies.
 
 **Files to Create:**
 
-- `app.gripday.com/package.json`
-- `app.gripday.com/vite.config.ts`
-- `app.gripday.com/tsconfig.json`
-- `app.gripday.com/src/app/theme.ts`
+- `app.iqscaffold.com/package.json`
+- `app.iqscaffold.com/vite.config.ts`
+- `app.iqscaffold.com/tsconfig.json`
+- `app.iqscaffold.com/src/app/theme.ts`
 
 ---
 
@@ -1763,9 +1763,9 @@ Set up shared layer with additional components for main app.
 
 **Files to Create:**
 
-- `app.gripday.com/src/shared/lib/*`
-- `app.gripday.com/src/shared/ui/*`
-- `app.gripday.com/src/shared/mocks/handlers/*`
+- `app.iqscaffold.com/src/shared/lib/*`
+- `app.iqscaffold.com/src/shared/ui/*`
+- `app.iqscaffold.com/src/shared/mocks/handlers/*`
 
 ---
 
@@ -1804,9 +1804,9 @@ Implement authentication process with route guards.
 
 **Files to Create:**
 
-- `app.gripday.com/src/processes/auth/model/auth-store.ts`
-- `app.gripday.com/src/processes/auth/lib/auth-guards.tsx`
-- `app.gripday.com/src/processes/auth/lib/token-manager.ts`
+- `app.iqscaffold.com/src/processes/auth/model/auth-store.ts`
+- `app.iqscaffold.com/src/processes/auth/lib/auth-guards.tsx`
+- `app.iqscaffold.com/src/processes/auth/lib/token-manager.ts`
 
 ---
 
@@ -1846,10 +1846,10 @@ Implement dashboard with statistics cards.
 
 **Files to Create:**
 
-- `app.gripday.com/src/features/dashboard/model/types.ts`
-- `app.gripday.com/src/features/dashboard/ui/dashboard-feature.tsx`
-- `app.gripday.com/src/features/dashboard/ui/statistics-card.tsx`
-- `app.gripday.com/src/features/dashboard/index.ts`
+- `app.iqscaffold.com/src/features/dashboard/model/types.ts`
+- `app.iqscaffold.com/src/features/dashboard/ui/dashboard-feature.tsx`
+- `app.iqscaffold.com/src/features/dashboard/ui/statistics-card.tsx`
+- `app.iqscaffold.com/src/features/dashboard/index.ts`
 
 ---
 
@@ -1895,13 +1895,13 @@ Implement user management with CRUD operations.
 
 **Files to Create:**
 
-- `app.gripday.com/src/features/users/model/types.ts`
-- `app.gripday.com/src/features/users/model/validation.ts`
-- `app.gripday.com/src/features/users/model/queries.ts`
-- `app.gripday.com/src/features/users/ui/users-list-feature.tsx`
-- `app.gripday.com/src/features/users/ui/user-form-feature.tsx`
-- `app.gripday.com/src/features/users/ui/user-table.tsx`
-- `app.gripday.com/src/features/users/index.ts`
+- `app.iqscaffold.com/src/features/users/model/types.ts`
+- `app.iqscaffold.com/src/features/users/model/validation.ts`
+- `app.iqscaffold.com/src/features/users/model/queries.ts`
+- `app.iqscaffold.com/src/features/users/ui/users-list-feature.tsx`
+- `app.iqscaffold.com/src/features/users/ui/user-form-feature.tsx`
+- `app.iqscaffold.com/src/features/users/ui/user-table.tsx`
+- `app.iqscaffold.com/src/features/users/index.ts`
 
 ---
 
@@ -1940,11 +1940,11 @@ Implement security settings (password change, session management).
 
 **Files to Create:**
 
-- `app.gripday.com/src/features/security-settings/model/validation.ts`
-- `app.gripday.com/src/features/security-settings/ui/security-settings-feature.tsx`
-- `app.gripday.com/src/features/security-settings/ui/password-change-form.tsx`
-- `app.gripday.com/src/features/security-settings/ui/session-management.tsx`
-- `app.gripday.com/src/features/security-settings/index.ts`
+- `app.iqscaffold.com/src/features/security-settings/model/validation.ts`
+- `app.iqscaffold.com/src/features/security-settings/ui/security-settings-feature.tsx`
+- `app.iqscaffold.com/src/features/security-settings/ui/password-change-form.tsx`
+- `app.iqscaffold.com/src/features/security-settings/ui/session-management.tsx`
+- `app.iqscaffold.com/src/features/security-settings/index.ts`
 
 ---
 
@@ -1981,9 +1981,9 @@ Implement user preferences management.
 
 **Files to Create:**
 
-- `app.gripday.com/src/features/user-preferences/model/types.ts`
-- `app.gripday.com/src/features/user-preferences/ui/user-preferences-feature.tsx`
-- `app.gripday.com/src/features/user-preferences/index.ts`
+- `app.iqscaffold.com/src/features/user-preferences/model/types.ts`
+- `app.iqscaffold.com/src/features/user-preferences/ui/user-preferences-feature.tsx`
+- `app.iqscaffold.com/src/features/user-preferences/index.ts`
 
 ---
 
@@ -2019,8 +2019,8 @@ Implement email verification status checker.
 
 **Files to Create:**
 
-- `app.gripday.com/src/features/email-status-checker/ui/email-status-checker.tsx`
-- `app.gripday.com/src/features/email-status-checker/index.ts`
+- `app.iqscaffold.com/src/features/email-status-checker/ui/email-status-checker.tsx`
+- `app.iqscaffold.com/src/features/email-status-checker/index.ts`
 
 ---
 
@@ -2061,11 +2061,11 @@ Create layout widgets (header, sidebar, tenant info).
 
 **Files to Create:**
 
-- `app.gripday.com/src/widgets/header/ui/header.tsx`
-- `app.gripday.com/src/widgets/header/ui/user-menu.tsx`
-- `app.gripday.com/src/widgets/sidebar/ui/sidebar.tsx`
-- `app.gripday.com/src/widgets/sidebar/ui/navigation-links.tsx`
-- `app.gripday.com/src/widgets/tenant-info/ui/tenant-info.tsx`
+- `app.iqscaffold.com/src/widgets/header/ui/header.tsx`
+- `app.iqscaffold.com/src/widgets/header/ui/user-menu.tsx`
+- `app.iqscaffold.com/src/widgets/sidebar/ui/sidebar.tsx`
+- `app.iqscaffold.com/src/widgets/sidebar/ui/navigation-links.tsx`
+- `app.iqscaffold.com/src/widgets/tenant-info/ui/tenant-info.tsx`
 
 ---
 
@@ -2110,13 +2110,13 @@ Create all pages and configure routing with guards.
 
 **Files to Create:**
 
-- `app.gripday.com/src/pages/__root.tsx`
-- `app.gripday.com/src/pages/index.tsx`
-- `app.gripday.com/src/pages/dashboard.tsx`
-- `app.gripday.com/src/pages/users.tsx`
-- `app.gripday.com/src/pages/user-preferences.tsx`
-- `app.gripday.com/src/pages/about.tsx`
-- `app.gripday.com/src/pages/404.tsx`
+- `app.iqscaffold.com/src/pages/__root.tsx`
+- `app.iqscaffold.com/src/pages/index.tsx`
+- `app.iqscaffold.com/src/pages/dashboard.tsx`
+- `app.iqscaffold.com/src/pages/users.tsx`
+- `app.iqscaffold.com/src/pages/user-preferences.tsx`
+- `app.iqscaffold.com/src/pages/about.tsx`
+- `app.iqscaffold.com/src/pages/404.tsx`
 
 ---
 
@@ -2151,7 +2151,7 @@ Implement FSD architecture compliance tests.
 
 **Files to Create:**
 
-- `app.gripday.com/src/architecture.test.ts`
+- `app.iqscaffold.com/src/architecture.test.ts`
 
 ---
 
@@ -2238,8 +2238,8 @@ Test integration between frontend applications and backend services.
 
 **Files to Create:**
 
-- `auth.gripday.com/e2e/integration/auth-flow.spec.ts`
-- `app.gripday.com/e2e/integration/user-management.spec.ts`
+- `auth.iqscaffold.com/e2e/integration/auth-flow.spec.ts`
+- `app.iqscaffold.com/e2e/integration/user-management.spec.ts`
 
 ---
 
@@ -2384,11 +2384,11 @@ Create comprehensive E2E test suite with Playwright.
 
 **Files to Create:**
 
-- `auth.gripday.com/e2e/auth/signup.spec.ts`
-- `auth.gripday.com/e2e/auth/login.spec.ts`
-- `auth.gripday.com/e2e/auth/password-reset.spec.ts`
-- `app.gripday.com/e2e/users/user-management.spec.ts`
-- `app.gripday.com/e2e/dashboard/dashboard.spec.ts`
+- `auth.iqscaffold.com/e2e/auth/signup.spec.ts`
+- `auth.iqscaffold.com/e2e/auth/login.spec.ts`
+- `auth.iqscaffold.com/e2e/auth/password-reset.spec.ts`
+- `app.iqscaffold.com/e2e/users/user-management.spec.ts`
+- `app.iqscaffold.com/e2e/dashboard/dashboard.spec.ts`
 
 ---
 
@@ -2516,11 +2516,11 @@ Create optimized Docker images for all services.
 
 **Files to Create:**
 
-- `backend/gripday-user-service/Dockerfile`
-- `backend/gripday-gateway-service/Dockerfile`
-- `backend/gripday-bookstore-service/Dockerfile`
-- `auth.gripday.com/Dockerfile`
-- `app.gripday.com/Dockerfile`
+- `backend/iqscaffold-user-service/Dockerfile`
+- `backend/iqscaffold-gateway-service/Dockerfile`
+- `backend/iqscaffold-bookstore-service/Dockerfile`
+- `auth.iqscaffold.com/Dockerfile`
+- `app.iqscaffold.com/Dockerfile`
 
 ---
 
@@ -2610,7 +2610,7 @@ Create Helm charts for simplified Kubernetes deployment.
 
 - `backend/helm/user-service/Chart.yaml`
 - `backend/helm/user-service/values.yaml`
-- `backend/helm/gripday-platform/Chart.yaml`
+- `backend/helm/iqscaffold-platform/Chart.yaml`
 
 ---
 
@@ -2889,8 +2889,8 @@ Create comprehensive AGENTS.md files for AI-assisted development.
 **Files to Create:**
 
 - `backend/AGENTS.md`
-- `auth.gripday.com/AGENTS.md`
-- `app.gripday.com/AGENTS.md`
+- `auth.iqscaffold.com/AGENTS.md`
+- `app.iqscaffold.com/AGENTS.md`
 
 ---
 

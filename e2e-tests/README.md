@@ -1,6 +1,6 @@
-# Gripday E2E API Testing Suite
+# IQ Scaffold E2E API Testing Suite
 
-Comprehensive Playwright-based API testing infrastructure for the Gripday microservices platform.
+Comprehensive Playwright-based API testing infrastructure for the IQ Scaffold microservices platform.
 
 ## Quick Start
 
@@ -8,7 +8,7 @@ Comprehensive Playwright-based API testing infrastructure for the Gripday micros
 
 - Node.js 18+
 - Docker and Docker Compose
-- Running Gripday services (Auth, Gateway, Bookstore)
+- Running IQ Scaffold services (Auth, Gateway, Bookstore)
 
 ### Installation
 
@@ -86,8 +86,8 @@ e2e-tests/
 Environment-specific settings are defined in `playwright.config.ts`:
 
 - Local: `http://localhost:8080`
-- Staging: `https://api.gripday.website`
-- Production: `https://api.gripday.com`
+- Staging: `https://api.iqscaffold.website`
+- Production: `https://api.iqscaffold.com`
 
 ## Development
 

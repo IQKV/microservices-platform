@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251122000000-000000-organization-preferences-table" author="iqscaffold">
+        <comment>Create organization_preferences table with one-to-one relationship to organizations</comment>
+
+        <createTable tableName="organization_preferences">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="default_locale" type="VARCHAR(10)" defaultValue="en">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_timezone" type="VARCHAR(50)" defaultValue="UTC">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_currency" type="VARCHAR(3)" defaultValue="USD">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_date_format" type="VARCHAR(50)" defaultValue="yyyy-MM-dd">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_time_format" type="VARCHAR(50)" defaultValue="HH:mm:ss">
+                <constraints nullable="true"/>
+            </column>
+            <column name="allow_user_registration" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="require_email_verification" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_min_length" type="INT" defaultValueNumeric="8">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_require_uppercase" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_require_lowercase" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_require_numbers" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_require_special_chars" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="session_timeout_minutes" type="INT" defaultValueNumeric="30">
+                <constraints nullable="true"/>
+            </column>
+            <column name="max_login_attempts" type="INT" defaultValueNumeric="5">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lockout_duration_minutes" type="INT" defaultValueNumeric="15">
+                <constraints nullable="true"/>
+            </column>
+            <column name="enable_two_factor_auth" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="require_two_factor_auth" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_email" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="support_email" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="custom_settings" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="organization_preferences"
+                baseColumnNames="organization_id"
+                constraintName="fk_organization_preferences_organization"
+                referencedTableName="organizations"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <addUniqueConstraint 
+                tableName="organization_preferences" 
+                columnNames="organization_id" 
+                constraintName="uq_organization_preferences_organization_id"/>
+
+        <createIndex indexName="idx_organization_preferences_organization_id" tableName="organization_preferences">
+            <column name="organization_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_organization_preferences_tenant_id" tableName="organization_preferences">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_organization_preferences_created_at" tableName="organization_preferences">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_organization_preferences_tenant_org" tableName="organization_preferences">
+            <column name="tenant_id"/>
+            <column name="organization_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="organization_preferences"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

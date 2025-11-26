@@ -66,7 +66,7 @@ test.describe('JWT Token Lifecycle Tests', () => {
       expect(tokenClaims!.roles).toContain('USER');
       expect(tokenClaims!.issuedAt).toBeDefined();
       expect(tokenClaims!.expiresAt).toBeDefined();
-      expect(tokenClaims!.issuer).toBe('gripday-user-service');
+      expect(tokenClaims!.issuer).toBe('iqscaffold-user-service');
     });
 
     test('should have different expiration times for access and refresh tokens', async () => {
@@ -340,7 +340,7 @@ test.describe('JWT Token Lifecycle Tests', () => {
       const tokenClaims = JwtTestUtils.getTokenClaims(authTokens.accessToken);
       
       expect(tokenClaims).toBeDefined();
-      expect(tokenClaims!.issuer).toBe('gripday-user-service');
+      expect(tokenClaims!.issuer).toBe('iqscaffold-user-service');
       expect(tokenClaims!.audience).toBeDefined();
       expect(tokenClaims!.jwtId).toBeDefined();
       expect(tokenClaims!.issuedAt).toBeDefined();
@@ -366,8 +366,8 @@ test.describe('JWT Token Lifecycle Tests', () => {
       const payload = JwtTestUtils.decodeToken(authTokens.accessToken);
       
       expect(payload).toBeDefined();
-      expect(payload!.iss).toBe('gripday-user-service');
-      expect(payload!.aud).toBe('gripday');
+      expect(payload!.iss).toBe('iqscaffold-user-service');
+      expect(payload!.aud).toBe('iqscaffold');
     });
 
     test('should include unique JWT ID for each token', async () => {

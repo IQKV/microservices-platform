@@ -26,9 +26,9 @@ kubectl apply -f gateway-service/
 kubectl apply -f bookstore-service/
 
 # Wait for services to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-user-service -n gripday-dev-env --timeout=300s
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-gateway-service -n gripday-dev-env --timeout=300s
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-bookstore-service -n gripday-dev-env --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-user-service -n iqscaffold-dev-env --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-gateway-service -n iqscaffold-dev-env --timeout=300s
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-bookstore-service -n iqscaffold-dev-env --timeout=300s
 
 log "Local deployment complete"
-log "Gateway: http://api.gripday.local"
+log "Gateway: http://api.iqscaffold.local"

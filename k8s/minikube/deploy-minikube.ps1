@@ -1,4 +1,4 @@
-# Gripday Platform - Minikube Deployment (PowerShell)
+# IQ Scaffold Platform - Minikube Deployment (PowerShell)
 param(
     [switch]$Build,
     [switch]$NoWait,
@@ -46,7 +46,7 @@ if ($Build) {
     
     foreach ($svc in @("user", "gateway", "bookstore")) {
         log "Building $svc service..."
-        docker build -t "gripday/${svc}-service:latest" -f "gripday-${svc}-service/Dockerfile" .
+        docker build -t "iqscaffold/${svc}-service:latest" -f "iqscaffold-${svc}-service/Dockerfile" .
         if ($LASTEXITCODE -ne 0) { Pop-Location; err "Failed to build $svc service" }
     }
     
@@ -64,7 +64,7 @@ if ($ingressEnabled) {
     log "Applying ingress..."
     kubectl apply -f ingress.yaml
     ok "Ingress applied"
-    log "Add to hosts file: $MINIKUBE_IP api.gripday.site user.gripday.site bookstore.gripday.site"
+    log "Add to hosts file: $MINIKUBE_IP api.iqscaffold.site user.iqscaffold.site bookstore.iqscaffold.site"
 } else {
     warn "Ingress addon not enabled. Enable with: minikube addons enable ingress"
 }
@@ -72,29 +72,29 @@ if ($ingressEnabled) {
 if (-not $NoWait) {
     log "Waiting for pods..."
     
-    kubectl wait --for=condition=ready pod -l app=postgres-user -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=postgres-user -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Postgres user not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=postgres-bookstore -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=postgres-bookstore -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Postgres bookstore not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=redis -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=redis -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Redis not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=user-service -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=user-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "User service not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=bookstore-service -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=bookstore-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Bookstore service not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=gateway-service -n gripday-dev-env --timeout=300s 2>&1 | Out-Null
+    kubectl wait --for=condition=ready pod -l app=gateway-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Gateway service not ready" }
     
     ok "All pods ready"
 }
 
 Write-Host ""
-kubectl get pods -n gripday-dev-env
+kubectl get pods -n iqscaffold-dev-env
 Write-Host ""
 
 log "Service URLs:"
@@ -104,12 +104,12 @@ Write-Host "  Bookstore: http://${MINIKUBE_IP}:30082"
 Write-Host ""
 
 if ($ingressEnabled) {
-    Write-Host "  API Gateway: http://api.gripday.site"
-    Write-Host "  User:        http://user.gripday.site"
-    Write-Host "  Bookstore:   http://bookstore.gripday.site"
+    Write-Host "  API Gateway: http://api.iqscaffold.site"
+    Write-Host "  User:        http://user.iqscaffold.site"
+    Write-Host "  Bookstore:   http://bookstore.iqscaffold.site"
     Write-Host ""
 }
 
 ok "Deployment complete"
-log "View resources: kubectl get all -n gripday-dev-env"
+log "View resources: kubectl get all -n iqscaffold-dev-env"
 log "Cleanup: .\cleanup-minikube.ps1"

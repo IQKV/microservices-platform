@@ -84,12 +84,12 @@ wait_for_services() {
         local all_healthy=true
         
         # Check user service
-        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps gripday-user-service | grep -q "Up (healthy)"; then
+        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps iqscaffold-user-service | grep -q "Up (healthy)"; then
             all_healthy=false
         fi
         
         # Check gateway service
-        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps gripday-gateway-service | grep -q "Up (healthy)"; then
+        if ! $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" ps iqscaffold-gateway-service | grep -q "Up (healthy)"; then
             all_healthy=false
         fi
         
@@ -133,11 +133,11 @@ show_logs() {
     
     echo
     echo "=== User Service Logs ==="
-    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 gripday-user-service
+    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 iqscaffold-user-service
     
     echo
     echo "=== Gateway Service Logs ==="
-    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 gripday-gateway-service
+    $DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" logs --tail=20 iqscaffold-gateway-service
 }
 
 # Stop the platform

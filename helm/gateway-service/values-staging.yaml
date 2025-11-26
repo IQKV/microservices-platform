@@ -2,10 +2,10 @@
 
 global:
   environment: staging
-  platform: gripday
+  platform: iqscaffold
 
 namespace:
-  name: gripday-staging-env
+  name: iqscaffold-staging-env
   labels:
     app.kubernetes.io/component: gateway
     environment: staging
@@ -13,7 +13,7 @@ namespace:
 replicaCount: 5
 
 image:
-  repository: gripday/gripday-gateway-service
+  repository: iqscaffold/iqscaffold-gateway-service
   pullPolicy: Always
   tag: "staging-latest"
 
@@ -32,10 +32,10 @@ ingress:
     # cert-manager.io/cluster-issuer: letsencrypt-staging  # Uncomment if using cert-manager
     nginx.ingress.kubernetes.io/ssl-redirect: "false" # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/rate-limit: "1000"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.space, https://*.gripday.space"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://iqscaffold.space, https://*.iqscaffold.space"
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
   hosts:
-    - host: api.gripday.space
+    - host: api.iqscaffold.space
       paths:
         - path: /
           pathType: Prefix
@@ -44,7 +44,7 @@ ingress:
   # tls:
   #   - secretName: gateway-staging-tls
   #     hosts:
-  #       - api.gripday.space
+  #       - api.iqscaffold.space
 
 resources:
   requests:
@@ -68,41 +68,41 @@ podDisruptionBudget:
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: "staging"
-  - name: GRIPDAY_CACHE_REDIS_HOST
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
     value: "gateway-redis"
-  - name: GRIPDAY_CACHE_REDIS_PORT
+  - name: IQSCAFFOLD_CACHE_REDIS_PORT
     value: "6379"
-  - name: GRIPDAY_CACHE_REDIS_DATABASE
+  - name: IQSCAFFOLD_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
     value: "http://user-service/.well-known/jwks.json"
-  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
+  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
     value: "http://user-service"
-  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
+  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
     value: "http://bookstore-service"
-  - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
-    value: "https://gripday.space,https://*.gripday.space"
-  - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+  - name: IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS
+    value: "https://iqscaffold.space,https://*.iqscaffold.space"
+  - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-gateway-service"
+    value: "iqscaffold-gateway-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-gateway-service,service.version=staging,deployment.environment=staging"
+    value: "service.name=iqscaffold-gateway-service,service.version=staging,deployment.environment=staging"
   - name: JAVA_OPTS
     value: "-Xms768m -Xmx1536m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
 secretEnv:
-  - name: GRIPDAY_CACHE_REDIS_PASSWORD
+  - name: IQSCAFFOLD_CACHE_REDIS_PASSWORD
     secretKeyRef:
       name: gateway-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
       optional: true
-  - name: GRIPDAY_AUTH_JWT_SECRET
+  - name: IQSCAFFOLD_AUTH_JWT_SECRET
     secretKeyRef:
       name: gateway-service-secrets
-      key: GRIPDAY_AUTH_JWT_SECRET
+      key: IQSCAFFOLD_AUTH_JWT_SECRET
 
 secrets:
   enabled: true
@@ -118,7 +118,7 @@ configMap:
 
       logging:
         level:
-          org.gripday.gateway: INFO
+          com.iqscaffold.gateway: INFO
           org.springframework.cloud.gateway: INFO
           org.springframework.security: WARN
           AUDIT: INFO

@@ -1,0 +1,147 @@
+version: "3.8"
+
+services:
+  bookstore-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iqscaffold/iqscaffold-bookstore-service:dev
+    container_name: bookstore-service-dev
+    ports:
+      - "8082:8080" # Bookstore service (internal)
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_APPLICATION_NAME: iqscaffold-bookstore-service
+
+      # Database Configuration
+      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://bookstore-db:5432/iqscaffold_bookstore_local
+      IQSCAFFOLD_DATABASE_USERNAME: bookstore_user
+      IQSCAFFOLD_DATABASE_PASSWORD: bookstore_pass
+
+      # Redis Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: bookstore-redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ""
+
+      # JWT Configuration (for validation)
+      USER_SERVICE_JWK_URI: http://user-service:8080/.well-known/jwks.json
+
+      # Observability Configuration
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: iqscaffold-bookstore-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-bookstore-service,service.version=1.0.0,deployment.environment=dev
+
+      # JVM Configuration
+      JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -Djava.security.egd=file:/dev/./urandom
+    depends_on:
+      bookstore-db:
+        condition: service_healthy
+      bookstore-redis:
+        condition: service_healthy
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768Mi
+          cpus: "0.5"
+        reservations:
+          memory: 384Mi
+          cpus: "0.25"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    volumes:
+      - bookstore_logs:/app/logs
+      - bookstore_tmp:/tmp
+
+  bookstore-db:
+    image: postgres:15.8-alpine
+    container_name: bookstore-db-dev
+    ports:
+      - "5433:5432" # Bookstore DB on 5433 to avoid conflicts
+    environment:
+      POSTGRES_DB: iqscaffold_bookstore_local
+      POSTGRES_USER: bookstore_user
+      POSTGRES_PASSWORD: bookstore_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - bookstore_db_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookstore_user -d iqscaffold_bookstore_local -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+
+  bookstore-redis:
+    image: redis:7.2-alpine
+    container_name: bookstore-redis-dev
+    ports:
+      - "6381:6379" # Bookstore Redis on 6381 to avoid conflicts
+    volumes:
+      - bookstore_redis_data:/data
+    networks:
+      - bookstore-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+
+volumes:
+  bookstore_db_data:
+    name: iqscaffold_bookstore_postgres_data_dev
+    driver: local
+  bookstore_redis_data:
+    name: iqscaffold_bookstore_redis_data_dev
+    driver: local
+  bookstore_logs:
+    name: iqscaffold_bookstore_logs_dev
+    driver: local
+  bookstore_tmp:
+    name: iqscaffold_bookstore_tmp_dev
+    driver: local
+
+networks:
+  bookstore-network:
+    driver: bridge
+    name: iqscaffold-bookstore-network-dev
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16

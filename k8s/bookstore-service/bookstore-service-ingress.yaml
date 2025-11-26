@@ -2,11 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: bookstore-service-ingress
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
   annotations:
     # NGINX Ingress Controller annotations
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -100,12 +100,12 @@ spec:
   # TLS configuration (uncomment for HTTPS)
   # tls:
   # - hosts:
-  #   - bookstore.gripday.local
+  #   - bookstore.iqscaffold.local
   #   secretName: bookstore-service-tls
 # NOTE: Staging and production environments do NOT have direct ingress
 # All traffic routes through the Gateway Service (API Gateway pattern)
 # Direct ingress is only available in local development environment for debugging
 #
 # In staging/production, bookstore is accessed via:
-#   https://api.gripday.website/api/v1/bookstore/* -> Gateway -> Bookstore Service
-#   https://api.gripday.com/api/v1/bookstore/* -> Gateway -> Bookstore Service
+#   https://api.iqscaffold.website/api/v1/bookstore/* -> Gateway -> Bookstore Service
+#   https://api.iqscaffold.com/api/v1/bookstore/* -> Gateway -> Bookstore Service

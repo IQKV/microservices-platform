@@ -1,4 +1,4 @@
-# 🚀 Gripday Microservices Platform
+# 🚀 IQ Scaffold Microservices Platform
 
 > Production-ready Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
@@ -15,7 +15,7 @@ This platform serves as a reference implementation for organizations building mi
 
 ## Platform Services
 
-### 🔐 [User Service](gripday-user-service/README.md)
+### 🔐 [User Service](iqscaffold-user-service/README.md)
 
 Centralized authentication and identity management hub.
 
@@ -37,7 +37,7 @@ Centralized authentication and identity management hub.
 - User context propagation with full JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
 - Pattern matching for claim extraction (Java 21)
 
-### 🌐 [Gateway Service](gripday-gateway-service/README.md)
+### 🌐 [Gateway Service](iqscaffold-gateway-service/README.md)
 
 Reactive API gateway providing unified entry point for all services.
 
@@ -57,9 +57,9 @@ Reactive API gateway providing unified entry point for all services.
 - Dual-layer rate limiting (global IP + tenant-specific)
 - Request/response transformation with GlobalFilter chain
 - API versioning (path and header-based)
-- Type-safe configuration with Java records (GripdayProperties)
+- Type-safe configuration with Java records (IqScaffoldProperties)
 
-### 📚 [Bookstore Service](gripday-bookstore-service/README.md)
+### 📚 [Bookstore Service](iqscaffold-bookstore-service/README.md)
 
 Domain service demonstrating catalog and inventory management with DDD patterns.
 
@@ -213,15 +213,15 @@ Each service can be run independently with Docker Compose:
 
 ```bash
 # Start User Service with dependencies
-cd gripday-user-service
+cd iqscaffold-user-service
 docker-compose up
 
 # Start Gateway Service
-cd gripday-gateway-service
+cd iqscaffold-gateway-service
 docker-compose up
 
 # Start Bookstore Service
-cd gripday-bookstore-service
+cd iqscaffold-bookstore-service
 docker-compose up
 ```
 

@@ -1,12 +1,12 @@
 # User Service Helm Chart
 
-Production-ready Helm chart for deploying the Gripday User Service with PostgreSQL and Redis on Kubernetes.
+Production-ready Helm chart for deploying the IQ Scaffold User Service with PostgreSQL and Redis on Kubernetes.
 
 ## Overview
 
-The User Service is the centralized authentication and user management microservice for the Gripday platform. It provides JWT-based authentication, user lifecycle management, email verification, password reset flows, and role-based access control.
+The User Service is the centralized authentication and user management microservice for the IQ Scaffold platform. It provides JWT-based authentication, user lifecycle management, email verification, password reset flows, and role-based access control.
 
-**Architecture**: User service is internal-only with ClusterIP service. Access via Gateway Service at `api.gripday.site/api/v1/auth`
+**Architecture**: User service is internal-only with ClusterIP service. Access via Gateway Service at `api.iqscaffold.site/api/v1/auth`
 
 ## Features
 
@@ -31,10 +31,10 @@ The User Service is the centralized authentication and user management microserv
 
 | Environment | Access Domain       | Namespace              | Values File            |
 | ----------- | ------------------- | ---------------------- | ---------------------- |
-| Development | api.gripday.site    | gripday-dev-env        | values.yaml            |
-| Test        | api.gripday.website | gripday-test-env       | values-test.yaml       |
-| Staging     | api.gripday.space   | gripday-staging-env    | values-staging.yaml    |
-| Production  | api.gripday.com     | gripday-production-env | values-production.yaml |
+| Development | api.iqscaffold.site    | iqscaffold-dev-env        | values.yaml            |
+| Test        | api.iqscaffold.website | iqscaffold-test-env       | values-test.yaml       |
+| Staging     | api.iqscaffold.space   | iqscaffold-staging-env    | values-staging.yaml    |
+| Production  | api.iqscaffold.com     | iqscaffold-production-env | values-production.yaml |
 
 **Note**: User service is accessed via Gateway Service at `/api/v1/auth/**` and `/api/v1/users/**`
 
@@ -45,15 +45,15 @@ The User Service is the centralized authentication and user management microserv
 ```bash
 # Install with default values (dev environment)
 helm install user-service ./helm/user-service \
-  --namespace gripday-dev-env \
+  --namespace iqscaffold-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-dev-env
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-user-service
+kubectl get pods -n iqscaffold-dev-env
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-user-service
 
 # Check database initialization
-kubectl logs -n gripday-dev-env -l app.kubernetes.io/name=user-postgres
+kubectl logs -n iqscaffold-dev-env -l app.kubernetes.io/name=user-postgres
 ```
 
 **Note**: Default values are optimized for k3s single-node development with 1 replica, HPA disabled, and local-path storage.
@@ -63,17 +63,17 @@ kubectl logs -n gripday-dev-env -l app.kubernetes.io/name=user-postgres
 ```bash
 # Create secrets first
 kubectl create secret generic user-service-secrets \
-  --from-literal=GRIPDAY_DATABASE_USERNAME=user_db_user \
-  --from-literal=GRIPDAY_DATABASE_PASSWORD=secure_password \
-  --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
+  --from-literal=IQSCAFFOLD_DATABASE_USERNAME=user_db_user \
+  --from-literal=IQSCAFFOLD_DATABASE_PASSWORD=secure_password \
+  --from-literal=IQSCAFFOLD_AUTH_JWT_SECRET=jwt_secret_key \
   --from-literal=SMTP_USERNAME=smtp_user \
   --from-literal=SMTP_PASSWORD=smtp_password \
-  -n gripday-test-env
+  -n iqscaffold-test-env
 
 # Install with test configuration
 helm install user-service ./helm/user-service \
   -f ./helm/user-service/values-test.yaml \
-  --namespace gripday-test-env \
+  --namespace iqscaffold-test-env \
   --create-namespace
 ```
 
@@ -82,17 +82,17 @@ helm install user-service ./helm/user-service \
 ```bash
 # Create secrets first
 kubectl create secret generic user-service-secrets \
-  --from-literal=GRIPDAY_DATABASE_USERNAME=user_db_user \
-  --from-literal=GRIPDAY_DATABASE_PASSWORD=secure_password \
-  --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
+  --from-literal=IQSCAFFOLD_DATABASE_USERNAME=user_db_user \
+  --from-literal=IQSCAFFOLD_DATABASE_PASSWORD=secure_password \
+  --from-literal=IQSCAFFOLD_AUTH_JWT_SECRET=jwt_secret_key \
   --from-literal=SMTP_USERNAME=smtp_user \
   --from-literal=SMTP_PASSWORD=smtp_password \
-  -n gripday-staging-env
+  -n iqscaffold-staging-env
 
 # Install with staging configuration
 helm install user-service ./helm/user-service \
   -f ./helm/user-service/values-staging.yaml \
-  --namespace gripday-staging-env \
+  --namespace iqscaffold-staging-env \
   --create-namespace
 ```
 
@@ -103,7 +103,7 @@ helm install user-service ./helm/user-service \
 # Then install with production configuration
 helm install user-service ./helm/user-service \
   -f ./helm/user-service/values-production.yaml \
-  --namespace gripday-production-env \
+  --namespace iqscaffold-production-env \
   --create-namespace
 ```
 
@@ -114,7 +114,7 @@ helm install user-service ./helm/user-service \
 | Parameter                     | Description        | Default                |
 | ----------------------------- | ------------------ | ---------------------- |
 | `replicaCount`                | Number of replicas | `1`                    |
-| `image.repository`            | Image repository   | `gripday/gripday-user-service` |
+| `image.repository`            | Image repository   | `iqscaffold/iqscaffold-user-service` |
 | `image.tag`                   | Image tag          | `1.0.0`                |
 | `service.port`                | Service port       | `80`                   |
 | `service.targetPort`          | Container port     | `8080`                 |
@@ -139,7 +139,7 @@ helm install user-service ./helm/user-service \
 - 5Gi PostgreSQL, 1Gi Redis storage with local-path storage class
 - Human-readable console logging
 - Full tracing (100% sampling)
-- Database: gripday_user_local
+- Database: iqscaffold_user_local
 - SMTP disabled (localhost)
 - No affinity/topology constraints
 
@@ -152,9 +152,9 @@ helm install user-service ./helm/user-service \
 - 10Gi PostgreSQL, 2Gi Redis storage with standard storage class
 - JSON structured logging
 - Full tracing (100% sampling)
-- Database: gripday_user_test
+- Database: iqscaffold_user_test
 - SMTP enabled (SendGrid)
-- App base URL: https://gripday.website
+- App base URL: https://iqscaffold.website
 
 **Staging** (`values-staging.yaml`)
 
@@ -165,9 +165,9 @@ helm install user-service ./helm/user-service \
 - 10Gi PostgreSQL, 2Gi Redis storage with fast-ssd storage class
 - JSON structured logging
 - Full tracing (100% sampling)
-- Database: gripday_user_staging
+- Database: iqscaffold_user_staging
 - SMTP enabled (SendGrid)
-- App base URL: https://gripday.space
+- App base URL: https://iqscaffold.space
 
 **Production** (`values-production.yaml`)
 
@@ -178,9 +178,9 @@ helm install user-service ./helm/user-service \
 - 20Gi PostgreSQL, 5Gi Redis storage with fast-ssd storage class
 - JSON structured logging
 - Reduced tracing (10% sampling)
-- Database: gripday_user_production
+- Database: iqscaffold_user_production
 - SMTP enabled (SendGrid)
-- App base URL: https://gripday.com
+- App base URL: https://iqscaffold.com
 - OAuth2 Google enabled
 - Strict pod anti-affinity (requiredDuringScheduling)
 - Multi-zone distribution with topology spread constraints
@@ -268,7 +268,7 @@ Redis configuration:
 
 - Prometheus metrics exposed at `/actuator/prometheus`
 - Annotations for automatic scraping
-- Custom metrics prefix: `gripday_user`
+- Custom metrics prefix: `iqscaffold_user`
 - Distribution percentiles: 0.5, 0.95, 0.99
 
 ### Logging
@@ -400,7 +400,7 @@ curl http://user-service:8080/.well-known/jwks.json | jq
 curl http://user-service:8080/actuator/prometheus
 
 # User-specific metrics
-curl http://user-service:8080/actuator/prometheus | grep gripday_user
+curl http://user-service:8080/actuator/prometheus | grep iqscaffold_user
 ```
 
 ## Troubleshooting
@@ -409,36 +409,36 @@ curl http://user-service:8080/actuator/prometheus | grep gripday_user
 
 ```bash
 # Pod status (adjust namespace as needed)
-kubectl get pods -n gripday-dev-env -l app.kubernetes.io/name=gripday-user-service
+kubectl get pods -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-user-service
 
 # Deployment status
-kubectl rollout status deployment/user-service -n gripday-dev-env
+kubectl rollout status deployment/user-service -n iqscaffold-dev-env
 
 # HPA status (if enabled)
-kubectl get hpa -n gripday-dev-env
+kubectl get hpa -n iqscaffold-dev-env
 ```
 
 ### View Logs
 
 ```bash
 # Application logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-user-service
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-user-service
 
 # PostgreSQL logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=user-postgres
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=user-postgres
 
 # Redis logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=user-redis
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=user-redis
 
 # Previous container logs (if crashed)
-kubectl logs -n gripday-dev-env <pod-name> --previous
+kubectl logs -n iqscaffold-dev-env <pod-name> --previous
 ```
 
 ### Test Authentication
 
 ```bash
 # Port forward
-kubectl port-forward -n gripday-dev-env svc/user-service 8080:80
+kubectl port-forward -n iqscaffold-dev-env svc/user-service 8080:80
 
 # Register user
 curl -X POST http://localhost:8080/api/v1/auth/signup \
@@ -468,9 +468,9 @@ curl -H "Authorization: Bearer <access_token>" \
 
 ```bash
 # Connect to PostgreSQL
-kubectl exec -it -n gripday-dev-env \
-  $(kubectl get pod -n gripday-dev-env -l app.kubernetes.io/name=user-postgres -o jsonpath='{.items[0].metadata.name}') \
-  -- psql -U gripday_user -d gripday_user_local
+kubectl exec -it -n iqscaffold-dev-env \
+  $(kubectl get pod -n iqscaffold-dev-env -l app.kubernetes.io/name=user-postgres -o jsonpath='{.items[0].metadata.name}') \
+  -- psql -U iqscaffold_user -d iqscaffold_user_local
 
 # Check tables
 \dt
@@ -489,31 +489,31 @@ SELECT * FROM databasechangelog ORDER BY dateexecuted DESC LIMIT 5;
 
 ```bash
 # Connect to Redis
-kubectl exec -it -n gripday-dev-env \
-  $(kubectl get pod -n gripday-dev-env -l app.kubernetes.io/name=user-redis -o jsonpath='{.items[0].metadata.name}') \
+kubectl exec -it -n iqscaffold-dev-env \
+  $(kubectl get pod -n iqscaffold-dev-env -l app.kubernetes.io/name=user-redis -o jsonpath='{.items[0].metadata.name}') \
   -- redis-cli
 
 # Check token blacklist
-KEYS "gripday:user:token:blacklist:*"
+KEYS "iqscaffold:user:token:blacklist:*"
 
 # Check session data
 KEYS "spring:session:*"
 
 # Check key TTL
-TTL "gripday:user:token:blacklist:abc123"
+TTL "iqscaffold:user:token:blacklist:abc123"
 ```
 
 ### Common Issues
 
 **Pods not starting**
 
-- Check resource quotas: `kubectl describe resourcequota -n gripday-dev-env`
-- Verify secrets exist: `kubectl get secrets -n gripday-dev-env`
-- Check image pull: `kubectl describe pod <pod-name> -n gripday-dev-env`
+- Check resource quotas: `kubectl describe resourcequota -n iqscaffold-dev-env`
+- Verify secrets exist: `kubectl get secrets -n iqscaffold-dev-env`
+- Check image pull: `kubectl describe pod <pod-name> -n iqscaffold-dev-env`
 
 **Database connection failures**
 
-- Verify PostgreSQL is running: `kubectl get pods -n gripday-dev-env -l app.kubernetes.io/name=user-postgres`
+- Verify PostgreSQL is running: `kubectl get pods -n iqscaffold-dev-env -l app.kubernetes.io/name=user-postgres`
 - Check database credentials in secrets
 - Verify network policy allows traffic
 
@@ -542,17 +542,17 @@ TTL "gripday:user:token:blacklist:abc123"
 # Upgrade with new values (adjust namespace and values file as needed)
 helm upgrade user-service ./helm/user-service \
   -f ./helm/user-service/values-production.yaml \
-  --namespace gripday-production-env
+  --namespace iqscaffold-production-env
 
 # Rollback if needed
-helm rollback user-service --namespace gripday-production-env
+helm rollback user-service --namespace iqscaffold-production-env
 ```
 
 ## Uninstalling
 
 ```bash
 # Adjust namespace as needed
-helm uninstall user-service --namespace gripday-dev-env
+helm uninstall user-service --namespace iqscaffold-dev-env
 ```
 
 ## Security
@@ -586,14 +586,14 @@ The chart includes network policies that:
 
 Required secrets:
 
-- `GRIPDAY_DATABASE_USERNAME`: PostgreSQL username
-- `GRIPDAY_DATABASE_PASSWORD`: PostgreSQL password
-- `GRIPDAY_AUTH_JWT_SECRET`: RSA private key for JWT signing
+- `IQSCAFFOLD_DATABASE_USERNAME`: PostgreSQL username
+- `IQSCAFFOLD_DATABASE_PASSWORD`: PostgreSQL password
+- `IQSCAFFOLD_AUTH_JWT_SECRET`: RSA private key for JWT signing
 - `SMTP_USERNAME`: SMTP username (optional in dev)
 - `SMTP_PASSWORD`: SMTP password (optional in dev)
-- `GRIPDAY_CACHE_REDIS_PASSWORD`: Redis password (optional)
-- `GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID`: Google OAuth2 client ID (optional)
-- `GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET`: Google OAuth2 client secret (optional)
+- `IQSCAFFOLD_CACHE_REDIS_PASSWORD`: Redis password (optional)
+- `IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID`: Google OAuth2 client ID (optional)
+- `IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET`: Google OAuth2 client secret (optional)
 
 ## Included Resources
 
@@ -620,6 +620,6 @@ The Helm chart creates the following Kubernetes resources:
 
 ## Support
 
-- GitHub Issues: https://github.com/gripday/gripday-user-service
-- Platform Team: platform@gripday.site
-- Documentation: https://docs.gripday.site
+- GitHub Issues: https://github.com/iqscaffold/iqscaffold-user-service
+- Platform Team: platform@iqscaffold.site
+- Documentation: https://docs.iqscaffold.site

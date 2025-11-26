@@ -1,4 +1,4 @@
-# Gripday Platform - Minikube All-in-One Deployment
+# IQ Scaffold Platform - Minikube All-in-One Deployment
 # This file contains all resources needed to run the platform on minikube
 
 ---
@@ -6,9 +6,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gripday-dev-env
+  name: iqscaffold-dev-env
   labels:
-    name: gripday-dev-env
+    name: iqscaffold-dev-env
     environment: local
 
 ---
@@ -16,12 +16,12 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gripday-config
-  namespace: gripday-dev-env
+  name: iqscaffold-config
+  namespace: iqscaffold-dev-env
 data:
   # Database URLs
-  AUTH_DB_URL: "jdbc:postgresql://postgres-user:5432/gripday_user"
-  BOOKSTORE_DB_URL: "jdbc:postgresql://postgres-bookstore:5432/gripday_bookstore"
+  AUTH_DB_URL: "jdbc:postgresql://postgres-user:5432/iqscaffold_user"
+  BOOKSTORE_DB_URL: "jdbc:postgresql://postgres-bookstore:5432/iqscaffold_bookstore"
 
   # Redis
   REDIS_HOST: "redis"
@@ -42,11 +42,11 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: gripday-secrets
-  namespace: gripday-dev-env
+  name: iqscaffold-secrets
+  namespace: iqscaffold-dev-env
 type: Opaque
 data:
-  # Database credentials (gripday_user:gripday_password)
+  # Database credentials (iqscaffold_user:iqscaffold_password)
   DB_USERNAME: Z3JpcGRheV91c2Vy
   DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
 
@@ -62,7 +62,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-user
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-user
     component: database
@@ -84,16 +84,16 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_user
+              value: iqscaffold_user
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -112,7 +112,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
@@ -120,7 +120,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:
@@ -132,7 +132,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-user
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-user
 spec:
@@ -149,7 +149,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-bookstore
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-bookstore
     component: database
@@ -171,16 +171,16 @@ spec:
             - containerPort: 5432
           env:
             - name: POSTGRES_DB
-              value: gripday_bookstore
+              value: iqscaffold_bookstore
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -199,7 +199,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
@@ -207,7 +207,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - gripday_user
+                - iqscaffold_user
             initialDelaySeconds: 5
             periodSeconds: 5
       volumes:
@@ -219,7 +219,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-bookstore
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: postgres-bookstore
 spec:
@@ -236,7 +236,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: redis
     component: cache
@@ -293,7 +293,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: redis
 spec:
@@ -310,7 +310,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: user-service
     component: microservice
@@ -352,7 +352,7 @@ spec:
               echo "Redis is ready!"
       containers:
         - name: user-service
-          image: gripday/gripday-user-service:latest
+          image: iqscaffold/iqscaffold-user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -361,42 +361,42 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: SPRING_PROFILES_ACTIVE
-            - name: GRIPDAY_DATABASE_URL
+            - name: IQSCAFFOLD_DATABASE_URL
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: AUTH_DB_URL
-            - name: GRIPDAY_DATABASE_USERNAME
+            - name: IQSCAFFOLD_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_USERNAME
-            - name: GRIPDAY_DATABASE_PASSWORD
+            - name: IQSCAFFOLD_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_PASSWORD
-            - name: GRIPDAY_CACHE_REDIS_HOST
+            - name: IQSCAFFOLD_CACHE_REDIS_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_HOST
-            - name: GRIPDAY_CACHE_REDIS_PORT
+            - name: IQSCAFFOLD_CACHE_REDIS_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_PORT
-            - name: GRIPDAY_AUTH_JWT_SECRET
+            - name: IQSCAFFOLD_AUTH_JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: JWT_SECRET
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: JAVA_OPTS
           resources:
             requests:
@@ -432,7 +432,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: user-service
 spec:
@@ -451,7 +451,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bookstore-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: bookstore-service
     component: microservice
@@ -493,7 +493,7 @@ spec:
               echo "Redis is ready!"
       containers:
         - name: bookstore-service
-          image: gripday/bookstore-service:latest
+          image: iqscaffold/bookstore-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -502,39 +502,39 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: SPRING_PROFILES_ACTIVE
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: BOOKSTORE_DB_URL
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_USERNAME
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gripday-secrets
+                  name: iqscaffold-secrets
                   key: DB_PASSWORD
             - name: SPRING_DATA_REDIS_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_HOST
             - name: SPRING_DATA_REDIS_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_PORT
             - name: JWT_ISSUER_URI
               value: "http://user-service:8080"
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: JAVA_OPTS
           resources:
             requests:
@@ -570,7 +570,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: bookstore-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: bookstore-service
 spec:
@@ -589,7 +589,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: gateway-service
     component: gateway
@@ -619,7 +619,7 @@ spec:
               echo "All services are ready!"
       containers:
         - name: gateway-service
-          image: gripday/gripday-gateway-service:latest
+          image: iqscaffold/iqscaffold-gateway-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -628,36 +628,36 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: SPRING_PROFILES_ACTIVE
             - name: SPRING_DATA_REDIS_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_HOST
             - name: SPRING_DATA_REDIS_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: REDIS_PORT
-            - name: GRIPDAY_GATEWAY_USER_SERVICE_URL
+            - name: IQSCAFFOLD_GATEWAY_USER_SERVICE_URL
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: USER_SERVICE_URL
-            - name: GRIPDAY_GATEWAY_BOOKSTORE_SERVICE_URL
+            - name: IQSCAFFOLD_GATEWAY_BOOKSTORE_SERVICE_URL
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: BOOKSTORE_SERVICE_URL
-            - name: GRIPDAY_GATEWAY_RATE_LIMITING_ENABLED
+            - name: IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED
               value: "true"
-            - name: GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE
+            - name: IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE
               value: "100"
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:
-                  name: gripday-config
+                  name: iqscaffold-config
                   key: JAVA_OPTS
           resources:
             requests:
@@ -693,7 +693,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gateway-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app: gateway-service
 spec:

@@ -41,12 +41,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "bookstore-service.fullname" . }}-secrets
-              key: GRIPDAY_DATABASE_USERNAME
+              key: IQSCAFFOLD_DATABASE_USERNAME
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ include "bookstore-service.fullname" . }}-secrets
-              key: GRIPDAY_DATABASE_PASSWORD
+              key: IQSCAFFOLD_DATABASE_PASSWORD
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         volumeMounts:

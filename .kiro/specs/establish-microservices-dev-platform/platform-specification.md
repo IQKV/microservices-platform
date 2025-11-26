@@ -1,4 +1,4 @@
-# 🚀 Gripday Platform - Complete Development Specification
+# 🚀 IQ Scaffold Platform - Complete Development Specification
 
 > **Generated:** November 25, 2025  
 > **Version:** 1.0.0  
@@ -6,12 +6,12 @@
 
 ## 📋 Executive Summary
 
-Gripday is a production-ready, full-stack microservices platform demonstrating modern architecture patterns for building scalable SaaS applications. The platform consists of:
+IQ Scaffold is a production-ready, full-stack microservices platform demonstrating modern architecture patterns for building scalable SaaS applications. The platform consists of:
 
 - **Backend**: Spring Boot 3.5.6 microservices (Java 21) with JWT authentication, API gateway, and domain services
 - **Frontend**: Two React 19 applications using Feature-Sliced Design architecture
-  - **Auth Portal** (`auth.gripday.com`): Dedicated authentication gateway
-  - **Main Application** (`app.gripday.com`): User management, dashboard, and business features
+  - **Auth Portal** (`auth.iqscaffold.com`): Dedicated authentication gateway
+  - **Main Application** (`app.iqscaffold.com`): User management, dashboard, and business features
 
 **Key Differentiators:**
 
@@ -231,7 +231,7 @@ GET    /api/v1/admin/tenants/statistics - Get tenant statistics
   "lastName": "Doe",
   "tenantId": "tenant-123",
   "type": "access",
-  "iss": "gripday-user-service",
+  "iss": "iqscaffold-user-service",
   "iat": 1634567890,
   "exp": 1634568790,
   "jti": "unique-token-id"
@@ -268,8 +268,8 @@ GET    /api/v1/admin/tenants/statistics - Get tenant statistics
 
 ```bash
 # Database
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/gripday_user
-SPRING_DATASOURCE_USERNAME=gripday_user
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/iqscaffold_user
+SPRING_DATASOURCE_USERNAME=iqscaffold_user
 SPRING_DATASOURCE_PASSWORD=secure_password
 
 # Redis
@@ -285,7 +285,7 @@ JWT_REFRESH_TOKEN_EXPIRATION=604800000 # 7 days
 # Email
 SPRING_MAIL_HOST=smtp.example.com
 SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=noreply@gripday.com
+SPRING_MAIL_USERNAME=noreply@iqscaffold.com
 SPRING_MAIL_PASSWORD=email_password
 
 # Observability
@@ -628,8 +628,8 @@ public class Inventory extends AggregateRoot {
 
 ```bash
 # Database
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/gripday_bookstore
-SPRING_DATASOURCE_USERNAME=gripday_bookstore
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/iqscaffold_bookstore
+SPRING_DATASOURCE_USERNAME=iqscaffold_bookstore
 SPRING_DATASOURCE_PASSWORD=secure_password
 
 # Redis
@@ -749,7 +749,7 @@ api.interceptors.response.use(
 );
 ```
 
-### 1. Auth Portal (auth.gripday.com)
+### 1. Auth Portal (auth.iqscaffold.com)
 
 **Purpose**: Dedicated authentication gateway handling user registration, login, password management, and redirects to main application
 
@@ -850,20 +850,20 @@ export const createValidationSchemas = () => ({
 VITE_API_URL_SERVER=http://localhost:8080
 
 # Auth Domain Configuration
-VITE_AUTH_DOMAIN_AUTH=https://auth.gripday.com
-VITE_AUTH_DOMAIN_APP=https://app.gripday.com
+VITE_AUTH_DOMAIN_AUTH=https://auth.iqscaffold.com
+VITE_AUTH_DOMAIN_APP=https://app.iqscaffold.com
 
 # Redirect Configuration (optional)
-VITE_AUTH_REDIRECT_AFTER_LOGIN=https://app.gripday.com
-VITE_AUTH_REDIRECT_AFTER_LOGOUT=https://auth.gripday.com/login
-VITE_AUTH_REDIRECT_AFTER_SIGNUP=https://auth.gripday.com/login
+VITE_AUTH_REDIRECT_AFTER_LOGIN=https://app.iqscaffold.com
+VITE_AUTH_REDIRECT_AFTER_LOGOUT=https://auth.iqscaffold.com/login
+VITE_AUTH_REDIRECT_AFTER_SIGNUP=https://auth.iqscaffold.com/login
 
 # MSW Configuration
 VITE_ENABLE_MSW=true
 VITE_LOG_LEVEL=info
 ```
 
-### 2. Main Application (app.gripday.com)
+### 2. Main Application (app.iqscaffold.com)
 
 **Purpose**: Main application frontend providing authenticated user experience, user management, dashboard analytics, and security settings
 
@@ -1031,8 +1031,8 @@ processes/
 VITE_API_URL_SERVER=http://localhost:8080
 
 # Auth Domain Configuration
-VITE_AUTH_DOMAIN_AUTH=https://auth.gripday.com
-VITE_AUTH_DOMAIN_APP=https://app.gripday.com
+VITE_AUTH_DOMAIN_AUTH=https://auth.iqscaffold.com
+VITE_AUTH_DOMAIN_APP=https://app.iqscaffold.com
 
 # Redirect Configuration
 VITE_AUTH_REDIRECT_AFTER_LOGIN=/dashboard
@@ -1318,8 +1318,8 @@ pnpm e2e:all-browsers        # Test on all browsers
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/gripday.git
-cd gripday/backend
+git clone https://github.com/your-com/iqscaffold.git
+cd iqscaffold/backend
 
 # Copy environment variables
 cp .env.example .env
@@ -1331,15 +1331,15 @@ docker compose up -d
 mvn clean install -Dcheckstyle.skip=true
 
 # Run User Service
-cd gripday-user-service
+cd iqscaffold-user-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 # Run Gateway Service (separate terminal)
-cd gripday-gateway-service
+cd iqscaffold-gateway-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 # Run Bookstore Service (separate terminal)
-cd gripday-bookstore-service
+cd iqscaffold-bookstore-service
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
@@ -1347,13 +1347,13 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 ```bash
 # Auth Portal
-cd auth.gripday.com
+cd auth.iqscaffold.com
 pnpm install
 cp .env.example .env
 pnpm dev  # Runs on http://localhost:5173
 
 # Main Application (separate terminal)
-cd app.gripday.com
+cd app.iqscaffold.com
 pnpm install
 cp .env.example .env
 pnpm dev  # Runs on http://localhost:5174 (or configure port)
@@ -1366,7 +1366,7 @@ pnpm dev  # Runs on http://localhost:5174 (or configure port)
 Each service has a multi-stage Dockerfile:
 
 ```dockerfile
-# Example: gripday-user-service/Dockerfile
+# Example: iqscaffold-user-service/Dockerfile
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
@@ -1403,20 +1403,20 @@ docker compose up -d --build
 ```bash
 # Install User Service
 helm install user-service ./helm/user-service \
-  --namespace gripday \
+  --namespace iqscaffold \
   --create-namespace
 
 # Install Gateway Service
 helm install gateway-service ./helm/gateway-service \
-  --namespace gripday
+  --namespace iqscaffold
 
 # Install Bookstore Service
 helm install bookstore-service ./helm/bookstore-service \
-  --namespace gripday
+  --namespace iqscaffold
 
 # Install full platform
-helm install gripday ./helm/gripday-platform \
-  --namespace gripday \
+helm install iqscaffold ./helm/iqscaffold-platform \
+  --namespace iqscaffold \
   --create-namespace
 ```
 
@@ -1427,13 +1427,13 @@ helm install gripday ./helm/gripday-platform \
 kubectl apply -f k8s/
 
 # Check deployment status
-kubectl get pods -n gripday
+kubectl get pods -n iqscaffold
 
 # View logs
-kubectl logs -f deployment/user-service -n gripday
+kubectl logs -f deployment/user-service -n iqscaffold
 
 # Scale services
-kubectl scale deployment/user-service --replicas=3 -n gripday
+kubectl scale deployment/user-service --replicas=3 -n iqscaffold
 ```
 
 ### Environment Profiles
@@ -1455,7 +1455,7 @@ export SPRING_PROFILES_ACTIVE=production
 java -jar app.jar
 
 # Via Docker
-docker run -e SPRING_PROFILES_ACTIVE=production gripday-user-service
+docker run -e SPRING_PROFILES_ACTIVE=production iqscaffold-user-service
 ```
 
 ---
@@ -1529,7 +1529,7 @@ management:
 {
   "timestamp": "2024-01-15T10:30:00.123Z",
   "level": "INFO",
-  "logger": "org.gripday.user.service.UserService",
+  "logger": "com.iqscaffold.user.service.UserService",
   "message": "User created successfully",
   "correlationId": "abc-123",
   "userId": "1",
@@ -2107,8 +2107,8 @@ mvn verify -Dcheckstyle.skip=true
 
 ```bash
 cd backend
-mkdir gripday-newservice-service
-cd gripday-newservice-service
+mkdir iqscaffold-newservice-service
+cd iqscaffold-newservice-service
 ```
 
 **2. Create pom.xml**
@@ -2119,13 +2119,13 @@ cd gripday-newservice-service
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.gripday</groupId>
-        <artifactId>gripday</artifactId>
+        <groupId>com.iqscaffold</groupId>
+        <artifactId>iqscaffold</artifactId>
         <version>0.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>gripday-newservice-service</artifactId>
-    <name>Gripday New Service</name>
+    <artifactId>iqscaffold-newservice-service</artifactId>
+    <name>IQ Scaffold New Service</name>
 
     <dependencies>
         <dependency>
@@ -2152,7 +2152,7 @@ cd gripday-newservice-service
 **3. Create Application Class**
 
 ```java
-package org.gripday.newservice;
+package com.iqscaffold.newservice;
 
 @SpringBootApplication
 public class NewServiceApplication {
@@ -2174,7 +2174,7 @@ spring:
     name: newservice-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/gripday_newservice
+    url: jdbc:postgresql://localhost:5432/iqscaffold_newservice
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
@@ -2205,10 +2205,10 @@ management:
 ```xml
 <!-- backend/pom.xml -->
 <modules>
-    <module>gripday-user-service</module>
-    <module>gripday-gateway-service</module>
-    <module>gripday-bookstore-service</module>
-    <module>gripday-newservice-service</module>
+    <module>iqscaffold-user-service</module>
+    <module>iqscaffold-gateway-service</module>
+    <module>iqscaffold-bookstore-service</module>
+    <module>iqscaffold-newservice-service</module>
 </modules>
 ```
 
@@ -2231,7 +2231,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 **7. Add to Gateway Routes**
 
 ```yaml
-# gripday-gateway-service/src/main/resources/application.yml
+# iqscaffold-gateway-service/src/main/resources/application.yml
 spring:
   cloud:
     gateway:
@@ -2249,14 +2249,14 @@ spring:
 **8. Create Docker Compose**
 
 ```yaml
-# gripday-newservice-service/docker-compose.yml
+# iqscaffold-newservice-service/docker-compose.yml
 version: "3.8"
 
 services:
   newservice-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: gripday_newservice
+      POSTGRES_DB: iqscaffold_newservice
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
@@ -2268,7 +2268,7 @@ services:
       - "8083:8083"
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://newservice-db:5432/gripday_newservice
+      SPRING_DATASOURCE_URL: jdbc:postgresql://newservice-db:5432/iqscaffold_newservice
     depends_on:
       - newservice-db
 ```
@@ -2540,7 +2540,7 @@ curl http://localhost:8080/.well-known/jwks.json
 docker compose ps
 
 # Test connection
-psql -h localhost -U gripday_user -d gripday_user
+psql -h localhost -U iqscaffold_user -d iqscaffold_user
 
 # Check connection pool settings in application.yml
 spring:
@@ -2836,7 +2836,7 @@ Retry-After: 15
 
 ## 📝 Conclusion
 
-The Gripday platform provides a solid foundation for building production-ready microservices applications with modern architecture patterns. It demonstrates:
+The IQ Scaffold platform provides a solid foundation for building production-ready microservices applications with modern architecture patterns. It demonstrates:
 
 ✅ **Microservices Architecture** - Service decomposition, API gateway, database per service  
 ✅ **Security Best Practices** - JWT authentication, RBAC, multi-tenancy, audit logging  
@@ -2874,8 +2874,8 @@ The Gripday platform provides a solid foundation for building production-ready m
 **Documentation:**
 
 - Platform README: `backend/README.md`
-- Service READMEs: `backend/gripday-*/README.md`
-- Frontend READMEs: `auth.gripday.com/README.md`, `app.gripday.com/README.md`
+- Service READMEs: `backend/iqscaffold-*/README.md`
+- Frontend READMEs: `auth.iqscaffold.com/README.md`, `app.iqscaffold.com/README.md`
 - AI Guidelines: `*/AGENTS.md`
 
 **Contributing:**

@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: "Gripday Platform Dashboards"
+  - name: "IQ Scaffold Platform Dashboards"
     orgId: 1
-    folder: "Gripday Platform"
+    folder: "IQ Scaffold Platform"
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10

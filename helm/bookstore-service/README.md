@@ -1,6 +1,6 @@
 # Bookstore Service Helm Chart
 
-Production-ready Helm chart for deploying the Gripday Bookstore Service with PostgreSQL and Redis on Kubernetes.
+Production-ready Helm chart for deploying the IQ Scaffold Bookstore Service with PostgreSQL and Redis on Kubernetes.
 
 ## Overview
 
@@ -27,19 +27,19 @@ The Bookstore Service is a Spring Boot microservice that provides book catalog m
 ```bash
 # Install with default values (optimized for k3s single instance)
 helm install bookstore-service ./helm/bookstore-service \
-  --namespace gripday-dev-env \
+  --namespace iqscaffold-dev-env \
   --create-namespace
 
 # Verify deployment
-kubectl get pods -n gripday-dev-env
-kubectl get svc -n gripday-dev-env
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl get pods -n iqscaffold-dev-env
+kubectl get svc -n iqscaffold-dev-env
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-bookstore-service
 ```
 
 **Important Notes**:
 
 - Bookstore service is **internal-only** (no public ingress)
-- Access via Gateway Service at `http://api.gripday.site/api/v1/bookstore`
+- Access via Gateway Service at `http://api.iqscaffold.site/api/v1/bookstore`
 - Service exposed on port 80, container runs on port 8080
 - Default configuration optimized for k3s single node (1 replica, HPA disabled)
 
@@ -48,16 +48,16 @@ kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-s
 ```bash
 # Create secrets first (replace with actual values)
 kubectl create secret generic bookstore-service-secrets \
-  --from-literal=GRIPDAY_DATABASE_USERNAME=bookstore_user \
-  --from-literal=GRIPDAY_DATABASE_PASSWORD=secure_password \
-  --from-literal=GRIPDAY_AUTH_JWT_SECRET=jwt_secret_key \
-  --from-literal=GRIPDAY_CACHE_REDIS_PASSWORD=redis_password \
-  -n gripday-staging-env
+  --from-literal=IQSCAFFOLD_DATABASE_USERNAME=bookstore_user \
+  --from-literal=IQSCAFFOLD_DATABASE_PASSWORD=secure_password \
+  --from-literal=IQSCAFFOLD_AUTH_JWT_SECRET=jwt_secret_key \
+  --from-literal=IQSCAFFOLD_CACHE_REDIS_PASSWORD=redis_password \
+  -n iqscaffold-staging-env
 
 # Install with staging configuration
 helm install bookstore-service ./helm/bookstore-service \
   -f ./helm/bookstore-service/values-staging.yaml \
-  --namespace gripday-staging-env \
+  --namespace iqscaffold-staging-env \
   --create-namespace
 ```
 
@@ -69,7 +69,7 @@ helm install bookstore-service ./helm/bookstore-service \
 # Install with production configuration
 helm install bookstore-service ./helm/bookstore-service \
   -f ./helm/bookstore-service/values-production.yaml \
-  --namespace gripday-production-env \
+  --namespace iqscaffold-production-env \
   --create-namespace
 ```
 
@@ -79,16 +79,16 @@ helm install bookstore-service ./helm/bookstore-service \
 # Upgrade with new values
 helm upgrade bookstore-service ./helm/bookstore-service \
   -f ./helm/bookstore-service/values-production.yaml \
-  --namespace gripday-production-env
+  --namespace iqscaffold-production-env
 
 # Rollback if needed
-helm rollback bookstore-service --namespace gripday-production-env
+helm rollback bookstore-service --namespace iqscaffold-production-env
 ```
 
 ## Uninstalling
 
 ```bash
-helm uninstall bookstore-service --namespace gripday-dev-env
+helm uninstall bookstore-service --namespace iqscaffold-dev-env
 ```
 
 ## Configuration
@@ -100,14 +100,14 @@ The following table lists the configurable parameters of the Bookstore Service c
 | Parameter            | Description      | Default   |
 | -------------------- | ---------------- | --------- |
 | `global.environment` | Environment name | `dev`     |
-| `global.platform`    | Platform name    | `gripday` |
+| `global.platform`    | Platform name    | `iqscaffold` |
 
 ### Application Parameters
 
 | Parameter          | Description        | Default                     |
 | ------------------ | ------------------ | --------------------------- |
 | `replicaCount`     | Number of replicas | `1` (k3s optimized)         |
-| `image.repository` | Image repository   | `gripday/bookstore-service` |
+| `image.repository` | Image repository   | `iqscaffold/bookstore-service` |
 | `image.tag`        | Image tag          | `1.0.0`                     |
 | `image.pullPolicy` | Image pull policy  | `IfNotPresent`              |
 
@@ -126,7 +126,7 @@ The following table lists the configurable parameters of the Bookstore Service c
 
 - Bookstore service has no public ingress
 - All traffic routes through Gateway Service
-- Access URL: `http://api.gripday.site/api/v1/bookstore`
+- Access URL: `http://api.iqscaffold.site/api/v1/bookstore`
 
 **Service Discovery**:
 
@@ -284,13 +284,13 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: bookstore-service-secrets
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
 type: Opaque
 stringData:
-  GRIPDAY_DATABASE_USERNAME: bookstore_user
-  GRIPDAY_DATABASE_PASSWORD: secure_db_password
-  GRIPDAY_AUTH_JWT_SECRET: jwt_secret_key
-  GRIPDAY_CACHE_REDIS_PASSWORD: redis_password # optional
+  IQSCAFFOLD_DATABASE_USERNAME: bookstore_user
+  IQSCAFFOLD_DATABASE_PASSWORD: secure_db_password
+  IQSCAFFOLD_AUTH_JWT_SECRET: jwt_secret_key
+  IQSCAFFOLD_CACHE_REDIS_PASSWORD: redis_password # optional
 ```
 
 ### JWT Configuration
@@ -312,7 +312,7 @@ Configure allowed origins for frontend applications:
 ```yaml
 env:
   - name: CORS_ALLOWED_ORIGINS
-    value: "https://gripday.site,https://*.gripday.site"
+    value: "https://iqscaffold.site,https://*.iqscaffold.site"
 ```
 
 ## Monitoring
@@ -337,17 +337,17 @@ curl http://bookstore-service/actuator/health
 curl http://bookstore-service/actuator/prometheus
 
 # View metrics in Grafana
-# Dashboard: Gripday Bookstore Service Overview
+# Dashboard: IQ Scaffold Bookstore Service Overview
 ```
 
 ### API Documentation
 
 ```bash
 # Swagger UI (via Gateway)
-http://api.gripday.site/swagger-ui.html
+http://api.iqscaffold.site/swagger-ui.html
 
 # OpenAPI JSON (via Gateway)
-http://api.gripday.site/api-docs
+http://api.iqscaffold.site/api-docs
 
 # Internal access (from within cluster)
 curl http://bookstore-service/swagger-ui.html
@@ -360,64 +360,64 @@ curl http://bookstore-service/api-docs
 
 ```bash
 # Pod status
-kubectl get pods -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl get pods -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-bookstore-service
 
 # Deployment status
-kubectl rollout status deployment/bookstore-service -n gripday-dev-env
+kubectl rollout status deployment/bookstore-service -n iqscaffold-dev-env
 
 # HPA status (if enabled)
-kubectl get hpa -n gripday-dev-env
+kubectl get hpa -n iqscaffold-dev-env
 ```
 
 ### View Logs
 
 ```bash
 # Application logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=gripday-bookstore-service
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=iqscaffold-bookstore-service
 
 # PostgreSQL logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=bookstore-postgres
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=bookstore-postgres
 
 # Redis logs
-kubectl logs -f -n gripday-dev-env -l app.kubernetes.io/name=bookstore-redis
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=bookstore-redis
 
 # Previous container logs (if crashed)
-kubectl logs -n gripday-dev-env <pod-name> --previous
+kubectl logs -n iqscaffold-dev-env <pod-name> --previous
 ```
 
 ### Debug Issues
 
 ```bash
 # Describe pod for events
-kubectl describe pod <pod-name> -n gripday-dev-env
+kubectl describe pod <pod-name> -n iqscaffold-dev-env
 
 # Check service endpoints
-kubectl get endpoints -n gripday-dev-env
+kubectl get endpoints -n iqscaffold-dev-env
 
 # Test database connectivity
-kubectl exec -it <bookstore-pod> -n gripday-dev-env -- \
-  psql -h bookstore-postgres -U gripday_user -d gripday_bookstore_local
+kubectl exec -it <bookstore-pod> -n iqscaffold-dev-env -- \
+  psql -h bookstore-postgres -U iqscaffold_user -d iqscaffold_bookstore_local
 
 # Test Redis connectivity
-kubectl exec -it <bookstore-pod> -n gripday-dev-env -- \
+kubectl exec -it <bookstore-pod> -n iqscaffold-dev-env -- \
   redis-cli -h bookstore-redis ping
 
 # Check network policies
-kubectl get networkpolicies -n gripday-dev-env
-kubectl describe networkpolicy bookstore-service-netpol -n gripday-dev-env
+kubectl get networkpolicies -n iqscaffold-dev-env
+kubectl describe networkpolicy bookstore-service-netpol -n iqscaffold-dev-env
 ```
 
 ### Common Issues
 
 **Pods not starting**
 
-- Check resource quotas: `kubectl describe resourcequota -n gripday-bookstore`
-- Verify secrets exist: `kubectl get secrets -n gripday-bookstore`
-- Check image pull: `kubectl describe pod <pod-name> -n gripday-bookstore`
+- Check resource quotas: `kubectl describe resourcequota -n iqscaffold-bookstore`
+- Verify secrets exist: `kubectl get secrets -n iqscaffold-bookstore`
+- Check image pull: `kubectl describe pod <pod-name> -n iqscaffold-bookstore`
 
 **Database connection failures**
 
-- Verify PostgreSQL is running: `kubectl get pods -n gripday-bookstore -l app.kubernetes.io/name=bookstore-postgres`
+- Verify PostgreSQL is running: `kubectl get pods -n iqscaffold-bookstore -l app.kubernetes.io/name=bookstore-postgres`
 - Check database credentials in secrets
 - Verify network policy allows traffic
 
@@ -508,6 +508,6 @@ The chart includes network policies that:
 
 For issues and questions:
 
-- GitHub Issues: https://github.com/gripday/bookstore-service
-- Platform Team: platform@gripday.site
-- Documentation: https://docs.gripday.site
+- GitHub Issues: https://github.com/iqscaffold/bookstore-service
+- Platform Team: platform@iqscaffold.site
+- Documentation: https://docs.iqscaffold.site

@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-postgres
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   replicas: 1
   selector:
@@ -18,7 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: user-postgres
         app.kubernetes.io/component: database
-        app.kubernetes.io/part-of: gripday
+        app.kubernetes.io/part-of: iqscaffold
     spec:
       priorityClassName: infrastructure-priority
       securityContext:
@@ -36,17 +36,17 @@ spec:
               name: postgres
           env:
             - name: POSTGRES_DB
-              value: "gripday_user_local"
+              value: "iqscaffold_user_local"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_DATABASE_USERNAME
+                  key: IQSCAFFOLD_DATABASE_USERNAME
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_DATABASE_PASSWORD
+                  key: IQSCAFFOLD_DATABASE_PASSWORD
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:
@@ -105,11 +105,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: user-postgres-pvc
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   accessModes:
     - ReadWriteOnce
@@ -122,11 +122,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-config
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: user-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 data:
   01-init-extensions.sql: |
     -- Create extensions if needed
@@ -134,4 +134,4 @@ data:
     CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
     -- Grant necessary permissions
-    GRANT ALL PRIVILEGES ON DATABASE gripday_user_local TO gripday_user;
+    GRANT ALL PRIVILEGES ON DATABASE iqscaffold_user_local TO iqscaffold_user;

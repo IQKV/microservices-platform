@@ -49,7 +49,7 @@ export interface RoleTestSuite {
 export class RbacTestHelpers {
   private readonly apiClient: ApiClient;
 
-  // Standard role definitions for Gripday platform
+  // Standard role definitions for iqscaffold platform
   static readonly STANDARD_ROLES: Record<string, RoleDefinition> = {
     USER: {
       name: 'USER',

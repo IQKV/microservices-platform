@@ -45,7 +45,7 @@ app.kubernetes.io/part-of: {{ .Values.global.platform }}
 Selector labels
 */}}
 {{- define "user-service.selectorLabels" -}}
-app.kubernetes.io/name: gripday-user-service
+app.kubernetes.io/name: iqscaffold-user-service
 app.kubernetes.io/component: authentication
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

@@ -46,7 +46,7 @@ export class DatabaseConnectionManager {
       min: DEFAULT_POOL_CONFIG.min,
       max: DEFAULT_POOL_CONFIG.max,
       idleTimeoutMillis: DEFAULT_POOL_CONFIG.idleTimeoutMillis,
-      application_name: 'gripday-e2e-tests'
+      application_name: 'iqscaffold-e2e-tests'
     };
 
     const pool = new Pool(poolConfig);

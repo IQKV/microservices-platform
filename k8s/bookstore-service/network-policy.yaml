@@ -2,15 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-service-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-bookstore-service
+    app.kubernetes.io/name: iqscaffold-bookstore-service
     app.kubernetes.io/component: bookstore
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: gripday-bookstore-service
+      app.kubernetes.io/name: iqscaffold-bookstore-service
       app.kubernetes.io/component: bookstore
   policyTypes:
     - Ingress
@@ -21,10 +21,10 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday
+              app.kubernetes.io/part-of: iqscaffold
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-gateway-service
+              app.kubernetes.io/name: iqscaffold-gateway-service
       ports:
         - protocol: TCP
           port: 8080
@@ -79,10 +79,10 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/part-of: gripday
+              app.kubernetes.io/part-of: iqscaffold
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
       ports:
         - protocol: TCP
           port: 8080
@@ -111,11 +111,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-postgres-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: bookstore-postgres
     app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
@@ -130,7 +130,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-bookstore-service
+              app.kubernetes.io/name: iqscaffold-bookstore-service
       ports:
         - protocol: TCP
           port: 5432
@@ -149,11 +149,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: bookstore-redis-network-policy
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
     app.kubernetes.io/name: bookstore-redis
     app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   podSelector:
     matchLabels:
@@ -168,7 +168,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-bookstore-service
+              app.kubernetes.io/name: iqscaffold-bookstore-service
       ports:
         - protocol: TCP
           port: 6379

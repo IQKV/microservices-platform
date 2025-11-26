@@ -39,15 +39,15 @@ scrape_configs:
       - output:
           source: output
 
-  # Gripday User Service logs
-  - job_name: gripday-user-service
+  # IQ Scaffold User Service logs
+  - job_name: iqscaffold-user-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: gripday-user-service
+          job: iqscaffold-user-service
           service: auth
-          __path__: /var/log/gripday/gripday-user-service/*.log
+          __path__: /var/log/iqscaffold/iqscaffold-user-service/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -72,15 +72,15 @@ scrape_configs:
           userId:
           tenantId:
 
-  # Gripday Gateway Service logs
-  - job_name: gripday-gateway-service
+  # IQ Scaffold Gateway Service logs
+  - job_name: iqscaffold-gateway-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: gripday-gateway-service
+          job: iqscaffold-gateway-service
           service: gateway
-          __path__: /var/log/gripday/gripday-gateway-service/*.log
+          __path__: /var/log/iqscaffold/iqscaffold-gateway-service/*.log
     pipeline_stages:
       - json:
           expressions:

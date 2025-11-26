@@ -45,7 +45,7 @@ app.kubernetes.io/part-of: {{ .Values.global.platform }}
 Selector labels
 */}}
 {{- define "gateway-service.selectorLabels" -}}
-app.kubernetes.io/name: gripday-gateway-service
+app.kubernetes.io/name: iqscaffold-gateway-service
 app.kubernetes.io/component: gateway
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}

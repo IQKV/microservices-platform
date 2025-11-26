@@ -481,7 +481,7 @@ check_dependencies() {
 
 # Script entry point
 main() {
-    echo "=== Gripday Platform End-to-End Validation ==="
+    echo "=== IQ Scaffold Platform End-to-End Validation ==="
     echo
     
     # Check dependencies

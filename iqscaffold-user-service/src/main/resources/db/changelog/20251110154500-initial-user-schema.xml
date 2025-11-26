@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251110154500-000000-initial-schema" author="iqscaffold">
+        <comment>Initial database schema with all tables, indexes, and constraints</comment>
+
+        <!-- Create users table -->
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email_verified" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="preferred_locale" type="VARCHAR(10)" defaultValue="en">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Create authorities table -->
+        <createTable tableName="authorities">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Insert default authorities -->
+        <insert tableName="authorities">
+            <column name="name" value="USER"/>
+            <column name="description" value="Standard user with basic access"/>
+        </insert>
+        <insert tableName="authorities">
+            <column name="name" value="ADMIN"/>
+            <column name="description" value="Administrator with user management access"/>
+        </insert>
+        <insert tableName="authorities">
+            <column name="name" value="SUPER_ADMIN"/>
+            <column name="description" value="Super administrator with full system access"/>
+        </insert>
+
+        <!-- Create user_authorities junction table -->
+        <createTable tableName="user_authorities">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authority_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey
+                tableName="user_authorities"
+                columnNames="user_id, authority_id"
+                constraintName="pk_user_authorities"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_authorities"
+                baseColumnNames="user_id"
+                constraintName="fk_user_authorities_user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_authorities"
+                baseColumnNames="authority_id"
+                constraintName="fk_user_authorities_authority_id"
+                referencedTableName="authorities"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- Create user_audit_log table -->
+        <createTable tableName="user_audit_log">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="action" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(45)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_agent" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_audit_log"
+                baseColumnNames="user_id"
+                constraintName="fk_user_audit_log_user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <!-- Create email_verification_tokens table -->
+        <createTable tableName="email_verification_tokens">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="email_verification_tokens"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_email_verification_tokens_user_id"/>
+
+        <!-- Create organizations table -->
+        <createTable tableName="organizations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="industry" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="website" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="users"
+                baseColumnNames="organization_id"
+                constraintName="fk_users_organization"
+                referencedTableName="organizations"
+                referencedColumnNames="id"
+                onDelete="SET NULL"
+                onUpdate="CASCADE"/>
+
+        <!-- Add unique constraints -->
+        <addUniqueConstraint 
+                tableName="organizations" 
+                columnNames="tenant_id, name" 
+                constraintName="uq_organizations_tenant_name"/>
+
+        <addUniqueConstraint 
+                tableName="users" 
+                columnNames="organization_id" 
+                constraintName="uq_users_organization_id"/>
+
+        <!-- Create indexes for users table -->
+        <createIndex indexName="idx_users_username" tableName="users">
+            <column name="username"/>
+        </createIndex>
+        <createIndex indexName="idx_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+        <createIndex indexName="idx_users_tenant_id" tableName="users">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_users_created_at" tableName="users">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_users_tenant_enabled" tableName="users">
+            <column name="tenant_id"/>
+            <column name="enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_users_organization_id" tableName="users">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex indexName="idx_users_tenant_email_verified" tableName="users">
+            <column name="tenant_id"/>
+            <column name="email_verified"/>
+            <column name="enabled"/>
+        </createIndex>
+
+        <!-- Create indexes for authorities table -->
+        <createIndex indexName="idx_authorities_name" tableName="authorities">
+            <column name="name"/>
+        </createIndex>
+
+        <!-- Create indexes for user_audit_log table -->
+        <createIndex indexName="idx_user_audit_log_user_id" tableName="user_audit_log">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_audit_log_tenant_id" tableName="user_audit_log">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_user_audit_log_created_at" tableName="user_audit_log">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_user_audit_log_tenant_action" tableName="user_audit_log">
+            <column name="tenant_id"/>
+            <column name="action"/>
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_user_audit_log_user_tenant_created" tableName="user_audit_log">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <!-- Create indexes for email_verification_tokens table -->
+        <createIndex tableName="email_verification_tokens" indexName="idx_email_verification_token">
+            <column name="token"/>
+        </createIndex>
+        <createIndex tableName="email_verification_tokens" indexName="idx_email_verification_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="email_verification_tokens" indexName="idx_email_verification_expires_at">
+            <column name="expires_at"/>
+        </createIndex>
+        <createIndex tableName="email_verification_tokens" indexName="idx_email_verification_tenant_id">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_email_verification_user_used" tableName="email_verification_tokens">
+            <column name="user_id"/>
+            <column name="used"/>
+        </createIndex>
+        <createIndex indexName="idx_email_verification_token_used" tableName="email_verification_tokens">
+            <column name="token"/>
+            <column name="used"/>
+            <column name="expires_at"/>
+        </createIndex>
+        <createIndex indexName="idx_email_verification_tenant_user_used" tableName="email_verification_tokens">
+            <column name="tenant_id"/>
+            <column name="user_id"/>
+            <column name="used"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+        <createIndex indexName="idx_email_verification_user_created" tableName="email_verification_tokens">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="created_at"/>
+        </createIndex>
+
+        <!-- Create indexes for organizations table -->
+        <createIndex indexName="idx_organizations_tenant_id" tableName="organizations">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_name" tableName="organizations">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_enabled" tableName="organizations">
+            <column name="enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_created_at" tableName="organizations">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_tenant_enabled" tableName="organizations">
+            <column name="tenant_id"/>
+            <column name="enabled"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="user_authorities"/>
+            <dropTable tableName="email_verification_tokens"/>
+            <dropTable tableName="user_audit_log"/>
+            <dropTable tableName="users"/>
+            <dropTable tableName="authorities"/>
+            <dropTable tableName="organizations"/>
+        </rollback>
+    </changeSet>
+
+    <!-- PostgreSQL-specific partial index for failed login attempts -->
+    <changeSet id="20251110154500-000001-postgresql-partial-index" author="iqscaffold" dbms="postgresql">
+        <comment>Add partial index for failed login attempts (PostgreSQL only)</comment>
+        <sql>
+            CREATE INDEX idx_user_audit_log_login_failures
+            ON user_audit_log(user_id, tenant_id, action, created_at DESC)
+            WHERE action = 'LOGIN_FAILURE';
+        </sql>
+        <rollback>
+            <sql>DROP INDEX IF EXISTS idx_user_audit_log_login_failures;</sql>
+        </rollback>
+    </changeSet>
+
+    <!-- Non-PostgreSQL index for failed login attempts -->
+    <changeSet id="20251110154500-000002-non-postgresql-index" author="iqscaffold" dbms="!postgresql">
+        <comment>Add regular index for failed login attempts (non-PostgreSQL databases)</comment>
+        <createIndex indexName="idx_user_audit_log_login_failures" tableName="user_audit_log">
+            <column name="user_id"/>
+            <column name="tenant_id"/>
+            <column name="action"/>
+            <column name="created_at" descending="true"/>
+        </createIndex>
+        <rollback>
+            <dropIndex indexName="idx_user_audit_log_login_failures" tableName="user_audit_log"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

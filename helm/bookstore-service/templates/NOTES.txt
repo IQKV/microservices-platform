@@ -1,5 +1,5 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    Gripday Bookstore Service Deployed                        ║
+║                    IQ Scaffold Bookstore Service Deployed                        ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 Release Name:    {{ .Release.Name }}
@@ -31,7 +31,7 @@ App Version:     {{ .Chart.AppVersion }}
 🔍 VERIFY DEPLOYMENT
 
   # Check pod status
-  kubectl get pods -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-bookstore-service
+  kubectl get pods -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-bookstore-service
 
   # Watch deployment rollout
   kubectl rollout status deployment/{{ include "bookstore-service.fullname" . }} -n {{ .Values.namespace.name }}
@@ -70,12 +70,12 @@ App Version:     {{ .Chart.AppVersion }}
 
   # Liveness probe
   kubectl exec -n {{ .Values.namespace.name }} \
-    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-bookstore-service -o jsonpath='{.items[0].metadata.name}') \
+    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-bookstore-service -o jsonpath='{.items[0].metadata.name}') \
     -- curl -s http://localhost:8080/actuator/health/liveness
 
   # Readiness probe
   kubectl exec -n {{ .Values.namespace.name }} \
-    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-bookstore-service -o jsonpath='{.items[0].metadata.name}') \
+    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-bookstore-service -o jsonpath='{.items[0].metadata.name}') \
     -- curl -s http://localhost:8080/actuator/health/readiness
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -83,7 +83,7 @@ App Version:     {{ .Chart.AppVersion }}
 📊 MONITORING
 
   # View logs
-  kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-bookstore-service
+  kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-bookstore-service
 
   # View metrics
   kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "bookstore-service.fullname" . }} 8080:8080
@@ -102,7 +102,7 @@ App Version:     {{ .Chart.AppVersion }}
   # Connect to PostgreSQL
   kubectl exec -it -n {{ .Values.namespace.name }} \
     $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=bookstore-postgres -o jsonpath='{.items[0].metadata.name}') \
-    -- psql -U gripday_user -d {{ .Values.postgresql.env.POSTGRES_DB }}
+    -- psql -U iqscaffold_user -d {{ .Values.postgresql.env.POSTGRES_DB }}
   {{- end }}
 
   {{- if .Values.redis.enabled }}
@@ -118,7 +118,7 @@ App Version:     {{ .Chart.AppVersion }}
 
   Helm Chart:       helm/bookstore-service/README.md
   Deployment Guide: helm/bookstore-service/DEPLOYMENT.md
-  Service README:   gripday-bookstore-service/README.md
+  Service README:   iqscaffold-bookstore-service/README.md
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -180,5 +180,5 @@ For staging/production, use external secret management (AWS Secrets Manager, Vau
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-For support: platform@gripday.site
-Documentation: https://docs.gripday.site
+For support: platform@iqscaffold.site
+Documentation: https://docs.iqscaffold.site

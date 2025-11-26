@@ -1,5 +1,5 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                     Gripday Gateway Service Deployed                         ║
+║                     IQ Scaffold Gateway Service Deployed                         ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 Release Name:    {{ .Release.Name }}
@@ -28,7 +28,7 @@ App Version:     {{ .Chart.AppVersion }}
 🔍 VERIFY DEPLOYMENT
 
   # Check pod status
-  kubectl get pods -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service
+  kubectl get pods -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-gateway-service
 
   # Watch deployment rollout
   kubectl rollout status deployment/{{ include "gateway-service.fullname" . }} -n {{ .Values.namespace.name }}
@@ -69,12 +69,12 @@ App Version:     {{ .Chart.AppVersion }}
 
   # Liveness probe
   kubectl exec -n {{ .Values.namespace.name }} \
-    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service -o jsonpath='{.items[0].metadata.name}') \
+    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-gateway-service -o jsonpath='{.items[0].metadata.name}') \
     -- curl -s http://localhost:8080/actuator/health/liveness
 
   # Readiness probe
   kubectl exec -n {{ .Values.namespace.name }} \
-    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service -o jsonpath='{.items[0].metadata.name}') \
+    $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-gateway-service -o jsonpath='{.items[0].metadata.name}') \
     -- curl -s http://localhost:8080/actuator/health/readiness
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -82,7 +82,7 @@ App Version:     {{ .Chart.AppVersion }}
 📊 MONITORING
 
   # View logs
-  kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gripday-gateway-service
+  kubectl logs -f -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-gateway-service
 
   # View gateway routes
   kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "gateway-service.fullname" . }} 8080:8080
@@ -109,7 +109,7 @@ App Version:     {{ .Chart.AppVersion }}
   # Check rate limiting keys
   kubectl exec -n {{ .Values.namespace.name }} \
     $(kubectl get pod -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=gateway-redis -o jsonpath='{.items[0].metadata.name}') \
-    -- redis-cli KEYS "gripday:gateway:rate-limit:*"
+    -- redis-cli KEYS "iqscaffold:gateway:rate-limit:*"
   {{- end }}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -190,5 +190,5 @@ For staging/production, use external secret management (AWS Secrets Manager, Vau
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-For support: platform@gripday.site
-Documentation: https://docs.gripday.site
+For support: platform@iqscaffold.site
+Documentation: https://docs.iqscaffold.site

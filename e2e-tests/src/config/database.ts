@@ -78,7 +78,7 @@ export function buildConnectionUrl(
   
   // Add default parameters for testing
   const defaultParams = {
-    'application_name': 'gripday-e2e-tests',
+    'application_name': 'iqscaffold-e2e-tests',
     'connect_timeout': '30',
     'statement_timeout': '60000',
     'idle_in_transaction_session_timeout': '30000'

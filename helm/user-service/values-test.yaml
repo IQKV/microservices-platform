@@ -2,10 +2,10 @@
 
 global:
   environment: test
-  platform: gripday
+  platform: iqscaffold
 
 namespace:
-  name: gripday-test-env
+  name: iqscaffold-test-env
   labels:
     app.kubernetes.io/component: authentication
     environment: test
@@ -13,7 +13,7 @@ namespace:
 replicaCount: 2
 
 image:
-  repository: gripday/gripday-user-service
+  repository: iqscaffold/iqscaffold-user-service
   pullPolicy: Always
   tag: "test-latest"
 
@@ -50,55 +50,55 @@ podDisruptionBudget:
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: "test"
-  - name: GRIPDAY_DATABASE_URL
-    value: "jdbc:postgresql://user-postgres:5432/gripday_user_test"
-  - name: GRIPDAY_CACHE_REDIS_HOST
+  - name: IQSCAFFOLD_DATABASE_URL
+    value: "jdbc:postgresql://user-postgres:5432/iqscaffold_user_test"
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
     value: "user-redis"
-  - name: GRIPDAY_CACHE_REDIS_PORT
+  - name: IQSCAFFOLD_CACHE_REDIS_PORT
     value: "6379"
-  - name: GRIPDAY_CACHE_REDIS_DATABASE
+  - name: IQSCAFFOLD_CACHE_REDIS_DATABASE
     value: "0"
-  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED
+  - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_ENABLED
     value: "false"
   - name: SMTP_HOST
     value: "smtp.sendgrid.net"
   - name: SMTP_PORT
     value: "587"
   - name: EMAIL_FROM_EMAIL
-    value: "noreply@gripday.website"
+    value: "noreply@iqscaffold.website"
   - name: EMAIL_FROM_NAME
-    value: "Gripday Platform (Test)"
+    value: "IQ Scaffold Platform (Test)"
   - name: APP_BASE_URL
-    value: "https://gripday.website"
-  - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+    value: "https://iqscaffold.website"
+  - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-user-service"
+    value: "iqscaffold-user-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-user-service,service.version=test,deployment.environment=test"
+    value: "service.name=iqscaffold-user-service,service.version=test,deployment.environment=test"
   - name: JAVA_OPTS
     value: "-Xms384m -Xmx768m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
 secretEnv:
-  - name: GRIPDAY_DATABASE_USERNAME
+  - name: IQSCAFFOLD_DATABASE_USERNAME
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_DATABASE_USERNAME
-  - name: GRIPDAY_DATABASE_PASSWORD
+      key: IQSCAFFOLD_DATABASE_USERNAME
+  - name: IQSCAFFOLD_DATABASE_PASSWORD
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_DATABASE_PASSWORD
-  - name: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_DATABASE_PASSWORD
+  - name: IQSCAFFOLD_CACHE_REDIS_PASSWORD
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
       optional: true
-  - name: GRIPDAY_AUTH_JWT_SECRET
+  - name: IQSCAFFOLD_AUTH_JWT_SECRET
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_AUTH_JWT_SECRET
+      key: IQSCAFFOLD_AUTH_JWT_SECRET
   - name: SMTP_USERNAME
     secretKeyRef:
       name: user-service-secrets
@@ -107,15 +107,15 @@ secretEnv:
     secretKeyRef:
       name: user-service-secrets
       key: SMTP_PASSWORD
-  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+  - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+      key: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID
       optional: true
-  - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+  - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
     secretKeyRef:
       name: user-service-secrets
-      key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+      key: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
       optional: true
 
 secrets:
@@ -132,7 +132,7 @@ configMap:
 
       logging:
         level:
-          org.gripday.user: INFO
+          com.iqscaffold.user: INFO
           org.springframework.security: INFO
           org.springframework.cache: WARN
           org.hibernate.SQL: WARN
@@ -150,7 +150,7 @@ postgresql:
     size: 10Gi
     storageClass: standard
   env:
-    POSTGRES_DB: gripday_user_test
+    POSTGRES_DB: iqscaffold_user_test
   resources:
     requests:
       memory: "512Mi"

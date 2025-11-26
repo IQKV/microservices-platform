@@ -3,12 +3,12 @@
 # Global settings
 global:
   environment: dev
-  platform: gripday
+  platform: iqscaffold
 
 # Namespace configuration
 namespace:
   create: true
-  name: gripday-dev-env
+  name: iqscaffold-dev-env
   labels:
     app.kubernetes.io/component: gateway
     environment: dev
@@ -22,7 +22,7 @@ namespace:
 replicaCount: 1
 
 image:
-  repository: gripday/gripday-gateway-service
+  repository: iqscaffold/iqscaffold-gateway-service
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 
@@ -76,7 +76,7 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false" # TLS optional - set to "true" if TLS enabled
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://gripday.site, https://*.gripday.site"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://iqscaffold.site, https://*.iqscaffold.site"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Tenant-ID,X-Correlation-ID"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
@@ -93,7 +93,7 @@ ingress:
       more_set_headers "X-XSS-Protection: 1; mode=block";
       more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
   hosts:
-    - host: api.gripday.site
+    - host: api.iqscaffold.site
       paths:
         - path: /
           pathType: Prefix
@@ -229,7 +229,7 @@ configMap:
 
       spring:
         application:
-          name: gripday-gateway-service
+          name: iqscaffold-gateway-service
         profiles:
           active: local
         
@@ -238,7 +238,7 @@ configMap:
             routes:
               # User Service Routes
               - id: user-service-auth
-                uri: ${gripday.gateway.routing.services.user-service.uri}
+                uri: ${iqscaffold.gateway.routing.services.user-service.uri}
                 predicates:
                   - Path=/api/v1/auth/**
                 filters:
@@ -249,7 +249,7 @@ configMap:
                       redis-rate-limiter.burst-capacity: 100
               
               - id: user-service-profile
-                uri: ${gripday.gateway.routing.services.user-service.uri}
+                uri: ${iqscaffold.gateway.routing.services.user-service.uri}
                 predicates:
                   - Path=/api/v1/users/me,/api/v1/users/me/**
                 filters:
@@ -260,7 +260,7 @@ configMap:
                       redis-rate-limiter.burst-capacity: 150
               
               - id: user-service-admin
-                uri: ${gripday.gateway.routing.services.user-service.uri}
+                uri: ${iqscaffold.gateway.routing.services.user-service.uri}
                 predicates:
                   - Path=/api/v1/admin/**
                 filters:
@@ -271,7 +271,7 @@ configMap:
                       redis-rate-limiter.burst-capacity: 150
               
               - id: user-service-jwks
-                uri: ${gripday.gateway.routing.services.user-service.uri}
+                uri: ${iqscaffold.gateway.routing.services.user-service.uri}
                 predicates:
                   - Path=/.well-known/jwks.json
                 filters:
@@ -279,7 +279,7 @@ configMap:
               
               # Bookstore Service Routes
               - id: bookstore-service
-                uri: ${gripday.gateway.routing.services.bookstore-service.uri}
+                uri: ${iqscaffold.gateway.routing.services.bookstore-service.uri}
                 predicates:
                   - Path=/api/v1/bookstore/**
                 filters:
@@ -304,7 +304,7 @@ configMap:
             globalcors:
               cors-configurations:
                 '[/**]':
-                  allowedOriginPatterns: ${gripday.gateway.cors.allowed-origins}
+                  allowedOriginPatterns: ${iqscaffold.gateway.cors.allowed-origins}
                   allowedMethods:
                     - GET
                     - POST
@@ -320,20 +320,20 @@ configMap:
             default-filters:
               - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
-      # Gripday Gateway Configuration
-      gripday:
+      # IQ Scaffold Gateway Configuration
+      iqscaffold:
         cache:
           redis:
-            host: ${GRIPDAY_CACHE_REDIS_HOST:localhost}
-            port: ${GRIPDAY_CACHE_REDIS_PORT:6379}
-            password: ${GRIPDAY_CACHE_REDIS_PASSWORD:}
-            database: ${GRIPDAY_CACHE_REDIS_DATABASE:1}
+            host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+            port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+            password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+            database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:1}
             timeout: PT2S
             pool:
               max-active: 8
               max-idle: 8
               min-idle: 0
-            key-prefix: "gripday:gateway"
+            key-prefix: "iqscaffold:gateway"
             default-ttl: PT1H
         
         gateway:
@@ -344,13 +344,13 @@ configMap:
               strip-count: 0
             services:
               user-service:
-                uri: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service}
+                uri: ${IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service}
                 path: /v1/**
                 enabled: true
                 connect-timeout: 5000
                 response-timeout: 30000
               bookstore-service:
-                uri: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI:http://bookstore-service}
+                uri: ${IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI:http://bookstore-service}
                 path: /v1/bookstore/**
                 enabled: true
                 connect-timeout: 5000
@@ -360,13 +360,13 @@ configMap:
             jwt:
               access-token-expiry: PT15M
               refresh-token-expiry: P7D
-              issuer: gripday-user-service
-              audience: gripday-services
+              issuer: iqscaffold-user-service
+              audience: iqscaffold-services
               algorithm: RS256
               jwk-set-uri: ${USER_SERVICE_JWK_URI:http://user-service/.well-known/jwks.json}
             authentication:
               enabled: true
-              user-service-url: ${GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service}
+              user-service-url: ${IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI:http://user-service}
               token-validation-timeout: PT5S
               enable-user-context-propagation: true
             public-paths:
@@ -403,7 +403,7 @@ configMap:
           rate-limiting:
             enabled: true
             redis:
-              key-prefix: "gripday:gateway:rate-limit"
+              key-prefix: "iqscaffold:gateway:rate-limit"
               key-expiry: PT1M
             policies:
               default-requests-per-minute: 60
@@ -431,7 +431,7 @@ configMap:
           
           cors:
             enabled: true
-            allowed-origins: ${GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+            allowed-origins: ${IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
             allowed-methods:
               - GET
               - POST
@@ -468,7 +468,7 @@ configMap:
           metrics:
             enabled: true
             path: /actuator/prometheus
-            prefix: gripday_gateway
+            prefix: iqscaffold_gateway
             include-host-tag: true
             include-application-tag: true
           logging:
@@ -524,7 +524,7 @@ configMap:
             percentiles:
               "[http.server.requests]": 0.5,0.95,0.99
           tags:
-            application: gripday-gateway-service
+            application: iqscaffold-gateway-service
             environment: ${spring.profiles.active:local}
         prometheus:
           metrics:
@@ -540,49 +540,49 @@ configMap:
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: "dev"
-  - name: GRIPDAY_CACHE_REDIS_HOST
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
     value: "gateway-redis"
-  - name: GRIPDAY_CACHE_REDIS_PORT
+  - name: IQSCAFFOLD_CACHE_REDIS_PORT
     value: "6379"
-  - name: GRIPDAY_CACHE_REDIS_DATABASE
+  - name: IQSCAFFOLD_CACHE_REDIS_DATABASE
     value: "1"
   - name: USER_SERVICE_JWK_URI
     value: "http://user-service/.well-known/jwks.json"
-  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
+  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
     value: "http://user-service"
-  - name: GRIPDAY_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
+  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
     value: "http://bookstore-service"
-  - name: GRIPDAY_GATEWAY_CORS_ALLOWED_ORIGINS
+  - name: IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
-  - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+  - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-gateway-service"
+    value: "iqscaffold-gateway-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-gateway-service,service.version=1.0.0,deployment.environment=dev"
+    value: "service.name=iqscaffold-gateway-service,service.version=1.0.0,deployment.environment=dev"
   - name: JAVA_OPTS
     value: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
 # Secret environment variables
 secretEnv:
-  - name: GRIPDAY_CACHE_REDIS_PASSWORD
+  - name: IQSCAFFOLD_CACHE_REDIS_PASSWORD
     secretKeyRef:
       name: gateway-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
       optional: true
-  - name: GRIPDAY_AUTH_JWT_SECRET
+  - name: IQSCAFFOLD_AUTH_JWT_SECRET
     secretKeyRef:
       name: gateway-service-secrets
-      key: GRIPDAY_AUTH_JWT_SECRET
+      key: IQSCAFFOLD_AUTH_JWT_SECRET
 
 # Secrets configuration
 secrets:
   enabled: true
   data:
-    GRIPDAY_AUTH_JWT_SECRET: bG9jYWwtZGV2ZWxvcG1lbnQtc2VjcmV0LWtleS1ub3QtZm9yLXByb2R1Y3Rpb24tdXNl
-    GRIPDAY_CACHE_REDIS_PASSWORD: ""
+    IQSCAFFOLD_AUTH_JWT_SECRET: bG9jYWwtZGV2ZWxvcG1lbnQtc2VjcmV0LWtleS1ub3QtZm9yLXByb2R1Y3Rpb24tdXNl
+    IQSCAFFOLD_CACHE_REDIS_PASSWORD: ""
 
 # Network Policy
 networkPolicy:
@@ -621,7 +621,7 @@ networkPolicy:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
       ports:
         - protocol: TCP
           port: 8080
@@ -629,7 +629,7 @@ networkPolicy:
     - to:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-bookstore-service
+              app.kubernetes.io/name: iqscaffold-bookstore-service
       ports:
         - protocol: TCP
           port: 8080
@@ -764,7 +764,7 @@ redis:
       - from:
           - podSelector:
               matchLabels:
-                app.kubernetes.io/name: gripday-gateway-service
+                app.kubernetes.io/name: iqscaffold-gateway-service
                 app.kubernetes.io/component: gateway
         ports:
           - protocol: TCP

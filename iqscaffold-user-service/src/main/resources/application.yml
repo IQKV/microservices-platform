@@ -1,0 +1,213 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: iqscaffold-user-service
+  profiles:
+    active: local
+  
+  # Internationalization Configuration
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        multiTenancy: SCHEMA
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
+  liquibase:
+    enabled: false
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    groups-order: ASC
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+    display-operation-id: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: authentication
+      display-name: Authentication APIs
+      paths-to-match: /api/*/auth/**
+    - group: user-management
+      display-name: User Management APIs
+      paths-to-match: /api/*/users/**
+    - group: tenant-management
+      display-name: Tenant Management APIs
+      paths-to-match: /api/*/tenants/**
+  show-actuator: true
+  use-management-port: false
+
+# OpenTelemetry Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase,openapi
+  endpoint:
+    health:
+      show-details: when-authorized
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# IQ Scaffold-specific configuration properties
+iqscaffold:
+  database:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5432/iqscaffold_user}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_user}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
+    pool:
+      maximum-size: 10
+      minimum-idle: 2
+      connection-timeout: PT20S
+      idle-timeout: PT5M
+      max-lifetime: PT20M
+  cache:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "iqscaffold:auth"
+      default-ttl: PT1H
+      enable-statistics: false
+  auth:
+    jwt:
+      secret-key: ${IQSCAFFOLD_AUTH_JWT_SECRET:change-me-in-production}
+      access-token-expiry: PT15M  # 15 minutes
+      refresh-token-expiry: P7D   # 7 days
+      issuer: iqscaffold-user-service
+      audience: iqscaffold-services
+      algorithm: HS256
+    security:
+      password:
+        encoder-strength: 10
+        require-special-chars: true
+        min-length: 8
+      rate-limiting:
+        login-attempts: 5
+        lockout-duration: PT15M
+      session:
+        timeout: PT2H
+        concurrent-sessions: 2
+    oauth2:
+      enabled: false
+      providers: {}
+  email:
+    smtp:
+      host: ${SMTP_HOST:localhost}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      auth: true
+      starttls: true
+      timeout: PT30S
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:noreply@iqscaffold.com}
+      from-name: ${EMAIL_FROM_NAME:IQ Scaffold Platform}
+      base-url: ${APP_BASE_URL:https://app.iqscaffold.com}
+    verification:
+      token-expiry: PT24H  # 24 hours
+      rate-limit: 3  # emails per hour per user
+    templates:
+      verification-subject: "Verify your IQ Scaffold account"
+      verification-template: "email/user-registration/email-verification.html"
+      password-reset-subject: "Reset your IQ Scaffold password"
+      password-reset-template: "email/password-reset/initiate.html"
+      password-reset-confirmed-subject: "Password Reset Successful - IQ Scaffold"
+      password-reset-confirmed-template: "email/password-reset/confirmed.html"
+      registration-confirmed-subject: "Welcome to IQ Scaffold - Email Verified!"
+      registration-confirmed-template: "email/user-registration/email-confirmed.html"
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: iqscaffold_user
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: false
+      custom-tags: {}
+    logging:
+      level: INFO
+      format: console
+      include-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
+      enable-sql-logging: false
+      enable-security-events: true
+      enable-performance-logging: false
+  tenant-id-header: X-Tenant-ID
+  tenancy:
+    schema:
+      prefix: tenant_
+      default: public
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml
+    # System changelog runs once on startup for public schema (tenants table, etc.)
+    # Tenant changelog runs per-tenant schema during tenant provisioning

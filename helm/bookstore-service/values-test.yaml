@@ -2,10 +2,10 @@
 
 global:
   environment: test
-  platform: gripday
+  platform: iqscaffold
 
 namespace:
-  name: gripday-test-env
+  name: iqscaffold-test-env
   labels:
     app.kubernetes.io/component: bookstore
     environment: test
@@ -13,7 +13,7 @@ namespace:
 replicaCount: 2
 
 image:
-  repository: gripday/bookstore-service
+  repository: iqscaffold/bookstore-service
   pullPolicy: Always
   tag: "test-latest"
 
@@ -50,57 +50,57 @@ podDisruptionBudget:
 env:
   - name: SPRING_PROFILES_ACTIVE
     value: "test"
-  - name: GRIPDAY_DATABASE_URL
-    value: "jdbc:postgresql://bookstore-postgres:5432/gripday_bookstore_test"
-  - name: GRIPDAY_CACHE_REDIS_HOST
+  - name: IQSCAFFOLD_DATABASE_URL
+    value: "jdbc:postgresql://bookstore-postgres:5432/iqscaffold_bookstore_test"
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
     value: "bookstore-redis"
-  - name: GRIPDAY_CACHE_REDIS_PORT
+  - name: IQSCAFFOLD_CACHE_REDIS_PORT
     value: "6379"
-  - name: GRIPDAY_CACHE_REDIS_DATABASE
+  - name: IQSCAFFOLD_CACHE_REDIS_DATABASE
     value: "2"
   - name: JWT_ISSUER_URI
     value: "http://user-service:8080"
   - name: JWT_JWK_SET_URI
     value: "http://user-service:8080/.well-known/jwks.json"
   - name: CORS_ALLOWED_ORIGINS
-    value: "https://gripday.website,https://*.gripday.website"
+    value: "https://iqscaffold.website,https://*.iqscaffold.website"
   - name: REDIS_HOST
     value: "bookstore-redis"
   - name: REDIS_PORT
     value: "6379"
-  - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+  - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
     value: "http://jaeger-collector.observability:14268/api/traces"
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: "http://otel-collector.observability:4317"
   - name: OTEL_SERVICE_NAME
-    value: "gripday-bookstore-service"
+    value: "iqscaffold-bookstore-service"
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "service.name=gripday-bookstore-service,service.version=test,deployment.environment=test"
+    value: "service.name=iqscaffold-bookstore-service,service.version=test,deployment.environment=test"
   - name: JAVA_OPTS
     value: "-Xms384m -Xmx768m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/heapdump.hprof"
 
 secretEnv:
-  - name: GRIPDAY_DATABASE_USERNAME
+  - name: IQSCAFFOLD_DATABASE_USERNAME
     secretKeyRef:
       name: bookstore-service-secrets
-      key: GRIPDAY_DATABASE_USERNAME
-  - name: GRIPDAY_DATABASE_PASSWORD
+      key: IQSCAFFOLD_DATABASE_USERNAME
+  - name: IQSCAFFOLD_DATABASE_PASSWORD
     secretKeyRef:
       name: bookstore-service-secrets
-      key: GRIPDAY_DATABASE_PASSWORD
-  - name: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_DATABASE_PASSWORD
+  - name: IQSCAFFOLD_CACHE_REDIS_PASSWORD
     secretKeyRef:
       name: bookstore-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
       optional: true
-  - name: GRIPDAY_AUTH_JWT_SECRET
+  - name: IQSCAFFOLD_AUTH_JWT_SECRET
     secretKeyRef:
       name: bookstore-service-secrets
-      key: GRIPDAY_AUTH_JWT_SECRET
+      key: IQSCAFFOLD_AUTH_JWT_SECRET
   - name: REDIS_PASSWORD
     secretKeyRef:
       name: bookstore-service-secrets
-      key: GRIPDAY_CACHE_REDIS_PASSWORD
+      key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
       optional: true
 
 secrets:
@@ -117,7 +117,7 @@ configMap:
 
       logging:
         level:
-          org.gripday.bookstore: INFO
+          com.iqscaffold.bookstore: INFO
           org.springframework.security: INFO
           org.springframework.cache: WARN
           org.hibernate.SQL: WARN
@@ -135,7 +135,7 @@ postgresql:
     size: 10Gi
     storageClass: standard
   env:
-    POSTGRES_DB: gripday_bookstore_test
+    POSTGRES_DB: iqscaffold_bookstore_test
   resources:
     requests:
       memory: "512Mi"

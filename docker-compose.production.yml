@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database for User Service - Production
   postgres-user:
     environment:
-      POSTGRES_DB: gripday_user_production
+      POSTGRES_DB: iqscaffold_user_production
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -60,12 +60,12 @@ services:
   user-service:
     environment:
       SPRING_PROFILES_ACTIVE: production
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/gripday_user_production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user_production
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      GRIPDAY_AUTH_JWT_SECRET: ${JWT_SECRET}
-      GRIPDAY_AUTH_JWT_EXPIRATION: 900
-      GRIPDAY_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      IQSCAFFOLD_AUTH_JWT_SECRET: ${JWT_SECRET}
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
       JAVA_OPTS: >
         -XX:+UseContainerSupport
         -XX:MaxRAMPercentage=75.0
@@ -98,8 +98,8 @@ services:
   gateway-service:
     environment:
       SPRING_PROFILES_ACTIVE: production
-      GRIPDAY_GATEWAY_USER_SERVICE_URL: http://user-service:8080
-      GRIPDAY_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 500
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 500
       JAVA_OPTS: >
         -XX:+UseContainerSupport
         -XX:MaxRAMPercentage=75.0
@@ -183,10 +183,10 @@ services:
 
 volumes:
   postgres_auth_production_data:
-    name: gripday_postgres_auth_production_data
+    name: iqscaffold_postgres_auth_production_data
   prometheus_production_data:
-    name: gripday_prometheus_production_data
+    name: iqscaffold_prometheus_production_data
   grafana_production_data:
-    name: gripday_grafana_production_data
+    name: iqscaffold_grafana_production_data
   loki_production_data:
-    name: gripday_loki_production_data
+    name: iqscaffold_loki_production_data

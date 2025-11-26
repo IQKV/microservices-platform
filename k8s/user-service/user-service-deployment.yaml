@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-user-service
+    app.kubernetes.io/name: iqscaffold-user-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
     app.kubernetes.io/version: "1.0.0"
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app.kubernetes.io/name: gripday-user-service
+      app.kubernetes.io/name: iqscaffold-user-service
       app.kubernetes.io/component: authentication
   strategy:
     type: RollingUpdate
@@ -22,9 +22,9 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: gripday-user-service
+        app.kubernetes.io/name: iqscaffold-user-service
         app.kubernetes.io/component: authentication
-        app.kubernetes.io/part-of: gripday
+        app.kubernetes.io/part-of: iqscaffold
         app.kubernetes.io/version: "1.0.0"
       annotations:
         prometheus.io/scrape: "true"
@@ -42,7 +42,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: user-service
-          image: gripday/gripday-user-service:1.0.0
+          image: iqscaffold/iqscaffold-user-service:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -54,63 +54,63 @@ spec:
               value: "local"
 
             # Database Configuration
-            - name: GRIPDAY_DATABASE_URL
-              value: "jdbc:postgresql://user-postgres:5432/gripday_user_local"
-            - name: GRIPDAY_DATABASE_USERNAME
+            - name: IQSCAFFOLD_DATABASE_URL
+              value: "jdbc:postgresql://user-postgres:5432/iqscaffold_user_local"
+            - name: IQSCAFFOLD_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_DATABASE_USERNAME
-            - name: GRIPDAY_DATABASE_PASSWORD
+                  key: IQSCAFFOLD_DATABASE_USERNAME
+            - name: IQSCAFFOLD_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_DATABASE_PASSWORD
+                  key: IQSCAFFOLD_DATABASE_PASSWORD
 
             # Redis Configuration
-            - name: GRIPDAY_CACHE_REDIS_HOST
+            - name: IQSCAFFOLD_CACHE_REDIS_HOST
               value: "user-redis"
-            - name: GRIPDAY_CACHE_REDIS_PORT
+            - name: IQSCAFFOLD_CACHE_REDIS_PORT
               value: "6379"
-            - name: GRIPDAY_CACHE_REDIS_PASSWORD
+            - name: IQSCAFFOLD_CACHE_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_CACHE_REDIS_PASSWORD
+                  key: IQSCAFFOLD_CACHE_REDIS_PASSWORD
                   optional: true
-            - name: GRIPDAY_CACHE_REDIS_DATABASE
+            - name: IQSCAFFOLD_CACHE_REDIS_DATABASE
               value: "0"
 
             # JWT Configuration
-            - name: GRIPDAY_AUTH_JWT_SECRET
+            - name: IQSCAFFOLD_AUTH_JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_AUTH_JWT_SECRET
+                  key: IQSCAFFOLD_AUTH_JWT_SECRET
 
             # OAuth2 Configuration
-            - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+            - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_ID
-            - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+                  key: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID
+            - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: user-service-secrets
-                  key: GRIPDAY_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
-            - name: GRIPDAY_AUTH_OAUTH2_GOOGLE_ENABLED
+                  key: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET
+            - name: IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_ENABLED
               value: "false"
 
             # Observability Configuration
-            - name: GRIPDAY_OBSERVABILITY_TRACING_ENDPOINT
+            - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
               value: "http://jaeger-collector:14268/api/traces"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://otel-collector:4317"
             - name: OTEL_SERVICE_NAME
-              value: "gripday-user-service"
+              value: "iqscaffold-user-service"
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "service.name=gripday-user-service,service.version=1.0.0,deployment.environment=local"
+              value: "service.name=iqscaffold-user-service,service.version=1.0.0,deployment.environment=local"
 
             # JVM Configuration
             - name: JAVA_OPTS
@@ -195,14 +195,14 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
               app.kubernetes.io/component: authentication
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app.kubernetes.io/name: gripday-user-service
+              app.kubernetes.io/name: iqscaffold-user-service
               app.kubernetes.io/component: authentication
 
       # Pod disruption budget for high availability
@@ -216,32 +216,32 @@ spec:
                     - key: app.kubernetes.io/name
                       operator: In
                       values:
-                        - gripday-user-service
+                        - iqscaffold-user-service
                 topologyKey: kubernetes.io/hostname
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: user-service-sa
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-user-service
+    app.kubernetes.io/name: iqscaffold-user-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 automountServiceAccountToken: false
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: user-service-pdb
-  namespace: gripday-dev-env
+  namespace: iqscaffold-dev-env
   labels:
-    app.kubernetes.io/name: gripday-user-service
+    app.kubernetes.io/name: iqscaffold-user-service
     app.kubernetes.io/component: authentication
-    app.kubernetes.io/part-of: gripday
+    app.kubernetes.io/part-of: iqscaffold
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: gripday-user-service
+      app.kubernetes.io/name: iqscaffold-user-service
       app.kubernetes.io/component: authentication

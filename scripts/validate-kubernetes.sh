@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-NAMESPACE="${NAMESPACE:-gripday}"
+NAMESPACE="${NAMESPACE:-iqscaffold}"
 VALIDATION_TIMEOUT="${VALIDATION_TIMEOUT:-600}"
 KUBECTL_CMD="${KUBECTL_CMD:-kubectl}"
 
@@ -254,7 +254,7 @@ main() {
             -h|--help)
                 echo "Usage: $0 [OPTIONS]"
                 echo "Options:"
-                echo "  --namespace NAME        Kubernetes namespace (default: gripday)"
+                echo "  --namespace NAME        Kubernetes namespace (default: iqscaffold)"
                 echo "  --timeout SECONDS       Validation timeout in seconds (default: 600)"
                 echo "  --no-logs               Don't show logs on failure"
                 echo "  -h, --help              Show this help message"

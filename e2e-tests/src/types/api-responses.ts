@@ -1,5 +1,5 @@
 /**
- * API response type definitions for Gripday microservices platform
+ * API response type definitions for iqscaffold microservices platform
  * Based on the Spring Boot error response format from the steering rules
  */
 

@@ -1,5 +1,5 @@
 /**
- * Type-safe API client methods for Gripday microservices
+ * Type-safe API client methods for IQ Scaffold microservices
  * Provides strongly typed methods for all API endpoints
  */
 

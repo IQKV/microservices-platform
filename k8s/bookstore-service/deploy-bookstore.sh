@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Gripday Bookstore Service - Kubernetes Deployment Script
+# IQ Scaffold Bookstore Service - Kubernetes Deployment Script
 # This script deploys only the bookstore service to Kubernetes
 
 set -euo pipefail
@@ -17,7 +17,7 @@ DRY_RUN=false
 VERBOSE=false
 SKIP_BUILD=false
 ENVIRONMENT="local"
-NAMESPACE="gripday-bookstore"
+NAMESPACE="iqscaffold-bookstore"
 
 # Function to print colored output
 print_status() {
@@ -43,7 +43,7 @@ show_usage() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
-Deploy Gripday Bookstore Service to Kubernetes
+Deploy IQ Scaffold Bookstore Service to Kubernetes
 
 OPTIONS:
     -e, --environment ENV   Target environment (local, staging, production) [default: local]
@@ -100,13 +100,13 @@ done
 # Set namespace based on environment
 case $ENVIRONMENT in
     local)
-        NAMESPACE="gripday-bookstore"
+        NAMESPACE="iqscaffold-bookstore"
         ;;
     staging)
-        NAMESPACE="gripday-bookstore-staging"
+        NAMESPACE="iqscaffold-bookstore-staging"
         ;;
     production)
-        NAMESPACE="gripday-bookstore-production"
+        NAMESPACE="iqscaffold-bookstore-production"
         ;;
     *)
         print_error "Invalid environment: $ENVIRONMENT"
@@ -175,8 +175,8 @@ build_image() {
     fi
     
     if [[ "$DRY_RUN" == "false" ]]; then
-        cd ../../gripday-bookstore-service
-        docker build -t gripday/bookstore-service:latest .
+        cd ../../iqscaffold-bookstore-service
+        docker build -t iqscaffold/bookstore-service:latest .
         cd ../k8s/bookstore-service
         print_status "Docker image built successfully"
     else
@@ -235,7 +235,7 @@ deploy_service() {
     
     if [[ "$DRY_RUN" == "false" ]]; then
         print_status "Waiting for bookstore service to be ready..."
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=gripday-bookstore-service -n "$NAMESPACE" --timeout=300s
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-bookstore-service -n "$NAMESPACE" --timeout=300s
     fi
     
     print_status "Bookstore service deployed successfully"
@@ -252,7 +252,7 @@ verify_deployment() {
     
     # Check pod status
     print_status "Pod status:"
-    kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/part-of=gripday
+    kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/part-of=iqscaffold
     
     # Check service status
     print_status "Service status:"
@@ -270,9 +270,9 @@ verify_deployment() {
         print_status "  Swagger UI: http://localhost/bookstore/swagger-ui.html"
         print_status "  Health Check: http://localhost/bookstore/actuator/health"
     elif [[ "$ENVIRONMENT" == "staging" ]]; then
-        print_status "  API: https://api.gripday.website/api/v1/bookstore"
+        print_status "  API: https://api.iqscaffold.website/api/v1/bookstore"
     elif [[ "$ENVIRONMENT" == "production" ]]; then
-        print_status "  API: https://api.gripday.com/api/v1/bookstore"
+        print_status "  API: https://api.iqscaffold.com/api/v1/bookstore"
     fi
     
     print_status "Deployment verification completed!"
@@ -285,12 +285,12 @@ show_logs() {
     fi
     
     print_status "Recent logs from bookstore service:"
-    kubectl logs -n "$NAMESPACE" -l app.kubernetes.io/name=gripday-bookstore-service --tail=20 --prefix=true
+    kubectl logs -n "$NAMESPACE" -l app.kubernetes.io/name=iqscaffold-bookstore-service --tail=20 --prefix=true
 }
 
 # Main execution
 main() {
-    print_status "Gripday Bookstore Service - Kubernetes Deployment"
+    print_status "IQ Scaffold Bookstore Service - Kubernetes Deployment"
     print_status "Environment: $ENVIRONMENT"
     print_status "Namespace: $NAMESPACE"
     print_status "Dry Run: $DRY_RUN"
