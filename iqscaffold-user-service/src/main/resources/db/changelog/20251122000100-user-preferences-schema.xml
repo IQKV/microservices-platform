@@ -80,9 +80,9 @@
                 onDelete="CASCADE"
                 onUpdate="CASCADE"/>
 
-        <addUniqueConstraint 
-                tableName="user_preferences" 
-                columnNames="user_id" 
+        <addUniqueConstraint
+                tableName="user_preferences"
+                columnNames="user_id"
                 constraintName="uq_user_preferences_user_id"/>
 
         <createIndex indexName="idx_user_preferences_user_id" tableName="user_preferences">

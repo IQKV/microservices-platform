@@ -95,9 +95,9 @@
                 onDelete="CASCADE"
                 onUpdate="CASCADE"/>
 
-        <addUniqueConstraint 
-                tableName="organization_preferences" 
-                columnNames="organization_id" 
+        <addUniqueConstraint
+                tableName="organization_preferences"
+                columnNames="organization_id"
                 constraintName="uq_organization_preferences_organization_id"/>
 
         <createIndex indexName="idx_organization_preferences_organization_id" tableName="organization_preferences">

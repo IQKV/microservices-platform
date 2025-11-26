@@ -200,7 +200,7 @@
                     <excludes>
                         <!-- Application entry point -->
                         <exclude>**/*Application.class</exclude>
-                        
+
                         <!-- Configuration classes -->
                         <exclude>**/*Config.class</exclude>
                         <exclude>**/*Config$*.class</exclude>
@@ -208,7 +208,7 @@
                         <exclude>**/*Configuration$*.class</exclude>
                         <exclude>**/*Properties.class</exclude>
                         <exclude>**/*Properties$*.class</exclude>
-                        
+
                         <!-- DTOs and Records -->
                         <exclude>**/dto/*.class</exclude>
                         <exclude>**/*Dto.class</exclude>
@@ -217,35 +217,35 @@
                         <exclude>**/*Response.class</exclude>
                         <exclude>**/*Detail.class</exclude>
                         <exclude>**/*Data.class</exclude>
-                        
+
                         <!-- Constants -->
                         <exclude>**/*Constants.class</exclude>
                         <exclude>**/*Constants$*.class</exclude>
                         <exclude>**/*ClaimNames.class</exclude>
-                        
+
                         <!-- Exceptions -->
                         <exclude>**/*Exception.class</exclude>
-                        
+
                         <!-- REST Resources (Controllers) -->
                         <exclude>**/*RestResource.class</exclude>
-                        
+
                         <!-- Filters -->
                         <exclude>**/*Filter.class</exclude>
-                        
+
                         <!-- Health Indicators -->
                         <exclude>**/*HealthIndicator.class</exclude>
-                        
+
                         <!-- Metrics -->
                         <exclude>**/*Metrics.class</exclude>
-                        
+
                         <!-- Serializers/Deserializers -->
                         <exclude>**/*Serializer.class</exclude>
                         <exclude>**/*Deserializer.class</exclude>
-                        
+
                         <!-- Liquibase initializers -->
                         <exclude>**/*Initializer.class</exclude>
                         <exclude>**/*Runner.class</exclude>
-                        
+
                         <!-- Loggers -->
                         <exclude>**/*Logger.class</exclude>
                     </excludes>

@@ -129,7 +129,7 @@
         <sql>
             ALTER TABLE tenants
                 ADD CONSTRAINT chk_tenants_tenant_id_format
-                    CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH(tenant_id) >= 3);
+                    CHECK (tenant_id ~ '^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$' AND LENGTH (tenant_id) >= 3);
         </sql>
         <rollback>
             <sql>ALTER TABLE tenants DROP CONSTRAINT IF EXISTS chk_tenants_tenant_id_format;</sql>
