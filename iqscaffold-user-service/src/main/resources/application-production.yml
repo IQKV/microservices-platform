@@ -1,234 +1,234 @@
 # Production Environment Configuration
 # This configuration is optimized for production with minimal logging and maximum security
 
-server:
-  port: 8080
+server :
+  port : 8080
 
-spring:
+spring :
   # Database Configuration - Production PostgreSQL
-  datasource:
-    url: ${IQSCAFFOLD_DATABASE_URL}
-    username: ${IQSCAFFOLD_DATABASE_USERNAME}
-    password: ${IQSCAFFOLD_DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 50
-      minimum-idle: 10
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
-      leak-detection-threshold: 60000
+  datasource :
+    url : ${IQSCAFFOLD_DATABASE_URL}
+    username : ${IQSCAFFOLD_DATABASE_USERNAME}
+    password : ${IQSCAFFOLD_DATABASE_PASSWORD}
+    driver-class-name : org.postgresql.Driver
+    hikari :
+      maximum-pool-size : 50
+      minimum-idle : 10
+      connection-timeout : 20000
+      idle-timeout : 300000
+      max-lifetime : 1200000
+      leak-detection-threshold : 60000
 
   # JPA Configuration - Production Settings
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
-        use_sql_comments: false
-        multiTenancy: SCHEMA
-        generate_statistics: false
-        jdbc:
-          batch_size: 100
-        order_inserts: true
-        order_updates: true
-    open-in-view: false
+  jpa :
+    hibernate :
+      ddl-auto : validate
+    show-sql : false
+    properties :
+      hibernate :
+        dialect : org.hibernate.dialect.PostgreSQLDialect
+        format_sql : false
+        use_sql_comments : false
+        multiTenancy : SCHEMA
+        generate_statistics : false
+        jdbc :
+          batch_size : 100
+        order_inserts : true
+        order_updates : true
+    open-in-view : false
 
   # Redis Configuration - Production Redis
-  data:
-    redis:
-      host: ${IQSCAFFOLD_CACHE_REDIS_HOST}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
-          max-wait: -1ms
+  data :
+    redis :
+      host : ${IQSCAFFOLD_CACHE_REDIS_HOST}
+      port : ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+      database : ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout : 2000ms
+      lettuce :
+        pool :
+          max-active : 32
+          max-idle : 16
+          min-idle : 4
+          max-wait : -1ms
 
   # Liquibase Configuration
   # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
-  liquibase:
-    enabled: false
+  liquibase :
+    enabled : false
 
 # IQ Scaffold Configuration - Production Environment
-iqscaffold:
+iqscaffold :
   # Database Configuration
-  database:
-    url: ${IQSCAFFOLD_DATABASE_URL}
-    username: ${IQSCAFFOLD_DATABASE_USERNAME}
-    password: ${IQSCAFFOLD_DATABASE_PASSWORD}
-    pool:
-      maximum-size: 50
-      minimum-idle: 10
-      connection-timeout: PT20S
-      idle-timeout: PT5M
-      max-lifetime: PT20M
+  database :
+    url : ${IQSCAFFOLD_DATABASE_URL}
+    username : ${IQSCAFFOLD_DATABASE_USERNAME}
+    password : ${IQSCAFFOLD_DATABASE_PASSWORD}
+    pool :
+      maximum-size : 50
+      minimum-idle : 10
+      connection-timeout : PT20S
+      idle-timeout : PT5M
+      max-lifetime : PT20M
 
   # Cache Configuration - Redis
-  cache:
-    redis:
-      host: ${IQSCAFFOLD_CACHE_REDIS_HOST}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout: PT2S
-      pool:
-        max-active: 32
-        max-idle: 16
-        min-idle: 4
-        max-wait: PT-1S
-      key-prefix: "iqscaffold:auth:production"
-      default-ttl: PT15M
-      enable-statistics: false
+  cache :
+    redis :
+      host : ${IQSCAFFOLD_CACHE_REDIS_HOST}
+      port : ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+      database : ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout : PT2S
+      pool :
+        max-active : 32
+        max-idle : 16
+        min-idle : 4
+        max-wait : PT-1S
+      key-prefix : "iqscaffold:auth:production"
+      default-ttl : PT15M
+      enable-statistics : false
 
   # Authentication Configuration
-  auth:
-    jwt:
-      secret-key: ${IQSCAFFOLD_AUTH_JWT_SECRET}
-      access-token-expiry: PT15M
-      refresh-token-expiry: P7D
-      issuer: iqscaffold-user-service
-      audience: iqscaffold-services
-      algorithm: HS256
+  auth :
+    jwt :
+      secret-key : ${IQSCAFFOLD_AUTH_JWT_SECRET}
+      access-token-expiry : PT15M
+      refresh-token-expiry : P7D
+      issuer : iqscaffold-user-service
+      audience : iqscaffold-services
+      algorithm : HS256
 
   # Email Configuration - Production Environment
-  email:
-    smtp:
-      host: ${SMTP_HOST}
-      port: ${SMTP_PORT:587}
-      username: ${SMTP_USERNAME}
-      password: ${SMTP_PASSWORD}
-      auth: true
-      starttls: true
-      timeout: PT30S
-    sender:
-      from-email: ${EMAIL_FROM_EMAIL:noreply@iqscaffold.com}
-      from-name: ${EMAIL_FROM_NAME:IQ Scaffold Platform}
-      base-url: ${APP_BASE_URL:https://app.iqscaffold.com}
-    verification:
-      token-expiry: PT24H
-      rate-limit: 3
-    templates:
-      verification-subject: "Verify your IQ Scaffold account"
-      verification-template: "email/user-registration/email-verification.html"
-      password-reset-subject: "Reset your IQ Scaffold password"
-      password-reset-template: "email/password-reset/initiate.html"
-      password-reset-confirmed-subject: "Password Reset Successful - IQ Scaffold"
-      password-reset-confirmed-template: "email/password-reset/confirmed.html"
-      registration-confirmed-subject: "Welcome to IQ Scaffold - Email Verified!"
-      registration-confirmed-template: "email/user-registration/email-confirmed.html"
+  email :
+    smtp :
+      host : ${SMTP_HOST}
+      port : ${SMTP_PORT:587}
+      username : ${SMTP_USERNAME}
+      password : ${SMTP_PASSWORD}
+      auth : true
+      starttls : true
+      timeout : PT30S
+    sender :
+      from-email : ${EMAIL_FROM_EMAIL:noreply@iqscaffold.com}
+      from-name : ${EMAIL_FROM_NAME:IQ Scaffold Platform}
+      base-url : ${APP_BASE_URL:https://app.iqscaffold.com}
+    verification :
+      token-expiry : PT24H
+      rate-limit : 3
+    templates :
+      verification-subject : "Verify your IQ Scaffold account"
+      verification-template : "email/user-registration/email-verification.html"
+      password-reset-subject : "Reset your IQ Scaffold password"
+      password-reset-template : "email/password-reset/initiate.html"
+      password-reset-confirmed-subject : "Password Reset Successful - IQ Scaffold"
+      password-reset-confirmed-template : "email/password-reset/confirmed.html"
+      registration-confirmed-subject : "Welcome to IQ Scaffold - Email Verified!"
+      registration-confirmed-template : "email/user-registration/email-confirmed.html"
   
-  security:
-    password:
-      encoder-strength: 14
-      require-special-chars: true
-      min-length: 12
-    rate-limiting:
-      login-attempts: 3
-      lockout-duration: PT30M
-    session:
-      timeout: PT2H
-      concurrent-sessions: 2
+  security :
+    password :
+      encoder-strength : 14
+      require-special-chars : true
+      min-length : 12
+    rate-limiting :
+      login-attempts : 3
+      lockout-duration : PT30M
+    session :
+      timeout : PT2H
+      concurrent-sessions : 2
   
-  oauth2:
-    enabled: false
-    providers: { }
+  oauth2 :
+    enabled : false
+    providers : { }
 
   # Observability Configuration - Production
-  observability:
-    tracing:
-      enabled: true
-      service-name: ${spring.application.name}
-      sampling-rate: 0.01  # Minimal sampling for production
-      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT}
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 1024
-    metrics:
-      enabled: true
-      path: /actuator/prometheus
-      prefix: iqscaffold_user
-      include-host-tag: true
-      include-application-tag: true
-      include-environment-tag: true
-      custom-tags:
-        environment: production
-        service: user-service
-    logging:
-      level: WARN
-      format: json  # JSON format for production
-      include-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
-      include-user-id: false  # Disabled for privacy in production
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
-      enable-sql-logging: false
-      enable-security-events: true
-      enable-performance-logging: false
+  observability :
+    tracing :
+      enabled : true
+      service-name : ${spring.application.name}
+      sampling-rate : 0.01  # Minimal sampling for production
+      endpoint : ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT}
+      timeout : PT10S
+      export-timeout : PT30S
+      batch-size : 1024
+    metrics :
+      enabled : true
+      path : /actuator/prometheus
+      prefix : iqscaffold_user
+      include-host-tag : true
+      include-application-tag : true
+      include-environment-tag : true
+      custom-tags :
+        environment : production
+        service : user-service
+    logging :
+      level : WARN
+      format : json  # JSON format for production
+      include-correlation-id : true
+      include-trace-id : true
+      include-span-id : true
+      include-user-id : false  # Disabled for privacy in production
+      include-tenant-id : true
+      correlation-id-header : X-Correlation-ID
+      request-id-header : X-Request-ID
+      tenant-id-header : X-Tenant-ID
+      enable-sql-logging : false
+      enable-security-events : true
+      enable-performance-logging : false
   
-  tenant-id-header: X-Tenant-ID
+  tenant-id-header : X-Tenant-ID
   
-  tenancy:
-    schema:
-      prefix: tenant_
-      default: public
+  tenancy :
+    schema :
+      prefix : tenant_
+      default : public
   
-  liquibase:
-    systemChangeLog: classpath:db/changelog/system/master.xml
-    tenantChangeLog: classpath:db/changelog/tenant/master.xml
+  liquibase :
+    systemChangeLog : classpath:db/changelog/system/master.xml
+    tenantChangeLog : classpath:db/changelog/tenant/master.xml
     # System changelog runs once on startup for public schema (tenants table, etc.)
     # Tenant changelog runs per-tenant schema during tenant provisioning
 
 # Logging Configuration - Production
-logging:
-  level:
-    com.iqscaffold: WARN
-    org.springframework.security: ERROR
-    org.springframework.web: ERROR
-    org.hibernate.SQL: ERROR
-    liquibase: WARN
-    com.zaxxer.hikari: ERROR
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
+logging :
+  level :
+    com.iqscaffold : WARN
+    org.springframework.security : ERROR
+    org.springframework.web : ERROR
+    org.hibernate.SQL : ERROR
+    liquibase : WARN
+    com.zaxxer.hikari : ERROR
+  pattern :
+    console : "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
 # Management Configuration - Production
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics,prometheus
-  endpoint:
-    health:
-      show-details: never
-    prometheus:
-      access: read_only
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5,0.95,0.99
-  tracing:
-    sampling:
-      probability: 0.01  # Minimal sampling for production
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+management :
+  endpoints :
+    web :
+      exposure :
+        include : health,metrics,prometheus
+  endpoint :
+    health :
+      show-details : never
+    prometheus :
+      access : read_only
+  metrics :
+    distribution :
+      percentiles-histogram :
+        http.server.requests : true
+      percentiles :
+        http.server.requests : 0.5,0.95,0.99
+  tracing :
+    sampling :
+      probability : 0.01  # Minimal sampling for production
+  prometheus :
+    metrics :
+      export :
+        enabled : true
 
 # SpringDoc Configuration - Production
-springdoc:
-  api-docs:
-    enabled: false  # Disabled in production
-  swagger-ui:
-    enabled: false  # Disabled in production
+springdoc :
+  api-docs :
+    enabled : false  # Disabled in production
+  swagger-ui :
+    enabled : false  # Disabled in production

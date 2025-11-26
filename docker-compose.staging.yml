@@ -1,106 +1,106 @@
-version: "3.8"
+version : "3.8"
 
-services:
+services :
   # PostgreSQL Database for User Service - Staging
-  postgres-user:
-    environment:
-      POSTGRES_DB: iqscaffold_user_staging
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
+  postgres-user :
+    environment :
+      POSTGRES_DB : iqscaffold_user_staging
+      POSTGRES_USER : ${POSTGRES_USER}
+      POSTGRES_PASSWORD : ${POSTGRES_PASSWORD}
+    volumes :
       - postgres_auth_staging_data:/var/lib/postgresql/data
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "0.5"
-        reservations:
-          memory: 512M
-          cpus: "0.25"
+    deploy :
+      resources :
+        limits :
+          memory : 1G
+          cpus : "0.5"
+        reservations :
+          memory : 512M
+          cpus : "0.25"
 
   # Redis - Staging Configuration
-  redis:
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.25"
-        reservations:
-          memory: 256M
-          cpus: "0.1"
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+  redis :
+    deploy :
+      resources :
+        limits :
+          memory : 512M
+          cpus : "0.25"
+        reservations :
+          memory : 256M
+          cpus : "0.1"
+    command : redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
   # User Service - Staging
-  user-service:
-    environment:
-      SPRING_PROFILES_ACTIVE: staging
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user_staging
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      IQSCAFFOLD_AUTH_JWT_SECRET: ${JWT_SECRET}
-      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
-      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
-      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "0.5"
-        reservations:
-          memory: 512M
-          cpus: "0.25"
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
+  user-service :
+    environment :
+      SPRING_PROFILES_ACTIVE : staging
+      SPRING_DATASOURCE_URL : jdbc:postgresql://postgres-user:5432/iqscaffold_user_staging
+      SPRING_DATASOURCE_USERNAME : ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD : ${POSTGRES_PASSWORD}
+      IQSCAFFOLD_AUTH_JWT_SECRET : ${JWT_SECRET}
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION : 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION : 604800
+      JAVA_OPTS : "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
+    deploy :
+      resources :
+        limits :
+          memory : 1G
+          cpus : "0.5"
+        reservations :
+          memory : 512M
+          cpus : "0.25"
+      restart_policy :
+        condition : on-failure
+        delay : 5s
+        max_attempts : 3
 
   # Gateway Service - Staging
-  gateway-service:
-    environment:
-      SPRING_PROFILES_ACTIVE: staging
-      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 200
-      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "0.5"
-        reservations:
-          memory: 512M
-          cpus: "0.25"
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
+  gateway-service :
+    environment :
+      SPRING_PROFILES_ACTIVE : staging
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL : http://user-service:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE : 200
+      JAVA_OPTS : "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:+UseG1GC"
+    deploy :
+      resources :
+        limits :
+          memory : 1G
+          cpus : "0.5"
+        reservations :
+          memory : 512M
+          cpus : "0.25"
+      restart_policy :
+        condition : on-failure
+        delay : 5s
+        max_attempts : 3
 
   # Observability - Staging optimized
-  prometheus:
-    volumes:
+  prometheus :
+    volumes :
       - ./docker/prometheus/prometheus-staging.yml:/etc/prometheus/prometheus.yml
       - prometheus_staging_data:/prometheus
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.25"
+    deploy :
+      resources :
+        limits :
+          memory : 512M
+          cpus : "0.25"
 
-  grafana:
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-      GF_INSTALL_PLUGINS: grafana-piechart-panel
-    volumes:
+  grafana :
+    environment :
+      GF_SECURITY_ADMIN_PASSWORD : ${GRAFANA_ADMIN_PASSWORD}
+      GF_INSTALL_PLUGINS : grafana-piechart-panel
+    volumes :
       - grafana_staging_data:/var/lib/grafana
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
+    deploy :
+      resources :
+        limits :
+          memory : 256M
+          cpus : "0.25"
 
-volumes:
-  postgres_auth_staging_data:
-    name: iqscaffold_postgres_auth_staging_data
-  prometheus_staging_data:
-    name: iqscaffold_prometheus_staging_data
-  grafana_staging_data:
-    name: iqscaffold_grafana_staging_data
+volumes :
+  postgres_auth_staging_data :
+    name : iqscaffold_postgres_auth_staging_data
+  prometheus_staging_data :
+    name : iqscaffold_prometheus_staging_data
+  grafana_staging_data :
+    name : iqscaffold_grafana_staging_data

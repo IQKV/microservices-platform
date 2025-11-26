@@ -1,39 +1,39 @@
-version: "3.8"
+version : "3.8"
 
-services:
+services :
   # PostgreSQL Database for User Service - Production Environment
-  postgres-user:
-    image: postgres:15.8-alpine
-    container_name: iqscaffold-user-postgres-production
-    environment:
-      POSTGRES_DB: iqscaffold_user_production
-      POSTGRES_USER: ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user}
-      POSTGRES_PASSWORD: ${IQSCAFFOLD_DATABASE_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
+  postgres-user :
+    image : postgres:15.8-alpine
+    container_name : iqscaffold-user-postgres-production
+    environment :
+      POSTGRES_DB : iqscaffold_user_production
+      POSTGRES_USER : ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user}
+      POSTGRES_PASSWORD : ${IQSCAFFOLD_DATABASE_PASSWORD}
+      POSTGRES_INITDB_ARGS : "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+      PGDATA : /var/lib/postgresql/data/pgdata
+    ports :
       - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
+    volumes :
       - postgres_user_data_production:/var/lib/postgresql/data
       - ./scripts/init-user-db.sql:/docker-entrypoint-initdb.d/01-init-user-db.sql:ro
       - ./scripts/init-user-schema.sql:/docker-entrypoint-initdb.d/02-init-user-schema.sql:ro
       - ./scripts/postgres-production.conf:/etc/postgresql/postgresql.conf:ro
-    networks:
+    networks :
       - auth-network-production
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user} -d iqscaffold_user_production -h localhost"]
-      interval: 30s
-      timeout: 15s
-      retries: 5
-      start_period: 120s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "10"
-        labels: "service=postgres-user,environment=production"
-    command: >
+    restart : unless-stopped
+    healthcheck :
+      test : [ "CMD-SHELL", "pg_isready -U ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user} -d iqscaffold_user_production -h localhost" ]
+      interval : 30s
+      timeout : 15s
+      retries : 5
+      start_period : 120s
+    logging :
+      driver : "json-file"
+      options :
+        max-size : "100m"
+        max-file : "10"
+        labels : "service=postgres-user,environment=production"
+    command : >
       postgres
       -c config_file=/etc/postgresql/postgresql.conf
       -c shared_preload_libraries=pg_stat_statements,pg_buffercache
@@ -57,47 +57,47 @@ services:
       -c log_connections=on
       -c log_disconnections=on
       -c log_lock_waits=on
-    deploy:
-      resources:
-        limits:
-          cpus: "4.0"
-          memory: 6G
-        reservations:
-          cpus: "2.0"
-          memory: 3G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-        window: 300s
+    deploy :
+      resources :
+        limits :
+          cpus : "4.0"
+          memory : 6G
+        reservations :
+          cpus : "2.0"
+          memory : 3G
+      restart_policy :
+        condition : on-failure
+        delay : 10s
+        max_attempts : 5
+        window : 300s
 
   # Redis for User Service - Production Environment
-  redis-user:
-    image: redis:7.2-alpine
-    container_name: iqscaffold-user-redis-production
-    environment:
-      REDIS_PASSWORD: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-    ports:
+  redis-user :
+    image : redis:7.2-alpine
+    container_name : iqscaffold-user-redis-production
+    environment :
+      REDIS_PASSWORD : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+    ports :
       - "${REDIS_PORT:-6379}:6379"
-    volumes:
+    volumes :
       - redis_user_data_production:/data
       - ./scripts/redis-production.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
+    networks :
       - auth-network-production
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${IQSCAFFOLD_CACHE_REDIS_PASSWORD}", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "10"
-        labels: "service=redis-user,environment=production"
-    command: >
+    restart : unless-stopped
+    healthcheck :
+      test : [ "CMD", "redis-cli", "-a", "${IQSCAFFOLD_CACHE_REDIS_PASSWORD}", "ping" ]
+      interval : 30s
+      timeout : 10s
+      retries : 5
+      start_period : 60s
+    logging :
+      driver : "json-file"
+      options :
+        max-size : "100m"
+        max-file : "10"
+        labels : "service=redis-user,environment=production"
+    command : >
       redis-server /usr/local/etc/redis/redis.conf
       --requirepass ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
       --appendonly yes
@@ -114,73 +114,73 @@ services:
       --stop-writes-on-bgsave-error yes
       --rdbcompression yes
       --rdbchecksum yes
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 3G
-        reservations:
-          cpus: "1.0"
-          memory: 1.5G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-        window: 300s
+    deploy :
+      resources :
+        limits :
+          cpus : "2.0"
+          memory : 3G
+        reservations :
+          cpus : "1.0"
+          memory : 1.5G
+      restart_policy :
+        condition : on-failure
+        delay : 10s
+        max_attempts : 5
+        window : 300s
 
   # User Service - Production Environment
-  user-service:
-    build:
-      context: ..
-      dockerfile: iqscaffold-user-service/Dockerfile
-    image: iqscaffold/iqscaffold-user-service:production
-    container_name: iqscaffold-user-service-production
-    env_file:
+  user-service :
+    build :
+      context : ..
+      dockerfile : iqscaffold-user-service/Dockerfile
+    image : iqscaffold/iqscaffold-user-service:production
+    container_name : iqscaffold-user-service-production
+    env_file :
       - .env.production
-    environment:
+    environment :
       # Spring Configuration
-      SPRING_PROFILES_ACTIVE: production
-      SPRING_APPLICATION_NAME: iqscaffold-user-service
+      SPRING_PROFILES_ACTIVE : production
+      SPRING_APPLICATION_NAME : iqscaffold-user-service
 
       # Database Configuration
-      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user_production
-      IQSCAFFOLD_DATABASE_USERNAME: ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user}
-      IQSCAFFOLD_DATABASE_PASSWORD: ${IQSCAFFOLD_DATABASE_PASSWORD}
+      IQSCAFFOLD_DATABASE_URL : jdbc:postgresql://postgres-user:5432/iqscaffold_user_production
+      IQSCAFFOLD_DATABASE_USERNAME : ${IQSCAFFOLD_DATABASE_USERNAME:-iqscaffold_user}
+      IQSCAFFOLD_DATABASE_PASSWORD : ${IQSCAFFOLD_DATABASE_PASSWORD}
 
       # Redis Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis-user
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
-      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+      IQSCAFFOLD_CACHE_REDIS_HOST : redis-user
+      IQSCAFFOLD_CACHE_REDIS_PORT : 6379
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
+      IQSCAFFOLD_CACHE_REDIS_DATABASE : 0
 
       # JWT Configuration
-      IQSCAFFOLD_AUTH_JWT_SECRET: ${IQSCAFFOLD_AUTH_JWT_SECRET}
-      IQSCAFFOLD_AUTH_JWT_ISSUER: iqscaffold-user-service
+      IQSCAFFOLD_AUTH_JWT_SECRET : ${IQSCAFFOLD_AUTH_JWT_SECRET}
+      IQSCAFFOLD_AUTH_JWT_ISSUER : iqscaffold-user-service
 
       # Email Configuration
-      SMTP_HOST: smtp.sendgrid.net
-      SMTP_PORT: 587
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      EMAIL_FROM_EMAIL: noreply@iqscaffold.com
-      EMAIL_FROM_NAME: IQ Scaffold Platform
-      APP_BASE_URL: https://iqscaffold.com
+      SMTP_HOST : smtp.sendgrid.net
+      SMTP_PORT : 587
+      SMTP_USERNAME : ${SMTP_USERNAME}
+      SMTP_PASSWORD : ${SMTP_PASSWORD}
+      EMAIL_FROM_EMAIL : noreply@iqscaffold.com
+      EMAIL_FROM_NAME : IQ Scaffold Platform
+      APP_BASE_URL : https://iqscaffold.com
 
       # OAuth2 Configuration
-      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_ENABLED: true
-      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID: ${IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID}
-      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET: ${IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET}
+      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_ENABLED : true
+      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID : ${IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_ID}
+      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET : ${IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_CLIENT_SECRET}
 
       # Observability Configuration
-      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
-      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: 0.1
-      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger-collector.observability:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability:4317
-      OTEL_SERVICE_NAME: iqscaffold-user-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-user-service,service.version=1.0.0,deployment.environment=production
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED : true
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE : 0.1
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT : http://jaeger-collector.observability:14268/api/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT : http://otel-collector.observability:4317
+      OTEL_SERVICE_NAME : iqscaffold-user-service
+      OTEL_RESOURCE_ATTRIBUTES : service.name=iqscaffold-user-service,service.version=1.0.0,deployment.environment=production
 
       # JVM Configuration for production
-      JAVA_OPTS: >-
+      JAVA_OPTS : >-
         -Xms512m
         -Xmx1024m
         -XX:+UseG1GC
@@ -191,85 +191,85 @@ services:
         -XX:+UseStringDeduplication
         -XX:+ParallelRefProcEnabled
         -Djava.security.egd=file:/dev/./urandom
-    ports:
+    ports :
       - "${USER_SERVICE_PORT:-8080}:8080"
       - "${JMX_PORT:-9999}:9999" # JMX monitoring port
-    depends_on:
-      postgres-user:
-        condition: service_healthy
-      redis-user:
-        condition: service_healthy
-    networks:
+    depends_on :
+      postgres-user :
+        condition : service_healthy
+      redis-user :
+        condition : service_healthy
+    networks :
       - auth-network-production
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
-      interval: 30s
-      timeout: 20s
-      retries: 5
-      start_period: 180s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200m"
-        max-file: "10"
-        labels: "service=user-service,environment=production"
-    volumes:
+    restart : unless-stopped
+    healthcheck :
+      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness" ]
+      interval : 30s
+      timeout : 20s
+      retries : 5
+      start_period : 180s
+    logging :
+      driver : "json-file"
+      options :
+        max-size : "200m"
+        max-file : "10"
+        labels : "service=user-service,environment=production"
+    volumes :
       - auth_logs_production:/app/logs
       - auth_tmp_production:/app/tmp
-    deploy:
-      resources:
-        limits:
-          cpus: "4.0"
-          memory: 4G
-        reservations:
-          cpus: "2.0"
-          memory: 2G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-        window: 300s
-    security_opt:
+    deploy :
+      resources :
+        limits :
+          cpus : "4.0"
+          memory : 4G
+        reservations :
+          cpus : "2.0"
+          memory : 2G
+      restart_policy :
+        condition : on-failure
+        delay : 10s
+        max_attempts : 5
+        window : 300s
+    security_opt :
       - no-new-privileges:true
-    read_only: true
-    tmpfs:
+    read_only : true
+    tmpfs :
       - /tmp:noexec,nosuid,size=100m
 
-networks:
-  auth-network-production:
-    driver: bridge
-    name: iqscaffold-user-network-production
-    ipam:
-      config:
-        - subnet: 172.22.0.0/16
-    driver_opts:
-      com.docker.network.bridge.name: br-auth-production
-      com.docker.network.bridge.enable_icc: "true"
-      com.docker.network.bridge.enable_ip_masquerade: "true"
+networks :
+  auth-network-production :
+    driver : bridge
+    name : iqscaffold-user-network-production
+    ipam :
+      config :
+        - subnet : 172.22.0.0/16
+    driver_opts :
+      com.docker.network.bridge.name : br-auth-production
+      com.docker.network.bridge.enable_icc : "true"
+      com.docker.network.bridge.enable_ip_masquerade : "true"
 
-volumes:
-  postgres_user_data_production:
-    name: iqscaffold_user_postgres_data_production
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_PATH:-/opt/iqscaffold/data}/postgres-production
-  redis_user_data_production:
-    name: iqscaffold_user_redis_data_production
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_PATH:-/opt/iqscaffold/data}/redis-production
-  auth_logs_production:
-    name: iqscaffold_user_logs_production
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${LOGS_PATH:-/opt/iqscaffold/logs}/auth-production
-  auth_tmp_production:
-    name: iqscaffold_user_tmp_production
-    driver: local
+volumes :
+  postgres_user_data_production :
+    name : iqscaffold_user_postgres_data_production
+    driver : local
+    driver_opts :
+      type : none
+      o : bind
+      device : ${DATA_PATH:-/opt/iqscaffold/data}/postgres-production
+  redis_user_data_production :
+    name : iqscaffold_user_redis_data_production
+    driver : local
+    driver_opts :
+      type : none
+      o : bind
+      device : ${DATA_PATH:-/opt/iqscaffold/data}/redis-production
+  auth_logs_production :
+    name : iqscaffold_user_logs_production
+    driver : local
+    driver_opts :
+      type : none
+      o : bind
+      device : ${LOGS_PATH:-/opt/iqscaffold/logs}/auth-production
+  auth_tmp_production :
+    name : iqscaffold_user_tmp_production
+    driver : local

@@ -1,49 +1,49 @@
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+global :
+  scrape_interval : 15s
+  evaluation_interval : 15s
 
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+rule_files :
+# - "first_rules.yml"
+# - "second_rules.yml"
 
-scrape_configs:
+scrape_configs :
   # Prometheus itself
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:9090"]
+  - job_name : "prometheus"
+    static_configs :
+      - targets : [ "localhost:9090" ]
 
   # User Service
-  - job_name: "user-service"
-    metrics_path: "/actuator/prometheus"
-    static_configs:
-      - targets: ["user-service:8080"]
-    scrape_interval: 10s
-    scrape_timeout: 5s
+  - job_name : "user-service"
+    metrics_path : "/actuator/prometheus"
+    static_configs :
+      - targets : [ "user-service:8080" ]
+    scrape_interval : 10s
+    scrape_timeout : 5s
 
   # Gateway Service
-  - job_name: "gateway-service"
-    metrics_path: "/actuator/prometheus"
-    static_configs:
-      - targets: ["gateway-service:8080"]
-    scrape_interval: 10s
-    scrape_timeout: 5s
+  - job_name : "gateway-service"
+    metrics_path : "/actuator/prometheus"
+    static_configs :
+      - targets : [ "gateway-service:8080" ]
+    scrape_interval : 10s
+    scrape_timeout : 5s
 
   # Bookstore Service
-  - job_name: "bookstore-service"
-    metrics_path: "/actuator/prometheus"
-    static_configs:
-      - targets: ["bookstore-service:8080"]
-    scrape_interval: 10s
-    scrape_timeout: 5s
+  - job_name : "bookstore-service"
+    metrics_path : "/actuator/prometheus"
+    static_configs :
+      - targets : [ "bookstore-service:8080" ]
+    scrape_interval : 10s
+    scrape_timeout : 5s
 
   # PostgreSQL Exporter (if added later)
-  - job_name: "postgres"
-    static_configs:
-      - targets: ["postgres-exporter:9187"]
-    scrape_interval: 30s
+  - job_name : "postgres"
+    static_configs :
+      - targets : [ "postgres-exporter:9187" ]
+    scrape_interval : 30s
 
   # Redis Exporter (if added later)
-  - job_name: "redis"
-    static_configs:
-      - targets: ["redis-exporter:9121"]
-    scrape_interval: 30s
+  - job_name : "redis"
+    static_configs :
+      - targets : [ "redis-exporter:9121" ]
+    scrape_interval : 30s

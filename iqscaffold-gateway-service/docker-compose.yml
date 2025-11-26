@@ -1,25 +1,25 @@
-version: "3.8"
+version : "3.8"
 
-services:
+services :
   # Redis for Gateway Service - Local Development
-  redis-gateway:
-    image: redis:7-alpine
-    container_name: iqscaffold-gateway-redis-dev
-    ports:
+  redis-gateway :
+    image : redis:7-alpine
+    container_name : iqscaffold-gateway-redis-dev
+    ports :
       - "6380:6379"
-    volumes:
+    volumes :
       - redis_gateway_data:/data
       - ./scripts/redis-gateway.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
+    networks :
       - gateway-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-    command: >
+    healthcheck :
+      test : [ "CMD", "redis-cli", "ping" ]
+      interval : 10s
+      timeout : 5s
+      retries : 5
+      start_period : 30s
+    restart : unless-stopped
+    command : >
       redis-server /usr/local/etc/redis/redis.conf
       --appendonly yes
       --appendfsync everysec
@@ -30,110 +30,110 @@ services:
       --save 60 10000
 
   # Mock User Service for Gateway testing (local development)
-  mock-user-service:
-    image: wiremock/wiremock:3-alpine
-    container_name: iqscaffold-mock-user-service-dev
-    ports:
+  mock-user-service :
+    image : wiremock/wiremock:3-alpine
+    container_name : iqscaffold-mock-user-service-dev
+    ports :
       - "8080:8080"
-    volumes:
+    volumes :
       - ./scripts/wiremock:/home/wiremock:ro
-    networks:
+    networks :
       - gateway-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    command: --global-response-templating --verbose --port 8080
+    healthcheck :
+      test : [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health" ]
+      interval : 15s
+      timeout : 5s
+      retries : 3
+      start_period : 30s
+    restart : unless-stopped
+    command : --global-response-templating --verbose --port 8080
 
   # Gateway Service - Local Development
-  gateway-service:
-    build:
-      context: ..
-      dockerfile: iqscaffold-gateway-service/Dockerfile
-      target: builder
-    image: iqscaffold/iqscaffold-gateway-service:dev
-    container_name: iqscaffold-gateway-service-dev
-    environment:
+  gateway-service :
+    build :
+      context : ..
+      dockerfile : iqscaffold-gateway-service/Dockerfile
+      target : builder
+    image : iqscaffold/iqscaffold-gateway-service:dev
+    container_name : iqscaffold-gateway-service-dev
+    environment :
       # Spring Configuration
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_APPLICATION_NAME: iqscaffold-gateway-service
+      SPRING_PROFILES_ACTIVE : dev
+      SPRING_APPLICATION_NAME : iqscaffold-gateway-service
 
       # Redis Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis-gateway
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
-      IQSCAFFOLD_CACHE_REDIS_DATABASE: 1
-      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ""
+      IQSCAFFOLD_CACHE_REDIS_HOST : redis-gateway
+      IQSCAFFOLD_CACHE_REDIS_PORT : 6379
+      IQSCAFFOLD_CACHE_REDIS_DATABASE : 1
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD : ""
 
       # Gateway Routing Configuration
-      IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI: http://mock-user-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI: http://bookstore-service:8080
-      USER_SERVICE_JWK_URI: http://mock-user-service:8080/.well-known/jwks.json
+      IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI : http://mock-user-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI : http://bookstore-service:8080
+      USER_SERVICE_JWK_URI : http://mock-user-service:8080/.well-known/jwks.json
 
       # CORS Configuration
-      IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+      IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS : "http://localhost:3000,http://localhost:5173,http://localhost:8080"
 
       # Observability Configuration
-      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
-      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
-      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger:4317
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
-      OTEL_SERVICE_NAME: iqscaffold-gateway-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-gateway-service,service.version=1.0.0,deployment.environment=dev
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED : true
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE : 1.0
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT : http://jaeger:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT : http://jaeger:4317
+      OTEL_SERVICE_NAME : iqscaffold-gateway-service
+      OTEL_RESOURCE_ATTRIBUTES : service.name=iqscaffold-gateway-service,service.version=1.0.0,deployment.environment=dev
 
       # JVM Configuration
-      JAVA_OPTS: >-
+      JAVA_OPTS : >-
         -Xms512m
         -Xmx1024m
         -XX:+UseG1GC
         -XX:+UseContainerSupport
         -XX:MaxRAMPercentage=75.0
         -Djava.security.egd=file:/dev/./urandom
-    ports:
+    ports :
       - "8080:8080" # Gateway service (main entry point)
-    depends_on:
-      redis-gateway:
-        condition: service_healthy
-      mock-user-service:
-        condition: service_healthy
-    networks:
+    depends_on :
+      redis-gateway :
+        condition : service_healthy
+      mock-user-service :
+        condition : service_healthy
+    networks :
       - gateway-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
-    restart: unless-stopped
-    volumes:
+    healthcheck :
+      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness" ]
+      interval : 30s
+      timeout : 10s
+      retries : 3
+      start_period : 90s
+    restart : unless-stopped
+    volumes :
       - gateway_logs:/app/logs
       - gateway_tmp:/tmp
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1536Mi
-        reservations:
-          cpus: "0.5"
-          memory: 768Mi
+    deploy :
+      resources :
+        limits :
+          cpus : "1.0"
+          memory : 1536Mi
+        reservations :
+          cpus : "0.5"
+          memory : 768Mi
 
-networks:
-  gateway-network:
-    driver: bridge
-    name: iqscaffold-gateway-network-dev
-    ipam:
-      config:
-        - subnet: 172.23.0.0/16
+networks :
+  gateway-network :
+    driver : bridge
+    name : iqscaffold-gateway-network-dev
+    ipam :
+      config :
+        - subnet : 172.23.0.0/16
 
-volumes:
-  redis_gateway_data:
-    name: iqscaffold_gateway_redis_data_dev
-    driver: local
-  gateway_logs:
-    name: iqscaffold_gateway_logs_dev
-    driver: local
-  gateway_tmp:
-    name: iqscaffold_gateway_tmp_dev
-    driver: local
+volumes :
+  redis_gateway_data :
+    name : iqscaffold_gateway_redis_data_dev
+    driver : local
+  gateway_logs :
+    name : iqscaffold_gateway_logs_dev
+    driver : local
+  gateway_tmp :
+    name : iqscaffold_gateway_tmp_dev
+    driver : local

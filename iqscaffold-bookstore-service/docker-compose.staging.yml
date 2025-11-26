@@ -1,41 +1,41 @@
-version: "3.8"
+version : "3.8"
 
-services:
-  bookstore-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: bookstore-service-staging
-    ports:
+services :
+  bookstore-service :
+    build :
+      context : .
+      dockerfile : Dockerfile
+    container_name : bookstore-service-staging
+    ports :
       - "8080:8080"
-    environment:
+    environment :
       # Spring Configuration
-      SPRING_PROFILES_ACTIVE: staging
-      SPRING_APPLICATION_NAME: iqscaffold-bookstore-service
+      SPRING_PROFILES_ACTIVE : staging
+      SPRING_APPLICATION_NAME : iqscaffold-bookstore-service
 
       # Database Configuration
-      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://${DB_HOST:-bookstore-db-staging}:${DB_PORT:-5432}/iqscaffold_bookstore_staging
-      IQSCAFFOLD_DATABASE_USERNAME: ${DB_USERNAME}
-      IQSCAFFOLD_DATABASE_PASSWORD: ${DB_PASSWORD}
+      IQSCAFFOLD_DATABASE_URL : jdbc:postgresql://${DB_HOST:-bookstore-db-staging}:${DB_PORT:-5432}/iqscaffold_bookstore_staging
+      IQSCAFFOLD_DATABASE_USERNAME : ${DB_USERNAME}
+      IQSCAFFOLD_DATABASE_PASSWORD : ${DB_PASSWORD}
 
       # Redis Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: ${REDIS_HOST:-bookstore-redis-staging}
-      IQSCAFFOLD_CACHE_REDIS_PORT: ${REDIS_PORT:-6379}
-      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+      IQSCAFFOLD_CACHE_REDIS_HOST : ${REDIS_HOST:-bookstore-redis-staging}
+      IQSCAFFOLD_CACHE_REDIS_PORT : ${REDIS_PORT:-6379}
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD : ${REDIS_PASSWORD:-}
+      IQSCAFFOLD_CACHE_REDIS_DATABASE : 0
 
       # JWT Configuration
-      USER_SERVICE_JWK_URI: ${USER_SERVICE_JWK_URI}
+      USER_SERVICE_JWK_URI : ${USER_SERVICE_JWK_URI}
 
       # Observability Configuration
-      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
-      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability:4317
-      OTEL_SERVICE_NAME: iqscaffold-bookstore-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-bookstore-service,service.version=staging,deployment.environment=staging
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED : true
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE : 1.0
+      OTEL_EXPORTER_OTLP_ENDPOINT : http://otel-collector.observability:4317
+      OTEL_SERVICE_NAME : iqscaffold-bookstore-service
+      OTEL_RESOURCE_ATTRIBUTES : service.name=iqscaffold-bookstore-service,service.version=staging,deployment.environment=staging
 
       # JVM Configuration
-      JAVA_OPTS: >-
+      JAVA_OPTS : >-
         -Xms384m
         -Xmx768m
         -XX:+UseG1GC
@@ -44,35 +44,35 @@ services:
         -XX:+HeapDumpOnOutOfMemoryError
         -XX:HeapDumpPath=/tmp/heapdump.hprof
         -Djava.security.egd=file:/dev/./urandom
-    networks:
+    networks :
       - iqscaffold-staging-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1.5G
-          cpus: "1.0"
-        reservations:
-          memory: 512M
-          cpus: "0.5"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 90s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
-        max-file: "5"
-        labels: "service=bookstore,environment=staging"
-    volumes:
+    restart : unless-stopped
+    deploy :
+      resources :
+        limits :
+          memory : 1.5G
+          cpus : "1.0"
+        reservations :
+          memory : 512M
+          cpus : "0.5"
+    healthcheck :
+      test : [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval : 30s
+      timeout : 10s
+      retries : 3
+      start_period : 90s
+    logging :
+      driver : "json-file"
+      options :
+        max-size : "50m"
+        max-file : "5"
+        labels : "service=bookstore,environment=staging"
+    volumes :
       - bookstore_staging_logs:/app/logs
 
-volumes:
-  bookstore_staging_logs:
+volumes :
+  bookstore_staging_logs :
 
-networks:
-  iqscaffold-staging-network:
-    external: true
+networks :
+  iqscaffold-staging-network :
+    external : true

@@ -138,7 +138,7 @@ iqscaffold :
       include-host-tag : false
       include-application-tag : false
       include-environment-tag : false
-      custom-tags : {} 
+      custom-tags : { }
     logging :
       level : DEBUG
       format : console
