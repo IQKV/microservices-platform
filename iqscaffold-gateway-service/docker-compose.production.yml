@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # Redis for Gateway Service - Production Environment
   redis-gateway:

@@ -1,6 +1,6 @@
-# Example Ingress Configuration for Auth UI (Frontend)
+# Example Ingress Configuration for User UI (Frontend)
 # 
-# This file is a template for when you deploy the Auth UI frontend application
+# This file is a template for when you deploy the User UI frontend application
 # (React, Vue, Angular, etc.) for login, signup, and password reset pages.
 #
 # Domains reserved:
@@ -8,17 +8,17 @@
 #   Staging: auth.iqscaffold.website
 #
 # To use:
-# 1. Deploy your Auth UI application (e.g., auth-ui-deployment.yaml)
-# 2. Copy this file to auth-ui-ingress.yaml
+# 1. Deploy your User UI application (e.g., user-ui-deployment.yaml)
+# 2. Copy this file to user-ui-ingress.yaml
 # 3. Update service names and configurations as needed
-# 4. Apply: kubectl apply -f auth-ui-ingress.yaml
+# 4. Apply: kubectl apply -f user-ui-ingress.yaml
 
 ---
-# Staging Auth UI Ingress
+# Staging User UI Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auth-ui-ingress-staging
+  name: user-ui-ingress-staging
   namespace: staging-env
   labels:
     app.kubernetes.io/name: iqscaffold-user-ui
@@ -57,26 +57,26 @@ spec:
   tls:
   - hosts:
     - auth.iqscaffold.website
-    secretName: auth-ui-tls-staging
+    secretName: user-ui-tls-staging
   rules:
   - host: auth.iqscaffold.website
     http:
       paths:
-      # Serve Auth UI frontend application
+      # Serve User UI frontend application
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: auth-ui-service  # Your Auth UI frontend service
+            name: user-ui-service  # Your User UI frontend service
             port:
               number: 80  # Or 3000, 8080, depending on your setup
 
 ---
-# Production Auth UI Ingress
+# Production User UI Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auth-ui-ingress-production
+  name: user-ui-ingress-production
   namespace: iqscaffold-production-env
   labels:
     app.kubernetes.io/name: iqscaffold-user-ui
@@ -116,36 +116,36 @@ spec:
   tls:
   - hosts:
     - auth.iqscaffold.com
-    secretName: auth-ui-tls-production
+    secretName: user-ui-tls-production
   rules:
   - host: auth.iqscaffold.com
     http:
       paths:
-      # Serve Auth UI frontend application
+      # Serve User UI frontend application
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: auth-ui-service  # Your Auth UI frontend service
+            name: user-ui-service  # Your User UI frontend service
             port:
               number: 80  # Or 3000, 8080, depending on your setup
 
 ---
 # NOTES:
 # 
-# This Auth UI frontend will:
+# This User UI frontend will:
 # 1. Serve login, signup, password reset pages
 # 2. Make API calls to: https://api.iqscaffold.com/api/v1/auth/* (through gateway)
 # 3. Handle OAuth2 redirects
 # 4. Manage JWT tokens in browser (localStorage/cookies)
 # 
-# The Auth UI should be a separate frontend application because:
+# The User UI should be a separate frontend application because:
 # - Security isolation from main app
 # - Independent deployment and scaling
 # - Can be served from CDN
 # - Allows different security policies
 # 
-# Example Auth UI pages:
+# Example User UI pages:
 # - https://auth.iqscaffold.com/login
 # - https://auth.iqscaffold.com/signup
 # - https://auth.iqscaffold.com/forgot-password
