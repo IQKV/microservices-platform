@@ -1,15 +1,184 @@
-# This configuration is intended for development purposes
-name: dev-multimoduleservice
+version: "3.8"
+
 services:
-  sonar:
-    container_name: dev-sonarqube
-    image: sonarqube:25.3.0.104237-community
-    # Forced authentication redirect for UI is turned off for out of the box experience while trying out SonarQube
-    # For real use cases delete SONAR_FORCEAUTHENTICATION variable or set SONAR_FORCEAUTHENTICATION=true
+  # PostgreSQL Database for User Service
+  postgres-user:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-user
     environment:
-      - SONAR_FORCEAUTHENTICATION=false
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
+      POSTGRES_DB: iqscaffold_user
+      POSTGRES_USER: iqscaffold_user
+      POSTGRES_PASSWORD: iqscaffold_password
     ports:
-      - 127.0.0.1:9001:9000
-      - 127.0.0.1:9000:9000
+      - "5432:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis for Caching and Sessions
+  redis:
+    image: redis:7-alpine
+    container_name: iqscaffold-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: redis-server --appendonly yes
+
+  # User Service
+  user-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-user-service/Dockerfile
+    container_name: iqscaffold-user-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user
+      SPRING_DATASOURCE_USERNAME: iqscaffold_user
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
+      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Gateway Service
+  gateway-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-gateway-service/Dockerfile
+    container_name: iqscaffold-gateway-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
+      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+    ports:
+      - "8080:8080"
+    depends_on:
+      user-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Observability Stack - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: iqscaffold-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - iqscaffold-network
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
+
+  # Observability Stack - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: iqscaffold-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - iqscaffold-network
+    depends_on:
+      - prometheus
+
+  # Observability Stack - Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: iqscaffold-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - iqscaffold-network
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Observability Stack - Promtail
+  promtail:
+    image: grafana/promtail:latest
+    container_name: iqscaffold-promtail
+    volumes:
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - iqscaffold-network
+    depends_on:
+      - loki
+    command: -config.file=/etc/promtail/config.yml
+
+networks:
+  iqscaffold-network:
+    driver: bridge
+    name: iqscaffold-network
+
+volumes:
+  postgres_user_data:
+    name: iqscaffold_postgres_user_data
+  redis_data:
+    name: iqscaffold_redis_data
+  prometheus_data:
+    name: iqscaffold_prometheus_data
+  grafana_data:
+    name: iqscaffold_grafana_data
+  loki_data:
+    name: iqscaffold_loki_data

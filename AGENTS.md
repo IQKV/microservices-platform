@@ -30,7 +30,7 @@ iqscaffold/
 │   ├── src/test/                     # Unit and integration tests
 │   ├── scripts/                      # Service-specific scripts
 │   ├── Dockerfile                    # Container image definition
-│   ├── docker-compose.yml            # Local development setup
+│   ├── compose.yml                   # Local development setup
 │   └── pom.xml                       # Maven build configuration
 ├── iqscaffold-gateway-service/          # API Gateway with routing & rate limiting
 │   ├── src/main/java/                # Reactive gateway implementation
@@ -38,10 +38,9 @@ iqscaffold/
 │   ├── src/test/                     # Gateway tests
 │   ├── scripts/                      # Gateway-specific scripts
 │   ├── Dockerfile                    # Container image definition
-│   ├── docker-compose.yml            # Local development setup
+│   ├── compose.yml                   # Local development setup
 │   └── pom.xml                       # Maven build configuration
-├── docker-compose.yml                # Full platform orchestration
-├── compose.yaml                      # Development tools (SonarQube)
+├── compose.yml                       # Full platform orchestration
 ├── pom.xml                           # Parent POM with shared configuration
 ├── package.json                      # Node.js tooling (Prettier, Husky)
 └── AGENTS.md                         # This file
@@ -530,7 +529,7 @@ Before making recommendations, agents should understand the platform's technolog
 
 - Multi-stage Docker builds for optimized images
 - Docker Compose for local development with health checks
-- Service-specific docker-compose.yml files
+- Service-specific Docker compose.yaml files
 - Environment-specific configuration (.env files)
 - Kubernetes readiness and liveness probes
 - Helm charts for Kubernetes deployment
@@ -882,7 +881,7 @@ refactor(services): extract common JWT validation to shared utility
 chore(docker): update PostgreSQL to version 16
 
 Upgrade from PostgreSQL 15 to 16 for improved performance.
-Updated docker-compose.yml and all service configurations.
+Updated Docker compose.yaml and all service configurations.
 Tested migrations on local and staging environments.
 ```
 
@@ -1512,10 +1511,8 @@ mvn clean verify
 mvn org.owasp:dependency-check-maven:check
 
 # Build Docker images
-docker-compose build
+docker compose build
 
-# Test in staging environment
-docker-compose -f docker-compose.staging.yml up
 ```
 
 **2. Release Phase**

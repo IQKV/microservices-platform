@@ -62,43 +62,39 @@ Reactive API gateway providing unified entry point for all services.
 
 ### Microservices Architecture
 
-```
+```text
 ┌─────────────┐
 │   Clients   │
 │ (Web/Mobile)│
 └──────┬──────┘
        │
        ▼
-┌─────────────────────────────────────┐
-│      Gateway Service (Port 8081)    │
-│  • Routing & Rate Limiting          │
-│  • JWT Validation                   │
-│  • Circuit Breaker                  │
-└──────┬──────────────────────────────┘
+┌──────────────────────────────────────────┐
+│        Gateway Service (Port 8081)       │
+│  • Routing & Rate Limiting               │
+│  • JWT Validation                        │
+│  • Circuit Breaker                       │
+└──────┬────────────────────────────────────┘
        │
        ▼
-┌──────────────┐
-│ User Service │
-│  (Port 8080) │
-│              │
-│ • Auth/JWT   │
-│ • Users      │
-│ • Roles      │
-└──────┬───────┘
+┌──────────────────────────────────────────┐
+│            User Service (Port 8080)      │
+│  • Auth/JWT                              │
+│  • Users                                 │
+│  • Roles                                 │
+└──────┬────────────────────────────────────┘
        │
        ▼
-┌──────────────┐
-│  PostgreSQL  │
-│  (User DB)   │
-└──────────────┘
+┌──────────────────────────────────────────┐
+│            PostgreSQL (User DB)          │
+└──────────────────────────────────────────┘
 
-       Shared Infrastructure:
-┌──────────────┐   ┌──────────────┐
-│    Redis     │   │ Observability│
-│  (Caching &  │   │   Stack      │
-│ Rate Limit)  │   │ (Prometheus, │
-└──────────────┘   │ Grafana,Loki)│
-                   └──────────────┘
+Shared Infrastructure
+┌──────────────────────────────┐   ┌─────────────────────────────┐
+│            Redis             │   │        Observability        │
+│  • Caching                   │   │  • Prometheus / Grafana     │
+│  • Rate Limiting             │   │  • Loki / OpenTelemetry     │
+└──────────────────────────────┘   └─────────────────────────────┘
 ```
 
 ### Technology Stack
