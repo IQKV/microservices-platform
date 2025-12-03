@@ -14,7 +14,6 @@ log "Deploying to local cluster..."
 # Setup namespaces
 kubectl apply -f user-service/namespace.yaml
 kubectl apply -f gateway-service/namespace.yaml
-kubectl apply -f bookstore-service/namespace.yaml
 
 # Apply priority classes
 kubectl apply -f priority-classes.yaml
@@ -23,12 +22,10 @@ kubectl apply -f priority-classes.yaml
 log "Deploying services..."
 kubectl apply -f user-service/
 kubectl apply -f gateway-service/
-kubectl apply -f bookstore-service/
 
 # Wait for services to be ready
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-user-service -n iqscaffold-dev-env --timeout=300s
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-gateway-service -n iqscaffold-dev-env --timeout=300s
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-bookstore-service -n iqscaffold-dev-env --timeout=300s
 
 log "Local deployment complete"
 log "Gateway: http://api.iqscaffold.local"

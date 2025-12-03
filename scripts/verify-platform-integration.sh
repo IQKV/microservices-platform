@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Platform Integration Verification Script
-# This script verifies the integration between Gateway Service, User Service, 
-# Bookstore Service, and the observability stack
+# This script verifies the integration between Gateway Service, User Service,
+# and the observability stack
 
 set -e
 
@@ -11,7 +11,6 @@ echo "🚀 Starting Platform Integration Verification..."
 # Configuration
 GATEWAY_URL="http://localhost:8080"
 USER_URL="http://localhost:8080"
-BOOKSTORE_URL="http://localhost:8080"
 PROMETHEUS_URL="http://localhost:9090"
 GRAFANA_URL="http://localhost:3000"
 
@@ -60,15 +59,6 @@ test_gateway_routing() {
         log_warn "⚠️  User service routing may not be configured"
     fi
     
-    # Test bookstore service routing through gateway
-    log_info "Testing bookstore service routing through gateway..."
-    if curl -f -s "$GATEWAY_URL/api/v1/bookstore/books" > /dev/null; then
-        log_info "✅ Bookstore service routing works"
-    else
-        log_error "❌ Bookstore service routing failed"
-        return 1
-    fi
-    
     return 0
 }
 
@@ -89,11 +79,11 @@ test_jwt_authentication_flow() {
         token=$(echo "$login_response" | grep -o '"token":"[^"]*' | cut -d'"' -f4 || echo "")
         
         if [[ -n "$token" ]]; then
-            # Test authenticated request to bookstore
-            if curl -f -s -H "Authorization: Bearer $token" "$GATEWAY_URL/api/v1/bookstore/books" > /dev/null; then
-                log_info "✅ Authenticated bookstore access works"
+            # Test authenticated request to user profile endpoint
+            if curl -f -s -H "Authorization: Bearer $token" "$GATEWAY_URL/api/v1/users/me" > /dev/null; then
+                log_info "✅ Authenticated user profile access works"
             else
-                log_warn "⚠️  Authenticated bookstore access may need configuration"
+                log_warn "⚠️  Authenticated user access may need configuration"
             fi
         fi
     else
@@ -108,14 +98,14 @@ test_observability_integration() {
     if curl -f -s "$PROMETHEUS_URL/api/v1/status/config" > /dev/null; then
         log_info "✅ Prometheus is accessible"
         
-        # Check if services are being scraped
+        # Check if gateway service is being scraped
         local targets_response
         targets_response=$(curl -s "$PROMETHEUS_URL/api/v1/targets" || echo "")
         
-        if echo "$targets_response" | grep -q "bookstore-service"; then
-            log_info "✅ Bookstore service is being monitored by Prometheus"
+        if echo "$targets_response" | grep -q "gateway-service"; then
+            log_info "✅ Gateway service is being monitored by Prometheus"
         else
-            log_warn "⚠️  Bookstore service monitoring needs verification"
+            log_warn "⚠️  Gateway monitoring needs verification"
         fi
     else
         log_error "❌ Prometheus is not accessible"
@@ -129,21 +119,18 @@ test_observability_integration() {
     fi
     
     # Test service metrics endpoints
-    for service in "user-service:$USER_URL" "bookstore-service:$BOOKSTORE_URL"; do
-        IFS=':' read -r service_name service_url <<< "$service"
-        if curl -f -s "$service_url/actuator/prometheus" > /dev/null; then
-            log_info "✅ $service_name metrics endpoint works"
-        else
-            log_error "❌ $service_name metrics endpoint failed"
-        fi
-    done
+    if curl -f -s "$USER_URL/actuator/prometheus" > /dev/null; then
+        log_info "✅ User service metrics endpoint works"
+    else
+        log_error "❌ User service metrics endpoint failed"
+    fi
 }
 
 test_cors_configuration() {
     log_info "Testing CORS configuration for React 19 frontend..."
     
     local cors_response
-    cors_response=$(curl -s -X OPTIONS "$GATEWAY_URL/api/v1/bookstore/books" \
+    cors_response=$(curl -s -X OPTIONS "$GATEWAY_URL/api/v1/auth/health" \
         -H "Origin: http://localhost:5173" \
         -H "Access-Control-Request-Method: GET" \
         -H "Access-Control-Request-Headers: Authorization,Content-Type" \
@@ -163,7 +150,7 @@ test_rate_limiting() {
     local rate_limit_headers=false
     for i in {1..5}; do
         local response_headers
-        response_headers=$(curl -s -I "$GATEWAY_URL/api/v1/bookstore/books" || echo "")
+        response_headers=$(curl -s -I "$GATEWAY_URL/api/v1/auth/health" || echo "")
         
         if echo "$response_headers" | grep -q "X-RateLimit"; then
             rate_limit_headers=true
@@ -192,10 +179,6 @@ main() {
     fi
     
     if ! check_service_health "User Service" "$USER_URL"; then
-        services_healthy=false
-    fi
-    
-    if ! check_service_health "Bookstore Service" "$BOOKSTORE_URL"; then
         services_healthy=false
     fi
     

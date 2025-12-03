@@ -25,13 +25,13 @@ log "Deploying to production (tag: $TAG)..."
 
 # Backup databases
 log "Creating database backups..."
-for svc in user bookstore; do
+for svc in user; do
     kubectl exec -n iqscaffold-production-env deployment/${svc}-postgres -- \
         pg_dump -U iqscaffold_${svc}_prod iqscaffold_${svc}_production > /tmp/${svc}_backup_$(date +%Y%m%d_%H%M%S).sql || warn "Backup failed for $svc"
 done
 
 # Update image tags
-for svc in user gateway bookstore; do
+for svc in user gateway; do
     sed "s|iqscaffold/${svc}-service:latest|iqscaffold/${svc}-service:$TAG|g" \
         ${svc}-service/${svc}-service-deployment.yaml | \
     sed 's/namespace: iqscaffold-dev-env/namespace: iqscaffold-production-env/g' | \
@@ -43,7 +43,7 @@ done
 kubectl apply -f priority-classes.yaml
 
 # Wait for rollout
-for svc in user gateway bookstore; do
+for svc in user gateway; do
     kubectl rollout status deployment/${svc}-service -n iqscaffold-production-env --timeout=600s
     kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=iqscaffold-${svc}-service -n iqscaffold-production-env --timeout=300s
 done

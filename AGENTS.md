@@ -40,14 +40,6 @@ iqscaffold/
 │   ├── Dockerfile                    # Container image definition
 │   ├── docker-compose.yml            # Local development setup
 │   └── pom.xml                       # Maven build configuration
-├── iqscaffold-bookstore-service/        # Domain service (catalog & inventory)
-│   ├── src/main/java/                # Domain implementation
-│   ├── src/main/resources/           # Configuration and migrations
-│   ├── src/test/                     # Domain tests
-│   ├── scripts/                      # Service-specific scripts
-│   ├── Dockerfile                    # Container image definition
-│   ├── docker-compose.yml            # Local development setup
-│   └── pom.xml                       # Maven build configuration
 ├── docker-compose.yml                # Full platform orchestration
 ├── compose.yaml                      # Development tools (SonarQube)
 ├── pom.xml                           # Parent POM with shared configuration
@@ -94,7 +86,6 @@ iqscaffold-{service-name}/
 <modules>
     <module>iqscaffold-user-service</module>
     <module>iqscaffold-gateway-service</module>
-    <module>iqscaffold-bookstore-service</module>
 </modules>
 ```
 
@@ -606,7 +597,6 @@ quality_gates:
   code_coverage:
     user_service: ">= 18% (instruction), >= 48% (line), >= 30% (branch)"
     gateway_service: ">= 27% (instruction)"
-    bookstore_service: ">= 60% (instruction), >= 65% (line), >= 50% (branch)"
 
   code_style:
     tool: "Checkstyle"
@@ -786,7 +776,7 @@ key pattern to include tenant ID.
 Closes #123
 
 # Performance improvement
-perf(bookstore): optimize book search query with indexes
+perf(some-bussiness-service): optimize book search query with indexes
 
 Added composite index on (title, author, category) to improve
 search performance by 80%.
@@ -971,7 +961,6 @@ Would you like me to use this commit message, or would you prefer to modify it?
 service_scopes:
   - user-service: "Authentication, user management, tenants"
   - gateway-service: "Routing, rate limiting, circuit breaker"
-  - bookstore-service: "Books, inventory, catalog"
   - agents: "AGENTS.md, agent guidelines"
   - docker: "Docker, docker-compose, containerization"
   - k8s: "Kubernetes manifests, Helm charts"
@@ -1316,7 +1305,7 @@ Examples:
 feat(user-service): add email verification endpoint
 fix(gateway): resolve rate limiting for tenant requests
 docs(readme): update deployment instructions
-refactor(bookstore): extract inventory logic to separate service
+refactor(some-bussiness-service): extract inventory logic to separate service
 ```
 
 **Validation Rules:**
@@ -1543,11 +1532,9 @@ git push origin v1.0.0
 # Build and push Docker images
 docker build -t iqscaffold/user-service:1.0.0 -f iqscaffold-user-service/Dockerfile .
 docker build -t iqscaffold/gateway-service:1.0.0 -f iqscaffold-gateway-service/Dockerfile .
-docker build -t iqscaffold/bookstore-service:1.0.0 -f iqscaffold-bookstore-service/Dockerfile .
 
 docker push iqscaffold/user-service:1.0.0
 docker push iqscaffold/gateway-service:1.0.0
-docker push iqscaffold/bookstore-service:1.0.0
 
 # Deploy to production
 kubectl apply -f k8s/production/
@@ -1605,7 +1592,7 @@ production_deployment:
   - [ ] Backup databases
   - [ ] Deploy during maintenance window
   - [ ] Run database migrations
-  - [ ] Deploy services in order (user → gateway → bookstore)
+  - [ ] Deploy services in order (user → gateway → some-bussiness-service)
   - [ ] Verify health checks
   - [ ] Monitor logs and metrics
   - [ ] Verify critical user flows
@@ -1813,12 +1800,6 @@ user_service:
 gateway_service:
   instruction_coverage: ">= 27%"
   note: "Reactive code with extensive configuration classes"
-
-bookstore_service:
-  instruction_coverage: ">= 60%"
-  line_coverage: ">= 65%"
-  branch_coverage: ">= 50%"
-  note: "Highest coverage as reference implementation"
 ```
 
 **Code Style (Checkstyle):**
@@ -2064,7 +2045,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [user-service, gateway-service, bookstore-service]
+        service: [user-service, gateway-service]
     steps:
       - uses: actions/checkout@v4
 
@@ -2142,7 +2123,7 @@ jobs:
     if: github.ref == 'refs/heads/dev'
     strategy:
       matrix:
-        service: [user-service, gateway-service, bookstore-service]
+        service: [user-service, gateway-service]
     steps:
       - uses: actions/checkout@v4
 
@@ -2179,7 +2160,6 @@ jobs:
         run: |
           docker load -i user-service-image/user-service.tar
           docker load -i gateway-service-image/gateway-service.tar
-          docker load -i bookstore-service-image/bookstore-service.tar
 
       - name: Start Services
         run: docker-compose up -d
@@ -2293,7 +2273,6 @@ helm upgrade --install iqscaffold ./helm/iqscaffold \
 # Verify deployment
 kubectl rollout status deployment/user-service -n production
 kubectl rollout status deployment/gateway-service -n production
-kubectl rollout status deployment/bookstore-service -n production
 ```
 
 ## 📚 Documentation Standards
@@ -2776,8 +2755,8 @@ public class BookService {
 
 // 3. Add controller endpoint
 @RestController
-@RequestMapping("/api/v1/bookstore/books")
-public class BookResource {
+@RequestMapping("/api/v1/some-bussiness/items")
+public class BusinessResource {
 
   @PostMapping
   @Operation(summary = "Create new book")

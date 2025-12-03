@@ -17,7 +17,7 @@ apply_configs() {
     local env=$1
     log "Applying configs for $env..."
     
-    for svc in user-service gateway-service bookstore-service; do
+    for svc in user-service gateway-service; do
         kubectl $ACTION -f $svc/configmap.yaml
         kubectl $ACTION -f $svc/secret.yaml
     done

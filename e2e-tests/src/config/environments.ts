@@ -13,25 +13,16 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'http://localhost:8090',
     services: {
       gateway: 'http://localhost:8090',
-      user: 'http://localhost:8091',
-      bookstore: 'http://localhost:8092'
+      auth: 'http://localhost:8091'
     },
     databases: {
-      user: {
+      auth: {
         host: 'localhost',
         port: 5434,
         database: 'iqscaffold_user_test',
         username: 'iqscaffold_test_user',
         password: 'iqscaffold_test_password',
         url: 'postgresql://iqscaffold_test_user:iqscaffold_test_password@localhost:5434/iqscaffold_user_test'
-      },
-      bookstore: {
-        host: 'localhost',
-        port: 5435,
-        database: 'iqscaffold_bookstore_test',
-        username: 'iqscaffold_test_user',
-        password: 'iqscaffold_test_password',
-        url: 'postgresql://iqscaffold_test_user:iqscaffold_test_password@localhost:5435/iqscaffold_bookstore_test'
       }
     },
     redis: {
@@ -66,25 +57,16 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'https://api.iqscaffold.website',
     services: {
       gateway: 'https://api.iqscaffold.website',
-      user: 'https://user.iqscaffold.website',
-      bookstore: 'https://bookstore.iqscaffold.website'
+      auth: 'https://user.iqscaffold.website'
     },
     databases: {
-      user: {
+      auth: {
         host: 'staging-postgres-user.iqscaffold.com',
         port: 5432,
         database: 'iqscaffold_user_staging',
         username: 'iqscaffold_staging_user',
         password: process.env.STAGING_DB_PASSWORD || 'staging_password',
         url: `postgresql://iqscaffold_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-user.iqscaffold.com:5432/iqscaffold_user_staging`
-      },
-      bookstore: {
-        host: 'staging-postgres-bookstore.iqscaffold.com',
-        port: 5432,
-        database: 'iqscaffold_bookstore_staging',
-        username: 'iqscaffold_staging_user',
-        password: process.env.STAGING_DB_PASSWORD || 'staging_password',
-        url: `postgresql://iqscaffold_staging_user:${process.env.STAGING_DB_PASSWORD || 'staging_password'}@staging-postgres-bookstore.iqscaffold.com:5432/iqscaffold_bookstore_staging`
       }
     },
     redis: {
@@ -119,25 +101,16 @@ const environments: Record<EnvironmentName, TestEnvironmentConfig> = {
     baseUrl: 'https://api.iqscaffold.com',
     services: {
       gateway: 'https://api.iqscaffold.com',
-      user: 'https://user.iqscaffold.com',
-      bookstore: 'https://bookstore.iqscaffold.com'
+      auth: 'https://user.iqscaffold.com'
     },
     databases: {
-      user: {
+      auth: {
         host: 'prod-postgres-user.iqscaffold.com',
         port: 5432,
         database: 'iqscaffold_user_prod',
         username: 'iqscaffold_prod_user',
         password: process.env.PROD_DB_PASSWORD || 'prod_password',
         url: `postgresql://iqscaffold_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-user.iqscaffold.com:5432/iqscaffold_user_prod`
-      },
-      bookstore: {
-        host: 'prod-postgres-bookstore.iqscaffold.com',
-        port: 5432,
-        database: 'iqscaffold_bookstore_prod',
-        username: 'iqscaffold_prod_user',
-        password: process.env.PROD_DB_PASSWORD || 'prod_password',
-        url: `postgresql://iqscaffold_prod_user:${process.env.PROD_DB_PASSWORD || 'prod_password'}@prod-postgres-bookstore.iqscaffold.com:5432/iqscaffold_bookstore_prod`
       }
     },
     redis: {
@@ -184,16 +157,9 @@ function validateEnvironmentConfig(config: TestEnvironmentConfig): void {
   if (!config.services.auth) {
     errors.push('services.auth URL is required');
   }
-  if (!config.services.bookstore) {
-    errors.push('services.bookstore URL is required');
-  }
-
   // Validate database configurations
-  if (!config.databases.auth.url) {
+  if (!config.databases.auth?.url) {
     errors.push('databases.auth.url is required');
-  }
-  if (!config.databases.bookstore.url) {
-    errors.push('databases.bookstore.url is required');
   }
 
   // Validate Redis configuration
@@ -246,16 +212,10 @@ function applyEnvironmentOverrides(config: TestEnvironmentConfig, envVars: Envir
   if (envVars.USER_SERVICE_URL) {
     overriddenConfig.services.auth = envVars.USER_SERVICE_URL;
   }
-  if (envVars.BOOKSTORE_SERVICE_URL) {
-    overriddenConfig.services.bookstore = envVars.BOOKSTORE_SERVICE_URL;
-  }
 
   // Apply database URL overrides
   if (envVars.DATABASE_USER_URL) {
     overriddenConfig.databases.auth.url = envVars.DATABASE_USER_URL;
-  }
-  if (envVars.DATABASE_BOOKSTORE_URL) {
-    overriddenConfig.databases.bookstore.url = envVars.DATABASE_BOOKSTORE_URL;
   }
 
   // Apply Redis URL override

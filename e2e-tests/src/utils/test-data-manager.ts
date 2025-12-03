@@ -3,9 +3,9 @@
  * Combines TestDataFactory and DatabaseHelper for complete test data lifecycle management
  */
 
-import { TestDataFactory, TestDataRelationships, CreateUserOptions, CreateBookOptions, CreateTenantOptions } from './test-data-factory.js';
+import { TestDataFactory, TestDataRelationships, CreateUserOptions, CreateTenantOptions } from './test-data-factory.js';
 import { DatabaseHelper, TestTransactionManager } from './database-helper.js';
-import { UserData, BookData, TenantData, CreateUserRequest, CreateBookRequest, CreateTenantRequest } from '../types/api-responses.js';
+import { UserData, TenantData, CreateUserRequest, CreateTenantRequest } from '../types/api-responses.js';
 import { TestEnvironmentConfig } from '../types/environment.js';
 import { generateTestId } from '../config/database.js';
 import { getEnvironmentConfig } from '../config/environments.js';
@@ -181,104 +181,6 @@ export class TestDataManager {
   }
 
   /**
-   * Creates a book with database persistence
-   */
-  async createBook(
-    overrides: Partial<CreateBookRequest> = {},
-    options: CreateBookOptions = {}
-  ): Promise<TestDataCreationResult<BookData>> {
-    const bookRequest = this.factory.createBookRequest(overrides, options);
-    
-    let transactionId: string | undefined;
-    if (this.config.useTransactions) {
-      transactionId = await this.databaseHelper.transactionManager.beginTransaction('bookstore', this.testId);
-      this.activeTransactions.set(`book_${this.testId}`, transactionId);
-    }
-
-    try {
-      // Insert book into database
-      const result = await this.insertBookToDatabase(bookRequest, transactionId);
-      
-      // Create BookData from the result
-      const bookData = this.factory.createBookData({
-        id: result.id,
-        title: bookRequest.title,
-        author: bookRequest.author,
-        isbn: bookRequest.isbn,
-        ...(bookRequest.description ? { description: bookRequest.description } : {}),
-        price: bookRequest.price,
-        ...(bookRequest.currency ? { currency: bookRequest.currency } : {}),
-        ...(bookRequest.stock !== undefined ? { stock: bookRequest.stock } : {}),
-        ...(bookRequest.category ? { category: bookRequest.category } : {})
-      }, options);
-
-      return {
-        data: bookData,
-        id: bookData.id,
-        relationships: this.factory.getRelationships(),
-        ...(transactionId ? { transactionId } : {})
-      };
-    } catch (error) {
-      if (transactionId) {
-        await this.databaseHelper.transactionManager.rollbackTransaction(transactionId);
-        this.activeTransactions.delete(`book_${this.testId}`);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Creates multiple books with database persistence
-   */
-  async createBooks(
-    count: number,
-    overrides: Partial<CreateBookRequest> = {},
-    options: CreateBookOptions = {}
-  ): Promise<BatchTestDataResult<BookData>> {
-    const books: BookData[] = [];
-    let transactionId: string | undefined;
-
-    if (this.config.useTransactions) {
-      transactionId = await this.databaseHelper.transactionManager.beginTransaction('bookstore', this.testId);
-      this.activeTransactions.set(`books_${this.testId}`, transactionId);
-    }
-
-    try {
-      for (let i = 0; i < count; i++) {
-        const bookRequest = this.factory.createBookRequest(overrides, options);
-        const result = await this.insertBookToDatabase(bookRequest, transactionId);
-        
-        const bookData = this.factory.createBookData({
-          id: result.id,
-          title: bookRequest.title,
-          author: bookRequest.author,
-          isbn: bookRequest.isbn,
-          ...(bookRequest.description ? { description: bookRequest.description } : {}),
-          price: bookRequest.price,
-          ...(bookRequest.currency ? { currency: bookRequest.currency } : {}),
-          ...(bookRequest.stock !== undefined ? { stock: bookRequest.stock } : {}),
-          ...(bookRequest.category ? { category: bookRequest.category } : {})
-        }, options);
-
-        books.push(bookData);
-      }
-
-      return {
-        items: books,
-        relationships: this.factory.getRelationships(),
-        count: books.length,
-        ...(transactionId ? { transactionId } : {})
-      };
-    } catch (error) {
-      if (transactionId) {
-        await this.databaseHelper.transactionManager.rollbackTransaction(transactionId);
-        this.activeTransactions.delete(`books_${this.testId}`);
-      }
-      throw error;
-    }
-  }
-
-  /**
    * Creates a tenant with database persistence
    */
   async createTenant(
@@ -323,30 +225,19 @@ export class TestDataManager {
   }
 
   /**
-   * Creates a complete test dataset with tenant, users, and books
+   * Creates a complete test dataset with tenant and users
    */
   async createCompleteDataset(
     tenantOverrides: Partial<CreateTenantRequest> = {},
-    userCount: number = 3,
-    bookCount: number = 5
+    userCount: number = 3
   ): Promise<{
     tenant: TestDataCreationResult<TenantData>;
     users: BatchTestDataResult<UserData>;
-    books: BatchTestDataResult<BookData>;
   }> {
-    // Create tenant first
     const tenant = await this.createTenant(tenantOverrides);
-    
-    // Set tenant context for subsequent creations
     this.factory.setTenantContext(tenant.data.id);
-    
-    // Create users for the tenant
     const users = await this.createUsers(userCount, {}, { tenantId: tenant.data.id });
-    
-    // Create books for the tenant
-    const books = await this.createBooks(bookCount, {}, { tenantId: tenant.data.id });
-
-    return { tenant, users, books };
+    return { tenant, users };
   }
 
   /**
@@ -464,56 +355,6 @@ export class TestDataManager {
     }
 
     return { id: userId };
-  }
-
-  /**
-   * Inserts a book into the database
-   */
-  private async insertBookToDatabase(
-    bookRequest: CreateBookRequest, 
-    transactionId?: string
-  ): Promise<{ id: number }> {
-    const query = `
-      INSERT INTO books (title, author, isbn, description, price, currency, stock, category, tenant_id, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
-      RETURNING id
-    `;
-    
-    const params = [
-      bookRequest.title,
-      bookRequest.author,
-      bookRequest.isbn,
-      bookRequest.description,
-      bookRequest.price,
-      bookRequest.currency || 'USD',
-      bookRequest.stock || 0,
-      bookRequest.category,
-      this.config.tenantId
-    ];
-
-    let result;
-    if (transactionId) {
-      result = await this.databaseHelper.transactionManager.query(transactionId, query, params);
-    } else {
-      result = await this.databaseHelper.query('bookstore', query, params);
-    }
-
-    const bookId = result.rows[0].id;
-
-    // Create inventory record
-    const inventoryQuery = `
-      INSERT INTO inventory (book_id, quantity, available_quantity, created_at, updated_at)
-      VALUES ($1, $2, $3, NOW(), NOW())
-    `;
-    
-    const stock = bookRequest.stock || 0;
-    if (transactionId) {
-      await this.databaseHelper.transactionManager.query(transactionId, inventoryQuery, [bookId, stock, stock]);
-    } else {
-      await this.databaseHelper.query('bookstore', inventoryQuery, [bookId, stock, stock]);
-    }
-
-    return { id: bookId };
   }
 
   /**

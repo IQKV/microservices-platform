@@ -68,17 +68,6 @@ iqscaffold :
             display-name : "User Service APIs"
             description : "Authentication and user management APIs"
             context-path : "user-service"
-        bookstore-service :
-          uri : ${IQSCAFFOLD_GATEWAY_ROUTING_BOOKSTORE_SERVICE_URI:http://localhost:8081}
-          path : /v1/bookstore/**
-          enabled : true
-          connect-timeout : 10000
-          response-timeout : 60000
-          openapi :
-            enabled : true
-            display-name : "Bookstore Service APIs"
-            description : "Bookstore management and inventory APIs"
-            context-path : "bookstore-service"
       enable-service-discovery : false
       load-balancing :
         strategy : round-robin
@@ -118,26 +107,6 @@ iqscaffold :
         - /api/v1/auth/password/forgot
         - /api/v1/auth/password/reset
         
-        # Bookstore public endpoints (no authentication required)
-        - /api/v1/bookstore/version
-        - /api/v1/bookstore/books
-        - /api/v1/bookstore/books/*/
-        - /api/v1/bookstore/books/isbn/**
-        - /api/v1/bookstore/books/available
-        - /api/v1/bookstore/books/in-stock
-        - /api/v1/bookstore/books/search
-        - /api/v1/bookstore/books/search/**
-        - /api/v1/bookstore/inventory
-        - /api/v1/bookstore/inventory/*/
-        - /api/v1/bookstore/inventory/*/availability
-        - /api/v1/bookstore/inventory/low-stock
-        - /api/v1/bookstore/inventory/out-of-stock
-        - /api/v1/bookstore/inventory/stats/**
-        
-        # Bookstore admin endpoints require authentication (ADMIN/SUPERADMIN role):
-        # - /api/v1/bookstore/admin/books/** (POST, PUT, DELETE)
-        # - /api/v1/bookstore/admin/inventory/** (PUT, POST)
-        
         # Actuator and documentation endpoints
         - /actuator/health
         - /actuator/info
@@ -146,8 +115,7 @@ iqscaffold :
         - /api-docs/**
         - /user-service/swagger-ui/**
         - /user-service/api-docs/**
-        - /bookstore-service/swagger-ui/**
-        - /bookstore-service/api-docs/**
+
     
     rate-limiting :
       enabled : true
@@ -201,22 +169,6 @@ iqscaffold :
           "/api/v1/users/me/password" :
             requests-per-minute : 10
             burst-capacity : 20
-            enable-tenant-quotas : false
-          "/api/v1/bookstore/books" :
-            requests-per-minute : 200
-            burst-capacity : 400
-            enable-tenant-quotas : false
-          "/api/v1/bookstore/inventory/**" :
-            requests-per-minute : 100
-            burst-capacity : 200
-            enable-tenant-quotas : false
-          "/api/v1/bookstore/admin/books/**" :
-            requests-per-minute : 100
-            burst-capacity : 200
-            enable-tenant-quotas : false
-          "/api/v1/bookstore/admin/inventory/**" :
-            requests-per-minute : 100
-            burst-capacity : 200
             enable-tenant-quotas : false
       tenant-quotas :
         enabled : false  # Disabled for development

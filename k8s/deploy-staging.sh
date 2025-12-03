@@ -16,7 +16,7 @@ CONTEXT=$(kubectl config current-context)
 log "Deploying to staging (tag: $TAG)..."
 
 # Update image tags
-for svc in user gateway bookstore; do
+for svc in user gateway; do
     sed "s|iqscaffold/${svc}-service:latest|iqscaffold/${svc}-service:$TAG|g" \
         ${svc}-service/${svc}-service-deployment.yaml | \
     sed 's/namespace: iqscaffold-dev-env/namespace: iqscaffold-staging-env/g' | \
@@ -26,11 +26,10 @@ done
 # Apply other resources
 kubectl apply -f user-service/namespace.yaml
 kubectl apply -f gateway-service/namespace.yaml
-kubectl apply -f bookstore-service/namespace.yaml
 kubectl apply -f priority-classes.yaml
 
 # Wait for rollout
-for svc in user gateway bookstore; do
+for svc in user gateway; do
     kubectl rollout status deployment/${svc}-service -n iqscaffold-staging-env --timeout=600s
 done
 

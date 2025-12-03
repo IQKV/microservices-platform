@@ -23,28 +23,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # PostgreSQL Database for Bookstore Service
-  postgres-bookstore:
-    image: postgres:15-alpine
-    container_name: iqscaffold-postgres-bookstore
-    environment:
-      POSTGRES_DB: iqscaffold_bookstore
-      POSTGRES_USER: iqscaffold_user
-      POSTGRES_PASSWORD: iqscaffold_password
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_bookstore_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-bookstore.sql:/docker-entrypoint-initdb.d/init-bookstore.sql
-    networks:
-      - iqscaffold-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_bookstore"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
@@ -96,37 +74,6 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  # Bookstore Service
-  bookstore-service:
-    build:
-      context: .
-      dockerfile: iqscaffold-bookstore-service/Dockerfile
-    container_name: iqscaffold-bookstore-service
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-bookstore:5432/iqscaffold_bookstore
-      SPRING_DATASOURCE_USERNAME: iqscaffold_user
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      JWT_ISSUER_URI: http://gateway-service:8080/auth/realms/iqscaffold
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres-bookstore:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - iqscaffold-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-
   # Gateway Service
   gateway-service:
     build:
@@ -138,15 +85,12 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
-      IQSCAFFOLD_GATEWAY_BOOKSTORE_SERVICE_URL: http://bookstore-service:8080
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:
       - "8080:8080"
     depends_on:
       user-service:
-        condition: service_healthy
-      bookstore-service:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -230,8 +174,6 @@ networks:
 volumes:
   postgres_user_data:
     name: iqscaffold_postgres_user_data
-  postgres_bookstore_data:
-    name: iqscaffold_postgres_bookstore_data
   redis_data:
     name: iqscaffold_redis_data
   prometheus_data:

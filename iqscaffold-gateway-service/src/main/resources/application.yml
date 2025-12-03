@@ -45,58 +45,6 @@ spring :
             - Path=/.well-known/jwks.json
           filters :
             - StripPrefix=0
-        - id : bookstore-catalog
-          uri : ${iqscaffold.gateway.routing.services.bookstore-service.uri}
-          predicates :
-            - Path=/api/v1/bookstore/books,/api/v1/bookstore/books/**
-          filters :
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : 100
-                redis-rate-limiter.burst-capacity : 200
-            - name : CircuitBreaker
-              args :
-                name : bookstore-catalog-circuit-breaker
-                fallbackUri : forward:/fallback/bookstore/catalog
-        - id : bookstore-inventory
-          uri : ${iqscaffold.gateway.routing.services.bookstore-service.uri}
-          predicates :
-            - Path=/api/v1/bookstore/inventory,/api/v1/bookstore/inventory/**
-          filters :
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : 50
-                redis-rate-limiter.burst-capacity : 100
-            - name : CircuitBreaker
-              args :
-                name : bookstore-inventory-circuit-breaker
-                fallbackUri : forward:/fallback/bookstore/inventory
-        - id : bookstore-admin
-          uri : ${iqscaffold.gateway.routing.services.bookstore-service.uri}
-          predicates :
-            - Path=/api/v1/bookstore/admin/**
-          filters :
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : 50
-                redis-rate-limiter.burst-capacity : 100
-            - name : CircuitBreaker
-              args :
-                name : bookstore-admin-circuit-breaker
-                fallbackUri : forward:/fallback/bookstore/admin
-        - id : bookstore-info
-          uri : ${iqscaffold.gateway.routing.services.bookstore-service.uri}
-          predicates :
-            - Path=/api/v1/bookstore/version,/api/v1/bookstore/health,/api/v1/bookstore
-          filters :
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity : ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
         - id : health-check
           uri : ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates :
@@ -141,23 +89,6 @@ iqscaffold :
             display-name : "User Service APIs"
             description : "Authentication and user management APIs"
             context-path : "user-service"
-        bookstore-service :
-          uri : http://localhost:8080
-          path : /v1/bookstore/**
-          enabled : true
-          connect-timeout : 5000
-          response-timeout : 30000
-          openapi :
-            enabled : true
-            display-name : "Bookstore Service APIs"
-            description : "Bookstore management and inventory APIs - routed by domain (catalog, inventory, admin)"
-            context-path : "bookstore-service"
-          # Note: Bookstore routes are split by domain for better control:
-          # - /api/v1/bookstore/books/** -> catalog operations
-          # - /api/v1/bookstore/inventory/** -> inventory operations
-          # - /api/v1/bookstore/admin/** -> admin operations
-          # - /api/v1/bookstore -> service info
-          # This allows independent rate limiting, circuit breaking, and future service splitting
       enable-service-discovery : false
       load-balancing :
         strategy : round-robin
@@ -197,26 +128,6 @@ iqscaffold :
         - /api/v1/auth/password/forgot
         - /api/v1/auth/password/reset
         
-        # Bookstore public endpoints (no authentication required)
-        - /api/v1/bookstore/version
-        - /api/v1/bookstore/books
-        - /api/v1/bookstore/books/*/
-        - /api/v1/bookstore/books/isbn/**
-        - /api/v1/bookstore/books/available
-        - /api/v1/bookstore/books/in-stock
-        - /api/v1/bookstore/books/search
-        - /api/v1/bookstore/books/search/**
-        - /api/v1/bookstore/inventory
-        - /api/v1/bookstore/inventory/*/
-        - /api/v1/bookstore/inventory/*/availability
-        - /api/v1/bookstore/inventory/low-stock
-        - /api/v1/bookstore/inventory/out-of-stock
-        - /api/v1/bookstore/inventory/stats/**
-        
-        # Bookstore admin endpoints require authentication (ADMIN/SUPERADMIN role):
-        # - /api/v1/bookstore/admin/books/** (POST, PUT, DELETE)
-        # - /api/v1/bookstore/admin/inventory/** (PUT, POST)
-        
         # Actuator endpoints (public health checks)
         - /actuator/health
         - /actuator/info
@@ -227,8 +138,8 @@ iqscaffold :
         - /api-docs/**
         - /user-service/swagger-ui/**
         - /user-service/api-docs/**
-        - /bookstore-service/swagger-ui/**
-        - /bookstore-service/api-docs/**
+        - /business-service/swagger-ui/**
+        - /business-service/api-docs/**
         
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)
@@ -261,21 +172,6 @@ iqscaffold :
           "/api/v1/auth/email/verify" :
             requests-per-minute : 10
             burst-capacity : 15
-            enable-tenant-quotas : true
-          # Bookstore catalog endpoints - higher rate limit for public browsing
-          "/api/v1/bookstore/books/**" :
-            requests-per-minute : 100
-            burst-capacity : 200
-            enable-tenant-quotas : true
-          # Bookstore inventory endpoints - moderate rate limit
-          "/api/v1/bookstore/inventory/**" :
-            requests-per-minute : 50
-            burst-capacity : 100
-            enable-tenant-quotas : true
-          # Bookstore admin endpoints - moderate rate limit with auth required
-          "/api/v1/bookstore/admin/**" :
-            requests-per-minute : 50
-            burst-capacity : 100
             enable-tenant-quotas : true
           "/api/v1/auth/password/forgot" :
             requests-per-minute : 3

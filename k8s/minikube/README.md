@@ -39,7 +39,6 @@ minikube start --memory=4096 --cpus=2
 
 - Gateway: `http://$(minikube ip):30080`
 - User Service: `http://$(minikube ip):30081`
-- Bookstore Service: `http://$(minikube ip):30082`
 
 **Ingress (Production-like):**
 
@@ -48,7 +47,7 @@ minikube start --memory=4096 --cpus=2
 minikube addons enable ingress
 
 # Add to /etc/hosts (Linux/macOS) or C:\Windows\System32\drivers\etc\hosts (Windows)
-$(minikube ip) api.iqscaffold.site user.iqscaffold.site bookstore.iqscaffold.site
+$(minikube ip) api.iqscaffold.site user.iqscaffold.site
 
 # Access via domain names
 curl http://api.iqscaffold.site/actuator/health
@@ -99,7 +98,6 @@ kubectl get services -n iqscaffold-dev-env
 ```bash
 kubectl logs -f deployment/gateway-service -n iqscaffold-dev-env
 kubectl logs -f deployment/user-service -n iqscaffold-dev-env
-kubectl logs -f deployment/bookstore-service -n iqscaffold-dev-env
 ```
 
 ### Port Forwarding (Alternative to NodePort)
@@ -115,10 +113,6 @@ kubectl port-forward -n iqscaffold-dev-env svc/user-service 8081:8080
 # PostgreSQL (User Service)
 kubectl port-forward -n iqscaffold-dev-env svc/postgres-user 5432:5432
 psql -h localhost -U iqscaffold_user -d iqscaffold_user
-
-# PostgreSQL (Bookstore Service)
-kubectl port-forward -n iqscaffold-dev-env svc/postgres-bookstore 5433:5432
-psql -h localhost -p 5433 -U iqscaffold_user -d iqscaffold_bookstore
 
 # Redis
 kubectl port-forward -n iqscaffold-dev-env svc/redis 6379:6379
@@ -249,28 +243,28 @@ kubectl get pods -n ingress-nginx
 │                  (iqscaffold-dev-env namespace)             │
 ├─────────────────────────────────────────────────────────┤
 │                                                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │   Gateway    │  │     User     │  │  Bookstore   │  │
-│  │   Service    │  │   Service    │  │   Service    │  │
-│  │  (Port 8080) │  │  (Port 8080) │  │  (Port 8080) │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
-│         │                 │                  │           │
-│         │                 │                  │           │
-│  ┌──────▼─────────────────▼──────────────────▼───────┐  │
+│  ┌──────────────┐  ┌──────────────┐
+│  │   Gateway    │  │     User     │
+│  │   Service    │  │   Service    │
+│  │  (Port 8080) │  │  (Port 8080) │
+│  └──────┬───────┘  └──────┬───────┘
+│         │                 │
+│         │                 │
+│  ┌──────▼─────────────────▼──────────────────────────┐  │
 │  │                    Redis                           │  │
 │  │                 (Port 6379)                        │  │
 │  └────────────────────────────────────────────────────┘  │
 │                                                           │
-│  ┌──────────────────┐         ┌──────────────────┐      │
-│  │   PostgreSQL     │         │   PostgreSQL     │      │
-│  │  (User Service)  │         │ (Bookstore Svc)  │      │
-│  │   (Port 5432)    │         │   (Port 5432)    │      │
-│  └──────────────────┘         └──────────────────┘      │
+│  ┌──────────────────┐
+│  │   PostgreSQL     │
+│  │  (User Service)  │
+│  │   (Port 5432)    │
+│  └──────────────────┘
 │                                                           │
 └─────────────────────────────────────────────────────────┘
-         │                    │                    │
-         ▼                    ▼                    ▼
-    NodePort 30080       NodePort 30081      NodePort 30082
+         │
+         ▼
+    NodePort 30080
 ```
 
 ## Configuration
@@ -285,7 +279,6 @@ kubectl get pods -n ingress-nginx
 
 - **Gateway Service**: 256Mi-512Mi RAM, 100m-500m CPU
 - **User Service**: 256Mi-512Mi RAM, 100m-500m CPU
-- **Bookstore Service**: 256Mi-512Mi RAM, 100m-500m CPU
 - **PostgreSQL**: 128Mi-256Mi RAM, 100m-200m CPU
 - **Redis**: 64Mi-128Mi RAM, 50m-100m CPU
 

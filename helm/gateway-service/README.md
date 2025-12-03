@@ -6,11 +6,11 @@ Production-ready Helm chart for deploying the IQ Scaffold Gateway Service with R
 
 The Gateway Service is the **single public entry point** for the IQ Scaffold microservices platform. Built on Spring Cloud Gateway, it provides intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and request transformation.
 
-**Architecture**: Gateway is the only service with public ingress. All other services (User, Bookstore) are internal-only with ClusterIP services.
+**Architecture**: Gateway is the only service with public ingress. All other services (User, some-bussiness-service) are internal-only with ClusterIP services.
 
 ## Features
 
-- **Intelligent Routing**: Dynamic request routing to downstream services (User Service, Bookstore Service)
+- **Intelligent Routing**: Dynamic request routing to downstream services (User Service, some-bussiness-service)
 - **JWT Authentication**: Validates tokens from User Service via JWK endpoint
 - **Rate Limiting**: Redis-backed distributed rate limiting with endpoint-specific policies
 - **Circuit Breaker**: Resilience4j fault tolerance with automatic failure detection
@@ -25,7 +25,6 @@ The Gateway Service is the **single public entry point** for the IQ Scaffold mic
 - PV provisioner for Redis persistent storage (local-path for k3s)
 - Nginx Ingress Controller (if ingress enabled)
 - User Service deployed (for JWT validation)
-- Bookstore Service deployed (for routing)
 
 ## Quick Start
 
@@ -194,12 +193,12 @@ helm install gateway-service ./helm/gateway-service \
        │
        ├──────────────┬─────────────────┐
        ↓              ↓                 ↓
-┌──────────────┐ ┌──────────────┐ ┌──────────┐
-│ User Service │ │   Bookstore  │ │  Redis   │
-│              │ │   Service    │ │ (Cache & │
-│ (JWT Issuer) │ │              │ │  Rate    │
-│              │ │              │ │ Limiting)│
-└──────────────┘ └──────────────┘ └──────────┘
+┌──────────────┐ ┌────────────────────┐ ┌──────────┐
+│ User Service │ │ some-bussiness-service │ │  Redis   │
+│              │ │                    │ │ (Cache & │
+│ (JWT Issuer) │ │                    │ │  Rate    │
+│              │ │                    │ │ Limiting)│
+└──────────────┘ └────────────────────┘ └──────────┘
 ```
 
 ### Gateway Routes
@@ -207,7 +206,6 @@ helm install gateway-service ./helm/gateway-service \
 - `/api/v1/auth/**` → User Service (authentication endpoints, 60 req/min, burst 100)
 - `/api/v1/users/me` → User Service (user profile, 100 req/min, burst 150)
 - `/api/v1/admin/**` → User Service (admin endpoints, 100 req/min, burst 150)
-- `/api/v1/bookstore/**` → Bookstore Service (catalog and inventory, 100 req/min, burst 200)
 - `/.well-known/jwks.json` → User Service (JWK Set for JWT validation, no rate limit)
 - `/actuator/**` → Gateway actuator endpoints (no rate limit)
 
@@ -217,8 +215,6 @@ helm install gateway-service ./helm/gateway-service \
 - `/api/v1/auth/login`, `/api/v1/auth/signup`, `/api/v1/auth/refresh`
 - `/api/v1/auth/validate`, `/api/v1/auth/health`
 - `/api/v1/auth/email/**`, `/api/v1/auth/password/**`
-- `/api/v1/bookstore/version`, `/api/v1/bookstore/books/**`
-- `/api/v1/bookstore/inventory/**`
 - `/actuator/health`, `/actuator/info`
 - `/swagger-ui/**`, `/api-docs/**`
 
@@ -322,8 +318,6 @@ kubectl port-forward -n iqscaffold-dev-env svc/gateway-service 8080:80
 # Test User Service route
 curl http://localhost:8080/api/v1/auth/health
 
-# Test Bookstore Service route
-curl http://localhost:8080/api/v1/bookstore/books
 
 # Test with JWT
 curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/users/me
@@ -408,7 +402,7 @@ helm uninstall gateway-service --namespace iqscaffold-dev-env
 The chart includes network policies that:
 
 - Allow ingress from Nginx Ingress Controller
-- Allow egress to User Service and Bookstore Service
+- Allow egress to User Service and some-bussiness-service
 - Allow egress to Redis
 - Allow egress to observability services
 - Block all other traffic

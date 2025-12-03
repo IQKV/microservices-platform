@@ -47,7 +47,6 @@ export {
 // Re-export types for convenience
 export type {
   PaginationParams,
-  BookSearchParams,
   UserSearchParams
 } from './typed-api-client.js';
 
@@ -77,7 +76,6 @@ export type {
 export type {
   TestDataFactoryConfig,
   CreateUserOptions,
-  CreateBookOptions,
   CreateTenantOptions,
   TestDataRelationships
 } from './test-data-factory.js';
@@ -105,7 +103,6 @@ export type {
   AuthResponse,
   UserData,
   UserRegistrationData,
-  BookData,
   TenantData,
   PaginatedResponse,
   HealthCheckResponse,

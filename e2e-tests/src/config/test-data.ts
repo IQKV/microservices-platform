@@ -18,16 +18,6 @@ export interface TestTenantData {
   settings?: Record<string, any>;
 }
 
-export interface TestBookData {
-  title: string;
-  author: string;
-  isbn: string;
-  price: number;
-  category: string;
-  description: string;
-  stock: number;
-}
-
 /**
  * Default test data templates
  */
@@ -83,38 +73,6 @@ export const DEFAULT_TEST_DATA = {
       }
     } as TestTenantData
   },
-
-  books: {
-    fiction: {
-      title: 'Test Fiction Book',
-      author: 'Test Author',
-      isbn: '978-0-123456-78-9',
-      price: 19.99,
-      category: 'Fiction',
-      description: 'A test fiction book for API testing',
-      stock: 100
-    } as TestBookData,
-    
-    nonFiction: {
-      title: 'Test Non-Fiction Book',
-      author: 'Test Expert',
-      isbn: '978-0-987654-32-1',
-      price: 29.99,
-      category: 'Non-Fiction',
-      description: 'A test non-fiction book for API testing',
-      stock: 50
-    } as TestBookData,
-    
-    technical: {
-      title: 'Test Technical Book',
-      author: 'Tech Author',
-      isbn: '978-0-555666-77-8',
-      price: 49.99,
-      category: 'Technology',
-      description: 'A test technical book for API testing',
-      stock: 25
-    } as TestBookData
-  }
 };
 
 /**
@@ -138,31 +96,6 @@ export const TEST_DATA_CONFIG = {
     nameMinLength: 5,
     nameMaxLength: 50,
     descriptionMaxLength: 200
-  },
-
-  // Book generation settings
-  book: {
-    titleMinLength: 5,
-    titleMaxLength: 100,
-    authorMinLength: 3,
-    authorMaxLength: 50,
-    descriptionMaxLength: 500,
-    priceMin: 5.99,
-    priceMax: 99.99,
-    stockMin: 0,
-    stockMax: 1000,
-    categories: [
-      'Fiction',
-      'Non-Fiction',
-      'Technology',
-      'Science',
-      'History',
-      'Biography',
-      'Self-Help',
-      'Business',
-      'Health',
-      'Travel'
-    ]
   },
 
   // Test execution settings
@@ -202,19 +135,9 @@ export const API_ENDPOINTS = {
     users: (id: string) => `/api/v1/tenants/${id}/users`,
     settings: (id: string) => `/api/v1/tenants/${id}/settings`
   },
-  
-  books: {
-    base: '/api/v1/books',
-    byId: (id: string) => `/api/v1/books/${id}`,
-    search: '/api/v1/books/search',
-    categories: '/api/v1/books/categories',
-    inventory: (id: string) => `/api/v1/books/${id}/inventory`
-  },
-  
   health: {
     gateway: '/actuator/health',
     user: '/actuator/health',
-    bookstore: '/actuator/health'
   }
 };
 

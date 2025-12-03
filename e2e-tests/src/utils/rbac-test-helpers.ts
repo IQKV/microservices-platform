@@ -105,32 +105,6 @@ export class RbacTestHelpers {
       requiredRoles: ['USER'],
       description: 'Update current user profile'
     },
-    {
-      endpoint: '/api/v1/books',
-      method: 'GET',
-      requiredRoles: ['USER'],
-      description: 'List books'
-    },
-    {
-      endpoint: '/api/v1/books/{id}',
-      method: 'GET',
-      requiredRoles: ['USER'],
-      description: 'Get book by ID'
-    },
-
-    // Moderator endpoints
-    {
-      endpoint: '/api/v1/books',
-      method: 'POST',
-      requiredRoles: ['MODERATOR', 'ADMIN'],
-      description: 'Create new book'
-    },
-    {
-      endpoint: '/api/v1/books/{id}',
-      method: 'PUT',
-      requiredRoles: ['MODERATOR', 'ADMIN'],
-      description: 'Update book'
-    },
 
     // Admin endpoints
     {
@@ -163,13 +137,6 @@ export class RbacTestHelpers {
       requiredRoles: ['ADMIN'],
       description: 'Delete user'
     },
-    {
-      endpoint: '/api/v1/books/{id}',
-      method: 'DELETE',
-      requiredRoles: ['ADMIN'],
-      description: 'Delete book'
-    },
-
     // Super Admin endpoints
     {
       endpoint: '/api/v1/tenants',

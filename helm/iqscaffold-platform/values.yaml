@@ -63,31 +63,6 @@ gateway-service:
   # Service routing configuration
   routing:
     userServiceUrl: "http://user-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
-    bookstoreServiceUrl: "http://bookstore-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
-
-# Bookstore Service
-bookstore-service:
-  enabled: true
-  replicaCount: 2
-
-  image:
-    tag: "1.0.0"
-
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 70
-
-  postgresql:
-    enabled: true
-    persistence:
-      size: 5Gi
-
-  redis:
-    enabled: true
-    persistence:
-      size: 1Gi
 
 # Observability Stack (Optional)
 observability:
@@ -116,7 +91,6 @@ ingress:
   hosts:
     gateway: api.iqscaffold.site
     user: user.iqscaffold.site
-    bookstore: bookstore.iqscaffold.site
 
 # Priority Classes
 priorityClasses:

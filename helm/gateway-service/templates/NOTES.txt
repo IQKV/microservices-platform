@@ -45,7 +45,6 @@ App Version:     {{ .Chart.AppVersion }}
 
   Gateway URL:      http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
   User Service:     http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/api/v1/auth
-  Bookstore:        http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/api/v1/bookstore
   Health Check:     http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/actuator/health
   Metrics:          http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/actuator/prometheus
   Gateway Routes:   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}/actuator/gateway/routes
@@ -57,7 +56,6 @@ App Version:     {{ .Chart.AppVersion }}
 
   Gateway URL:      http://localhost:8080
   User Service:     http://localhost:8080/api/v1/auth
-  Bookstore:        http://localhost:8080/api/v1/bookstore
   Health Check:     http://localhost:8080/actuator/health
   Metrics:          http://localhost:8080/actuator/prometheus
   Gateway Routes:   http://localhost:8080/actuator/gateway/routes
@@ -116,7 +114,7 @@ App Version:     {{ .Chart.AppVersion }}
 
 🔐 GATEWAY FEATURES
 
-  ✓ Intelligent Routing       - Routes to User and Bookstore services
+  ✓ Intelligent Routing        - Routes to User and buiness services
   ✓ JWT Authentication         - Validates tokens from User Service
   ✓ Rate Limiting              - Redis-backed distributed rate limiting
   ✓ Circuit Breaker            - Resilience4j fault tolerance
@@ -161,7 +159,6 @@ App Version:     {{ .Chart.AppVersion }}
 
   # Test routing
   curl -X GET http://localhost:8080/api/v1/auth/health
-  curl -X GET http://localhost:8080/api/v1/bookstore/books
 
   # Test rate limiting
   for i in {1..100}; do curl -X POST http://localhost:8080/api/v1/auth/login; done

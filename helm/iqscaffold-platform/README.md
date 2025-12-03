@@ -41,14 +41,14 @@ helm install iqscaffold . -f values-production.yaml --create-namespace
            │ Gateway Service │
            └───────┬─────────┘
                    │
-        ┏━━━━━━━━━━┻━━━━━━━━━━┓
-        ▼                      ▼
-┌───────────────┐      ┌──────────────────┐
-│ User Service  │      │Bookstore Service │
-├───────────────┤      ├──────────────────┤
-│ PostgreSQL    │      │  PostgreSQL      │
-│ Redis         │      │  Redis           │
-└───────────────┘      └──────────────────┘
+        ┏━━━━━━━━━━┻
+        ▼
+┌───────────────┐
+│ User Service  │
+├───────────────┤
+│ PostgreSQL    │
+│ Redis         │
+└───────────────┘
 ```
 
 ## Configuration
@@ -114,8 +114,7 @@ helm install iqscaffold . -f custom-values.yaml
 ```bash
 # Install only user service
 helm install iqscaffold . \
-  --set gateway-service.enabled=false \
-  --set bookstore-service.enabled=false
+  --set gateway-service.enabled=false 
 
 # Install without observability
 helm install iqscaffold . \
@@ -163,7 +162,6 @@ curl http://localhost:8081/actuator/health
 ```bash
 kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=gateway-service
 kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=user-service
-kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=bookstore-service
 ```
 
 ### View Resources
@@ -215,7 +213,6 @@ See individual service charts for detailed configuration:
 
 - [User Service](../user-service/README.md)
 - [Gateway Service](../gateway-service/README.md)
-- [Bookstore Service](../bookstore-service/README.md)
 
 ## Support
 

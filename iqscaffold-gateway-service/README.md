@@ -156,7 +156,6 @@ Request Flow:
 ### Request Routing
 
 - Route requests to user-service (/api/v1/auth/**, /api/v1/users/me, /api/v1/admin/**)
-- Route requests to bookstore-service (/api/v1/bookstore/\*\*)
 - Dynamic service registration support
 - Load balancing across service instances
 - Health check-based routing
@@ -238,7 +237,6 @@ spring:
 - `POST /api/v1/auth/refresh` - Refresh access token
 - `GET /api/v1/auth/email/verify` - Verify email
 - `POST /api/v1/auth/password/forgot` - Password reset request
-- `GET /api/v1/bookstore/books` - List books (public)
 - `GET /.well-known/jwks.json` - JWK Set for token validation
 
 ### Protected Endpoints (Requires JWT)
@@ -246,7 +244,6 @@ spring:
 - `GET /api/v1/users/me` - Get current user
 - `POST /api/v1/auth/logout` - Logout current session
 - `GET /api/v1/admin/users` - List users (admin only)
-- `POST /api/v1/bookstore/orders` - Create order
 
 ### Monitoring Endpoints
 

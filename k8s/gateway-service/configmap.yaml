@@ -50,28 +50,6 @@ data:
             filters:
             - RewritePath=/api/v1/auth/(?<segment>.*), /$\{segment}
           
-          # ===== Bookstore Service Routes =====
-          - id: bookstore-service-api
-            uri: http://bookstore-service.iqscaffold-bookstore.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/**
-            filters:
-            - StripPrefix=0
-          
-          - id: bookstore-service-public
-            uri: http://bookstore-service.iqscaffold-bookstore.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/public/**
-            filters:
-            - StripPrefix=0
-          
-          - id: bookstore-service-actuator
-            uri: http://bookstore-service.iqscaffold-bookstore.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/actuator/**
-            filters:
-            - RewritePath=/api/v1/bookstore/(?<segment>.*), /$\{segment}
-          
           # ===== Gateway Health & Monitoring =====
           - id: gateway-actuator
             uri: http://localhost:8080
@@ -208,21 +186,6 @@ data:
             filters:
             - StripPrefix=0
           
-          # ===== Bookstore Service Routes =====
-          - id: bookstore-service-api
-            uri: http://bookstore-service.staging-env.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/**
-            filters:
-            - StripPrefix=0
-          
-          - id: bookstore-service-public
-            uri: http://bookstore-service.staging-env.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/public/**
-            filters:
-            - StripPrefix=0
-          
           # ===== Gateway Health =====
           - id: gateway-actuator
             uri: http://localhost:8080
@@ -288,21 +251,6 @@ data:
             uri: http://user-service-production.production-env.svc.cluster.local:8080
             predicates:
             - Path=/api/v1/tenants/**
-            filters:
-            - StripPrefix=0
-          
-          # ===== Bookstore Service Routes =====
-          - id: bookstore-service-api
-            uri: http://bookstore-service.production-env.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/**
-            filters:
-            - StripPrefix=0
-          
-          - id: bookstore-service-public
-            uri: http://bookstore-service.production-env.svc.cluster.local:8080
-            predicates:
-            - Path=/api/v1/bookstore/public/**
             filters:
             - StripPrefix=0
           

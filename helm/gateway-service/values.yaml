@@ -277,22 +277,6 @@ configMap:
                 filters:
                   - StripPrefix=0
               
-              # Bookstore Service Routes
-              - id: bookstore-service
-                uri: ${iqscaffold.gateway.routing.services.bookstore-service.uri}
-                predicates:
-                  - Path=/api/v1/bookstore/**
-                filters:
-                  - StripPrefix=0
-                  - name: RequestRateLimiter
-                    args:
-                      redis-rate-limiter.replenish-rate: 100
-                      redis-rate-limiter.burst-capacity: 200
-                  - name: CircuitBreaker
-                    args:
-                      name: bookstore-circuit-breaker
-                      fallbackUri: forward:/fallback/bookstore
-              
               # Gateway Health & Monitoring
               - id: gateway-actuator
                 uri: http://localhost:8080
@@ -349,12 +333,6 @@ configMap:
                 enabled: true
                 connect-timeout: 5000
                 response-timeout: 30000
-              bookstore-service:
-                uri: ${IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI:http://bookstore-service}
-                path: /v1/bookstore/**
-                enabled: true
-                connect-timeout: 5000
-                response-timeout: 30000
           
           security:
             jwt:
@@ -381,20 +359,6 @@ configMap:
               - /api/v1/auth/email/status
               - /api/v1/auth/password/forgot
               - /api/v1/auth/password/reset
-              - /api/v1/bookstore/version
-              - /api/v1/bookstore/books
-              - /api/v1/bookstore/books/*/
-              - /api/v1/bookstore/books/isbn/**
-              - /api/v1/bookstore/books/available
-              - /api/v1/bookstore/books/in-stock
-              - /api/v1/bookstore/books/search
-              - /api/v1/bookstore/books/search/**
-              - /api/v1/bookstore/inventory
-              - /api/v1/bookstore/inventory/*/
-              - /api/v1/bookstore/inventory/*/availability
-              - /api/v1/bookstore/inventory/low-stock
-              - /api/v1/bookstore/inventory/out-of-stock
-              - /api/v1/bookstore/inventory/stats/**
               - /actuator/health
               - /actuator/info
               - /swagger-ui/**
@@ -415,9 +379,6 @@ configMap:
                 "/api/v1/auth/signup":
                   requests-per-minute: 5
                   burst-capacity: 10
-                "/api/v1/bookstore/books":
-                  requests-per-minute: 100
-                  burst-capacity: 200
           
           circuit-breaker:
             enabled: true
@@ -550,8 +511,6 @@ env:
     value: "http://user-service/.well-known/jwks.json"
   - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
     value: "http://user-service"
-  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service"
   - name: IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
   - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT
@@ -622,14 +581,6 @@ networkPolicy:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: iqscaffold-user-service
-      ports:
-        - protocol: TCP
-          port: 8080
-    # Allow access to bookstore-service (same namespace)
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: iqscaffold-bookstore-service
       ports:
         - protocol: TCP
           port: 8080

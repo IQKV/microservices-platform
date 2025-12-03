@@ -8,7 +8,7 @@ Comprehensive Playwright-based API testing infrastructure for the IQ Scaffold mi
 
 - Node.js 18+
 - Docker and Docker Compose
-- Running IQ Scaffold services (Auth, Gateway, Bookstore)
+- Running IQ Scaffold services (Auth, Gateway)
 
 ### Installation
 

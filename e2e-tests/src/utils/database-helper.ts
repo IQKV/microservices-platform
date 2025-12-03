@@ -35,7 +35,7 @@ export class DatabaseConnectionManager {
   /**
    * Gets or creates a connection pool for a specific database
    */
-  async getPool(service: 'auth' | 'bookstore'): Promise<Pool> {
+  async getPool(service: 'auth'): Promise<Pool> {
     if (this.pools.has(service)) {
       return this.pools.get(service)!;
     }
@@ -69,7 +69,7 @@ export class DatabaseConnectionManager {
   /**
    * Gets a client from the connection pool
    */
-  async getClient(service: 'auth' | 'bookstore'): Promise<PoolClient> {
+  async getClient(service: 'auth'): Promise<PoolClient> {
     const pool = await this.getPool(service);
     return pool.connect();
   }
@@ -89,15 +89,14 @@ export class DatabaseConnectionManager {
   async checkHealth(): Promise<Record<string, boolean>> {
     const results: Record<string, boolean> = {};
     
-    for (const service of ['auth', 'bookstore'] as const) {
-      try {
-        const client = await this.getClient(service);
-        await client.query(HEALTH_CHECK_QUERIES[service]);
-        client.release();
-        results[service] = true;
-      } catch (error) {
-        results[service] = false;
-      }
+    const service: 'auth' = 'auth';
+    try {
+      const client = await this.getClient(service);
+      await client.query(HEALTH_CHECK_QUERIES[service]);
+      client.release();
+      results[service] = true;
+    } catch (error) {
+      results[service] = false;
     }
 
     return results;
@@ -119,7 +118,7 @@ export class TestTransactionManager {
    * Begins a transaction for test isolation
    */
   async beginTransaction(
-    service: 'auth' | 'bookstore', 
+    service: 'auth', 
     testId: string = generateTestId(),
     config: TransactionConfig = DEFAULT_TRANSACTION_CONFIG
   ): Promise<string> {
@@ -265,47 +264,10 @@ export class TestDataSeeder {
   }
 
   /**
-   * Seeds basic test data for bookstore service
-   */
-  async seedBookstoreData(tenantId?: string): Promise<void> {
-    const client = await this.connectionManager.getClient('bookstore');
-    
-    try {
-      await client.query('BEGIN');
-
-      // Create test categories
-      const categories = [
-        { name: 'Fiction', description: 'Fiction books for testing' },
-        { name: 'Non-Fiction', description: 'Non-fiction books for testing' },
-        { name: 'Technology', description: 'Technology books for testing' },
-        { name: 'Science', description: 'Science books for testing' }
-      ];
-
-      for (const category of categories) {
-        await client.query(`
-          INSERT INTO categories (name, description, created_at, updated_at)
-          VALUES ($1, $2, NOW(), NOW())
-          ON CONFLICT (name) DO NOTHING
-        `, [category.name, category.description]);
-      }
-
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new Error(`Failed to seed bookstore data: ${error}`);
-    } finally {
-      client.release();
-    }
-  }
-
-  /**
    * Seeds all basic test data
    */
   async seedAllData(tenantId?: string): Promise<void> {
-    await Promise.all([
-      this.seedAuthData(tenantId),
-      this.seedBookstoreData(tenantId)
-    ]);
+    await this.seedAuthData(tenantId);
   }
 }
 
@@ -323,10 +285,7 @@ export class TestDataCleanup {
    * Cleans up test data based on relationships
    */
   async cleanupTestData(relationships: TestDataRelationships): Promise<void> {
-    await Promise.all([
-      this.cleanupAuthData(relationships),
-      this.cleanupBookstoreData(relationships)
-    ]);
+    await this.cleanupAuthData(relationships);
   }
 
   /**
@@ -386,62 +345,16 @@ export class TestDataCleanup {
   }
 
   /**
-   * Cleans up bookstore service test data
-   */
-  async cleanupBookstoreData(relationships: TestDataRelationships): Promise<void> {
-    const client = await this.connectionManager.getClient('bookstore');
-    
-    try {
-      await client.query('BEGIN');
-
-      // Clean up books and related data
-      if (relationships.books.size > 0) {
-        const bookIds = Array.from(relationships.books);
-        
-        // Clean up order items
-        await client.query(`
-          DELETE FROM order_items WHERE book_id = ANY($1)
-        `, [bookIds]);
-
-        // Clean up inventory
-        await client.query(`
-          DELETE FROM inventory WHERE book_id = ANY($1)
-        `, [bookIds]);
-
-        // Clean up book categories
-        await client.query(`
-          DELETE FROM book_categories WHERE book_id = ANY($1)
-        `, [bookIds]);
-
-        // Clean up books
-        await client.query(`
-          DELETE FROM books WHERE id = ANY($1)
-        `, [bookIds]);
-      }
-
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw new Error(`Failed to cleanup bookstore data: ${error}`);
-    } finally {
-      client.release();
-    }
-  }
-
-  /**
    * Performs general cleanup using predefined queries
    */
   async performGeneralCleanup(): Promise<void> {
-    await Promise.all([
-      this.executeCleanupQueries('auth', CLEANUP_QUERIES.auth),
-      this.executeCleanupQueries('bookstore', CLEANUP_QUERIES.bookstore)
-    ]);
+    await this.executeCleanupQueries('auth', CLEANUP_QUERIES.auth);
   }
 
   /**
    * Executes cleanup queries for a specific service
    */
-  private async executeCleanupQueries(service: 'auth' | 'bookstore', queries: readonly string[]): Promise<void> {
+  private async executeCleanupQueries(service: 'auth', queries: readonly string[]): Promise<void> {
     const client = await this.connectionManager.getClient(service);
     
     try {
@@ -469,16 +382,13 @@ export class TestDataCleanup {
    * Truncates all test tables (use with caution)
    */
   async truncateAllTestTables(): Promise<void> {
-    await Promise.all([
-      this.truncateServiceTables('auth'),
-      this.truncateServiceTables('bookstore')
-    ]);
+    await this.truncateServiceTables('auth');
   }
 
   /**
    * Truncates tables for a specific service
    */
-  private async truncateServiceTables(service: 'auth' | 'bookstore'): Promise<void> {
+  private async truncateServiceTables(service: 'auth'): Promise<void> {
     const client = await this.connectionManager.getClient(service);
     const tables = DATABASE_SCHEMAS[service].tables;
     
@@ -538,7 +448,7 @@ export class DatabaseHelper {
   /**
    * Executes a query against a specific service database
    */
-  async query(service: 'auth' | 'bookstore', text: string, params?: any[]): Promise<QueryResult> {
+  async query(service: 'auth', text: string, params?: any[]): Promise<QueryResult> {
     const client = await this.connectionManager.getClient(service);
     try {
       return await client.query(text, params);
@@ -551,7 +461,7 @@ export class DatabaseHelper {
    * Executes multiple queries in a transaction
    */
   async executeInTransaction(
-    service: 'auth' | 'bookstore',
+    service: 'auth',
     queries: Array<{ text: string; params?: any[] }>,
     config?: TransactionConfig
   ): Promise<QueryResult[]> {

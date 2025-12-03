@@ -67,7 +67,6 @@ services:
 
       # Gateway Routing Configuration
       IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI: http://mock-user-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI: http://bookstore-service:8080
       USER_SERVICE_JWK_URI: http://mock-user-service:8080/.well-known/jwks.json
 
       # CORS Configuration

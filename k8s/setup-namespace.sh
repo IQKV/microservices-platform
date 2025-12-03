@@ -17,7 +17,6 @@ setup_namespaces() {
     
     kubectl apply -f user-service/namespace.yaml
     kubectl apply -f gateway-service/namespace.yaml
-    kubectl apply -f bookstore-service/namespace.yaml
     kubectl apply -f priority-classes.yaml
 }
 

@@ -8,7 +8,6 @@ A microservices ecosystem that provides:
 
 - **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
 - **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
-- **Catalog & Inventory** - Book management system demonstrating domain-driven design and inventory tracking patterns
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
@@ -59,28 +58,6 @@ Reactive API gateway providing unified entry point for all services.
 - API versioning (path and header-based)
 - Type-safe configuration with Java records (IqScaffoldProperties)
 
-### 📚 [Bookstore Service](iqscaffold-bookstore-service/README.md)
-
-Domain service demonstrating catalog and inventory management with DDD patterns.
-
-**Core Capabilities:**
-
-- Book catalog management with rich domain models
-- Inventory tracking with reservations
-- Multi-criteria search and filtering
-- Stock level monitoring with low-stock alerts
-- Admin operations with audit trail
-
-**Key Patterns:**
-
-- Domain-Driven Design with value objects (ISBN, Money, BookId)
-- Aggregate roots with business logic (Book, Category, Inventory)
-- Factory methods for object creation
-- Repository and service layers with clear boundaries
-- Cache-aside pattern with Redis
-- Optimistic locking for concurrency
-- Modular package structure (catalog, inventory, shared)
-
 ## Architecture Overview
 
 ### Microservices Architecture
@@ -97,23 +74,23 @@ Domain service demonstrating catalog and inventory management with DDD patterns.
 │  • Routing & Rate Limiting          │
 │  • JWT Validation                   │
 │  • Circuit Breaker                  │
-└──────┬──────────────────┬───────────┘
-       │                  │
-       ▼                  ▼
-┌──────────────┐   ┌──────────────┐
-│ User Service │   │   Bookstore  │
-│  (Port 8080) │   │    Service   │
-│              │   │  (Port 8082) │
-│ • Auth/JWT   │   │              │
-│ • Users      │   │ • Books      │
-│ • Roles      │   │ • Inventory  │
-└──────┬───────┘   └──────┬───────┘
-       │                  │
-       ▼                  ▼
-┌──────────────┐   ┌──────────────┐
-│  PostgreSQL  │   │  PostgreSQL  │
-│  (User DB)   │   │ (Bookstore)  │
-└──────────────┘   └──────────────┘
+└──────┬──────────────────────────────┘
+       │
+       ▼
+┌──────────────┐
+│ User Service │
+│  (Port 8080) │
+│              │
+│ • Auth/JWT   │
+│ • Users      │
+│ • Roles      │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  PostgreSQL  │
+│  (User DB)   │
+└──────────────┘
 
        Shared Infrastructure:
 ┌──────────────┐   ┌──────────────┐
@@ -220,9 +197,6 @@ docker-compose up
 cd iqscaffold-gateway-service
 docker-compose up
 
-# Start Bookstore Service
-cd iqscaffold-bookstore-service
-docker-compose up
 ```
 
 ### API Documentation
@@ -231,7 +205,6 @@ Once services are running, access Swagger UI:
 
 - User Service: http://user-service:8080/swagger-ui.html
 - Gateway Service: http://gateway-service:8081/swagger-ui.html
-- Bookstore Service: http://bookstore-service:8082/swagger-ui.html
 
 ### Monitoring
 
@@ -300,7 +273,6 @@ This platform provides reusable patterns for:
 
 ### Domain Services
 
-- Catalog and inventory management
 - Order processing systems
 - Asset management platforms
 - Any CRUD-based business domain

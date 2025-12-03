@@ -29,9 +29,9 @@ scale_service() {
 }
 
 case "$SERVICE" in
-    user|gateway|bookstore) scale_service "$SERVICE" "$NS" "$REPLICAS" ;;
+    user|gateway) scale_service "$SERVICE" "$NS" "$REPLICAS" ;;
     all)
-        for svc in user gateway bookstore; do
+        for svc in user gateway; do
             scale_service "$svc" "$NS" "$REPLICAS"
         done
         ;;

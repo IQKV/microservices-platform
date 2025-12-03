@@ -54,7 +54,7 @@ export const DEFAULT_TRANSACTION_CONFIG: TransactionConfig = {
 /**
  * Gets database configuration for a specific service
  */
-export function getDatabaseConfig(service: 'auth' | 'bookstore'): DatabaseConfig {
+export function getDatabaseConfig(service: 'auth'): DatabaseConfig {
   const envConfig = getEnvironmentConfig();
   return envConfig.databases[service];
 }
@@ -99,7 +99,7 @@ export function buildConnectionUrl(
  * Database schema management utilities
  */
 export const DATABASE_SCHEMAS = {
-  user: {
+  auth: {
     tables: [
       'users',
       'user_authorities',
@@ -114,22 +114,6 @@ export const DATABASE_SCHEMAS = {
       'authorities_id_seq',
       'tenants_id_seq'
     ]
-  },
-  
-  bookstore: {
-    tables: [
-      'books',
-      'categories',
-      'book_categories',
-      'inventory',
-      'orders',
-      'order_items'
-    ],
-    sequences: [
-      'books_id_seq',
-      'categories_id_seq',
-      'orders_id_seq'
-    ]
   }
 } as const;
 
@@ -137,22 +121,13 @@ export const DATABASE_SCHEMAS = {
  * Test data cleanup queries
  */
 export const CLEANUP_QUERIES = {
-  user: [
+  auth: [
     'DELETE FROM email_verifications WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\'',
     'DELETE FROM password_reset_tokens WHERE user_id IN (SELECT id FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\')',
     'DELETE FROM tenant_users WHERE user_id IN (SELECT id FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\')',
     'DELETE FROM user_authorities WHERE user_id IN (SELECT id FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\')',
     'DELETE FROM users WHERE email LIKE \'%test%\' OR email LIKE \'%example.com\'',
     'DELETE FROM tenants WHERE name LIKE \'%Test%\' OR subdomain LIKE \'%test%\''
-  ],
-  
-  bookstore: [
-    'DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE created_at > NOW() - INTERVAL \'1 hour\')',
-    'DELETE FROM orders WHERE created_at > NOW() - INTERVAL \'1 hour\'',
-    'DELETE FROM inventory WHERE book_id IN (SELECT id FROM books WHERE title LIKE \'%Test%\')',
-    'DELETE FROM book_categories WHERE book_id IN (SELECT id FROM books WHERE title LIKE \'%Test%\')',
-    'DELETE FROM books WHERE title LIKE \'%Test%\'',
-    'DELETE FROM categories WHERE name LIKE \'%Test%\''
   ]
 } as const;
 
@@ -160,8 +135,7 @@ export const CLEANUP_QUERIES = {
  * Database health check queries
  */
 export const HEALTH_CHECK_QUERIES = {
-  user: 'SELECT 1 as health_check',
-  bookstore: 'SELECT 1 as health_check'
+  auth: 'SELECT 1 as health_check'
 } as const;
 
 /**

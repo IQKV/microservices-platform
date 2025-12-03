@@ -133,8 +133,6 @@ test.describe('Role-Based Access Control Tests', () => {
     test('should allow user access to user endpoints', async () => {
       const userEndpoints = [
         { endpoint: '/api/v1/users/me', method: 'GET' as const, requiredRoles: ['USER'] },
-        { endpoint: '/api/v1/books', method: 'GET' as const, requiredRoles: ['USER'] },
-        { endpoint: '/api/v1/books/1', method: 'GET' as const, requiredRoles: ['USER'] }
       ];
 
       const results = await rbacHelpers.testUserAccess(regularUser, userEndpoints);
@@ -180,20 +178,6 @@ test.describe('Role-Based Access Control Tests', () => {
       });
     });
 
-    test('should allow moderator access to content management endpoints', async () => {
-      const moderatorEndpoints = [
-        { endpoint: '/api/v1/books', method: 'POST' as const, requiredRoles: ['MODERATOR', 'ADMIN'] },
-        { endpoint: '/api/v1/books/1', method: 'PUT' as const, requiredRoles: ['MODERATOR', 'ADMIN'] }
-      ];
-
-      const results = await rbacHelpers.testUserAccess(moderatorUser, moderatorEndpoints);
-      
-      // Moderator should have access to content management
-      results.forEach(result => {
-        expect(result.passed).toBe(true);
-        expect(result.actualAccess).toBe(true);
-      });
-    });
   });
 
   test.describe('Access Matrix Testing', () => {
@@ -275,7 +259,6 @@ test.describe('Role-Based Access Control Tests', () => {
 
       // Test cross-tenant access
       const crossTenantEndpoints = [
-        '/api/v1/books',
         '/api/v1/users/me'
       ];
 
@@ -352,13 +335,6 @@ test.describe('Role-Based Access Control Tests', () => {
 
       // Login user
       await authFramework.loginTestUser(limitedUser);
-
-      // Test access to endpoints requiring specific permissions
-      const writeEndpoint = { 
-        endpoint: '/api/v1/books', 
-        method: 'POST' as const, 
-        requiredPermissions: ['WRITE', 'MODERATE'] 
-      };
 
       const result = await rbacHelpers.testEndpointAccess(limitedUser, writeEndpoint);
       

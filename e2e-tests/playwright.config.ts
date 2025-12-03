@@ -14,7 +14,6 @@ const environments = {
     services: {
       gateway: "http://localhost:8080",
       user: "http://localhost:8080",
-      bookstore: "http://localhost:8080",
     },
     timeout: 30000,
     retries: 1,
@@ -25,7 +24,6 @@ const environments = {
     services: {
       gateway: "https://api.iqscaffold.website",
       user: "https://user.iqscaffold.website",
-      bookstore: "https://bookstore.iqscaffold.website",
     },
     timeout: 60000,
     retries: 2,
@@ -36,7 +34,6 @@ const environments = {
     services: {
       gateway: "https://api.iqscaffold.com",
       user: "https://user.iqscaffold.com",
-      bookstore: "https://bookstore.iqscaffold.com",
     },
     timeout: 90000,
     retries: 3,
@@ -145,15 +142,6 @@ export default defineConfig({
     {
       name: "gateway-service",
       testDir: "./src/tests/gateway-service",
-      use: {
-        ...devices["Desktop Chrome"],
-        headless: true,
-      },
-    },
-
-    {
-      name: "bookstore-service",
-      testDir: "./src/tests/bookstore-service",
       use: {
         ...devices["Desktop Chrome"],
         headless: true,

@@ -30,7 +30,6 @@
     <modules>
         <module>iqscaffold-user-service</module>
         <module>iqscaffold-gateway-service</module>
-        <module>iqscaffold-bookstore-service</module>
     </modules>
 
     <build>

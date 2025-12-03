@@ -38,11 +38,10 @@ check_service() {
 log "Health check for $ENV environment..."
 
 case "$SERVICE" in
-    user|gateway|bookstore) check_service "$SERVICE" "$NS" ;;
+    user|gateway) check_service "$SERVICE" "$NS" ;;
     all)
         check_service "user" "$NS"
         check_service "gateway" "$NS"
-        check_service "bookstore" "$NS"
         ;;
 esac
 

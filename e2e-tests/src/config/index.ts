@@ -36,7 +36,6 @@ export {
 export type {
   TestUserData,
   TestTenantData,
-  TestBookData
 } from './test-data.js';
 
 // Database configuration

@@ -135,82 +135,6 @@ export interface TenantData {
   updatedAt: string;
 }
 
-// Book related responses (for Bookstore service)
-export interface BookData {
-  id: number;
-  title: string;
-  author: string;
-  isbn: string;
-  description?: string;
-  price: number;
-  currency?: string;
-  stock?: number;
-  category?: string;
-  categoryName?: string;
-  tags?: string[];
-  tenantId?: string;
-  available?: boolean;
-  availableQuantity?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BookResponse {
-  id: number;
-  title: string;
-  author: string;
-  isbn: string;
-  description?: string;
-  price: number;
-  currency?: string;
-  stock?: number;
-  category?: string;
-  categoryName?: string;
-  tags?: string[];
-  available?: boolean;
-  availableQuantity?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Book creation request
-export interface CreateBookRequest {
-  title: string;
-  author: string;
-  isbn: string;
-  description?: string;
-  price: number;
-  currency?: string;
-  stock?: number;
-  category?: string;
-  tags?: string[];
-}
-
-// Book update request
-export interface UpdateBookRequest {
-  title?: string;
-  author?: string;
-  isbn?: string;
-  description?: string;
-  price?: number;
-  currency?: string;
-  stock?: number;
-  category?: string;
-  tags?: string[];
-}
-
-// Book search criteria
-export interface BookSearchCriteria {
-  title?: string;
-  author?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  availableOnly?: boolean;
-  tags?: string[];
-  inStock?: boolean;
-}
-
 // Paginated response structure
 export interface PaginatedResponse<T> {
   content: T[];
@@ -383,54 +307,6 @@ export interface UpdateTenantRequest {
   subdomain?: string;
   enabled?: boolean;
   settings?: Record<string, unknown>;
-}
-
-// Inventory update request
-export interface UpdateInventoryRequest {
-  stock: number;
-}
-
-// Bulk inventory update request
-export interface BulkInventoryRequest {
-  updates: Array<{
-    bookId: number;
-    stock: number;
-  }>;
-}
-
-// Category response
-export interface CategoryResponse {
-  id: number;
-  name: string;
-  description?: string;
-  bookCount?: number;
-}
-
-// Search metadata
-export interface SearchMetadata {
-  query?: string;
-  totalResults: number;
-  searchTime: number;
-  filters?: Record<string, unknown>;
-}
-
-// Filter metadata
-export interface FilterMetadata {
-  availableCategories: string[];
-  priceRange: {
-    min: number;
-    max: number;
-  };
-  availableAuthors: string[];
-  totalBooks: number;
-}
-
-// API versioning support
-export interface ApiVersionInfo {
-  version: string;
-  supportedVersions: string[];
-  deprecatedVersions: string[];
-  latestVersion: string;
 }
 
 // Rate limiting response headers

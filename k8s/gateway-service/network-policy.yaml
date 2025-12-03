@@ -50,17 +50,6 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-    # Allow egress to bookstore service
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              app.kubernetes.io/part-of: iqscaffold
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: iqscaffold-bookstore-service
-      ports:
-        - protocol: TCP
-          port: 8080
     # Allow egress to Redis
     - to:
         - podSelector:

@@ -57,23 +57,7 @@ const authResponse = await typedClient.login({
   password: 'testpassword'
 });
 
-// Get books with type safety
-const books = await typedClient.getBooks({
-  page: 0,
-  size: 10,
-  category: 'programming'
-});
 
-// Create book with validation
-const newBook = await typedClient.createBook({
-  title: 'Test Book',
-  author: 'Test Author',
-  isbn: '978-0-123456-78-9',
-  price: 29.99,
-  currency: 'USD',
-  stock: 100,
-  category: 'testing'
-});
 ```
 
 ### Validation (`validation.ts`)
@@ -120,22 +104,10 @@ const errors = ValidationUtils.getValidationErrors(data, schema);
 - `getTenants(params?)` - Get all tenants (admin only)
 - `createTenant(tenantData)` - Create new tenant (admin only)
 
-### Bookstore Service
-
-- `getBooks(params?)` - Get books with search/pagination
-- `getBookById(bookId)` - Get book by ID
-- `createBook(bookData)` - Create new book
-- `updateBook(bookId, bookData)` - Update book
-- `deleteBook(bookId)` - Delete book
-- `searchBooks(query, params?)` - Search books
-- `updateBookStock(bookId, stock)` - Update book stock
-- `getBooksByCategory(category, params?)` - Get books by category
-
 ### Health Checks
 
 - `checkGatewayHealth()` - Check Gateway service health
 - `checkUserServiceHealth()` - Check User service health
-- `checkBookstoreServiceHealth()` - Check Bookstore service health
 
 ## Error Handling
 

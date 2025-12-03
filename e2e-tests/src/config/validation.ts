@@ -96,14 +96,8 @@ export function validateEnvironmentConfig(config: TestEnvironmentConfig): Valida
     errors.push(`Invalid user service URL format: ${config.services.auth}`);
   }
 
-  if (!config.services.bookstore) {
-    errors.push('Bookstore service URL is required');
-  } else if (!isValidUrl(config.services.bookstore)) {
-    errors.push(`Invalid bookstore service URL format: ${config.services.bookstore}`);
-  }
-
   // Validate database configurations
-  ['auth', 'bookstore'].forEach(service => {
+  ['auth'].forEach(service => {
     const dbConfig = config.databases[service as keyof typeof config.databases];
     
     if (!dbConfig.host) {
@@ -275,8 +269,7 @@ export async function validateEnvironment(): Promise<EnvironmentValidationResult
   // Perform service health checks
   const serviceHealthPromises = [
     checkServiceHealth('gateway', config.services.gateway, config.timeouts.healthCheck),
-    checkServiceHealth('auth', config.services.auth, config.timeouts.healthCheck),
-    checkServiceHealth('bookstore', config.services.bookstore, config.timeouts.healthCheck)
+    checkServiceHealth('auth', config.services.auth, config.timeouts.healthCheck)
   ];
   
   const serviceHealth = await Promise.all(serviceHealthPromises);
@@ -286,10 +279,6 @@ export async function validateEnvironment(): Promise<EnvironmentValidationResult
     {
       service: 'auth',
       isConnectable: !!config.databases.auth.url && isValidUrl(config.databases.auth.url.replace('postgresql://', 'http://'))
-    },
-    {
-      service: 'bookstore',
-      isConnectable: !!config.databases.bookstore.url && isValidUrl(config.databases.bookstore.url.replace('postgresql://', 'http://'))
     }
   ];
   
@@ -321,8 +310,7 @@ export async function waitForServicesHealthy(
   while (Date.now() - startTime < maxWaitTime) {
     const serviceHealth = await Promise.all([
       checkServiceHealth('gateway', config.services.gateway, config.timeouts.healthCheck),
-      checkServiceHealth('auth', config.services.auth, config.timeouts.healthCheck),
-      checkServiceHealth('bookstore', config.services.bookstore, config.timeouts.healthCheck)
+      checkServiceHealth('auth', config.services.auth, config.timeouts.healthCheck)
     ]);
     
     if (serviceHealth.every(health => health.isHealthy)) {

@@ -78,8 +78,6 @@ env:
     value: "http://user-service/.well-known/jwks.json"
   - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI
     value: "http://user-service"
-  - name: IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_BOOKSTORE_SERVICE_URI
-    value: "http://bookstore-service"
   - name: IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS
     value: "https://iqscaffold.website,https://*.iqscaffold.website"
   - name: IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT

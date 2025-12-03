@@ -7,7 +7,6 @@ import { getEnvironmentConfig } from '../../config/environments.js';
 // Endpoints:
 // - GET /actuator/health (gateway)
 // - GET /api/v1/auth/health (auth)
-// - GET /api/v1/books/health (bookstore)
 
 test.describe('Gateway and Services - Health Checks', () => {
   const env = getEnvironmentConfig();
@@ -29,11 +28,6 @@ test.describe('Gateway and Services - Health Checks', () => {
 
   test('GET /api/v1/auth/health should report UP', async () => {
     const res = await client.checkUserServiceHealth();
-    expect(res.status).toBe('UP');
-  });
-
-  test('GET /api/v1/books/health should report UP', async () => {
-    const res = await client.checkBookstoreServiceHealth();
     expect(res.status).toBe('UP');
   });
 });

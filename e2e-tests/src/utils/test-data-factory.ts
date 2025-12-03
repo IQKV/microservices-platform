@@ -1,14 +1,12 @@
 /**
  * Test data factory utilities for generating realistic test data using Faker.js
- * Provides factory methods for users, books, tenants, and other entities with relationship management
+ * Provides factory methods for users, tenants, and other entities with relationship management
  */
 
 import { faker } from '@faker-js/faker';
 import { 
   UserRegistrationData, 
   UserData, 
-  BookData, 
-  CreateBookRequest,
   TenantData, 
   CreateTenantRequest,
   CreateUserRequest 
@@ -16,7 +14,6 @@ import {
 import { 
   TestUserData, 
   TestTenantData, 
-  TestBookData, 
   TEST_DATA_CONFIG 
 } from '../config/test-data.js';
 import { 
@@ -50,17 +47,6 @@ export interface CreateUserOptions {
 }
 
 /**
- * Options for book creation
- */
-export interface CreateBookOptions {
-  tenantId?: string;
-  category?: string;
-  tags?: string[];
-  inStock?: boolean;
-  available?: boolean;
-}
-
-/**
  * Options for tenant creation
  */
 export interface CreateTenantOptions {
@@ -74,10 +60,8 @@ export interface CreateTenantOptions {
  */
 export interface TestDataRelationships {
   users: Set<number>;
-  books: Set<number>;
   tenants: Set<string>;
   userTenantMappings: Map<number, string>;
-  bookTenantMappings: Map<number, string>;
 }
 
 /**
@@ -105,10 +89,8 @@ export class TestDataFactory {
     // Initialize relationship tracking
     this.relationships = {
       users: new Set(),
-      books: new Set(),
       tenants: new Set(),
-      userTenantMappings: new Map(),
-      bookTenantMappings: new Map()
+      userTenantMappings: new Map()
     };
 
     this.currentTenantId = this.config.tenantId;
@@ -211,87 +193,6 @@ export class TestDataFactory {
   }
 
   /**
-   * Creates a realistic book data object
-   */
-  createBookData(overrides: Partial<BookData> = {}, options: CreateBookOptions = {}): BookData {
-    const id = overrides.id || faker.datatype.number({ min: 1, max: 999999 });
-    const title = overrides.title || this.generateBookTitle();
-    const author = overrides.author || `${faker.name.firstName()} ${faker.name.lastName()}`;
-    const isbn = overrides.isbn || this.generateISBN();
-    const category = options.category || faker.helpers.arrayElement(TEST_DATA_CONFIG.book.categories);
-    const price = overrides.price || faker.datatype.float({ 
-      min: TEST_DATA_CONFIG.book.priceMin, 
-      max: TEST_DATA_CONFIG.book.priceMax, 
-      precision: 0.01 
-    });
-    const stock = overrides.stock || faker.datatype.number({ 
-      min: TEST_DATA_CONFIG.book.stockMin, 
-      max: TEST_DATA_CONFIG.book.stockMax 
-    });
-    const tenantId = options.tenantId || this.currentTenantId;
-
-    const bookData: BookData = {
-      id,
-      title,
-      author,
-      isbn,
-      price,
-      stock,
-      category,
-      available: options.available !== undefined ? options.available : stock > 0,
-      availableQuantity: options.inStock !== false ? stock : 0,
-      createdAt: faker.date.recent(90).toISOString(),
-      updatedAt: faker.date.recent(30).toISOString(),
-      ...(overrides.description ? { description: overrides.description } : { description: faker.lorem.paragraphs(2) }),
-      ...(overrides.currency ? { currency: overrides.currency } : { currency: 'USD' }),
-      ...(category ? { categoryName: category } : {}),
-      ...(options.tags ? { tags: options.tags } : { tags: this.generateBookTags(category) }),
-      ...(tenantId ? { tenantId } : {}),
-      ...overrides
-    };
-
-    // Track relationships
-    this.relationships.books.add(bookData.id);
-    if (tenantId) {
-      this.relationships.bookTenantMappings.set(bookData.id, tenantId);
-    }
-
-    return bookData;
-  }
-
-  /**
-   * Creates a book creation request object
-   */
-  createBookRequest(overrides: Partial<CreateBookRequest> = {}, options: CreateBookOptions = {}): CreateBookRequest {
-    const title = overrides.title || this.generateBookTitle();
-    const author = overrides.author || `${faker.name.firstName()} ${faker.name.lastName()}`;
-    const isbn = overrides.isbn || this.generateISBN();
-    const category = options.category || faker.helpers.arrayElement(TEST_DATA_CONFIG.book.categories);
-    const price = overrides.price || faker.datatype.float({ 
-      min: TEST_DATA_CONFIG.book.priceMin, 
-      max: TEST_DATA_CONFIG.book.priceMax, 
-      precision: 0.01 
-    });
-    const stock = overrides.stock || faker.datatype.number({ 
-      min: TEST_DATA_CONFIG.book.stockMin, 
-      max: TEST_DATA_CONFIG.book.stockMax 
-    });
-
-    return {
-      title,
-      author,
-      isbn,
-      description: overrides.description || faker.lorem.paragraphs(2),
-      price,
-      currency: overrides.currency || 'USD',
-      stock: options.inStock !== false ? stock : 0,
-      category,
-      tags: options.tags || this.generateBookTags(category),
-      ...overrides
-    };
-  }
-
-  /**
    * Creates a realistic tenant data object
    */
   createTenantData(overrides: Partial<TenantData> = {}, options: CreateTenantOptions = {}): TenantData {
@@ -309,7 +210,7 @@ export class TestDataFactory {
         allowRegistration: true,
         requireEmailVerification: false,
         maxUsers: faker.datatype.number({ min: 10, max: 1000 }),
-        features: ['books', 'users', 'analytics'],
+        features: ['users', 'analytics'],
         ...options.settings
       },
       createdAt: faker.date.recent(60).toISOString(),
@@ -339,7 +240,7 @@ export class TestDataFactory {
         allowRegistration: true,
         requireEmailVerification: false,
         maxUsers: faker.datatype.number({ min: 10, max: 1000 }),
-        features: ['books', 'users', 'analytics'],
+        features: ['users', 'analytics'],
         ...options.settings
       },
       ...overrides
@@ -361,34 +262,16 @@ export class TestDataFactory {
   }
 
   /**
-   * Creates multiple books for a tenant with varied categories
-   */
-  createBooksForTenant(tenantId: string, count: number = 10, options: CreateBookOptions = {}): BookData[] {
-    const books: BookData[] = [];
-    const categories = TEST_DATA_CONFIG.book.categories;
-    
-    for (let i = 0; i < count; i++) {
-      const category = categories[i % categories.length];
-      const book = this.createBookData({}, { ...options, tenantId, ...(category ? { category } : {}) });
-      books.push(book);
-    }
-
-    return books;
-  }
-
-  /**
-   * Creates a complete tenant with associated users and books
+   * Creates a complete tenant with associated users
    */
   createTenantWithData(
     tenantOverrides: Partial<TenantData> = {},
-    userCount: number = 3,
-    bookCount: number = 5
-  ): { tenant: TenantData; users: UserData[]; books: BookData[] } {
+    userCount: number = 3
+  ): { tenant: TenantData; users: UserData[] } {
     const tenant = this.createTenantData(tenantOverrides);
     const users = this.createUsersForTenant(tenant.id, userCount);
-    const books = this.createBooksForTenant(tenant.id, bookCount);
 
-    return { tenant, users, books };
+    return { tenant, users };
   }
 
   /**
@@ -403,10 +286,8 @@ export class TestDataFactory {
    */
   clearRelationships(): void {
     this.relationships.users.clear();
-    this.relationships.books.clear();
     this.relationships.tenants.clear();
     this.relationships.userTenantMappings.clear();
-    this.relationships.bookTenantMappings.clear();
   }
 
   /**
@@ -434,78 +315,14 @@ export class TestDataFactory {
   }
 
   /**
-   * Generates realistic book title
-   */
-  private generateBookTitle(): string {
-    const templates = [
-      () => `The ${faker.random.word()} of ${faker.random.word()}`,
-      () => `${faker.random.word()} and ${faker.random.word()}`,
-      () => `A Guide to ${faker.random.word()}`,
-      () => `${faker.random.word()}: ${faker.random.words(3)}`,
-      () => `The Complete ${faker.random.word()}`,
-      () => faker.random.words(faker.datatype.number({ min: 2, max: 5 }))
-    ];
-    
-    const template = faker.helpers.arrayElement(templates);
-    return faker.helpers.fake(template().replace(/\b\w/g, (l: string) => l.toUpperCase()));
-  }
-
-  /**
-   * Generates a valid ISBN-13
-   */
-  private generateISBN(): string {
-    const prefix = '978';
-    const group = faker.datatype.number({ min: 0, max: 9 });
-    const publisher = faker.datatype.number({ min: 100000, max: 999999 });
-    const title = faker.datatype.number({ min: 10, max: 99 });
-    
-    // Calculate check digit (simplified)
-    const digits = `${prefix}${group}${publisher}${title}`;
-    let sum = 0;
-    for (let i = 0; i < digits.length; i++) {
-      sum += parseInt(digits[i]!) * (i % 2 === 0 ? 1 : 3);
-    }
-    const checkDigit = (10 - (sum % 10)) % 10;
-    
-    return `${prefix}-${group}-${publisher}-${title}-${checkDigit}`;
-  }
-
-  /**
-   * Generates relevant tags for a book category
-   */
-  private generateBookTags(category: string): string[] {
-    const categoryTags: Record<string, string[]> = {
-      'Fiction': ['novel', 'story', 'drama', 'adventure', 'mystery'],
-      'Non-Fiction': ['facts', 'real', 'educational', 'informative', 'reference'],
-      'Technology': ['programming', 'software', 'computer', 'digital', 'innovation'],
-      'Science': ['research', 'discovery', 'experiment', 'theory', 'analysis'],
-      'History': ['historical', 'past', 'events', 'timeline', 'culture'],
-      'Biography': ['life', 'person', 'memoir', 'autobiography', 'story'],
-      'Self-Help': ['improvement', 'motivation', 'success', 'personal', 'growth'],
-      'Business': ['management', 'strategy', 'leadership', 'finance', 'entrepreneurship'],
-      'Health': ['wellness', 'fitness', 'medical', 'nutrition', 'lifestyle'],
-      'Travel': ['journey', 'destination', 'culture', 'adventure', 'guide']
-    };
-
-    const baseTags = categoryTags[category] || ['general', 'book', 'reading'];
-    const selectedTags = faker.helpers.arrayElements(baseTags, faker.datatype.number({ min: 2, max: 4 }));
-    
-    // Add some random generic tags
-    const genericTags = ['popular', 'bestseller', 'recommended', 'new', 'classic'];
-    const additionalTags = faker.helpers.arrayElements(genericTags, faker.datatype.number({ min: 0, max: 2 }));
-    
-    return [...selectedTags, ...additionalTags];
-  }
-
-  /**
    * Generates permissions based on roles
    */
   private generatePermissionsFromRoles(roles: string[]): string[] {
     const rolePermissions: Record<string, string[]> = {
-      'ADMIN': ['user:read', 'user:write', 'user:delete', 'book:read', 'book:write', 'book:delete', 'tenant:read', 'tenant:write'],
-      'MANAGER': ['user:read', 'user:write', 'book:read', 'book:write', 'tenant:read'],
-      'USER': ['user:read', 'book:read'],
-      'GUEST': ['book:read']
+      'ADMIN': ['user:read', 'user:write', 'user:delete', 'tenant:read', 'tenant:write'],
+      'MANAGER': ['user:read', 'user:write', 'tenant:read'],
+      'USER': ['user:read'],
+      'GUEST': []
     };
 
     const permissions = new Set<string>();

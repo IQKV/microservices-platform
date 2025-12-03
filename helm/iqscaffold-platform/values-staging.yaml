@@ -54,40 +54,12 @@ gateway-service:
     persistence:
       size: 5Gi
 
-bookstore-service:
-  replicaCount: 3
-
-  image:
-    tag: "staging"
-
-  autoscaling:
-    minReplicas: 3
-    maxReplicas: 15
-
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-    limits:
-      memory: "1Gi"
-      cpu: "1000m"
-
-  postgresql:
-    persistence:
-      size: 10Gi
-      storageClass: fast-ssd
-
-  redis:
-    persistence:
-      size: 2Gi
-
 ingress:
   tls:
     enabled: true
   hosts:
     gateway: api-staging.iqscaffold.com
     user: user-staging.iqscaffold.com
-    bookstore: bookstore-staging.iqscaffold.com
 
 observability:
   enabled: true

@@ -11,24 +11,18 @@ import {
   UserRegistrationData,
   UserResponse,
   VerificationResponse,
-  BookResponse,
   TenantData,
   PaginatedResponse,
   HealthCheckResponse,
   TokenRefreshResponse,
   LogoutResponse,
-  CreateBookRequest,
-  UpdateBookRequest,
   CreateUserRequest,
   UpdateUserRequest,
   CreateTenantRequest,
   UpdateTenantRequest,
   EmailVerificationRequest,
   ResendVerificationRequest,
-  VerificationStatusResponse,
-  UpdateInventoryRequest,
-  BulkInventoryRequest,
-  CategoryResponse
+  VerificationStatusResponse
 } from '../types/api-responses.js';
 
 export interface PaginationParams {
@@ -36,16 +30,6 @@ export interface PaginationParams {
   size?: number;
   sort?: string;
   direction?: 'asc' | 'desc';
-}
-
-export interface BookSearchParams extends PaginationParams {
-  title?: string;
-  author?: string;
-  category?: string;
-  tags?: string[];
-  minPrice?: number;
-  maxPrice?: number;
-  inStock?: boolean;
 }
 
 export interface UserSearchParams extends PaginationParams {
@@ -345,184 +329,6 @@ export class TypedApiClient {
   }
 
   // ============================================================================
-  // Bookstore Service Methods
-  // ============================================================================
-
-  /**
-   * Get all books
-   */
-  async getBooks(params?: BookSearchParams): Promise<PaginatedResponse<BookResponse>> {
-    const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
-      method: 'GET',
-      url: '/api/v1/bookstore/books',
-      params: params as Record<string, string | number | boolean>
-    });
-
-    return ValidationUtils.validatePaginatedResponse(response.data, schemas.bookData);
-  }
-
-  /**
-   * Get book by ID
-   */
-  async getBookById(bookId: number): Promise<BookResponse> {
-    const response = await this.apiClient.request<BookResponse>({
-      method: 'GET',
-      url: `/api/v1/bookstore/books/${bookId}`
-    });
-
-    return ValidationUtils.validateBookData(response.data);
-  }
-
-  /**
-   * Create new book
-   */
-  async createBook(bookData: CreateBookRequest): Promise<BookResponse> {
-    ValidationUtils.validate(bookData, schemas.createBook);
-    
-    const response = await this.apiClient.request<BookResponse>({
-      method: 'POST',
-      url: '/api/v1/bookstore/books',
-      data: bookData
-    });
-
-    return ValidationUtils.validateBookData(response.data);
-  }
-
-  /**
-   * Update book
-   */
-  async updateBook(bookId: number, bookData: UpdateBookRequest): Promise<BookResponse> {
-    ValidationUtils.validate(bookData, schemas.updateBook);
-    
-    const response = await this.apiClient.request<BookResponse>({
-      method: 'PUT',
-      url: `/api/v1/bookstore/books/${bookId}`,
-      data: bookData
-    });
-
-    return ValidationUtils.validateBookData(response.data);
-  }
-
-  /**
-   * Delete book
-   */
-  async deleteBook(bookId: number): Promise<void> {
-    await this.apiClient.request({
-      method: 'DELETE',
-      url: `/api/v1/bookstore/books/${bookId}`
-    });
-  }
-
-  /**
-   * Search books
-   */
-  async searchBooks(query: string, params?: BookSearchParams): Promise<PaginatedResponse<BookResponse>> {
-    const searchParams: Record<string, string | number | boolean> = {
-      q: query,
-      ...(params?.page !== undefined && { page: params.page }),
-      ...(params?.size !== undefined && { size: params.size }),
-      ...(params?.sort && { sort: params.sort }),
-      ...(params?.direction && { direction: params.direction }),
-      ...(params?.title && { title: params.title }),
-      ...(params?.author && { author: params.author }),
-      ...(params?.category && { category: params.category }),
-      ...(params?.tags && { tags: params.tags.join(',') }),
-      ...(params?.minPrice !== undefined && { minPrice: params.minPrice }),
-      ...(params?.maxPrice !== undefined && { maxPrice: params.maxPrice }),
-      ...(params?.inStock !== undefined && { inStock: params.inStock })
-    };
-
-    const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
-      method: 'GET',
-      url: '/api/v1/bookstore/books/search',
-      params: searchParams
-    });
-
-    return ValidationUtils.validatePaginatedResponse(response.data, schemas.bookData);
-  }
-
-  /**
-   * Update book stock
-   */
-  async updateBookStock(bookId: number, stock: number): Promise<BookResponse> {
-    const response = await this.apiClient.request<BookResponse>({
-      method: 'PUT',
-      url: `/api/v1/bookstore/inventory/${bookId}`,
-      data: { stock }
-    });
-
-    return ValidationUtils.validateBookData(response.data);
-  }
-
-  /**
-   * Get books by category
-   */
-  async getBooksByCategory(category: string, params?: PaginationParams): Promise<PaginatedResponse<BookResponse>> {
-    const response = await this.apiClient.request<PaginatedResponse<BookResponse>>({
-      method: 'GET',
-      url: `/api/v1/bookstore/books/search/category`,
-      params: { category, ...(params as Record<string, string | number | boolean>) } as Record<string, string | number | boolean>
-    });
-
-    return ValidationUtils.validatePaginatedResponse(response.data, schemas.bookData);
-  }
-
-  /**
-   * Update book inventory/stock
-   */
-  async updateBookInventory(bookId: number, inventoryData: UpdateInventoryRequest): Promise<BookResponse> {
-    ValidationUtils.validate(inventoryData, schemas.updateInventory);
-    
-    const response = await this.apiClient.request<BookResponse>({
-      method: 'PUT',
-      url: `/api/v1/bookstore/inventory/${bookId}`,
-      data: inventoryData
-    });
-
-    return ValidationUtils.validateBookData(response.data);
-  }
-
-  /**
-   * Bulk update book inventory
-   */
-  async bulkUpdateInventory(inventoryData: BulkInventoryRequest): Promise<BookResponse[]> {
-    ValidationUtils.validate(inventoryData, schemas.bulkInventory);
-    
-    const response = await this.apiClient.request<BookResponse[]>({
-      method: 'POST',
-      url: '/api/v1/bookstore/inventory/bulk-update',
-      data: inventoryData.updates
-    });
-
-    // Validate each book in the response
-    return response.data.map(book => ValidationUtils.validateBookData(book));
-  }
-
-  /**
-   * Get all categories
-   */
-  async getCategories(): Promise<CategoryResponse[]> {
-    const response = await this.apiClient.request<CategoryResponse[]>({
-      method: 'GET',
-      url: '/api/v1/books/categories'
-    });
-
-    return response.data.map(category => ValidationUtils.validateCategoryResponse(category));
-  }
-
-  /**
-   * Get category by ID
-   */
-  async getCategoryById(categoryId: number): Promise<CategoryResponse> {
-    const response = await this.apiClient.request<CategoryResponse>({
-      method: 'GET',
-      url: `/api/v1/books/categories/${categoryId}`
-    });
-
-    return ValidationUtils.validateCategoryResponse(response.data);
-  }
-
-  // ============================================================================
   // Health Check Methods
   // ============================================================================
 
@@ -545,18 +351,6 @@ export class TypedApiClient {
     const response = await this.apiClient.request<HealthCheckResponse>({
       method: 'GET',
       url: '/api/v1/auth/health'
-    });
-
-    return ValidationUtils.validateHealthCheckResponse(response.data);
-  }
-
-  /**
-   * Check Bookstore service health
-   */
-  async checkBookstoreServiceHealth(): Promise<HealthCheckResponse> {
-    const response = await this.apiClient.request<HealthCheckResponse>({
-      method: 'GET',
-      url: '/api/v1/books/health'
     });
 
     return ValidationUtils.validateHealthCheckResponse(response.data);

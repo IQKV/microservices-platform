@@ -21,8 +21,7 @@ export interface RedisConfig {
 
 export interface ServiceEndpoints {
   gateway: string;
-  user: string;
-  bookstore: string;
+  auth: string;
 }
 
 export interface TimeoutConfig {
@@ -48,8 +47,7 @@ export interface TestEnvironmentConfig {
   baseUrl: string;
   services: ServiceEndpoints;
   databases: {
-    user: DatabaseConfig;
-    bookstore: DatabaseConfig;
+    auth: DatabaseConfig;
   };
   redis: RedisConfig;
   timeouts: TimeoutConfig;
@@ -67,9 +65,7 @@ export interface EnvironmentVariables {
   BASE_URL?: string;
   GATEWAY_URL?: string;
   USER_SERVICE_URL?: string;
-  BOOKSTORE_SERVICE_URL?: string;
   DATABASE_USER_URL?: string;
-  DATABASE_BOOKSTORE_URL?: string;
   REDIS_URL?: string;
   TEST_TIMEOUT?: string;
   TEST_WORKERS?: string;

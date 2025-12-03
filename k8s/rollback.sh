@@ -40,9 +40,9 @@ rollback_service() {
 }
 
 case "$SERVICE" in
-    user|gateway|bookstore) rollback_service "$SERVICE" "$NS" ;;
+    user|gateway) rollback_service "$SERVICE" "$NS" ;;
     all)
-        for svc in user gateway bookstore; do
+        for svc in user gateway; do
             rollback_service "$svc" "$NS"
         done
         ;;

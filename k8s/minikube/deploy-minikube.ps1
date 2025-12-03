@@ -44,7 +44,7 @@ if ($Build) {
     
     Push-Location $PROJECT_ROOT
     
-    foreach ($svc in @("user", "gateway", "bookstore")) {
+    foreach ($svc in @("user", "gateway")) {
         log "Building $svc service..."
         docker build -t "iqscaffold/${svc}-service:latest" -f "iqscaffold-${svc}-service/Dockerfile" .
         if ($LASTEXITCODE -ne 0) { Pop-Location; err "Failed to build $svc service" }
@@ -64,7 +64,7 @@ if ($ingressEnabled) {
     log "Applying ingress..."
     kubectl apply -f ingress.yaml
     ok "Ingress applied"
-    log "Add to hosts file: $MINIKUBE_IP api.iqscaffold.site user.iqscaffold.site bookstore.iqscaffold.site"
+    log "Add to hosts file: $MINIKUBE_IP api.iqscaffold.site user.iqscaffold.site"
 } else {
     warn "Ingress addon not enabled. Enable with: minikube addons enable ingress"
 }
@@ -75,17 +75,11 @@ if (-not $NoWait) {
     kubectl wait --for=condition=ready pod -l app=postgres-user -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Postgres user not ready" }
     
-    kubectl wait --for=condition=ready pod -l app=postgres-bookstore -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { warn "Postgres bookstore not ready" }
-    
     kubectl wait --for=condition=ready pod -l app=redis -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Redis not ready" }
     
     kubectl wait --for=condition=ready pod -l app=user-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "User service not ready" }
-    
-    kubectl wait --for=condition=ready pod -l app=bookstore-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { warn "Bookstore service not ready" }
     
     kubectl wait --for=condition=ready pod -l app=gateway-service -n iqscaffold-dev-env --timeout=300s 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { warn "Gateway service not ready" }
@@ -100,13 +94,11 @@ Write-Host ""
 log "Service URLs:"
 Write-Host "  Gateway:   http://${MINIKUBE_IP}:30080"
 Write-Host "  User:      http://${MINIKUBE_IP}:30081"
-Write-Host "  Bookstore: http://${MINIKUBE_IP}:30082"
 Write-Host ""
 
 if ($ingressEnabled) {
     Write-Host "  API Gateway: http://api.iqscaffold.site"
     Write-Host "  User:        http://user.iqscaffold.site"
-    Write-Host "  Bookstore:   http://bookstore.iqscaffold.site"
     Write-Host ""
 }
 
