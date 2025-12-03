@@ -1,0 +1,170 @@
+services:
+  # PostgreSQL Database for User Service - Local Development
+  postgres-user:
+    image: postgres:15.8-alpine
+    container_name: iqscaffold-user-postgres-dev
+    environment:
+      POSTGRES_DB: iqscaffold_user_local
+      POSTGRES_USER: iqscaffold_user
+      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - user-service-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_user_local -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
+  # Redis for User Service - Local Development
+  redis-user:
+    image: redis:7.2-alpine
+    container_name: iqscaffold-user-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_user_data:/data
+    networks:
+      - user-service-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+
+  # User Service - Local Development
+  user-service:
+    build:
+      context: ..
+      dockerfile: iqscaffold-user-service/Dockerfile
+      target: builder
+    image: iqscaffold/iqscaffold-user-service:dev
+    container_name: iqscaffold-user-service-dev
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_APPLICATION_NAME: iqscaffold-user-service
+
+      # Database Configuration
+      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user_local
+      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_user
+      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+
+      # Redis Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis-user
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ""
+
+      # JWT Configuration
+      IQSCAFFOLD_AUTH_JWT_SECRET: local-development-secret-key-not-for-production-use
+      IQSCAFFOLD_AUTH_JWT_ISSUER: iqscaffold-user-service
+
+      # Email Configuration
+      SMTP_HOST: localhost
+      SMTP_PORT: 587
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      EMAIL_FROM_EMAIL: noreply@iqscaffold.site
+      EMAIL_FROM_NAME: IQ Scaffold Platform
+      APP_BASE_URL: http://localhost:3000
+
+      # OAuth2 Configuration
+      IQSCAFFOLD_AUTH_OAUTH2_GOOGLE_ENABLED: false
+
+      # Observability Configuration
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: true
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: 1.0
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: iqscaffold-user-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-user-service,service.version=1.0.0,deployment.environment=dev
+
+      # JVM Configuration
+      JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -Djava.security.egd=file:/dev/./urandom
+    ports:
+      - "8081:8080" # User service (internal)
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      redis-user:
+        condition: service_healthy
+    networks:
+      - user-service-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+    volumes:
+      - auth_logs:/app/logs
+      - auth_tmp:/tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 768Mi
+        reservations:
+          cpus: "0.25"
+          memory: 384Mi
+
+networks:
+  user-service-network:
+    driver: bridge
+    name: iqscaffold-user-network-dev
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_user_data:
+    name: iqscaffold_user_postgres_data_dev
+    driver: local
+  redis_user_data:
+    name: iqscaffold_user_redis_data_dev
+    driver: local
+  auth_logs:
+    name: iqscaffold_user_logs_dev
+    driver: local
+  auth_tmp:
+    name: iqscaffold_user_tmp_dev
+    driver: local
