@@ -69,11 +69,7 @@ spring:
 private RabbitTemplate rabbitTemplate;
 
 public void publishUserEvent(String eventType, Object payload) {
-    rabbitTemplate.convertAndSend(
-        "iqscaffold.events",
-        "user." + eventType,
-        payload
-    );
+  rabbitTemplate.convertAndSend("iqscaffold.events", "user." + eventType, payload);
 }
 ```
 
@@ -82,13 +78,14 @@ public void publishUserEvent(String eventType, Object payload) {
 ```java
 @RabbitListener(queues = "iqscaffold.user.events")
 public void handleUserEvent(Message message) {
-    // Process user event
+  // Process user event
 }
 ```
 
 ## Monitoring
 
 Access the RabbitMQ Management UI at http://localhost:15672 to:
+
 - Monitor queue depths
 - View message rates
 - Inspect exchanges and bindings
@@ -98,6 +95,7 @@ Access the RabbitMQ Management UI at http://localhost:15672 to:
 ## Production Notes
 
 For production deployments:
+
 1. Change default credentials
 2. Enable TLS/SSL
 3. Configure clustering for high availability

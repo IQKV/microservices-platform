@@ -50,7 +50,7 @@ services:
       RABBITMQ_DEFAULT_PASS: iqscaffold_password
       RABBITMQ_DEFAULT_VHOST: /
     ports:
-      - "5672:5672"   # AMQP port
+      - "5672:5672" # AMQP port
       - "15672:15672" # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
