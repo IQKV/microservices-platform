@@ -47,7 +47,7 @@ public class UserEventListener {
       }
 
       log.debug("Successfully processed user event: {}", event.getEventId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Error processing user event: {}", event.getEventId(), e);
       throw e; // Re-throw to trigger retry or DLQ routing
     }
