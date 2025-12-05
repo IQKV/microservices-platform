@@ -1,0 +1,101 @@
+{
+  "rabbit_version": "3.13.0",
+  "rabbitmq_version": "3.13.0",
+  "users": [
+    {
+      "name": "iqscaffold",
+      "password_hash": "JDJiJDEyJGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhY",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": ["administrator"]
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "iqscaffold",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "iqscaffold.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "iqscaffold.dlx",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "iqscaffold.user.events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "iqscaffold.dlx",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "iqscaffold.notifications",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "iqscaffold.dlx",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "iqscaffold.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "iqscaffold.events",
+      "vhost": "/",
+      "destination": "iqscaffold.user.events",
+      "destination_type": "queue",
+      "routing_key": "user.*",
+      "arguments": {}
+    },
+    {
+      "source": "iqscaffold.events",
+      "vhost": "/",
+      "destination": "iqscaffold.notifications",
+      "destination_type": "queue",
+      "routing_key": "notification.*",
+      "arguments": {}
+    },
+    {
+      "source": "iqscaffold.dlx",
+      "vhost": "/",
+      "destination": "iqscaffold.dlq",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    }
+  ]
+}

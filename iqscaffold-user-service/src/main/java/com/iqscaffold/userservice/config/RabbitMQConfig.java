@@ -1,0 +1,190 @@
+package com.iqscaffold.userservice.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * RabbitMQ Configuration for IQScaffold User Service
+ * Configures exchanges, queues, bindings, and message converters
+ */
+@Slf4j
+@Configuration
+@RequiredArgsConstructor
+public class RabbitMQConfig {
+
+  private final IqScaffoldProperties properties;
+  private final ObjectMapper objectMapper;
+
+  // Exchange names
+  public static final String EVENTS_EXCHANGE = "iqscaffold.events";
+  public static final String DLX_EXCHANGE = "iqscaffold.dlx";
+
+  // Queue names
+  public static final String USER_EVENTS_QUEUE = "iqscaffold.user.events";
+  public static final String NOTIFICATIONS_QUEUE = "iqscaffold.notifications";
+  public static final String DLQ = "iqscaffold.dlq";
+
+  // Routing keys
+  public static final String USER_CREATED_KEY = "user.created";
+  public static final String USER_UPDATED_KEY = "user.updated";
+  public static final String USER_DELETED_KEY = "user.deleted";
+  public static final String USER_VERIFIED_KEY = "user.verified";
+  public static final String PASSWORD_RESET_KEY = "user.password.reset";
+  public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
+
+  /**
+   * Main events exchange for application events
+   */
+  @Bean
+  public TopicExchange eventsExchange() {
+    return ExchangeBuilder
+        .topicExchange(EVENTS_EXCHANGE)
+        .durable(true)
+        .build();
+  }
+
+  /**
+   * Dead Letter Exchange for failed messages
+   */
+  @Bean
+  public TopicExchange deadLetterExchange() {
+    return ExchangeBuilder
+        .topicExchange(DLX_EXCHANGE)
+        .durable(true)
+        .build();
+  }
+
+  /**
+   * User events queue with dead letter routing
+   */
+  @Bean
+  public Queue userEventsQueue() {
+    return QueueBuilder
+        .durable(USER_EVENTS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
+  }
+
+  /**
+   * Notifications queue with dead letter routing
+   */
+  @Bean
+  public Queue notificationsQueue() {
+    return QueueBuilder
+        .durable(NOTIFICATIONS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
+  }
+
+  /**
+   * Dead Letter Queue for failed messages
+   */
+  @Bean
+  public Queue deadLetterQueue() {
+    return QueueBuilder
+        .durable(DLQ)
+        .build();
+  }
+
+  /**
+   * Bind user events queue to events exchange with user.* routing key
+   */
+  @Bean
+  public Binding userEventsBinding() {
+    return BindingBuilder
+        .bind(userEventsQueue())
+        .to(eventsExchange())
+        .with("user.*");
+  }
+
+  /**
+   * Bind notifications queue to events exchange with notification.* routing key
+   */
+  @Bean
+  public Binding notificationsBinding() {
+    return BindingBuilder
+        .bind(notificationsQueue())
+        .to(eventsExchange())
+        .with("notification.*");
+  }
+
+  /**
+   * Bind dead letter queue to DLX with all routing keys
+   */
+  @Bean
+  public Binding deadLetterBinding() {
+    return BindingBuilder
+        .bind(deadLetterQueue())
+        .to(deadLetterExchange())
+        .with("#");
+  }
+
+  /**
+   * JSON message converter using Jackson
+   */
+  @Bean
+  public MessageConverter messageConverter() {
+    return new Jackson2JsonMessageConverter(objectMapper);
+  }
+
+  /**
+   * RabbitTemplate with JSON message converter and publisher confirms
+   */
+  @Bean
+  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    RabbitTemplate template = new RabbitTemplate(connectionFactory);
+    template.setMessageConverter(messageConverter());
+    template.setMandatory(true);
+
+    // Publisher confirms callback
+    template.setConfirmCallback((correlationData, ack, cause) -> {
+      if (ack) {
+        log.debug("Message confirmed: {}", correlationData);
+      } else {
+        log.error("Message not confirmed: {}, cause: {}", correlationData, cause);
+      }
+    });
+
+    // Publisher returns callback
+    template.setReturnsCallback(returned -> {
+      log.error("Message returned: {}, reply code: {}, reply text: {}, exchange: {}, routing key: {}",
+          returned.getMessage(),
+          returned.getReplyCode(),
+          returned.getReplyText(),
+          returned.getExchange(),
+          returned.getRoutingKey());
+    });
+
+    return template;
+  }
+
+  /**
+   * Listener container factory with JSON message converter
+   */
+  @Bean
+  public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+      ConnectionFactory connectionFactory,
+      SimpleRabbitListenerContainerFactoryConfigurer configurer) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    configurer.configure(factory, connectionFactory);
+    factory.setMessageConverter(messageConverter());
+    return factory;
+  }
+}

@@ -41,6 +41,30 @@ services:
       start_period: 30s
     command: redis-server --appendonly yes
 
+  # RabbitMQ for Message Queue
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: iqscaffold-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: iqscaffold
+      RABBITMQ_DEFAULT_PASS: iqscaffold_password
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # User Service
   user-service:
     build:
@@ -54,6 +78,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: iqscaffold_password
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: iqscaffold
+      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
       IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
       IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
       IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
@@ -63,6 +91,8 @@ services:
       postgres-user:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - iqscaffold-network
@@ -84,6 +114,10 @@ services:
       SPRING_PROFILES_ACTIVE: local
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: iqscaffold
+      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
       IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
@@ -176,6 +210,8 @@ volumes:
     name: iqscaffold_postgres_user_data
   redis_data:
     name: iqscaffold_redis_data
+  rabbitmq_data:
+    name: iqscaffold_rabbitmq_data
   prometheus_data:
     name: iqscaffold_prometheus_data
   grafana_data:

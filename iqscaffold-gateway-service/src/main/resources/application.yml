@@ -1,114 +1,114 @@
-server :
-  port : 8080
+server:
+  port: 8080
 
-spring :
-  application :
-    name : iqscaffold-gateway-service
-  profiles :
-    active : local
-  cloud :
-    gateway :
-      routes :
-        - id : user-service-auth
-          uri : ${iqscaffold.gateway.routing.services.user-service.uri}
-          predicates :
+spring:
+  application:
+    name: iqscaffold-gateway-service
+  profiles:
+    active: local
+  cloud:
+    gateway:
+      routes:
+        - id: user-service-auth
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
             - Path=/api/v1/auth/**
-          filters :
+          filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity : ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id : user-service-profile
-          uri : ${iqscaffold.gateway.routing.services.user-service.uri}
-          predicates :
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: user-service-profile
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
             - Path=/api/v1/users/me,/api/v1/users/me/**
-          filters :
+          filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity : ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id : user-service-admin
-          uri : ${iqscaffold.gateway.routing.services.user-service.uri}
-          predicates :
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: user-service-admin
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
             - Path=/api/v1/admin/**
-          filters :
+          filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name : RequestRateLimiter
-              args :
-                redis-rate-limiter.replenish-rate : ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity : ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id : user-service-jwks
-          uri : ${iqscaffold.gateway.routing.services.user-service.uri}
-          predicates :
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: user-service-jwks
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
             - Path=/.well-known/jwks.json
-          filters :
+          filters:
             - StripPrefix=0
-        - id : health-check
-          uri : ${iqscaffold.gateway.routing.services.user-service.uri}
-          predicates :
+        - id: health-check
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
             - Path=/actuator/health
-          filters :
+          filters:
             - StripPrefix=0
 
 # IQ Scaffold Gateway Configuration
-iqscaffold :
-  cache :
-    redis :
-      host : ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
-      port : ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
-      database : ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout : PT2S
-      pool :
-        max-active : 8
-        max-idle : 8
-        min-idle : 0
-        max-wait : PT-1S
-      key-prefix : "iqscaffold:gateway"
-      default-ttl : PT1H
-      enable-statistics : false
+iqscaffold:
+  cache:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "iqscaffold:gateway"
+      default-ttl: PT1H
+      enable-statistics: false
   
-  gateway :
-    routing :
+  gateway:
+    routing:
       # API prefix configuration - allows stripping /api prefix when deployed on api.iqscaffold.com
-      api-prefix :
-        enabled : true
-        prefix : /api
-        strip-count : 0  # Number of path segments to strip (0 = no stripping, 1 = strip first segment)
-      services :
-        user-service :
-          uri : http://localhost:8080
-          path : /v1/**
-          enabled : true
-          connect-timeout : 5000
-          response-timeout : 30000
-          openapi :
-            enabled : true
-            display-name : "User Service APIs"
-            description : "Authentication and user management APIs"
-            context-path : "user-service"
-      enable-service-discovery : false
-      load-balancing :
-        strategy : round-robin
-        enable-health-check : true
-        health-check-interval : PT30S
+      api-prefix:
+        enabled: true
+        prefix: /api
+        strip-count: 0  # Number of path segments to strip (0 = no stripping, 1 = strip first segment)
+      services:
+        user-service:
+          uri: http://localhost:8080
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "User Service APIs"
+            description: "Authentication and user management APIs"
+            context-path: "user-service"
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: true
+        health-check-interval: PT30S
     
-    security :
-      jwt :
-        access-token-expiry : PT15M
-        refresh-token-expiry : P7D
-        issuer : iqscaffold-user-service
-        audience : iqscaffold-services
-        algorithm : RS256
-        jwk-set-uri : ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
-      authentication :
-        enabled : true
-        user-service-url : http://localhost:8080
-        token-validation-timeout : PT5S
-        enable-user-context-propagation : true
-      public-paths :
+    security:
+      jwt:
+        access-token-expiry: PT15M
+        refresh-token-expiry: P7D
+        issuer: iqscaffold-user-service
+        audience: iqscaffold-services
+        algorithm: RS256
+        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
+      authentication:
+        enabled: true
+        user-service-url: http://localhost:8080
+        token-validation-timeout: PT5S
+        enable-user-context-propagation: true
+      public-paths:
         # JWK endpoint for public key distribution
         - /.well-known/jwks.json
         
@@ -148,184 +148,184 @@ iqscaffold :
         # - /api/v1/users/me/password (requires Bearer token)
         # - /api/v1/admin/** (requires Bearer token + ADMIN role)
     
-    rate-limiting :
-      enabled : true
-      redis :
-        key-prefix : "iqscaffold:gateway:rate-limit"
-        key-expiry : PT1M
-      policies :
-        default-requests-per-minute : 60
-        default-burst-capacity : 100
-        endpoints :
-          "/api/v1/auth/login" :
-            requests-per-minute : 10
-            burst-capacity : 20
-            enable-tenant-quotas : true
-          "/api/v1/auth/signup" :
-            requests-per-minute : 5
-            burst-capacity : 10
-            enable-tenant-quotas : true
-          "/api/v1/auth/email/resend" :
-            requests-per-minute : 3
-            burst-capacity : 5
-            enable-tenant-quotas : true
-          "/api/v1/auth/email/verify" :
-            requests-per-minute : 10
-            burst-capacity : 15
-            enable-tenant-quotas : true
-          "/api/v1/auth/password/forgot" :
-            requests-per-minute : 3
-            burst-capacity : 5
-            enable-tenant-quotas : true
-          "/api/v1/auth/password/reset" :
-            requests-per-minute : 5
-            burst-capacity : 10
-            enable-tenant-quotas : true
-          "/api/v1/admin/users/**" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : true
-          "/api/v1/admin/organizations/**" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : true
-          "/api/v1/admin/organization-preferences/**" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : true
-          "/api/v1/admin/tenants/**" :
-            requests-per-minute : 50
-            burst-capacity : 75
-            enable-tenant-quotas : true
-          "/api/v1/users/me" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : true
-          "/api/v1/users/me/password" :
-            requests-per-minute : 5
-            burst-capacity : 10
-            enable-tenant-quotas : true
-          "/api/v1/users/me/preferences" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : true
-      tenant-quotas :
-        enabled : true
-        default-tenant-requests-per-minute : 1000
-        tenant-specific-quotas : { }
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "iqscaffold:gateway:rate-limit"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 60
+        default-burst-capacity: 100
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: true
+          "/api/v1/auth/signup":
+            requests-per-minute: 5
+            burst-capacity: 10
+            enable-tenant-quotas: true
+          "/api/v1/auth/email/resend":
+            requests-per-minute: 3
+            burst-capacity: 5
+            enable-tenant-quotas: true
+          "/api/v1/auth/email/verify":
+            requests-per-minute: 10
+            burst-capacity: 15
+            enable-tenant-quotas: true
+          "/api/v1/auth/password/forgot":
+            requests-per-minute: 3
+            burst-capacity: 5
+            enable-tenant-quotas: true
+          "/api/v1/auth/password/reset":
+            requests-per-minute: 5
+            burst-capacity: 10
+            enable-tenant-quotas: true
+          "/api/v1/admin/users/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/admin/organizations/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/admin/organization-preferences/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/admin/tenants/**":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: true
+          "/api/v1/users/me":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/users/me/password":
+            requests-per-minute: 5
+            burst-capacity: 10
+            enable-tenant-quotas: true
+          "/api/v1/users/me/preferences":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+      tenant-quotas:
+        enabled: true
+        default-tenant-requests-per-minute: 1000
+        tenant-specific-quotas: { }
     
-    circuit-breaker :
-      enabled : true
-      failure-rate-threshold : 50
-      slow-call-rate-threshold : 50
-      slow-call-duration-threshold : PT2S
-      minimum-number-of-calls : 10
-      wait-duration-in-open-state : PT30S
-      sliding-window-size : 100
-      sliding-window-type : COUNT_BASED
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 50
+      slow-call-rate-threshold: 50
+      slow-call-duration-threshold: PT2S
+      minimum-number-of-calls: 10
+      wait-duration-in-open-state: PT30S
+      sliding-window-size: 100
+      sliding-window-type: COUNT_BASED
     
-    cors :
-      enabled : true
-      allowed-origins :
+    cors:
+      enabled: true
+      allowed-origins:
         - http://localhost:3000
         - http://localhost:5173
         - http://localhost:8080
-      allowed-methods :
+      allowed-methods:
         - GET
         - POST
         - PUT
         - PATCH
         - DELETE
         - OPTIONS
-      allowed-headers :
+      allowed-headers:
         - "*"
-      allow-credentials : true
-      max-age : 3600
+      allow-credentials: true
+      max-age: 3600
     
-    transformation :
-      request :
-        enabled : true
-        enable-header-enrichment : true
-        enable-user-context-propagation : true
-        enable-tenant-context-propagation : true
-        headers-to-remove :
+    transformation:
+      request:
+        enabled: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
           - Authorization-Internal
           - X-Internal-Token
-        additional-headers :
-          X-Gateway-Version : "1.0.0"
-      response :
-        enabled : true
-        enable-security-headers : true
-        enable-correlation-headers : true
-        remove-internal-headers : true
-        additional-headers-to-remove :
+        additional-headers:
+          X-Gateway-Version: "1.0.0"
+      response:
+        enabled: true
+        enable-security-headers: true
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
           - X-Internal-Service
           - X-Database-Query-Time
 
-  observability :
-    tracing :
-      enabled : true
-      service-name : ${spring.application.name}
-      sampling-rate : 1.0
-      endpoint : ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
-      timeout : PT10S
-      export-timeout : PT30S
-      batch-size : 512
-    metrics :
-      enabled : true
-      path : /actuator/prometheus
-      prefix : iqscaffold_gateway
-      include-host-tag : true
-      include-application-tag : true
-      include-environment-tag : true
-      custom-tags : { }
-      enabled-metrics :
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: iqscaffold_gateway
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags: { }
+      enabled-metrics:
         - gateway.requests
         - gateway.response.time
         - gateway.circuit.breaker
         - gateway.rate.limit
-    logging :
-      level : INFO
-      format : console
-      enable-request-logging : true
-      enable-response-logging : false
-      enable-correlation-id : true
-      include-trace-id : true
-      include-span-id : true
-      include-user-id : true
-      include-tenant-id : true
-      correlation-id-header : X-Correlation-ID
-      request-id-header : X-Request-ID
-      tenant-id-header : X-Tenant-ID
+    logging:
+      level: INFO
+      format: console
+      enable-request-logging: true
+      enable-response-logging: false
+      enable-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
 
 # SpringDoc OpenAPI Configuration
-springdoc :
-  api-docs :
-    enabled : true
-    path : /api-docs
-  swagger-ui :
-    enabled : true
-    path : /swagger-ui.html
-    urls-primary-name : Gateway APIs
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls-primary-name: Gateway APIs
 
-management :
-  endpoints :
-    web :
-      exposure :
-        include : health,info,metrics,prometheus
-  endpoint :
-    health :
-      show-details : when-authorized
-  metrics :
-    distribution :
-      percentiles-histogram :
-        http.server.requests : true
-      percentiles :
-        http.server.requests : 0.5,0.95,0.99
-  tracing :
-    sampling :
-      probability : 1.0
-  prometheus :
-    metrics :
-      export :
-        enabled : true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true

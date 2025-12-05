@@ -93,7 +93,7 @@ class SchemaPerTenantConnectionProviderTest {
     when(connection.getMetaData()).thenReturn(metaData);
     when(metaData.getDatabaseProductName()).thenReturn("H2");
     when(connection.createStatement()).thenReturn(statement);
-    
+
     try (var ignored = statement; var result = provider.getConnection("tenant_123")) {
       assertThat(result).isNotNull();
       verify(statement).execute("CREATE SCHEMA IF NOT EXISTS tenant_123");

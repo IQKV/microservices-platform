@@ -10,18 +10,18 @@ scrape_configs:
   # Prometheus itself
   - job_name: "prometheus"
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: [ "localhost:9090" ]
 
   # IQ Scaffold User Service
   - job_name: "iqscaffold-user-service"
     metrics_path: "/actuator/prometheus"
     scrape_interval: 15s
     static_configs:
-      - targets: ["host.docker.internal:8080"]
+      - targets: [ "host.docker.internal:8080" ]
     relabel_configs:
-      - source_labels: [__address__]
+      - source_labels: [ __address__ ]
         target_label: __param_target
-      - source_labels: [__param_target]
+      - source_labels: [ __param_target ]
         target_label: instance
       - target_label: __address__
         replacement: host.docker.internal:8080
@@ -31,11 +31,11 @@ scrape_configs:
     metrics_path: "/actuator/prometheus"
     scrape_interval: 15s
     static_configs:
-      - targets: ["host.docker.internal:8080"]
+      - targets: [ "host.docker.internal:8080" ]
     relabel_configs:
-      - source_labels: [__address__]
+      - source_labels: [ __address__ ]
         target_label: __param_target
-      - source_labels: [__param_target]
+      - source_labels: [ __param_target ]
         target_label: instance
       - target_label: __address__
         replacement: host.docker.internal:8080
@@ -43,7 +43,7 @@ scrape_configs:
   # Docker containers (if Docker daemon metrics are enabled)
   - job_name: "docker"
     static_configs:
-      - targets: ["host.docker.internal:9323"]
+      - targets: [ "host.docker.internal:9323" ]
 
 alerting:
   alertmanagers:

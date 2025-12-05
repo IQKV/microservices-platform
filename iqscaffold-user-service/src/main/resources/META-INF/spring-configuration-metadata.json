@@ -105,7 +105,6 @@
       "sourceType": "com.iqscaffold.userservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
       "defaultValue": "1800s"
     },
-
     {
       "name": "iqscaffold.cache.redis.host",
       "type": "java.lang.String",

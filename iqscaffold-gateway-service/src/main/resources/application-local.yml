@@ -1,93 +1,93 @@
 # Local Development Environment Configuration
 # This configuration is optimized for development with debug logging and relaxed security
 
-server :
-  port : 8080
+server:
+  port: 8080
 
-spring :
+spring:
   # Redis Configuration - Local Redis
-  data :
-    redis :
-      host : ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
-      port : ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
-      database : ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout : 2000ms
-      lettuce :
-        pool :
-          max-active : 8
-          max-idle : 8
-          min-idle : 0
-          max-wait : -1ms
+  data:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
 
   # Cloud Gateway Configuration - Development
   # Note: Routes are defined in main application.yml
   # Environment-specific overrides only
-  cloud :
-    gateway :
-      discovery :
-        locator :
-          enabled : false
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
 
 # IQ Scaffold Gateway Configuration - Local Environment
-iqscaffold :
+iqscaffold:
   # Cache Configuration - Redis
-  cache :
-    redis :
-      host : ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
-      port : ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password : ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
-      database : ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout : PT2S
-      pool :
-        max-active : 8
-        max-idle : 8
-        min-idle : 0
-        max-wait : PT-1S
-      key-prefix : "iqscaffold:gateway:local"
-      default-ttl : PT1H
-      enable-statistics : true
+  cache:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: PT2S
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: PT-1S
+      key-prefix: "iqscaffold:gateway:local"
+      default-ttl: PT1H
+      enable-statistics: true
 
   # Gateway Configuration
-  gateway :
-    routing :
+  gateway:
+    routing:
       # API prefix configuration - keep /api prefix in local development
-      api-prefix :
-        enabled : true
-        prefix : /api
-        strip-count : 0  # Don't strip in local development
-      services :
-        user-service :
-          uri : ${IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI:http://localhost:8080}
-          path : /v1/**
-          enabled : true
-          connect-timeout : 10000  # Extended for development
-          response-timeout : 60000  # Extended for development
-          openapi :
-            enabled : true
-            display-name : "User Service APIs"
-            description : "Authentication and user management APIs"
-            context-path : "user-service"
-      enable-service-discovery : false
-      load-balancing :
-        strategy : round-robin
-        enable-health-check : true
-        health-check-interval : PT30S
+      api-prefix:
+        enabled: true
+        prefix: /api
+        strip-count: 0  # Don't strip in local development
+      services:
+        user-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI:http://localhost:8080}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 10000  # Extended for development
+          response-timeout: 60000  # Extended for development
+          openapi:
+            enabled: true
+            display-name: "User Service APIs"
+            description: "Authentication and user management APIs"
+            context-path: "user-service"
+      enable-service-discovery: false
+      load-balancing:
+        strategy: round-robin
+        enable-health-check: true
+        health-check-interval: PT30S
     
-    security :
-      jwt :
-        access-token-expiry : PT30M  # Extended for development
-        refresh-token-expiry : P30D  # Extended for development
-        issuer : iqscaffold-user-service
-        audience : iqscaffold-services
-        algorithm : RS256
-        jwk-set-uri : ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
-      authentication :
-        enabled : true
-        user-service-url : ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
-        token-validation-timeout : PT10S  # Extended for development
-        enable-user-context-propagation : true
-      public-paths :
+    security:
+      jwt:
+        access-token-expiry: PT30M  # Extended for development
+        refresh-token-expiry: P30D  # Extended for development
+        issuer: iqscaffold-user-service
+        audience: iqscaffold-services
+        algorithm: RS256
+        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
+      authentication:
+        enabled: true
+        user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
+        token-validation-timeout: PT10S  # Extended for development
+        enable-user-context-propagation: true
+      public-paths:
         # JWK endpoint for public key distribution
         - /.well-known/jwks.json
         
@@ -117,84 +117,84 @@ iqscaffold :
         - /user-service/api-docs/**
 
     
-    rate-limiting :
-      enabled : true
-      redis :
-        key-prefix : "iqscaffold:gateway:rate-limit:local"
-        key-expiry : PT1M
-      policies :
-        default-requests-per-minute : 120  # More lenient for development
-        default-burst-capacity : 200
-        endpoints :
-          "/api/v1/auth/login" :
-            requests-per-minute : 20  # More lenient for development
-            burst-capacity : 40
-            enable-tenant-quotas : false  # Disabled for development
-          "/api/v1/auth/signup" :
-            requests-per-minute : 10
-            burst-capacity : 20
-            enable-tenant-quotas : false
-          "/api/v1/auth/email/resend" :
-            requests-per-minute : 6  # More lenient for development
-            burst-capacity : 10
-            enable-tenant-quotas : false
-          "/api/v1/auth/email/verify" :
-            requests-per-minute : 20
-            burst-capacity : 30
-            enable-tenant-quotas : false
-          "/api/v1/auth/password/forgot" :
-            requests-per-minute : 6
-            burst-capacity : 10
-            enable-tenant-quotas : false
-          "/api/v1/auth/password/reset" :
-            requests-per-minute : 10
-            burst-capacity : 20
-            enable-tenant-quotas : false
-          "/api/v1/admin/users/**" :
-            requests-per-minute : 200
-            burst-capacity : 300
-            enable-tenant-quotas : false
-          "/api/v1/admin/organizations/**" :
-            requests-per-minute : 200
-            burst-capacity : 300
-            enable-tenant-quotas : false
-          "/api/v1/admin/tenants/**" :
-            requests-per-minute : 100
-            burst-capacity : 150
-            enable-tenant-quotas : false
-          "/api/v1/users/me" :
-            requests-per-minute : 200
-            burst-capacity : 300
-            enable-tenant-quotas : false
-          "/api/v1/users/me/password" :
-            requests-per-minute : 10
-            burst-capacity : 20
-            enable-tenant-quotas : false
-      tenant-quotas :
-        enabled : false  # Disabled for development
-        default-tenant-requests-per-minute : 5000
-        tenant-specific-quotas : { }
+    rate-limiting:
+      enabled: true
+      redis:
+        key-prefix: "iqscaffold:gateway:rate-limit:local"
+        key-expiry: PT1M
+      policies:
+        default-requests-per-minute: 120  # More lenient for development
+        default-burst-capacity: 200
+        endpoints:
+          "/api/v1/auth/login":
+            requests-per-minute: 20  # More lenient for development
+            burst-capacity: 40
+            enable-tenant-quotas: false  # Disabled for development
+          "/api/v1/auth/signup":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+          "/api/v1/auth/email/resend":
+            requests-per-minute: 6  # More lenient for development
+            burst-capacity: 10
+            enable-tenant-quotas: false
+          "/api/v1/auth/email/verify":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: false
+          "/api/v1/auth/password/forgot":
+            requests-per-minute: 6
+            burst-capacity: 10
+            enable-tenant-quotas: false
+          "/api/v1/auth/password/reset":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+          "/api/v1/admin/users/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/admin/organizations/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/admin/tenants/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: false
+          "/api/v1/users/me":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/users/me/password":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: false
+      tenant-quotas:
+        enabled: false  # Disabled for development
+        default-tenant-requests-per-minute: 5000
+        tenant-specific-quotas: { }
     
-    circuit-breaker :
-      enabled : true
-      failure-rate-threshold : 70  # More lenient for development
-      slow-call-rate-threshold : 70
-      slow-call-duration-threshold : PT5S  # More lenient for development
-      minimum-number-of-calls : 5  # Lower threshold for development
-      wait-duration-in-open-state : PT10S  # Shorter for development
-      sliding-window-size : 50
-      sliding-window-type : COUNT_BASED
+    circuit-breaker:
+      enabled: true
+      failure-rate-threshold: 70  # More lenient for development
+      slow-call-rate-threshold: 70
+      slow-call-duration-threshold: PT5S  # More lenient for development
+      minimum-number-of-calls: 5  # Lower threshold for development
+      wait-duration-in-open-state: PT10S  # Shorter for development
+      sliding-window-size: 50
+      sliding-window-type: COUNT_BASED
     
-    cors :
-      enabled : true
-      allowed-origins :
+    cors:
+      enabled: true
+      allowed-origins:
         - http://localhost:3000
         - http://localhost:5173
         - http://localhost:8080
         - http://localhost:8080
         - http://127.0.0.1:3000
         - http://127.0.0.1:5173
-      allowed-methods :
+      allowed-methods:
         - GET
         - POST
         - PUT
@@ -202,115 +202,115 @@ iqscaffold :
         - DELETE
         - OPTIONS
         - HEAD
-      allowed-headers :
+      allowed-headers:
         - "*"
-      allow-credentials : true
-      max-age : 3600
+      allow-credentials: true
+      max-age: 3600
     
-    transformation :
-      request :
-        enabled : true
-        enable-header-enrichment : true
-        enable-user-context-propagation : true
-        enable-tenant-context-propagation : true
-        headers-to-remove :
+    transformation:
+      request:
+        enabled: true
+        enable-header-enrichment: true
+        enable-user-context-propagation: true
+        enable-tenant-context-propagation: true
+        headers-to-remove:
           - Authorization-Internal
           - X-Internal-Token
-        additional-headers :
-          X-Gateway-Version : "1.0.0-local"
-          X-Environment : "local"
-      response :
-        enabled : true
-        enable-security-headers : false  # Relaxed for development
-        enable-correlation-headers : true
-        remove-internal-headers : true
-        additional-headers-to-remove :
+        additional-headers:
+          X-Gateway-Version: "1.0.0-local"
+          X-Environment: "local"
+      response:
+        enabled: true
+        enable-security-headers: false  # Relaxed for development
+        enable-correlation-headers: true
+        remove-internal-headers: true
+        additional-headers-to-remove:
           - X-Internal-Service
           - X-Database-Query-Time
 
   # Observability Configuration - Development
-  observability :
-    tracing :
-      enabled : true
-      service-name : ${spring.application.name}
-      sampling-rate : 1.0  # Full sampling for development
-      endpoint : ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
-      timeout : PT10S
-      export-timeout : PT30S
-      batch-size : 512
-    metrics :
-      enabled : true
-      path : /actuator/prometheus
-      prefix : iqscaffold_gateway_local
-      include-host-tag : true
-      include-application-tag : true
-      include-environment-tag : true
-      custom-tags :
-        environment : local
-        service : gateway-service
-      enabled-metrics :
+  observability:
+    tracing:
+      enabled: true
+      service-name: ${spring.application.name}
+      sampling-rate: 1.0  # Full sampling for development
+      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
+      timeout: PT10S
+      export-timeout: PT30S
+      batch-size: 512
+    metrics:
+      enabled: true
+      path: /actuator/prometheus
+      prefix: iqscaffold_gateway_local
+      include-host-tag: true
+      include-application-tag: true
+      include-environment-tag: true
+      custom-tags:
+        environment: local
+        service: gateway-service
+      enabled-metrics:
         - gateway.requests
         - gateway.response.time
         - gateway.circuit.breaker
         - gateway.rate.limit
-    logging :
-      level : DEBUG  # Verbose logging for development
-      format : console  # Human-readable format
-      enable-request-logging : true
-      enable-response-logging : true  # Enabled for development debugging
-      enable-correlation-id : true
-      include-trace-id : true
-      include-span-id : true
-      include-user-id : true
-      include-tenant-id : true
-      correlation-id-header : X-Correlation-ID
-      request-id-header : X-Request-ID
-      tenant-id-header : X-Tenant-ID
+    logging:
+      level: DEBUG  # Verbose logging for development
+      format: console  # Human-readable format
+      enable-request-logging: true
+      enable-response-logging: true  # Enabled for development debugging
+      enable-correlation-id: true
+      include-trace-id: true
+      include-span-id: true
+      include-user-id: true
+      include-tenant-id: true
+      correlation-id-header: X-Correlation-ID
+      request-id-header: X-Request-ID
+      tenant-id-header: X-Tenant-ID
 
 # Logging Configuration - Development
-logging :
-  level :
-    com.iqscaffold : DEBUG
-    org.springframework.cloud.gateway : DEBUG
-    org.springframework.security : DEBUG
-    org.springframework.web : DEBUG
-    reactor.netty : DEBUG
-    io.lettuce : INFO
-  pattern :
-    console : "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
+logging:
+  level:
+    com.iqscaffold: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: DEBUG
+    io.lettuce: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] [%X{traceId:-}] [%X{spanId:-}] %logger{36} - %msg%n"
 
 # Management Configuration - Development
-management :
-  endpoints :
-    web :
-      exposure :
-        include : "*"  # Expose all endpoints for development
-  endpoint :
-    health :
-      show-details : always  # Always show health details in development
-    prometheus :
-      enabled : true
-  metrics :
-    distribution :
-      percentiles-histogram :
-        http.server.requests : true
-      percentiles :
-        http.server.requests : 0.5,0.95,0.99
-  tracing :
-    sampling :
-      probability : 1.0  # Full tracing in development
-  prometheus :
-    metrics :
-      export :
-        enabled : true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # Expose all endpoints for development
+  endpoint:
+    health:
+      show-details: always  # Always show health details in development
+    prometheus:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    sampling:
+      probability: 1.0  # Full tracing in development
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # SpringDoc Configuration - Development
-springdoc :
-  api-docs :
-    enabled : true
-    path : /api-docs
-  swagger-ui :
-    enabled : true
-    path : /swagger-ui.html
-    try-it-out-enabled : true
-    urls-primary-name : Gateway APIs
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+    urls-primary-name: Gateway APIs
