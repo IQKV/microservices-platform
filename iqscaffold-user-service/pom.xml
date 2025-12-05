@@ -267,6 +267,10 @@
 
                         <!-- Loggers -->
                         <exclude>**/*Logger.class</exclude>
+
+                        <!-- Event Listeners -->
+                        <exclude>**/*Listener.class</exclude>
+                        <exclude>**/*EventListener.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
