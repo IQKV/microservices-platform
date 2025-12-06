@@ -43,6 +43,12 @@ spring:
     redis:
       time-to-live: PT5M
       cache-null-values: false
+    cache-names:
+      - subscriptions
+      - plans
+      - usage
+      - quotas
+      - payment-methods
 
   data:
     redis:
@@ -55,19 +61,36 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 2
+        shutdown-timeout: 100ms
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    connection-timeout: 30000
+    requested-heartbeat: 60
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        multiplier: 2.0
     listener:
       simple:
+        acknowledge-mode: manual
+        prefetch: 10
+        default-requeue-rejected: false
         retry:
           enabled: true
           initial-interval: 1000ms
           max-attempts: 3
           multiplier: 2.0
+          max-interval: 10000ms
 
   security:
     oauth2:
@@ -105,6 +128,11 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+      timeout: 10s
+      compression: gzip
 
 springdoc:
   api-docs:

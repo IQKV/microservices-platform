@@ -175,7 +175,12 @@ This implementation follows the detailed technical standards defined in the desi
   - Configure Liquibase to run programmatically per schema (system and tenant)
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [ ] 4. Configure external integrations
+- [x] 4. Configure external integrations
+
+
+
+
+
   - Set up PostgreSQL datasource with connection pooling (20 connections per instance)
   - Configure Redis for caching with appropriate TTL settings (subscriptions: 5min, plans: 1hr, usage: 1min, quotas: 1min, payment-methods: 10min)
   - Configure RabbitMQ exchanges, queues, and dead letter queues
