@@ -230,7 +230,12 @@ This implementation follows the detailed technical standards defined in the desi
   - Ensure all modifications to line items go through Invoice aggregate root
   - _Requirements: REQ-INV-001, REQ-INV-002, REQ-INV-007, 3.8.2, REQ-DDD-007, REQ-DDD-010, REQ-DDD-011, REQ-DDD-012, REQ-DDD-013, REQ-DDD-014_
 
-- [ ] 8. Implement payment aggregates
+- [x] 8. Implement payment aggregates
+
+
+
+
+
   - Create Payment aggregate root entity
   - Create PaymentMethod aggregate root entity
   - Create PaymentStatus and PaymentMethodType enums
