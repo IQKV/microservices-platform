@@ -1,0 +1,66 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://staging-db:5432/billing_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  liquibase:
+    enabled: true
+    drop-first: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:staging-redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:staging-rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+iqscaffold:
+  billing:
+    security:
+      rate-limiting:
+        enabled: true
+        requests-per-minute: 200
+        burst-capacity: 400
+    integration:
+      user-service:
+        url: ${USER_SERVICE_URL:http://user-service:8081}
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://email-service:8084}
+    payment:
+      provider: ${PAYMENT_PROVIDER:stripe}
+      stripe:
+        api-key: ${STRIPE_API_KEY}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+      paypal:
+        client-id: ${PAYPAL_CLIENT_ID}
+        client-secret: ${PAYPAL_CLIENT_SECRET}

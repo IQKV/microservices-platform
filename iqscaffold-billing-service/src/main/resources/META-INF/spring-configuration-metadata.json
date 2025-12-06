@@ -1,0 +1,159 @@
+{
+  "groups": [
+    {
+      "name": "iqscaffold.billing",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties",
+      "description": "Configuration properties for the Billing Service"
+    },
+    {
+      "name": "iqscaffold.billing.security",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Security",
+      "description": "Security configuration for JWT and rate limiting"
+    },
+    {
+      "name": "iqscaffold.billing.integration",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Integration",
+      "description": "Integration configuration for external services"
+    },
+    {
+      "name": "iqscaffold.billing.payment",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Payment",
+      "description": "Payment provider configuration"
+    },
+    {
+      "name": "iqscaffold.billing.subscription",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Subscription",
+      "description": "Subscription configuration"
+    },
+    {
+      "name": "iqscaffold.billing.usage",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Usage",
+      "description": "Usage metering configuration"
+    },
+    {
+      "name": "iqscaffold.billing.invoice",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Invoice",
+      "description": "Invoice configuration"
+    },
+    {
+      "name": "iqscaffold.billing.portal",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Portal",
+      "description": "Customer portal configuration"
+    },
+    {
+      "name": "iqscaffold.billing.features",
+      "type": "com.iqscaffold.billingservice.config.BillingProperties$Features",
+      "description": "Feature flags configuration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "iqscaffold.billing.security.jwt.jwk-set-uri",
+      "type": "java.lang.String",
+      "description": "JWK Set URI for JWT token validation",
+      "defaultValue": "http://localhost:8081/.well-known/jwks.json"
+    },
+    {
+      "name": "iqscaffold.billing.security.jwt.issuer",
+      "type": "java.lang.String",
+      "description": "Expected JWT token issuer",
+      "defaultValue": "iqscaffold-user-service"
+    },
+    {
+      "name": "iqscaffold.billing.security.rate-limiting.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable rate limiting",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.security.rate-limiting.requests-per-minute",
+      "type": "java.lang.Integer",
+      "description": "Maximum requests per minute per tenant",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.billing.security.rate-limiting.burst-capacity",
+      "type": "java.lang.Integer",
+      "description": "Burst capacity for rate limiting",
+      "defaultValue": 200
+    },
+    {
+      "name": "iqscaffold.billing.payment.provider",
+      "type": "java.lang.String",
+      "description": "Payment provider to use (stripe, paypal, manual)",
+      "defaultValue": "stripe"
+    },
+    {
+      "name": "iqscaffold.billing.subscription.default-currency",
+      "type": "java.lang.String",
+      "description": "Default currency code (ISO 4217)",
+      "defaultValue": "USD"
+    },
+    {
+      "name": "iqscaffold.billing.subscription.trial-days",
+      "type": "java.lang.Integer",
+      "description": "Default trial period in days",
+      "defaultValue": 14
+    },
+    {
+      "name": "iqscaffold.billing.subscription.grace-period-days",
+      "type": "java.lang.Integer",
+      "description": "Grace period after payment failure in days",
+      "defaultValue": 3
+    },
+    {
+      "name": "iqscaffold.billing.usage.metering-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable usage metering",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.usage.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Batch size for usage record processing",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.billing.invoice.number-format",
+      "type": "java.lang.String",
+      "description": "Invoice number format pattern",
+      "defaultValue": "INV-{YEAR}{MONTH}-{SEQUENCE}"
+    },
+    {
+      "name": "iqscaffold.billing.invoice.due-days",
+      "type": "java.lang.Integer",
+      "description": "Invoice due date in days from generation",
+      "defaultValue": 7
+    },
+    {
+      "name": "iqscaffold.billing.portal.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable customer billing portal",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.features.proration",
+      "type": "java.lang.Boolean",
+      "description": "Enable proration for plan changes",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.features.dunning",
+      "type": "java.lang.Boolean",
+      "description": "Enable dunning for failed payments",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.features.analytics",
+      "type": "java.lang.Boolean",
+      "description": "Enable billing analytics",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.billing.features.webhooks",
+      "type": "java.lang.Boolean",
+      "description": "Enable webhook processing",
+      "defaultValue": true
+    }
+  ]
+}

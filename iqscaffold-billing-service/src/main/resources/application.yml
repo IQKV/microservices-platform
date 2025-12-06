@@ -1,0 +1,187 @@
+server:
+  port: 8082
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  application:
+    name: iqscaffold-billing-service
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/tenant/master.xml
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: PT5M
+      cache-null-values: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          multiplier: 2.0
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
+          issuer-uri: ${USER_SERVICE_URL:http://localhost:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+  group-configs:
+    - group: subscription-plans
+      paths-to-match: /api/v1/billing/plans/**
+    - group: subscriptions
+      paths-to-match: /api/v1/billing/subscriptions/**
+    - group: payments
+      paths-to-match: /api/v1/billing/payments/**,/api/v1/billing/payment-methods/**
+    - group: invoices
+      paths-to-match: /api/v1/billing/invoices/**
+    - group: usage
+      paths-to-match: /api/v1/billing/usage/**
+    - group: webhooks
+      paths-to-match: /api/v1/billing/webhooks/**
+    - group: admin
+      paths-to-match: /api/v1/admin/billing/**
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+iqscaffold:
+  billing:
+    security:
+      jwt:
+        jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
+        issuer: iqscaffold-user-service
+      rate-limiting:
+        enabled: true
+        requests-per-minute: 100
+        burst-capacity: 200
+    integration:
+      user-service:
+        url: ${USER_SERVICE_URL:http://localhost:8081}
+        timeout: 5s
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
+        timeout: 10s
+    payment:
+      provider: stripe
+      stripe:
+        api-key: ${STRIPE_API_KEY:}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      paypal:
+        client-id: ${PAYPAL_CLIENT_ID:}
+        client-secret: ${PAYPAL_CLIENT_SECRET:}
+    subscription:
+      default-currency: USD
+      trial-days: 14
+      grace-period-days: 3
+      allow-multiple-subscriptions: false
+    usage:
+      metering-enabled: true
+      batch-size: 100
+      flush-interval: PT30S
+      retention-days: 365
+    invoice:
+      number-format: "INV-{YEAR}{MONTH}-{SEQUENCE}"
+      due-days: 7
+      auto-finalize: true
+      pdf-generation-enabled: true
+    portal:
+      enabled: true
+      allow-plan-changes: true
+      allow-cancellation: true
+    features:
+      proration: true
+      dunning: true
+      analytics: true
+      webhooks: true
