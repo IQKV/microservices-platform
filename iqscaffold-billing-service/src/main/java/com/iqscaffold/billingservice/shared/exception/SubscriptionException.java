@@ -85,4 +85,60 @@ public class SubscriptionException extends BillingException {
             return targetState;
         }
     }
+
+    /**
+     * Exception thrown when a tenant is not eligible for a trial period.
+     */
+    public static class TrialNotEligibleException extends SubscriptionException {
+        
+        public TrialNotEligibleException(String message) {
+            super(message);
+        }
+
+        public TrialNotEligibleException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * Exception thrown when a plan does not offer a trial period.
+     */
+    public static class PlanDoesNotOfferTrialException extends SubscriptionException {
+        
+        public PlanDoesNotOfferTrialException(String message) {
+            super(message);
+        }
+
+        public PlanDoesNotOfferTrialException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * Exception thrown when a payment method is invalid.
+     */
+    public static class InvalidPaymentMethodException extends SubscriptionException {
+        
+        public InvalidPaymentMethodException(String message) {
+            super(message);
+        }
+
+        public InvalidPaymentMethodException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * Exception thrown when a payment method does not belong to the tenant.
+     */
+    public static class PaymentMethodMismatchException extends SubscriptionException {
+        
+        public PaymentMethodMismatchException(String message) {
+            super(message);
+        }
+
+        public PaymentMethodMismatchException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }
