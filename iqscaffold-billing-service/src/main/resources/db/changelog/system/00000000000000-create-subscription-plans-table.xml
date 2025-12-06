@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="00000000000001" author="iqscaffold">
+        <comment>Create subscription_plans table in public schema for shared subscription plan definitions</comment>
+
+        <createTable tableName="subscription_plans">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="plan_code" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="tier" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="billing_cycle" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="base_price" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="currency" type="VARCHAR(3)" defaultValue="USD">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="features" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="quotas" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="trial_days" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="public_plan" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="00000000000002" author="iqscaffold">
+        <comment>Create indexes on subscription_plans table for query performance</comment>
+
+        <createIndex indexName="idx_subscription_plans_plan_code" tableName="subscription_plans">
+            <column name="plan_code"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscription_plans_tier" tableName="subscription_plans">
+            <column name="tier"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscription_plans_billing_cycle" tableName="subscription_plans">
+            <column name="billing_cycle"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscription_plans_active" tableName="subscription_plans">
+            <column name="active"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscription_plans_public_plan" tableName="subscription_plans">
+            <column name="public_plan"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscription_plans_created_at" tableName="subscription_plans">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00000000000003" author="iqscaffold">
+        <comment>Add check constraints for subscription plan validation</comment>
+
+        <sql>
+            ALTER TABLE subscription_plans
+                ADD CONSTRAINT chk_subscription_plans_tier
+                    CHECK (tier IN ('FREE', 'PRO', 'ENTERPRISE'));
+
+            ALTER TABLE subscription_plans
+                ADD CONSTRAINT chk_subscription_plans_billing_cycle
+                    CHECK (billing_cycle IN ('MONTHLY', 'YEARLY', 'LIFETIME'));
+
+            ALTER TABLE subscription_plans
+                ADD CONSTRAINT chk_subscription_plans_base_price_non_negative
+                    CHECK (base_price >= 0);
+
+            ALTER TABLE subscription_plans
+                ADD CONSTRAINT chk_subscription_plans_trial_days_non_negative
+                    CHECK (trial_days >= 0);
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS chk_subscription_plans_tier;
+                ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS chk_subscription_plans_billing_cycle;
+                ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS chk_subscription_plans_base_price_non_negative;
+                ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS chk_subscription_plans_trial_days_non_negative;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00000000000004" author="iqscaffold">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <comment>Plan code format validation (PostgreSQL only)</comment>
+
+        <sql>
+            ALTER TABLE subscription_plans
+                ADD CONSTRAINT chk_subscription_plans_plan_code_format
+                    CHECK (plan_code ~ '^[a-z0-9][a-z0-9-]*[a-z0-9]$' AND LENGTH(plan_code) >= 3);
+        </sql>
+
+        <rollback>
+            <sql>ALTER TABLE subscription_plans DROP CONSTRAINT IF EXISTS chk_subscription_plans_plan_code_format;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="00000000000005" author="iqscaffold">
+        <comment>Insert default subscription plans</comment>
+
+        <insert tableName="subscription_plans">
+            <column name="plan_code" value="free-monthly"/>
+            <column name="name" value="Free Plan"/>
+            <column name="description" value="Basic features for individuals and small teams"/>
+            <column name="tier" value="FREE"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="base_price" value="0.00"/>
+            <column name="currency" value="USD"/>
+            <column name="features" value='{"api_access": true, "basic_support": true, "advanced_workflows": false, "ai_features": false}'/>
+            <column name="quotas" value='{"api_calls": 1000, "storage_gb": 1, "active_users": 5, "email_sends": 100}'/>
+            <column name="trial_days" value="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="public_plan" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="subscription_plans">
+            <column name="plan_code" value="pro-monthly"/>
+            <column name="name" value="Pro Plan (Monthly)"/>
+            <column name="description" value="Advanced features for growing businesses"/>
+            <column name="tier" value="PRO"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="base_price" value="49.00"/>
+            <column name="currency" value="USD"/>
+            <column name="features" value='{"api_access": true, "basic_support": true, "advanced_workflows": true, "ai_features": true, "custom_templates": true, "bulk_operations": true}'/>
+            <column name="quotas" value='{"api_calls": 50000, "storage_gb": 50, "active_users": 25, "email_sends": 10000, "campaign_executions": 100}'/>
+            <column name="trial_days" value="14"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="public_plan" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="subscription_plans">
+            <column name="plan_code" value="pro-yearly"/>
+            <column name="name" value="Pro Plan (Yearly)"/>
+            <column name="description" value="Advanced features with annual billing discount"/>
+            <column name="tier" value="PRO"/>
+            <column name="billing_cycle" value="YEARLY"/>
+            <column name="base_price" value="490.00"/>
+            <column name="currency" value="USD"/>
+            <column name="features" value='{"api_access": true, "basic_support": true, "advanced_workflows": true, "ai_features": true, "custom_templates": true, "bulk_operations": true}'/>
+            <column name="quotas" value='{"api_calls": 50000, "storage_gb": 50, "active_users": 25, "email_sends": 10000, "campaign_executions": 100}'/>
+            <column name="trial_days" value="14"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="public_plan" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="subscription_plans">
+            <column name="plan_code" value="enterprise-monthly"/>
+            <column name="name" value="Enterprise Plan"/>
+            <column name="description" value="Full platform access with premium support"/>
+            <column name="tier" value="ENTERPRISE"/>
+            <column name="billing_cycle" value="MONTHLY"/>
+            <column name="base_price" value="199.00"/>
+            <column name="currency" value="USD"/>
+            <column name="features" value='{"api_access": true, "basic_support": true, "advanced_workflows": true, "ai_features": true, "custom_templates": true, "bulk_operations": true, "priority_support": true, "custom_domains": true, "sso": true, "audit_logs": true}'/>
+            <column name="quotas" value='{"api_calls": -1, "storage_gb": 500, "active_users": -1, "email_sends": -1, "campaign_executions": -1}'/>
+            <column name="trial_days" value="30"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="public_plan" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

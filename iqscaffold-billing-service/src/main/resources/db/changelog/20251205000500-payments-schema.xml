@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251205000500-000001-create-payments-table" author="iqscaffold">
+        <comment>Create payments table for payment processing and tracking</comment>
+
+        <createTable tableName="payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="invoice_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="amount" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="currency" type="VARCHAR(3)" defaultValue="USD">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="payment_method_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="provider_payment_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="failure_reason" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="metadata" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251205000500-000002-add-payments-indexes" author="iqscaffold">
+        <comment>Create indexes on payments table for query performance</comment>
+
+        <createIndex indexName="idx_payments_invoice_id" tableName="payments">
+            <column name="invoice_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payments_tenant_id" tableName="payments">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payments_status" tableName="payments">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payments_payment_method_id" tableName="payments">
+            <column name="payment_method_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payments_provider_id" tableName="payments">
+            <column name="provider_payment_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payments_created_at" tableName="payments">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251205000500-000003-add-payments-constraints" author="iqscaffold">
+        <comment>Add foreign key and check constraints to payments table</comment>
+
+        <addForeignKeyConstraint
+                baseTableName="payments"
+                baseColumnNames="invoice_id"
+                constraintName="fk_payments_invoice"
+                referencedTableName="invoices"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <addForeignKeyConstraint
+                baseTableName="payments"
+                baseColumnNames="payment_method_id"
+                constraintName="fk_payments_payment_method"
+                referencedTableName="payment_methods"
+                referencedColumnNames="id"
+                onDelete="SET NULL"/>
+
+        <sql>
+            ALTER TABLE payments
+                ADD CONSTRAINT chk_payments_status
+                    CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED', 'REFUNDED', 'CANCELED'));
+
+            ALTER TABLE payments
+                ADD CONSTRAINT chk_payments_amount_positive
+                    CHECK (amount > 0);
+        </sql>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="payments" constraintName="fk_payments_invoice"/>
+            <dropForeignKeyConstraint baseTableName="payments" constraintName="fk_payments_payment_method"/>
+            <sql>
+                ALTER TABLE payments DROP CONSTRAINT IF EXISTS chk_payments_status;
+                ALTER TABLE payments DROP CONSTRAINT IF EXISTS chk_payments_amount_positive;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

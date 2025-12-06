@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251205000200-000001-create-usage-records-table" author="iqscaffold">
+        <comment>Create usage_records table for usage tracking and metering</comment>
+
+        <createTable tableName="usage_records">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="metric_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="quantity" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="unit" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="recorded_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="billing_period_start" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="billing_period_end" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="metadata" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251205000200-000002-add-usage-records-indexes" author="iqscaffold">
+        <comment>Create indexes on usage_records table for query performance</comment>
+
+        <createIndex indexName="idx_usage_records_subscription_id" tableName="usage_records">
+            <column name="subscription_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_usage_records_tenant_id" tableName="usage_records">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_usage_records_metric_type" tableName="usage_records">
+            <column name="metric_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_usage_records_recorded_at" tableName="usage_records">
+            <column name="recorded_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_usage_records_billing_period" tableName="usage_records">
+            <column name="billing_period_start"/>
+            <column name="billing_period_end"/>
+        </createIndex>
+
+        <createIndex indexName="idx_usage_records_tenant_metric" tableName="usage_records">
+            <column name="tenant_id"/>
+            <column name="metric_type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251205000200-000003-add-usage-records-constraints" author="iqscaffold">
+        <comment>Add foreign key and check constraints to usage_records table</comment>
+
+        <addForeignKeyConstraint
+                baseTableName="usage_records"
+                baseColumnNames="subscription_id"
+                constraintName="fk_usage_records_subscription"
+                referencedTableName="subscriptions"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <sql>
+            ALTER TABLE usage_records
+                ADD CONSTRAINT chk_usage_records_metric_type
+                    CHECK (metric_type IN ('API_CALLS', 'STORAGE_GB', 'ACTIVE_USERS', 'EMAIL_SENDS', 'CAMPAIGN_EXECUTIONS', 'SCORING_REQUESTS', 'CUSTOM_DOMAINS', 'DATA_EXPORTS', 'CUSTOM'));
+
+            ALTER TABLE usage_records
+                ADD CONSTRAINT chk_usage_records_quantity_positive
+                    CHECK (quantity > 0);
+        </sql>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="usage_records" constraintName="fk_usage_records_subscription"/>
+            <sql>
+                ALTER TABLE usage_records DROP CONSTRAINT IF EXISTS chk_usage_records_metric_type;
+                ALTER TABLE usage_records DROP CONSTRAINT IF EXISTS chk_usage_records_quantity_positive;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

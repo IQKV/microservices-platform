@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <include file="db/changelog/20251205000100-subscriptions-schema.xml"/>
+    <include file="db/changelog/20251205000200-usage-records-schema.xml"/>
+    <include file="db/changelog/20251205000300-payment-methods-schema.xml"/>
+    <include file="db/changelog/20251205000400-invoices-schema.xml"/>
+    <include file="db/changelog/20251205000500-payments-schema.xml"/>
+    <include file="db/changelog/20251205000600-billing-events-schema.xml"/>
+
+</databaseChangeLog>

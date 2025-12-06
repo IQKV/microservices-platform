@@ -33,9 +33,10 @@ spring:
         order_inserts: true
         order_updates: true
 
+  # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/tenant/master.xml
+    enabled: false
 
   cache:
     type: redis
@@ -79,13 +80,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,liquibase,openapi
       base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
       probes:
         enabled: true
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
   health:
     livenessstate:
       enabled: true
@@ -133,10 +138,15 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    liquibase: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 iqscaffold:
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml
+
   billing:
     security:
       jwt:

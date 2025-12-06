@@ -16,9 +16,10 @@ spring:
     hibernate:
       ddl-auto: validate
 
+  # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
-    enabled: true
-    drop-first: false
+    enabled: false
 
   data:
     redis:
@@ -42,17 +43,22 @@ logging:
     com.iqscaffold.billingservice: INFO
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
+    liquibase: WARN
+
+iqscaffold:
+  liquibase:
+    systemChangeLog: classpath:db/changelog/system/master.xml
+    tenantChangeLog: classpath:db/changelog/tenant/master.xml
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,liquibase
   endpoint:
     health:
       show-details: never
 
-iqscaffold:
   billing:
     security:
       rate-limiting:

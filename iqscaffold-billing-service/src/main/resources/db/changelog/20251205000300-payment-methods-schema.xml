@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251205000300-000001-create-payment-methods-table" author="iqscaffold">
+        <comment>Create payment_methods table for payment method management</comment>
+
+        <createTable tableName="payment_methods">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="provider_payment_method_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last4" type="VARCHAR(4)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="brand" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="expiry_month" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="expiry_year" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="is_default" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251205000300-000002-add-payment-methods-indexes" author="iqscaffold">
+        <comment>Create indexes on payment_methods table for query performance</comment>
+
+        <createIndex indexName="idx_payment_methods_tenant_id" tableName="payment_methods">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_methods_user_id" tableName="payment_methods">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_methods_type" tableName="payment_methods">
+            <column name="type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_methods_is_default" tableName="payment_methods">
+            <column name="is_default"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_methods_active" tableName="payment_methods">
+            <column name="active"/>
+        </createIndex>
+
+        <createIndex indexName="idx_payment_methods_provider_id" tableName="payment_methods">
+            <column name="provider_payment_method_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251205000300-000003-add-payment-methods-constraints" author="iqscaffold">
+        <comment>Add check constraints to payment_methods table</comment>
+
+        <sql>
+            ALTER TABLE payment_methods
+                ADD CONSTRAINT chk_payment_methods_type
+                    CHECK (type IN ('CARD', 'BANK_ACCOUNT', 'PAYPAL'));
+
+            ALTER TABLE payment_methods
+                ADD CONSTRAINT chk_payment_methods_expiry_month
+                    CHECK (expiry_month IS NULL OR (expiry_month >= 1 AND expiry_month <= 12));
+
+            ALTER TABLE payment_methods
+                ADD CONSTRAINT chk_payment_methods_expiry_year
+                    CHECK (expiry_year IS NULL OR expiry_year >= 2024);
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE payment_methods DROP CONSTRAINT IF EXISTS chk_payment_methods_type;
+                ALTER TABLE payment_methods DROP CONSTRAINT IF EXISTS chk_payment_methods_expiry_month;
+                ALTER TABLE payment_methods DROP CONSTRAINT IF EXISTS chk_payment_methods_expiry_year;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251205000600-000001-create-billing-events-table" author="iqscaffold">
+        <comment>Create billing_events table for audit logging and event tracking</comment>
+
+        <createTable tableName="billing_events">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="event_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="entity_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="changes" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="ip_address" type="VARCHAR(45)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="user_agent" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251205000600-000002-add-billing-events-indexes" author="iqscaffold">
+        <comment>Create indexes on billing_events table for query performance</comment>
+
+        <createIndex indexName="idx_billing_events_tenant_id" tableName="billing_events">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_user_id" tableName="billing_events">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_event_type" tableName="billing_events">
+            <column name="event_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_entity_type" tableName="billing_events">
+            <column name="entity_type"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_entity_id" tableName="billing_events">
+            <column name="entity_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_created_at" tableName="billing_events">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_billing_events_tenant_entity" tableName="billing_events">
+            <column name="tenant_id"/>
+            <column name="entity_type"/>
+            <column name="entity_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251205000600-000003-add-billing-events-constraints" author="iqscaffold">
+        <comment>Add check constraints to billing_events table</comment>
+
+        <sql>
+            ALTER TABLE billing_events
+                ADD CONSTRAINT chk_billing_events_event_type
+                    CHECK (event_type IN (
+                        'SUBSCRIPTION_CREATED', 'SUBSCRIPTION_UPDATED', 'SUBSCRIPTION_UPGRADED', 
+                        'SUBSCRIPTION_DOWNGRADED', 'SUBSCRIPTION_CANCELED', 'SUBSCRIPTION_EXPIRED', 
+                        'SUBSCRIPTION_REACTIVATED', 'TRIAL_STARTED', 'TRIAL_ENDING_SOON', 
+                        'TRIAL_ENDED', 'TRIAL_CONVERTED', 'PAYMENT_SUCCEEDED', 'PAYMENT_FAILED', 
+                        'PAYMENT_REFUNDED', 'PAYMENT_METHOD_ADDED', 'PAYMENT_METHOD_REMOVED', 
+                        'INVOICE_GENERATED', 'INVOICE_PAID', 'INVOICE_VOIDED', 'QUOTA_EXCEEDED', 
+                        'QUOTA_WARNING', 'USAGE_RECORDED'
+                    ));
+
+            ALTER TABLE billing_events
+                ADD CONSTRAINT chk_billing_events_entity_type
+                    CHECK (entity_type IN (
+                        'SUBSCRIPTION', 'INVOICE', 'PAYMENT', 'PAYMENT_METHOD', 'USAGE_RECORD', 'PLAN'
+                    ));
+        </sql>
+
+        <rollback>
+            <sql>
+                ALTER TABLE billing_events DROP CONSTRAINT IF EXISTS chk_billing_events_event_type;
+                ALTER TABLE billing_events DROP CONSTRAINT IF EXISTS chk_billing_events_entity_type;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251205000100-000001-create-subscriptions-table" author="iqscaffold">
+        <comment>Create subscriptions table for subscription lifecycle management</comment>
+
+        <createTable tableName="subscriptions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="plan_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="current_period_start" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="current_period_end" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="trial_start" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="trial_end" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="canceled_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="cancel_at_period_end" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="metadata" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251205000100-000002-add-subscriptions-indexes" author="iqscaffold">
+        <comment>Create indexes on subscriptions table for query performance</comment>
+
+        <createIndex indexName="idx_subscriptions_tenant_id" tableName="subscriptions">
+            <column name="tenant_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_user_id" tableName="subscriptions">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_plan_id" tableName="subscriptions">
+            <column name="plan_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_status" tableName="subscriptions">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_period_end" tableName="subscriptions">
+            <column name="current_period_end"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_trial_end" tableName="subscriptions">
+            <column name="trial_end"/>
+        </createIndex>
+
+        <createIndex indexName="idx_subscriptions_created_at" tableName="subscriptions">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251205000100-000003-add-subscriptions-constraints" author="iqscaffold">
+        <comment>Add check constraints to subscriptions table</comment>
+
+        <sql>
+            ALTER TABLE subscriptions
+                ADD CONSTRAINT chk_subscriptions_status
+                    CHECK (status IN ('TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'EXPIRED', 'SUSPENDED', 'INCOMPLETE'));
+        </sql>
+
+        <rollback>
+            <sql>ALTER TABLE subscriptions DROP CONSTRAINT IF EXISTS chk_subscriptions_status;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
