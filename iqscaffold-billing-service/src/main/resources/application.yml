@@ -148,6 +148,9 @@ iqscaffold:
     tenantChangeLog: classpath:db/changelog/tenant/master.xml
 
   billing:
+    tenancy:
+      schema:
+        prefix: tenant_
     security:
       jwt:
         jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json

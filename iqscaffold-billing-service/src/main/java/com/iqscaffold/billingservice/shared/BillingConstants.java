@@ -131,6 +131,7 @@ public final class BillingConstants {
      * Default values for billing operations.
      */
     public static final class Defaults {
+        public static final String DEFAULT_TENANT_ID = "default";
         public static final String CURRENCY = "USD";
         public static final int TRIAL_DAYS = 14;
         public static final int GRACE_PERIOD_DAYS = 3;
