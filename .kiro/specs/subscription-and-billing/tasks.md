@@ -243,7 +243,12 @@ This implementation follows the detailed technical standards defined in the desi
   - Use switch expressions for payment status handling
   - _Requirements: REQ-PAY-007, REQ-PAY-014, 3.8.5, REQ-DDD-008, REQ-DDD-009, REQ-DDD-010, REQ-DDD-011, REQ-DDD-012, REQ-DDD-013_
 
-- [ ] 9. Implement usage entities and value objects as Java records
+- [x] 9. Implement usage entities and value objects as Java records
+
+
+
+
+
   - Create UsageRecord entity
   - Create BillingEvent entity
   - Create MetricType enum
