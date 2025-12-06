@@ -201,7 +201,12 @@ This implementation follows the detailed technical standards defined in the desi
   - Follow naming conventions: entities (no suffix), repositories (Repository suffix), services (Service suffix), REST resources (RestResource suffix)
   - _Requirements: 3.1.1, 3.1.2, 3.1.3, REQ-DDD-045, REQ-DDD-046, REQ-DDD-047, REQ-DDD-048, REQ-DDD-049, REQ-DDD-061, REQ-DDD-062_
 
-- [ ] 6. Implement subscription aggregate with Java 21 features
+- [x] 6. Implement subscription aggregate with Java 21 features
+
+
+
+
+
   - Create Subscription aggregate root entity with identity and lifecycle
   - Create SubscriptionPlan aggregate root entity (public schema)
   - Create PlanTier and BillingCycle enums

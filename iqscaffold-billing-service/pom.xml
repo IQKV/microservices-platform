@@ -80,6 +80,13 @@
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
+        <!-- Hypersistence Utils for JSONB support -->
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
