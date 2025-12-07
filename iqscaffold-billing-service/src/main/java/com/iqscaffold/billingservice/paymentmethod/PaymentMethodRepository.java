@@ -207,4 +207,48 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
       ORDER BY pm.tenantId ASC
       """)
   List<PaymentMethod> findAllDefaultPaymentMethods();
+
+  /**
+   * Finds a payment method by ID and tenant ID.
+   * 
+   * @param id payment method ID
+   * @param tenantId tenant identifier
+   * @return optional containing the payment method, or empty if not found
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.id = :id
+        AND pm.tenantId = :tenantId
+      """)
+  Optional<PaymentMethod> findByIdAndTenantId(
+      @Param("id") Long id,
+      @Param("tenantId") UUID tenantId
+  );
+
+  /**
+   * Finds all default payment methods for a tenant.
+   * 
+   * @param tenantId tenant identifier
+   * @return list of default payment methods (should be at most one)
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.tenantId = :tenantId
+        AND pm.isDefault = true
+      """)
+  List<PaymentMethod> findByTenantIdAndIsDefaultTrue(@Param("tenantId") UUID tenantId);
+
+  /**
+   * Finds all active payment methods for a tenant.
+   * 
+   * @param tenantId tenant identifier
+   * @return list of active payment methods
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.tenantId = :tenantId
+        AND pm.active = true
+      ORDER BY pm.isDefault DESC, pm.createdAt DESC
+      """)
+  List<PaymentMethod> findByTenantIdAndActiveTrue(@Param("tenantId") UUID tenantId);
 }

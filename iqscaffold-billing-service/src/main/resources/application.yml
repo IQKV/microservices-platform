@@ -226,3 +226,27 @@ iqscaffold:
       dunning: true
       analytics: true
       webhooks: true
+
+# Resilience4j Configuration for Circuit Breaker and Time Limiter
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentProvider:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 60s
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 5s
+        record-exceptions:
+          - com.iqscaffold.billingservice.shared.exception.PaymentException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+  timelimiter:
+    instances:
+      paymentProvider:
+        timeout-duration: 10s
+        cancel-running-future: true

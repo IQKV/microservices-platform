@@ -514,7 +514,10 @@ This implementation follows the detailed technical standards defined in the desi
   - Manage transactions at application service level
   - _Requirements: REQ-SUB-039 through REQ-SUB-050, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055_
 
-- [ ] 25. Implement payment application service
+- [x] 25. Implement payment application service
+
+
+
   - Create PaymentApplicationService as thin orchestration layer
   - Delegate to Payment and PaymentMethod aggregates for business logic
   - Use PaymentProviderAdapter (anti-corruption layer) for external calls
