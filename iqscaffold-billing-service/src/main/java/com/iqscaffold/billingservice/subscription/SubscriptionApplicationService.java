@@ -1088,4 +1088,38 @@ public class SubscriptionApplicationService {
         subscription.getUpdatedAt()
     );
   }
+  
+  /**
+   * Updates subscription status.
+   * 
+   * <p>This method is used by async consumers (e.g., PaymentRetryConsumer) to update
+   * subscription status based on payment results.
+   * 
+   * @param subscriptionId the subscription ID
+   * @param newStatus the new subscription status
+   * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
+   */
+  @Transactional
+  @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
+  public void updateSubscriptionStatus(Long subscriptionId, SubscriptionStatus newStatus) {
+    log.info("Updating subscription status: subscriptionId={}, newStatus={}", subscriptionId, newStatus);
+    
+    var subscription = subscriptionRepository.findById(subscriptionId)
+        .orElseThrow(() -> {
+          var errorMessage = messageService.getMessage("subscription.not.found");
+          log.error("Subscription not found: {}", subscriptionId);
+          return new SubscriptionException.SubscriptionNotFoundException(errorMessage);
+        });
+    
+    // Use lifecycle manager to transition status
+    subscriptionLifecycleManager.transitionStatus(
+        subscription,
+        newStatus,
+        "Status updated by payment retry consumer"
+    );
+    
+    subscriptionRepository.save(subscription);
+    
+    log.info("Subscription status updated: subscriptionId={}, newStatus={}", subscriptionId, newStatus);
+  }
 }

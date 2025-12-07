@@ -494,4 +494,41 @@ public class InvoiceApplicationService {
         lineItem.amount()
     );
   }
+  
+  /**
+   * Generates an invoice for a subscription.
+   * 
+   * <p>This method is called by the InvoiceGenerationConsumer for async invoice generation.
+   * It generates an invoice for the current billing period including PDF generation.
+   * 
+   * @param subscriptionId the subscription ID
+   * @return the generated invoice DTO
+   * @throws com.iqscaffold.billingservice.shared.exception.SubscriptionException.SubscriptionNotFoundException if subscription not found
+   */
+  @Transactional
+  public InvoiceDto generateInvoiceForSubscription(Long subscriptionId) {
+    log.info("Generating invoice for subscription: {}", subscriptionId);
+    
+    var subscription = subscriptionRepository.findById(subscriptionId)
+        .orElseThrow(() -> {
+          var errorMessage = messageService.getMessage("subscription.not.found");
+          log.error("Subscription not found: {}", subscriptionId);
+          return new com.iqscaffold.billingservice.shared.exception.SubscriptionException.SubscriptionNotFoundException(errorMessage);
+        });
+    
+    // Use invoice generator to create invoice
+    var invoice = invoiceGenerator.generate(
+        subscription,
+        subscription.getCurrentPeriodStart(),
+        subscription.getCurrentPeriodEnd()
+    );
+    
+    // Save invoice
+    var savedInvoice = invoiceRepository.save(invoice);
+    
+    log.info("Invoice generated: invoiceId={}, subscriptionId={}, total={}",
+        savedInvoice.getId(), subscriptionId, savedInvoice.getTotal());
+    
+    return toDto(savedInvoice);
+  }
 }

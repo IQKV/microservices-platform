@@ -26,6 +26,14 @@ public interface WebhookEventRepository extends JpaRepository<WebhookEvent, Long
   boolean existsByProviderEventId(String providerEventId);
   
   /**
+   * Finds a webhook event by provider event ID.
+   * 
+   * @param providerEventId the provider event ID
+   * @return optional webhook event
+   */
+  java.util.Optional<WebhookEvent> findByProviderEventId(String providerEventId);
+  
+  /**
    * Finds webhook events by provider and status.
    * 
    * @param provider the provider name

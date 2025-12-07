@@ -81,6 +81,26 @@ public class WebhookApplicationService {
   private static final int WEBHOOK_EVENT_TTL_DAYS = 30;
   
   /**
+   * Verifies webhook signature for a given provider.
+   * 
+   * @param provider the payment provider name (stripe, paypal)
+   * @param payload the raw webhook payload
+   * @param signature the signature header value
+   * @return true if signature is valid, false otherwise
+   */
+  public boolean verifyWebhookSignature(String provider, String payload, String signature) {
+    log.debug("Verifying webhook signature for provider: {}", provider);
+    
+    try {
+      PaymentProviderAdapter providerAdapter = paymentProviderFactory.getProvider(provider);
+      return providerAdapter.verifyWebhookSignature(payload, signature);
+    } catch (Exception e) {
+      log.error("Error verifying webhook signature for provider: {}", provider, e);
+      return false;
+    }
+  }
+  
+  /**
    * Processes Stripe webhook events.
    * 
    * <p><strong>Sync Response Pattern:</strong> Validates signature → publishes to queue → returns 200 OK
