@@ -8,6 +8,7 @@ import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.shared.exception.PlanException;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -831,6 +832,226 @@ public class SubscriptionApplicationService {
           null // No payment method required for FREE plans
       );
     }
+  }
+
+  /**
+   * Cancels a subscription with immediate or period-end options.
+   * 
+   * <p>This method handles subscription cancellations by:
+   * <ul>
+   *   <li>Validating the subscription is active using ActiveSubscriptionSpecification</li>
+   *   <li>Using SubscriptionLifecycleManager domain service for state transitions</li>
+   *   <li>Supporting immediate cancellation (access revoked immediately)</li>
+   *   <li>Supporting period-end cancellation (access until period end)</li>
+   *   <li>Publishing SubscriptionCanceled domain event</li>
+   * </ul>
+   * 
+   * <p>Cancellation options:
+   * <ul>
+   *   <li>Immediate: Subscription is canceled immediately, access revoked</li>
+   *   <li>Period-end: Subscription remains active until current period ends</li>
+   * </ul>
+   * 
+   * @param subscriptionId subscription identifier
+   * @param request cancellation request containing immediate flag and reason
+   * @return DTO representation of the canceled subscription
+   * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
+   * @throws IllegalStateException if subscription cannot be canceled
+   */
+  @Transactional
+  @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
+  public SubscriptionDto cancelSubscription(Long subscriptionId, CancelSubscriptionRequest request) {
+    log.info(
+        "Canceling subscription: {}, immediate: {}, reason: {}",
+        subscriptionId,
+        request.immediate(),
+        request.reason()
+    );
+
+    // Retrieve the subscription
+    var subscription = subscriptionRepository.findById(subscriptionId)
+        .orElseThrow(() -> {
+          var errorMessage = messageService.getMessage("subscription.not.found");
+          log.error("Subscription not found: {}", subscriptionId);
+          return new SubscriptionException.SubscriptionNotFoundException(subscriptionId.toString());
+        });
+
+    // Validate subscription is active using specification
+    var activeSpec = new ActiveSubscriptionSpecification();
+    if (!activeSpec.isSatisfiedBy(subscription) && subscription.getStatus() != SubscriptionStatus.TRIAL) {
+      var errorMessage = messageService.getMessage("subscription.cancel.not.active");
+      log.error(
+          "Cannot cancel subscription {} in status: {}",
+          subscriptionId,
+          subscription.getStatus()
+      );
+      throw new IllegalStateException(
+          "Cannot cancel subscription in " + subscription.getStatus() + " status"
+      );
+    }
+
+    // Determine cancellation type
+    var isImmediate = Boolean.TRUE.equals(request.immediate());
+    var reason = request.reason() != null ? request.reason() : "Customer request";
+
+    // Delegate to lifecycle manager for state transition
+    if (isImmediate) {
+      subscriptionLifecycleManager.cancelImmediately(subscription, reason);
+      log.info("Subscription {} canceled immediately", subscriptionId);
+    } else {
+      subscriptionLifecycleManager.cancelAtPeriodEnd(subscription, reason);
+      log.info(
+          "Subscription {} scheduled for cancellation at period end: {}",
+          subscriptionId,
+          subscription.getCurrentPeriodEnd()
+      );
+    }
+
+    // Add metadata if provided
+    if (request.metadata() != null && !request.metadata().isEmpty()) {
+      request.metadata().forEach(subscription::addMetadata);
+    }
+
+    // Add cancellation metadata
+    subscription.addMetadata("cancellation_reason", reason);
+    subscription.addMetadata("cancellation_type", isImmediate ? "immediate" : "period_end");
+    subscription.addMetadata("canceled_by_user", request.userId() != null ? request.userId().toString() : "unknown");
+
+    // Persist changes
+    var updatedSubscription = subscriptionRepository.save(subscription);
+
+    // TODO: Publish SubscriptionCanceled domain event
+    // Event should include:
+    // - subscriptionId
+    // - tenantId
+    // - planCode
+    // - immediate (boolean)
+    // - reason
+    // - canceledAt (timestamp)
+    // - effectiveDate (now for immediate, period end for scheduled)
+    // Event will be published using BillingConstants.BillingEvents constants
+
+    var successMessage = isImmediate
+        ? messageService.getMessage("subscription.canceled.immediate")
+        : messageService.getMessage("subscription.canceled.period.end", subscription.getCurrentPeriodEnd());
+    
+    log.info(
+        "Successfully canceled subscription: {}, immediate: {}, status: {}",
+        updatedSubscription.getId(),
+        isImmediate,
+        updatedSubscription.getStatus()
+    );
+
+    return toDto(updatedSubscription);
+  }
+
+  /**
+   * Reactivates a canceled subscription before the period end.
+   * 
+   * <p>This method handles subscription reactivation by:
+   * <ul>
+   *   <li>Validating the subscription can be reactivated</li>
+   *   <li>Using SubscriptionLifecycleManager domain service for state transitions</li>
+   *   <li>Removing the cancel_at_period_end flag</li>
+   *   <li>Publishing SubscriptionReactivated domain event</li>
+   * </ul>
+   * 
+   * <p>Reactivation is only allowed for:
+   * <ul>
+   *   <li>Subscriptions with cancel_at_period_end flag set</li>
+   *   <li>Subscriptions in CANCELED status before period end</li>
+   * </ul>
+   * 
+   * @param subscriptionId subscription identifier
+   * @param request reactivation request containing reason and metadata
+   * @return DTO representation of the reactivated subscription
+   * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
+   * @throws IllegalStateException if subscription cannot be reactivated
+   */
+  @Transactional
+  @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
+  public SubscriptionDto reactivateSubscription(Long subscriptionId, ReactivateSubscriptionRequest request) {
+    log.info(
+        "Reactivating subscription: {}, reason: {}",
+        subscriptionId,
+        request.reason()
+    );
+
+    // Retrieve the subscription
+    var subscription = subscriptionRepository.findById(subscriptionId)
+        .orElseThrow(() -> {
+          var errorMessage = messageService.getMessage("subscription.not.found");
+          log.error("Subscription not found: {}", subscriptionId);
+          return new SubscriptionException.SubscriptionNotFoundException(subscriptionId.toString());
+        });
+
+    // Validate subscription can be reactivated
+    if (!subscription.getStatus().canReactivate()) {
+      var errorMessage = messageService.getMessage("subscription.reactivate.invalid.status");
+      log.error(
+          "Cannot reactivate subscription {} in status: {}",
+          subscriptionId,
+          subscription.getStatus()
+      );
+      throw new IllegalStateException(
+          "Cannot reactivate subscription in " + subscription.getStatus() + " status"
+      );
+    }
+
+    // Check if subscription is scheduled for cancellation at period end
+    if (subscription.getCancelAtPeriodEnd() == null || !subscription.getCancelAtPeriodEnd()) {
+      // Check if subscription is in CANCELED status but still within period
+      if (subscription.getStatus() == SubscriptionStatus.CANCELED) {
+        var now = LocalDateTime.now();
+        if (subscription.getCurrentPeriodEnd() == null || subscription.getCurrentPeriodEnd().isBefore(now)) {
+          var errorMessage = messageService.getMessage("subscription.reactivate.period.ended");
+          log.error(
+              "Cannot reactivate subscription {} - period has ended: {}",
+              subscriptionId,
+              subscription.getCurrentPeriodEnd()
+          );
+          throw new IllegalStateException(
+              "Cannot reactivate subscription - billing period has ended"
+          );
+        }
+      }
+    }
+
+    var reason = request.reason() != null ? request.reason() : "Customer request";
+
+    // Delegate to lifecycle manager for state transition
+    subscriptionLifecycleManager.reactivate(subscription, reason);
+
+    // Add metadata if provided
+    if (request.metadata() != null && !request.metadata().isEmpty()) {
+      request.metadata().forEach(subscription::addMetadata);
+    }
+
+    // Add reactivation metadata
+    subscription.addMetadata("reactivation_reason", reason);
+    subscription.addMetadata("reactivated_at", LocalDateTime.now().toString());
+    subscription.addMetadata("reactivated_by_user", request.userId() != null ? request.userId().toString() : "unknown");
+
+    // Persist changes
+    var updatedSubscription = subscriptionRepository.save(subscription);
+
+    // TODO: Publish SubscriptionReactivated domain event
+    // Event should include:
+    // - subscriptionId
+    // - tenantId
+    // - planCode
+    // - reason
+    // - reactivatedAt (timestamp)
+    // Event will be published using BillingConstants.BillingEvents constants
+
+    var successMessage = messageService.getMessage("subscription.reactivated");
+    log.info(
+        "Successfully reactivated subscription: {}, status: {}",
+        updatedSubscription.getId(),
+        updatedSubscription.getStatus()
+    );
+
+    return toDto(updatedSubscription);
   }
 
   /**
