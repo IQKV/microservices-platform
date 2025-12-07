@@ -801,7 +801,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-ADMIN-010 through REQ-ADMIN-027, REQ-API-019 through REQ-API-022, REQ-DDD-049_
 
 
-- [ ] 39. Implement webhook endpoints
+- [x] 39. Implement webhook endpoints
   - Create WebhookController in presentation layer
   - Delegate to WebhookApplicationService
   - Implement POST /api/v1/billing/webhooks/stripe endpoint
@@ -811,7 +811,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-PAY-037, REQ-PAY-038, REQ-PAY-039, REQ-API-023, REQ-API-024, REQ-DDD-049_
 
-- [ ] 40. Implement internal endpoints
+- [x] 40. Implement internal endpoints
   - Create InternalBillingController in presentation layer
   - Delegate to SubscriptionApplicationService and UsageApplicationService
   - Implement GET /internal/billing/feature-access/{tenantId} endpoint
