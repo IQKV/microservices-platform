@@ -484,7 +484,13 @@ This implementation follows the detailed technical standards defined in the desi
   - Add subscription caching with 5-minute TTL using BillingConstants.CacheNames
   - _Requirements: 3.7.5, 3.7.6, REQ-SUB-001 through REQ-SUB-015, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
-- [ ] 25. Implement subscription application service - upgrade and downgrade with i18n
+- [x] 25. Implement subscription application service - upgrade and downgrade with i18n
+
+
+
+
+
+
   - Use ProrationCalculator domain service for proration calculations
   - Use ValidPlanTransitionSpecification for validation
   - Use QuotaExceededSpecification for downgrade validation
