@@ -15,17 +15,62 @@ import org.springframework.stereotype.Component;
  * the main transaction.
  *
  * <p>Design Rationale: Using RabbitMQ for event publishing enables:
- * - Loose coupling between aggregates
- * - Eventual consistency
- * - Asynchronous processing of side effects (notifications, integrations)
- * - Scalable event-driven architecture
+ * <ul>
+ *   <li>Loose coupling between aggregates</li>
+ *   <li>Eventual consistency</li>
+ *   <li>Asynchronous processing of side effects (notifications, integrations)</li>
+ *   <li>Scalable event-driven architecture</li>
+ *   <li>Parallel processing of event handlers</li>
+ *   <li>Prevention of cascading failures</li>
+ * </ul>
+ *
+ * <p>Event Metadata:
+ * Each published event includes comprehensive metadata for traceability and versioning:
+ * <ul>
+ *   <li>eventId: Unique identifier for idempotency</li>
+ *   <li>eventType: Type of domain event</li>
+ *   <li>eventVersion: Schema version for evolution</li>
+ *   <li>aggregateId: ID of the aggregate that generated the event</li>
+ *   <li>aggregateType: Type of aggregate (Subscription, Invoice, Payment, etc.)</li>
+ *   <li>tenantId: Tenant context for multi-tenancy</li>
+ *   <li>timestamp: When the event occurred</li>
+ * </ul>
+ *
+ * <p>Event Versioning:
+ * Events include a version number to support schema evolution. Consumers can handle
+ * multiple versions of the same event type, enabling backward compatibility during
+ * rolling deployments and gradual migrations.
+ *
+ * <p>Async Benefits:
+ * <ul>
+ *   <li>SubscriptionCreated → triggers welcome email, analytics update</li>
+ *   <li>InvoiceGenerated → triggers PDF generation, email notification</li>
+ *   <li>PaymentFailed → triggers retry scheduling, notification</li>
+ *   <li>UsageRecorded → triggers quota check, analytics update</li>
+ *   <li>QuotaExceeded → triggers notification, feature throttling</li>
+ * </ul>
+ *
+ * <p>Note: In production, consider implementing the transactional outbox pattern
+ * to ensure events are not lost on publish failure. This involves storing events
+ * in a database table within the same transaction as the aggregate, then publishing
+ * them asynchronously via a separate process.
  */
 @Component
 public class RabbitMQDomainEventPublisher implements DomainEventPublisher {
 
   private static final Logger log = LoggerFactory.getLogger(RabbitMQDomainEventPublisher.class);
 
-  private static final String EXCHANGE_NAME = "billing.domain.events";
+  /**
+   * Main exchange for billing domain events.
+   * Matches the exchange configured in RabbitMQConfig.
+   */
+  private static final String EXCHANGE_NAME = "billing.events";
+
+  /**
+   * Current event schema version.
+   * Increment this when making breaking changes to event structure.
+   */
+  private static final String EVENT_VERSION = "1.0";
 
   private final RabbitTemplate rabbitTemplate;
   private final ObjectMapper objectMapper;
@@ -38,31 +83,52 @@ public class RabbitMQDomainEventPublisher implements DomainEventPublisher {
   @Override
   public void publish(final DomainEvent event) {
     try {
-      var routingKey = event.eventType().toLowerCase().replace('_', '.');
+      // Convert event type to routing key format (e.g., "billing.subscription.created")
+      var routingKey = event.eventType();
+      
+      // Serialize event to JSON
       var eventJson = objectMapper.writeValueAsString(event);
 
+      // Publish to RabbitMQ with comprehensive metadata
       rabbitTemplate.convertAndSend(EXCHANGE_NAME, routingKey, eventJson, message -> {
-        message.getMessageProperties().setHeader("eventType", event.eventType());
-        message.getMessageProperties().setHeader("eventId", event.eventId().toString());
-        message.getMessageProperties().setHeader("tenantId", event.tenantId().toString());
-        message.getMessageProperties().setHeader("aggregateId", event.aggregateId().toString());
-        message.getMessageProperties().setTimestamp(java.util.Date.from(event.occurredAt()));
+        var properties = message.getMessageProperties();
+        
+        // Core event metadata
+        properties.setHeader("eventId", event.eventId().toString());
+        properties.setHeader("eventType", event.eventType());
+        properties.setHeader("eventVersion", EVENT_VERSION);
+        
+        // Aggregate metadata
+        properties.setHeader("aggregateId", event.aggregateId().toString());
+        properties.setHeader("aggregateType", extractAggregateType(event.eventType()));
+        
+        // Tenant context for multi-tenancy
+        properties.setHeader("tenantId", event.tenantId().toString());
+        
+        // Timestamp
+        properties.setTimestamp(java.util.Date.from(event.occurredAt()));
+        
+        // Content type for proper deserialization
+        properties.setContentType("application/json");
+        
         return message;
       });
 
       log.info(
-        "Published domain event: type={}, eventId={}, aggregateId={}, tenantId={}",
+        "Published domain event: type={}, eventId={}, aggregateId={}, tenantId={}, version={}",
         event.eventType(),
         event.eventId(),
         event.aggregateId(),
-        event.tenantId()
+        event.tenantId(),
+        EVENT_VERSION
       );
     } catch (Exception e) {
       log.error(
-        "Failed to publish domain event: type={}, eventId={}, aggregateId={}",
+        "Failed to publish domain event: type={}, eventId={}, aggregateId={}, tenantId={}",
         event.eventType(),
         event.eventId(),
         event.aggregateId(),
+        event.tenantId(),
         e
       );
       // In production, consider using transactional outbox pattern
@@ -76,5 +142,21 @@ public class RabbitMQDomainEventPublisher implements DomainEventPublisher {
     for (var event : events) {
       publish(event);
     }
+  }
+
+  /**
+   * Extracts the aggregate type from the event type.
+   * Example: "billing.subscription.created" → "Subscription"
+   *
+   * @param eventType the event type
+   * @return the aggregate type
+   */
+  private String extractAggregateType(final String eventType) {
+    var parts = eventType.split("\\.");
+    if (parts.length >= 2) {
+      var aggregateType = parts[1];
+      return Character.toUpperCase(aggregateType.charAt(0)) + aggregateType.substring(1);
+    }
+    return "Unknown";
   }
 }
