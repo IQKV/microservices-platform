@@ -838,7 +838,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-ERR-012, REQ-ERR-013, REQ-ERR-014, REQ-ERR-015, REQ-DDD-049_
 
 
-- [ ] 43. Implement request validation
+- [x] 43. Implement request validation
   - Add Bean Validation annotations to DTOs and request objects in presentation layer
   - Use specifications in domain layer for business rule validation
   - Implement validation at controller (input), application service (use case), and domain (invariants) layers
@@ -866,7 +866,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Integrate with billing service internal endpoint for quota checks
   - _Requirements: REQ-INT-007, REQ-INT-008, REQ-INT-009, REQ-USAGE-007_
 
-- [ ] 47. Create email templates for billing notifications
+- [x] 47. Create email templates for billing notifications
   - Create email templates for: subscription_created, trial_ending, trial_ended, subscription_upgraded, subscription_downgraded, subscription_canceled, invoice_generated, payment_succeeded, payment_failed, payment_retry, subscription_past_due, subscription_expired
   - Integrate with Email Service for sending notifications
   - Implement email sending logic in NotificationConsumer

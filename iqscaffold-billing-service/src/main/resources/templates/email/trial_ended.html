@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.trial.ended.subject}">Trial Ended</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.trial.ended.title}">Your Trial Has Ended</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.trial.ended.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.trial.ended.message(${planName})}">
+                Your trial period has ended.
+            </p>
+            
+            <div class="info-box">
+                <p th:text="#{email.trial.ended.downgraded}">
+                    Your account has been downgraded to the Free plan.
+                </p>
+                <p th:text="#{email.trial.ended.upgrade}">
+                    To restore full access, please upgrade your subscription.
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${upgradeUrl}" class="cta-button" th:text="#{email.trial.ended.cta}">
+                    Upgrade Now
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.trial.ended.footer}">
+                We hope you enjoyed your trial!
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

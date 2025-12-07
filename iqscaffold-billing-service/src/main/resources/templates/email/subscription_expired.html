@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.subscription.expired.subject}">Subscription Expired</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.subscription.expired.title}">Subscription Expired</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.subscription.expired.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.subscription.expired.message(${planName})}">
+                Your subscription has expired due to non-payment.
+            </p>
+            
+            <div class="error-box">
+                <p th:text="#{email.subscription.expired.access.removed}">
+                    Your access to premium features has been removed.
+                </p>
+                <p th:text="#{email.subscription.expired.data.retained(${dataRetentionDays})}">
+                    Your data will be retained.
+                </p>
+            </div>
+            
+            <div class="info-box">
+                <p th:text="#{email.subscription.expired.reactivate}">
+                    To restore your subscription, please update your payment method and reactivate.
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${reactivateUrl}" class="cta-button" th:text="#{email.subscription.expired.cta}">
+                    Reactivate Subscription
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.subscription.expired.footer}">
+                We'd love to have you back!
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

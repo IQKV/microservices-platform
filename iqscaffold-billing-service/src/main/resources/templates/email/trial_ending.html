@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.trial.ending.subject}">Trial Ending Soon</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.trial.ending.title}">Your Trial is Ending Soon</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.trial.ending.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.trial.ending.message(${planName}, ${daysRemaining}, ${#temporals.format(endDate, 'MMM dd, yyyy')})}">
+                Your trial period for the plan will end soon.
+            </p>
+            
+            <div class="warning-box">
+                <h3 th:text="#{email.trial.ending.action.required}">Action Required</h3>
+                <p th:text="#{email.trial.ending.add.payment}">
+                    To continue using IQ Scaffold without interruption, please add a payment method.
+                </p>
+            </div>
+            
+            <div class="info-box" th:if="${features != null and !features.isEmpty()}">
+                <h3 th:text="#{email.trial.ending.features}">You'll continue to enjoy:</h3>
+                <ul>
+                    <li th:each="feature : ${features}" th:text="${feature}">Feature</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${paymentMethodUrl}" class="cta-button" th:text="#{email.trial.ending.cta}">
+                    Add Payment Method
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.trial.ending.footer}">
+                Questions? Contact our support team.
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

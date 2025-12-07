@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${subject}">Email</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .email-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .email-body {
+            padding: 30px 20px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+        .message {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #555555;
+            margin-bottom: 25px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333333;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555555;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #667eea;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .cta-button:hover {
+            background-color: #5568d3;
+        }
+        .email-footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #777777;
+            border-top: 1px solid #e9ecef;
+        }
+        .email-footer p {
+            margin: 5px 0;
+        }
+        .email-footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 25px 0;
+        }
+        ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        ul li {
+            margin: 8px 0;
+            color: #555555;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .error-box {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="${title}">Email Title</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="${greeting}">Hello,</p>
+            
+            <!-- Content block - to be replaced by specific templates -->
+            <div th:replace="~{::content}">
+                <p class="message">Email content goes here.</p>
+            </div>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a href="#" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a href="#" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.subscription.downgraded.subject}">Subscription Downgraded</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.subscription.downgraded.title}">Subscription Downgraded</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.subscription.downgraded.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.subscription.downgraded.message(${oldPlanName}, ${newPlanName})}">
+                Your subscription has been downgraded.
+            </p>
+            
+            <div class="info-box">
+                <p th:if="${immediate}">
+                    <strong th:text="#{email.subscription.downgraded.effective.immediate}">Effective immediately</strong>
+                </p>
+                <p th:if="${!immediate}">
+                    <strong th:text="#{email.subscription.downgraded.effective.period.end(${#temporals.format(effectiveDate, 'MMM dd, yyyy')})}">
+                        Effective at period end
+                    </strong>
+                </p>
+                <p th:if="${creditAmount != null}" 
+                   th:text="#{email.subscription.downgraded.credit(${creditAmount}, ${currency})}">
+                    A credit has been applied.
+                </p>
+            </div>
+            
+            <div class="warning-box" th:if="${removedFeatures != null and !removedFeatures.isEmpty()}">
+                <h3 th:text="#{email.subscription.downgraded.features.removed}">Features no longer available:</h3>
+                <ul>
+                    <li th:each="feature : ${removedFeatures}" th:text="${feature}">Feature</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${subscriptionUrl}" class="cta-button" th:text="#{email.subscription.downgraded.cta}">
+                    View Subscription
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.subscription.downgraded.footer}">
+                You can upgrade anytime.
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

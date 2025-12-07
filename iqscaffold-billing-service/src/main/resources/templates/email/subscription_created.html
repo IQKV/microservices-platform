@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{email.subscription.created.subject(${planName})}">Welcome!</title>
+    <style th:replace="~{email/base :: style}"></style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.subscription.created.title}">Welcome to IQ Scaffold!</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.subscription.created.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.subscription.created.message(${planName})}">
+                Your subscription to the plan has been created successfully.
+            </p>
+            
+            <div class="success-box">
+                <h3 th:text="#{email.subscription.created.plan.details}">Plan Details</h3>
+                <p th:text="#{email.subscription.created.plan.name(${planName})}">Plan: Pro</p>
+                <p th:text="#{email.subscription.created.plan.price(${price}, ${currency}, ${billingCycle})}">
+                    Price: $29.99 USD/month
+                </p>
+                <p th:text="#{email.subscription.created.start.date(${#temporals.format(startDate, 'MMM dd, yyyy')})}">
+                    Start Date: Jan 01, 2024
+                </p>
+                <p th:text="#{email.subscription.created.next.billing(${#temporals.format(nextBillingDate, 'MMM dd, yyyy')})}">
+                    Next Billing Date: Feb 01, 2024
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${portalUrl}" class="cta-button" th:text="#{email.subscription.created.cta}">
+                    Manage Subscription
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; color: #667eea; font-weight: 600;" 
+               th:text="#{email.subscription.created.footer}">
+                Thank you for choosing IQ Scaffold!
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

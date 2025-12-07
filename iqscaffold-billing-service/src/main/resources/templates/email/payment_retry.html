@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.payment.retry.subject}">Payment Retry Scheduled</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.payment.retry.title}">Payment Retry Scheduled</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.payment.retry.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.payment.retry.message(${invoiceNumber})}">
+                We will retry processing your payment.
+            </p>
+            
+            <div class="info-box">
+                <p th:text="#{email.payment.retry.amount(${amount}, ${currency})}">Amount</p>
+                <p th:text="#{email.payment.retry.date(${#temporals.format(retryDate, 'MMM dd, yyyy')})}">Retry Date</p>
+            </div>
+            
+            <div class="warning-box">
+                <p th:text="#{email.payment.retry.update}">
+                    To avoid further issues, please update your payment method.
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${paymentMethodUrl}" class="cta-button" th:text="#{email.payment.retry.cta}">
+                    Update Payment Method
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.payment.retry.footer}">
+                Questions? We're here to help.
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

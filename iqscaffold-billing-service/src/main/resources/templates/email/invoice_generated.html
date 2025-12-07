@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.invoice.generated.subject(${invoiceNumber})}">New Invoice</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.invoice.generated.title}">New Invoice Available</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.invoice.generated.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.invoice.generated.message}">
+                A new invoice has been generated for your subscription.
+            </p>
+            
+            <div class="info-box">
+                <h3 th:text="#{email.invoice.generated.invoice.number(${invoiceNumber})}">Invoice Number</h3>
+                <p th:text="#{email.invoice.generated.amount(${amount}, ${currency})}">Amount Due</p>
+                <p th:text="#{email.invoice.generated.due.date(${#temporals.format(dueDate, 'MMM dd, yyyy')})}">Due Date</p>
+                <p th:text="#{email.invoice.generated.period(${#temporals.format(periodStart, 'MMM dd, yyyy')}, ${#temporals.format(periodEnd, 'MMM dd, yyyy')})}">
+                    Billing Period
+                </p>
+            </div>
+            
+            <div class="success-box" th:if="${autoPayment}">
+                <p th:text="#{email.invoice.generated.auto.payment}">
+                    This invoice will be automatically charged to your payment method on file.
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${invoiceUrl}" class="cta-button" th:text="#{email.invoice.generated.cta}">
+                    View Invoice
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.invoice.generated.footer}">
+                Thank you for your business!
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

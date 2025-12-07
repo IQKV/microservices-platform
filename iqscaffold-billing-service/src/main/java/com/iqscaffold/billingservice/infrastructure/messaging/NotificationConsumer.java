@@ -1,17 +1,15 @@
 package com.iqscaffold.billingservice.infrastructure.messaging;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import com.iqscaffold.billingservice.infrastructure.email.EmailService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import java.time.Duration;
+import java.util.Locale;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Consumer for sending billing notifications.
@@ -21,39 +19,30 @@ import org.springframework.web.client.RestTemplate;
  * 
  * <p>Features:
  * <ul>
- *   <li>Email template rendering</li>
+ *   <li>Email template rendering with Thymeleaf</li>
+ *   <li>i18n support for multi-language emails</li>
  *   <li>Retry logic for email delivery failures</li>
- *   <li>Email delivery tracking</li>
+ *   <li>Email delivery tracking with metrics</li>
  *   <li>Handles email provider rate limits with circuit breaker</li>
  * </ul>
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class NotificationConsumer {
 
     private static final String QUEUE_NAME = "billing.notification";
     
-    private final RestTemplate restTemplate;
-    private final CircuitBreaker circuitBreaker;
+    private final EmailService emailService;
     private final Counter successCounter;
     private final Counter failureCounter;
     private final Timer processingTimer;
 
     public NotificationConsumer(
-        RestTemplate restTemplate,
+        EmailService emailService,
         MeterRegistry meterRegistry
     ) {
-        this.restTemplate = restTemplate;
-        
-        // Configure circuit breaker for email service
-        var circuitBreakerConfig = CircuitBreakerConfig.custom()
-            .failureRateThreshold(50)
-            .waitDurationInOpenState(Duration.ofMinutes(1))
-            .slidingWindowSize(10)
-            .build();
-        
-        var circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
-        this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("emailService");
+        this.emailService = emailService;
         
         // Initialize metrics
         this.successCounter = Counter.builder("billing.notification.consumer.success")
@@ -72,7 +61,23 @@ public class NotificationConsumer {
     /**
      * Processes notification messages from the queue.
      * 
-     * @param message the notification request containing recipient, template, and data
+     * <p>Message format:
+     * <pre>
+     * {
+     *   "recipient": "user@example.com",
+     *   "template": "subscription_created",
+     *   "locale": "en",
+     *   "data": {
+     *     "userName": "John Doe",
+     *     "planName": "Pro",
+     *     "price": "29.99",
+     *     "currency": "USD",
+     *     ...
+     *   }
+     * }
+     * </pre>
+     * 
+     * @param message the notification request containing recipient, template, locale, and data
      */
     @RabbitListener(queues = QUEUE_NAME, concurrency = "3-6")
     public void handleNotification(Map<String, Object> message) {
@@ -80,16 +85,18 @@ public class NotificationConsumer {
             try {
                 var recipient = (String) message.get("recipient");
                 var template = (String) message.get("template");
-                var subject = (String) message.get("subject");
+                var localeStr = (String) message.getOrDefault("locale", "en");
                 @SuppressWarnings("unchecked")
                 var templateData = (Map<String, Object>) message.get("data");
                 
-                log.info("Sending notification: recipient={}, template={}", recipient, template);
+                log.info("Processing notification: recipient={}, template={}, locale={}", 
+                    recipient, template, localeStr);
                 
-                // Send email with circuit breaker protection
-                circuitBreaker.executeRunnable(() -> {
-                    sendEmail(recipient, subject, template, templateData);
-                });
+                // Parse locale
+                var locale = parseLocale(localeStr);
+                
+                // Send email using EmailService with i18n support
+                emailService.sendEmail(recipient, template, templateData, locale);
                 
                 successCounter.increment();
                 log.info("Successfully sent notification: recipient={}, template={}", recipient, template);
@@ -115,22 +122,23 @@ public class NotificationConsumer {
     }
 
     /**
-     * Sends an email using the email service.
+     * Parses locale string to Locale object.
+     * Supports formats: "en", "en_US", "en-US"
      */
-    private void sendEmail(
-        String recipient,
-        String subject,
-        String template,
-        Map<String, Object> templateData
-    ) {
-        // TODO: Replace with actual email service integration
-        // For now, just log the email details
-        log.info("Sending email: recipient={}, subject={}, template={}, data={}",
-            recipient, subject, template, templateData);
+    private Locale parseLocale(String localeStr) {
+        if (localeStr == null || localeStr.isBlank()) {
+            return Locale.ENGLISH;
+        }
         
-        // Simulate email sending
-        // In production, this would call the email service API:
-        // restTemplate.postForEntity(emailServiceUrl, emailRequest, EmailResponse.class);
+        // Handle both underscore and hyphen separators
+        var parts = localeStr.replace("-", "_").split("_");
+        
+        return switch (parts.length) {
+            case 1 -> new Locale(parts[0]);
+            case 2 -> new Locale(parts[0], parts[1]);
+            case 3 -> new Locale(parts[0], parts[1], parts[2]);
+            default -> Locale.ENGLISH;
+        };
     }
 
     /**

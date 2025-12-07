@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${locale}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.subscription.canceled.subject}">Subscription Canceled</title>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1 th:text="#{email.subscription.canceled.title}">Subscription Canceled</h1>
+        </div>
+        
+        <div class="email-body">
+            <p class="greeting" th:text="#{email.subscription.canceled.greeting(${userName})}">Hello,</p>
+            
+            <p class="message" th:text="#{email.subscription.canceled.message(${planName})}">
+                Your subscription has been canceled.
+            </p>
+            
+            <div class="info-box">
+                <p th:if="${immediate}">
+                    <strong th:text="#{email.subscription.canceled.effective.immediate}">Canceled immediately</strong>
+                </p>
+                <p th:if="${!immediate}">
+                    <strong th:text="#{email.subscription.canceled.effective.period.end(${#temporals.format(endDate, 'MMM dd, yyyy')})}">
+                        Active until period end
+                    </strong>
+                </p>
+                <p th:text="#{email.subscription.canceled.access(${#temporals.format(accessUntil, 'MMM dd, yyyy')})}">
+                    You will have access until
+                </p>
+            </div>
+            
+            <div class="warning-box">
+                <p th:text="#{email.subscription.canceled.reactivate}">
+                    Changed your mind? You can reactivate your subscription anytime.
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a th:href="${reactivateUrl}" class="cta-button" th:text="#{email.subscription.canceled.cta}">
+                    Reactivate Subscription
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="text-align: center; font-size: 13px; color: #777777;" 
+               th:text="#{email.subscription.canceled.footer}">
+                We're sorry to see you go!
+            </p>
+        </div>
+        
+        <div class="email-footer">
+            <p th:text="#{email.common.company.name}">IQ Scaffold</p>
+            <p th:text="#{email.common.company.address}">123 Business St, Suite 100, City, State 12345</p>
+            <p>
+                <a th:href="${supportUrl}" th:text="#{email.common.contact.support}">Contact Support</a> | 
+                <a th:href="${unsubscribeUrl}" th:text="#{email.common.unsubscribe}">Unsubscribe</a>
+            </p>
+            <p th:text="'© 2024 ' + #{email.common.company.name} + '. ' + #{email.common.all.rights.reserved}">
+                © 2024 IQ Scaffold. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
