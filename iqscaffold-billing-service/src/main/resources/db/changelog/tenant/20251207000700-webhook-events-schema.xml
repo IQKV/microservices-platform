@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251207000700-000001-create-webhook-events-table" author="iqscaffold">
+        <comment>Create webhook_events table for webhook event storage and idempotency</comment>
+        
+        <createTable tableName="webhook_events">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="provider_event_id" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="provider" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="signature" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_message" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="retry_count" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="received_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="processed_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20251207000700-000002-add-webhook-events-indexes" author="iqscaffold">
+        <comment>Create indexes on webhook_events table for query performance</comment>
+        
+        <createIndex indexName="idx_webhook_events_provider_event_id" tableName="webhook_events" unique="true">
+            <column name="provider_event_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_webhook_events_provider" tableName="webhook_events">
+            <column name="provider"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_webhook_events_status" tableName="webhook_events">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_webhook_events_event_type" tableName="webhook_events">
+            <column name="event_type"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_webhook_events_received_at" tableName="webhook_events">
+            <column name="received_at"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_webhook_events_provider_status" tableName="webhook_events">
+            <column name="provider"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20251207000700-000003-add-webhook-events-constraints" author="iqscaffold">
+        <comment>Add check constraints to webhook_events table</comment>
+        
+        <sql>
+            ALTER TABLE webhook_events
+                ADD CONSTRAINT chk_webhook_events_status
+                    CHECK (status IN ('PENDING', 'PROCESSED', 'FAILED', 'DEAD_LETTER'));
+        </sql>
+        
+        <sql>
+            ALTER TABLE webhook_events
+                ADD CONSTRAINT chk_webhook_events_provider
+                    CHECK (provider IN ('stripe', 'paypal'));
+        </sql>
+        
+        <rollback>
+            <sql>ALTER TABLE webhook_events DROP CONSTRAINT IF EXISTS chk_webhook_events_status;</sql>
+            <sql>ALTER TABLE webhook_events DROP CONSTRAINT IF EXISTS chk_webhook_events_provider;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -11,5 +11,6 @@
     <include file="db/changelog/20251205000400-invoices-schema.xml"/>
     <include file="db/changelog/20251205000500-payments-schema.xml"/>
     <include file="db/changelog/20251205000600-billing-events-schema.xml"/>
+    <include file="db/changelog/20251207000700-webhook-events-schema.xml"/>
 
 </databaseChangeLog>

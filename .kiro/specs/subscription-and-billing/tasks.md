@@ -595,6 +595,10 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-USAGE-001 through REQ-USAGE-023, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
 - [ ] 28. Implement webhook application service
+
+
+
+
   - Create WebhookApplicationService as thin orchestration layer
   - Use PaymentProviderAdapter for webhook signature verification
   - Implement processStripeWebhook and processPayPalWebhook use cases
