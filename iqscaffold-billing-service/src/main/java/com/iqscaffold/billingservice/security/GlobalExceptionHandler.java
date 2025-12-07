@@ -1,569 +1,542 @@
 package com.iqscaffold.billingservice.security;
 
-import com.iqscaffold.billingservice.shared.BillingConstants;
+import com.iqscaffold.billingservice.shared.exception.BillingException;
 import com.iqscaffold.billingservice.shared.exception.InvoiceException;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
 import com.iqscaffold.billingservice.shared.exception.PlanException;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
-import com.iqscaffold.billingservice.shared.exception.TenantContextException;
 import com.iqscaffold.billingservice.shared.exception.UsageException;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Global exception handler for the Billing Service using Java 21 switch expressions and records.
- * Provides consistent ProblemDetail error responses across all endpoints with OpenAPI documentation.
- *
- * <p>This handler follows RFC 7807 (Problem Details for HTTP APIs) and includes:
- * <ul>
- *   <li>Structured error responses with correlation IDs</li>
- *   <li>Field-level validation error details</li>
- *   <li>Domain-specific error codes</li>
- *   <li>Appropriate HTTP status codes</li>
- *   <li>OpenAPI documentation for error responses</li>
- * </ul>
+ * Global exception handler for the Billing Service.
+ * 
+ * <p>Provides centralized exception handling across all REST controllers.
+ * Translates domain exceptions into appropriate HTTP responses with
+ * consistent error format.
+ * 
+ * <p>Error Response Format:
+ * <pre>
+ * {
+ *   "errorCode": "BILLING_009",
+ *   "message": "Quota exceeded for API_CALLS: used 1000 of 500",
+ *   "timestamp": "2024-12-07T10:30:00Z",
+ *   "path": "/api/v1/billing/usage/check-quota",
+ *   "details": {
+ *     "metricType": "API_CALLS",
+ *     "limit": 500,
+ *     "used": 1000
+ *   }
+ * }
+ * </pre>
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-  /**
-   * Helper to create a ProblemDetail with common properties.
-   *
-   * @param type URI reference that identifies the problem type
-   * @param title short, human-readable summary of the problem
-   * @param status HTTP status code
-   * @param detail human-readable explanation specific to this occurrence
-   * @param request HTTP servlet request for context
-   * @return configured ProblemDetail instance
-   */
-  private ProblemDetail problem(String type, String title, HttpStatus status, String detail, HttpServletRequest request) {
-    var pd = ProblemDetail.forStatusAndDetail(status, detail);
-    pd.setType(java.net.URI.create(type));
-    pd.setTitle(title);
-    pd.setInstance(java.net.URI.create(request.getRequestURI()));
-    pd.setProperty("path", request.getRequestURI());
-    pd.setProperty("method", request.getMethod());
-    pd.setProperty("correlationId", MDC.get(BillingConstants.MDC.CORRELATION_ID));
-    pd.setProperty("requestId", generateRequestId());
-    return pd;
-  }
+    /**
+     * Error response record for consistent error format.
+     */
+    public record ErrorResponse(
+        String errorCode,
+        String message,
+        Instant timestamp,
+        String path,
+        Map<String, Object> details
+    ) {
+        public ErrorResponse(String errorCode, String message, String path) {
+            this(errorCode, message, Instant.now(), path, new HashMap<>());
+        }
 
-  /**
-   * Handle validation errors from @Valid annotations.
-   */
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Validation failed - invalid request data",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleValidationException(
-      MethodArgumentNotValidException ex, HttpServletRequest request) {
-    var fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-        .map(this::createErrorDetail)
-        .toList();
-    var pd = problem("https://problems.iqscaffold.com/validation-error",
-        "Request validation failed",
-        HttpStatus.BAD_REQUEST,
-        "One or more fields contain invalid values",
-        request);
-    pd.setProperty("code", "VALIDATION_ERROR");
-    pd.setProperty("fields", fieldErrors);
-    logger.warn("Validation error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
-  }
+        public ErrorResponse(String errorCode, String message, String path, Map<String, Object> details) {
+            this(errorCode, message, Instant.now(), path, details);
+        }
+    }
 
-  /**
-   * Handle constraint violation errors.
-   */
-  @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<ProblemDetail> handleConstraintViolationException(
-      ConstraintViolationException ex, HttpServletRequest request) {
-    var fieldErrors = ex.getConstraintViolations().stream()
-        .map(violation -> new ErrorDetail(
-            violation.getPropertyPath().toString(),
+    /**
+     * Handles quota exceeded exceptions with specific error details.
+     */
+    @ExceptionHandler(UsageException.QuotaExceededException.class)
+    public ResponseEntity<ErrorResponse> handleQuotaExceeded(
+        UsageException.QuotaExceededException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Quota exceeded: metricType={}, limit={}, used={}", 
+            ex.getMetricType(), ex.getLimit(), ex.getUsed());
+
+        var details = new HashMap<String, Object>();
+        details.put("metricType", ex.getMetricType());
+        details.put("limit", ex.getLimit());
+        details.put("used", ex.getUsed());
+        details.put("upgradeUrl", "/api/v1/billing/portal/upgrade");
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponse);
+    }
+
+    /**
+     * Handles feature not available exceptions with upgrade information.
+     */
+    @ExceptionHandler(SubscriptionException.FeatureNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> handleFeatureNotAvailable(
+        SubscriptionException.FeatureNotAvailableException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Feature not available: feature={}, currentPlan={}", 
+            ex.getFeatureName(), ex.getCurrentPlan());
+
+        var details = new HashMap<String, Object>();
+        details.put("featureName", ex.getFeatureName());
+        details.put("currentPlan", ex.getCurrentPlan());
+        details.put("upgradeUrl", "/api/v1/billing/portal/upgrade");
+        details.put("availableInPlans", "PRO, ENTERPRISE");
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Handles payment failed exceptions with retry information.
+     */
+    @ExceptionHandler(PaymentException.PaymentFailedException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentFailed(
+        PaymentException.PaymentFailedException ex,
+        HttpServletRequest request
+    ) {
+        logger.error("Payment failed: paymentId={}, reason={}", 
+            ex.getPaymentId(), ex.getReason());
+
+        var details = new HashMap<String, Object>();
+        details.put("paymentId", ex.getPaymentId());
+        details.put("reason", ex.getReason());
+        details.put("retryUrl", "/api/v1/billing/payments/" + ex.getPaymentId() + "/retry");
+        details.put("updatePaymentMethodUrl", "/api/v1/billing/payment-methods");
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(errorResponse);
+    }
+
+    /**
+     * Handles subscription not found exceptions.
+     */
+    @ExceptionHandler(SubscriptionException.SubscriptionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSubscriptionNotFound(
+        SubscriptionException.SubscriptionNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Subscription not found: subscriptionId={}", ex.getSubscriptionId());
+
+        var details = new HashMap<String, Object>();
+        details.put("subscriptionId", ex.getSubscriptionId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles subscription already exists exceptions.
+     */
+    @ExceptionHandler(SubscriptionException.SubscriptionAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSubscriptionAlreadyExists(
+        SubscriptionException.SubscriptionAlreadyExistsException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Subscription already exists: tenantId={}", ex.getTenantId());
+
+        var details = new HashMap<String, Object>();
+        details.put("tenantId", ex.getTenantId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Handles invalid subscription state exceptions.
+     */
+    @ExceptionHandler(SubscriptionException.InvalidSubscriptionStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidSubscriptionState(
+        SubscriptionException.InvalidSubscriptionStateException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Invalid subscription state transition: from={}, to={}", 
+            ex.getCurrentState(), ex.getTargetState());
+
+        var details = new HashMap<String, Object>();
+        details.put("currentState", ex.getCurrentState());
+        details.put("targetState", ex.getTargetState());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles plan not found exceptions.
+     */
+    @ExceptionHandler(PlanException.PlanNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePlanNotFound(
+        PlanException.PlanNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Plan not found: planId={}", ex.getPlanId());
+
+        var details = new HashMap<String, Object>();
+        details.put("planId", ex.getPlanId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles invalid plan transition exceptions.
+     */
+    @ExceptionHandler(PlanException.InvalidPlanTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPlanTransition(
+        PlanException.InvalidPlanTransitionException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Invalid plan transition: from={}, to={}", 
+            ex.getFromPlan(), ex.getToPlan());
+
+        var details = new HashMap<String, Object>();
+        details.put("fromPlan", ex.getFromPlan());
+        details.put("toPlan", ex.getToPlan());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles payment method not found exceptions.
+     */
+    @ExceptionHandler(PaymentException.PaymentMethodNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentMethodNotFound(
+        PaymentException.PaymentMethodNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Payment method not found: paymentMethodId={}", ex.getPaymentMethodId());
+
+        var details = new HashMap<String, Object>();
+        details.put("paymentMethodId", ex.getPaymentMethodId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles invalid payment method exceptions.
+     */
+    @ExceptionHandler(PaymentException.InvalidPaymentMethodException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPaymentMethod(
+        PaymentException.InvalidPaymentMethodException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Invalid payment method: paymentMethodId={}, reason={}", 
+            ex.getPaymentMethodId(), ex.getReason());
+
+        var details = new HashMap<String, Object>();
+        details.put("paymentMethodId", ex.getPaymentMethodId());
+        details.put("reason", ex.getReason());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles invoice not found exceptions.
+     */
+    @ExceptionHandler(InvoiceException.InvoiceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInvoiceNotFound(
+        InvoiceException.InvoiceNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Invoice not found: invoiceId={}", ex.getInvoiceId());
+
+        var details = new HashMap<String, Object>();
+        details.put("invoiceId", ex.getInvoiceId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
+     * Handles invoice already paid exceptions.
+     */
+    @ExceptionHandler(InvoiceException.InvoiceAlreadyPaidException.class)
+    public ResponseEntity<ErrorResponse> handleInvoiceAlreadyPaid(
+        InvoiceException.InvoiceAlreadyPaidException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Invoice already paid: invoiceId={}", ex.getInvoiceId());
+
+        var details = new HashMap<String, Object>();
+        details.put("invoiceId", ex.getInvoiceId());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
+     * Handles usage limit exceeded exceptions.
+     */
+    @ExceptionHandler(UsageException.UsageLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleUsageLimitExceeded(
+        UsageException.UsageLimitExceededException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Usage limit exceeded: metricType={}, limit={}", 
+            ex.getMetricType(), ex.getLimit());
+
+        var details = new HashMap<String, Object>();
+        details.put("metricType", ex.getMetricType());
+        details.put("limit", ex.getLimit());
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponse);
+    }
+
+    /**
+     * Handles payment required exceptions.
+     */
+    @ExceptionHandler(SubscriptionException.PaymentRequiredException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentRequired(
+        SubscriptionException.PaymentRequiredException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Payment required: operation={}, reason={}", 
+            ex.getOperation(), ex.getReason());
+
+        var details = new HashMap<String, Object>();
+        details.put("operation", ex.getOperation());
+        details.put("reason", ex.getReason());
+        details.put("paymentUrl", "/api/v1/billing/payments");
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(errorResponse);
+    }
+
+    /**
+     * Handles generic billing exceptions.
+     */
+    @ExceptionHandler(BillingException.class)
+    public ResponseEntity<ErrorResponse> handleBillingException(
+        BillingException ex,
+        HttpServletRequest request
+    ) {
+        logger.error("Billing exception: errorCode={}, message={}", 
+            ex.getErrorCode(), ex.getMessage(), ex);
+
+        var errorResponse = new ErrorResponse(
+            ex.getErrorCode() != null ? ex.getErrorCode() : "BILLING_000",
+            ex.getMessage(),
+            request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    /**
+     * Handles validation exceptions from Bean Validation.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+        MethodArgumentNotValidException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Validation failed: {}", ex.getMessage());
+
+        var details = new HashMap<String, Object>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            details.put(error.getField(), error.getDefaultMessage());
+        }
+
+        var errorResponse = new ErrorResponse(
+            "VALIDATION_ERROR",
+            "Validation failed for request",
+            request.getRequestURI(),
+            details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles constraint violation exceptions.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+        ConstraintViolationException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Constraint violation: {}", ex.getMessage());
+
+        var details = new HashMap<String, Object>();
+        ex.getConstraintViolations().forEach(violation -> 
+            details.put(violation.getPropertyPath().toString(), violation.getMessage())
+        );
+
+        var errorResponse = new ErrorResponse(
             "CONSTRAINT_VIOLATION",
-            violation.getMessage(),
-            violation.getInvalidValue()
-        ))
-        .toList();
-    var pd = problem("https://problems.iqscaffold.com/validation-error",
-        "Constraint validation failed",
-        HttpStatus.BAD_REQUEST,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", "VALIDATION_ERROR");
-    pd.setProperty("fields", fieldErrors);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
-  }
+            "Constraint violation in request",
+            request.getRequestURI(),
+            details
+        );
 
-  /**
-   * Handle subscription-related exceptions.
-   */
-  @ExceptionHandler(SubscriptionException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Subscription operation failed",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleSubscriptionException(
-      SubscriptionException ex, HttpServletRequest request) {
-    var errorCode = determineSubscriptionErrorCode(ex);
-    var status = determineSubscriptionStatus(ex);
-    var pd = problem("https://problems.iqscaffold.com/subscription-error",
-        "Subscription operation failed",
-        status,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", errorCode);
-
-    // Add specific properties for certain exception types
-    if (ex instanceof SubscriptionException.SubscriptionNotFoundException notFoundEx) {
-      pd.setProperty("subscriptionId", notFoundEx.getSubscriptionId());
-    } else if (ex instanceof SubscriptionException.SubscriptionAlreadyExistsException existsEx) {
-      pd.setProperty("tenantId", existsEx.getTenantId());
-    } else if (ex instanceof SubscriptionException.InvalidSubscriptionStateException stateEx) {
-      pd.setProperty("currentState", stateEx.getCurrentState());
-      pd.setProperty("targetState", stateEx.getTargetState());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    logger.warn("Subscription error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(status).body(pd);
-  }
+    /**
+     * Handles authentication exceptions.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+        AuthenticationException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Authentication failed: {}", ex.getMessage());
 
-  /**
-   * Handle payment-related exceptions.
-   */
-  @ExceptionHandler(PaymentException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Payment operation failed",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handlePaymentException(
-      PaymentException ex, HttpServletRequest request) {
-    var errorCode = determinePaymentErrorCode(ex);
-    var status = determinePaymentStatus(ex);
-    var pd = problem("https://problems.iqscaffold.com/payment-error",
-        "Payment operation failed",
-        status,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", errorCode);
+        var errorResponse = new ErrorResponse(
+            "AUTHENTICATION_FAILED",
+            "Authentication failed: " + ex.getMessage(),
+            request.getRequestURI()
+        );
 
-    // Add specific properties for certain exception types
-    if (ex instanceof PaymentException.PaymentFailedException failedEx) {
-      pd.setProperty("paymentId", failedEx.getPaymentId());
-      pd.setProperty("reason", failedEx.getReason());
-    } else if (ex instanceof PaymentException.PaymentMethodNotFoundException notFoundEx) {
-      pd.setProperty("paymentMethodId", notFoundEx.getPaymentMethodId());
-    } else if (ex instanceof PaymentException.InvalidPaymentMethodException invalidEx) {
-      pd.setProperty("paymentMethodId", invalidEx.getPaymentMethodId());
-      pd.setProperty("reason", invalidEx.getReason());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    logger.warn("Payment error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(status).body(pd);
-  }
+    /**
+     * Handles access denied exceptions.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+        AccessDeniedException ex,
+        HttpServletRequest request
+    ) {
+        logger.warn("Access denied: {}", ex.getMessage());
 
-  /**
-   * Handle invoice-related exceptions.
-   */
-  @ExceptionHandler(InvoiceException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Invoice operation failed",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleInvoiceException(
-      InvoiceException ex, HttpServletRequest request) {
-    var errorCode = determineInvoiceErrorCode(ex);
-    var status = determineInvoiceStatus(ex);
-    var pd = problem("https://problems.iqscaffold.com/invoice-error",
-        "Invoice operation failed",
-        status,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", errorCode);
+        var errorResponse = new ErrorResponse(
+            "ACCESS_DENIED",
+            "Access denied: " + ex.getMessage(),
+            request.getRequestURI()
+        );
 
-    // Add specific properties for certain exception types
-    if (ex instanceof InvoiceException.InvoiceNotFoundException notFoundEx) {
-      pd.setProperty("invoiceId", notFoundEx.getInvoiceId());
-    } else if (ex instanceof InvoiceException.InvoiceAlreadyPaidException paidEx) {
-      pd.setProperty("invoiceId", paidEx.getInvoiceId());
-    } else if (ex instanceof InvoiceException.InvalidInvoiceStateException stateEx) {
-      pd.setProperty("currentState", stateEx.getCurrentState());
-      pd.setProperty("requiredState", stateEx.getRequiredState());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
-    logger.warn("Invoice error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(status).body(pd);
-  }
+    /**
+     * Handles all other unexpected exceptions.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(
+        Exception ex,
+        HttpServletRequest request
+    ) {
+        logger.error("Unexpected error occurred", ex);
 
-  /**
-   * Handle plan-related exceptions.
-   */
-  @ExceptionHandler(PlanException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Plan operation failed",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handlePlanException(
-      PlanException ex, HttpServletRequest request) {
-    var errorCode = determinePlanErrorCode(ex);
-    var status = determinePlanStatus(ex);
-    var pd = problem("https://problems.iqscaffold.com/plan-error",
-        "Plan operation failed",
-        status,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", errorCode);
+        var errorResponse = new ErrorResponse(
+            "INTERNAL_ERROR",
+            "An unexpected error occurred. Please contact support if the problem persists.",
+            request.getRequestURI()
+        );
 
-    // Add specific properties for certain exception types
-    if (ex instanceof PlanException.PlanNotFoundException notFoundEx) {
-      pd.setProperty("planId", notFoundEx.getPlanId());
-    } else if (ex instanceof PlanException.InvalidPlanTransitionException transitionEx) {
-      pd.setProperty("fromPlan", transitionEx.getFromPlan());
-      pd.setProperty("toPlan", transitionEx.getToPlan());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-
-    logger.warn("Plan error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(status).body(pd);
-  }
-
-  /**
-   * Handle usage and quota-related exceptions.
-   */
-  @ExceptionHandler(UsageException.class)
-  @ApiResponse(
-      responseCode = "429",
-      description = "Usage quota exceeded",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleUsageException(
-      UsageException ex, HttpServletRequest request) {
-    var errorCode = determineUsageErrorCode(ex);
-    var status = determineUsageStatus(ex);
-    var pd = problem("https://problems.iqscaffold.com/usage-error",
-        "Usage quota exceeded",
-        status,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", errorCode);
-
-    // Add specific properties for quota exceeded exceptions
-    if (ex instanceof UsageException.QuotaExceededException quotaEx) {
-      pd.setProperty("metricType", quotaEx.getMetricType());
-      pd.setProperty("limit", quotaEx.getLimit());
-      pd.setProperty("used", quotaEx.getUsed());
-      pd.setProperty("actions", new QuotaActions(
-          "/api/v1/billing/subscriptions/upgrade",
-          "/api/v1/billing/usage/current"
-      ));
-    } else if (ex instanceof UsageException.UsageLimitExceededException limitEx) {
-      pd.setProperty("metricType", limitEx.getMetricType());
-      pd.setProperty("limit", limitEx.getLimit());
-    }
-
-    logger.warn("Usage error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(status).body(pd);
-  }
-
-  /**
-   * Handle tenant context exceptions.
-   */
-  @ExceptionHandler(TenantContextException.class)
-  @ApiResponse(
-      responseCode = "400",
-      description = "Tenant context error",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleTenantContextException(
-      TenantContextException ex, HttpServletRequest request) {
-    var pd = problem("https://problems.iqscaffold.com/tenant-context",
-        "Tenant context error",
-        HttpStatus.BAD_REQUEST,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", "TENANT_CONTEXT_INVALID");
-    logger.warn("Tenant context error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
-  }
-
-  /**
-   * Handle access denied exceptions.
-   */
-  @ExceptionHandler(AccessDeniedException.class)
-  @ApiResponse(
-      responseCode = "403",
-      description = "Access denied - insufficient permissions",
-      content = @Content(
-          mediaType = "application/problem+json",
-          schema = @Schema(implementation = ProblemDetail.class)
-      )
-  )
-  public ResponseEntity<ProblemDetail> handleAccessDeniedException(
-      AccessDeniedException ex, HttpServletRequest request) {
-    var pd = problem("https://problems.iqscaffold.com/access-denied",
-        "Insufficient permissions for this operation",
-        HttpStatus.FORBIDDEN,
-        ex.getMessage(),
-        request);
-    pd.setProperty("code", "AUTH_INSUFFICIENT_PERMISSIONS");
-    logger.warn("Access denied: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage());
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(pd);
-  }
-
-  /**
-   * Handle all other exceptions.
-   */
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ProblemDetail> handleGenericException(
-      Exception ex, HttpServletRequest request) {
-    var pd = problem("https://problems.iqscaffold.com/internal-error",
-        "Internal system error",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "An unexpected error occurred",
-        request);
-    pd.setProperty("code", "SYSTEM_INTERNAL_ERROR");
-    logger.error("Unexpected error: {} - {}", MDC.get(BillingConstants.MDC.CORRELATION_ID), ex.getMessage(), ex);
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pd);
-  }
-
-  /**
-   * Determine subscription error code using switch expression.
-   */
-  private String determineSubscriptionErrorCode(SubscriptionException ex) {
-    return switch (ex) {
-      case SubscriptionException.SubscriptionNotFoundException e -> "SUBSCRIPTION_NOT_FOUND";
-      case SubscriptionException.SubscriptionAlreadyExistsException e -> "SUBSCRIPTION_ALREADY_EXISTS";
-      case SubscriptionException.InvalidSubscriptionStateException e -> "INVALID_SUBSCRIPTION_STATE";
-      case SubscriptionException.TrialNotEligibleException e -> "TRIAL_NOT_ELIGIBLE";
-      case SubscriptionException.PlanDoesNotOfferTrialException e -> "PLAN_NO_TRIAL";
-      case SubscriptionException.InvalidPaymentMethodException e -> "INVALID_PAYMENT_METHOD";
-      case SubscriptionException.PaymentMethodMismatchException e -> "PAYMENT_METHOD_MISMATCH";
-      default -> "SUBSCRIPTION_ERROR";
-    };
-  }
-
-  /**
-   * Determine HTTP status for subscription errors.
-   */
-  private HttpStatus determineSubscriptionStatus(SubscriptionException ex) {
-    return switch (ex) {
-      case SubscriptionException.SubscriptionNotFoundException e -> HttpStatus.NOT_FOUND;
-      case SubscriptionException.SubscriptionAlreadyExistsException e -> HttpStatus.CONFLICT;
-      case SubscriptionException.InvalidSubscriptionStateException e -> HttpStatus.CONFLICT;
-      default -> HttpStatus.BAD_REQUEST;
-    };
-  }
-
-  /**
-   * Determine payment error code using switch expression.
-   */
-  private String determinePaymentErrorCode(PaymentException ex) {
-    return switch (ex) {
-      case PaymentException.PaymentFailedException e -> "PAYMENT_FAILED";
-      case PaymentException.PaymentMethodNotFoundException e -> "PAYMENT_METHOD_NOT_FOUND";
-      case PaymentException.InvalidPaymentMethodException e -> "INVALID_PAYMENT_METHOD";
-      default -> "PAYMENT_ERROR";
-    };
-  }
-
-  /**
-   * Determine HTTP status for payment errors.
-   */
-  private HttpStatus determinePaymentStatus(PaymentException ex) {
-    return switch (ex) {
-      case PaymentException.PaymentMethodNotFoundException e -> HttpStatus.NOT_FOUND;
-      case PaymentException.PaymentFailedException e -> HttpStatus.PAYMENT_REQUIRED;
-      default -> HttpStatus.BAD_REQUEST;
-    };
-  }
-
-  /**
-   * Determine invoice error code using switch expression.
-   */
-  private String determineInvoiceErrorCode(InvoiceException ex) {
-    return switch (ex) {
-      case InvoiceException.InvoiceNotFoundException e -> "INVOICE_NOT_FOUND";
-      case InvoiceException.InvoiceAlreadyPaidException e -> "INVOICE_ALREADY_PAID";
-      case InvoiceException.SubscriptionNotFoundException e -> "SUBSCRIPTION_NOT_FOUND";
-      case InvoiceException.InvalidInvoiceStateException e -> "INVALID_INVOICE_STATE";
-      default -> "INVOICE_ERROR";
-    };
-  }
-
-  /**
-   * Determine HTTP status for invoice errors.
-   */
-  private HttpStatus determineInvoiceStatus(InvoiceException ex) {
-    return switch (ex) {
-      case InvoiceException.InvoiceNotFoundException e -> HttpStatus.NOT_FOUND;
-      case InvoiceException.SubscriptionNotFoundException e -> HttpStatus.NOT_FOUND;
-      case InvoiceException.InvoiceAlreadyPaidException e -> HttpStatus.CONFLICT;
-      case InvoiceException.InvalidInvoiceStateException e -> HttpStatus.CONFLICT;
-      default -> HttpStatus.BAD_REQUEST;
-    };
-  }
-
-  /**
-   * Determine plan error code using switch expression.
-   */
-  private String determinePlanErrorCode(PlanException ex) {
-    return switch (ex) {
-      case PlanException.PlanNotFoundException e -> "PLAN_NOT_FOUND";
-      case PlanException.InvalidPlanTransitionException e -> "INVALID_PLAN_TRANSITION";
-      default -> "PLAN_ERROR";
-    };
-  }
-
-  /**
-   * Determine HTTP status for plan errors.
-   */
-  private HttpStatus determinePlanStatus(PlanException ex) {
-    return switch (ex) {
-      case PlanException.PlanNotFoundException e -> HttpStatus.NOT_FOUND;
-      case PlanException.InvalidPlanTransitionException e -> HttpStatus.CONFLICT;
-      default -> HttpStatus.BAD_REQUEST;
-    };
-  }
-
-  /**
-   * Determine usage error code using switch expression.
-   */
-  private String determineUsageErrorCode(UsageException ex) {
-    return switch (ex) {
-      case UsageException.QuotaExceededException e -> "QUOTA_EXCEEDED";
-      case UsageException.UsageLimitExceededException e -> "USAGE_LIMIT_EXCEEDED";
-      default -> "USAGE_ERROR";
-    };
-  }
-
-  /**
-   * Determine HTTP status for usage errors.
-   */
-  private HttpStatus determineUsageStatus(UsageException ex) {
-    return switch (ex) {
-      case UsageException.QuotaExceededException e -> HttpStatus.TOO_MANY_REQUESTS;
-      case UsageException.UsageLimitExceededException e -> HttpStatus.TOO_MANY_REQUESTS;
-      default -> HttpStatus.BAD_REQUEST;
-    };
-  }
-
-  /**
-   * Create error detail from field error.
-   */
-  private ErrorDetail createErrorDetail(FieldError fieldError) {
-    return new ErrorDetail(
-        fieldError.getField(),
-        fieldError.getCode(),
-        fieldError.getDefaultMessage(),
-        fieldError.getRejectedValue()
-    );
-  }
-
-  /**
-   * Generate unique request ID.
-   */
-  private String generateRequestId() {
-    return "req-" + UUID.randomUUID().toString().substring(0, 8);
-  }
-
-  /**
-   * Error detail record for field-level errors.
-   */
-  @Schema(
-      name = "ErrorDetail",
-      description = "Field-specific validation error details"
-  )
-  public record ErrorDetail(
-      @Schema(
-          description = "Name of the field that failed validation",
-          example = "planId"
-      )
-      String field,
-
-      @Schema(
-          description = "Validation error code",
-          example = "NotBlank"
-      )
-      String code,
-
-      @Schema(
-          description = "Human-readable error message",
-          example = "Plan ID must not be blank"
-      )
-      String message,
-
-      @Schema(
-          description = "The value that was rejected",
-          example = ""
-      )
-      Object rejectedValue
-  ) {
-
-  }
-
-  /**
-   * Actions record for quota exceeded errors.
-   */
-  @Schema(
-      name = "QuotaActions",
-      description = "Actionable links for quota resolution"
-  )
-  public record QuotaActions(
-      @Schema(
-          description = "Endpoint to upgrade subscription",
-          example = "/api/v1/billing/subscriptions/upgrade"
-      )
-      String upgradeSubscription,
-
-      @Schema(
-          description = "Endpoint to check current usage",
-          example = "/api/v1/billing/usage/current"
-      )
-      String checkUsage
-  ) {
-
-  }
 }
