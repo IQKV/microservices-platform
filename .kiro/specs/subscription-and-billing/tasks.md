@@ -501,7 +501,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Manage transactions at application service level
   - _Requirements: REQ-SUB-023 through REQ-SUB-038, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055_
 
-- [x] 24. Implement subscription application service - cancellation and reactivation
+- [x] 26. Implement subscription application service - cancellation and reactivation
 
 
 
@@ -514,7 +514,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Manage transactions at application service level
   - _Requirements: REQ-SUB-039 through REQ-SUB-050, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055_
 
-- [x] 25. Implement payment application service
+- [x] 27. Implement payment application service
 
 
 
@@ -543,7 +543,7 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-PAY-007 through REQ-PAY-036, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
 
-- [x] 26. Implement invoice application service
+- [x] 28. Implement invoice application service
 
 
 
@@ -568,7 +568,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Translate between domain objects and DTOs
   - _Requirements: REQ-INV-001 through REQ-INV-021, REQ-INV-030 through REQ-INV-034, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
-- [x] 27. Implement usage application service
+- [x] 29. Implement usage application service
 
 
 
@@ -594,7 +594,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Add usage caching with 1-minute TTL
   - _Requirements: REQ-USAGE-001 through REQ-USAGE-023, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
-- [ ] 28. Implement webhook application service
+- [ ] 30. Implement webhook application service
 
 
 
@@ -647,7 +647,7 @@ This phase implements event-driven architecture for operations that benefit from
 - Events enable eventual consistency between aggregates
 - Events trigger async workflows without tight coupling
 
-- [ ] 29. Set up RabbitMQ infrastructure
+- [ ] 31. Set up RabbitMQ infrastructure
   - Create billing.events exchange (topic, durable)
   - Create queues: usage, invoice, webhook, notification, payment-retry
   - Configure dead letter queues for all queues
@@ -657,7 +657,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: 1.5_
 
 
-- [ ] 30. Implement domain event publisher
+- [ ] 32. Implement domain event publisher
   - Create DomainEventPublisher in infrastructure layer
   - Implement publishing to RabbitMQ for domain events
   - Publish events after successful aggregate persistence (transactional outbox pattern recommended)
@@ -673,7 +673,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Implement event versioning for schema evolution
   - _Requirements: REQ-DDD-032, REQ-DDD-033, REQ-DDD-034, REQ-DDD-055, REQ-USAGE-006, REQ-INV-009, REQ-PAY-046_
 
-- [ ] 31. Implement message consumers
+- [ ] 33. Implement message consumers
   - **UsageRecordConsumer** for asynchronous usage recording
     - **Why Async:** High volume (10,000+ records/sec), can be batched, eventual consistency acceptable
     - Implement batch processing (process 100 records at a time)
@@ -713,7 +713,7 @@ This phase implements event-driven architecture for operations that benefit from
 
 ## Phase 7: Presentation Layer - REST API Controllers
 
-- [ ] 32. Implement public plan endpoints with comprehensive OpenAPI documentation
+- [ ] 34. Implement public plan endpoints with comprehensive OpenAPI documentation
   - Create SubscriptionPlanRestResource (use -RestResource suffix per platform conventions)
   - Add @RestController and @RequestMapping("/api/v1/billing/plans")
   - Add @Tag(name = "Subscription Plans", description = "Public subscription plan APIs")
@@ -730,7 +730,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add @Timed annotation for metrics collection
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.8, 3.3.9, 6.1, 6.2, 6.3, 6.4, REQ-API-001, REQ-API-002, REQ-DDD-049_
 
-- [ ] 33. Implement customer portal endpoints - subscription management with OpenAPI
+- [ ] 35. Implement customer portal endpoints - subscription management with OpenAPI
   - Create BillingPortalRestResource (use -RestResource suffix)
   - Add @RestController and @RequestMapping("/api/v1/billing/portal")
   - Add @Tag(name = "Customer Portal", description = "Self-service billing portal APIs")
@@ -749,7 +749,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.9, REQ-PORTAL-001 through REQ-PORTAL-015, REQ-API-003 through REQ-API-006, REQ-DDD-049_
 
 
-- [ ] 34. Implement customer portal endpoints - invoices and payments
+- [ ] 36. Implement customer portal endpoints - invoices and payments
   - Delegate to InvoiceApplicationService, UsageApplicationService, and PaymentApplicationService
   - Implement GET /api/v1/billing/portal/invoices endpoint with pagination and filtering
   - Implement GET /api/v1/billing/portal/invoices/{id}/pdf endpoint
@@ -762,7 +762,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-PORTAL-016 through REQ-PORTAL-034, REQ-API-007 through REQ-API-012, REQ-DDD-049_
 
-- [ ] 35. Implement admin endpoints - plan and subscription management
+- [ ] 37. Implement admin endpoints - plan and subscription management
   - Create AdminBillingController in presentation layer
   - Delegate to PlanApplicationService and SubscriptionApplicationService
   - Implement POST /api/v1/admin/billing/plans endpoint
@@ -776,7 +776,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-ADMIN-001 through REQ-ADMIN-009, REQ-API-013 through REQ-API-018, REQ-DDD-049_
 
-- [ ] 36. Implement admin endpoints - invoices and analytics
+- [ ] 38. Implement admin endpoints - invoices and analytics
   - Delegate to InvoiceApplicationService
   - Implement GET /api/v1/admin/billing/invoices endpoint with filtering
   - Implement POST /api/v1/admin/billing/invoices/{id}/void endpoint
@@ -787,7 +787,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-ADMIN-010 through REQ-ADMIN-027, REQ-API-019 through REQ-API-022, REQ-DDD-049_
 
 
-- [ ] 37. Implement webhook endpoints
+- [ ] 39. Implement webhook endpoints
   - Create WebhookController in presentation layer
   - Delegate to WebhookApplicationService
   - Implement POST /api/v1/billing/webhooks/stripe endpoint
@@ -797,7 +797,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-PAY-037, REQ-PAY-038, REQ-PAY-039, REQ-API-023, REQ-API-024, REQ-DDD-049_
 
-- [ ] 38. Implement internal endpoints
+- [ ] 40. Implement internal endpoints
   - Create InternalBillingController in presentation layer
   - Delegate to SubscriptionApplicationService and UsageApplicationService
   - Implement GET /internal/billing/feature-access/{tenantId} endpoint
@@ -810,13 +810,13 @@ This phase implements event-driven architecture for operations that benefit from
 
 ## Phase 8: Error Handling and Validation
 
-- [ ] 39. Implement exception hierarchy
+- [ ] 41. Implement exception hierarchy
   - Create BillingException base class
   - Create specific exceptions: SubscriptionNotFoundException, SubscriptionAlreadyExistsException, PlanNotFoundException, InvalidPlanTransitionException, QuotaExceededException, FeatureNotAvailableException, PaymentRequiredException, PaymentFailedException, InvoiceNotFoundException, InvalidPaymentMethodException, UsageLimitExceededException
   - Add error codes and details to exceptions
   - _Requirements: REQ-ERR-001, REQ-ERR-002, REQ-ERR-003, REQ-ERR-004, REQ-ERR-005, REQ-ERR-006, REQ-ERR-007, REQ-ERR-008, REQ-ERR-009, REQ-ERR-010, REQ-ERR-011_
 
-- [ ] 40. Implement global exception handler
+- [ ] 42. Implement global exception handler
   - Create BillingExceptionHandler with @RestControllerAdvice in presentation layer
   - Implement handlers for all billing exceptions
   - Implement error response format with error code, message, timestamp, path, and details
@@ -824,7 +824,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-ERR-012, REQ-ERR-013, REQ-ERR-014, REQ-ERR-015, REQ-DDD-049_
 
 
-- [ ] 41. Implement request validation
+- [ ] 43. Implement request validation
   - Add Bean Validation annotations to DTOs and request objects in presentation layer
   - Use specifications in domain layer for business rule validation
   - Implement validation at controller (input), application service (use case), and domain (invariants) layers
@@ -832,27 +832,27 @@ This phase implements event-driven architecture for operations that benefit from
 
 ## Phase 9: Integration with Other Services
 
-- [ ] 42. Update User Service for billing integration
+- [ ] 44. Update User Service for billing integration
   - Add subscriptionId, subscriptionStatus, and subscriptionPlanCode fields to Tenant entity
   - Add subscription context to JWT token generation (subscriptionStatus, subscriptionPlan, features)
   - Create internal endpoint for billing service to update tenant subscription status
   - Implement subscription status update logic
   - _Requirements: REQ-INT-001, REQ-INT-002, REQ-INT-003, REQ-INT-004_
 
-- [ ] 43. Update Gateway Service for feature access control
+- [ ] 45. Update Gateway Service for feature access control
   - Implement FeatureAccessFilter to check feature access based on subscription
   - Add feature access rejection with FEATURE_NOT_AVAILABLE error (HTTP 403)
   - Integrate with billing service internal endpoint for feature checks
   - _Requirements: REQ-INT-005, REQ-INT-006_
 
-- [ ] 44. Update Gateway Service for quota enforcement
+- [ ] 46. Update Gateway Service for quota enforcement
   - Implement QuotaEnforcementFilter to enforce API call quotas
   - Add asynchronous API call usage recording
   - Add quota exceeded rejection with QUOTA_EXCEEDED error (HTTP 429)
   - Integrate with billing service internal endpoint for quota checks
   - _Requirements: REQ-INT-007, REQ-INT-008, REQ-INT-009, REQ-USAGE-007_
 
-- [ ] 45. Create email templates for billing notifications
+- [ ] 47. Create email templates for billing notifications
   - Create email templates for: subscription_created, trial_ending, trial_ended, subscription_upgraded, subscription_downgraded, subscription_canceled, invoice_generated, payment_succeeded, payment_failed, payment_retry, subscription_past_due, subscription_expired
   - Integrate with Email Service for sending notifications
   - Implement email sending logic in NotificationConsumer
@@ -871,7 +871,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 **Job Pattern:** Job queries database → publishes events to queue → consumers process events asynchronously
 
-- [ ] 46. Implement scheduled jobs
+- [ ] 48. Implement scheduled jobs
   - **TrialExpirationJob** - Check and convert expired trials (runs daily at 2 AM UTC)
     - **Async Pattern:** Query expired trials → publish TrialExpired events to queue → consumer processes conversions
     - **Why Async:** May affect thousands of subscriptions, shouldn't block job execution
@@ -913,33 +913,33 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 11: Monitoring and Observability
 
-- [ ] 47. Implement metrics and monitoring
+- [ ] 49. Implement metrics and monitoring
   - Configure Prometheus metrics for business metrics (MRR, ARR, churn, trial conversion, ARPU, CLV)
   - Configure Prometheus metrics for operational metrics (API latency, payment success/failure rate, invoice generation time, usage recording latency, webhook processing time, database connection pool, cache hit rate, message queue depth)
   - Configure Prometheus metrics for error metrics (error rate by endpoint, payment failure rate, webhook failures, database errors)
   - Create Grafana dashboards for service health, billing metrics, revenue, and usage analytics
   - _Requirements: REQ-MAINT-014, REQ-MAINT-015, REQ-DEPLOY-012, REQ-DEPLOY-013, REQ-DEPLOY-014, REQ-DEPLOY-015, REQ-DEPLOY-016, REQ-DEPLOY-017, REQ-DEPLOY-018, REQ-DEPLOY-024, REQ-DEPLOY-025, REQ-DEPLOY-026, REQ-DEPLOY-027_
 
-- [ ] 48. Implement structured logging
+- [ ] 50. Implement structured logging
   - Configure structured JSON logging with timestamp, level, service, traceId, spanId, tenantId, userId, operation, message, and details
   - Implement appropriate log levels (ERROR, WARN, INFO, DEBUG)
   - Add correlation IDs for distributed tracing
   - _Requirements: REQ-MAINT-012, REQ-MAINT-013_
 
-- [ ] 49. Implement alerting
+- [ ] 51. Implement alerting
   - Configure critical alerts: payment failure rate > 5%, API error rate > 1%, database connection pool > 80%, webhook processing failures, service health check failures
   - Configure warning alerts: response time p95 > 500ms, cache hit rate < 70%, message queue depth > 1000, trial conversion rate drops > 20%
   - _Requirements: REQ-MAINT-016, REQ-DEPLOY-019, REQ-DEPLOY-020, REQ-DEPLOY-021, REQ-DEPLOY-022, REQ-DEPLOY-023_
 
 
-- [ ] 50. Implement health checks
+- [ ] 52. Implement health checks
   - Create BillingHealthIndicator to check database, Redis, RabbitMQ, and payment provider connectivity
   - Configure Spring Boot Actuator health endpoints
   - _Requirements: REQ-REL-013_
 
 ## Phase 12: Security Implementation
 
-- [ ] 51. Implement security measures
+- [ ] 53. Implement security measures
   - Configure JWT token validation for authenticated endpoints
   - Implement role-based access control (TENANT_OWNER, BILLING_ADMIN, ADMIN, USER)
   - Implement tenant context extraction from JWT claims
@@ -949,13 +949,13 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Configure encryption for Redis tokens
   - _Requirements: REQ-SEC-001, REQ-SEC-002, REQ-SEC-003, REQ-SEC-004, REQ-SEC-005, REQ-SEC-006, REQ-SEC-007, REQ-SEC-008, REQ-SEC-009, REQ-SEC-010_
 
-- [ ] 52. Implement audit logging
+- [ ] 54. Implement audit logging
   - Create audit logging for all billing operations
   - Implement immutable audit records
   - Store audit logs in billing_events table
   - _Requirements: REQ-SEC-011, REQ-SEC-012, REQ-REL-007_
 
-- [ ] 53. Implement GDPR compliance features
+- [ ] 55. Implement GDPR compliance features
   - Implement data export functionality for billing data
   - Implement data deletion functionality for billing data
   - Implement data retention policies
@@ -984,32 +984,32 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-TEST-002, REQ-MAINT-004_
 
 
-- [ ]* 47.1 Write unit tests for proration calculations
+- [ ]* 56.1 Write unit tests for proration calculations
   - Test proration calculation correctness for various scenarios
   - Test edge cases (same day changes, end of period, leap years)
   - Ensure 100% coverage for financial calculations
   - _Requirements: REQ-TEST-003_
 
-- [ ]* 47.2 Write unit tests for subscription state transitions
+- [ ]* 56.2 Write unit tests for subscription state transitions
   - Test all valid state transitions
   - Test invalid state transition rejection
   - Test state transition side effects
   - _Requirements: REQ-TEST-004_
 
-- [ ]* 47.3 Write unit tests for quota enforcement logic
+- [ ]* 56.3 Write unit tests for quota enforcement logic
   - Test quota checking for various usage levels
   - Test quota exceeded scenarios
   - Test grace period logic (5% overage)
   - _Requirements: REQ-TEST-005_
 
-- [ ]* 47.4 Write unit tests for payment processing logic
+- [ ]* 56.4 Write unit tests for payment processing logic
   - Test payment processing success and failure scenarios
   - Test payment retry logic
   - Test refund processing
   - Test idempotency
   - _Requirements: REQ-TEST-006_
 
-- [ ]* 47.5 Write unit tests for invoice generation logic
+- [ ]* 56.5 Write unit tests for invoice generation logic
   - Test invoice generation for regular billing periods
   - Test proration invoice generation
   - Test invoice line item calculations
@@ -1017,7 +1017,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Ensure 100% coverage for financial calculations
   - _Requirements: REQ-TEST-007_
 
-- [ ] 48. Write integration tests
+- [ ] 57. Write integration tests
   - Set up Testcontainers for PostgreSQL, Redis, and RabbitMQ
   - Write integration tests for complete subscription lifecycle (create → upgrade → cancel)
   - Write integration tests for payment processing with retry logic
@@ -1028,7 +1028,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-TEST-008, REQ-TEST-009, REQ-TEST-010, REQ-TEST-011, REQ-TEST-012, REQ-MAINT-005_
 
 
-- [ ]* 49. Write property-based tests
+- [ ]* 58. Write property-based tests
   - Set up jqwik property-based testing framework
   - Configure property tests to run minimum 100 iterations
   - **Property 1: Tenant Isolation for Subscriptions** - For any two distinct tenants, querying subscriptions for one tenant should never return subscriptions belonging to the other tenant - **Validates: Requirements 2.2**
@@ -1059,7 +1059,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - **Property 24: Payment Idempotency** - For any payment request with the same idempotency key, processing multiple times should result in only one payment - **Validates: Payment processing requirements**
   - **Property 25: Webhook Idempotency** - For any webhook event with the same event ID, processing multiple times should result in the same system state - **Validates: Webhook handling requirements**
 
-- [ ]* 50. Write architecture tests for DDD compliance
+- [ ]* 59. Write architecture tests for DDD compliance
   - Set up ArchUnit for architecture testing
   - Write tests to verify layered architecture (Domain → Application → Infrastructure → Presentation)
   - Write tests to verify domain layer has no dependencies on other layers
@@ -1074,7 +1074,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Write tests to verify package structure follows DDD conventions
   - _Requirements: REQ-TEST-013, REQ-TEST-014, REQ-TEST-015, REQ-MAINT-006, REQ-DDD-050, REQ-DDD-051, REQ-DDD-063_
 
-- [ ]* 51. Write security tests
+- [ ]* 60. Write security tests
   - Write tests for authentication and authorization
   - Write tests for tenant isolation
   - Write tests for payment data security
@@ -1086,7 +1086,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 14: Documentation and Deployment
 
-- [ ] 56. Create service documentation
+- [ ] 61. Create service documentation
   - Write comprehensive README with service setup instructions
   - Document API endpoints with examples
   - Create runbooks for common operations
@@ -1095,7 +1095,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Document disaster recovery procedures
   - _Requirements: REQ-MAINT-007, REQ-MAINT-008, REQ-MAINT-009, REQ-MAINT-010, REQ-MAINT-011, REQ-DEPLOY-034_
 
-- [ ] 57. Create Docker and Kubernetes configurations
+- [ ] 62. Create Docker and Kubernetes configurations
   - Create Dockerfile for billing service
   - Create docker-compose.yaml for local development
   - Create Kubernetes deployment manifests
@@ -1103,7 +1103,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Configure environment-specific values (local, staging, production)
   - _Requirements: REQ-DEPLOY-001, REQ-DEPLOY-002, REQ-DEPLOY-003, REQ-DEPLOY-004, REQ-DEPLOY-005, REQ-DEPLOY-006, REQ-DEPLOY-007_
 
-- [ ] 58. Configure database backup and recovery
+- [ ] 63. Configure database backup and recovery
   - Configure daily full database backups
   - Configure hourly incremental database backups
   - Set up 30-day backup retention
@@ -1113,7 +1113,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 15: Data Migration
 
-- [ ] 59. Create migration scripts
+- [ ] 64. Create migration scripts
   - Create script to create subscription plans in billing service
   - Create script to map existing tenants to appropriate plans
   - Create script to create subscription records for all tenants
@@ -1123,7 +1123,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-MIG-001, REQ-MIG-002, REQ-MIG-003, REQ-MIG-004, REQ-MIG-005, REQ-MIG-006, REQ-MIG-007, REQ-MIG-008, REQ-MIG-009, REQ-MIG-010, REQ-MIG-011, REQ-MIG-012, REQ-MIG-013_
 
 
-- [ ] 60. Execute migration
+- [ ] 65. Execute migration
   - Execute pre-migration validation
   - Run migration scripts in staging environment
   - Validate migration results
@@ -1132,7 +1132,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Monitor for issues post-migration
   - _Requirements: REQ-MIG-014, REQ-MIG-015_
 
-- [ ] 61. Prepare rollback plan
+- [ ] 66. Prepare rollback plan
   - Document rollback procedures
   - Create rollback scripts to disable billing service routing
   - Create rollback scripts to revert tenant subscription references
@@ -1141,7 +1141,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 16: Final Integration and Testing
 
-- [ ] 62. Checkpoint - Ensure all tests pass
+- [ ] 67. Checkpoint - Ensure all tests pass
   - Run all unit tests and verify 80%+ coverage
   - Run all integration tests
   - Run all property-based tests
@@ -1150,7 +1150,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Fix any failing tests
   - Ask the user if questions arise
 
-- [ ] 63. End-to-end testing
+- [ ] 68. End-to-end testing
   - Test complete subscription lifecycle from creation to cancellation
   - Test payment processing with Stripe test mode
   - Test invoice generation and PDF download
@@ -1160,7 +1160,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Test multi-tenant isolation
   - _Requirements: REQ-TEST-011_
 
-- [ ] 64. Performance testing
+- [ ] 69. Performance testing
   - Test 1000 concurrent subscription creations
   - Test 10,000 usage records per second
   - Test 100 payments per minute
@@ -1171,7 +1171,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-TEST-016, REQ-TEST-017, REQ-TEST-018, REQ-TEST-019, REQ-TEST-020, REQ-TEST-021, REQ-TEST-022, REQ-PERF-001, REQ-PERF-002, REQ-PERF-003, REQ-PERF-004, REQ-PERF-005, REQ-PERF-006, REQ-PERF-007, REQ-PERF-008, REQ-PERF-009, REQ-PERF-010, REQ-PERF-011, REQ-PERF-012_
 
 
-- [ ] 65. Final checkpoint - Production readiness
+- [ ] 70. Final checkpoint - Production readiness
   - Verify all monitoring and alerting is configured
   - Verify all documentation is complete
   - Verify all security measures are in place
