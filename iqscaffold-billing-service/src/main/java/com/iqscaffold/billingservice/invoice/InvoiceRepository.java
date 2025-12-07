@@ -59,6 +59,22 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   );
 
   /**
+   * Finds all invoices for a tenant.
+   * 
+   * @param tenantId tenant identifier (as string)
+   * @return list of invoices ordered by creation date descending
+   */
+  @Query("""
+      SELECT i FROM Invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH i.paymentMethod
+      WHERE i.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY i.createdAt DESC
+      """)
+  List<Invoice> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
    * Finds invoices by tenant and status.
    * 
    * @param tenantId tenant identifier

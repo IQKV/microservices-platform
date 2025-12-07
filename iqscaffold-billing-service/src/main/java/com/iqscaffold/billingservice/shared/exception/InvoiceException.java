@@ -56,4 +56,41 @@ public class InvoiceException extends BillingException {
             return invoiceId;
         }
     }
+
+    /**
+     * Exception thrown when subscription is not found for invoice operations.
+     */
+    public static class SubscriptionNotFoundException extends InvoiceException {
+        
+        public SubscriptionNotFoundException(String message) {
+            super(message);
+        }
+
+        public SubscriptionNotFoundException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * Exception thrown when invoice is in an invalid state for the requested operation.
+     */
+    public static class InvalidInvoiceStateException extends InvoiceException {
+        
+        private final String currentState;
+        private final String requiredState;
+
+        public InvalidInvoiceStateException(String message, String currentState, String requiredState) {
+            super(message);
+            this.currentState = currentState;
+            this.requiredState = requiredState;
+        }
+
+        public String getCurrentState() {
+            return currentState;
+        }
+
+        public String getRequiredState() {
+            return requiredState;
+        }
+    }
 }

@@ -312,6 +312,32 @@ public class Invoice {
   }
 
   /**
+   * Marks the invoice as paid with payment method information.
+   * Transitions from OPEN to PAID status.
+   * 
+   * @param paymentMethodId the payment method ID used for payment
+   * @param paymentDate the date payment was received
+   * @throws IllegalStateException if invoice cannot be paid
+   */
+  public void markAsPaid(Long paymentMethodId, LocalDateTime paymentDate) {
+    if (!status.canPay()) {
+      throw new IllegalStateException(
+          "Cannot mark invoice as paid in " + status + " status"
+      );
+    }
+
+    if (paymentDate == null) {
+      throw new IllegalArgumentException("Payment date cannot be null");
+    }
+
+    this.paidAt = paymentDate;
+    if (paymentMethodId != null) {
+      addMetadata("paymentMethodId", paymentMethodId);
+    }
+    transitionTo(InvoiceStatus.PAID);
+  }
+
+  /**
    * Voids the invoice, preventing payment.
    * Can void DRAFT or OPEN invoices.
    * 
@@ -629,6 +655,10 @@ public class Invoice {
 
   public PaymentMethod getPaymentMethod() {
     return paymentMethod;
+  }
+
+  public Long getPaymentMethodId() {
+    return paymentMethod != null ? paymentMethod.getId() : null;
   }
 
   public String getProviderInvoiceId() {
