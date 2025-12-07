@@ -647,7 +647,11 @@ This phase implements event-driven architecture for operations that benefit from
 - Events enable eventual consistency between aggregates
 - Events trigger async workflows without tight coupling
 
-- [ ] 31. Set up RabbitMQ infrastructure
+- [x] 31. Set up RabbitMQ infrastructure
+
+
+
+
   - Create billing.events exchange (topic, durable)
   - Create queues: usage, invoice, webhook, notification, payment-retry
   - Configure dead letter queues for all queues
