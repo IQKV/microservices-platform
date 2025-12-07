@@ -26,11 +26,11 @@ public record UsageMetricDto(
   MetricType metricType,
 
   @Schema(description = "Total quantity consumed", example = "15000")
-  Long totalQuantity,
+  Long quantity,
 
   @Schema(description = "Unit of measurement", example = "requests")
   String unit,
 
-  @Schema(description = "Number of usage records for this metric", example = "523")
-  Integer recordCount
+  @Schema(description = "Quota limit (null means unlimited)", example = "10000")
+  Long limit
 ) {}
