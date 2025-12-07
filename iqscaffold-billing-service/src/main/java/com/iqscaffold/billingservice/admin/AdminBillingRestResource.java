@@ -68,6 +68,8 @@ public class AdminBillingRestResource {
   private final SubscriptionPlanService subscriptionPlanService;
   private final SubscriptionApplicationService subscriptionApplicationService;
   private final AdminSubscriptionService adminSubscriptionService;
+  private final com.iqscaffold.billingservice.invoice.InvoiceApplicationService invoiceApplicationService;
+  private final com.iqscaffold.billingservice.analytics.BillingAnalyticsService billingAnalyticsService;
 
   /**
    * Creates a new subscription plan.
@@ -667,5 +669,373 @@ public class AdminBillingRestResource {
     );
 
     return ResponseEntity.ok(subscription);
+  }
+
+  /**
+   * Lists all invoices with filtering and pagination.
+   * 
+   * <p>This endpoint allows administrators to view all invoices across
+   * all tenants with optional filtering by status, tenant, and date range.
+   * 
+   * @param status optional status filter
+   * @param tenantId optional tenant ID filter
+   * @param pageable pagination parameters
+   * @return page of invoice DTOs
+   */
+  @GetMapping("/invoices")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @Timed(value = "admin.billing.invoices.list", description = "Time taken to list invoices")
+  @Operation(
+    summary = "List all invoices",
+    description = """
+      Retrieves all invoices across all tenants with optional filtering and pagination.
+      
+      **Features:**
+      - View all invoices across tenants
+      - Filter by status (DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE)
+      - Filter by tenant ID
+      - Paginated results with sorting
+      
+      **Requirements:**
+      - ADMIN or SUPER_ADMIN authority required
+      
+      **Use Cases:**
+      - Monitor invoice status across platform
+      - Identify unpaid invoices
+      - Audit billing operations
+      - Generate financial reports
+      
+      **Pagination:**
+      - Default page size: 20
+      - Maximum page size: 100
+      - Sortable by any field (default: createdAt desc)
+      
+      **Example Response:**
+      Returns a paginated list of invoices with complete details including line items.
+      """
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved invoices",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = Page.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - JWT token missing or invalid"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - ADMIN authority required"
+    )
+  })
+  public ResponseEntity<Page<com.iqscaffold.billingservice.invoice.InvoiceDto>> listInvoices(
+      @Parameter(description = "Filter by invoice status", example = "OPEN")
+      @RequestParam(required = false) com.iqscaffold.billingservice.invoice.InvoiceStatus status,
+      @Parameter(description = "Filter by tenant ID")
+      @RequestParam(required = false) String tenantId,
+      @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+
+    log.info(
+        "Admin listing invoices with filters - status: {}, tenantId: {}",
+        status,
+        tenantId
+    );
+
+    var invoices = billingAnalyticsService.listInvoices(
+        status,
+        tenantId,
+        pageable
+    );
+
+    log.info("Retrieved {} invoices (page {} of {})",
+        invoices.getNumberOfElements(),
+        invoices.getNumber() + 1,
+        invoices.getTotalPages()
+    );
+
+    return ResponseEntity.ok(invoices);
+  }
+
+  /**
+   * Voids an invoice.
+   * 
+   * <p>This endpoint allows administrators to void an unpaid invoice,
+   * preventing payment and marking it as canceled.
+   * 
+   * @param id invoice identifier
+   * @param request void request with reason
+   * @return voided invoice DTO
+   */
+  @PostMapping("/invoices/{id}/void")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @Timed(value = "admin.billing.invoices.void", description = "Time taken to void invoice")
+  @Operation(
+    summary = "Void invoice",
+    description = """
+      Voids an unpaid invoice, preventing payment and marking it as canceled.
+      
+      **Features:**
+      - Void unpaid invoices (DRAFT or OPEN status)
+      - Requires reason for audit trail
+      - Publishes InvoiceVoided event
+      - Triggers customer notification
+      
+      **Requirements:**
+      - ADMIN or SUPER_ADMIN authority required
+      - Invoice must exist
+      - Invoice must be unpaid (DRAFT or OPEN status)
+      - Reason must be provided
+      
+      **Important Notes:**
+      - Only unpaid invoices can be voided
+      - Paid invoices cannot be voided (use refund instead)
+      - Voiding is permanent and cannot be undone
+      - Customer will be notified of voided invoice
+      
+      **Use Cases:**
+      - Cancel incorrect invoices
+      - Handle billing disputes
+      - Correct billing errors
+      - Process customer refund requests
+      
+      **Example Request:**
+      Voids an invoice with a reason for the audit trail.
+      """
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Invoice voided successfully",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = com.iqscaffold.billingservice.invoice.InvoiceDto.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "Invalid request - invoice already paid or reason missing"
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - JWT token missing or invalid"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - ADMIN authority required"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Invoice not found"
+    )
+  })
+  public ResponseEntity<com.iqscaffold.billingservice.invoice.InvoiceDto> voidInvoice(
+      @Parameter(description = "Invoice ID", required = true, example = "1")
+      @PathVariable Long id,
+      @Parameter(description = "Void request with reason", required = true)
+      @Valid @RequestBody VoidInvoiceRequest request) {
+
+    log.info("Admin voiding invoice: {}, reason: {}", id, request.reason());
+
+    var invoice = invoiceApplicationService.voidInvoice(id, request.reason());
+
+    log.info("Successfully voided invoice: {} for tenant: {}",
+        invoice.id(),
+        invoice.tenantId()
+    );
+
+    return ResponseEntity.ok(invoice);
+  }
+
+  /**
+   * Retrieves Monthly Recurring Revenue (MRR) analytics.
+   * 
+   * <p>This endpoint provides MRR metrics including current MRR, growth rate,
+   * and breakdown by plan tier.
+   * 
+   * @return MRR report DTO
+   */
+  @GetMapping("/analytics/mrr")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @Timed(value = "admin.billing.analytics.mrr", description = "Time taken to calculate MRR")
+  @Operation(
+    summary = "Get Monthly Recurring Revenue (MRR)",
+    description = """
+      Retrieves Monthly Recurring Revenue (MRR) analytics and metrics.
+      
+      **Features:**
+      - Current MRR calculation
+      - MRR growth rate (month-over-month)
+      - MRR breakdown by plan tier (FREE, PRO, ENTERPRISE)
+      - New MRR from new subscriptions
+      - Churned MRR from canceled subscriptions
+      - Expansion MRR from upgrades
+      - Contraction MRR from downgrades
+      
+      **Requirements:**
+      - ADMIN or SUPER_ADMIN authority required
+      
+      **Calculation:**
+      - MRR = Sum of all active monthly subscription values
+      - Yearly subscriptions normalized to monthly (price / 12)
+      - Lifetime subscriptions excluded from MRR
+      - Only ACTIVE and TRIAL subscriptions counted
+      
+      **Use Cases:**
+      - Monitor revenue health
+      - Track growth trends
+      - Identify revenue drivers
+      - Financial reporting and forecasting
+      
+      **Example Response:**
+      Returns comprehensive MRR metrics with historical comparison.
+      """
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved MRR analytics",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = com.iqscaffold.billingservice.analytics.RevenueReportDto.class),
+        examples = @ExampleObject(
+          name = "MRR Report",
+          value = """
+            {
+              "currentMrr": 125000.00,
+              "previousMrr": 118000.00,
+              "growthRate": 5.93,
+              "newMrr": 12000.00,
+              "churnedMrr": 3500.00,
+              "expansionMrr": 4500.00,
+              "contractionMrr": 1000.00,
+              "mrrByTier": {
+                "FREE": 0.00,
+                "PRO": 85000.00,
+                "ENTERPRISE": 40000.00
+              },
+              "calculatedAt": "2024-01-15T10:30:00Z"
+            }
+            """
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - JWT token missing or invalid"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - ADMIN authority required"
+    )
+  })
+  public ResponseEntity<com.iqscaffold.billingservice.analytics.RevenueReportDto> getMrrAnalytics() {
+    log.info("Admin retrieving MRR analytics");
+
+    var mrrReport = billingAnalyticsService.calculateMrr();
+
+    log.info("Successfully calculated MRR: {}", mrrReport);
+
+    return ResponseEntity.ok(mrrReport);
+  }
+
+  /**
+   * Retrieves churn rate analytics.
+   * 
+   * <p>This endpoint provides churn metrics including churn rate, churned
+   * subscriptions count, and churn reasons breakdown.
+   * 
+   * @return churn analysis DTO
+   */
+  @GetMapping("/analytics/churn")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @Timed(value = "admin.billing.analytics.churn", description = "Time taken to calculate churn")
+  @Operation(
+    summary = "Get churn rate analytics",
+    description = """
+      Retrieves churn rate analytics and customer retention metrics.
+      
+      **Features:**
+      - Current month churn rate
+      - Churned subscriptions count
+      - Churn reasons breakdown
+      - Churn trend over time
+      - Revenue churn vs customer churn
+      - Churn by plan tier
+      
+      **Requirements:**
+      - ADMIN or SUPER_ADMIN authority required
+      
+      **Calculation:**
+      - Churn Rate = (Canceled Subscriptions / Total Active Subscriptions at Start) × 100
+      - Calculated for current month
+      - Includes voluntary and involuntary churn
+      - Revenue churn weighted by subscription value
+      
+      **Use Cases:**
+      - Monitor customer retention
+      - Identify churn patterns
+      - Evaluate product-market fit
+      - Inform retention strategies
+      
+      **Example Response:**
+      Returns comprehensive churn metrics with historical trends.
+      """
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved churn analytics",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = com.iqscaffold.billingservice.analytics.ChurnAnalysisDto.class),
+        examples = @ExampleObject(
+          name = "Churn Analysis",
+          value = """
+            {
+              "churnRate": 3.5,
+              "churnedCount": 42,
+              "totalActiveStart": 1200,
+              "revenueChurnRate": 4.2,
+              "churnedRevenue": 5250.00,
+              "churnByTier": {
+                "FREE": 15,
+                "PRO": 22,
+                "ENTERPRISE": 5
+              },
+              "churnReasons": {
+                "price": 18,
+                "features": 12,
+                "support": 5,
+                "other": 7
+              },
+              "calculatedAt": "2024-01-15T10:30:00Z",
+              "periodStart": "2024-01-01T00:00:00Z",
+              "periodEnd": "2024-01-31T23:59:59Z"
+            }
+            """
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - JWT token missing or invalid"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - ADMIN authority required"
+    )
+  })
+  public ResponseEntity<com.iqscaffold.billingservice.analytics.ChurnAnalysisDto> getChurnAnalytics() {
+    log.info("Admin retrieving churn analytics");
+
+    var churnAnalysis = billingAnalyticsService.calculateChurn();
+
+    log.info("Successfully calculated churn rate: {}%", churnAnalysis.churnRate());
+
+    return ResponseEntity.ok(churnAnalysis);
   }
 }

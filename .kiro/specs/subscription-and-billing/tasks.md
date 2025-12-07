@@ -790,7 +790,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-ADMIN-001 through REQ-ADMIN-009, REQ-API-013 through REQ-API-018, REQ-DDD-049_
 
-- [ ] 38. Implement admin endpoints - invoices and analytics
+- [x] 38. Implement admin endpoints - invoices and analytics
   - Delegate to InvoiceApplicationService
   - Implement GET /api/v1/admin/billing/invoices endpoint with filtering
   - Implement POST /api/v1/admin/billing/invoices/{id}/void endpoint

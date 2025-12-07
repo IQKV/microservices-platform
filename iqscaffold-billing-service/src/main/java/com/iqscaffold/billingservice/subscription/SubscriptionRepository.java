@@ -258,4 +258,66 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
       ORDER BY s.createdAt DESC
       """)
   List<Subscription> findByUserId(@Param("userId") UUID userId);
+
+  /**
+   * Finds subscriptions by status list.
+   * 
+   * @param statuses list of subscription statuses
+   * @return list of subscriptions with any of the specified statuses
+   */
+  @Query("""
+      SELECT s FROM Subscription s
+      JOIN FETCH s.plan
+      WHERE s.status IN :statuses
+      ORDER BY s.createdAt DESC
+      """)
+  List<Subscription> findByStatusIn(@Param("statuses") List<SubscriptionStatus> statuses);
+
+  /**
+   * Counts subscriptions by status list.
+   * 
+   * @param statuses list of subscription statuses
+   * @return number of subscriptions with any of the specified statuses
+   */
+  @Query("""
+      SELECT COUNT(s) FROM Subscription s
+      WHERE s.status IN :statuses
+      """)
+  long countByStatusIn(@Param("statuses") List<SubscriptionStatus> statuses);
+
+  /**
+   * Finds subscriptions canceled between dates.
+   * 
+   * @param startDate start of date range
+   * @param endDate end of date range
+   * @return list of subscriptions canceled in the date range
+   */
+  @Query("""
+      SELECT s FROM Subscription s
+      JOIN FETCH s.plan
+      WHERE s.canceledAt BETWEEN :startDate AND :endDate
+      ORDER BY s.canceledAt DESC
+      """)
+  List<Subscription> findByCanceledAtBetween(
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate
+  );
+
+  /**
+   * Finds subscriptions created between dates.
+   * 
+   * @param startDate start of date range
+   * @param endDate end of date range
+   * @return list of subscriptions created in the date range
+   */
+  @Query("""
+      SELECT s FROM Subscription s
+      JOIN FETCH s.plan
+      WHERE s.createdAt BETWEEN :startDate AND :endDate
+      ORDER BY s.createdAt DESC
+      """)
+  List<Subscription> findByCreatedAtBetween(
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate
+  );
 }

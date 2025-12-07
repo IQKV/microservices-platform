@@ -289,4 +289,41 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
       WHERE i.invoiceNumber LIKE CONCAT('INV-', :yearMonth, '-%')
       """)
   int findMaxSequenceForPeriod(@Param("yearMonth") String yearMonth);
+
+  /**
+   * Finds invoices by status.
+   * 
+   * @param status invoice status
+   * @return list of invoices with the specified status
+   */
+  @Query("""
+      SELECT i FROM Invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH i.paymentMethod
+      WHERE i.status = :status
+      ORDER BY i.createdAt DESC
+      """)
+  List<Invoice> findByStatus(@Param("status") InvoiceStatus status);
+
+  /**
+   * Finds invoices by status and tenant ID.
+   * 
+   * @param status invoice status
+   * @param tenantId tenant identifier (as string)
+   * @return list of invoices matching criteria
+   */
+  @Query("""
+      SELECT i FROM Invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH i.paymentMethod
+      WHERE i.status = :status
+        AND i.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY i.createdAt DESC
+      """)
+  List<Invoice> findByStatusAndTenantId(
+      @Param("status") InvoiceStatus status,
+      @Param("tenantId") String tenantId
+  );
 }
