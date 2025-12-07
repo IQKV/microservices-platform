@@ -427,7 +427,12 @@ This implementation follows the detailed technical standards defined in the desi
 
 ## Phase 5: Application Layer - Application Services and DTOs
 
-- [ ] 22. Create DTOs as Java records
+- [x] 22. Create DTOs as Java records
+
+
+
+
+
   - Create SubscriptionDto, SubscriptionPlanDto, CreateSubscriptionRequest, UpdateSubscriptionRequest as Java records
   - Create InvoiceDto, InvoiceLineItemDto, CreateInvoiceRequest as Java records
   - Create PaymentDto, PaymentMethodDto, AddPaymentMethodRequest as Java records
