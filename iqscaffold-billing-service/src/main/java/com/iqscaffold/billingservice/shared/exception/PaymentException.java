@@ -13,6 +13,14 @@ public class PaymentException extends BillingException {
         super(message, cause);
     }
 
+    public PaymentException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+
+    public PaymentException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
+
     /**
      * Exception thrown when a payment fails.
      */
@@ -22,13 +30,15 @@ public class PaymentException extends BillingException {
         private final String reason;
 
         public PaymentFailedException(String paymentId, String reason) {
-            super("Payment failed: " + paymentId + " - " + reason);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_FAILED, 
+                  "Payment failed: " + paymentId + " - " + reason);
             this.paymentId = paymentId;
             this.reason = reason;
         }
 
         public PaymentFailedException(String paymentId, String reason, Throwable cause) {
-            super("Payment failed: " + paymentId + " - " + reason, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_FAILED, 
+                  "Payment failed: " + paymentId + " - " + reason, cause);
             this.paymentId = paymentId;
             this.reason = reason;
         }
@@ -50,12 +60,14 @@ public class PaymentException extends BillingException {
         private final String paymentMethodId;
 
         public PaymentMethodNotFoundException(String paymentMethodId) {
-            super("Payment method not found: " + paymentMethodId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_METHOD_NOT_FOUND, 
+                  "Payment method not found: " + paymentMethodId);
             this.paymentMethodId = paymentMethodId;
         }
 
         public PaymentMethodNotFoundException(String paymentMethodId, Throwable cause) {
-            super("Payment method not found: " + paymentMethodId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_METHOD_NOT_FOUND, 
+                  "Payment method not found: " + paymentMethodId, cause);
             this.paymentMethodId = paymentMethodId;
         }
 
@@ -73,13 +85,15 @@ public class PaymentException extends BillingException {
         private final String reason;
 
         public InvalidPaymentMethodException(String paymentMethodId, String reason) {
-            super("Invalid payment method: " + paymentMethodId + " - " + reason);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PAYMENT_METHOD, 
+                  "Invalid payment method: " + paymentMethodId + " - " + reason);
             this.paymentMethodId = paymentMethodId;
             this.reason = reason;
         }
 
         public InvalidPaymentMethodException(String paymentMethodId, String reason, Throwable cause) {
-            super("Invalid payment method: " + paymentMethodId + " - " + reason, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PAYMENT_METHOD, 
+                  "Invalid payment method: " + paymentMethodId + " - " + reason, cause);
             this.paymentMethodId = paymentMethodId;
             this.reason = reason;
         }

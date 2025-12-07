@@ -13,6 +13,14 @@ public class SubscriptionException extends BillingException {
         super(message, cause);
     }
 
+    public SubscriptionException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+
+    public SubscriptionException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
+
     /**
      * Exception thrown when a subscription is not found.
      */
@@ -21,12 +29,14 @@ public class SubscriptionException extends BillingException {
         private final String subscriptionId;
 
         public SubscriptionNotFoundException(String subscriptionId) {
-            super("Subscription not found: " + subscriptionId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_NOT_FOUND, 
+                  "Subscription not found: " + subscriptionId);
             this.subscriptionId = subscriptionId;
         }
 
         public SubscriptionNotFoundException(String subscriptionId, Throwable cause) {
-            super("Subscription not found: " + subscriptionId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_NOT_FOUND, 
+                  "Subscription not found: " + subscriptionId, cause);
             this.subscriptionId = subscriptionId;
         }
 
@@ -43,12 +53,14 @@ public class SubscriptionException extends BillingException {
         private final String tenantId;
 
         public SubscriptionAlreadyExistsException(String tenantId) {
-            super("Subscription already exists for tenant: " + tenantId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_ALREADY_EXISTS, 
+                  "Subscription already exists for tenant: " + tenantId);
             this.tenantId = tenantId;
         }
 
         public SubscriptionAlreadyExistsException(String tenantId, Throwable cause) {
-            super("Subscription already exists for tenant: " + tenantId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_ALREADY_EXISTS, 
+                  "Subscription already exists for tenant: " + tenantId, cause);
             this.tenantId = tenantId;
         }
 
@@ -66,13 +78,15 @@ public class SubscriptionException extends BillingException {
         private final String targetState;
 
         public InvalidSubscriptionStateException(String currentState, String targetState) {
-            super("Invalid subscription state transition from " + currentState + " to " + targetState);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_SUBSCRIPTION_STATE, 
+                  "Invalid subscription state transition from " + currentState + " to " + targetState);
             this.currentState = currentState;
             this.targetState = targetState;
         }
 
         public InvalidSubscriptionStateException(String currentState, String targetState, Throwable cause) {
-            super("Invalid subscription state transition from " + currentState + " to " + targetState, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_SUBSCRIPTION_STATE, 
+                  "Invalid subscription state transition from " + currentState + " to " + targetState, cause);
             this.currentState = currentState;
             this.targetState = targetState;
         }
@@ -139,6 +153,68 @@ public class SubscriptionException extends BillingException {
 
         public PaymentMethodMismatchException(String message, Throwable cause) {
             super(message, cause);
+        }
+    }
+
+    /**
+     * Exception thrown when a feature is not available in the current subscription plan.
+     */
+    public static class FeatureNotAvailableException extends SubscriptionException {
+        
+        private final String featureName;
+        private final String currentPlan;
+
+        public FeatureNotAvailableException(String featureName, String currentPlan) {
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.FEATURE_NOT_AVAILABLE, 
+                  "Feature '" + featureName + "' is not available in plan: " + currentPlan);
+            this.featureName = featureName;
+            this.currentPlan = currentPlan;
+        }
+
+        public FeatureNotAvailableException(String featureName, String currentPlan, Throwable cause) {
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.FEATURE_NOT_AVAILABLE, 
+                  "Feature '" + featureName + "' is not available in plan: " + currentPlan, cause);
+            this.featureName = featureName;
+            this.currentPlan = currentPlan;
+        }
+
+        public String getFeatureName() {
+            return featureName;
+        }
+
+        public String getCurrentPlan() {
+            return currentPlan;
+        }
+    }
+
+    /**
+     * Exception thrown when a payment is required to perform an operation.
+     */
+    public static class PaymentRequiredException extends SubscriptionException {
+        
+        private final String operation;
+        private final String reason;
+
+        public PaymentRequiredException(String operation, String reason) {
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_REQUIRED, 
+                  "Payment required for operation '" + operation + "': " + reason);
+            this.operation = operation;
+            this.reason = reason;
+        }
+
+        public PaymentRequiredException(String operation, String reason, Throwable cause) {
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_REQUIRED, 
+                  "Payment required for operation '" + operation + "': " + reason, cause);
+            this.operation = operation;
+            this.reason = reason;
+        }
+
+        public String getOperation() {
+            return operation;
+        }
+
+        public String getReason() {
+            return reason;
         }
     }
 }

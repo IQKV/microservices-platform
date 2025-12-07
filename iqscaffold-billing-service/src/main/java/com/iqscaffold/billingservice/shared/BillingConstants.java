@@ -178,6 +178,8 @@ public final class BillingConstants {
         public static final String USAGE_LIMIT_EXCEEDED = "BILLING_010";
         public static final String INVOICE_NOT_FOUND = "BILLING_011";
         public static final String INVOICE_ALREADY_PAID = "BILLING_012";
+        public static final String FEATURE_NOT_AVAILABLE = "BILLING_013";
+        public static final String PAYMENT_REQUIRED = "BILLING_014";
 
         private ErrorCodes() {
             throw new UnsupportedOperationException("Utility class cannot be instantiated");

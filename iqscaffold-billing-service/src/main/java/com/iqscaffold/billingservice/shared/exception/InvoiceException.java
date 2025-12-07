@@ -13,6 +13,14 @@ public class InvoiceException extends BillingException {
         super(message, cause);
     }
 
+    public InvoiceException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+
+    public InvoiceException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
+
     /**
      * Exception thrown when an invoice is not found.
      */
@@ -21,12 +29,14 @@ public class InvoiceException extends BillingException {
         private final String invoiceId;
 
         public InvoiceNotFoundException(String invoiceId) {
-            super("Invoice not found: " + invoiceId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_NOT_FOUND, 
+                  "Invoice not found: " + invoiceId);
             this.invoiceId = invoiceId;
         }
 
         public InvoiceNotFoundException(String invoiceId, Throwable cause) {
-            super("Invoice not found: " + invoiceId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_NOT_FOUND, 
+                  "Invoice not found: " + invoiceId, cause);
             this.invoiceId = invoiceId;
         }
 
@@ -43,12 +53,14 @@ public class InvoiceException extends BillingException {
         private final String invoiceId;
 
         public InvoiceAlreadyPaidException(String invoiceId) {
-            super("Invoice already paid: " + invoiceId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_ALREADY_PAID, 
+                  "Invoice already paid: " + invoiceId);
             this.invoiceId = invoiceId;
         }
 
         public InvoiceAlreadyPaidException(String invoiceId, Throwable cause) {
-            super("Invoice already paid: " + invoiceId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_ALREADY_PAID, 
+                  "Invoice already paid: " + invoiceId, cause);
             this.invoiceId = invoiceId;
         }
 

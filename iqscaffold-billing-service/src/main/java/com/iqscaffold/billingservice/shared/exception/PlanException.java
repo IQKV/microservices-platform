@@ -13,6 +13,14 @@ public class PlanException extends BillingException {
         super(message, cause);
     }
 
+    public PlanException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+
+    public PlanException(String errorCode, String message, Throwable cause) {
+        super(errorCode, message, cause);
+    }
+
     /**
      * Exception thrown when a plan is not found.
      */
@@ -21,12 +29,14 @@ public class PlanException extends BillingException {
         private final String planId;
 
         public PlanNotFoundException(String planId) {
-            super("Plan not found: " + planId);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PLAN_NOT_FOUND, 
+                  "Plan not found: " + planId);
             this.planId = planId;
         }
 
         public PlanNotFoundException(String planId, Throwable cause) {
-            super("Plan not found: " + planId, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PLAN_NOT_FOUND, 
+                  "Plan not found: " + planId, cause);
             this.planId = planId;
         }
 
@@ -44,13 +54,15 @@ public class PlanException extends BillingException {
         private final String toPlan;
 
         public InvalidPlanTransitionException(String fromPlan, String toPlan) {
-            super("Invalid plan transition from " + fromPlan + " to " + toPlan);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PLAN_TRANSITION, 
+                  "Invalid plan transition from " + fromPlan + " to " + toPlan);
             this.fromPlan = fromPlan;
             this.toPlan = toPlan;
         }
 
         public InvalidPlanTransitionException(String fromPlan, String toPlan, Throwable cause) {
-            super("Invalid plan transition from " + fromPlan + " to " + toPlan, cause);
+            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PLAN_TRANSITION, 
+                  "Invalid plan transition from " + fromPlan + " to " + toPlan, cause);
             this.fromPlan = fromPlan;
             this.toPlan = toPlan;
         }
