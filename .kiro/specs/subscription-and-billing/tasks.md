@@ -776,7 +776,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation
   - _Requirements: REQ-PORTAL-016 through REQ-PORTAL-034, REQ-API-007 through REQ-API-012, REQ-DDD-049_
 
-- [ ] 37. Implement admin endpoints - plan and subscription management
+- [x] 37. Implement admin endpoints - plan and subscription management
   - Create AdminBillingController in presentation layer
   - Delegate to PlanApplicationService and SubscriptionApplicationService
   - Implement POST /api/v1/admin/billing/plans endpoint
@@ -831,7 +831,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-ERR-001, REQ-ERR-002, REQ-ERR-003, REQ-ERR-004, REQ-ERR-005, REQ-ERR-006, REQ-ERR-007, REQ-ERR-008, REQ-ERR-009, REQ-ERR-010, REQ-ERR-011_
 
 - [ ] 42. Implement global exception handler
-  - Create BillingExceptionHandler with @RestControllerAdvice in presentation layer
+  - Create GlobalExceptionHandler with @RestControllerAdvice in presentation layer
   - Implement handlers for all billing exceptions
   - Implement error response format with error code, message, timestamp, path, and details
   - Add specific error details for quota exceeded, feature not available, and payment failed
