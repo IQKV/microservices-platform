@@ -744,7 +744,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Add @Timed annotation for metrics collection
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.8, 3.3.9, 6.1, 6.2, 6.3, 6.4, REQ-API-001, REQ-API-002, REQ-DDD-049_
 
-- [ ] 35. Implement customer portal endpoints - subscription management with OpenAPI
+- [x] 35. Implement customer portal endpoints - subscription management with OpenAPI
   - Create BillingPortalRestResource (use -RestResource suffix)
   - Add @RestController and @RequestMapping("/api/v1/billing/portal")
   - Add @Tag(name = "Customer Portal", description = "Self-service billing portal APIs")
