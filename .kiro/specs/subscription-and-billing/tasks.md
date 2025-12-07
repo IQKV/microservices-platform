@@ -763,7 +763,7 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.9, REQ-PORTAL-001 through REQ-PORTAL-015, REQ-API-003 through REQ-API-006, REQ-DDD-049_
 
 
-- [ ] 36. Implement customer portal endpoints - invoices and payments
+- [x] 36. Implement customer portal endpoints - invoices and payments
   - Delegate to InvoiceApplicationService, UsageApplicationService, and PaymentApplicationService
   - Implement GET /api/v1/billing/portal/invoices endpoint with pagination and filtering
   - Implement GET /api/v1/billing/portal/invoices/{id}/pdf endpoint

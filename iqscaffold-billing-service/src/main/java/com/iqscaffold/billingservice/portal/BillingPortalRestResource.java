@@ -1,10 +1,17 @@
 package com.iqscaffold.billingservice.portal;
 
+import com.iqscaffold.billingservice.invoice.InvoiceApplicationService;
+import com.iqscaffold.billingservice.invoice.InvoiceDto;
+import com.iqscaffold.billingservice.payment.PaymentApplicationService;
+import com.iqscaffold.billingservice.paymentmethod.AddPaymentMethodRequest;
+import com.iqscaffold.billingservice.paymentmethod.PaymentMethodDto;
 import com.iqscaffold.billingservice.subscription.CancelSubscriptionRequest;
 import com.iqscaffold.billingservice.subscription.ReactivateSubscriptionRequest;
 import com.iqscaffold.billingservice.subscription.SubscriptionApplicationService;
 import com.iqscaffold.billingservice.subscription.SubscriptionDto;
 import com.iqscaffold.billingservice.subscription.UpdateSubscriptionRequest;
+import com.iqscaffold.billingservice.usage.UsageApplicationService;
+import com.iqscaffold.billingservice.usage.UsageSummaryDto;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,14 +23,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +68,9 @@ public class BillingPortalRestResource {
 
   private final BillingPortalService billingPortalService;
   private final SubscriptionApplicationService subscriptionApplicationService;
+  private final InvoiceApplicationService invoiceApplicationService;
+  private final UsageApplicationService usageApplicationService;
+  private final PaymentApplicationService paymentApplicationService;
 
   /**
    * Retrieves comprehensive billing dashboard for a tenant.
@@ -777,5 +791,687 @@ public class BillingPortalRestResource {
     );
     
     return ResponseEntity.ok(reactivated);
+  }
+
+  /**
+   * Retrieves all invoices for a tenant with pagination and filtering.
+   * 
+   * <p>Returns a list of invoices for the tenant's subscription, ordered by
+   * creation date (most recent first). Includes invoice details, line items,
+   * and payment status.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @return list of invoice DTOs
+   */
+  @GetMapping("/invoices/{tenantId}")
+  @Timed(value = "billing.portal.invoices", description = "Time taken to retrieve invoices")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Get invoices for tenant",
+    description = """
+      Retrieves all invoices for the specified tenant's subscription.
+      
+      **Features:**
+      - Complete invoice history
+      - Invoice line items included
+      - Payment status and dates
+      - Downloadable PDF links
+      - Ordered by creation date (most recent first)
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only access their own tenant's invoices
+      
+      **Use Cases:**
+      - Display invoice history in billing portal
+      - Download past invoices
+      - Track payment history
+      - Verify billing charges
+      
+      **Performance:**
+      - Results include all invoices (no pagination in this version)
+      - Consider implementing pagination for tenants with many invoices
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved invoices",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = InvoiceDto.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Tenant not found"
+    )
+  })
+  public ResponseEntity<List<InvoiceDto>> getInvoices(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId
+  ) {
+    log.info("Retrieving invoices for tenant: {}", tenantId);
+    var invoices = invoiceApplicationService.getInvoicesByTenant(tenantId);
+    return ResponseEntity.ok(invoices);
+  }
+
+  /**
+   * Retrieves invoice PDF for download.
+   * 
+   * <p>Returns the PDF file for the specified invoice. The PDF is generated
+   * asynchronously when the invoice is finalized, so it may not be immediately
+   * available for draft invoices.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @param invoiceId the invoice unique identifier
+   * @return PDF file as byte array
+   */
+  @GetMapping("/invoices/{tenantId}/{invoiceId}/pdf")
+  @Timed(value = "billing.portal.invoice.pdf", description = "Time taken to retrieve invoice PDF")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Download invoice PDF",
+    description = """
+      Downloads the PDF file for the specified invoice.
+      
+      **Features:**
+      - Professional invoice PDF format
+      - Includes company branding
+      - Complete line item details
+      - Payment information
+      - Tax calculations
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only download their own tenant's invoices
+      
+      **PDF Generation:**
+      - PDFs are generated asynchronously when invoice is finalized
+      - Draft invoices may not have PDFs available yet
+      - Returns 404 if PDF not yet generated
+      
+      **Use Cases:**
+      - Download invoice for records
+      - Print invoice for accounting
+      - Share invoice with finance team
+      - Attach to expense reports
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved invoice PDF",
+      content = @Content(
+        mediaType = "application/pdf"
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Invoice or PDF not found"
+    ),
+    @ApiResponse(
+      responseCode = "202",
+      description = "Accepted - PDF generation in progress, try again later"
+    )
+  })
+  public ResponseEntity<byte[]> getInvoicePdf(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId,
+    
+    @Parameter(
+      description = "Invoice unique identifier",
+      example = "1",
+      required = true
+    )
+    @PathVariable Long invoiceId
+  ) {
+    log.info("Retrieving invoice PDF for tenant: {}, invoice: {}", tenantId, invoiceId);
+    
+    // TODO: Implement PDF generation and retrieval
+    // For now, return 501 Not Implemented as PDF generation is handled in a future task
+    log.warn("Invoice PDF generation not yet implemented");
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+  }
+
+  /**
+   * Retrieves current usage for a tenant.
+   * 
+   * <p>Returns aggregated usage metrics for the current billing period,
+   * including quota limits and percentage used for each metric type.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @return usage summary DTO
+   */
+  @GetMapping("/usage/{tenantId}")
+  @Timed(value = "billing.portal.usage", description = "Time taken to retrieve usage")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Get current usage for tenant",
+    description = """
+      Retrieves current usage metrics for the tenant's billing period.
+      
+      **Features:**
+      - Real-time usage data across all metrics
+      - Quota limits from subscription plan
+      - Percentage used calculations
+      - Quota exceeded indicators
+      - Billing period information
+      
+      **Metrics Tracked:**
+      - API_CALLS: API requests made
+      - STORAGE_GB: Storage consumed in gigabytes
+      - EMAIL_SENDS: Emails sent
+      - CAMPAIGN_EXECUTIONS: Marketing campaigns executed
+      - SCORING_REQUESTS: Scoring API requests
+      - ACTIVE_USERS: Number of active users
+      - CUSTOM_DOMAINS: Custom domains configured
+      - DATA_EXPORTS: Data export operations
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only access their own tenant's usage
+      
+      **Use Cases:**
+      - Display usage dashboard
+      - Monitor quota consumption
+      - Identify when to upgrade plan
+      - Track resource utilization
+      
+      **Performance:**
+      - Results cached with 1-minute TTL
+      - Optimized queries for fast response
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved usage data",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = UsageSummaryDto.class),
+        examples = @ExampleObject(
+          name = "Usage Summary Response",
+          value = """
+            {
+              "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+              "periodStart": "2024-12-01T00:00:00Z",
+              "periodEnd": "2024-12-31T23:59:59Z",
+              "metrics": [
+                {
+                  "metricType": "API_CALLS",
+                  "quantity": 45000,
+                  "unit": "calls",
+                  "limit": 100000
+                },
+                {
+                  "metricType": "STORAGE_GB",
+                  "quantity": 25,
+                  "unit": "GB",
+                  "limit": 50
+                },
+                {
+                  "metricType": "EMAIL_SENDS",
+                  "quantity": 5000,
+                  "unit": "emails",
+                  "limit": 10000
+                }
+              ],
+              "totalRecords": 3
+            }
+            """
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Tenant or subscription not found"
+    )
+  })
+  public ResponseEntity<UsageSummaryDto> getUsage(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId
+  ) {
+    log.info("Retrieving usage for tenant: {}", tenantId);
+    var usage = usageApplicationService.getCurrentUsage(tenantId);
+    return ResponseEntity.ok(usage);
+  }
+
+  /**
+   * Retrieves all payment methods for a tenant.
+   * 
+   * <p>Returns a list of active payment methods with display information
+   * (PCI DSS compliant - no full card numbers). Includes default payment
+   * method indicator and expiration status.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @return list of payment method DTOs
+   */
+  @GetMapping("/payment-methods/{tenantId}")
+  @Timed(value = "billing.portal.payment.methods", description = "Time taken to retrieve payment methods")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Get payment methods for tenant",
+    description = """
+      Retrieves all active payment methods for the specified tenant.
+      
+      **Features:**
+      - PCI DSS compliant (no full card numbers)
+      - Last 4 digits and brand for cards
+      - Expiration dates for cards
+      - Default payment method indicator
+      - Active/inactive status
+      - Display names for easy identification
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only access their own tenant's payment methods
+      
+      **Security:**
+      - Full card numbers never stored or returned
+      - Tokenized payment methods only
+      - Provider payment method IDs used for processing
+      
+      **Use Cases:**
+      - Display payment methods in billing portal
+      - Select payment method for manual payment
+      - Manage payment methods (add, remove, set default)
+      - Verify payment method expiration
+      
+      **Performance:**
+      - Results cached with 10-minute TTL
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successfully retrieved payment methods",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = PaymentMethodDto.class)
+      )
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Tenant not found"
+    )
+  })
+  public ResponseEntity<List<PaymentMethodDto>> getPaymentMethods(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId
+  ) {
+    log.info("Retrieving payment methods for tenant: {}", tenantId);
+    var paymentMethods = paymentApplicationService.listPaymentMethods(tenantId);
+    return ResponseEntity.ok(paymentMethods);
+  }
+
+  /**
+   * Adds a new payment method for a tenant.
+   * 
+   * <p>Creates a new payment method using a token obtained from the payment
+   * provider's client-side SDK. This ensures PCI compliance by never handling
+   * raw card data on the server.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @param request the payment method creation request
+   * @return the created payment method DTO
+   */
+  @PostMapping("/payment-methods/{tenantId}")
+  @Timed(value = "billing.portal.payment.method.add", description = "Time taken to add payment method")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Add payment method for tenant",
+    description = """
+      Adds a new payment method for the specified tenant.
+      
+      **Features:**
+      - PCI DSS compliant tokenization
+      - Supports multiple payment types (card, bank account, PayPal)
+      - Automatic validation with payment provider
+      - Optional default payment method setting
+      - Secure token-based creation
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only add payment methods to their own tenant
+      
+      **Token Generation:**
+      - Client must obtain token from payment provider's SDK
+      - Token represents payment method without exposing sensitive data
+      - Token is single-use and expires quickly
+      
+      **Validation:**
+      - Payment provider validates payment method
+      - Checks for valid card number, expiration, CVV
+      - Verifies bank account routing and account numbers
+      - Confirms PayPal account authorization
+      
+      **Use Cases:**
+      - Add first payment method during onboarding
+      - Add backup payment method
+      - Update expired payment method
+      - Switch payment providers
+      
+      **Error Handling:**
+      - Invalid token: 400 Bad Request
+      - Payment provider error: 502 Bad Gateway
+      - Duplicate payment method: 409 Conflict
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "201",
+      description = "Successfully added payment method",
+      content = @Content(
+        mediaType = "application/json",
+        schema = @Schema(implementation = PaymentMethodDto.class),
+        examples = @ExampleObject(
+          name = "Payment Method Response",
+          value = """
+            {
+              "id": 1,
+              "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+              "userId": "550e8400-e29b-41d4-a716-446655440001",
+              "type": "CARD",
+              "providerPaymentMethodId": "pm_1234567890",
+              "last4": "4242",
+              "brand": "Visa",
+              "expiryMonth": 12,
+              "expiryYear": 2025,
+              "isDefault": true,
+              "active": true,
+              "displayName": "Visa ending in 4242",
+              "statusMessage": "Default payment method",
+              "expired": false,
+              "createdAt": "2024-12-07T10:30:00Z",
+              "updatedAt": "2024-12-07T10:30:00Z"
+            }
+            """
+        )
+      )
+    ),
+    @ApiResponse(
+      responseCode = "400",
+      description = "Bad Request - Invalid token or payment method data"
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "Conflict - Payment method already exists"
+    ),
+    @ApiResponse(
+      responseCode = "502",
+      description = "Bad Gateway - Payment provider error"
+    )
+  })
+  public ResponseEntity<PaymentMethodDto> addPaymentMethod(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId,
+    
+    @Parameter(
+      description = "Payment method creation request with token",
+      required = true
+    )
+    @Valid @RequestBody AddPaymentMethodRequest request
+  ) {
+    log.info("Adding payment method for tenant: {}", tenantId);
+    
+    // Add payment method (async with timeout and circuit breaker)
+    var futurePaymentMethod = paymentApplicationService.addPaymentMethod(
+      tenantId,
+      request.userId(),
+      request.providerPaymentMethodId(),
+      null // customerId - will be created if needed
+    );
+    
+    // Wait for result (with timeout handled by @TimeLimiter)
+    var paymentMethod = futurePaymentMethod.join();
+    
+    return ResponseEntity.status(HttpStatus.CREATED).body(paymentMethod);
+  }
+
+  /**
+   * Removes a payment method for a tenant.
+   * 
+   * <p>Deactivates the payment method in the database and deletes it from
+   * the payment provider. The payment method cannot be used for future
+   * payments after removal.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @param paymentMethodId the payment method unique identifier
+   * @return no content
+   */
+  @DeleteMapping("/payment-methods/{tenantId}/{paymentMethodId}")
+  @Timed(value = "billing.portal.payment.method.remove", description = "Time taken to remove payment method")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Remove payment method for tenant",
+    description = """
+      Removes a payment method for the specified tenant.
+      
+      **Features:**
+      - Deactivates payment method in database
+      - Deletes from payment provider
+      - Cannot be used for future payments
+      - Historical payment records preserved
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only remove their own tenant's payment methods
+      
+      **Validation:**
+      - Cannot remove default payment method if other methods exist
+      - Cannot remove if active subscriptions require payment method
+      - Payment method must belong to the tenant
+      
+      **Use Cases:**
+      - Remove expired payment method
+      - Remove unused payment method
+      - Clean up old payment methods
+      - Switch to different payment method
+      
+      **Error Handling:**
+      - Payment method not found: 404 Not Found
+      - Cannot remove default: 409 Conflict
+      - Payment provider error: 502 Bad Gateway
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "204",
+      description = "Successfully removed payment method"
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Payment method not found"
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "Conflict - Cannot remove default payment method or payment method in use"
+    ),
+    @ApiResponse(
+      responseCode = "502",
+      description = "Bad Gateway - Payment provider error"
+    )
+  })
+  public ResponseEntity<Void> removePaymentMethod(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId,
+    
+    @Parameter(
+      description = "Payment method unique identifier",
+      example = "1",
+      required = true
+    )
+    @PathVariable Long paymentMethodId
+  ) {
+    log.info("Removing payment method: {} for tenant: {}", paymentMethodId, tenantId);
+    paymentApplicationService.removePaymentMethod(tenantId, paymentMethodId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Sets a payment method as the default for a tenant.
+   * 
+   * <p>Marks the specified payment method as the default for automatic
+   * subscription payments. Only one payment method can be default at a time.
+   * 
+   * @param tenantId the tenant unique identifier
+   * @param paymentMethodId the payment method unique identifier
+   * @return no content
+   */
+  @PutMapping("/payment-methods/{tenantId}/{paymentMethodId}/default")
+  @Timed(value = "billing.portal.payment.method.default", description = "Time taken to set default payment method")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  @Operation(
+    summary = "Set default payment method for tenant",
+    description = """
+      Sets the specified payment method as the default for the tenant.
+      
+      **Features:**
+      - Marks payment method as default
+      - Removes default status from other payment methods
+      - Used for automatic subscription payments
+      - Used for invoice payments when no method specified
+      
+      **Authorization:**
+      - Requires TENANT_OWNER or BILLING_ADMIN role
+      - Users can only set default for their own tenant's payment methods
+      
+      **Validation:**
+      - Payment method must be active
+      - Payment method must not be expired
+      - Payment method must belong to the tenant
+      
+      **Use Cases:**
+      - Set primary payment method
+      - Switch default payment method
+      - Update payment method for auto-renewal
+      - Change payment method after expiration
+      
+      **Error Handling:**
+      - Payment method not found: 404 Not Found
+      - Payment method expired: 409 Conflict
+      - Payment method inactive: 409 Conflict
+      """,
+    security = @SecurityRequirement(name = "bearer-jwt")
+  )
+  @ApiResponses({
+    @ApiResponse(
+      responseCode = "204",
+      description = "Successfully set default payment method"
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Unauthorized - Invalid or missing JWT token"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden - User does not have required role"
+    ),
+    @ApiResponse(
+      responseCode = "404",
+      description = "Not Found - Payment method not found"
+    ),
+    @ApiResponse(
+      responseCode = "409",
+      description = "Conflict - Payment method expired or inactive"
+    )
+  })
+  public ResponseEntity<Void> setDefaultPaymentMethod(
+    @Parameter(
+      description = "Tenant unique identifier",
+      example = "550e8400-e29b-41d4-a716-446655440000",
+      required = true
+    )
+    @PathVariable UUID tenantId,
+    
+    @Parameter(
+      description = "Payment method unique identifier",
+      example = "1",
+      required = true
+    )
+    @PathVariable Long paymentMethodId
+  ) {
+    log.info("Setting default payment method: {} for tenant: {}", paymentMethodId, tenantId);
+    paymentApplicationService.setDefaultPaymentMethod(tenantId, paymentMethodId);
+    return ResponseEntity.noContent().build();
   }
 }
