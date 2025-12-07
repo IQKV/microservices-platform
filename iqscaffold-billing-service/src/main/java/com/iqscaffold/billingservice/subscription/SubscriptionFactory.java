@@ -122,8 +122,8 @@ public class SubscriptionFactory {
    * <p>This method performs the following validations:
    * <ul>
    *   <li>Validates tenant ID, user ID, and plan</li>
-   *   <li>Ensures payment method is valid and not expired</li>
-   *   <li>Verifies payment method belongs to the tenant</li>
+   *   <li>Ensures payment method is valid and not expired (if provided)</li>
+   *   <li>Verifies payment method belongs to the tenant (if provided)</li>
    *   <li>Ensures all subscription invariants are satisfied</li>
    * </ul>
    * 
@@ -131,14 +131,16 @@ public class SubscriptionFactory {
    * <ul>
    *   <li>Current period start set to current time</li>
    *   <li>Current period end calculated based on billing cycle</li>
-   *   <li>Payment method attached for billing</li>
+   *   <li>Payment method attached for billing (if provided)</li>
    *   <li>No trial period</li>
    * </ul>
+   * 
+   * <p>Payment method can be null for FREE plans or manual billing scenarios.
    * 
    * @param tenantId the tenant identifier
    * @param userId the user who is creating the subscription
    * @param plan the subscription plan
-   * @param paymentMethod the payment method for billing
+   * @param paymentMethod the payment method for billing (can be null for FREE plans)
    * @return a new Subscription in ACTIVE status
    * @throws IllegalArgumentException if any parameter is null or invalid
    * @throws SubscriptionException.InvalidPaymentMethodException if payment method is invalid
@@ -154,20 +156,24 @@ public class SubscriptionFactory {
     validateTenantId(tenantId);
     validateUserId(userId);
     validatePlan(plan);
-    validatePaymentMethod(paymentMethod);
 
-    // Verify payment method belongs to the tenant
-    if (!paymentMethod.getTenantId().equals(tenantId)) {
-      throw new SubscriptionException.PaymentMethodMismatchException(
-          "Payment method does not belong to tenant " + tenantId
-      );
-    }
+    // Validate payment method if provided
+    if (paymentMethod != null) {
+      validatePaymentMethod(paymentMethod);
 
-    // Verify payment method is not expired
-    if (paymentMethod.isExpired()) {
-      throw new SubscriptionException.InvalidPaymentMethodException(
-          "Payment method is expired"
-      );
+      // Verify payment method belongs to the tenant
+      if (!paymentMethod.getTenantId().equals(tenantId)) {
+        throw new SubscriptionException.PaymentMethodMismatchException(
+            "Payment method does not belong to tenant " + tenantId
+        );
+      }
+
+      // Verify payment method is not expired
+      if (paymentMethod.isExpired()) {
+        throw new SubscriptionException.InvalidPaymentMethodException(
+            "Payment method is expired"
+        );
+      }
     }
 
     // Create active subscription using aggregate factory method

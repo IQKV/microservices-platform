@@ -1,108 +1,171 @@
 package com.iqscaffold.billingservice.subscription;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Value object representing a tenant's trial history.
+ * Entity tracking trial period usage history for tenants.
  * 
- * <p>Encapsulates information about whether a tenant has previously used a trial period.
- * This immutable value object is used by specifications and domain services to
- * determine trial eligibility.
+ * <p>This entity enforces the business rule that each tenant receives only one
+ * trial period per lifetime. It tracks whether a tenant has ever used a trial
+ * period, regardless of whether the trial was completed or canceled.
  * 
- * <p>Business rules for trial eligibility:
+ * <p>Business rules:
  * <ul>
- *   <li>Each tenant is eligible for one trial period per lifetime</li>
- *   <li>Once a trial has been used, the tenant cannot start another trial</li>
- *   <li>Canceled trials still count as "used"</li>
+ *   <li>Each tenant can have exactly one trial period</li>
+ *   <li>Once a trial is used, the tenant cannot start another trial</li>
+ *   <li>Trial history is immutable once marked as used</li>
  * </ul>
  * 
- * <p>Example usage:
- * <pre>{@code
- * TenantTrialHistory history = new TenantTrialHistory(
- *   tenantId,
- *   false,  // has never used trial
- *   null,   // no previous trial date
- *   null    // no previous plan code
- * );
- * 
- * TrialEligibilitySpecification spec = new TrialEligibilitySpecification();
- * boolean eligible = spec.isSatisfiedBy(history); // true
- * }</pre>
- * 
- * @param tenantId the tenant identifier
- * @param hasUsedTrial whether the tenant has previously used a trial
- * @param lastTrialDate the date of the last trial (null if never used)
- * @param lastTrialPlanCode the plan code of the last trial (null if never used)
+ * <p>This entity is stored in tenant-scoped schemas for data isolation.
  */
-public record TenantTrialHistory(
-    UUID tenantId,
-    boolean hasUsedTrial,
-    LocalDateTime lastTrialDate,
-    String lastTrialPlanCode
-) {
+@Entity
+@Table(name = "tenant_trial_history")
+public class TenantTrialHistory {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false, unique = true)
+  private UUID tenantId;
+
+  @Column(nullable = false)
+  private Boolean hasUsedTrial;
+
+  @Column
+  private LocalDateTime firstTrialStartedAt;
+
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
   /**
-   * Creates a new tenant trial history with validation.
-   * 
-   * @param tenantId the tenant identifier
-   * @param hasUsedTrial whether the tenant has previously used a trial
-   * @param lastTrialDate the date of the last trial (null if never used)
-   * @param lastTrialPlanCode the plan code of the last trial (null if never used)
-   * @throws IllegalArgumentException if tenantId is null or if hasUsedTrial is true but lastTrialDate is null
+   * Default constructor for JPA.
    */
-  public TenantTrialHistory {
+  protected TenantTrialHistory() {
+    // JPA requires a no-arg constructor
+  }
+
+  /**
+   * Creates a new trial history for a tenant.
+   * 
+   * @param tenantId tenant identifier
+   */
+  private TenantTrialHistory(UUID tenantId) {
+    this.tenantId = tenantId;
+    this.hasUsedTrial = false;
+  }
+
+  /**
+   * Factory method to create a new trial history for a tenant.
+   * 
+   * @param tenantId tenant identifier
+   * @return new TenantTrialHistory with no trial used
+   * @throws IllegalArgumentException if tenantId is null
+   */
+  public static TenantTrialHistory create(UUID tenantId) {
     if (tenantId == null) {
       throw new IllegalArgumentException("Tenant ID cannot be null");
     }
-    if (hasUsedTrial && lastTrialDate == null) {
-      throw new IllegalArgumentException("Last trial date must be provided if trial has been used");
+
+    return new TenantTrialHistory(tenantId);
+  }
+
+  /**
+   * Marks the trial as used for this tenant.
+   * 
+   * <p>This method is idempotent - calling it multiple times has the same
+   * effect as calling it once.
+   */
+  public void markTrialUsed() {
+    if (!this.hasUsedTrial) {
+      this.hasUsedTrial = true;
+      this.firstTrialStartedAt = LocalDateTime.now();
     }
   }
 
   /**
-   * Factory method to create a trial history for a tenant who has never used a trial.
+   * Checks if the tenant has used their trial period.
    * 
-   * @param tenantId the tenant identifier
-   * @return a new TenantTrialHistory indicating no previous trial usage
+   * @return true if trial has been used
    */
-  public static TenantTrialHistory noTrialUsed(final UUID tenantId) {
-    return new TenantTrialHistory(tenantId, false, null, null);
+  public boolean hasUsedTrial() {
+    return hasUsedTrial;
   }
 
-  /**
-   * Factory method to create a trial history for a tenant who has used a trial.
-   * 
-   * @param tenantId the tenant identifier
-   * @param lastTrialDate the date of the last trial
-   * @param lastTrialPlanCode the plan code of the last trial
-   * @return a new TenantTrialHistory indicating previous trial usage
-   */
-  public static TenantTrialHistory trialUsed(
-      final UUID tenantId,
-      final LocalDateTime lastTrialDate,
-      final String lastTrialPlanCode) {
-    return new TenantTrialHistory(tenantId, true, lastTrialDate, lastTrialPlanCode);
+  @PrePersist
+  protected void onCreate() {
+    var now = LocalDateTime.now();
+    createdAt = now;
+    updatedAt = now;
   }
 
-  /**
-   * Checks if the tenant is eligible for a trial.
-   * 
-   * @return true if the tenant has never used a trial
-   */
-  public boolean isEligibleForTrial() {
-    return !hasUsedTrial;
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
   }
 
-  /**
-   * Gets the number of days since the last trial ended.
-   * 
-   * @return days since last trial, or null if no trial has been used
-   */
-  public Long daysSinceLastTrial() {
-    if (lastTrialDate == null) {
-      return null;
+  // Getters
+
+  public Long getId() {
+    return id;
+  }
+
+  public UUID getTenantId() {
+    return tenantId;
+  }
+
+  public Boolean getHasUsedTrial() {
+    return hasUsedTrial;
+  }
+
+  public LocalDateTime getFirstTrialStartedAt() {
+    return firstTrialStartedAt;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    return java.time.Duration.between(lastTrialDate, LocalDateTime.now()).toDays();
+    if (!(o instanceof TenantTrialHistory that)) {
+      return false;
+    }
+    return Objects.equals(id, that.id) && Objects.equals(tenantId, that.tenantId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, tenantId);
+  }
+
+  @Override
+  public String toString() {
+    return "TenantTrialHistory{" +
+        "id=" + id +
+        ", tenantId=" + tenantId +
+        ", hasUsedTrial=" + hasUsedTrial +
+        ", firstTrialStartedAt=" + firstTrialStartedAt +
+        '}';
   }
 }
