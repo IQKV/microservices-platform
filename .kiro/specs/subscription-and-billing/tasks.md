@@ -753,12 +753,17 @@ This phase implements event-driven architecture for operations that benefit from
     - Add @Operation with comprehensive description using text blocks
     - Add @ApiResponses with example responses using @ExampleObject
     - Add @SecurityRequirement annotation for JWT authentication
+    - Add @PreAuthorize("isAuthenticated()") - any authenticated user can view their dashboard
   - Implement POST /api/v1/billing/portal/subscription/upgrade endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/billing/portal/subscription/downgrade endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/billing/portal/subscription/cancel endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/billing/portal/subscription/reactivate endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Use request/response DTOs as Java records (not domain objects)
-  - Add role-based access control (TENANT_OWNER, BILLING_ADMIN)
+  - Add authority-based access control using @PreAuthorize with hasAnyAuthority()
   - Add @Timed annotation for metrics collection
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.9, REQ-PORTAL-001 through REQ-PORTAL-015, REQ-API-003 through REQ-API-006, REQ-DDD-049_
 
@@ -766,38 +771,56 @@ This phase implements event-driven architecture for operations that benefit from
 - [x] 36. Implement customer portal endpoints - invoices and payments
   - Delegate to InvoiceApplicationService, UsageApplicationService, and PaymentApplicationService
   - Implement GET /api/v1/billing/portal/invoices endpoint with pagination and filtering
+    - Add @PreAuthorize("isAuthenticated()") - users can view their own invoices
   - Implement GET /api/v1/billing/portal/invoices/{id}/pdf endpoint
+    - Add @PreAuthorize("isAuthenticated()") - users can download their own invoice PDFs
   - Implement GET /api/v1/billing/portal/usage endpoint
+    - Add @PreAuthorize("isAuthenticated()") - users can view their own usage
   - Implement GET /api/v1/billing/portal/payment-methods endpoint
+    - Add @PreAuthorize("isAuthenticated()") - users can view their own payment methods
   - Implement POST /api/v1/billing/portal/payment-methods endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Implement DELETE /api/v1/billing/portal/payment-methods/{id} endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Implement PUT /api/v1/billing/portal/payment-methods/{id}/default endpoint
+    - Add @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   - Use request/response DTOs (not domain objects)
-  - Add OpenAPI/Swagger documentation
+  - Add OpenAPI/Swagger documentation with @SecurityRequirement annotations
   - _Requirements: REQ-PORTAL-016 through REQ-PORTAL-034, REQ-API-007 through REQ-API-012, REQ-DDD-049_
 
 - [x] 37. Implement admin endpoints - plan and subscription management
-  - Create AdminBillingController in presentation layer
+  - Create AdminBillingRestResource in presentation layer (use -RestResource suffix)
+  - Add @RestController and @RequestMapping("/api/v1/admin/billing")
   - Delegate to PlanApplicationService and SubscriptionApplicationService
   - Implement POST /api/v1/admin/billing/plans endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement PUT /api/v1/admin/billing/plans/{id} endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement GET /api/v1/admin/billing/subscriptions endpoint with filtering
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement GET /api/v1/admin/billing/subscriptions/{id} endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/admin/billing/subscriptions/{id}/cancel endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/admin/billing/subscriptions/{id}/extend-trial endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Use request/response DTOs (not domain objects)
-  - Add role-based access control (ADMIN role)
-  - Add OpenAPI/Swagger documentation
+  - Add authority-based access control using @PreAuthorize with hasAnyAuthority('ADMIN', 'SUPER_ADMIN')
+  - Add OpenAPI/Swagger documentation with @SecurityRequirement annotations
   - _Requirements: REQ-ADMIN-001 through REQ-ADMIN-009, REQ-API-013 through REQ-API-018, REQ-DDD-049_
 
 - [x] 38. Implement admin endpoints - invoices and analytics
   - Delegate to InvoiceApplicationService
   - Implement GET /api/v1/admin/billing/invoices endpoint with filtering
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement POST /api/v1/admin/billing/invoices/{id}/void endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement GET /api/v1/admin/billing/analytics/mrr endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Implement GET /api/v1/admin/billing/analytics/churn endpoint
+    - Add @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   - Use request/response DTOs (not domain objects)
-  - Add OpenAPI/Swagger documentation
+  - Add OpenAPI/Swagger documentation with @SecurityRequirement annotations
   - _Requirements: REQ-ADMIN-010 through REQ-ADMIN-027, REQ-API-019 through REQ-API-022, REQ-DDD-049_
 
 
@@ -953,14 +976,45 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 12: Security Implementation
 
+- [ ] 52.1 Implement JWT integration and UserContext
+  - Create UserContext record in security package with fields:
+    - userId (Long) - from JWT `sub` claim
+    - username (String) - from JWT `username` claim
+    - email (String) - from JWT `email` claim
+    - authorities (Set<String>) - from JWT `roles` claim (contains authorities, not roles)
+    - tenantId (String) - from JWT `tenant_id` claim
+    - firstName (String) - from JWT `firstName` claim
+    - lastName (String) - from JWT `lastName` claim
+  - Add helper methods to UserContext:
+    - hasAuthority(String authority) - check if user has specific authority
+    - isAdmin() - check if user has ADMIN or SUPER_ADMIN authority
+  - Create JwtAuthenticationFilter to extract JWT from Authorization header
+    - Parse JWT and extract claims (following user-service JWT structure)
+    - Create UserContext from JWT claims
+    - Set UserContext in SecurityContextHolder
+    - Set tenant ID in TenantContext for multi-tenancy
+    - Add user ID and tenant ID to MDC for structured logging
+  - Create SecurityContextHolder wrapper for accessing UserContext in application services
+  - Follow gateway-service + user-service JWT propagation pattern
+  - _Requirements: REQ-SEC-001, REQ-SEC-002, 2.1, 2.7_
+
 - [ ] 53. Implement security measures
-  - Configure JWT token validation for authenticated endpoints
-  - Implement role-based access control (TENANT_OWNER, BILLING_ADMIN, ADMIN, USER)
-  - Implement tenant context extraction from JWT claims
+  - Configure JWT token validation for authenticated endpoints (following gateway-service + user-service JWT propagation pattern)
+  - Implement authority-based access control using @PreAuthorize with hasAnyAuthority() (TENANT_OWNER, BILLING_ADMIN, ADMIN, SUPER_ADMIN, USER)
+  - Extract authorities from JWT `roles` claim (which contains authorities, not roles)
+  - Implement tenant context extraction from JWT `tenant_id` claim
+  - Create UserContext record with userId, username, email, authorities (Set<String>), tenantId, firstName, lastName
+  - Implement SecurityContextHolder integration for accessing UserContext in application services
+  - Configure SecurityFilterChain with authority-based rules:
+    - Public endpoints: /api/v1/billing/plans/** (no authentication)
+    - Customer portal: /api/v1/billing/portal/** (authenticated)
+    - Admin endpoints: /api/v1/admin/billing/** (hasAnyAuthority("ADMIN", "SUPER_ADMIN"))
+    - Internal endpoints: /internal/billing/** (internal service authentication)
   - Configure TLS 1.3 for all API communication
-  - Implement rate limiting on public endpoints
+  - Implement rate limiting on public endpoints using RateLimitingFilter (following user-service pattern)
   - Configure encryption at rest for sensitive data in PostgreSQL
   - Configure encryption for Redis tokens
+  - Use stateless session management (SessionCreationPolicy.STATELESS)
   - _Requirements: REQ-SEC-001, REQ-SEC-002, REQ-SEC-003, REQ-SEC-004, REQ-SEC-005, REQ-SEC-006, REQ-SEC-007, REQ-SEC-008, REQ-SEC-009, REQ-SEC-010_
 
 - [ ] 54. Implement audit logging
@@ -1089,12 +1143,30 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-TEST-013, REQ-TEST-014, REQ-TEST-015, REQ-MAINT-006, REQ-DDD-050, REQ-DDD-051, REQ-DDD-063_
 
 - [ ]* 60. Write security tests
-  - Write tests for authentication and authorization
+  - Write tests for JWT authentication and authority-based authorization
+    - Test @PreAuthorize with hasAnyAuthority() for admin endpoints
+    - Test authenticated user access to customer portal endpoints
+    - Test public access to plan listing endpoints
+    - Test authority extraction from JWT `roles` claim
+    - Test UserContext creation with authorities (Set<String>)
   - Write tests for tenant isolation
+    - Test tenant context extraction from JWT `tenant_id` claim
+    - Test cross-tenant data access prevention
+    - Test tenant-specific queries return only tenant data
   - Write tests for payment data security
+    - Test payment method data encryption
+    - Test sensitive data masking in logs
+    - Test PCI compliance for payment data handling
   - Write tests for webhook signature verification
+    - Test Stripe webhook signature validation
+    - Test PayPal webhook signature validation
+    - Test rejection of webhooks with invalid signatures
   - Write tests for SQL injection prevention
+    - Test parameterized queries prevent SQL injection
+    - Test input validation prevents malicious SQL
   - Write tests for XSS prevention
+    - Test output encoding prevents XSS attacks
+    - Test input sanitization for user-provided data
   - _Requirements: REQ-TEST-023, REQ-TEST-024, REQ-TEST-025, REQ-TEST-026, REQ-TEST-027, REQ-TEST-028_
 
 
