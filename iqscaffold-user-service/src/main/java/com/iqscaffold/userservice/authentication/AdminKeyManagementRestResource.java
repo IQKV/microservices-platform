@@ -38,7 +38,7 @@ public class AdminKeyManagementRestResource {
       description = "Manually trigger JWT key rotation. Old keys are kept for validation during grace period."
   )
   @PostMapping("/rotate")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   public ResponseEntity<Map<String, Object>> rotateKeys() {
     keyManagementService.rotateKeys();
 
@@ -53,7 +53,7 @@ public class AdminKeyManagementRestResource {
       description = "Manually trigger cleanup of expired tokens and sessions from Redis"
   )
   @PostMapping("/cleanup")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   public ResponseEntity<Map<String, String>> cleanupTokens() {
     if (tokenCleanupService == null) {
       return ResponseEntity.ok(Map.of(

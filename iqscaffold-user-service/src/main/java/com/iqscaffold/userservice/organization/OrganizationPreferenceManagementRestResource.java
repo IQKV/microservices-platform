@@ -51,7 +51,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "list"})
   public ResponseEntity<Page<OrganizationPreferenceDto>> getAllPreferences(
       @PageableDefault(size = 20) Pageable pageable,
@@ -72,7 +72,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "get"})
   public ResponseEntity<OrganizationPreferenceDto> getPreferenceById(
       @Parameter(description = "Preference ID", required = true) @PathVariable Long id,
@@ -93,7 +93,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping("/organization/{organizationId}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "getByOrganization"})
   public ResponseEntity<OrganizationPreferenceDto> getPreferenceByOrganizationId(
       @Parameter(description = "Organization ID", required = true) @PathVariable Long organizationId,
@@ -115,7 +115,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "create"})
   public ResponseEntity<OrganizationPreferenceDto> createPreference(
       @Parameter(description = "Preference creation request", required = true)
@@ -138,7 +138,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "update"})
   public ResponseEntity<OrganizationPreferenceDto> updatePreference(
       @Parameter(description = "Preference ID", required = true) @PathVariable Long id,
@@ -161,7 +161,7 @@ public class OrganizationPreferenceManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.preference.endpoint", extraTags = {"endpoint", "delete"})
   public ResponseEntity<Void> deletePreference(
       @Parameter(description = "Preference ID", required = true) @PathVariable Long id,

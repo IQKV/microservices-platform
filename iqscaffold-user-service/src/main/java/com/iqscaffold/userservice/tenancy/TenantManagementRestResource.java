@@ -52,7 +52,7 @@ public class TenantManagementRestResource {
    * Create a new tenant. Requires SUPER_ADMIN role for access.
    */
   @PostMapping
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Create new tenant",
       description = "Create a new tenant with specified configuration. Requires SUPER_ADMIN role."
@@ -86,7 +86,7 @@ public class TenantManagementRestResource {
    * Get tenant by ID. Requires SUPER_ADMIN role for access.
    */
   @GetMapping("/{tenantId}")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Get tenant by ID",
       description = "Retrieve tenant information by tenant ID. Requires SUPER_ADMIN role."
@@ -116,7 +116,7 @@ public class TenantManagementRestResource {
    * Get all tenants with optional filtering. Requires SUPER_ADMIN role for access.
    */
   @GetMapping
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Get all tenants",
       description = "Retrieve all tenants with optional filtering. Requires SUPER_ADMIN role."
@@ -139,7 +139,7 @@ public class TenantManagementRestResource {
    * Update tenant information. Requires SUPER_ADMIN role for access.
    */
   @PutMapping("/{tenantId}")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Update tenant",
       description = "Update tenant information. Requires SUPER_ADMIN role."
@@ -183,7 +183,7 @@ public class TenantManagementRestResource {
    * Enable or disable a tenant. Requires SUPER_ADMIN role for access.
    */
   @PatchMapping("/{tenantId}/enabled")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Enable or disable tenant",
       description = "Enable or disable a tenant. Requires SUPER_ADMIN role."
@@ -219,7 +219,7 @@ public class TenantManagementRestResource {
    * Delete a tenant. Requires SUPER_ADMIN role for access.
    */
   @DeleteMapping("/{tenantId}")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Delete tenant",
       description = "Delete a tenant and all associated data. Requires SUPER_ADMIN role."
@@ -257,7 +257,7 @@ public class TenantManagementRestResource {
    * Get tenant statistics. Requires SUPER_ADMIN role for access.
    */
   @GetMapping("/statistics")
-  @PreAuthorize("hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
       summary = "Get tenant statistics",
       description = "Retrieve tenant statistics including user counts and quota utilization. Requires SUPER_ADMIN role."

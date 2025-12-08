@@ -51,7 +51,7 @@ public class OrganizationManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "list"})
   public ResponseEntity<Page<OrganizationDto>> getAllOrganizations(
       @PageableDefault(size = 20) Pageable pageable,
@@ -72,7 +72,7 @@ public class OrganizationManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "get"})
   public ResponseEntity<OrganizationDto> getOrganizationById(
       @Parameter(description = "Organization ID", required = true) @PathVariable Long id,
@@ -94,7 +94,7 @@ public class OrganizationManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "create"})
   public ResponseEntity<OrganizationDto> createOrganization(
       @Parameter(description = "Organization creation request", required = true)
@@ -118,7 +118,7 @@ public class OrganizationManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "update"})
   public ResponseEntity<OrganizationDto> updateOrganization(
       @Parameter(description = "Organization ID", required = true) @PathVariable Long id,
@@ -141,7 +141,7 @@ public class OrganizationManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "delete"})
   public ResponseEntity<Void> deleteOrganization(
       @Parameter(description = "Organization ID", required = true) @PathVariable Long id,

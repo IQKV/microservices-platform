@@ -49,7 +49,7 @@ public class UserManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Page<UserDto>> getAllUsers(
       @PageableDefault(size = 20) Pageable pageable,
       @Parameter(hidden = true) @AuthenticationPrincipal UserContext currentUser) {
@@ -69,7 +69,7 @@ public class UserManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<UserDto> getUserById(
       @Parameter(description = "User ID", required = true) @PathVariable Long id,
       @Parameter(hidden = true) @AuthenticationPrincipal UserContext currentUser) {
@@ -90,7 +90,7 @@ public class UserManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<UserDto> createUser(
       @Parameter(description = "User creation request", required = true)
       @Valid @RequestBody CreateUserRequest request,
@@ -113,7 +113,7 @@ public class UserManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<UserDto> updateUser(
       @Parameter(description = "User ID", required = true) @PathVariable Long id,
       @Parameter(description = "User update request", required = true)
@@ -135,7 +135,7 @@ public class UserManagementRestResource {
       @ApiResponse(responseCode = "401", description = "Authentication required")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteUser(
       @Parameter(description = "User ID", required = true) @PathVariable Long id,
       @Parameter(hidden = true) @AuthenticationPrincipal UserContext currentUser) {
