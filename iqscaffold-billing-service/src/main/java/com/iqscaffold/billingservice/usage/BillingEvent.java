@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
 /**
@@ -30,44 +31,51 @@ import org.hibernate.annotations.Type;
  *   <li>Trial events (started, ending, ended, converted)</li>
  * </ul>
  * 
+ * <p><strong>Immutability:</strong> This entity is marked as immutable to satisfy
+ * audit requirements (REQ-SEC-012). Once created, audit records cannot be modified
+ * or deleted, ensuring data integrity for compliance and security investigations.
+ * 
  * @see com.iqscaffold.billingservice.shared.BillingConstants.BillingEvents
  */
 @Entity
 @Table(name = "billing_events")
+@Immutable
 public class BillingEvent {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private UUID tenantId;
+  @Column(name = "tenant_id", nullable = false, length = 100)
+  private String tenantId;
 
-  @Column(nullable = false, length = 100)
+  @Column(name = "user_id")
+  private Long userId;
+
+  @Column(name = "event_type", nullable = false, length = 50)
   private String eventType;
 
-  @Column(length = 100)
-  private String aggregateType;
+  @Column(name = "entity_type", nullable = false, length = 50)
+  private String entityType;
 
-  @Column(length = 100)
-  private String aggregateId;
-
-  @Column(nullable = false)
-  private UUID userId;
+  @Column(name = "entity_id")
+  private Long entityId;
 
   @Column(length = 500)
   private String description;
 
   @Type(JsonBinaryType.class)
   @Column(columnDefinition = "jsonb")
-  private Map<String, Object> eventData;
+  private Map<String, Object> changes;
 
-  @Type(JsonBinaryType.class)
-  @Column(columnDefinition = "jsonb")
-  private Map<String, Object> metadata;
+  @Column(name = "ip_address", length = 45)
+  private String ipAddress;
 
-  @Column(nullable = false, updatable = false)
-  private LocalDateTime occurredAt;
+  @Column(name = "user_agent", columnDefinition = "TEXT")
+  private String userAgent;
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
   /**
    * Default constructor for JPA.
@@ -80,122 +88,80 @@ public class BillingEvent {
    * Creates a new billing event.
    *
    * @param tenantId the tenant identifier
+   * @param userId the user who triggered the event (may be null for system events)
    * @param eventType the type of event (e.g., SUBSCRIPTION_CREATED)
-   * @param aggregateType the type of aggregate (e.g., Subscription, Invoice)
-   * @param aggregateId the identifier of the aggregate
-   * @param userId the user who triggered the event
+   * @param entityType the type of entity (e.g., SUBSCRIPTION, INVOICE)
+   * @param entityId the identifier of the entity
    * @param description human-readable description of the event
+   * @param changes map of changes made (for audit trail)
+   * @param ipAddress the IP address of the request
+   * @param userAgent the user agent of the request
    */
   public BillingEvent(
-      final UUID tenantId,
+      final String tenantId,
+      final Long userId,
       final String eventType,
-      final String aggregateType,
-      final String aggregateId,
-      final UUID userId,
-      final String description) {
-    this.tenantId = tenantId;
-    this.eventType = eventType;
-    this.aggregateType = aggregateType;
-    this.aggregateId = aggregateId;
-    this.userId = userId;
-    this.description = description;
-    this.occurredAt = LocalDateTime.now();
-  }
-
-  /**
-   * Creates a new billing event with event data.
-   *
-   * @param tenantId the tenant identifier
-   * @param eventType the type of event
-   * @param aggregateType the type of aggregate
-   * @param aggregateId the identifier of the aggregate
-   * @param userId the user who triggered the event
-   * @param description human-readable description
-   * @param eventData additional event-specific data
-   */
-  public BillingEvent(
-      final UUID tenantId,
-      final String eventType,
-      final String aggregateType,
-      final String aggregateId,
-      final UUID userId,
+      final String entityType,
+      final Long entityId,
       final String description,
-      final Map<String, Object> eventData) {
-    this(tenantId, eventType, aggregateType, aggregateId, userId, description);
-    this.eventData = eventData;
+      final Map<String, Object> changes,
+      final String ipAddress,
+      final String userAgent) {
+    this.tenantId = tenantId;
+    this.userId = userId;
+    this.eventType = eventType;
+    this.entityType = entityType;
+    this.entityId = entityId;
+    this.description = description;
+    this.changes = changes;
+    this.ipAddress = ipAddress;
+    this.userAgent = userAgent;
+    this.createdAt = LocalDateTime.now();
   }
 
-  // Getters and setters
+  // Getters only - no setters for immutability
 
   public Long getId() {
     return id;
   }
 
-  public UUID getTenantId() {
+  public String getTenantId() {
     return tenantId;
   }
 
-  public void setTenantId(final UUID tenantId) {
-    this.tenantId = tenantId;
+  public Long getUserId() {
+    return userId;
   }
 
   public String getEventType() {
     return eventType;
   }
 
-  public void setEventType(final String eventType) {
-    this.eventType = eventType;
+  public String getEntityType() {
+    return entityType;
   }
 
-  public String getAggregateType() {
-    return aggregateType;
-  }
-
-  public void setAggregateType(final String aggregateType) {
-    this.aggregateType = aggregateType;
-  }
-
-  public String getAggregateId() {
-    return aggregateId;
-  }
-
-  public void setAggregateId(final String aggregateId) {
-    this.aggregateId = aggregateId;
-  }
-
-  public UUID getUserId() {
-    return userId;
-  }
-
-  public void setUserId(final UUID userId) {
-    this.userId = userId;
+  public Long getEntityId() {
+    return entityId;
   }
 
   public String getDescription() {
     return description;
   }
 
-  public void setDescription(final String description) {
-    this.description = description;
+  public Map<String, Object> getChanges() {
+    return changes;
   }
 
-  public Map<String, Object> getEventData() {
-    return eventData;
+  public String getIpAddress() {
+    return ipAddress;
   }
 
-  public void setEventData(final Map<String, Object> eventData) {
-    this.eventData = eventData;
+  public String getUserAgent() {
+    return userAgent;
   }
 
-  public Map<String, Object> getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(final Map<String, Object> metadata) {
-    this.metadata = metadata;
-  }
-
-  public LocalDateTime getOccurredAt() {
-    return occurredAt;
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
   }
 }

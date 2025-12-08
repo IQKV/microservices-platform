@@ -168,6 +168,22 @@ public final class BillingConstants {
     }
 
     /**
+     * Entity type identifiers for audit logging.
+     */
+    public static final class EntityTypes {
+        public static final String SUBSCRIPTION = "SUBSCRIPTION";
+        public static final String INVOICE = "INVOICE";
+        public static final String PAYMENT = "PAYMENT";
+        public static final String PAYMENT_METHOD = "PAYMENT_METHOD";
+        public static final String USAGE_RECORD = "USAGE_RECORD";
+        public static final String PLAN = "PLAN";
+
+        private EntityTypes() {
+            throw new UnsupportedOperationException("Utility class cannot be instantiated");
+        }
+    }
+
+    /**
      * Error codes for billing operations.
      */
     public static final class ErrorCodes {
