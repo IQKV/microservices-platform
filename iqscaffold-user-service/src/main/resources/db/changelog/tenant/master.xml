@@ -8,5 +8,6 @@
     <include file="db/changelog/20251110154500-initial-user-schema.xml"/>
     <include file="db/changelog/20251122000000-organization-preferences-schema.xml"/>
     <include file="db/changelog/20251122000100-user-preferences-schema.xml"/>
+    <include file="db/changelog/20251208000000-add-billing-authorities.xml"/>
 
 </databaseChangeLog>

@@ -69,17 +69,23 @@
 
         <!-- Insert default authorities -->
         <insert tableName="authorities">
-            <column name="name" value="USER"/>
-            <column name="description" value="Standard user with basic access"/>
+            <column name="name" value="SUPER_ADMIN"/>
+            <column name="description" value="Super administrator with full system access"/>
         </insert>
         <insert tableName="authorities">
             <column name="name" value="ADMIN"/>
             <column name="description" value="Administrator with user management access"/>
         </insert>
+        <!-- Insert TENANT_OWNER authority -->
         <insert tableName="authorities">
-            <column name="name" value="SUPER_ADMIN"/>
-            <column name="description" value="Super administrator with full system access"/>
+            <column name="name" value="TENANT_OWNER"/>
+            <column name="description" value="Tenant owner with billing and subscription management access"/>
         </insert>
+        <insert tableName="authorities">
+            <column name="name" value="USER"/>
+            <column name="description" value="Standard user with basic access"/>
+        </insert>
+
 
         <!-- Create user_authorities junction table -->
         <createTable tableName="user_authorities">

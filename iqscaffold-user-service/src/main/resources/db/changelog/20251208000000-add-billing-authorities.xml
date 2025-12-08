@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251208000000-add-billing-authorities" author="iqscaffold">
+        <comment>Add TENANT_OWNER and BILLING_ADMIN authorities for billing service integration</comment>
+
+        <!-- Insert TENANT_OWNER authority -->
+        <insert tableName="authorities">
+            <column name="name" value="TENANT_OWNER"/>
+            <column name="description" value="Tenant owner with billing and subscription management access"/>
+        </insert>
+
+        <!-- Insert BILLING_ADMIN authority -->
+        <insert tableName="authorities">
+            <column name="name" value="BILLING_ADMIN"/>
+            <column name="description" value="Billing administrator with subscription and payment management access"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="authorities">
+                <where>name = 'TENANT_OWNER'</where>
+            </delete>
+            <delete tableName="authorities">
+                <where>name = 'BILLING_ADMIN'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
