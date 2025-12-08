@@ -261,6 +261,23 @@ iqscaffold:
         additional-headers-to-remove:
           - X-Internal-Service
           - X-Database-Query-Time
+    
+    # Integration with external services
+    integration:
+      billing-service-enabled: ${BILLING_SERVICE_ENABLED:false}
+      billing-service-url: ${BILLING_SERVICE_URL:http://localhost:8082}
+      billing-service-timeout: PT5S
+    
+    # Feature access control based on subscription plans
+    feature-access:
+      enabled: ${FEATURE_ACCESS_ENABLED:false}
+      endpoint-feature-mapping:
+        # Example mappings - configure based on your feature requirements
+        # "/api/v1/crm/bulk-import/**": "CRM.BULK_IMPORT"
+        # "/api/v1/email/custom-templates/**": "EMAIL.CUSTOM_TEMPLATES"
+        # "/api/v1/scoring/ai-models/**": "SCORING.AI_MODELS"
+        # "/api/v1/campaigns/advanced/**": "CAMPAIGNS.ADVANCED"
+        # "/api/v1/analytics/custom-reports/**": "ANALYTICS.CUSTOM_REPORTS"
 
   observability:
     tracing:

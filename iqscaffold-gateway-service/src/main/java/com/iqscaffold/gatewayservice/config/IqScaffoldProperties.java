@@ -66,7 +66,9 @@ public record IqScaffoldProperties(
       @Valid @NotNull RateLimitingProperties rateLimiting,
       @Valid @NotNull CircuitBreakerProperties circuitBreaker,
       @Valid @NotNull CorsProperties cors,
-      @Valid @NotNull TransformationProperties transformation
+      @Valid @NotNull TransformationProperties transformation,
+      IntegrationProperties integration,
+      FeatureAccessProperties featureAccess
   ) {
 
     public record RoutingProperties(
@@ -246,6 +248,42 @@ public record IqScaffoldProperties(
           List<String> additionalHeadersToRemove
       ) {
 
+      }
+    }
+
+    /**
+     * Integration properties for external service communication.
+     */
+    public record IntegrationProperties(
+        boolean billingServiceEnabled,
+        @NotBlank(message = "Billing service URL must not be blank") String billingServiceUrl,
+        @NotNull(message = "Billing service timeout must not be null") Duration billingServiceTimeout
+    ) {
+
+      public IntegrationProperties {
+        // Default values if not provided
+        if (billingServiceUrl == null || billingServiceUrl.isBlank()) {
+          billingServiceUrl = "http://localhost:8082";
+        }
+        if (billingServiceTimeout == null) {
+          billingServiceTimeout = Duration.ofSeconds(5);
+        }
+      }
+    }
+
+    /**
+     * Feature access control properties for subscription-based feature gating.
+     */
+    public record FeatureAccessProperties(
+        boolean enabled,
+        Map<String, String> endpointFeatureMapping
+    ) {
+
+      public FeatureAccessProperties {
+        // Default to empty map if not provided
+        if (endpointFeatureMapping == null) {
+          endpointFeatureMapping = Map.of();
+        }
       }
     }
   }
