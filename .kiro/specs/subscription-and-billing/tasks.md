@@ -846,7 +846,7 @@ This phase implements event-driven architecture for operations that benefit from
 
 ## Phase 9: Integration with Other Services
 
-- [ ] 44. Update User Service for billing integration
+- [x] 44. Update User Service for billing integration
   - Add subscriptionId, subscriptionStatus, and subscriptionPlanCode fields to Tenant entity
   - Add subscription context to JWT token generation (subscriptionStatus, subscriptionPlan, features)
   - Create internal endpoint for billing service to update tenant subscription status

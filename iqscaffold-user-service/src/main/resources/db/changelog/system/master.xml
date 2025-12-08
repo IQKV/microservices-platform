@@ -6,5 +6,6 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <include file="db/changelog/system/00000000000000-create-tenants-table.xml"/>
+    <include file="db/changelog/system/00000000000001-add-subscription-fields-to-tenants.xml"/>
 
 </databaseChangeLog>

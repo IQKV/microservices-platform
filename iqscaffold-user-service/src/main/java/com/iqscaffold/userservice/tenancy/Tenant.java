@@ -48,6 +48,15 @@ public class Tenant {
   @Column(name = "api_rate_limit_per_minute")
   private Integer apiRateLimitPerMinute;
 
+  @Column(name = "subscription_id")
+  private Long subscriptionId;
+
+  @Column(name = "subscription_status", length = 20)
+  private String subscriptionStatus;
+
+  @Column(name = "subscription_plan_code", length = 50)
+  private String subscriptionPlanCode;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -146,6 +155,30 @@ public class Tenant {
     this.apiRateLimitPerMinute = apiRateLimitPerMinute;
   }
 
+  public Long getSubscriptionId() {
+    return subscriptionId;
+  }
+
+  public void setSubscriptionId(Long subscriptionId) {
+    this.subscriptionId = subscriptionId;
+  }
+
+  public String getSubscriptionStatus() {
+    return subscriptionStatus;
+  }
+
+  public void setSubscriptionStatus(String subscriptionStatus) {
+    this.subscriptionStatus = subscriptionStatus;
+  }
+
+  public String getSubscriptionPlanCode() {
+    return subscriptionPlanCode;
+  }
+
+  public void setSubscriptionPlanCode(String subscriptionPlanCode) {
+    this.subscriptionPlanCode = subscriptionPlanCode;
+  }
+
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }
@@ -181,6 +214,11 @@ public class Tenant {
   public boolean hasRateLimit() {
     var rateLimit = this.apiRateLimitPerMinute;
     return rateLimit != null && rateLimit > 0;
+  }
+
+  public boolean hasActiveSubscription() {
+    return subscriptionStatus != null && 
+           ("ACTIVE".equals(subscriptionStatus) || "TRIAL".equals(subscriptionStatus));
   }
 
   public String getDisplayName() {

@@ -53,6 +53,9 @@ class JwtServiceTest {
   @Mock
   private ValueOperations<String, String> valueOperations;
 
+  @Mock
+  private com.iqscaffold.userservice.tenancy.TenantRepository tenantRepository;
+
   private JwtService service;
   private User testUser;
 
@@ -64,7 +67,7 @@ class JwtServiceTest {
     org.mockito.Mockito.lenient().when(jwtConfiguration.getRefreshTokenExpiry()).thenReturn(Duration.ofDays(7));
     org.mockito.Mockito.lenient().when(jwtConfiguration.getIssuer()).thenReturn("test-issuer");
 
-    service = new JwtService(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate);
+    service = new JwtService(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate, tenantRepository);
 
     // Setup test user
     testUser = new User("testuser", "test@example.com", "hash", "Test", "User", "tenant-123");

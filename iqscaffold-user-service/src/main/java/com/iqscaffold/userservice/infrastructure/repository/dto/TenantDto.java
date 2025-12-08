@@ -80,6 +80,9 @@ public final class TenantDto {
       Integer maxUsers,
       Integer storageQuotaGb,
       Integer apiRateLimitPerMinute,
+      Long subscriptionId,
+      String subscriptionStatus,
+      String subscriptionPlanCode,
       LocalDateTime createdAt,
       LocalDateTime updatedAt,
       String createdBy

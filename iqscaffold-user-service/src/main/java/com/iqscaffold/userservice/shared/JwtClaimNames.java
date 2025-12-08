@@ -23,6 +23,11 @@ public final class JwtClaimNames {
   public static final String LAST_NAME = "lastName";
   public static final String TENANT_ID = "tenant_id";
 
+  // Subscription claims (for billing integration)
+  public static final String SUBSCRIPTION_STATUS = "subscription_status";
+  public static final String SUBSCRIPTION_PLAN = "subscription_plan";
+  public static final String SUBSCRIPTION_FEATURES = "subscription_features";
+
   // Token types
   public static final String TOKEN_TYPE_ACCESS = "access";
   public static final String TOKEN_TYPE_REFRESH = "refresh";

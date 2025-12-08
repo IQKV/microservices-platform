@@ -385,6 +385,43 @@ public class TenantManagementService {
         .orElse(false);
   }
 
+  /**
+   * Update tenant subscription information from billing service.
+   * This method is called by the billing service when subscription status changes.
+   *
+   * @param tenantId the tenant ID
+   * @param request  the subscription update request
+   * @return the updated tenant response
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   */
+  @Caching(evict = {
+      @CacheEvict(value = "tenants", key = "#tenantId"),
+      @CacheEvict(value = "tenants", key = "'all_tenants'"),
+      @CacheEvict(value = "tenants", key = "'enabled_tenants'"),
+      @CacheEvict(value = "tenants", key = "'valid_' + #tenantId")
+  })
+  public TenantResponse updateTenantSubscription(String tenantId, TenantSubscriptionUpdateRequest request) {
+    logger.info("Updating subscription for tenant: {} - Status: {}, Plan: {}", 
+        tenantId, request.subscriptionStatus(), request.subscriptionPlanCode());
+
+    var tenant = tenantRepository.findByTenantId(tenantId)
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
+
+    // Update subscription fields
+    tenant.setSubscriptionId(request.subscriptionId());
+    tenant.setSubscriptionStatus(request.subscriptionStatus());
+    tenant.setSubscriptionPlanCode(request.subscriptionPlanCode());
+
+    var updatedTenant = tenantRepository.save(tenant);
+
+    logger.info("Successfully updated subscription for tenant: {}", tenantId);
+
+    return mapToTenantResponse(updatedTenant);
+  }
+
   // Private helper methods
 
   private TenantResponse mapToTenantResponse(Tenant tenant) {
@@ -398,6 +435,9 @@ public class TenantManagementService {
         tenant.getMaxUsers(),
         tenant.getStorageQuotaGb(),
         tenant.getApiRateLimitPerMinute(),
+        tenant.getSubscriptionId(),
+        tenant.getSubscriptionStatus(),
+        tenant.getSubscriptionPlanCode(),
         tenant.getCreatedAt(),
         tenant.getUpdatedAt(),
         tenant.getCreatedBy()

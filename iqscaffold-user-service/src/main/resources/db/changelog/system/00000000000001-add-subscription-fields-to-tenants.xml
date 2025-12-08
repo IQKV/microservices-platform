@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="00000000000001-000001-add-subscription-fields" author="iqscaffold">
+        <comment>Add subscription-related fields to tenants table for billing integration</comment>
+        
+        <addColumn tableName="tenants" schemaName="public">
+            <column name="subscription_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="subscription_status" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="subscription_plan_code" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="00000000000001-000002-add-subscription-indexes" author="iqscaffold">
+        <comment>Create indexes on subscription fields for query performance</comment>
+        
+        <createIndex indexName="idx_tenants_subscription_id" tableName="tenants" schemaName="public">
+            <column name="subscription_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tenants_subscription_status" tableName="tenants" schemaName="public">
+            <column name="subscription_status"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

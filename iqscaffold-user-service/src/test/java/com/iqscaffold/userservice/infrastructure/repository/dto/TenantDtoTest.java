@@ -151,6 +151,9 @@ class TenantDtoTest {
         100,
         50,
         1000,
+        null,  // subscriptionId
+        null,  // subscriptionStatus
+        null,  // subscriptionPlanCode
         createdAt,
         updatedAt,
         "admin"
