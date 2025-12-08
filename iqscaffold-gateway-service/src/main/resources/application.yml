@@ -264,7 +264,7 @@ iqscaffold:
     
     # Integration with external services
     integration:
-      billing-service-enabled: ${BILLING_SERVICE_ENABLED:false}
+      billing-service-enabled: ${BILLING_SERVICE_ENABLED:true}
       billing-service-url: ${BILLING_SERVICE_URL:http://localhost:8082}
       billing-service-timeout: PT5S
     

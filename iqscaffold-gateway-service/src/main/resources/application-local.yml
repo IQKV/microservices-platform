@@ -227,6 +227,17 @@ iqscaffold:
         additional-headers-to-remove:
           - X-Internal-Service
           - X-Database-Query-Time
+    
+    # Integration with external services - Local
+    integration:
+      billing-service-enabled: ${BILLING_SERVICE_ENABLED:false}  # Disabled by default in local
+      billing-service-url: ${BILLING_SERVICE_URL:http://localhost:8082}
+      billing-service-timeout: PT10S  # Extended for development
+    
+    # Feature access control - Local
+    feature-access:
+      enabled: ${FEATURE_ACCESS_ENABLED:false}  # Disabled by default in local
+      endpoint-feature-mapping: {}
 
   # Observability Configuration - Development
   observability:

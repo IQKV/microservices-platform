@@ -9,6 +9,7 @@ import com.iqscaffold.gatewayservice.exception.CircuitBreakerOpenException;
 import com.iqscaffold.gatewayservice.exception.InvalidJwtTokenException;
 import com.iqscaffold.gatewayservice.exception.MissingTenantContextException;
 import com.iqscaffold.gatewayservice.exception.NoHealthyInstancesException;
+import com.iqscaffold.gatewayservice.exception.QuotaExceededException;
 import com.iqscaffold.gatewayservice.exception.RateLimitExceededException;
 import com.iqscaffold.gatewayservice.exception.UnsupportedApiVersionException;
 import org.slf4j.Logger;
@@ -53,7 +54,22 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
     ProblemDetail pd;
 
     // Handle custom exceptions with specific logic
-    if (ex instanceof RateLimitExceededException rateLimitEx) {
+    if (ex instanceof QuotaExceededException quotaEx) {
+      status = HttpStatus.TOO_MANY_REQUESTS;
+      errorCode = "QUOTA_EXCEEDED";
+      message = quotaEx.getMessage();
+      pd = createProblemDetail(status, message, errorCode, request.getPath().value(), correlationId, tenantId);
+      pd.setProperty("metricType", quotaEx.getMetricType());
+      pd.setProperty("currentUsage", quotaEx.getCurrentUsage());
+      pd.setProperty("limit", quotaEx.getLimit());
+      pd.setProperty("resetsAt", quotaEx.getResetsAt().toString());
+      response.getHeaders().add("X-Quota-Limit", String.valueOf(quotaEx.getLimit()));
+      response.getHeaders().add("X-Quota-Remaining", "0");
+      response.getHeaders().add("X-Quota-Reset", quotaEx.getResetsAt().toString());
+      logger.warn("Quota exceeded - Tenant: {}, Metric: {}, Usage: {}/{}, Resets: {}",
+          quotaEx.getTenantId(), quotaEx.getMetricType(), quotaEx.getCurrentUsage(),
+          quotaEx.getLimit(), quotaEx.getResetsAt());
+    } else if (ex instanceof RateLimitExceededException rateLimitEx) {
       status = HttpStatus.TOO_MANY_REQUESTS;
       errorCode = "RATE_LIMIT_EXCEEDED";
       message = rateLimitEx.getReason();
