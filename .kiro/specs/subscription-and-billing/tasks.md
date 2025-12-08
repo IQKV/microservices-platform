@@ -885,7 +885,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 **Job Pattern:** Job queries database → publishes events to queue → consumers process events asynchronously
 
-- [ ] 48. Implement scheduled jobs
+- [x] 48. Implement scheduled jobs
   - **TrialExpirationJob** - Check and convert expired trials (runs daily at 2 AM UTC)
     - **Async Pattern:** Query expired trials → publish TrialExpired events to queue → consumer processes conversions
     - **Why Async:** May affect thousands of subscriptions, shouldn't block job execution

@@ -71,13 +71,18 @@ public final class BillingConstants {
         public static final String TRIAL_STARTED = "billing.trial.started";
         public static final String TRIAL_ENDING = "billing.trial.ending";
         public static final String TRIAL_ENDED = "billing.trial.ended";
+        public static final String TRIAL_EXPIRED = "billing.trial.expired";
+        public static final String TRIAL_REMINDER_REQUESTED = "billing.trial.reminder.requested";
         public static final String INVOICE_GENERATED = "billing.invoice.generated";
+        public static final String INVOICE_GENERATION_REQUESTED = "billing.invoice.generation.requested";
         public static final String INVOICE_PAID = "billing.invoice.paid";
         public static final String INVOICE_VOIDED = "billing.invoice.voided";
         public static final String PAYMENT_SUCCEEDED = "billing.payment.succeeded";
         public static final String PAYMENT_FAILED = "billing.payment.failed";
         public static final String PAYMENT_REFUNDED = "billing.payment.refunded";
+        public static final String PAYMENT_RETRY_REQUESTED = "billing.payment.retry.requested";
         public static final String USAGE_RECORDED = "billing.usage.recorded";
+        public static final String USAGE_RESET_REQUESTED = "billing.usage.reset.requested";
         public static final String QUOTA_EXCEEDED = "billing.quota.exceeded";
 
         private BillingEvents() {
