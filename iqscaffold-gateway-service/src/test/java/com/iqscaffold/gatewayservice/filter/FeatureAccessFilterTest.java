@@ -2,6 +2,7 @@ package com.iqscaffold.gatewayservice.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
 import com.iqscaffold.gatewayservice.exception.FeatureNotAvailableException;
 import com.iqscaffold.gatewayservice.service.BillingServiceClient;
-import com.iqscaffold.gatewayservice.service.FeatureCheckResponse;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +47,7 @@ class FeatureAccessFilterTest {
 
   @BeforeEach
   void setUp() {
-    when(properties.gateway()).thenReturn(gatewayProperties);
+    lenient().when(properties.gateway()).thenReturn(gatewayProperties);
     featureAccessFilter = new FeatureAccessFilter(properties, billingServiceClient);
   }
 
@@ -102,7 +102,7 @@ class FeatureAccessFilterTest {
         .thenReturn(Map.of("/api/v1/crm/bulk-import", "CRM.BULK_IMPORT"));
     when(filterChain.filter(org.mockito.ArgumentMatchers.any())).thenReturn(Mono.empty());
 
-    var featureResponse = new FeatureCheckResponse(true, "CRM.BULK_IMPORT", "PRO", "Feature available");
+    var featureResponse = new BillingServiceClient.FeatureAccessResponse(true, "PRO", "Feature available");
     when(billingServiceClient.checkFeatureAccess("tenant-123", "CRM.BULK_IMPORT"))
         .thenReturn(Mono.just(featureResponse));
 
@@ -131,7 +131,7 @@ class FeatureAccessFilterTest {
     when(featureAccessProperties.endpointFeatureMapping())
         .thenReturn(Map.of("/api/v1/crm/bulk-import", "CRM.BULK_IMPORT"));
 
-    var featureResponse = new FeatureCheckResponse(false, "CRM.BULK_IMPORT", "FREE", "Feature not available");
+    var featureResponse = new BillingServiceClient.FeatureAccessResponse(false, "FREE", "Feature not available");
     when(billingServiceClient.checkFeatureAccess("tenant-123", "CRM.BULK_IMPORT"))
         .thenReturn(Mono.just(featureResponse));
 
@@ -188,7 +188,7 @@ class FeatureAccessFilterTest {
         .thenReturn(Map.of("/api/v1/crm/**", "CRM.ADVANCED"));
     when(filterChain.filter(org.mockito.ArgumentMatchers.any())).thenReturn(Mono.empty());
 
-    var featureResponse = new FeatureCheckResponse(true, "CRM.ADVANCED", "ENTERPRISE", "Feature available");
+    var featureResponse = new BillingServiceClient.FeatureAccessResponse(true, "ENTERPRISE", "Feature available");
     when(billingServiceClient.checkFeatureAccess("tenant-123", "CRM.ADVANCED"))
         .thenReturn(Mono.just(featureResponse));
 

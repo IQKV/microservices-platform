@@ -199,14 +199,7 @@ class TenantRateLimitingFilterTest {
 
     var updatedProps = new IqScaffoldProperties(
         properties.cache(),
-        new IqScaffoldProperties.GatewayProperties(
-            properties.gateway().routing(),
-            properties.gateway().security(),
-            rateLimiting,
-            properties.gateway().circuitBreaker(),
-            properties.gateway().cors(),
-            properties.gateway().transformation()
-        ),
+        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(), properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
         properties.observability()
     );
 
@@ -238,14 +231,7 @@ class TenantRateLimitingFilterTest {
 
     var updatedProps = new IqScaffoldProperties(
         properties.cache(),
-        new IqScaffoldProperties.GatewayProperties(
-            properties.gateway().routing(),
-            properties.gateway().security(),
-            rateLimiting,
-            properties.gateway().circuitBreaker(),
-            properties.gateway().cors(),
-            properties.gateway().transformation()
-        ),
+        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(), properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
         properties.observability()
     );
 
@@ -327,9 +313,9 @@ class TenantRateLimitingFilterTest {
         requestTransform, responseTransform
     );
 
-    var gateway = new IqScaffoldProperties.GatewayProperties(
-        routing, security, rateLimiting, circuitBreaker, cors, transformation
-    );
+    var integration = new IqScaffoldProperties.GatewayProperties.IntegrationProperties(false, "http://localhost:8082", Duration.ofSeconds(5));
+    var featureAccess = new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(false, Map.of());
+    var gateway = new IqScaffoldProperties.GatewayProperties(routing, security, rateLimiting, circuitBreaker, cors, transformation, integration, featureAccess);
 
     var cacheRedis = new IqScaffoldProperties.CacheProperties.RedisProperties(
         "localhost", 6379, null, 0, Duration.ofSeconds(5),
@@ -422,9 +408,9 @@ class TenantRateLimitingFilterTest {
         requestTransform, responseTransform
     );
 
-    var gateway = new IqScaffoldProperties.GatewayProperties(
-        routing, security, rateLimiting, circuitBreaker, cors, transformation
-    );
+    var integration = new IqScaffoldProperties.GatewayProperties.IntegrationProperties(false, "http://localhost:8082", Duration.ofSeconds(5));
+    var featureAccess = new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(false, Map.of());
+    var gateway = new IqScaffoldProperties.GatewayProperties(routing, security, rateLimiting, circuitBreaker, cors, transformation, integration, featureAccess);
 
     var cacheRedis = new IqScaffoldProperties.CacheProperties.RedisProperties(
         "localhost", 6379, null, 0, Duration.ofSeconds(5),
@@ -452,3 +438,6 @@ class TenantRateLimitingFilterTest {
     return new IqScaffoldProperties(cache, gateway, observability);
   }
 }
+
+
+

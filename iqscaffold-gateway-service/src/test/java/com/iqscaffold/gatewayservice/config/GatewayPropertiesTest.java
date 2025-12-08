@@ -50,7 +50,9 @@ class GatewayPropertiesTest {
           createValidRateLimitingProperties(),
           createValidCircuitBreakerProperties(),
           createValidCorsProperties(),
-          createValidTransformationProperties()
+          createValidTransformationProperties(),
+          createValidIntegrationProperties(),
+          createValidFeatureAccessProperties()
       );
 
       Set<ConstraintViolation<IqScaffoldProperties.GatewayProperties>> violations = validator.validate(gatewayProperties);
@@ -1194,7 +1196,21 @@ class GatewayPropertiesTest {
         createValidRateLimitingProperties(),
         createValidCircuitBreakerProperties(),
         createValidCorsProperties(),
-        createValidTransformationProperties()
+        createValidTransformationProperties(),
+        createValidIntegrationProperties(),
+        createValidFeatureAccessProperties()
+    );
+  }
+
+  private IqScaffoldProperties.GatewayProperties.IntegrationProperties createValidIntegrationProperties() {
+    return new IqScaffoldProperties.GatewayProperties.IntegrationProperties(
+        false, "http://localhost:8082", Duration.ofSeconds(5)
+    );
+  }
+
+  private IqScaffoldProperties.GatewayProperties.FeatureAccessProperties createValidFeatureAccessProperties() {
+    return new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(
+        false, Map.of()
     );
   }
 

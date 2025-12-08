@@ -56,8 +56,16 @@ class RequestTransformationFilterTest {
         requestTransformation, responseTransformation
     );
 
+    var integration = new IqScaffoldProperties.GatewayProperties.IntegrationProperties(
+        false, "http://localhost:8082", Duration.ofSeconds(5)
+    );
+
+    var featureAccess = new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(
+        false, Map.of()
+    );
+
     var gatewayProperties = new IqScaffoldProperties.GatewayProperties(
-        null, null, null, null, null, transformation
+        null, null, null, null, null, transformation, integration, featureAccess
     );
 
     var observabilityProperties = new IqScaffoldProperties.ObservabilityProperties(null, null, null);

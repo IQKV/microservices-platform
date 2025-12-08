@@ -221,8 +221,16 @@ class JwtAuthenticationFilterTest {
         requestTransform, responseTransform
     );
 
+    var integration = new IqScaffoldProperties.GatewayProperties.IntegrationProperties(
+        false, "http://localhost:8082", Duration.ofSeconds(5)
+    );
+
+    var featureAccess = new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(
+        false, Map.of()
+    );
+
     var gateway = new IqScaffoldProperties.GatewayProperties(
-        routing, security, rateLimiting, circuitBreaker, cors, transformation
+        routing, security, rateLimiting, circuitBreaker, cors, transformation, integration, featureAccess
     );
 
     var cacheRedis = new IqScaffoldProperties.CacheProperties.RedisProperties(
