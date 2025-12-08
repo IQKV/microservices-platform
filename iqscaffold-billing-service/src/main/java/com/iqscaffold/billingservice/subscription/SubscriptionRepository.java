@@ -73,6 +73,20 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
   );
 
   /**
+   * Finds all subscriptions by status.
+   * 
+   * @param status subscription status
+   * @return list of subscriptions with the specified status
+   */
+  @Query("""
+      SELECT s FROM Subscription s
+      JOIN FETCH s.plan
+      WHERE s.status = :status
+      ORDER BY s.createdAt DESC
+      """)
+  List<Subscription> findByStatus(@Param("status") SubscriptionStatus status);
+
+  /**
    * Finds subscriptions by tenant and status.
    * 
    * @param tenantId tenant identifier
