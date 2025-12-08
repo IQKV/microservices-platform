@@ -1,0 +1,224 @@
+groups:
+  - name: billing_service_critical_alerts
+    interval: 30s
+    rules:
+      # Critical Alert: Payment failure rate > 5%
+      - alert: HighPaymentFailureRate
+        expr: |
+          (
+            rate(billing_payment_failures_total[5m]) /
+            rate(billing_payment_attempts_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: billing-service
+          category: payment
+        annotations:
+          summary: "High payment failure rate detected"
+          description: "Payment failure rate is {{ $value | humanizePercentage }} (threshold: 5%). This indicates issues with payment processing."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-payment-failure-rate"
+
+      # Critical Alert: API error rate > 1%
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5..", application="billing-service"}[5m])) /
+            sum(rate(http_server_requests_seconds_count{application="billing-service"}[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          service: billing-service
+          category: api
+        annotations:
+          summary: "High API error rate detected"
+          description: "API error rate is {{ $value | humanizePercentage }} (threshold: 1%). Check service logs for errors."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-api-error-rate"
+
+      # Critical Alert: Database connection pool > 80%
+      - alert: HighDatabaseConnectionPoolUsage
+        expr: |
+          (
+            hikaricp_connections_active{application="billing-service"} /
+            hikaricp_connections_max{application="billing-service"}
+          ) > 0.80
+        for: 5m
+        labels:
+          severity: critical
+          service: billing-service
+          category: database
+        annotations:
+          summary: "Database connection pool usage is high"
+          description: "Connection pool usage is {{ $value | humanizePercentage }} (threshold: 80%). Risk of connection exhaustion."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-db-connection-pool"
+
+      # Critical Alert: Webhook processing failures
+      - alert: WebhookProcessingFailures
+        expr: |
+          rate(billing_webhook_processing_failures_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: billing-service
+          category: webhook
+        annotations:
+          summary: "Webhook processing failures detected"
+          description: "Webhook processing is failing at {{ $value }} failures/sec. Payment provider events may be lost."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/webhook-processing-failures"
+
+      # Critical Alert: Service health check failures
+      - alert: ServiceHealthCheckFailure
+        expr: |
+          up{job="iqscaffold-billing-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: billing-service
+          category: health
+        annotations:
+          summary: "Billing service is down"
+          description: "Billing service health check has failed. Service may be unavailable."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/service-down"
+
+      # Critical Alert: Service health indicator unhealthy
+      - alert: ServiceHealthIndicatorUnhealthy
+        expr: |
+          spring_boot_application_health_status{application="billing-service"} != 1
+        for: 2m
+        labels:
+          severity: critical
+          service: billing-service
+          category: health
+        annotations:
+          summary: "Billing service health indicator is unhealthy"
+          description: "One or more health indicators (database, Redis, RabbitMQ) are reporting unhealthy status."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/health-indicator-unhealthy"
+
+  - name: billing_service_warning_alerts
+    interval: 60s
+    rules:
+      # Warning Alert: Response time p95 > 500ms
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_server_requests_seconds_bucket{application="billing-service"}[5m])) by (le, uri)
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: billing-service
+          category: performance
+        annotations:
+          summary: "High API response time detected"
+          description: "P95 response time is {{ $value | humanizeDuration }} (threshold: 500ms) for endpoint {{ $labels.uri }}."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-response-time"
+
+      # Warning Alert: Cache hit rate < 70%
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            rate(cache_gets_total{result="hit", application="billing-service"}[5m]) /
+            rate(cache_gets_total{application="billing-service"}[5m])
+          ) < 0.70
+        for: 15m
+        labels:
+          severity: warning
+          service: billing-service
+          category: cache
+        annotations:
+          summary: "Low cache hit rate detected"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 70%) for cache {{ $labels.cache }}. Consider cache tuning."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/low-cache-hit-rate"
+
+      # Warning Alert: Message queue depth > 1000
+      - alert: HighMessageQueueDepth
+        expr: |
+          rabbitmq_queue_messages{application="billing-service"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: billing-service
+          category: messaging
+        annotations:
+          summary: "High message queue depth detected"
+          description: "Queue {{ $labels.queue }} has {{ $value }} messages (threshold: 1000). Processing may be lagging."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-queue-depth"
+
+      # Warning Alert: Trial conversion rate drops > 20%
+      - alert: TrialConversionRateDrop
+        expr: |
+          (
+            (
+              rate(billing_trial_conversions_total[1h] offset 24h) -
+              rate(billing_trial_conversions_total[1h])
+            ) /
+            rate(billing_trial_conversions_total[1h] offset 24h)
+          ) > 0.20
+        for: 30m
+        labels:
+          severity: warning
+          service: billing-service
+          category: business
+        annotations:
+          summary: "Trial conversion rate has dropped significantly"
+          description: "Trial conversion rate has dropped by {{ $value | humanizePercentage }} compared to 24h ago (threshold: 20% drop)."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/trial-conversion-drop"
+
+      # Warning Alert: High payment retry rate
+      - alert: HighPaymentRetryRate
+        expr: |
+          rate(billing_payment_retries_total[5m]) > 0.1
+        for: 15m
+        labels:
+          severity: warning
+          service: billing-service
+          category: payment
+        annotations:
+          summary: "High payment retry rate detected"
+          description: "Payment retry rate is {{ $value }} retries/sec. May indicate payment provider issues."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/high-payment-retry-rate"
+
+      # Warning Alert: Invoice generation time > 5s
+      - alert: SlowInvoiceGeneration
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(billing_invoice_generation_duration_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          service: billing-service
+          category: performance
+        annotations:
+          summary: "Slow invoice generation detected"
+          description: "P95 invoice generation time is {{ $value | humanizeDuration }} (threshold: 5s)."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/slow-invoice-generation"
+
+      # Warning Alert: Redis connection issues
+      - alert: RedisConnectionIssues
+        expr: |
+          redis_connected_clients{application="billing-service"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: billing-service
+          category: cache
+        annotations:
+          summary: "Redis connection issues detected"
+          description: "No active Redis connections. Caching may be unavailable."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/redis-connection-issues"
+
+      # Warning Alert: RabbitMQ connection issues
+      - alert: RabbitMQConnectionIssues
+        expr: |
+          rabbitmq_connections{application="billing-service"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: billing-service
+          category: messaging
+        annotations:
+          summary: "RabbitMQ connection issues detected"
+          description: "No active RabbitMQ connections. Async processing may be unavailable."
+          runbook_url: "https://docs.iqscaffold.com/runbooks/rabbitmq-connection-issues"

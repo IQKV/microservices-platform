@@ -1,0 +1,123 @@
+{{ define "__alertmanager" }}AlertManager{{ end }}
+{{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver }}{{ end }}
+
+{{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
+
+{{ define "__description" }}{{ end }}
+
+{{ define "__text_alert_list" }}{{ range . }}
+Labels:
+{{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}
+{{ end }}Annotations:
+{{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}
+{{ end }}Source: {{ .GeneratorURL }}
+{{ end }}{{ end }}
+
+{{ define "slack.default.title" }}{{ template "__subject" . }}{{ end }}
+{{ define "slack.default.username" }}{{ template "__alertmanager" . }}{{ end }}
+{{ define "slack.default.fallback" }}{{ template "slack.default.title" . }} | {{ template "slack.default.titlelink" . }}{{ end }}
+{{ define "slack.default.pretext" }}{{ end }}
+{{ define "slack.default.titlelink" }}{{ template "__alertmanagerURL" . }}{{ end }}
+{{ define "slack.default.iconemoji" }}{{ end }}
+{{ define "slack.default.iconurl" }}{{ end }}
+{{ define "slack.default.text" }}{{ end }}
+
+{{ define "email.default.subject" }}{{ template "__subject" . }}{{ end }}
+{{ define "email.default.html" }}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+.alert {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  margin: 10px 0;
+}
+.alert.firing {
+  background-color: #fff3cd;
+  border-color: #ffc107;
+}
+.alert.resolved {
+  background-color: #d4edda;
+  border-color: #28a745;
+}
+.alert-header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.alert-details {
+  margin: 10px 0;
+}
+.label {
+  display: inline-block;
+  background-color: #e9ecef;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin: 2px;
+  font-size: 12px;
+}
+.annotation {
+  margin: 5px 0;
+}
+.footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+  font-size: 12px;
+  color: #666;
+}
+</style>
+</head>
+<body>
+<h2>{{ if eq .Status "firing" }}🔥 Firing Alerts{{ else }}✅ Resolved Alerts{{ end }}</h2>
+
+{{ range .Alerts }}
+<div class="alert {{ .Status }}">
+  <div class="alert-header">{{ .Labels.alertname }}</div>
+  
+  <div class="alert-details">
+    <strong>Status:</strong> {{ .Status | toUpper }}<br>
+    <strong>Severity:</strong> {{ .Labels.severity }}<br>
+    <strong>Service:</strong> {{ .Labels.service }}<br>
+    <strong>Started:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}<br>
+    {{ if ne .Status "firing" }}
+    <strong>Ended:</strong> {{ .EndsAt.Format "2006-01-02 15:04:05 MST" }}<br>
+    {{ end }}
+  </div>
+
+  <div class="alert-details">
+    <strong>Summary:</strong> {{ .Annotations.summary }}<br>
+    <strong>Description:</strong> {{ .Annotations.description }}<br>
+    {{ if .Annotations.runbook_url }}
+    <strong>Runbook:</strong> <a href="{{ .Annotations.runbook_url }}">{{ .Annotations.runbook_url }}</a><br>
+    {{ end }}
+  </div>
+
+  <div class="alert-details">
+    <strong>Labels:</strong><br>
+    {{ range .Labels.SortedPairs }}
+    <span class="label">{{ .Name }}: {{ .Value }}</span>
+    {{ end }}
+  </div>
+
+  <div class="alert-details">
+    <a href="{{ .GeneratorURL }}">View in Prometheus</a>
+  </div>
+</div>
+{{ end }}
+
+<div class="footer">
+  <p>This alert was sent by AlertManager</p>
+  <p><a href="{{ .ExternalURL }}">View in AlertManager</a></p>
+</div>
+</body>
+</html>
+{{ end }}

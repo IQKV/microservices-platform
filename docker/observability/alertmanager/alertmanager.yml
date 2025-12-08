@@ -1,0 +1,176 @@
+global:
+  resolve_timeout: 5m
+  # SMTP configuration for email alerts (configure with environment variables)
+  smtp_smarthost: '${SMTP_HOST:localhost:587}'
+  smtp_from: '${SMTP_FROM:alerts@iqscaffold.com}'
+  smtp_auth_username: '${SMTP_USERNAME:}'
+  smtp_auth_password: '${SMTP_PASSWORD:}'
+  smtp_require_tls: true
+
+# Templates for alert notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert routing
+route:
+  # Default receiver for all alerts
+  receiver: 'default-receiver'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'service', 'severity']
+  
+  # Wait time before sending initial notification
+  group_wait: 30s
+  
+  # Wait time before sending notification about new alerts in the same group
+  group_interval: 5m
+  
+  # Wait time before re-sending notification if alert is still firing
+  repeat_interval: 4h
+
+  # Child routes for specific alert types
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      group_interval: 2m
+      repeat_interval: 1h
+      continue: true
+
+    # Warning alerts - less urgent
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 12h
+
+    # Payment-related alerts
+    - match:
+        category: payment
+      receiver: 'payment-alerts'
+      continue: true
+
+    # Business metrics alerts
+    - match:
+        category: business
+      receiver: 'business-alerts'
+      continue: true
+
+# Inhibition rules - suppress certain alerts when others are firing
+inhibit_rules:
+  # Suppress warning alerts if critical alert is firing for same service
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service', 'alertname']
+
+  # Suppress specific alerts when service is down
+  - source_match:
+      alertname: 'ServiceHealthCheckFailure'
+    target_match_re:
+      alertname: '(HighAPIErrorRate|HighResponseTime|.*ConnectionIssues)'
+    equal: ['service']
+
+# Receivers - define how to send notifications
+receivers:
+  # Default receiver - logs to console
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+
+  # Critical alerts - multiple notification channels
+  - name: 'critical-alerts'
+    # Email notifications
+    email_configs:
+      - to: '${ALERT_EMAIL_CRITICAL:ops-critical@iqscaffold.com}'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        html: |
+          <h2>Critical Alert: {{ .GroupLabels.alertname }}</h2>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <p><strong>Severity:</strong> {{ .GroupLabels.severity }}</p>
+          <p><strong>Summary:</strong> {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}</p>
+          <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+          <p><strong>Runbook:</strong> {{ range .Alerts }}<a href="{{ .Annotations.runbook_url }}">{{ .Annotations.runbook_url }}</a>{{ end }}</p>
+          <p><strong>Time:</strong> {{ range .Alerts }}{{ .StartsAt }}{{ end }}</p>
+        send_resolved: true
+
+    # Slack notifications (configure webhook URL)
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL:}'
+        channel: '#billing-alerts-critical'
+        title: ':rotating_light: Critical Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *Service:* {{ .GroupLabels.service }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          *Runbook:* {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+        send_resolved: true
+
+    # PagerDuty integration (configure with service key)
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY:}'
+        description: '{{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        details:
+          summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+          description: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+          runbook_url: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
+        send_resolved: true
+
+  # Warning alerts - email and Slack only
+  - name: 'warning-alerts'
+    email_configs:
+      - to: '${ALERT_EMAIL_WARNING:ops-warning@iqscaffold.com}'
+        headers:
+          Subject: '[WARNING] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        html: |
+          <h2>Warning Alert: {{ .GroupLabels.alertname }}</h2>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <p><strong>Severity:</strong> {{ .GroupLabels.severity }}</p>
+          <p><strong>Summary:</strong> {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}</p>
+          <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+          <p><strong>Runbook:</strong> {{ range .Alerts }}<a href="{{ .Annotations.runbook_url }}">{{ .Annotations.runbook_url }}</a>{{ end }}</p>
+        send_resolved: true
+
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL:}'
+        channel: '#billing-alerts-warning'
+        title: ':warning: Warning Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *Service:* {{ .GroupLabels.service }}
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+        send_resolved: true
+
+  # Payment-specific alerts - notify finance team
+  - name: 'payment-alerts'
+    email_configs:
+      - to: '${ALERT_EMAIL_PAYMENT:finance@iqscaffold.com,ops@iqscaffold.com}'
+        headers:
+          Subject: '[PAYMENT] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        html: |
+          <h2>Payment Alert: {{ .GroupLabels.alertname }}</h2>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <p><strong>Severity:</strong> {{ .GroupLabels.severity }}</p>
+          <p><strong>Summary:</strong> {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}</p>
+          <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+        send_resolved: true
+
+  # Business metrics alerts - notify product/business team
+  - name: 'business-alerts'
+    email_configs:
+      - to: '${ALERT_EMAIL_BUSINESS:product@iqscaffold.com,ops@iqscaffold.com}'
+        headers:
+          Subject: '[BUSINESS] {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}'
+        html: |
+          <h2>Business Metrics Alert: {{ .GroupLabels.alertname }}</h2>
+          <p><strong>Service:</strong> {{ .GroupLabels.service }}</p>
+          <p><strong>Summary:</strong> {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}</p>
+          <p><strong>Description:</strong> {{ range .Alerts }}{{ .Annotations.description }}{{ end }}</p>
+        send_resolved: true
