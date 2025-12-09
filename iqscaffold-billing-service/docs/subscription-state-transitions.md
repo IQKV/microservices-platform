@@ -1,9 +1,11 @@
 # Subscription State Transition Tests
 
 ## Overview
+
 Comprehensive unit tests for the Subscription aggregate's state machine, covering all valid transitions, invalid transition rejection, and side effects.
 
 ## Test Coverage Summary
+
 - **Total Tests**: 57
 - **Test Categories**: 10 nested test classes
 - **All Tests Passing**: ✅
@@ -23,11 +25,13 @@ EXPIRED → (terminal state, no transitions allowed)
 ## Test Categories
 
 ### 1. INCOMPLETE State Transitions (3 tests)
+
 - ✅ INCOMPLETE → TRIAL: When trial is activated
 - ✅ INCOMPLETE → ACTIVE: When payment is completed
 - ✅ INCOMPLETE → EXPIRED: When setup times out
 
 ### 2. TRIAL State Transitions (5 tests)
+
 - ✅ TRIAL → ACTIVE: When trial converts to paid
 - ✅ TRIAL → EXPIRED: When trial expires without payment
 - ✅ TRIAL → CANCELED: When user cancels during trial
@@ -35,6 +39,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ TRIAL → SUSPENDED: Rejected (invalid transition)
 
 ### 3. ACTIVE State Transitions (7 tests)
+
 - ✅ ACTIVE → PAST_DUE: When payment fails
 - ✅ ACTIVE → CANCELED: When user cancels at period end
 - ✅ ACTIVE → EXPIRED: When canceled immediately
@@ -44,6 +49,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ ACTIVE → INCOMPLETE: Rejected (invalid transition)
 
 ### 4. PAST_DUE State Transitions (5 tests)
+
 - ✅ PAST_DUE → ACTIVE: When payment succeeds
 - ✅ PAST_DUE → EXPIRED: When payment fails permanently
 - ✅ PAST_DUE → SUSPENDED: When admin suspends
@@ -51,6 +57,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ PAST_DUE → TRIAL: Rejected (invalid transition)
 
 ### 5. CANCELED State Transitions (5 tests)
+
 - ✅ CANCELED → ACTIVE: When user reactivates
 - ✅ CANCELED → EXPIRED: When period ends
 - ✅ CANCELED → PAST_DUE: Rejected (invalid transition)
@@ -58,6 +65,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ CANCELED → TRIAL: Rejected (invalid transition)
 
 ### 6. SUSPENDED State Transitions (5 tests)
+
 - ✅ SUSPENDED → ACTIVE: When admin unsuspends
 - ✅ SUSPENDED → EXPIRED: When admin expires
 - ✅ SUSPENDED → PAST_DUE: Rejected (invalid transition)
@@ -65,10 +73,12 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ SUSPENDED → TRIAL: Rejected (invalid transition)
 
 ### 7. EXPIRED State Transitions (2 tests)
+
 - ✅ EXPIRED → Any: All transitions rejected (terminal state)
 - ✅ EXPIRED: Remains in EXPIRED state
 
 ### 8. State Transition Side Effects (11 tests)
+
 - ✅ convertTrialToActive: Resets billing period
 - ✅ cancelAtPeriodEnd: Sets canceledAt timestamp
 - ✅ cancelAtPeriodEnd: Sets cancelAtPeriodEnd flag
@@ -82,6 +92,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ renew: Advances billing period
 
 ### 9. Access Control Based on State (7 tests)
+
 - ✅ TRIAL: Allows access
 - ✅ ACTIVE: Allows access
 - ✅ PAST_DUE: Allows access (grace period)
@@ -91,6 +102,7 @@ EXPIRED → (terminal state, no transitions allowed)
 - ✅ INCOMPLETE: Denies access
 
 ### 10. Plan Change Restrictions Based on State (7 tests)
+
 - ✅ TRIAL: Allows plan changes
 - ✅ ACTIVE: Allows plan changes
 - ✅ PAST_DUE: Allows plan changes
@@ -106,11 +118,12 @@ EXPIRED → (terminal state, no transitions allowed)
 3. **Side Effects**: State transitions properly update related fields (timestamps, flags, periods)
 4. **Access Control**: Each state correctly determines feature access
 5. **Plan Changes**: Only certain states allow plan modifications
-6. **Cancellation Semantics**: 
+6. **Cancellation Semantics**:
    - `cancelAtPeriodEnd()` → CANCELED with access until period end
    - `cancelImmediately()` → EXPIRED with immediate access revocation
 
 ## Test File Location
+
 `backend/iqscaffold-billing-service/src/test/java/com/iqscaffold/billingservice/subscription/SubscriptionStateTransitionTest.java`
 
 ## Running the Tests

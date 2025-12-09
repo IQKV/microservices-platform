@@ -19,6 +19,7 @@ The billing service manages subscriptions and billing while providing **lightwei
 - **Multi-Tenancy**: Strict tenant isolation using schema-per-tenant strategy
 
 **Lightweight Orchestration APIs** (for easy integration with business microservices):
+
 - **Subscription Status Check**: Simple API for other services (CRM, Campaign, Email, Scoring, etc.) to verify if a tenant has an active subscription
 - **Feature Access Check**: Lightweight API to check if a tenant's plan includes specific features
 - **Quota Enforcement**: Simple quota check and usage recording APIs for services to enforce limits (email sends, API calls, storage, etc.)
@@ -27,6 +28,7 @@ The billing service manages subscriptions and billing while providing **lightwei
 ### Key Capabilities
 
 **Core Billing Operations:**
+
 - **Subscription Lifecycle**: Create, upgrade, downgrade, cancel, reactivate subscriptions with trial periods and proration
 - **Payment Processing**: Multi-provider payment integration (Stripe, PayPal, manual) with automated retry logic
 - **Invoice Management**: Automated invoice generation, payment processing, PDF generation, and delivery
@@ -55,37 +57,40 @@ The billing service provides **simple REST APIs** that business microservices (C
    - Use case: Display plan limits in service UIs, show upgrade prompts
 
 **Example Integration Pattern:**
+
 ```java
 // In CRM Service - before creating a contact
 @Service
 public class ContactService {
-    private final BillingClient billingClient;
-    
-    public Contact createContact(String tenantId, ContactRequest request) {
-        // Check subscription status
-        SubscriptionStatus status = billingClient.getSubscriptionStatus(tenantId);
-        if (!status.isActive()) {
-            throw new SubscriptionInactiveException("Please renew your subscription");
-        }
-        
-        // Check quota
-        QuotaCheckResult quota = billingClient.checkQuota(tenantId, "CONTACTS", 1);
-        if (!quota.isAvailable()) {
-            throw new QuotaExceededException("Contact limit reached. Upgrade your plan.");
-        }
-        
-        // Create contact
-        Contact contact = contactRepository.save(new Contact(request));
-        
-        // Record usage
-        billingClient.recordUsage(tenantId, "CONTACTS", 1);
-        
-        return contact;
+
+  private final BillingClient billingClient;
+
+  public Contact createContact(String tenantId, ContactRequest request) {
+    // Check subscription status
+    SubscriptionStatus status = billingClient.getSubscriptionStatus(tenantId);
+    if (!status.isActive()) {
+      throw new SubscriptionInactiveException("Please renew your subscription");
     }
+
+    // Check quota
+    QuotaCheckResult quota = billingClient.checkQuota(tenantId, "CONTACTS", 1);
+    if (!quota.isAvailable()) {
+      throw new QuotaExceededException("Contact limit reached. Upgrade your plan.");
+    }
+
+    // Create contact
+    Contact contact = contactRepository.save(new Contact(request));
+
+    // Record usage
+    billingClient.recordUsage(tenantId, "CONTACTS", 1);
+
+    return contact;
+  }
 }
 ```
 
 **Customer & Admin Experience:**
+
 - **Customer Portal**: Self-service dashboard for subscription management, usage monitoring, invoices, and payment methods
 - **Administrative Functions**: Comprehensive admin tools for subscription management, analytics, and manual billing operations
 - **Usage Analytics**: Real-time usage dashboards showing consumption across all platform services
@@ -191,9 +196,10 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 #### Aggregates and Aggregate Roots
 
 **Subscription Aggregate**
+
 - **Aggregate Root**: Subscription
 - **Entities**: None (subscription is self-contained)
-- **Invariants**: 
+- **Invariants**:
   - One active subscription per tenant
   - Status transitions must follow valid state machine
   - Trial period cannot be negative
@@ -201,6 +207,7 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 - **Boundary**: All subscription modifications go through the Subscription aggregate root
 
 **Invoice Aggregate**
+
 - **Aggregate Root**: Invoice
 - **Entities**: InvoiceLineItem (within aggregate)
 - **Invariants**:
@@ -211,6 +218,7 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 - **Boundary**: Line items are only accessible through Invoice
 
 **Payment Aggregate**
+
 - **Aggregate Root**: Payment
 - **Entities**: None
 - **Invariants**:
@@ -220,6 +228,7 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 - **Boundary**: Payment state changes go through Payment aggregate root
 
 **SubscriptionPlan Aggregate** (Public Schema)
+
 - **Aggregate Root**: SubscriptionPlan
 - **Entities**: None
 - **Invariants**:
@@ -229,6 +238,7 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 - **Boundary**: Plan modifications go through SubscriptionPlan aggregate root
 
 **PaymentMethod Aggregate**
+
 - **Aggregate Root**: PaymentMethod
 - **Entities**: None
 - **Invariants**:
@@ -243,58 +253,50 @@ The billing service follows tactical Domain-Driven Design patterns to ensure a m
 Domain services encapsulate business logic that doesn't naturally belong to a single aggregate:
 
 **ProrationCalculator**
+
 ```java
 @Service
 public class ProrationCalculator {
-    public ProrationResult calculate(
-        Subscription subscription,
-        SubscriptionPlan newPlan,
-        LocalDateTime effectiveDate
-    ) {
-        // Complex proration logic spanning subscription and plan
-    }
+
+  public ProrationResult calculate(Subscription subscription, SubscriptionPlan newPlan, LocalDateTime effectiveDate) {
+    // Complex proration logic spanning subscription and plan
+  }
 }
 ```
 
 **QuotaEnforcer**
+
 ```java
 @Service
 public class QuotaEnforcer {
-    public QuotaCheckResult checkQuota(
-        Subscription subscription,
-        MetricType metricType,
-        long requestedQuantity
-    ) {
-        // Quota validation logic spanning subscription, plan, and usage
-    }
+
+  public QuotaCheckResult checkQuota(Subscription subscription, MetricType metricType, long requestedQuantity) {
+    // Quota validation logic spanning subscription, plan, and usage
+  }
 }
 ```
 
 **SubscriptionLifecycleManager**
+
 ```java
 @Service
 public class SubscriptionLifecycleManager {
-    public void transitionStatus(
-        Subscription subscription,
-        SubscriptionStatus newStatus,
-        String reason
-    ) {
-        // Complex state transition logic with validation
-    }
+
+  public void transitionStatus(Subscription subscription, SubscriptionStatus newStatus, String reason) {
+    // Complex state transition logic with validation
+  }
 }
 ```
 
 **InvoiceGenerator**
+
 ```java
 @Service
 public class InvoiceGenerator {
-    public Invoice generate(
-        Subscription subscription,
-        LocalDateTime periodStart,
-        LocalDateTime periodEnd
-    ) {
-        // Invoice creation logic spanning subscription, plan, and usage
-    }
+
+  public Invoice generate(Subscription subscription, LocalDateTime periodStart, LocalDateTime periodEnd) {
+    // Invoice creation logic spanning subscription, plan, and usage
+  }
 }
 ```
 
@@ -318,43 +320,50 @@ Value objects are immutable and defined by their attributes rather than identity
 Specifications encapsulate business rules that can be reused and combined:
 
 **ActiveSubscriptionSpecification**
+
 ```java
 public class ActiveSubscriptionSpecification implements Specification<Subscription> {
-    @Override
-    public boolean isSatisfiedBy(Subscription subscription) {
-        return subscription.getStatus() == SubscriptionStatus.ACTIVE
-            && subscription.getCurrentPeriodEnd().isAfter(LocalDateTime.now());
-    }
+
+  @Override
+  public boolean isSatisfiedBy(Subscription subscription) {
+    return subscription.getStatus() == SubscriptionStatus.ACTIVE && subscription.getCurrentPeriodEnd().isAfter(LocalDateTime.now());
+  }
 }
 ```
 
 **QuotaExceededSpecification**
+
 ```java
 public class QuotaExceededSpecification implements Specification<UsageContext> {
-    @Override
-    public boolean isSatisfiedBy(UsageContext context) {
-        return context.getCurrentUsage() >= context.getQuotaLimit();
-    }
+
+  @Override
+  public boolean isSatisfiedBy(UsageContext context) {
+    return context.getCurrentUsage() >= context.getQuotaLimit();
+  }
 }
 ```
 
 **ValidPlanTransitionSpecification**
+
 ```java
 public class ValidPlanTransitionSpecification implements Specification<PlanTransition> {
-    @Override
-    public boolean isSatisfiedBy(PlanTransition transition) {
-        // Validate upgrade/downgrade rules
-    }
+
+  @Override
+  public boolean isSatisfiedBy(PlanTransition transition) {
+    // Validate upgrade/downgrade rules
+  }
 }
 ```
 
 **TrialEligibilitySpecification**
+
 ```java
 public class TrialEligibilitySpecification implements Specification<Tenant> {
-    @Override
-    public boolean isSatisfiedBy(Tenant tenant) {
-        // Check if tenant has never had a trial
-    }
+
+  @Override
+  public boolean isSatisfiedBy(Tenant tenant) {
+    // Check if tenant has never had a trial
+  }
 }
 ```
 
@@ -365,47 +374,36 @@ public class TrialEligibilitySpecification implements Specification<Tenant> {
 Factories encapsulate complex object construction:
 
 **SubscriptionFactory**
+
 ```java
 @Component
 public class SubscriptionFactory {
-    public Subscription createTrialSubscription(
-        UUID tenantId,
-        UUID userId,
-        SubscriptionPlan plan
-    ) {
-        // Complex subscription creation with trial logic
-        // Validates business rules before creation
-    }
-    
-    public Subscription createPaidSubscription(
-        UUID tenantId,
-        UUID userId,
-        SubscriptionPlan plan,
-        PaymentMethod paymentMethod
-    ) {
-        // Complex subscription creation with payment validation
-    }
+
+  public Subscription createTrialSubscription(UUID tenantId, UUID userId, SubscriptionPlan plan) {
+    // Complex subscription creation with trial logic
+    // Validates business rules before creation
+  }
+
+  public Subscription createPaidSubscription(UUID tenantId, UUID userId, SubscriptionPlan plan, PaymentMethod paymentMethod) {
+    // Complex subscription creation with payment validation
+  }
 }
 ```
 
 **InvoiceFactory**
+
 ```java
 @Component
 public class InvoiceFactory {
-    public Invoice createSubscriptionInvoice(
-        Subscription subscription,
-        List<InvoiceLineItem> lineItems
-    ) {
-        // Complex invoice creation with line items
-        // Calculates totals and validates invariants
-    }
-    
-    public Invoice createProrationInvoice(
-        Subscription subscription,
-        ProrationResult proration
-    ) {
-        // Creates invoice with proration line items
-    }
+
+  public Invoice createSubscriptionInvoice(Subscription subscription, List<InvoiceLineItem> lineItems) {
+    // Complex invoice creation with line items
+    // Calculates totals and validates invariants
+  }
+
+  public Invoice createProrationInvoice(Subscription subscription, ProrationResult proration) {
+    // Creates invoice with proration line items
+  }
 }
 ```
 
@@ -416,6 +414,7 @@ public class InvoiceFactory {
 Domain events represent significant business occurrences:
 
 **Subscription Events**
+
 - `SubscriptionCreated`
 - `SubscriptionUpgraded`
 - `SubscriptionDowngraded`
@@ -427,6 +426,7 @@ Domain events represent significant business occurrences:
 - `TrialConverted`
 
 **Payment Events**
+
 - `PaymentSucceeded`
 - `PaymentFailed`
 - `PaymentRefunded`
@@ -434,11 +434,13 @@ Domain events represent significant business occurrences:
 - `PaymentMethodRemoved`
 
 **Invoice Events**
+
 - `InvoiceGenerated`
 - `InvoicePaid`
 - `InvoiceVoided`
 
 **Usage Events**
+
 - `UsageRecorded`
 - `QuotaExceeded`
 - `QuotaWarning`
@@ -458,6 +460,7 @@ The billing service uses anti-corruption layers to isolate the domain model from
 ### Service Boundaries
 
 **Billing Service Responsibilities:**
+
 - Subscription lifecycle management (create, update, cancel, reactivate)
 - Payment method management and tokenization
 - Payment processing and retry logic
@@ -468,6 +471,7 @@ The billing service uses anti-corruption layers to isolate the domain model from
 - Billing analytics and reporting
 
 **External Service Dependencies:**
+
 - **User Service**: Tenant and user information, subscription status updates
 - **Gateway Service**: Request routing, feature access control, quota enforcement
 - **Email Service**: Billing notifications and invoice delivery
@@ -486,7 +490,7 @@ The service implements schema-per-tenant multi-tenancy:
    - Payment methods
    - Billing events
 
-3. **Tenant Context Resolution**: 
+3. **Tenant Context Resolution**:
    - Extract tenant ID from JWT token in request
    - Set Hibernate tenant identifier for current request
    - All database operations automatically scoped to tenant schema
@@ -502,64 +506,58 @@ The billing service implements strict security following the same patterns as th
 #### JWT Token Validation
 
 **JWT Configuration**:
+
 ```java
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-    
-    @Value("${iqscaffold.billing.security.jwt.jwk-set-uri}")
-    private String jwkSetUri;
-    
-    @Bean
-    public SecurityFilterChain filterChain(
-        HttpSecurity http,
-        TenantExtractionFilter tenantExtractionFilter,
-        RateLimitingFilter rateLimitingFilter
-    ) throws Exception {
-        return http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
-            .sessionManagement(session -> 
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/v1/billing/plans/**").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                
-                // Integration APIs (require authentication)
-                .requestMatchers("/api/v1/billing/subscriptions/*/status").authenticated()
-                .requestMatchers("/api/v1/billing/subscriptions/*/check-feature").authenticated()
-                .requestMatchers("/api/v1/billing/usage/**").authenticated()
-                
-                // Customer portal (require authentication)
-                .requestMatchers("/api/v1/billing/portal/**").authenticated()
-                
-                // Admin endpoints (require ADMIN or SUPER_ADMIN authority)
-                .requestMatchers("/api/v1/admin/billing/**")
-                    .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
-                
-                // All other requests require authentication
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> 
-                oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
-            .addFilterBefore(tenantExtractionFilter, 
-                UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(rateLimitingFilter, 
-                UsernamePasswordAuthenticationFilter.class)
-            .headers(headers -> headers
-                .frameOptions(frameOptions -> frameOptions.deny())
-                .httpStrictTransportSecurity(hsts -> 
-                    hsts.maxAgeInSeconds(31536000).includeSubDomains(true))
-            )
-            .build();
-    }
-    
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
-    }
+
+  @Value("${iqscaffold.billing.security.jwt.jwk-set-uri}")
+  private String jwkSetUri;
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http, TenantExtractionFilter tenantExtractionFilter, RateLimitingFilter rateLimitingFilter) throws Exception {
+    return http
+      .csrf((csrf) -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
+      .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .authorizeHttpRequests((auth) ->
+        auth
+          // Public endpoints
+          .requestMatchers("/api/v1/billing/plans/**")
+          .permitAll()
+          .requestMatchers("/actuator/health", "/actuator/info")
+          .permitAll()
+          .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+          .permitAll()
+          // Integration APIs (require authentication)
+          .requestMatchers("/api/v1/billing/subscriptions/*/status")
+          .authenticated()
+          .requestMatchers("/api/v1/billing/subscriptions/*/check-feature")
+          .authenticated()
+          .requestMatchers("/api/v1/billing/usage/**")
+          .authenticated()
+          // Customer portal (require authentication)
+          .requestMatchers("/api/v1/billing/portal/**")
+          .authenticated()
+          // Admin endpoints (require ADMIN or SUPER_ADMIN authority)
+          .requestMatchers("/api/v1/admin/billing/**")
+          .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
+          // All other requests require authentication
+          .anyRequest()
+          .authenticated()
+      )
+      .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.decoder(jwtDecoder())))
+      .addFilterBefore(tenantExtractionFilter, UsernamePasswordAuthenticationFilter.class)
+      .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
+      .headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.deny()).httpStrictTransportSecurity((hsts) -> hsts.maxAgeInSeconds(31536000).includeSubDomains(true)))
+      .build();
+  }
+
+  @Bean
+  public JwtDecoder jwtDecoder() {
+    return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+  }
 }
 ```
 
@@ -568,78 +566,69 @@ public class SecurityConfig {
 #### JWT Claims Extraction
 
 **JWT Claim Names**:
+
 ```java
 public final class JwtClaimNames {
-    public static final String SUBJECT = "sub";
-    public static final String USERNAME = "username";
-    public static final String EMAIL = "email";
-    public static final String ROLES = "roles"; // Contains authorities
-    public static final String TENANT_ID = "tenant_id";
-    public static final String FIRST_NAME = "firstName";
-    public static final String LAST_NAME = "lastName";
-    
-    private JwtClaimNames() {
-        throw new UnsupportedOperationException("Utility class");
-    }
+
+  public static final String SUBJECT = "sub";
+  public static final String USERNAME = "username";
+  public static final String EMAIL = "email";
+  public static final String ROLES = "roles"; // Contains authorities
+  public static final String TENANT_ID = "tenant_id";
+  public static final String FIRST_NAME = "firstName";
+  public static final String LAST_NAME = "lastName";
+
+  private JwtClaimNames() {
+    throw new UnsupportedOperationException("Utility class");
+  }
 }
 ```
 
 **User Context**:
+
 ```java
-public record UserContext(
-    Long userId,
-    String username,
-    String email,
-    Set<String> authorities,
-    String firstName,
-    String lastName,
-    String tenantId
-) {
-    public boolean hasAuthority(String authority) {
-        return authorities.contains(authority);
-    }
-    
-    public boolean isAdmin() {
-        return hasAuthority("ADMIN") || hasAuthority("SUPER_ADMIN");
-    }
-    
-    public boolean isTenantOwner() {
-        return hasAuthority("TENANT_OWNER");
-    }
-    
-    public boolean canManageBilling() {
-        return isAdmin() || isTenantOwner() || hasAuthority("BILLING_ADMIN");
-    }
+public record UserContext(Long userId, String username, String email, Set<String> authorities, String firstName, String lastName, String tenantId) {
+  public boolean hasAuthority(String authority) {
+    return authorities.contains(authority);
+  }
+
+  public boolean isAdmin() {
+    return hasAuthority("ADMIN") || hasAuthority("SUPER_ADMIN");
+  }
+
+  public boolean isTenantOwner() {
+    return hasAuthority("TENANT_OWNER");
+  }
+
+  public boolean canManageBilling() {
+    return isAdmin() || isTenantOwner() || hasAuthority("BILLING_ADMIN");
+  }
 }
 ```
 
 **JWT Utilities**:
+
 ```java
 @Component
 public class JwtUtils {
-    
-    public static UserContext extractUserContext(Jwt jwt) {
-        Long userId = jwt.getClaim(JwtClaimNames.SUBJECT);
-        String username = jwt.getClaim(JwtClaimNames.USERNAME);
-        String email = jwt.getClaim(JwtClaimNames.EMAIL);
-        List<String> roles = jwt.getClaim(JwtClaimNames.ROLES);
-        String firstName = jwt.getClaim(JwtClaimNames.FIRST_NAME);
-        String lastName = jwt.getClaim(JwtClaimNames.LAST_NAME);
-        String tenantId = jwt.getClaim(JwtClaimNames.TENANT_ID);
-        
-        if (tenantId == null) {
-            throw new AuthenticationException("Missing tenant_id claim in JWT");
-        }
-        
-        Set<String> authorities = roles != null 
-            ? new HashSet<>(roles) 
-            : Collections.emptySet();
-        
-        return new UserContext(
-            userId, username, email, authorities, 
-            firstName, lastName, tenantId
-        );
+
+  public static UserContext extractUserContext(Jwt jwt) {
+    Long userId = jwt.getClaim(JwtClaimNames.SUBJECT);
+    String username = jwt.getClaim(JwtClaimNames.USERNAME);
+    String email = jwt.getClaim(JwtClaimNames.EMAIL);
+    List<String> roles = jwt.getClaim(JwtClaimNames.ROLES);
+    String firstName = jwt.getClaim(JwtClaimNames.FIRST_NAME);
+    String lastName = jwt.getClaim(JwtClaimNames.LAST_NAME);
+    String tenantId = jwt.getClaim(JwtClaimNames.TENANT_ID);
+
+    if (tenantId == null) {
+      throw new AuthenticationException("Missing tenant_id claim in JWT");
     }
+
+    Set<String> authorities = roles != null ? new HashSet<>(roles) : Collections.emptySet();
+
+    return new UserContext(userId, username, email, authorities, firstName, lastName, tenantId);
+  }
 }
 ```
 
@@ -648,137 +637,130 @@ public class JwtUtils {
 #### Tenant Context Management
 
 **Tenant Context**:
+
 ```java
 public final class TenantContext {
-    
-    private static final ThreadLocal<String> currentTenantId = new ThreadLocal<>();
-    
-    private TenantContext() {
-        throw new UnsupportedOperationException("Utility class");
+
+  private static final ThreadLocal<String> currentTenantId = new ThreadLocal<>();
+
+  private TenantContext() {
+    throw new UnsupportedOperationException("Utility class");
+  }
+
+  public static void setCurrentTenantId(String tenantId) {
+    currentTenantId.set(tenantId);
+  }
+
+  public static String getCurrentTenantId() {
+    String tenantId = currentTenantId.get();
+    if (tenantId == null) {
+      throw new IllegalStateException("No tenant context set");
     }
-    
-    public static void setCurrentTenantId(String tenantId) {
-        currentTenantId.set(tenantId);
+    return tenantId;
+  }
+
+  public static String getCurrentTenantIdOrDefault() {
+    return currentTenantId.get();
+  }
+
+  public static boolean hasTenantContext() {
+    return currentTenantId.get() != null;
+  }
+
+  public static void clear() {
+    currentTenantId.remove();
+  }
+
+  public static <T> T executeInTenantContext(String tenantId, Supplier<T> operation) {
+    String previousTenantId = getCurrentTenantIdOrDefault();
+    try {
+      setCurrentTenantId(tenantId);
+      return operation.get();
+    } finally {
+      if (previousTenantId != null) {
+        setCurrentTenantId(previousTenantId);
+      } else {
+        clear();
+      }
     }
-    
-    public static String getCurrentTenantId() {
-        String tenantId = currentTenantId.get();
-        if (tenantId == null) {
-            throw new IllegalStateException("No tenant context set");
-        }
-        return tenantId;
-    }
-    
-    public static String getCurrentTenantIdOrDefault() {
-        return currentTenantId.get();
-    }
-    
-    public static boolean hasTenantContext() {
-        return currentTenantId.get() != null;
-    }
-    
-    public static void clear() {
-        currentTenantId.remove();
-    }
-    
-    public static <T> T executeInTenantContext(String tenantId, Supplier<T> operation) {
-        String previousTenantId = getCurrentTenantIdOrDefault();
-        try {
-            setCurrentTenantId(tenantId);
-            return operation.get();
-        } finally {
-            if (previousTenantId != null) {
-                setCurrentTenantId(previousTenantId);
-            } else {
-                clear();
-            }
-        }
-    }
-    
-    public static void executeInTenantContext(String tenantId, Runnable operation) {
-        executeInTenantContext(tenantId, () -> {
-            operation.run();
-            return null;
-        });
-    }
+  }
+
+  public static void executeInTenantContext(String tenantId, Runnable operation) {
+    executeInTenantContext(tenantId, () -> {
+      operation.run();
+      return null;
+    });
+  }
 }
 ```
 
 **Tenant Extraction Filter**:
+
 ```java
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class TenantExtractionFilter extends OncePerRequestFilter {
-    
-    private static final Logger logger = LoggerFactory.getLogger(TenantExtractionFilter.class);
-    
-    @Override
-    protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-    ) throws ServletException, IOException {
-        try {
-            Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-            
-            if (authentication instanceof JwtAuthenticationToken token) {
-                Jwt jwt = token.getToken();
-                String tenantId = jwt.getClaimAsString(JwtClaimNames.TENANT_ID);
-                
-                if (tenantId != null) {
-                    TenantContext.setCurrentTenantId(tenantId);
-                    MDC.put(BillingConstants.MDC.TENANT_ID, tenantId);
-                    
-                    // Validate tenant ID in path matches JWT tenant ID
-                    validateTenantIdInPath(request, tenantId);
-                }
-            }
-            
-            filterChain.doFilter(request, response);
-            
-        } finally {
-            TenantContext.clear();
-            MDC.remove(BillingConstants.MDC.TENANT_ID);
+
+  private static final Logger logger = LoggerFactory.getLogger(TenantExtractionFilter.class);
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    try {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+      if (authentication instanceof JwtAuthenticationToken token) {
+        Jwt jwt = token.getToken();
+        String tenantId = jwt.getClaimAsString(JwtClaimNames.TENANT_ID);
+
+        if (tenantId != null) {
+          TenantContext.setCurrentTenantId(tenantId);
+          MDC.put(BillingConstants.MDC.TENANT_ID, tenantId);
+
+          // Validate tenant ID in path matches JWT tenant ID
+          validateTenantIdInPath(request, tenantId);
         }
+      }
+
+      filterChain.doFilter(request, response);
+    } finally {
+      TenantContext.clear();
+      MDC.remove(BillingConstants.MDC.TENANT_ID);
     }
-    
-    private void validateTenantIdInPath(HttpServletRequest request, String jwtTenantId) {
-        String path = request.getRequestURI();
-        
-        // Extract tenant ID from path patterns like /api/v1/billing/subscriptions/{tenantId}/...
-        Pattern pattern = Pattern.compile("/subscriptions/([^/]+)/");
-        Matcher matcher = pattern.matcher(path);
-        
-        if (matcher.find()) {
-            String pathTenantId = matcher.group(1);
-            if (!jwtTenantId.equals(pathTenantId)) {
-                throw new AccessDeniedException(
-                    "Tenant ID in path does not match authenticated tenant"
-                );
-            }
-        }
+  }
+
+  private void validateTenantIdInPath(HttpServletRequest request, String jwtTenantId) {
+    String path = request.getRequestURI();
+
+    // Extract tenant ID from path patterns like /api/v1/billing/subscriptions/{tenantId}/...
+    Pattern pattern = Pattern.compile("/subscriptions/([^/]+)/");
+    Matcher matcher = pattern.matcher(path);
+
+    if (matcher.find()) {
+      String pathTenantId = matcher.group(1);
+      if (!jwtTenantId.equals(pathTenantId)) {
+        throw new AccessDeniedException("Tenant ID in path does not match authenticated tenant");
+      }
     }
+  }
 }
 ```
 
 **Hibernate Multi-Tenancy Integration**:
+
 ```java
 @Component
-public class CurrentTenantIdentifierResolverImpl 
-    implements CurrentTenantIdentifierResolver {
-    
-    @Override
-    public String resolveCurrentTenantIdentifier() {
-        String tenantId = TenantContext.getCurrentTenantIdOrDefault();
-        return tenantId != null ? tenantId : "public";
-    }
-    
-    @Override
-    public boolean validateExistingCurrentSessions() {
-        return true;
-    }
+public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentifierResolver {
+
+  @Override
+  public String resolveCurrentTenantIdentifier() {
+    String tenantId = TenantContext.getCurrentTenantIdOrDefault();
+    return tenantId != null ? tenantId : "public";
+  }
+
+  @Override
+  public boolean validateExistingCurrentSessions() {
+    return true;
+  }
 }
 ```
 
@@ -787,60 +769,60 @@ public class CurrentTenantIdentifierResolverImpl
 #### Rate Limiting
 
 **Rate Limiting Filter**:
+
 ```java
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 20)
 public class RateLimitingFilter extends OncePerRequestFilter {
-    
-    private final RedisTemplate<String, String> redisTemplate;
-    private final BillingProperties billingProperties;
-    
-    @Override
-    protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-    ) throws ServletException, IOException {
-        
-        if (!billingProperties.security().rateLimiting().enabled()) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        
-        String tenantId = TenantContext.getCurrentTenantIdOrDefault();
-        if (tenantId == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        
-        String key = "rate-limit:billing:" + tenantId;
-        Long requests = redisTemplate.opsForValue().increment(key);
-        
-        if (requests == 1) {
-            redisTemplate.expire(key, Duration.ofMinutes(1));
-        }
-        
-        int limit = billingProperties.security().rateLimiting().requestsPerMinute();
-        
-        if (requests > limit) {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.setContentType("application/json");
-            response.getWriter().write("""
-                {
-                  "error": "RATE_LIMIT_EXCEEDED",
-                  "message": "Too many requests. Please try again later.",
-                  "limit": %d,
-                  "window": "1 minute"
-                }
-                """.formatted(limit));
-            return;
-        }
-        
-        response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
-        response.setHeader("X-RateLimit-Remaining", String.valueOf(limit - requests));
-        
-        filterChain.doFilter(request, response);
+
+  private final RedisTemplate<String, String> redisTemplate;
+  private final BillingProperties billingProperties;
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    if (!billingProperties.security().rateLimiting().enabled()) {
+      filterChain.doFilter(request, response);
+      return;
     }
+
+    String tenantId = TenantContext.getCurrentTenantIdOrDefault();
+    if (tenantId == null) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    String key = "rate-limit:billing:" + tenantId;
+    Long requests = redisTemplate.opsForValue().increment(key);
+
+    if (requests == 1) {
+      redisTemplate.expire(key, Duration.ofMinutes(1));
+    }
+
+    int limit = billingProperties.security().rateLimiting().requestsPerMinute();
+
+    if (requests > limit) {
+      response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+      response.setContentType("application/json");
+      response
+        .getWriter()
+        .write(
+          """
+          {
+            "error": "RATE_LIMIT_EXCEEDED",
+            "message": "Too many requests. Please try again later.",
+            "limit": %d,
+            "window": "1 minute"
+          }
+          """.formatted(limit)
+        );
+      return;
+    }
+
+    response.setHeader("X-RateLimit-Limit", String.valueOf(limit));
+    response.setHeader("X-RateLimit-Remaining", String.valueOf(limit - requests));
+
+    filterChain.doFilter(request, response);
+  }
 }
 ```
 
@@ -849,57 +831,51 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 #### Authorization Patterns
 
 **Method-Level Security**:
+
 ```java
 @RestController
 @RequestMapping("/api/v1/billing/portal")
 public class BillingPortalRestResource {
-    
-    @PostMapping("/subscription/upgrade")
-    @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<SubscriptionDto> upgradeSubscription(
-        @Valid @RequestBody UpgradeRequest request
-    ) {
-        // Only users with billing management authority can upgrade
-    }
-    
-    @GetMapping("/dashboard")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BillingDashboardDto> getDashboard() {
-        // Any authenticated user can view dashboard
-    }
+
+  @PostMapping("/subscription/upgrade")
+  @PreAuthorize("hasAnyAuthority('TENANT_OWNER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<SubscriptionDto> upgradeSubscription(@Valid @RequestBody UpgradeRequest request) {
+    // Only users with billing management authority can upgrade
+  }
+
+  @GetMapping("/dashboard")
+  @PreAuthorize("isAuthenticated()")
+  public ResponseEntity<BillingDashboardDto> getDashboard() {
+    // Any authenticated user can view dashboard
+  }
 }
 ```
 
 **Service-Level Authorization**:
+
 ```java
 @Service
 public class SubscriptionService {
-    
-    public void validateBillingAccess(String tenantId) {
-        UserContext userContext = getCurrentUserContext();
-        
-        if (!userContext.tenantId().equals(tenantId) && !userContext.isAdmin()) {
-            throw new AccessDeniedException(
-                "User does not have access to this tenant's billing information"
-            );
-        }
+
+  public void validateBillingAccess(String tenantId) {
+    UserContext userContext = getCurrentUserContext();
+
+    if (!userContext.tenantId().equals(tenantId) && !userContext.isAdmin()) {
+      throw new AccessDeniedException("User does not have access to this tenant's billing information");
     }
-    
-    public void validateBillingManagement(String tenantId) {
-        UserContext userContext = getCurrentUserContext();
-        
-        if (!userContext.tenantId().equals(tenantId)) {
-            throw new AccessDeniedException(
-                "User does not belong to this tenant"
-            );
-        }
-        
-        if (!userContext.canManageBilling()) {
-            throw new AccessDeniedException(
-                "User does not have billing management authority"
-            );
-        }
+  }
+
+  public void validateBillingManagement(String tenantId) {
+    UserContext userContext = getCurrentUserContext();
+
+    if (!userContext.tenantId().equals(tenantId)) {
+      throw new AccessDeniedException("User does not belong to this tenant");
     }
+
+    if (!userContext.canManageBilling()) {
+      throw new AccessDeniedException("User does not have billing management authority");
+    }
+  }
 }
 ```
 
@@ -918,31 +894,33 @@ The billing service achieves PCI DSS compliance through payment provider abstrac
 5. **Secure Transmission**: All payment data transmitted over TLS 1.3
 
 **Payment Method Storage**:
+
 ```java
 @Entity
 @Table(name = "payment_methods")
 public class PaymentMethod {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    private UUID tenantId;
-    private UUID userId;
-    
-    @Enumerated(EnumType.STRING)
-    private PaymentMethodType type;
-    
-    // Provider token - NOT the actual card number
-    private String providerPaymentMethodId;
-    
-    // Only last 4 digits for display
-    private String last4;
-    private String brand;
-    
-    private Integer expiryMonth;
-    private Integer expiryYear;
-    
-    // No full card number stored!
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  private UUID tenantId;
+  private UUID userId;
+
+  @Enumerated(EnumType.STRING)
+  private PaymentMethodType type;
+
+  // Provider token - NOT the actual card number
+  private String providerPaymentMethodId;
+
+  // Only last 4 digits for display
+  private String last4;
+  private String brand;
+
+  private Integer expiryMonth;
+  private Integer expiryYear;
+
+  // No full card number stored!
 }
 ```
 
@@ -951,42 +929,38 @@ public class PaymentMethod {
 #### Webhook Security
 
 **Webhook Signature Verification**:
+
 ```java
 @RestController
 @RequestMapping("/api/v1/billing/webhooks")
 public class WebhookRestResource {
-    
-    private final WebhookService webhookService;
-    
-    @PostMapping("/stripe")
-    public ResponseEntity<Void> handleStripeWebhook(
-        @RequestBody String payload,
-        @RequestHeader("Stripe-Signature") String signature
-    ) {
-        if (!webhookService.verifyStripeSignature(payload, signature)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        
-        webhookService.processStripeWebhook(payload);
-        return ResponseEntity.ok().build();
+
+  private final WebhookService webhookService;
+
+  @PostMapping("/stripe")
+  public ResponseEntity<Void> handleStripeWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String signature) {
+    if (!webhookService.verifyStripeSignature(payload, signature)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-    
-    @PostMapping("/paypal")
-    public ResponseEntity<Void> handlePayPalWebhook(
-        @RequestBody String payload,
-        @RequestHeader("PAYPAL-TRANSMISSION-ID") String transmissionId,
-        @RequestHeader("PAYPAL-TRANSMISSION-TIME") String transmissionTime,
-        @RequestHeader("PAYPAL-TRANSMISSION-SIG") String signature
-    ) {
-        if (!webhookService.verifyPayPalSignature(
-            payload, transmissionId, transmissionTime, signature
-        )) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        
-        webhookService.processPayPalWebhook(payload);
-        return ResponseEntity.ok().build();
+
+    webhookService.processStripeWebhook(payload);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/paypal")
+  public ResponseEntity<Void> handlePayPalWebhook(
+    @RequestBody String payload,
+    @RequestHeader("PAYPAL-TRANSMISSION-ID") String transmissionId,
+    @RequestHeader("PAYPAL-TRANSMISSION-TIME") String transmissionTime,
+    @RequestHeader("PAYPAL-TRANSMISSION-SIG") String signature
+  ) {
+    if (!webhookService.verifyPayPalSignature(payload, transmissionId, transmissionTime, signature)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    webhookService.processPayPalWebhook(payload);
+    return ResponseEntity.ok().build();
+  }
 }
 ```
 
@@ -995,40 +969,30 @@ public class WebhookRestResource {
 #### Idempotency
 
 **Idempotency Key Handling**:
+
 ```java
 @Service
 public class PaymentService {
-    
-    private final RedisTemplate<String, String> redisTemplate;
-    
-    public Payment processPayment(
-        Invoice invoice,
-        PaymentMethod paymentMethod,
-        String idempotencyKey
-    ) {
-        String key = "payment:idempotency:" + idempotencyKey;
-        
-        // Check if payment already processed
-        String existingPaymentId = redisTemplate.opsForValue().get(key);
-        if (existingPaymentId != null) {
-            return paymentRepository.findById(Long.parseLong(existingPaymentId))
-                .orElseThrow(() -> new PaymentNotFoundException(
-                    "Payment not found: " + existingPaymentId
-                ));
-        }
-        
-        // Process payment
-        Payment payment = doProcessPayment(invoice, paymentMethod);
-        
-        // Store idempotency key
-        redisTemplate.opsForValue().set(
-            key,
-            payment.getId().toString(),
-            Duration.ofHours(24)
-        );
-        
-        return payment;
+
+  private final RedisTemplate<String, String> redisTemplate;
+
+  public Payment processPayment(Invoice invoice, PaymentMethod paymentMethod, String idempotencyKey) {
+    String key = "payment:idempotency:" + idempotencyKey;
+
+    // Check if payment already processed
+    String existingPaymentId = redisTemplate.opsForValue().get(key);
+    if (existingPaymentId != null) {
+      return paymentRepository.findById(Long.parseLong(existingPaymentId)).orElseThrow(() -> new PaymentNotFoundException("Payment not found: " + existingPaymentId));
     }
+
+    // Process payment
+    Payment payment = doProcessPayment(invoice, paymentMethod);
+
+    // Store idempotency key
+    redisTemplate.opsForValue().set(key, payment.getId().toString(), Duration.ofHours(24));
+
+    return payment;
+  }
 }
 ```
 
@@ -1045,58 +1009,57 @@ public class PaymentService {
 #### Audit Logging
 
 **Audit Log Entity**:
+
 ```java
 @Entity
 @Table(name = "billing_audit_log")
 public class BillingAuditLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    private UUID tenantId;
-    private UUID userId;
-    
-    private String operation; // e.g., "SUBSCRIPTION_UPGRADED"
-    private String entityType; // e.g., "SUBSCRIPTION"
-    private Long entityId;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> changes;
-    
-    private String ipAddress;
-    private String userAgent;
-    
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-    
-    // Immutable - no update or delete methods
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  private UUID tenantId;
+  private UUID userId;
+
+  private String operation; // e.g., "SUBSCRIPTION_UPGRADED"
+  private String entityType; // e.g., "SUBSCRIPTION"
+  private Long entityId;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> changes;
+
+  private String ipAddress;
+  private String userAgent;
+
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
+
+  // Immutable - no update or delete methods
 }
 ```
 
 **Audit Logging Service**:
+
 ```java
 @Service
 public class AuditLogService {
-    
-    public void logSubscriptionChange(
-        Subscription subscription,
-        String operation,
-        Map<String, Object> changes
-    ) {
-        BillingAuditLog log = new BillingAuditLog();
-        log.setTenantId(subscription.getTenantId());
-        log.setUserId(getCurrentUserId());
-        log.setOperation(operation);
-        log.setEntityType("SUBSCRIPTION");
-        log.setEntityId(subscription.getId());
-        log.setChanges(changes);
-        log.setIpAddress(getCurrentIpAddress());
-        log.setUserAgent(getCurrentUserAgent());
-        log.setCreatedAt(LocalDateTime.now());
-        
-        auditLogRepository.save(log);
-    }
+
+  public void logSubscriptionChange(Subscription subscription, String operation, Map<String, Object> changes) {
+    BillingAuditLog log = new BillingAuditLog();
+    log.setTenantId(subscription.getTenantId());
+    log.setUserId(getCurrentUserId());
+    log.setOperation(operation);
+    log.setEntityType("SUBSCRIPTION");
+    log.setEntityId(subscription.getId());
+    log.setChanges(changes);
+    log.setIpAddress(getCurrentIpAddress());
+    log.setUserAgent(getCurrentUserAgent());
+    log.setCreatedAt(LocalDateTime.now());
+
+    auditLogRepository.save(log);
+  }
 }
 ```
 
@@ -1136,12 +1099,14 @@ iqscaffold-billing-service/
 ### Configuration Management
 
 **Configuration Properties Pattern**:
+
 - Use `@ConfigurationProperties` with Java records for type-safe configuration
 - Prefix all custom properties with `iqscaffold.billing.`
 - Apply Jakarta validation annotations for configuration validation
 - Generate `spring-configuration-metadata.json` for IDE support
 
 **Configuration Structure**:
+
 ```yaml
 iqscaffold:
   billing:
@@ -1178,6 +1143,7 @@ iqscaffold:
 **Controller Naming**: All REST controllers use the `-RestResource` suffix (e.g., `SubscriptionRestResource`, `InvoiceRestResource`)
 
 **OpenAPI Documentation**: Comprehensive API documentation using SpringDoc annotations:
+
 - `@Tag` for controller-level grouping
 - `@Operation` with detailed descriptions using text blocks
 - `@ApiResponses` documenting all response codes
@@ -1189,13 +1155,15 @@ iqscaffold:
 ### Database Migration Strategy
 
 **Liquibase Organization**:
+
 - **System changesets**: `db/changelog/system/` for public schema (subscription plans)
 - **Tenant changesets**: `db/changelog/tenant/` for tenant-scoped tables
-- **Naming convention**: 
+- **Naming convention**:
   - System: `00000000000000-descriptive-name.xml`
   - Tenant: `YYYYMMDDHHMMSS-descriptive-name.xml`
 
 **Migration Patterns**:
+
 - Separate changesets for table creation, indexes, constraints, and seed data
 - Descriptive comments in each changeset
 - Rollback blocks where applicable
@@ -1206,6 +1174,7 @@ iqscaffold:
 ### Constants and String Literals
 
 **Centralized Constants**: All repeatable strings centralized in `BillingConstants.java`:
+
 - HTTP headers (`Headers.X_TENANT_ID`, `Headers.X_IDEMPOTENCY_KEY`)
 - MDC keys for logging (`MDC.TENANT_ID`, `MDC.SUBSCRIPTION_ID`)
 - Event types (`BillingEvents.SUBSCRIPTION_CREATED`, `BillingEvents.PAYMENT_FAILED`)
@@ -1219,6 +1188,7 @@ iqscaffold:
 ### Exception Handling
 
 **Custom Exception Hierarchy**:
+
 ```
 BillingException (base)
 ├── SubscriptionException
@@ -1241,6 +1211,7 @@ BillingException (base)
 ```
 
 **HTTP Status Mapping**:
+
 - `NotFoundException` → 404
 - `AlreadyExistsException` → 409
 - `QuotaExceededException` → 429
@@ -1252,12 +1223,14 @@ BillingException (base)
 ### Internationalization (i18n)
 
 **Message Management**:
+
 - Message properties in `src/main/resources/i18n/messages.properties`
 - Support for English (default), Spanish, French
 - `MessageService` for convenient message retrieval
 - Locale resolution from user preferences, Accept-Language header, or default
 
 **Message Key Organization**:
+
 ```properties
 # Pattern: {category}.{entity}.{action}
 subscription.created=Subscription created successfully
@@ -1272,17 +1245,13 @@ email.subscription.created.subject=Welcome to {0} Plan
 ### Java 21 Modern Features
 
 **Records for DTOs**:
+
 ```java
-public record SubscriptionDto(
-    Long id,
-    String tenantId,
-    String planCode,
-    String status,
-    LocalDateTime currentPeriodEnd
-) {}
+public record SubscriptionDto(Long id, String tenantId, String planCode, String status, LocalDateTime currentPeriodEnd) {}
 ```
 
 **Text Blocks for Multi-line Strings**:
+
 ```java
 @Query("""
     SELECT s FROM Subscription s
@@ -1293,6 +1262,7 @@ public record SubscriptionDto(
 ```
 
 **Pattern Matching**:
+
 ```java
 if (authentication instanceof JwtAuthenticationToken token) {
     String userId = token.getToken().getSubject();
@@ -1300,20 +1270,21 @@ if (authentication instanceof JwtAuthenticationToken token) {
 ```
 
 **Switch Expressions**:
+
 ```java
 String statusMessage = switch (subscription.getStatus()) {
-    case TRIAL -> "Trial period active";
-    case ACTIVE -> "Subscription active";
-    case PAST_DUE -> "Payment overdue";
-    default -> "Unknown status";
+  case TRIAL -> "Trial period active";
+  case ACTIVE -> "Subscription active";
+  case PAST_DUE -> "Payment overdue";
+  default -> "Unknown status";
 };
 ```
 
 **Sealed Classes for Type Hierarchies**:
+
 ```java
-public sealed interface PaymentProvider 
-    permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
-    PaymentResult processPayment(PaymentRequest request);
+public sealed interface PaymentProvider permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
+  PaymentResult processPayment(PaymentRequest request);
 }
 ```
 
@@ -1326,351 +1297,368 @@ public sealed interface PaymentProvider
 ### Core Domain Entities
 
 #### SubscriptionPlan (Public Schema)
+
 ```java
 @Entity
 @Table(name = "subscription_plans", schema = "public")
 public class SubscriptionPlan {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(unique = true, nullable = false)
-    private String planCode;
-    
-    private String name;
-    private String description;
-    
-    @Enumerated(EnumType.STRING)
-    private PlanTier tier; // FREE, PRO, ENTERPRISE
-    
-    @Enumerated(EnumType.STRING)
-    private BillingCycle billingCycle; // MONTHLY, YEARLY, LIFETIME
-    
-    private BigDecimal basePrice;
-    private String currency;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> features;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private PlanQuotas quotas;
-    
-    private Integer trialDays;
-    private Boolean active;
-    private Boolean publicPlan;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(unique = true, nullable = false)
+  private String planCode;
+
+  private String name;
+  private String description;
+
+  @Enumerated(EnumType.STRING)
+  private PlanTier tier; // FREE, PRO, ENTERPRISE
+
+  @Enumerated(EnumType.STRING)
+  private BillingCycle billingCycle; // MONTHLY, YEARLY, LIFETIME
+
+  private BigDecimal basePrice;
+  private String currency;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> features;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private PlanQuotas quotas;
+
+  private Integer trialDays;
+  private Boolean active;
+  private Boolean publicPlan;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
 ```
 
 #### Subscription (Tenant Schema)
+
 ```java
 @Entity
 @Table(name = "subscriptions")
 public class Subscription {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false)
-    private UUID tenantId;
-    
-    @Column(nullable = false)
-    private UUID userId;
-    
-    @ManyToOne
-    @JoinColumn(name = "plan_id", nullable = false)
-    private SubscriptionPlan plan;
-    
-    @Enumerated(EnumType.STRING)
-    private SubscriptionStatus status; // TRIAL, ACTIVE, PAST_DUE, CANCELED, EXPIRED, SUSPENDED, INCOMPLETE
-    
-    private LocalDateTime currentPeriodStart;
-    private LocalDateTime currentPeriodEnd;
-    private LocalDateTime trialStart;
-    private LocalDateTime trialEnd;
-    private LocalDateTime canceledAt;
-    private Boolean cancelAtPeriodEnd;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> metadata;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false)
+  private UUID tenantId;
+
+  @Column(nullable = false)
+  private UUID userId;
+
+  @ManyToOne
+  @JoinColumn(name = "plan_id", nullable = false)
+  private SubscriptionPlan plan;
+
+  @Enumerated(EnumType.STRING)
+  private SubscriptionStatus status; // TRIAL, ACTIVE, PAST_DUE, CANCELED, EXPIRED, SUSPENDED, INCOMPLETE
+
+  private LocalDateTime currentPeriodStart;
+  private LocalDateTime currentPeriodEnd;
+  private LocalDateTime trialStart;
+  private LocalDateTime trialEnd;
+  private LocalDateTime canceledAt;
+  private Boolean cancelAtPeriodEnd;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
 ```
 
 #### Invoice (Tenant Schema)
+
 ```java
 @Entity
 @Table(name = "invoices")
 public class Invoice {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne
-    @JoinColumn(name = "subscription_id")
-    private Subscription subscription;
-    
-    @Column(nullable = false)
-    private UUID tenantId;
-    
-    @Column(unique = true, nullable = false)
-    private String invoiceNumber; // Format: INV-{YEAR}{MONTH}-{SEQUENCE}
-    
-    @Enumerated(EnumType.STRING)
-    private InvoiceStatus status; // DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE
-    
-    private BigDecimal subtotal;
-    private BigDecimal tax;
-    private BigDecimal total;
-    private String currency;
-    
-    private LocalDateTime periodStart;
-    private LocalDateTime periodEnd;
-    private LocalDateTime dueDate;
-    private LocalDateTime paidAt;
-    
-    @ManyToOne
-    @JoinColumn(name = "payment_method_id")
-    private PaymentMethod paymentMethod;
-    
-    private String providerInvoiceId;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private List<InvoiceLineItem> lineItems;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> metadata;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "subscription_id")
+  private Subscription subscription;
+
+  @Column(nullable = false)
+  private UUID tenantId;
+
+  @Column(unique = true, nullable = false)
+  private String invoiceNumber; // Format: INV-{YEAR}{MONTH}-{SEQUENCE}
+
+  @Enumerated(EnumType.STRING)
+  private InvoiceStatus status; // DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE
+
+  private BigDecimal subtotal;
+  private BigDecimal tax;
+  private BigDecimal total;
+  private String currency;
+
+  private LocalDateTime periodStart;
+  private LocalDateTime periodEnd;
+  private LocalDateTime dueDate;
+  private LocalDateTime paidAt;
+
+  @ManyToOne
+  @JoinColumn(name = "payment_method_id")
+  private PaymentMethod paymentMethod;
+
+  private String providerInvoiceId;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private List<InvoiceLineItem> lineItems;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
 ```
 
 #### Payment (Tenant Schema)
+
 ```java
 @Entity
 @Table(name = "payments")
 public class Payment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
-    
-    @Column(nullable = false)
-    private UUID tenantId;
-    
-    private BigDecimal amount;
-    private String currency;
-    
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus status; // PENDING, SUCCEEDED, FAILED, REFUNDED
-    
-    @ManyToOne
-    @JoinColumn(name = "payment_method_id")
-    private PaymentMethod paymentMethod;
-    
-    private String providerPaymentId;
-    private String failureReason;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> metadata;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "invoice_id")
+  private Invoice invoice;
+
+  @Column(nullable = false)
+  private UUID tenantId;
+
+  private BigDecimal amount;
+  private String currency;
+
+  @Enumerated(EnumType.STRING)
+  private PaymentStatus status; // PENDING, SUCCEEDED, FAILED, REFUNDED
+
+  @ManyToOne
+  @JoinColumn(name = "payment_method_id")
+  private PaymentMethod paymentMethod;
+
+  private String providerPaymentId;
+  private String failureReason;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
 ```
 
 #### UsageRecord (Tenant Schema)
+
 ```java
 @Entity
 @Table(name = "usage_records")
 public class UsageRecord {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne
-    @JoinColumn(name = "subscription_id")
-    private Subscription subscription;
-    
-    @Column(nullable = false)
-    private UUID tenantId;
-    
-    @Enumerated(EnumType.STRING)
-    private MetricType metricType; // API_CALLS, STORAGE_GB, ACTIVE_USERS, CUSTOM
-    
-    private Long quantity;
-    private String unit;
-    
-    private LocalDateTime recordedAt;
-    private LocalDateTime billingPeriodStart;
-    private LocalDateTime billingPeriodEnd;
-    
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> metadata;
-    
-    private LocalDateTime createdAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "subscription_id")
+  private Subscription subscription;
+
+  @Column(nullable = false)
+  private UUID tenantId;
+
+  @Enumerated(EnumType.STRING)
+  private MetricType metricType; // API_CALLS, STORAGE_GB, ACTIVE_USERS, CUSTOM
+
+  private Long quantity;
+  private String unit;
+
+  private LocalDateTime recordedAt;
+  private LocalDateTime billingPeriodStart;
+  private LocalDateTime billingPeriodEnd;
+
+  @Type(JsonBinaryType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
+
+  private LocalDateTime createdAt;
 }
 ```
 
 #### PaymentMethod (Tenant Schema)
+
 ```java
 @Entity
 @Table(name = "payment_methods")
 public class PaymentMethod {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(nullable = false)
-    private UUID tenantId;
-    
-    @Column(nullable = false)
-    private UUID userId;
-    
-    @Enumerated(EnumType.STRING)
-    private PaymentMethodType type; // CARD, BANK_ACCOUNT, PAYPAL
-    
-    private String providerPaymentMethodId;
-    private String last4;
-    private String brand;
-    private Integer expiryMonth;
-    private Integer expiryYear;
-    
-    private Boolean isDefault;
-    private Boolean active;
-    
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false)
+  private UUID tenantId;
+
+  @Column(nullable = false)
+  private UUID userId;
+
+  @Enumerated(EnumType.STRING)
+  private PaymentMethodType type; // CARD, BANK_ACCOUNT, PAYPAL
+
+  private String providerPaymentMethodId;
+  private String last4;
+  private String brand;
+  private Integer expiryMonth;
+  private Integer expiryYear;
+
+  private Boolean isDefault;
+  private Boolean active;
+
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }
 ```
 
 ### Service Layer Interfaces
 
 #### SubscriptionService
+
 ```java
 public interface SubscriptionService {
-    // Subscription Creation
-    Subscription createSubscription(UUID tenantId, UUID userId, String planCode);
-    
-    // Subscription Lifecycle
-    Subscription upgradeSubscription(Long subscriptionId, String newPlanCode);
-    Subscription downgradeSubscription(Long subscriptionId, String newPlanCode, boolean immediate);
-    Subscription cancelSubscription(Long subscriptionId, boolean immediate, String reason);
-    Subscription reactivateSubscription(Long subscriptionId);
-    
-    // Trial Management
-    void extendTrial(Long subscriptionId, int additionalDays);
-    void convertTrialToActive(Long subscriptionId);
-    
-    // Status Management
-    void updateSubscriptionStatus(Long subscriptionId, SubscriptionStatus newStatus);
-    
-    // Queries
-    Subscription getSubscription(Long subscriptionId);
-    Subscription getActiveSubscriptionForTenant(UUID tenantId);
-    List<Subscription> getSubscriptionsByStatus(SubscriptionStatus status);
-    
-    // Proration
-    ProrationResult calculateProration(Subscription current, SubscriptionPlan newPlan);
+  // Subscription Creation
+  Subscription createSubscription(UUID tenantId, UUID userId, String planCode);
+
+  // Subscription Lifecycle
+  Subscription upgradeSubscription(Long subscriptionId, String newPlanCode);
+  Subscription downgradeSubscription(Long subscriptionId, String newPlanCode, boolean immediate);
+  Subscription cancelSubscription(Long subscriptionId, boolean immediate, String reason);
+  Subscription reactivateSubscription(Long subscriptionId);
+
+  // Trial Management
+  void extendTrial(Long subscriptionId, int additionalDays);
+  void convertTrialToActive(Long subscriptionId);
+
+  // Status Management
+  void updateSubscriptionStatus(Long subscriptionId, SubscriptionStatus newStatus);
+
+  // Queries
+  Subscription getSubscription(Long subscriptionId);
+  Subscription getActiveSubscriptionForTenant(UUID tenantId);
+  List<Subscription> getSubscriptionsByStatus(SubscriptionStatus status);
+
+  // Proration
+  ProrationResult calculateProration(Subscription current, SubscriptionPlan newPlan);
 }
 ```
 
 #### PaymentService
+
 ```java
 public interface PaymentService {
-    // Payment Method Management
-    PaymentMethod addPaymentMethod(UUID tenantId, UUID userId, PaymentMethodRequest request);
-    void removePaymentMethod(Long paymentMethodId);
-    PaymentMethod setDefaultPaymentMethod(Long paymentMethodId);
-    List<PaymentMethod> getPaymentMethods(UUID tenantId);
-    
-    // Payment Processing
-    Payment processPayment(Invoice invoice, PaymentMethod paymentMethod);
-    Payment retryPayment(Long paymentId);
-    Payment refundPayment(Long paymentId, BigDecimal amount, String reason);
-    
-    // Payment Status
-    void updatePaymentStatus(Long paymentId, PaymentStatus status, String failureReason);
-    
-    // Queries
-    Payment getPayment(Long paymentId);
-    List<Payment> getPaymentsByInvoice(Long invoiceId);
+  // Payment Method Management
+  PaymentMethod addPaymentMethod(UUID tenantId, UUID userId, PaymentMethodRequest request);
+  void removePaymentMethod(Long paymentMethodId);
+  PaymentMethod setDefaultPaymentMethod(Long paymentMethodId);
+  List<PaymentMethod> getPaymentMethods(UUID tenantId);
+
+  // Payment Processing
+  Payment processPayment(Invoice invoice, PaymentMethod paymentMethod);
+  Payment retryPayment(Long paymentId);
+  Payment refundPayment(Long paymentId, BigDecimal amount, String reason);
+
+  // Payment Status
+  void updatePaymentStatus(Long paymentId, PaymentStatus status, String failureReason);
+
+  // Queries
+  Payment getPayment(Long paymentId);
+  List<Payment> getPaymentsByInvoice(Long invoiceId);
 }
 ```
 
 #### InvoiceService
+
 ```java
 public interface InvoiceService {
-    // Invoice Generation
-    Invoice generateInvoice(Subscription subscription);
-    Invoice generateProrationInvoice(Subscription subscription, ProrationResult proration);
-    
-    // Invoice Management
-    Invoice finalizeInvoice(Long invoiceId);
-    void voidInvoice(Long invoiceId, String reason);
-    byte[] generateInvoicePdf(Long invoiceId);
-    
-    // Invoice Payment
-    void markInvoiceAsPaid(Long invoiceId, Payment payment);
-    void markInvoiceAsFailed(Long invoiceId, String reason);
-    
-    // Queries
-    Invoice getInvoice(Long invoiceId);
-    List<Invoice> getInvoicesByTenant(UUID tenantId, InvoiceStatus status, Pageable pageable);
-    Invoice getUpcomingInvoice(UUID tenantId);
+  // Invoice Generation
+  Invoice generateInvoice(Subscription subscription);
+  Invoice generateProrationInvoice(Subscription subscription, ProrationResult proration);
+
+  // Invoice Management
+  Invoice finalizeInvoice(Long invoiceId);
+  void voidInvoice(Long invoiceId, String reason);
+  byte[] generateInvoicePdf(Long invoiceId);
+
+  // Invoice Payment
+  void markInvoiceAsPaid(Long invoiceId, Payment payment);
+  void markInvoiceAsFailed(Long invoiceId, String reason);
+
+  // Queries
+  Invoice getInvoice(Long invoiceId);
+  List<Invoice> getInvoicesByTenant(UUID tenantId, InvoiceStatus status, Pageable pageable);
+  Invoice getUpcomingInvoice(UUID tenantId);
 }
 ```
 
 #### UsageService
+
 ```java
 public interface UsageService {
-    // Usage Recording
-    void recordUsage(UUID tenantId, MetricType metricType, long quantity);
-    void recordUsageBatch(List<UsageRecordRequest> records);
-    
-    // Usage Queries
-    UsageSummary getCurrentUsage(UUID tenantId);
-    UsageSummary getUsageForPeriod(UUID tenantId, LocalDateTime start, LocalDateTime end);
-    Map<MetricType, Long> getUsageByMetric(UUID tenantId, LocalDateTime start, LocalDateTime end);
-    
-    // Quota Enforcement
-    QuotaCheckResult checkQuota(UUID tenantId, MetricType metricType, long requestedQuantity);
-    void enforceQuota(UUID tenantId, MetricType metricType) throws QuotaExceededException;
-    
-    // Usage Reset
-    void resetUsageForNewPeriod(UUID tenantId);
+  // Usage Recording
+  void recordUsage(UUID tenantId, MetricType metricType, long quantity);
+  void recordUsageBatch(List<UsageRecordRequest> records);
+
+  // Usage Queries
+  UsageSummary getCurrentUsage(UUID tenantId);
+  UsageSummary getUsageForPeriod(UUID tenantId, LocalDateTime start, LocalDateTime end);
+  Map<MetricType, Long> getUsageByMetric(UUID tenantId, LocalDateTime start, LocalDateTime end);
+
+  // Quota Enforcement
+  QuotaCheckResult checkQuota(UUID tenantId, MetricType metricType, long requestedQuantity);
+  void enforceQuota(UUID tenantId, MetricType metricType) throws QuotaExceededException;
+
+  // Usage Reset
+  void resetUsageForNewPeriod(UUID tenantId);
 }
 ```
 
 #### PlanService
+
 ```java
 public interface PlanService {
     // Plan Management
     SubscriptionPlan createPlan(PlanRequest request);
     SubscriptionPlan updatePlan(Long planId, PlanUpdateRequest request);
     void archivePlan(Long planId);
-    
+
     // Plan Queries
     SubscriptionPlan getPlan(Long planId);
     SubscriptionPlan getPlanByCode(String planCode);
     List<SubscriptionPlan> getPublicPlans(BillingCycle billingCycle);
     List<SubscriptionPlan> getAllPlans();
-    
+
     // Plan Validation
     boolean canTransitionToP
 lan(SubscriptionPlan from, SubscriptionPlan to);
@@ -1678,55 +1666,58 @@ lan(SubscriptionPlan from, SubscriptionPlan to);
 ```
 
 #### WebhookService
+
 ```java
 public interface WebhookService {
-    // Webhook Processing
-    void processStripeWebhook(String payload, String signature);
-    void processPayPalWebhook(String payload, String signature);
-    
-    // Event Handlers
-    void handlePaymentSucceeded(String providerPaymentId);
-    void handlePaymentFailed(String providerPaymentId, String reason);
-    void handleSubscriptionUpdated(String providerSubscriptionId);
-    void handleSubscriptionDeleted(String providerSubscriptionId);
-    void handleInvoicePaymentSucceeded(String providerInvoiceId);
-    void handleInvoicePaymentFailed(String providerInvoiceId);
-    
-    // Webhook Logging
-    void logWebhookEvent(String provider, String eventType, String payload);
+  // Webhook Processing
+  void processStripeWebhook(String payload, String signature);
+  void processPayPalWebhook(String payload, String signature);
+
+  // Event Handlers
+  void handlePaymentSucceeded(String providerPaymentId);
+  void handlePaymentFailed(String providerPaymentId, String reason);
+  void handleSubscriptionUpdated(String providerSubscriptionId);
+  void handleSubscriptionDeleted(String providerSubscriptionId);
+  void handleInvoicePaymentSucceeded(String providerInvoiceId);
+  void handleInvoicePaymentFailed(String providerInvoiceId);
+
+  // Webhook Logging
+  void logWebhookEvent(String provider, String eventType, String payload);
 }
 ```
 
 ### Payment Provider Abstraction
 
 #### PaymentProviderAdapter Interface
+
 ```java
 public interface PaymentProviderAdapter {
-    // Provider Identification
-    String getProviderName();
-    
-    // Payment Method Management
-    String createPaymentMethod(PaymentMethodRequest request);
-    void deletePaymentMethod(String providerPaymentMethodId);
-    PaymentMethodDetails getPaymentMethodDetails(String providerPaymentMethodId);
-    
-    // Payment Processing
-    PaymentResult processPayment(BigDecimal amount, String currency, String paymentMethodId);
-    PaymentResult refundPayment(String providerPaymentId, BigDecimal amount);
-    
-    // Customer Management
-    String createCustomer(UUID tenantId, String email);
-    void updateCustomer(String providerCustomerId, CustomerUpdateRequest request);
-    
-    // Subscription Sync (Optional)
-    void syncSubscription(Subscription subscription);
-    
-    // Webhook Verification
-    boolean verifyWebhookSignature(String payload, String signature);
+  // Provider Identification
+  String getProviderName();
+
+  // Payment Method Management
+  String createPaymentMethod(PaymentMethodRequest request);
+  void deletePaymentMethod(String providerPaymentMethodId);
+  PaymentMethodDetails getPaymentMethodDetails(String providerPaymentMethodId);
+
+  // Payment Processing
+  PaymentResult processPayment(BigDecimal amount, String currency, String paymentMethodId);
+  PaymentResult refundPayment(String providerPaymentId, BigDecimal amount);
+
+  // Customer Management
+  String createCustomer(UUID tenantId, String email);
+  void updateCustomer(String providerCustomerId, CustomerUpdateRequest request);
+
+  // Subscription Sync (Optional)
+  void syncSubscription(Subscription subscription);
+
+  // Webhook Verification
+  boolean verifyWebhookSignature(String payload, String signature);
 }
 ```
 
 #### Implementations
+
 - **StripePaymentAdapter**: Implements Stripe-specific payment processing
 - **PayPalPaymentAdapter**: Implements PayPal-specific payment processing
 - **ManualPaymentAdapter**: Implements manual/offline payment processing for enterprise contracts
@@ -1740,6 +1731,7 @@ public interface PaymentProviderAdapter {
 #### Public Schema Tables
 
 **subscription_plans**
+
 ```sql
 CREATE TABLE public.subscription_plans (
     id BIGSERIAL PRIMARY KEY,
@@ -1766,6 +1758,7 @@ CREATE INDEX idx_plans_active ON public.subscription_plans(active);
 #### Tenant Schema Tables
 
 **subscriptions**
+
 ```sql
 CREATE TABLE subscriptions (
     id BIGSERIAL PRIMARY KEY,
@@ -1790,6 +1783,7 @@ CREATE INDEX idx_subscriptions_period_end ON subscriptions(current_period_end);
 ```
 
 **invoices**
+
 ```sql
 CREATE TABLE invoices (
     id BIGSERIAL PRIMARY KEY,
@@ -1820,6 +1814,7 @@ CREATE INDEX idx_invoices_due_date ON invoices(due_date);
 ```
 
 **payments**
+
 ```sql
 CREATE TABLE payments (
     id BIGSERIAL PRIMARY KEY,
@@ -1842,6 +1837,7 @@ CREATE INDEX idx_payments_status ON payments(status);
 ```
 
 **usage_records**
+
 ```sql
 CREATE TABLE usage_records (
     id BIGSERIAL PRIMARY KEY,
@@ -1864,6 +1860,7 @@ CREATE INDEX idx_usage_metric ON usage_records(metric_type);
 ```
 
 **payment_methods**
+
 ```sql
 CREATE TABLE payment_methods (
     id BIGSERIAL PRIMARY KEY,
@@ -1886,6 +1883,7 @@ CREATE INDEX idx_payment_methods_default ON payment_methods(is_default);
 ```
 
 **billing_events**
+
 ```sql
 CREATE TABLE billing_events (
     id BIGSERIAL PRIMARY KEY,
@@ -1906,64 +1904,75 @@ CREATE INDEX idx_billing_events_created ON billing_events(created_at);
 ### Value Objects and DTOs
 
 #### PlanQuotas
+
 ```java
 public class PlanQuotas {
-    private Integer maxUsers;
-    private Integer storageGb;
-    private Long apiCallsPerMonth;
-    private Map<String, Long> customMetrics;
+
+  private Integer maxUsers;
+  private Integer storageGb;
+  private Long apiCallsPerMonth;
+  private Map<String, Long> customMetrics;
 }
 ```
 
 #### InvoiceLineItem
+
 ```java
 public class InvoiceLineItem {
-    private String description;
-    private LineItemType type; // SUBSCRIPTION_FEE, USAGE_CHARGE, PRORATION_CREDIT, PRORATION_CHARGE, DISCOUNT, TAX
-    private Long quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal amount;
+
+  private String description;
+  private LineItemType type; // SUBSCRIPTION_FEE, USAGE_CHARGE, PRORATION_CREDIT, PRORATION_CHARGE, DISCOUNT, TAX
+  private Long quantity;
+  private BigDecimal unitPrice;
+  private BigDecimal amount;
 }
 ```
 
 #### ProrationResult
+
 ```java
 public class ProrationResult {
-    private BigDecimal creditAmount;
-    private BigDecimal chargeAmount;
-    private BigDecimal netAmount;
-    private int daysRemaining;
-    private int daysInPeriod;
-    private String description;
+
+  private BigDecimal creditAmount;
+  private BigDecimal chargeAmount;
+  private BigDecimal netAmount;
+  private int daysRemaining;
+  private int daysInPeriod;
+  private String description;
 }
 ```
 
 #### UsageSummary
+
 ```java
 public class UsageSummary {
-    private UUID tenantId;
-    private Map<MetricType, UsageMetric> metrics;
-    private LocalDateTime periodStart;
-    private LocalDateTime periodEnd;
+
+  private UUID tenantId;
+  private Map<MetricType, UsageMetric> metrics;
+  private LocalDateTime periodStart;
+  private LocalDateTime periodEnd;
 }
 
 public class UsageMetric {
-    private MetricType type;
-    private Long used;
-    private Long limit;
-    private Double percentageUsed;
-    private LocalDateTime resetDate;
+
+  private MetricType type;
+  private Long used;
+  private Long limit;
+  private Double percentageUsed;
+  private LocalDateTime resetDate;
 }
 ```
 
 #### QuotaCheckResult
+
 ```java
 public class QuotaCheckResult {
-    private boolean allowed;
-    private Long currentUsage;
-    private Long limit;
-    private Long remaining;
-    private String message;
+
+  private boolean allowed;
+  private Long currentUsage;
+  private Long limit;
+  private Long remaining;
+  private String message;
 }
 ```
 
@@ -1976,21 +1985,32 @@ public class QuotaCheckResult {
 ```java
 // Base Exception
 public class BillingException extends RuntimeException {
-    private final String errorCode;
-    private final Map<String, Object> details;
+
+  private final String errorCode;
+  private final Map<String, Object> details;
 }
 
 // Specific Exceptions
 public class SubscriptionNotFoundException extends BillingException {}
+
 public class SubscriptionAlreadyExistsException extends BillingException {}
+
 public class PlanNotFoundException extends BillingException {}
+
 public class InvalidPlanTransitionException extends BillingException {}
+
 public class QuotaExceededException extends BillingException {}
+
 public class FeatureNotAvailableException extends BillingException {}
+
 public class PaymentRequiredException extends BillingException {}
+
 public class PaymentFailedException extends BillingException {}
+
 public class InvoiceNotFoundException extends BillingException {}
+
 public class InvalidPaymentMethodException extends BillingException {}
+
 public class UsageLimitExceededException extends BillingException {}
 ```
 
@@ -2017,26 +2037,23 @@ public class UsageLimitExceededException extends BillingException {}
 ```java
 @RestControllerAdvice
 public class BillingExceptionHandler {
-    
-    @ExceptionHandler(SubscriptionNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleSubscriptionNotFound(SubscriptionNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponse("SUBSCRIPTION_NOT_FOUND", ex.getMessage(), ex.getDetails()));
-    }
-    
-    @ExceptionHandler(QuotaExceededException.class)
-    public ResponseEntity<ErrorResponse> handleQuotaExceeded(QuotaExceededException ex) {
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-            .body(new ErrorResponse("QUOTA_EXCEEDED", ex.getMessage(), ex.getDetails()));
-    }
-    
-    @ExceptionHandler(PaymentFailedException.class)
-    public ResponseEntity<ErrorResponse> handlePaymentFailed(PaymentFailedException ex) {
-        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-            .body(new ErrorResponse("PAYMENT_FAILED", ex.getMessage(), ex.getDetails()));
-    }
-    
-    // Additional handlers for other exceptions...
+
+  @ExceptionHandler(SubscriptionNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleSubscriptionNotFound(SubscriptionNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("SUBSCRIPTION_NOT_FOUND", ex.getMessage(), ex.getDetails()));
+  }
+
+  @ExceptionHandler(QuotaExceededException.class)
+  public ResponseEntity<ErrorResponse> handleQuotaExceeded(QuotaExceededException ex) {
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ErrorResponse("QUOTA_EXCEEDED", ex.getMessage(), ex.getDetails()));
+  }
+
+  @ExceptionHandler(PaymentFailedException.class)
+  public ResponseEntity<ErrorResponse> handlePaymentFailed(PaymentFailedException ex) {
+    return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(new ErrorResponse("PAYMENT_FAILED", ex.getMessage(), ex.getDetails()));
+  }
+
+  // Additional handlers for other exceptions...
 }
 ```
 
@@ -2049,11 +2066,13 @@ public class BillingExceptionHandler {
 Unit tests will verify individual components in isolation using mocks for dependencies.
 
 **Coverage Requirements:**
+
 - Minimum 80% code coverage
 - 100% coverage for financial calculations (proration, invoice totals, tax calculations)
 - 100% coverage for state transition logic
 
 **Key Areas:**
+
 - Service layer business logic
 - Proration calculations
 - Subscription state transitions
@@ -2063,42 +2082,44 @@ Unit tests will verify individual components in isolation using mocks for depend
 - Usage aggregation
 
 **Testing Framework:**
+
 - JUnit 5 for test execution
 - Mockito for mocking dependencies
 - AssertJ for fluent assertions
 
 **Example Unit Test:**
+
 ```java
 @ExtendWith(MockitoExtension.class)
 class SubscriptionServiceTest {
-    
-    @Mock
-    private SubscriptionRepository subscriptionRepository;
-    
-    @Mock
-    private PlanService planService;
-    
-    @Mock
-    private InvoiceService invoiceService;
-    
-    @InjectMocks
-    private SubscriptionServiceImpl subscriptionService;
-    
-    @Test
-    void shouldCalculateProrationCorrectly() {
-        // Given
-        SubscriptionPlan currentPlan = createPlan("PRO", new BigDecimal("50.00"));
-        SubscriptionPlan newPlan = createPlan("ENTERPRISE", new BigDecimal("100.00"));
-        Subscription subscription = createSubscription(currentPlan, 15); // 15 days into 30-day period
-        
-        // When
-        ProrationResult result = subscriptionService.calculateProration(subscription, newPlan);
-        
-        // Then
-        assertThat(result.getCreditAmount()).isEqualByComparingTo(new BigDecimal("25.00")); // 15/30 * 50
-        assertThat(result.getChargeAmount()).isEqualByComparingTo(new BigDecimal("50.00")); // 15/30 * 100
-        assertThat(result.getNetAmount()).isEqualByComparingTo(new BigDecimal("25.00")); // 50 - 25
-    }
+
+  @Mock
+  private SubscriptionRepository subscriptionRepository;
+
+  @Mock
+  private PlanService planService;
+
+  @Mock
+  private InvoiceService invoiceService;
+
+  @InjectMocks
+  private SubscriptionServiceImpl subscriptionService;
+
+  @Test
+  void shouldCalculateProrationCorrectly() {
+    // Given
+    SubscriptionPlan currentPlan = createPlan("PRO", new BigDecimal("50.00"));
+    SubscriptionPlan newPlan = createPlan("ENTERPRISE", new BigDecimal("100.00"));
+    Subscription subscription = createSubscription(currentPlan, 15); // 15 days into 30-day period
+
+    // When
+    ProrationResult result = subscriptionService.calculateProration(subscription, newPlan);
+
+    // Then
+    assertThat(result.getCreditAmount()).isEqualByComparingTo(new BigDecimal("25.00")); // 15/30 * 50
+    assertThat(result.getChargeAmount()).isEqualByComparingTo(new BigDecimal("50.00")); // 15/30 * 100
+    assertThat(result.getNetAmount()).isEqualByComparingTo(new BigDecimal("25.00")); // 50 - 25
+  }
 }
 ```
 
@@ -2107,11 +2128,13 @@ class SubscriptionServiceTest {
 Integration tests will verify interactions between components using real database and message queue instances.
 
 **Testing Framework:**
+
 - Spring Boot Test
 - Testcontainers for PostgreSQL, Redis, and RabbitMQ
 - WireMock for mocking payment provider APIs
 
 **Key Scenarios:**
+
 - Complete subscription lifecycle (create → upgrade → cancel)
 - Payment processing with retry logic
 - Invoice generation and payment
@@ -2120,49 +2143,50 @@ Integration tests will verify interactions between components using real databas
 - Multi-tenant data isolation
 
 **Example Integration Test:**
+
 ```java
 @SpringBootTest
 @Testcontainers
 class SubscriptionIntegrationTest {
-    
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
-    
-    @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7");
-    
-    @Autowired
-    private SubscriptionService subscriptionService;
-    
-    @Autowired
-    private InvoiceService invoiceService;
-    
-    @Test
-    @Transactional
-    void shouldCreateSubscriptionWithTrialAndConvertToActive() {
-        // Given
-        UUID tenantId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        String planCode = "PRO";
-        
-        // When - Create subscription with trial
-        Subscription subscription = subscriptionService.createSubscription(tenantId, userId, planCode);
-        
-        // Then - Verify trial status
-        assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.TRIAL);
-        assertThat(subscription.getTrialEnd()).isAfter(LocalDateTime.now());
-        
-        // When - Convert to active
-        subscriptionService.convertTrialToActive(subscription.getId());
-        
-        // Then - Verify active status and invoice generated
-        Subscription activeSubscription = subscriptionService.getSubscription(subscription.getId());
-        assertThat(activeSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
-        
-        List<Invoice> invoices = invoiceService.getInvoicesByTenant(tenantId, null, Pageable.unpaged());
-        assertThat(invoices).hasSize(1);
-        assertThat(invoices.get(0).getStatus()).isEqualTo(InvoiceStatus.OPEN);
-    }
+
+  @Container
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
+
+  @Container
+  static GenericContainer<?> redis = new GenericContainer<>("redis:7");
+
+  @Autowired
+  private SubscriptionService subscriptionService;
+
+  @Autowired
+  private InvoiceService invoiceService;
+
+  @Test
+  @Transactional
+  void shouldCreateSubscriptionWithTrialAndConvertToActive() {
+    // Given
+    UUID tenantId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    String planCode = "PRO";
+
+    // When - Create subscription with trial
+    Subscription subscription = subscriptionService.createSubscription(tenantId, userId, planCode);
+
+    // Then - Verify trial status
+    assertThat(subscription.getStatus()).isEqualTo(SubscriptionStatus.TRIAL);
+    assertThat(subscription.getTrialEnd()).isAfter(LocalDateTime.now());
+
+    // When - Convert to active
+    subscriptionService.convertTrialToActive(subscription.getId());
+
+    // Then - Verify active status and invoice generated
+    Subscription activeSubscription = subscriptionService.getSubscription(subscription.getId());
+    assertThat(activeSubscription.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+
+    List<Invoice> invoices = invoiceService.getInvoicesByTenant(tenantId, null, Pageable.unpaged());
+    assertThat(invoices).hasSize(1);
+    assertThat(invoices.get(0).getStatus()).isEqualTo(InvoiceStatus.OPEN);
+  }
 }
 ```
 
@@ -2173,6 +2197,7 @@ Property-based tests will verify universal properties that should hold across al
 **Property Testing Library:** jqwik (Java property-based testing framework)
 
 **Key Properties to Test:**
+
 - Proration calculations are always positive and sum correctly
 - Invoice totals always equal sum of line items plus tax
 - Usage aggregation is commutative (order doesn't matter)
@@ -2180,34 +2205,33 @@ Property-based tests will verify universal properties that should hold across al
 - Quota checks are consistent with usage records
 
 **Example Property Test:**
+
 ```java
 @Property
 void prorationShouldAlwaysBePositiveAndSumCorrectly(
-    @ForAll @BigRange(min = "10.00", max = "1000.00") BigDecimal oldPrice,
-    @ForAll @BigRange(min = "10.00", max = "1000.00") BigDecimal newPrice,
-    @ForAll @IntRange(min = 1, max = 30) int daysRemaining,
-    @ForAll @IntRange(min = 28, max = 31) int daysInPeriod
+  @ForAll @BigRange(min = "10.00", max = "1000.00") BigDecimal oldPrice,
+  @ForAll @BigRange(min = "10.00", max = "1000.00") BigDecimal newPrice,
+  @ForAll @IntRange(min = 1, max = 30) int daysRemaining,
+  @ForAll @IntRange(min = 28, max = 31) int daysInPeriod
 ) {
-    // Given
-    SubscriptionPlan oldPlan = createPlan("OLD", oldPrice);
-    SubscriptionPlan newPlan = createPlan("NEW", newPrice);
-    Subscription subscription = createSubscriptionWithDaysRemaining(oldPlan, daysRemaining, daysInPeriod);
-    
-    // When
-    ProrationResult result = subscriptionService.calculateProration(subscription, newPlan);
-    
-    // Then
-    assertThat(result.getCreditAmount()).isGreaterThanOrEqualTo(BigDecimal.ZERO);
-    assertThat(result.getChargeAmount()).isGreaterThanOrEqualTo(BigDecimal.ZERO);
-    
-    BigDecimal expectedCredit = oldPrice.multiply(BigDecimal.valueOf(daysRemaining))
-        .divide(BigDecimal.valueOf(daysInPeriod), 2, RoundingMode.HALF_UP);
-    BigDecimal expectedCharge = newPrice.multiply(BigDecimal.valueOf(daysRemaining))
-        .divide(BigDecimal.valueOf(daysInPeriod), 2, RoundingMode.HALF_UP);
-    
-    assertThat(result.getCreditAmount()).isEqualByComparingTo(expectedCredit);
-    assertThat(result.getChargeAmount()).isEqualByComparingTo(expectedCharge);
-    assertThat(result.getNetAmount()).isEqualByComparingTo(expectedCharge.subtract(expectedCredit));
+  // Given
+  SubscriptionPlan oldPlan = createPlan("OLD", oldPrice);
+  SubscriptionPlan newPlan = createPlan("NEW", newPrice);
+  Subscription subscription = createSubscriptionWithDaysRemaining(oldPlan, daysRemaining, daysInPeriod);
+
+  // When
+  ProrationResult result = subscriptionService.calculateProration(subscription, newPlan);
+
+  // Then
+  assertThat(result.getCreditAmount()).isGreaterThanOrEqualTo(BigDecimal.ZERO);
+  assertThat(result.getChargeAmount()).isGreaterThanOrEqualTo(BigDecimal.ZERO);
+
+  BigDecimal expectedCredit = oldPrice.multiply(BigDecimal.valueOf(daysRemaining)).divide(BigDecimal.valueOf(daysInPeriod), 2, RoundingMode.HALF_UP);
+  BigDecimal expectedCharge = newPrice.multiply(BigDecimal.valueOf(daysRemaining)).divide(BigDecimal.valueOf(daysInPeriod), 2, RoundingMode.HALF_UP);
+
+  assertThat(result.getCreditAmount()).isEqualByComparingTo(expectedCredit);
+  assertThat(result.getChargeAmount()).isEqualByComparingTo(expectedCharge);
+  assertThat(result.getNetAmount()).isEqualByComparingTo(expectedCharge.subtract(expectedCredit));
 }
 ```
 
@@ -2215,122 +2239,122 @@ void prorationShouldAlwaysBePositiveAndSumCorrectly(
 
 ## Correctness Properties
 
-
-*A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 Based on the acceptance criteria analysis, the following correctness properties must be upheld by the billing service:
 
 ### Property 1: Tenant Isolation for Subscriptions
 
-*For any* two distinct tenants, querying subscriptions for one tenant should never return subscriptions belonging to the other tenant.
+_For any_ two distinct tenants, querying subscriptions for one tenant should never return subscriptions belonging to the other tenant.
 
 **Validates: Requirements 2.2**
 
 ### Property 2: Tenant Isolation for Usage Records
 
-*For any* two distinct tenants, querying usage records for one tenant should never return usage records belonging to the other tenant.
+_For any_ two distinct tenants, querying usage records for one tenant should never return usage records belonging to the other tenant.
 
 **Validates: Requirements 2.3**
 
 ### Property 3: Tenant Isolation for Invoices
 
-*For any* two distinct tenants, querying invoices for one tenant should never return invoices belonging to the other tenant.
+_For any_ two distinct tenants, querying invoices for one tenant should never return invoices belonging to the other tenant.
 
 **Validates: Requirements 2.4**
 
 ### Property 4: Tenant Isolation for Payment Methods
 
-*For any* two distinct tenants, querying payment methods for one tenant should never return payment methods belonging to the other tenant.
+_For any_ two distinct tenants, querying payment methods for one tenant should never return payment methods belonging to the other tenant.
 
 **Validates: Requirements 2.5**
 
 ### Property 5: Tenant Isolation for Billing Events
 
-*For any* two distinct tenants, querying billing events for one tenant should never return billing events belonging to the other tenant.
+_For any_ two distinct tenants, querying billing events for one tenant should never return billing events belonging to the other tenant.
 
 **Validates: Requirements 2.6**
 
 ### Property 6: Plan Creation Persistence
 
-*For any* valid subscription plan with name, code, tier, billing cycle, price, and currency, creating the plan and then retrieving it should return a plan with all the same field values.
+_For any_ valid subscription plan with name, code, tier, billing cycle, price, and currency, creating the plan and then retrieving it should return a plan with all the same field values.
 
 **Validates: Requirements 4.1**
 
 ### Property 7: Plan Features Round-Trip
 
-*For any* valid JSON feature structure, storing it in a plan's features field and then retrieving the plan should return the same feature structure.
+_For any_ valid JSON feature structure, storing it in a plan's features field and then retrieving the plan should return the same feature structure.
 
 **Validates: Requirements 4.5**
 
 ### Property 8: Plan Quotas Round-Trip
 
-*For any* valid quota structure including maxUsers, storageGb, apiCallsPerMonth, and custom metrics, storing it in a plan and then retrieving the plan should return the same quota structure.
+_For any_ valid quota structure including maxUsers, storageGb, apiCallsPerMonth, and custom metrics, storing it in a plan and then retrieving the plan should return the same quota structure.
 
 **Validates: Requirements 4.6**
 
 ### Property 9: Trial Period Persistence
 
-*For any* valid trial period duration in days, setting it on a plan and then retrieving the plan should return the same trial period value.
+_For any_ valid trial period duration in days, setting it on a plan and then retrieving the plan should return the same trial period value.
 
 **Validates: Requirements 4.7**
 
 ### Property 10: Plan Visibility Filtering
 
-*For any* plan marked as private, it should not appear in the public plan listing endpoint results.
+_For any_ plan marked as private, it should not appear in the public plan listing endpoint results.
 
 **Validates: Requirements 4.8**
 
 ### Property 11: Plan Update Persistence
 
-*For any* existing plan and valid updates to name, description, features, or quotas, updating the plan and then retrieving it should return the updated values.
+_For any_ existing plan and valid updates to name, description, features, or quotas, updating the plan and then retrieving it should return the updated values.
 
 **Validates: Requirements 5.1**
 
 ### Property 12: Price Grandfathering
 
-*For any* subscription created before a plan price change, the subscription should maintain the original price even after the plan price is updated.
+_For any_ subscription created before a plan price change, the subscription should maintain the original price even after the plan price is updated.
 
 **Validates: Requirements 5.2**
 
 ### Property 13: Archived Plan Subscription Prevention
 
-*For any* archived or deactivated plan, attempting to create a new subscription with that plan should fail with an appropriate error.
+_For any_ archived or deactivated plan, attempting to create a new subscription with that plan should fail with an appropriate error.
 
 **Validates: Requirements 5.4**
 
 ### Property 14: Public Plan Listing Filtering
 
-*For any* set of plans with various active/inactive and public/private combinations, the public listing endpoint should return only plans that are both active and public.
+_For any_ set of plans with various active/inactive and public/private combinations, the public listing endpoint should return only plans that are both active and public.
 
 **Validates: Requirements 6.1**
 
 ### Property 15: Plan Listing Completeness
 
-*For any* plan in the listing response, the response should include features, quotas, and pricing information.
+_For any_ plan in the listing response, the response should include features, quotas, and pricing information.
 
 **Validates: Requirements 6.2**
 
 ### Property 16: Plan Listing Sort Order
 
-*For any* set of plans with different tiers and prices, the listing response should be sorted first by tier (FREE < PRO < ENTERPRISE) and then by price within each tier.
+_For any_ set of plans with different tiers and prices, the listing response should be sorted first by tier (FREE < PRO < ENTERPRISE) and then by price within each tier.
 
 **Validates: Requirements 6.3**
 
 ### Property 17: Billing Cycle Filtering
 
-*For any* billing cycle filter value (MONTHLY, YEARLY, LIFETIME), the filtered plan listing should return only plans with that billing cycle.
+_For any_ billing cycle filter value (MONTHLY, YEARLY, LIFETIME), the filtered plan listing should return only plans with that billing cycle.
 
 **Validates: Requirements 6.4**
 
 ### Property 18: Admin Plan Listing Completeness
 
-*For any* set of plans including private and archived plans, the admin listing endpoint should return all plans regardless of their active or public status.
+_For any_ set of plans including private and archived plans, the admin listing endpoint should return all plans regardless of their active or public status.
 
 **Validates: Requirements 6.5**
 
 ### Property 19: Proration Calculation Correctness
 
-*For any* subscription upgrade or downgrade, the proration calculation should satisfy:
+_For any_ subscription upgrade or downgrade, the proration calculation should satisfy:
+
 - Credit amount = (old plan price × days remaining) / days in period
 - Charge amount = (new plan price × days remaining) / days in period
 - Net amount = charge amount - credit amount
@@ -2340,25 +2364,26 @@ Based on the acceptance criteria analysis, the following correctness properties 
 
 ### Property 20: Invoice Total Consistency
 
-*For any* invoice, the total should equal the sum of all line item amounts plus tax, and the subtotal should equal the sum of all non-tax line items.
+_For any_ invoice, the total should equal the sum of all line item amounts plus tax, and the subtotal should equal the sum of all non-tax line items.
 
 **Validates: Requirements from detailed technical specifications (invoice generation)**
 
 ### Property 21: Usage Aggregation Commutativity
 
-*For any* set of usage records for a tenant and metric type, the aggregated total usage should be the same regardless of the order in which the records are processed.
+_For any_ set of usage records for a tenant and metric type, the aggregated total usage should be the same regardless of the order in which the records are processed.
 
 **Validates: Requirements from detailed technical specifications (usage tracking)**
 
 ### Property 22: Quota Enforcement Consistency
 
-*For any* tenant and metric type, if the current usage equals or exceeds the quota limit, any operation that would increase usage should be rejected with a QUOTA_EXCEEDED error.
+_For any_ tenant and metric type, if the current usage equals or exceeds the quota limit, any operation that would increase usage should be rejected with a QUOTA_EXCEEDED error.
 
 **Validates: Requirements from detailed technical specifications (quota enforcement)**
 
 ### Property 23: Subscription Status Transition Validity
 
-*For any* subscription, all status transitions should follow valid state machine paths:
+_For any_ subscription, all status transitions should follow valid state machine paths:
+
 - TRIAL → ACTIVE (trial ends with payment)
 - TRIAL → EXPIRED (trial ends without payment)
 - ACTIVE → PAST_DUE (payment fails)
@@ -2374,13 +2399,13 @@ Invalid transitions should be rejected.
 
 ### Property 24: Payment Idempotency
 
-*For any* payment request with the same idempotency key, processing the request multiple times should result in only one payment being created and charged.
+_For any_ payment request with the same idempotency key, processing the request multiple times should result in only one payment being created and charged.
 
 **Validates: Requirements from detailed technical specifications (payment processing)**
 
 ### Property 25: Webhook Idempotency
 
-*For any* webhook event with the same event ID, processing the webhook multiple times should result in the same system state as processing it once.
+_For any_ webhook event with the same event ID, processing the webhook multiple times should result in the same system state as processing it once.
 
 **Validates: Requirements from detailed technical specifications (webhook handling)**
 
@@ -2393,6 +2418,7 @@ Invalid transitions should be rejected.
 #### Public Endpoints
 
 **GET /api/v1/billing/plans**
+
 - Description: List all active, public subscription plans
 - Query Parameters:
   - `billingCycle` (optional): Filter by billing cycle (MONTHLY, YEARLY, LIFETIME)
@@ -2400,6 +2426,7 @@ Invalid transitions should be rejected.
 - Authentication: Not required
 
 **GET /api/v1/billing/plans/{code}**
+
 - Description: Get specific plan details by plan code
 - Path Parameters:
   - `code`: Plan code
@@ -2409,34 +2436,40 @@ Invalid transitions should be rejected.
 #### Customer Portal Endpoints
 
 **GET /api/v1/billing/portal/dashboard**
+
 - Description: Get billing dashboard data including subscription, usage, and upcoming invoice
 - Response: BillingDashboardDTO
 - Authentication: Required (JWT)
 
 **POST /api/v1/billing/portal/subscription/upgrade**
+
 - Description: Upgrade subscription to a higher tier
 - Request Body: UpgradeRequest (newPlanCode)
 - Response: SubscriptionDTO
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **POST /api/v1/billing/portal/subscription/downgrade**
+
 - Description: Downgrade subscription to a lower tier
 - Request Body: DowngradeRequest (newPlanCode, immediate)
 - Response: SubscriptionDTO
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **POST /api/v1/billing/portal/subscription/cancel**
+
 - Description: Cancel subscription
 - Request Body: CancelRequest (immediate, reason)
 - Response: SubscriptionDTO
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **POST /api/v1/billing/portal/subscription/reactivate**
+
 - Description: Reactivate a canceled subscription
 - Response: SubscriptionDTO
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **GET /api/v1/billing/portal/invoices**
+
 - Description: List invoices with pagination
 - Query Parameters:
   - `status` (optional): Filter by invoice status
@@ -2446,6 +2479,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT)
 
 **GET /api/v1/billing/portal/invoices/{id}/pdf**
+
 - Description: Download invoice as PDF
 - Path Parameters:
   - `id`: Invoice ID
@@ -2453,22 +2487,26 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT)
 
 **GET /api/v1/billing/portal/usage**
+
 - Description: Get current usage metrics
 - Response: UsageSummaryDTO
 - Authentication: Required (JWT)
 
 **GET /api/v1/billing/portal/payment-methods**
+
 - Description: List payment methods
 - Response: List<PaymentMethodDTO>
 - Authentication: Required (JWT)
 
 **POST /api/v1/billing/portal/payment-methods**
+
 - Description: Add new payment method
 - Request Body: PaymentMethodRequest
 - Response: PaymentMethodDTO
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **DELETE /api/v1/billing/portal/payment-methods/{id}**
+
 - Description: Remove payment method
 - Path Parameters:
   - `id`: Payment method ID
@@ -2476,6 +2514,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, TENANT_OWNER or BILLING_ADMIN role)
 
 **PUT /api/v1/billing/portal/payment-methods/{id}/default**
+
 - Description: Set payment method as default
 - Path Parameters:
   - `id`: Payment method ID
@@ -2485,12 +2524,14 @@ Invalid transitions should be rejected.
 #### Admin Endpoints
 
 **POST /api/v1/admin/billing/plans**
+
 - Description: Create new subscription plan
 - Request Body: PlanRequest
 - Response: SubscriptionPlanDTO
 - Authentication: Required (JWT, ADMIN role)
 
 **PUT /api/v1/admin/billing/plans/{id}**
+
 - Description: Update subscription plan
 - Path Parameters:
   - `id`: Plan ID
@@ -2499,6 +2540,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **GET /api/v1/admin/billing/subscriptions**
+
 - Description: List all subscriptions with filtering
 - Query Parameters:
   - `status` (optional): Filter by status
@@ -2510,6 +2552,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **GET /api/v1/admin/billing/subscriptions/{id}**
+
 - Description: Get subscription details
 - Path Parameters:
   - `id`: Subscription ID
@@ -2517,6 +2560,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **POST /api/v1/admin/billing/subscriptions/{id}/cancel**
+
 - Description: Force cancel subscription
 - Path Parameters:
   - `id`: Subscription ID
@@ -2525,6 +2569,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **POST /api/v1/admin/billing/subscriptions/{id}/extend-trial**
+
 - Description: Extend trial period
 - Path Parameters:
   - `id`: Subscription ID
@@ -2533,6 +2578,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **GET /api/v1/admin/billing/invoices**
+
 - Description: List all invoices with filtering
 - Query Parameters:
   - `status` (optional): Filter by status
@@ -2543,6 +2589,7 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **POST /api/v1/admin/billing/invoices/{id}/void**
+
 - Description: Void an invoice
 - Path Parameters:
   - `id`: Invoice ID
@@ -2551,11 +2598,13 @@ Invalid transitions should be rejected.
 - Authentication: Required (JWT, ADMIN role)
 
 **GET /api/v1/admin/billing/analytics/mrr**
+
 - Description: Get Monthly Recurring Revenue
 - Response: MRRAnalyticsDTO
 - Authentication: Required (JWT, ADMIN role)
 
 **GET /api/v1/admin/billing/analytics/churn**
+
 - Description: Get churn analysis
 - Query Parameters:
   - `startDate` (optional): Start date for analysis
@@ -2566,6 +2615,7 @@ Invalid transitions should be rejected.
 #### Webhook Endpoints
 
 **POST /api/v1/billing/webhooks/stripe**
+
 - Description: Stripe webhook handler
 - Headers:
   - `Stripe-Signature`: Webhook signature for verification
@@ -2574,6 +2624,7 @@ Invalid transitions should be rejected.
 - Authentication: Signature verification
 
 **POST /api/v1/billing/webhooks/paypal**
+
 - Description: PayPal webhook handler
 - Headers:
   - `PAYPAL-TRANSMISSION-ID`: Webhook ID
@@ -2586,6 +2637,7 @@ Invalid transitions should be rejected.
 #### Internal Endpoints
 
 **GET /internal/billing/feature-access/{tenantId}**
+
 - Description: Check feature access for tenant
 - Path Parameters:
   - `tenantId`: Tenant ID
@@ -2595,6 +2647,7 @@ Invalid transitions should be rejected.
 - Authentication: Internal service authentication
 
 **GET /internal/billing/quota/{tenantId}**
+
 - Description: Check quota status for tenant
 - Path Parameters:
   - `tenantId`: Tenant ID
@@ -2604,6 +2657,7 @@ Invalid transitions should be rejected.
 - Authentication: Internal service authentication
 
 **POST /internal/billing/usage**
+
 - Description: Record usage
 - Request Body: UsageRecordRequest
 - Response: 202 Accepted
@@ -2616,6 +2670,7 @@ Invalid transitions should be rejected.
 ### RabbitMQ Queues and Exchanges
 
 **Exchange: billing.events**
+
 - Type: Topic
 - Durable: true
 
@@ -2656,28 +2711,28 @@ Invalid transitions should be rejected.
 ```java
 @Service
 public class BillingEventPublisher {
-    
-    private final RabbitTemplate rabbitTemplate;
-    
-    public void publishUsageRecorded(UsageRecordEvent event) {
-        rabbitTemplate.convertAndSend("billing.events", "usage.recorded", event);
-    }
-    
-    public void publishInvoiceGenerate(InvoiceGenerateEvent event) {
-        rabbitTemplate.convertAndSend("billing.events", "invoice.generate", event);
-    }
-    
-    public void publishWebhookReceived(WebhookEvent event) {
-        rabbitTemplate.convertAndSend("billing.events", "webhook.received", event);
-    }
-    
-    public void publishNotificationSend(NotificationEvent event) {
-        rabbitTemplate.convertAndSend("billing.events", "notification.send", event);
-    }
-    
-    public void publishPaymentRetry(PaymentRetryEvent event) {
-        rabbitTemplate.convertAndSend("billing.events", "payment.retry", event);
-    }
+
+  private final RabbitTemplate rabbitTemplate;
+
+  public void publishUsageRecorded(UsageRecordEvent event) {
+    rabbitTemplate.convertAndSend("billing.events", "usage.recorded", event);
+  }
+
+  public void publishInvoiceGenerate(InvoiceGenerateEvent event) {
+    rabbitTemplate.convertAndSend("billing.events", "invoice.generate", event);
+  }
+
+  public void publishWebhookReceived(WebhookEvent event) {
+    rabbitTemplate.convertAndSend("billing.events", "webhook.received", event);
+  }
+
+  public void publishNotificationSend(NotificationEvent event) {
+    rabbitTemplate.convertAndSend("billing.events", "notification.send", event);
+  }
+
+  public void publishPaymentRetry(PaymentRetryEvent event) {
+    rabbitTemplate.convertAndSend("billing.events", "payment.retry", event);
+  }
 }
 ```
 
@@ -2688,6 +2743,7 @@ public class BillingEventPublisher {
 ### Redis Cache Configuration
 
 **Cache Keys:**
+
 - `subscription:{tenantId}` - Active subscription for tenant
 - `plan:{planCode}` - Subscription plan details
 - `usage:{tenantId}:{metricType}:{period}` - Usage aggregates
@@ -2695,6 +2751,7 @@ public class BillingEventPublisher {
 - `payment-method:{tenantId}:default` - Default payment method
 
 **TTL Configuration:**
+
 - Subscription: 5 minutes
 - Plan: 1 hour
 - Usage: 1 minute
@@ -2702,6 +2759,7 @@ public class BillingEventPublisher {
 - Payment Method: 10 minutes
 
 **Cache Invalidation:**
+
 - Subscription changes: Invalidate `subscription:{tenantId}`
 - Plan updates: Invalidate `plan:{planCode}`
 - Usage recording: Invalidate `usage:{tenantId}:{metricType}:{period}` and `quota:{tenantId}:{metricType}`
@@ -2714,7 +2772,7 @@ public class BillingEventPublisher {
 ### Authentication and Authorization
 
 1. **JWT Token Validation**: All authenticated endpoints validate JWT tokens issued by the User Service
-2. **Role-Based Access Control**: 
+2. **Role-Based Access Control**:
    - TENANT_OWNER: Can manage subscription, payment methods, view invoices
    - BILLING_ADMIN: Same as TENANT_OWNER
    - ADMIN: Full access to all billing operations and analytics
@@ -2743,6 +2801,7 @@ public class BillingEventPublisher {
 ### Metrics
 
 **Business Metrics:**
+
 - Monthly Recurring Revenue (MRR)
 - Annual Recurring Revenue (ARR)
 - Churn rate
@@ -2751,6 +2810,7 @@ public class BillingEventPublisher {
 - Customer lifetime value (CLV)
 
 **Operational Metrics:**
+
 - API request rate and latency (p50, p95, p99)
 - Payment success/failure rate
 - Invoice generation time
@@ -2761,6 +2821,7 @@ public class BillingEventPublisher {
 - Message queue depth
 
 **Error Metrics:**
+
 - Error rate by endpoint
 - Payment failure rate
 - Webhook processing failures
@@ -2770,6 +2831,7 @@ public class BillingEventPublisher {
 ### Logging
 
 **Structured Logging Format:**
+
 ```json
 {
   "timestamp": "2024-12-05T10:30:00Z",
@@ -2785,12 +2847,13 @@ public class BillingEventPublisher {
     "subscriptionId": 123,
     "oldPlanCode": "PRO",
     "newPlanCode": "ENTERPRISE",
-    "prorationAmount": 25.00
+    "prorationAmount": 25.0
   }
 }
 ```
 
 **Log Levels:**
+
 - ERROR: Payment failures, webhook processing errors, database errors
 - WARN: Quota approaching limits, payment retry attempts, trial ending soon
 - INFO: Subscription lifecycle events, invoice generation, payment success
@@ -2806,6 +2869,7 @@ public class BillingEventPublisher {
 ### Alerting
 
 **Critical Alerts:**
+
 - Payment failure rate > 5%
 - API error rate > 1%
 - Database connection pool > 80%
@@ -2813,6 +2877,7 @@ public class BillingEventPublisher {
 - Service health check failures
 
 **Warning Alerts:**
+
 - Response time p95 > 500ms
 - Cache hit rate < 70%
 - Message queue depth > 1000
@@ -2825,6 +2890,7 @@ public class BillingEventPublisher {
 ### Environment Configuration
 
 **Configuration Properties:**
+
 ```yaml
 billing:
   payment:
@@ -2844,7 +2910,7 @@ billing:
     delays: [3, 5, 7] # days
   invoice:
     dueInDays: 7
-    
+
 spring:
   datasource:
     url: ${DATABASE_URL}
@@ -2872,21 +2938,16 @@ spring:
 ```java
 @Component
 public class BillingHealthIndicator implements HealthIndicator {
-    
-    @Override
-    public Health health() {
-        // Check database connectivity
-        // Check Redis connectivity
-        // Check RabbitMQ connectivity
-        // Check payment provider connectivity
-        
-        return Health.up()
-            .withDetail("database", "UP")
-            .withDetail("redis", "UP")
-            .withDetail("rabbitmq", "UP")
-            .withDetail("paymentProvider", "UP")
-            .build();
-    }
+
+  @Override
+  public Health health() {
+    // Check database connectivity
+    // Check Redis connectivity
+    // Check RabbitMQ connectivity
+    // Check payment provider connectivity
+
+    return Health.up().withDetail("database", "UP").withDetail("redis", "UP").withDetail("rabbitmq", "UP").withDetail("paymentProvider", "UP").build();
+  }
 }
 ```
 

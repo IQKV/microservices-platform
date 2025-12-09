@@ -17,6 +17,7 @@ Prometheus → Alertmanager → Notification Channels
 ## Alert Severity Levels
 
 ### Critical Alerts
+
 - **Response Time**: 10 seconds group wait, 2 minutes group interval, 1 hour repeat
 - **Notification Channels**: Email, Slack, PagerDuty
 - **Examples**:
@@ -27,6 +28,7 @@ Prometheus → Alertmanager → Notification Channels
   - Service health check failures
 
 ### Warning Alerts
+
 - **Response Time**: 1 minute group wait, 10 minutes group interval, 12 hours repeat
 - **Notification Channels**: Email, Slack
 - **Examples**:
@@ -38,18 +40,22 @@ Prometheus → Alertmanager → Notification Channels
 ## Alert Categories
 
 ### Payment Alerts
+
 - Routed to finance team and ops team
 - Includes payment failures, retry rates, and payment provider issues
 
 ### Business Alerts
+
 - Routed to product team and ops team
 - Includes trial conversion rates, churn metrics, and revenue indicators
 
 ### Health Alerts
+
 - Routed to ops team
 - Includes service health, database, Redis, and RabbitMQ connectivity
 
 ### Performance Alerts
+
 - Routed to ops team
 - Includes API response times, invoice generation times, and throughput metrics
 
@@ -205,11 +211,13 @@ docker exec -it iqscaffold-alertmanager amtool silence expire <silence-id>
 ## Runbooks
 
 Each alert includes a runbook URL in the format:
+
 ```
 https://docs.iqscaffold.com/runbooks/<alert-name-kebab-case>
 ```
 
 Runbooks should include:
+
 - Alert description and impact
 - Troubleshooting steps
 - Resolution procedures

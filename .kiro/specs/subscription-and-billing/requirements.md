@@ -386,31 +386,38 @@ iqscaffold-billing-service/
    @Bean
    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
      return http
-       .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
-       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-       .authorizeHttpRequests(auth -> auth
-         // Public endpoints
-         .requestMatchers("/api/v1/billing/plans/**").permitAll()
-         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-         // Integration APIs (require authentication)
-         .requestMatchers("/api/v1/billing/subscriptions/*/status").authenticated()
-         .requestMatchers("/api/v1/billing/subscriptions/*/check-feature").authenticated()
-         .requestMatchers("/api/v1/billing/usage/**").authenticated()
-         // Customer portal (require authentication)
-         .requestMatchers("/api/v1/billing/portal/**").authenticated()
-         // Admin endpoints (require ADMIN or SUPER_ADMIN authority)
-         .requestMatchers("/api/v1/admin/billing/**").hasAnyAuthority("ADMIN", "SUPER_ADMIN")
-         // All other requests require authentication
-         .anyRequest().authenticated()
+       .csrf((csrf) -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
+       .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+       .authorizeHttpRequests((auth) ->
+         auth
+           // Public endpoints
+           .requestMatchers("/api/v1/billing/plans/**")
+           .permitAll()
+           .requestMatchers("/actuator/health", "/actuator/info")
+           .permitAll()
+           .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
+           .permitAll()
+           // Integration APIs (require authentication)
+           .requestMatchers("/api/v1/billing/subscriptions/*/status")
+           .authenticated()
+           .requestMatchers("/api/v1/billing/subscriptions/*/check-feature")
+           .authenticated()
+           .requestMatchers("/api/v1/billing/usage/**")
+           .authenticated()
+           // Customer portal (require authentication)
+           .requestMatchers("/api/v1/billing/portal/**")
+           .authenticated()
+           // Admin endpoints (require ADMIN or SUPER_ADMIN authority)
+           .requestMatchers("/api/v1/admin/billing/**")
+           .hasAnyAuthority("ADMIN", "SUPER_ADMIN")
+           // All other requests require authentication
+           .anyRequest()
+           .authenticated()
        )
-       .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)))
+       .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.decoder(jwtDecoder)))
        .addFilterBefore(tenantExtractionFilter, UsernamePasswordAuthenticationFilter.class)
        .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
-       .headers(headers -> headers
-         .frameOptions(frameOptions -> frameOptions.deny())
-         .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000).includeSubDomains(true))
-       )
+       .headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.deny()).httpStrictTransportSecurity((hsts) -> hsts.maxAgeInSeconds(31536000).includeSubDomains(true)))
        .build();
    }
    ```
@@ -441,11 +448,17 @@ iqscaffold-billing-service/
 1. THE Billing Service SHALL create a JwtClaimNames class with constants matching the user-service:
    ```java
    public static final String SUBJECT = "sub";
+
    public static final String USERNAME = "username";
+
    public static final String EMAIL = "email";
+
    public static final String ROLES = "roles"; // Contains authorities (ADMIN, SUPER_ADMIN, USER)
+
    public static final String TENANT_ID = "tenant_id";
+
    public static final String FIRST_NAME = "firstName";
+
    public static final String LAST_NAME = "lastName";
    ```
 2. THE Billing Service SHALL create a UserContext record to hold extracted JWT claims:
@@ -462,7 +475,7 @@ iqscaffold-billing-service/
      public boolean hasAuthority(String authority) {
        return authorities.contains(authority);
      }
-     
+
      public boolean isAdmin() {
        return hasAuthority("ADMIN") || hasAuthority("SUPER_ADMIN");
      }
@@ -491,14 +504,14 @@ iqscaffold-billing-service/
 @ConfigurationProperties(prefix = "iqscaffold.billing")
 @Validated
 public record BillingProperties(
-    @Valid @NotNull Payment payment,
-    @Valid @NotNull Subscription subscription,
-    @Valid @NotNull Usage usage,
-    @Valid @NotNull Invoice invoice,
-    @Valid @NotNull Portal portal,
-    @Valid @NotNull Features features
+  @Valid @NotNull Payment payment,
+  @Valid @NotNull Subscription subscription,
+  @Valid @NotNull Usage usage,
+  @Valid @NotNull Invoice invoice,
+  @Valid @NotNull Portal portal,
+  @Valid @NotNull Features features
 ) {
-    // Nested record classes for each configuration section
+  // Nested record classes for each configuration section
 }
 ```
 
@@ -628,54 +641,54 @@ springdoc:
 @Tag(name = "Subscriptions", description = "Subscription lifecycle management and operations")
 public class SubscriptionRestResource {
 
-    @Operation(
-        summary = "Create subscription",
-        description = """
-            Create a new subscription for a tenant.
-            
-            ## Features
-            - Automatic trial period activation if configured
-            - Payment method validation for paid plans
-            - Tenant isolation enforcement
-            - Subscription status tracking
-            
-            ## Business Rules
-            - Only one active subscription per tenant
-            - Free plans activate immediately
-            - Paid plans require payment method (unless trial available)
-            """,
-        tags = {"Subscriptions"}
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201",
-            description = "Subscription created successfully",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = SubscriptionDto.class),
-                examples = @ExampleObject(
-                    name = "Trial Subscription",
-                    value = """
-                        {
-                          "id": 123,
-                          "tenantId": "tenant-abc",
-                          "planCode": "pro-monthly",
-                          "status": "TRIAL",
-                          "trialEnd": "2024-12-19T23:59:59Z"
-                        }
-                        """
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "400", description = "Invalid request", ref = "#/components/responses/BadRequest"),
-        @ApiResponse(responseCode = "409", description = "Subscription already exists", ref = "#/components/responses/Conflict")
-    })
-    @PostMapping
-    public ResponseEntity<SubscriptionDto> createSubscription(
-        @Valid @RequestBody CreateSubscriptionRequest request
-    ) {
-        // Implementation
+  @Operation(
+    summary = "Create subscription",
+    description = """
+    Create a new subscription for a tenant.
+
+    ## Features
+    - Automatic trial period activation if configured
+    - Payment method validation for paid plans
+    - Tenant isolation enforcement
+    - Subscription status tracking
+
+    ## Business Rules
+    - Only one active subscription per tenant
+    - Free plans activate immediately
+    - Paid plans require payment method (unless trial available)
+    """,
+    tags = { "Subscriptions" }
+  )
+  @ApiResponses(
+    value = {
+      @ApiResponse(
+        responseCode = "201",
+        description = "Subscription created successfully",
+        content = @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = SubscriptionDto.class),
+          examples = @ExampleObject(
+            name = "Trial Subscription",
+            value = """
+            {
+              "id": 123,
+              "tenantId": "tenant-abc",
+              "planCode": "pro-monthly",
+              "status": "TRIAL",
+              "trialEnd": "2024-12-19T23:59:59Z"
+            }
+            """
+          )
+        )
+      ),
+      @ApiResponse(responseCode = "400", description = "Invalid request", ref = "#/components/responses/BadRequest"),
+      @ApiResponse(responseCode = "409", description = "Subscription already exists", ref = "#/components/responses/Conflict"),
     }
+  )
+  @PostMapping
+  public ResponseEntity<SubscriptionDto> createSubscription(@Valid @RequestBody CreateSubscriptionRequest request) {
+    // Implementation
+  }
 }
 ```
 
@@ -788,7 +801,7 @@ Example changeset structure:
 ```xml
 <changeSet id="20251205000100-000001-create-subscriptions-table" author="iqscaffold">
     <comment>Create subscriptions table for subscription lifecycle management</comment>
-    
+
     <createTable tableName="subscriptions">
         <column name="id" type="BIGINT" autoIncrement="true">
             <constraints primaryKey="true" nullable="false"/>
@@ -837,23 +850,23 @@ Example changeset structure:
 
 <changeSet id="20251205000100-000002-add-subscriptions-indexes" author="iqscaffold">
     <comment>Create indexes on subscriptions table for query performance</comment>
-    
+
     <createIndex indexName="idx_subscriptions_tenant_id" tableName="subscriptions">
         <column name="tenant_id"/>
     </createIndex>
-    
+
     <createIndex indexName="idx_subscriptions_user_id" tableName="subscriptions">
         <column name="user_id"/>
     </createIndex>
-    
+
     <createIndex indexName="idx_subscriptions_plan_id" tableName="subscriptions">
         <column name="plan_id"/>
     </createIndex>
-    
+
     <createIndex indexName="idx_subscriptions_status" tableName="subscriptions">
         <column name="status"/>
     </createIndex>
-    
+
     <createIndex indexName="idx_subscriptions_period_end" tableName="subscriptions">
         <column name="current_period_end"/>
     </createIndex>
@@ -861,7 +874,7 @@ Example changeset structure:
 
 <changeSet id="20251205000100-000003-add-subscriptions-constraints" author="iqscaffold">
     <comment>Add foreign key and check constraints to subscriptions table</comment>
-    
+
     <addForeignKeyConstraint
             baseTableName="subscriptions"
             baseColumnNames="plan_id"
@@ -869,13 +882,13 @@ Example changeset structure:
             referencedTableName="subscription_plans"
             referencedColumnNames="id"
             onDelete="RESTRICT"/>
-    
+
     <sql>
         ALTER TABLE subscriptions
             ADD CONSTRAINT chk_subscriptions_status
                 CHECK (status IN ('TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'EXPIRED', 'SUSPENDED', 'INCOMPLETE'));
     </sql>
-    
+
     <rollback>
         <dropForeignKeyConstraint baseTableName="subscriptions" constraintName="fk_subscription_plan"/>
         <sql>ALTER TABLE subscriptions DROP CONSTRAINT IF EXISTS chk_subscriptions_status;</sql>
@@ -888,7 +901,7 @@ Example changeset structure:
 ```yaml
 spring:
   liquibase:
-    enabled: false  # Disabled globally - run programmatically per schema
+    enabled: false # Disabled globally - run programmatically per schema
 
 iqscaffold:
   liquibase:
@@ -925,6 +938,7 @@ public final class BillingConstants {
    * HTTP Header names used for request/response tracking and billing context.
    */
   public static final class Headers {
+
     private Headers() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -940,6 +954,7 @@ public final class BillingConstants {
    * MDC (Mapped Diagnostic Context) keys for structured logging.
    */
   public static final class MDC {
+
     private MDC() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -956,6 +971,7 @@ public final class BillingConstants {
    * Subscription status values.
    */
   public static final class SubscriptionStatus {
+
     private SubscriptionStatus() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -973,6 +989,7 @@ public final class BillingConstants {
    * Billing event types for audit and tracking.
    */
   public static final class BillingEvents {
+
     private BillingEvents() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -985,25 +1002,25 @@ public final class BillingConstants {
     public static final String SUBSCRIPTION_CANCELED = "SUBSCRIPTION_CANCELED";
     public static final String SUBSCRIPTION_EXPIRED = "SUBSCRIPTION_EXPIRED";
     public static final String SUBSCRIPTION_REACTIVATED = "SUBSCRIPTION_REACTIVATED";
-    
+
     // Trial Events
     public static final String TRIAL_STARTED = "TRIAL_STARTED";
     public static final String TRIAL_ENDING_SOON = "TRIAL_ENDING_SOON";
     public static final String TRIAL_ENDED = "TRIAL_ENDED";
     public static final String TRIAL_CONVERTED = "TRIAL_CONVERTED";
-    
+
     // Payment Events
     public static final String PAYMENT_SUCCEEDED = "PAYMENT_SUCCEEDED";
     public static final String PAYMENT_FAILED = "PAYMENT_FAILED";
     public static final String PAYMENT_REFUNDED = "PAYMENT_REFUNDED";
     public static final String PAYMENT_METHOD_ADDED = "PAYMENT_METHOD_ADDED";
     public static final String PAYMENT_METHOD_REMOVED = "PAYMENT_METHOD_REMOVED";
-    
+
     // Invoice Events
     public static final String INVOICE_GENERATED = "INVOICE_GENERATED";
     public static final String INVOICE_PAID = "INVOICE_PAID";
     public static final String INVOICE_VOIDED = "INVOICE_VOIDED";
-    
+
     // Usage Events
     public static final String QUOTA_EXCEEDED = "QUOTA_EXCEEDED";
     public static final String QUOTA_WARNING = "QUOTA_WARNING";
@@ -1014,6 +1031,7 @@ public final class BillingConstants {
    * Cache names used throughout the billing service.
    */
   public static final class CacheNames {
+
     private CacheNames() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1028,6 +1046,7 @@ public final class BillingConstants {
    * Payment provider names.
    */
   public static final class PaymentProviders {
+
     private PaymentProviders() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1041,6 +1060,7 @@ public final class BillingConstants {
    * Invoice number format and patterns.
    */
   public static final class InvoiceFormat {
+
     private InvoiceFormat() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1054,6 +1074,7 @@ public final class BillingConstants {
    * Default values for billing operations.
    */
   public static final class Defaults {
+
     private Defaults() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1069,6 +1090,7 @@ public final class BillingConstants {
    * Metric types for usage tracking.
    */
   public static final class MetricTypes {
+
     private MetricTypes() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1083,6 +1105,7 @@ public final class BillingConstants {
    * Error codes for billing operations.
    */
   public static final class ErrorCodes {
+
     private ErrorCodes() {
       throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
@@ -1130,6 +1153,7 @@ public final class BillingConstants {
 ```java
 // Base billing exception
 public class BillingException extends RuntimeException {
+
   public BillingException(final String message) {
     super(message);
   }
@@ -1141,6 +1165,7 @@ public class BillingException extends RuntimeException {
 
 // Subscription exceptions
 public class SubscriptionException extends BillingException {
+
   public SubscriptionException(final String message) {
     super(message);
   }
@@ -1150,18 +1175,21 @@ public class SubscriptionException extends BillingException {
   }
 
   public static class SubscriptionNotFoundException extends SubscriptionException {
+
     public SubscriptionNotFoundException(final String message) {
       super(message);
     }
   }
 
   public static class SubscriptionAlreadyExistsException extends SubscriptionException {
+
     public SubscriptionAlreadyExistsException(final String message) {
       super(message);
     }
   }
 
   public static class InvalidSubscriptionStateException extends SubscriptionException {
+
     public InvalidSubscriptionStateException(final String message) {
       super(message);
     }
@@ -1170,6 +1198,7 @@ public class SubscriptionException extends BillingException {
 
 // Payment exceptions
 public class PaymentException extends BillingException {
+
   public PaymentException(final String message) {
     super(message);
   }
@@ -1179,6 +1208,7 @@ public class PaymentException extends BillingException {
   }
 
   public static class PaymentFailedException extends PaymentException {
+
     private final String paymentId;
     private final String reason;
 
@@ -1198,12 +1228,14 @@ public class PaymentException extends BillingException {
   }
 
   public static class PaymentMethodNotFoundException extends PaymentException {
+
     public PaymentMethodNotFoundException(final String message) {
       super(message);
     }
   }
 
   public static class InvalidPaymentMethodException extends PaymentException {
+
     public InvalidPaymentMethodException(final String message) {
       super(message);
     }
@@ -1212,11 +1244,13 @@ public class PaymentException extends BillingException {
 
 // Usage and quota exceptions
 public class UsageException extends BillingException {
+
   public UsageException(final String message) {
     super(message);
   }
 
   public static class QuotaExceededException extends UsageException {
+
     private final String metricType;
     private final long limit;
     private final long used;
@@ -1242,6 +1276,7 @@ public class UsageException extends BillingException {
   }
 
   public static class UsageLimitExceededException extends UsageException {
+
     public UsageLimitExceededException(final String message) {
       super(message);
     }
@@ -1250,17 +1285,20 @@ public class UsageException extends BillingException {
 
 // Plan exceptions
 public class PlanException extends BillingException {
+
   public PlanException(final String message) {
     super(message);
   }
 
   public static class PlanNotFoundException extends PlanException {
+
     public PlanNotFoundException(final String message) {
       super(message);
     }
   }
 
   public static class InvalidPlanTransitionException extends PlanException {
+
     private final String fromPlan;
     private final String toPlan;
 
@@ -1282,17 +1320,20 @@ public class PlanException extends BillingException {
 
 // Invoice exceptions
 public class InvoiceException extends BillingException {
+
   public InvoiceException(final String message) {
     super(message);
   }
 
   public static class InvoiceNotFoundException extends InvoiceException {
+
     public InvoiceNotFoundException(final String message) {
       super(message);
     }
   }
 
   public static class InvoiceAlreadyPaidException extends InvoiceException {
+
     public InvoiceAlreadyPaidException(final String message) {
       super(message);
     }
@@ -1525,24 +1566,22 @@ operation.success=Operation completed successfully
 ```java
 @Service
 public class SubscriptionService {
+
   private final MessageService messageService;
-  
+
   public SubscriptionService(MessageService messageService) {
     this.messageService = messageService;
   }
-  
+
   public SubscriptionDto createSubscription(CreateSubscriptionRequest request) {
     // Business logic...
-    
+
     // Use i18n message
     String message = messageService.getMessage("subscription.created");
-    
+
     // With parameters
-    String upgradeMessage = messageService.getMessage(
-      "subscription.upgraded", 
-      new Object[]{newPlan.getName()}
-    );
-    
+    String upgradeMessage = messageService.getMessage("subscription.upgraded", new Object[] { newPlan.getName() });
+
     return subscriptionDto;
   }
 }
@@ -1556,13 +1595,13 @@ public class SubscriptionService {
 8. THE Billing Service SHALL pass locale to email templates:
 
 ```java
-Locale userLocale = user.getPreferredLocale() != null 
-    ? Locale.forLanguageTag(user.getPreferredLocale()) 
+Locale userLocale = user.getPreferredLocale() != null
+    ? Locale.forLanguageTag(user.getPreferredLocale())
     : Locale.ENGLISH;
 
 context.setVariable("greeting", messageService.getMessage(
-    "email.subscription.created.greeting", 
-    new Object[]{user.getFirstName()}, 
+    "email.subscription.created.greeting",
+    new Object[]{user.getFirstName()},
     userLocale
 ));
 ```
@@ -1595,25 +1634,16 @@ context.setVariable("greeting", messageService.getMessage(
 
 ```java
 // ✅ CORRECT - Use records for DTOs
-public record SubscriptionDto(
-    Long id,
-    String tenantId,
-    String planCode,
-    String status,
-    LocalDateTime currentPeriodEnd
-) {}
+public record SubscriptionDto(Long id, String tenantId, String planCode, String status, LocalDateTime currentPeriodEnd) {}
 
-public record CreateSubscriptionRequest(
-    @NotBlank String planCode,
-    @NotNull Long userId,
-    String paymentMethodId
-) {}
+public record CreateSubscriptionRequest(@NotBlank String planCode, @NotNull Long userId, String paymentMethodId) {}
 
 // ❌ INCORRECT - Don't use classes for simple DTOs
 public class SubscriptionDto {
-    private Long id;
-    private String tenantId;
-    // getters, setters, equals, hashCode, toString...
+
+  private Long id;
+  private String tenantId;
+  // getters, setters, equals, hashCode, toString...
 }
 ```
 
@@ -1625,12 +1655,12 @@ public class SubscriptionDto {
     summary = "Create subscription",
     description = """
         Create a new subscription for a tenant.
-        
+
         ## Features
         - Automatic trial period activation if configured
         - Payment method validation for paid plans
         - Tenant isolation enforcement
-        
+
         ## Business Rules
         - Only one active subscription per tenant
         - Free plans activate immediately
@@ -1783,30 +1813,32 @@ var flag = true; // Use boolean flag = true;
 
 ```java
 // ✅ CORRECT - Sealed class for payment provider types
-public sealed interface PaymentProvider 
-    permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
-    PaymentResult processPayment(PaymentRequest request);
+public sealed interface PaymentProvider permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
+  PaymentResult processPayment(PaymentRequest request);
 }
 
 public final class StripePaymentProvider implements PaymentProvider {
-    @Override
-    public PaymentResult processPayment(PaymentRequest request) {
-        // Stripe implementation
-    }
+
+  @Override
+  public PaymentResult processPayment(PaymentRequest request) {
+    // Stripe implementation
+  }
 }
 
 public final class PayPalPaymentProvider implements PaymentProvider {
-    @Override
-    public PaymentResult processPayment(PaymentRequest request) {
-        // PayPal implementation
-    }
+
+  @Override
+  public PaymentResult processPayment(PaymentRequest request) {
+    // PayPal implementation
+  }
 }
 
 public final class ManualPaymentProvider implements PaymentProvider {
-    @Override
-    public PaymentResult processPayment(PaymentRequest request) {
-        // Manual implementation
-    }
+
+  @Override
+  public PaymentResult processPayment(PaymentRequest request) {
+    // Manual implementation
+  }
 }
 ```
 
@@ -1814,14 +1846,10 @@ public final class ManualPaymentProvider implements PaymentProvider {
 
 ```java
 // ✅ CORRECT - Use toList() (Java 16+)
-var activePlans = plans.stream()
-    .filter(Plan::isActive)
-    .toList();
+var activePlans = plans.stream().filter(Plan::isActive).toList();
 
 // ❌ INCORRECT - Old style
-var activePlans = plans.stream()
-    .filter(Plan::isActive)
-    .collect(Collectors.toList());
+var activePlans = plans.stream().filter(Plan::isActive).collect(Collectors.toList());
 ```
 
 10. THE Billing Service SHALL use **Record Patterns** (Java 21) for destructuring:
@@ -1834,9 +1862,9 @@ if (result instanceof SuccessResult(var data, var message)) {
 
 // ✅ CORRECT - Switch with record patterns
 String description = switch (event) {
-    case SubscriptionCreated(var id, var plan) -> 
+    case SubscriptionCreated(var id, var plan) ->
         "Subscription " + id + " created for plan " + plan;
-    case PaymentProcessed(var amount, var currency) -> 
+    case PaymentProcessed(var amount, var currency) ->
         "Payment of " + amount + " " + currency + " processed";
     default -> "Unknown event";
 };
@@ -1995,7 +2023,6 @@ WHILE subscription status is EXPIRED, the system shall deny access to paid featu
 **REQ-SUB-022** [S]  
 WHILE subscription status is SUSPENDED, the system shall deny all access.
 
-
 ### 3.4 Subscription Upgrade
 
 **REQ-SUB-023** [E]  
@@ -2088,7 +2115,6 @@ WHEN a user reactivates canceled subscription, the system shall continue billing
 **REQ-SUB-050** [E]  
 WHEN a user reactivates canceled subscription, the system shall send reactivation confirmation email.
 
-
 ---
 
 ## 4. Usage-Based Billing & Metering
@@ -2169,7 +2195,6 @@ WHEN usage reaches 90% of quota, the system shall send usage alert email.
 
 **REQ-USAGE-023** [E]  
 WHEN usage reaches 100% of quota, the system shall send usage alert email.
-
 
 ---
 
@@ -2291,7 +2316,6 @@ WHEN refund is issued, the system shall display refund in billing portal.
 **REQ-PAY-036** [U]  
 The system shall maintain audit log for all refunds.
 
-
 ### 5.5 Webhook Handling
 
 **REQ-PAY-037** [U]  
@@ -2402,7 +2426,6 @@ WHEN payment succeeds, the system shall send receipt email.
 
 **REQ-INV-021** [E]  
 WHEN payment fails, the system shall update invoice status to open with failure reason.
-
 
 ### 6.4 Invoice History
 
@@ -2522,7 +2545,6 @@ The system shall use payment provider iframe or modal for secure card entry.
 
 **REQ-PORTAL-022** [U]  
 The system shall require authentication for sensitive payment operations.
-
 
 ### 7.4 Invoice Access
 
@@ -2654,7 +2676,6 @@ The system shall allow administrators to grant free subscription.
 
 **REQ-ADMIN-027** [U]  
 The system shall allow administrators to extend subscription period.
-
 
 ---
 
@@ -2788,7 +2809,6 @@ The system shall support right to data export.
 
 **REQ-SEC-016** [U]  
 The system shall support right to data deletion.
-
 
 ### 9.4 Maintainability
 
@@ -2924,7 +2944,6 @@ WHEN payment succeeds, the system shall send payment_succeeded email.
 **REQ-INT-015** [E]  
 WHEN payment fails, the system shall send payment_failed email.
 
-
 ---
 
 ## 11. Data Model Requirements
@@ -3052,7 +3071,6 @@ The system shall provide POST /api/v1/billing/portal/payment-methods endpoint to
 
 **REQ-API-012** [U]  
 The system shall provide DELETE /api/v1/billing/portal/payment-methods/{id} endpoint to remove payment method (authenticated).
-
 
 ### 12.3 Admin Endpoints
 
@@ -3183,7 +3201,6 @@ The system shall record usage in real-time or near-real-time.
 
 **REQ-BIZ-023** [U]  
 The system shall aggregate usage by billing period for invoicing.
-
 
 ---
 
@@ -3335,7 +3352,6 @@ The system shall include security tests for SQL injection prevention.
 
 **REQ-TEST-028** [U]  
 The system shall include security tests for XSS prevention.
-
 
 ---
 
@@ -3792,13 +3808,13 @@ The system shall enforce package dependencies using ArchUnit tests.
 
 ## 19. Event Handling & ern Summary
 
-| Pattern | Template | Usage |
-|---------|----------|-------|
-| Ubiquitous (U) | The system shall [requirement] | Always active requirements |
-| Event-driven (E) | WHEN [trigger] the system shall [requirement] | Requirements triggered by events |
-| State-driven (S) | WHILE [state] the system shall [requirement] | Requirements active in specific states |
-| Optional (O) | WHERE [feature] the system shall [requirement] | Requirements for optional features |
-| Unwanted (UW) | IF [condition] THEN the system shall [requirement] | Requirements handling error conditions |
+| Pattern          | Template                                           | Usage                                  |
+| ---------------- | -------------------------------------------------- | -------------------------------------- |
+| Ubiquitous (U)   | The system shall [requirement]                     | Always active requirements             |
+| Event-driven (E) | WHEN [trigger] the system shall [requirement]      | Requirements triggered by events       |
+| State-driven (S) | WHILE [state] the system shall [requirement]       | Requirements active in specific states |
+| Optional (O)     | WHERE [feature] the system shall [requirement]     | Requirements for optional features     |
+| Unwanted (UW)    | IF [condition] THEN the system shall [requirement] | Requirements handling error conditions |
 
 ---
 
@@ -3807,56 +3823,67 @@ The system shall enforce package dependencies using ArchUnit tests.
 ### Critical Path Requirements (Must Have for MVP)
 
 **Subscription Management:**
+
 - REQ-SUB-001 to REQ-SUB-007 (Subscription Creation)
 - REQ-SUB-016 to REQ-SUB-022 (Status Management)
 - REQ-SUB-023 to REQ-SUB-029 (Upgrade)
 - REQ-SUB-039 to REQ-SUB-044 (Cancellation)
 
 **Payment Processing:**
+
 - REQ-PAY-001 to REQ-PAY-006 (Provider Abstraction)
 - REQ-PAY-007 to REQ-PAY-019 (Payment Methods)
 - REQ-PAY-020 to REQ-PAY-029 (Payment Processing)
 
 **Invoice Management:**
+
 - REQ-INV-001 to REQ-INV-010 (Invoice Generation)
 - REQ-INV-016 to REQ-INV-021 (Invoice Payment)
 
 **Usage & Quotas:**
+
 - REQ-USAGE-001 to REQ-USAGE-006 (Usage Tracking)
 - REQ-USAGE-011 to REQ-USAGE-016 (Quota Enforcement)
 
 ### High Priority (Should Have)
 
 **Trial Management:**
+
 - REQ-SUB-008 to REQ-SUB-015 (Trial Period)
 
 **Downgrade:**
+
 - REQ-SUB-031 to REQ-SUB-038 (Downgrade)
 
 **Usage Reporting:**
+
 - REQ-USAGE-017 to REQ-USAGE-023 (Usage Reporting)
 
 **Billing Portal:**
+
 - REQ-PORTAL-001 to REQ-PORTAL-034 (All Portal Features)
 
 ### Medium Priority (Nice to Have)
 
 **Reactivation:**
+
 - REQ-SUB-046 to REQ-SUB-050 (Reactivation)
 
 **Refunds:**
+
 - REQ-PAY-030 to REQ-PAY-036 (Refund Processing)
 
 **Admin Functions:**
+
 - REQ-ADMIN-001 to REQ-ADMIN-027 (All Admin Features)
 
 ---
 
 ## Document Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2024-12-05 | Kiro AI | Initial EARS requirements document |
+| Version | Date       | Author  | Changes                            |
+| ------- | ---------- | ------- | ---------------------------------- |
+| 1.0.0   | 2024-12-05 | Kiro AI | Initial EARS requirements document |
 
 ---
 

@@ -1,19 +1,23 @@
 # Quota Enforcement Tests
 
 ## Overview
+
 Comprehensive unit tests for quota enforcement logic, covering various usage levels, exceeded scenarios, and grace period (5% overage) handling.
 
 ## Test Coverage Summary
+
 - **Total Tests**: 47
 - **Test Categories**: 9 nested test classes
 - **All Tests Passing**: ✅
 
 ## Grace Period Logic
+
 The quota enforcement system includes a **5% grace period** that allows users to slightly exceed their quota limits before hard enforcement kicks in.
 
 **Formula**: `graceLimit = baseLimit * 1.05`
 
-**Example**: 
+**Example**:
+
 - Base limit: 1000 API calls
 - Grace limit: 1050 API calls (5% overage allowed)
 - Hard rejection: 1051+ API calls
@@ -21,7 +25,9 @@ The quota enforcement system includes a **5% grace period** that allows users to
 ## Test Categories
 
 ### 1. Various Usage Levels Tests (7 tests)
+
 Tests quota checking at different usage percentages:
+
 - ✅ 0% usage: Full quota available
 - ✅ 25% usage: 75% remaining
 - ✅ 50% usage: 50% remaining
@@ -31,7 +37,9 @@ Tests quota checking at different usage percentages:
 - ✅ 100% usage: At limit, grace period applies
 
 ### 2. Grace Period Logic Tests (6 tests)
+
 Tests the 5% overage allowance:
+
 - ✅ Exactly at grace limit (1050/1050): Allowed
 - ✅ Just over grace limit (1051/1050): Denied
 - ✅ Just under grace limit (1049/1050): Allowed
@@ -40,7 +48,9 @@ Tests the 5% overage allowance:
 - ✅ No grace period for unlimited quotas
 
 ### 3. Quota Exceeded Scenarios (6 tests)
+
 Tests various exceeded conditions:
+
 - ✅ Significantly over limit: Denied
 - ✅ Already over grace limit: Denied
 - ✅ Exception thrown when enforcing exceeded quota
@@ -49,7 +59,9 @@ Tests various exceeded conditions:
 - ✅ hasQuotaAvailable returns false when exceeded
 
 ### 4. Edge Cases Tests (6 tests)
+
 Tests boundary conditions:
+
 - ✅ Zero requested amount
 - ✅ Exactly at limit
 - ✅ One unit over limit (within grace)
@@ -58,7 +70,9 @@ Tests boundary conditions:
 - ✅ Fractional grace period handling
 
 ### 5. Multiple Metric Types Tests (5 tests)
+
 Tests different quota types:
+
 - ✅ API_CALLS quota enforcement
 - ✅ STORAGE_GB quota enforcement
 - ✅ EMAIL_SENDS quota enforcement
@@ -66,7 +80,9 @@ Tests different quota types:
 - ✅ Independent quota tracking per metric
 
 ### 6. Unlimited Quota Tests (5 tests)
+
 Tests unlimited (enterprise) quotas:
+
 - ✅ Always allows regardless of usage
 - ✅ Returns zero percentage used
 - ✅ Never approaches limit
@@ -74,7 +90,9 @@ Tests unlimited (enterprise) quotas:
 - ✅ Returns Long.MAX_VALUE for remaining quota
 
 ### 7. Quota Status and Monitoring Tests (5 tests)
+
 Tests monitoring and alerting:
+
 - ✅ Approaching limit detection at 90%
 - ✅ Not flagged below 90%
 - ✅ Accurate usage percentage calculation
@@ -82,13 +100,17 @@ Tests monitoring and alerting:
 - ✅ Quota availability checking
 
 ### 8. Different Plan Tiers Tests (3 tests)
+
 Tests quota enforcement across plan tiers:
+
 - ✅ FREE tier limits enforced correctly
 - ✅ PRO tier has higher limits
 - ✅ ENTERPRISE tier has unlimited quotas
 
 ### 9. Boundary Condition Tests (4 tests)
+
 Tests extreme boundary values:
+
 - ✅ Minimum values (zero usage, zero request)
 - ✅ Maximum single request within limit
 - ✅ Request exactly at grace boundary
@@ -97,22 +119,26 @@ Tests extreme boundary values:
 ## Quota Limits by Plan Tier
 
 ### FREE Tier
+
 - API Calls: 1,000/month (grace: 1,050)
 - Storage: 1 GB (grace: 1.05 GB → 1 GB due to rounding)
 - Email Sends: 100/month (grace: 105)
 - Active Users: 5 (grace: 5.25 → 5 due to rounding)
 
 ### PRO Tier
+
 - Higher limits than FREE (tested dynamically)
 - Grace period applies to all quotas
 
 ### ENTERPRISE Tier
+
 - Unlimited quotas (no limits)
 - No grace period needed
 
 ## Key Test Scenarios
 
 ### Scenario 1: Normal Usage
+
 ```java
 currentUsage = 500L;  // 50% of 1000
 requestedAmount = 100L;
@@ -121,6 +147,7 @@ result = quotaEnforcer.checkQuota(subscription, MetricType.API_CALLS, 500L, 100L
 ```
 
 ### Scenario 2: At Limit with Grace
+
 ```java
 currentUsage = 1000L;  // 100% of 1000
 requestedAmount = 30L;  // Within 5% grace
@@ -129,6 +156,7 @@ result = quotaEnforcer.checkQuota(subscription, MetricType.API_CALLS, 1000L, 30L
 ```
 
 ### Scenario 3: Exceeded Grace Limit
+
 ```java
 currentUsage = 1000L;  // 100% of 1000
 requestedAmount = 100L;  // Exceeds 5% grace (1100 > 1050)
@@ -137,6 +165,7 @@ result = quotaEnforcer.checkQuota(subscription, MetricType.API_CALLS, 1000L, 100
 ```
 
 ### Scenario 4: Approaching Limit Warning
+
 ```java
 currentUsage = 920L;  // 92% of 1000
 isApproaching = quotaEnforcer.isApproachingLimit(subscription, MetricType.API_CALLS, 920L);
@@ -146,7 +175,7 @@ isApproaching = quotaEnforcer.isApproachingLimit(subscription, MetricType.API_CA
 ## Grace Period Calculation Examples
 
 | Base Limit | Grace Limit (5%) | Allowed Range | Hard Rejection |
-|------------|------------------|---------------|----------------|
+| ---------- | ---------------- | ------------- | -------------- |
 | 1,000      | 1,050            | 0-1,050       | 1,051+         |
 | 100        | 105              | 0-105         | 106+           |
 | 10         | 10.5 → 10        | 0-10          | 11+            |
@@ -156,6 +185,7 @@ isApproaching = quotaEnforcer.isApproachingLimit(subscription, MetricType.API_CA
 **Note**: Grace limits are cast to `long`, so fractional values are truncated.
 
 ## Test File Location
+
 `backend/iqscaffold-billing-service/src/test/java/com/iqscaffold/billingservice/usage/QuotaEnforcementTest.java`
 
 ## Running the Tests

@@ -11,6 +11,7 @@ This document describes the comprehensive unit test suite for payment processing
 Tests the core business logic of the Payment aggregate root entity.
 
 #### Payment Creation Tests
+
 - ✅ Create payment with valid parameters
 - ✅ Validate invoice is not null
 - ✅ Validate tenant ID is not null
@@ -20,18 +21,21 @@ Tests the core business logic of the Payment aggregate root entity.
 - ✅ Initialize refunded amount to zero
 
 #### Payment Success Tests
+
 - ✅ Mark payment as succeeded with provider payment ID
 - ✅ Clear failure reason on success
 - ✅ Prevent marking non-pending payment as succeeded
 - ✅ Prevent marking already succeeded payment as succeeded again (idempotency)
 
 #### Payment Failure Tests
+
 - ✅ Mark payment as failed with failure reason
 - ✅ Store failure reason
 - ✅ Prevent marking non-pending payment as failed
 - ✅ Prevent marking already failed payment as failed again
 
 #### Refund Processing Tests
+
 - ✅ Process full refund successfully
 - ✅ Process partial refund successfully
 - ✅ Process multiple partial refunds
@@ -44,6 +48,7 @@ Tests the core business logic of the Payment aggregate root entity.
 - ✅ Validate refund amount is not null, zero, or negative
 
 #### Refundable Amount Tests
+
 - ✅ Return full amount for succeeded payment
 - ✅ Return remaining amount after partial refund
 - ✅ Return zero for fully refunded payment
@@ -51,6 +56,7 @@ Tests the core business logic of the Payment aggregate root entity.
 - ✅ Return zero for failed payment
 
 #### Status Message Tests
+
 - ✅ Generate correct message for pending payment
 - ✅ Generate correct message for succeeded payment
 - ✅ Generate correct message for failed payment with reason
@@ -58,6 +64,7 @@ Tests the core business logic of the Payment aggregate root entity.
 - ✅ Generate correct message for partially refunded payment
 
 #### Metadata Tests
+
 - ✅ Add metadata to payment
 - ✅ Return defensive copy of metadata (prevent external modification)
 
@@ -66,6 +73,7 @@ Tests the core business logic of the Payment aggregate root entity.
 Tests the orchestration logic and coordination with external systems.
 
 #### Process Payment Tests
+
 - ✅ Process payment successfully
 - ✅ Return cached result for duplicate idempotency key
 - ✅ Handle payment failure from provider
@@ -80,6 +88,7 @@ Tests the orchestration logic and coordination with external systems.
 - ✅ Handle provider exceptions gracefully
 
 #### Retry Payment Tests
+
 - ✅ Retry failed payment successfully
 - ✅ Create new payment entity for retry
 - ✅ Process retry with payment provider
@@ -90,6 +99,7 @@ Tests the orchestration logic and coordination with external systems.
 - ✅ Generate unique idempotency key for retry
 
 #### Refund Payment Tests
+
 - ✅ Refund payment successfully
 - ✅ Process full refund
 - ✅ Process partial refund
@@ -101,6 +111,7 @@ Tests the orchestration logic and coordination with external systems.
 - ✅ Use full refundable amount when amount not specified
 
 #### Payment Method Management Tests
+
 - ✅ Add payment method successfully
 - ✅ Remove payment method successfully
 - ✅ Set default payment method successfully
@@ -109,6 +120,7 @@ Tests the orchestration logic and coordination with external systems.
 - ✅ Clear cache on payment method changes
 
 #### Payment Retrieval Tests
+
 - ✅ Get payment by ID
 - ✅ List payments by invoice
 - ✅ List payments by tenant
@@ -119,6 +131,7 @@ Tests the orchestration logic and coordination with external systems.
 Tests the immutable payment result record.
 
 #### Success Result Tests
+
 - ✅ Create successful payment result
 - ✅ Validate provider payment ID is not null or blank
 - ✅ Validate amount is not null or negative
@@ -127,6 +140,7 @@ Tests the immutable payment result record.
 - ✅ Validate processed timestamp is not null
 
 #### Failure Result Tests
+
 - ✅ Create failed payment result
 - ✅ Validate failure reason is not null or blank
 - ✅ Validate amount is not null or negative
@@ -134,16 +148,19 @@ Tests the immutable payment result record.
 - ✅ Auto-generate processed timestamp
 
 #### Direct Constructor Tests
+
 - ✅ Create result with direct constructor
 - ✅ Validate successful payment has provider ID
 - ✅ Validate failed payment has failure reason
 
 #### Immutability Tests
+
 - ✅ Verify record immutability
 - ✅ Support equality comparison
 - ✅ Support toString method
 
 #### Common Payment Scenarios Tests
+
 - ✅ Handle card declined scenario
 - ✅ Handle expired card scenario
 - ✅ Handle fraud detection scenario
@@ -152,6 +169,7 @@ Tests the immutable payment result record.
 - ✅ Handle small payment amounts
 
 #### Provider-Agnostic Tests
+
 - ✅ Work with Stripe-style payment IDs
 - ✅ Work with PayPal-style payment IDs
 - ✅ Work with generic UUID payment IDs
@@ -206,13 +224,10 @@ void shouldReturnCachedResultForDuplicateIdempotencyKey() {
   // Arrange
   String idempotencyKey = "idem_test123";
   PaymentDto cachedDto = createCachedPaymentDto();
-  when(valueOperations.get("payment:idempotency:" + idempotencyKey))
-      .thenReturn(cachedDto);
+  when(valueOperations.get("payment:idempotency:" + idempotencyKey)).thenReturn(cachedDto);
 
   // Act
-  CompletableFuture<PaymentDto> future = paymentApplicationService.processPayment(
-      1L, 1L, idempotencyKey
-  );
+  CompletableFuture<PaymentDto> future = paymentApplicationService.processPayment(1L, 1L, idempotencyKey);
   PaymentDto result = future.get();
 
   // Assert
@@ -233,8 +248,8 @@ void shouldNotAllowMarkingSucceededPaymentAsSucceededAgain() {
 
   // Act & Assert
   assertThatThrownBy(() -> payment.markAsSucceeded("pi_test456"))
-      .isInstanceOf(IllegalStateException.class)
-      .hasMessageContaining("Can only mark PENDING payments as succeeded");
+    .isInstanceOf(IllegalStateException.class)
+    .hasMessageContaining("Can only mark PENDING payments as succeeded");
 }
 ```
 
@@ -280,11 +295,13 @@ void shouldPublishPaymentSucceededEventOnSuccess() {
 ## Running the Tests
 
 ### Run all payment tests:
+
 ```bash
 mvn test -Dtest=Payment*Test
 ```
 
 ### Run specific test class:
+
 ```bash
 mvn test -Dtest=PaymentTest
 mvn test -Dtest=PaymentApplicationServiceTest
@@ -292,6 +309,7 @@ mvn test -Dtest=PaymentResultTest
 ```
 
 ### Run with coverage:
+
 ```bash
 mvn clean test jacoco:report
 ```
@@ -305,12 +323,10 @@ Tests use `TestEntityUtils` for setting entity IDs and creating test fixtures:
 void setUp() {
   testTenantId = UUID.randomUUID();
   testUserId = UUID.randomUUID();
-  
-  testPaymentMethod = new PaymentMethod(
-      testTenantId, testUserId, PaymentMethodType.CARD, "pm_test123"
-  );
+
+  testPaymentMethod = new PaymentMethod(testTenantId, testUserId, PaymentMethodType.CARD, "pm_test123");
   TestEntityUtils.setId(testPaymentMethod, 1L);
-  
+
   testInvoice = createTestInvoice();
   TestEntityUtils.setId(testInvoice, 1L);
 }
@@ -319,20 +335,24 @@ void setUp() {
 ## Mocking Strategy
 
 ### Payment Provider Adapter
+
 - Mock external payment provider calls
 - Return success/failure results
 - Simulate provider exceptions
 
 ### Redis Template
+
 - Mock idempotency cache operations
 - Verify cache hits/misses
 - Test TTL configuration
 
 ### Event Publisher
+
 - Verify domain events are published
 - Check event payload correctness
 
 ### Repositories
+
 - Mock database operations
 - Return test entities
 - Simulate not found scenarios

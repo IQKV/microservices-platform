@@ -11,6 +11,7 @@ This document describes the comprehensive unit test suite for invoice generation
 Tests the core business logic of the Invoice aggregate root entity (already existing).
 
 #### Coverage Areas
+
 - ✅ Invoice creation and validation
 - ✅ Line item management (add, remove, clear)
 - ✅ Tax management
@@ -23,6 +24,7 @@ Tests the core business logic of the Invoice aggregate root entity (already exis
 Tests the invoice generation domain service for creating invoices.
 
 #### Regular Invoice Generation Tests (8 tests)
+
 - ✅ Generate invoice for regular billing period
 - ✅ Generate invoice with subscription fee line item
 - ✅ Generate unique invoice numbers
@@ -33,12 +35,14 @@ Tests the invoice generation domain service for creating invoices.
 - ✅ Validate period end is after period start
 
 #### Invoice Generation with Usage Charges Tests (4 tests)
+
 - ✅ Generate invoice with usage charges
 - ✅ Generate invoice with empty usage charges list
 - ✅ Generate invoice with null usage charges list
 - ✅ Calculate correct total with multiple usage charges
 
 #### Proration Invoice Generation Tests (6 tests)
+
 - ✅ Generate proration invoice for upgrade
 - ✅ Generate proration invoice for downgrade
 - ✅ Include proration metadata in invoice
@@ -47,6 +51,7 @@ Tests the invoice generation domain service for creating invoices.
 - ✅ Validate proration result is not null
 
 #### One-Time Charge Invoice Generation Tests (6 tests)
+
 - ✅ Generate invoice for one-time charge
 - ✅ Generate invoice with correct line item for one-time charge
 - ✅ Validate description is not blank
@@ -55,23 +60,27 @@ Tests the invoice generation domain service for creating invoices.
 - ✅ Validate amount is not negative
 
 #### Invoice Number Generation Tests (3 tests)
+
 - ✅ Generate invoice number with correct format (INV-YYYYMM-XXXXX)
 - ✅ Generate invoice number with year-month prefix
 - ✅ Validate date is not null
 
 #### Invoice Scheduling Tests (4 tests)
+
 - ✅ Calculate next invoice date as period end
 - ✅ Determine invoice should be generated when period ending soon (≤3 days)
 - ✅ Determine invoice should not be generated when period far away (>3 days)
 - ✅ Determine invoice should not be generated for inactive subscription
 
 #### Financial Calculation Precision Tests (4 tests)
+
 - ✅ Maintain 2 decimal places for all monetary values
 - ✅ Calculate correct total with complex proration
 - ✅ Handle rounding correctly for usage charges
 - ✅ Verify all amounts use proper scale
 
 #### UsageCharge Value Object Tests (5 tests)
+
 - ✅ Create usage charge with valid parameters
 - ✅ Validate description is not blank
 - ✅ Validate amount is not null
@@ -85,8 +94,9 @@ Tests the invoice generation domain service for creating invoices.
 Tests the InvoiceLineItem value object for line item calculations.
 
 #### Line Item Creation Tests (7 tests)
+
 - ✅ Create line item with valid parameters
-- ✅ Calculate amount when not provided (quantity * unitPrice)
+- ✅ Calculate amount when not provided (quantity \* unitPrice)
 - ✅ Validate type is not null
 - ✅ Validate description is not blank
 - ✅ Validate quantity is not zero
@@ -95,33 +105,41 @@ Tests the InvoiceLineItem value object for line item calculations.
 - ✅ Validate amount matches calculation
 
 #### Subscription Fee Factory Method Tests (2 tests)
+
 - ✅ Create subscription fee line item
 - ✅ Maintain 2 decimal places for subscription fee
 
 #### Usage Charge Factory Method Tests (3 tests)
+
 - ✅ Create usage charge line item
 - ✅ Calculate correct amount for large quantities
 - ✅ Handle fractional unit prices correctly
 
 #### Proration Credit Factory Method Tests (2 tests)
+
 - ✅ Create proration credit line item
 - ✅ Negate positive amount for credit
 
 #### Proration Charge Factory Method Tests (1 test)
+
 - ✅ Create proration charge line item
 
 #### Discount Factory Method Tests (2 tests)
+
 - ✅ Create discount line item
 - ✅ Negate positive amount for discount
 
 #### Tax Factory Method Tests (1 test)
+
 - ✅ Create tax line item
 
 #### Line Item Query Methods Tests (2 tests)
+
 - ✅ Identify credit line items (isCredit, isCharge)
 - ✅ Get absolute amount
 
 #### Financial Calculation Precision Tests (5 tests)
+
 - ✅ Maintain 2 decimal places for all amounts
 - ✅ Round half up for monetary values
 - ✅ Handle complex quantity and unit price calculations
@@ -129,11 +147,13 @@ Tests the InvoiceLineItem value object for line item calculations.
 - ✅ Handle zero unit price
 
 #### Value Object Equality Tests (3 tests)
+
 - ✅ Be equal when all fields match
 - ✅ Not be equal when amounts differ
 - ✅ Have meaningful toString representation
 
 #### Edge Case Tests (3 tests)
+
 - ✅ Handle maximum reasonable quantity (999,999,999)
 - ✅ Handle maximum reasonable unit price ($999,999.99)
 - ✅ Handle minimum positive unit price ($0.01)
@@ -196,18 +216,13 @@ InvoiceLineItemTest (Value Object - New)
 void shouldCalculateCorrectTotalWithMultipleUsageCharges() {
   // Arrange
   List<InvoiceGenerator.UsageCharge> usageCharges = List.of(
-      new InvoiceGenerator.UsageCharge("Charge 1", new BigDecimal("10.50")),
-      new InvoiceGenerator.UsageCharge("Charge 2", new BigDecimal("20.25")),
-      new InvoiceGenerator.UsageCharge("Charge 3", new BigDecimal("5.75"))
+    new InvoiceGenerator.UsageCharge("Charge 1", new BigDecimal("10.50")),
+    new InvoiceGenerator.UsageCharge("Charge 2", new BigDecimal("20.25")),
+    new InvoiceGenerator.UsageCharge("Charge 3", new BigDecimal("5.75"))
   );
 
   // Act
-  Invoice invoice = invoiceGenerator.generateWithUsage(
-      testSubscription,
-      periodStart,
-      periodEnd,
-      usageCharges
-  );
+  Invoice invoice = invoiceGenerator.generateWithUsage(testSubscription, periodStart, periodEnd, usageCharges);
 
   // Assert
   // 49.99 (subscription) + 10.50 + 20.25 + 5.75 = 86.49
@@ -224,19 +239,16 @@ void shouldCalculateCorrectTotalWithMultipleUsageCharges() {
 void shouldGenerateProrationInvoiceForUpgrade() {
   // Arrange
   ProrationResult prorationResult = ProrationResult.forUpgrade(
-      new BigDecimal("49.99"),  // old plan price
-      new BigDecimal("99.99"),  // new plan price
-      15,                        // days remaining
-      30,                        // days in period
-      "Pro Plan",
-      "Enterprise Plan"
+    new BigDecimal("49.99"), // old plan price
+    new BigDecimal("99.99"), // new plan price
+    15, // days remaining
+    30, // days in period
+    "Pro Plan",
+    "Enterprise Plan"
   );
 
   // Act
-  Invoice invoice = invoiceGenerator.generateProrationInvoice(
-      testSubscription,
-      prorationResult
-  );
+  Invoice invoice = invoiceGenerator.generateProrationInvoice(testSubscription, prorationResult);
 
   // Assert
   // Credit: 49.99 * (15/30) = 24.995 ≈ 25.00
@@ -253,13 +265,7 @@ void shouldGenerateProrationInvoiceForUpgrade() {
 @DisplayName("Should calculate amount when not provided")
 void shouldCalculateAmountWhenNotProvided() {
   // Act
-  InvoiceLineItem lineItem = new InvoiceLineItem(
-      InvoiceLineItem.LineItemType.USAGE_CHARGE,
-      "API calls",
-      1000L,
-      new BigDecimal("0.01"),
-      null
-  );
+  InvoiceLineItem lineItem = new InvoiceLineItem(InvoiceLineItem.LineItemType.USAGE_CHARGE, "API calls", 1000L, new BigDecimal("0.01"), null);
 
   // Assert
   assertThat(lineItem.amount()).isEqualByComparingTo(new BigDecimal("10.00"));
@@ -273,16 +279,8 @@ void shouldCalculateAmountWhenNotProvided() {
 @DisplayName("Should round half up for monetary values")
 void shouldRoundHalfUpForMonetaryValues() {
   // Act
-  InvoiceLineItem lineItem1 = InvoiceLineItem.usageCharge(
-      "Usage 1",
-      1L,
-      new BigDecimal("10.555")
-  );
-  InvoiceLineItem lineItem2 = InvoiceLineItem.usageCharge(
-      "Usage 2",
-      1L,
-      new BigDecimal("10.554")
-  );
+  InvoiceLineItem lineItem1 = InvoiceLineItem.usageCharge("Usage 1", 1L, new BigDecimal("10.555"));
+  InvoiceLineItem lineItem2 = InvoiceLineItem.usageCharge("Usage 2", 1L, new BigDecimal("10.554"));
 
   // Assert
   assertThat(lineItem1.amount()).isEqualByComparingTo(new BigDecimal("10.56"));
@@ -293,11 +291,13 @@ void shouldRoundHalfUpForMonetaryValues() {
 ## Running the Tests
 
 ### Run all invoice tests:
+
 ```bash
 mvn test -Dtest=Invoice*Test
 ```
 
 ### Run specific test class:
+
 ```bash
 mvn test -Dtest=InvoiceGeneratorTest
 mvn test -Dtest=InvoiceLineItemTest
@@ -305,6 +305,7 @@ mvn test -Dtest=InvoiceTest
 ```
 
 ### Run with coverage:
+
 ```bash
 mvn clean test jacoco:report
 ```
@@ -321,21 +322,19 @@ void setUp() {
   testUserId = UUID.randomUUID();
 
   // Create test plan
-  PlanQuotas testQuotas = new PlanQuotas(
-      100L, 50L, 10000L, 5000L, 100L, 1000L, 5L, 10L
-  );
+  PlanQuotas testQuotas = new PlanQuotas(100L, 50L, 10000L, 5000L, 100L, 1000L, 5L, 10L);
   testPlan = SubscriptionPlan.create(
-      "PRO_MONTHLY",
-      "Pro Plan",
-      "Professional features",
-      PlanTier.PRO,
-      BillingCycle.MONTHLY,
-      new BigDecimal("49.99"),
-      "USD",
-      Map.of("advanced_workflows", true),
-      testQuotas,
-      14,
-      true
+    "PRO_MONTHLY",
+    "Pro Plan",
+    "Professional features",
+    PlanTier.PRO,
+    BillingCycle.MONTHLY,
+    new BigDecimal("49.99"),
+    "USD",
+    Map.of("advanced_workflows", true),
+    testQuotas,
+    14,
+    true
   );
   TestEntityUtils.setId(testPlan, 1L);
 
@@ -350,6 +349,7 @@ void setUp() {
 ## Financial Calculation Coverage
 
 ### Precision Requirements
+
 - **Decimal Places**: All monetary values maintain exactly 2 decimal places
 - **Rounding Mode**: HALF_UP rounding for all calculations
 - **Scale Validation**: Tests verify scale is exactly 2 for all amounts
@@ -416,6 +416,7 @@ void setUp() {
 ## Financial Calculation Examples
 
 ### Example 1: Regular Billing Period
+
 ```
 Subscription: Pro Plan @ $49.99/month
 Period: 30 days
@@ -427,6 +428,7 @@ Total: $49.99
 ```
 
 ### Example 2: With Usage Charges
+
 ```
 Subscription: Pro Plan @ $49.99/month
 Period: 30 days
@@ -440,6 +442,7 @@ Total: $64.99
 ```
 
 ### Example 3: Upgrade Proration
+
 ```
 Old Plan: Pro @ $49.99/month
 New Plan: Enterprise @ $99.99/month
@@ -453,6 +456,7 @@ Total: $25.00
 ```
 
 ### Example 4: Downgrade Proration
+
 ```
 Old Plan: Enterprise @ $99.99/month
 New Plan: Pro @ $49.99/month

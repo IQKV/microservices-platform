@@ -7,12 +7,14 @@ This implementation follows the detailed technical standards defined in the desi
 **Event Handling & Async Processing Guidelines:**
 
 **Use Synchronous Processing When:**
+
 - User needs immediate feedback (payment processing, quota checks)
 - Operation is fast (<100ms) and reliable
 - Strong consistency is required (subscription creation, plan changes)
 - Operation is part of a user-facing transaction
 
 **Use Asynchronous Processing When:**
+
 - Operation is long-running (>1 second) - PDF generation, batch processing
 - High volume operations that can be buffered - usage recording (10,000+ records/sec)
 - External service calls that may be slow/unreliable - email sending, webhooks
@@ -22,6 +24,7 @@ This implementation follows the detailed technical standards defined in the desi
 - Decoupling is beneficial - prevent cascading failures
 
 **Async Processing Patterns Used:**
+
 1. **Event Publishing:** Domain events published to RabbitMQ after aggregate persistence
 2. **Message Consumers:** Dedicated consumers process events asynchronously with retry logic
 3. **Scheduled Jobs:** Jobs identify work and publish to queues for async processing
@@ -30,6 +33,7 @@ This implementation follows the detailed technical standards defined in the desi
 6. **Circuit Breakers:** Protect against cascading failures in external service calls
 
 **Java 21 Modern Features:**
+
 - Use Java records for all DTOs, value objects, and immutable data carriers
 - Use text blocks (""") for multi-line strings (JPQL queries, OpenAPI descriptions, JSON examples)
 - Use pattern matching for instanceof instead of traditional casting
@@ -39,12 +43,14 @@ This implementation follows the detailed technical standards defined in the desi
 - Use Stream API enhancements (toList() instead of collect(Collectors.toList()))
 
 **Naming Conventions:**
+
 - REST controllers: Use `-RestResource` suffix (e.g., SubscriptionRestResource, not SubscriptionController)
 - Configuration: Use `@ConfigurationProperties` with Java records, prefix `iqscaffold.billing.`
 - Constants: Centralize in `BillingConstants.java` with nested static classes
 - Exceptions: Domain-specific custom exceptions in `shared/exception` package
 
 **OpenAPI Documentation:**
+
 - Use `@Tag` on controllers for grouping
 - Use `@Operation` with detailed descriptions using text blocks
 - Use `@ApiResponses` documenting all response codes
@@ -53,17 +59,20 @@ This implementation follows the detailed technical standards defined in the desi
 - Use `@Timed` for metrics collection
 
 **Internationalization:**
+
 - Use `MessageService` for all user-facing messages
 - Message keys follow pattern: `{category}.{entity}.{action}`
 - Support English, Spanish, French
 - Use parameterized messages with `{0}`, `{1}` placeholders
 
 **Database Migrations:**
+
 - System changesets: `db/changelog/system/00000000000000-descriptive-name.xml`
 - Tenant changesets: `db/changelog/tenant/YYYYMMDDHHMMSS-descriptive-name.xml`
 - Separate changesets for tables, indexes, constraints, and seed data
 
 **Package Structure:**
+
 - Domain-driven organization: subscription/, plan/, usage/, payment/, paymentmethod/, invoice/, billing/, portal/, webhook/, analytics/, config/, security/, shared/
 - Each domain package contains: entity, repository, service, REST resource, DTOs
 
@@ -72,8 +81,6 @@ This implementation follows the detailed technical standards defined in the desi
 ## Phase 1: Project Setup and Infrastructure
 
 - [x] 1. Create billing service module structure and configure Java 21
-
-
   - Create iqscaffold-billing-service directory with Maven module structure
   - Configure pom.xml with Java 21 target version
   - Add Spring Boot, PostgreSQL, Redis, RabbitMQ dependencies
@@ -86,20 +93,15 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 1.1, 1.2, 3.8.1, 3.8.12_
 
 - [x] 1.1 Set up configuration properties with type-safe records
-
-
   - Create BillingProperties record class with @ConfigurationProperties(prefix = "iqscaffold.billing")
   - Define nested record classes for payment, subscription, usage, invoice, portal, and features configuration
   - Add Jakarta validation annotations to all configuration properties
   - Configure spring-configuration-metadata.json generation for IDE autocomplete
   - Create application-local.yml, application-staging.yml, application-production.yml
-  - Use environment variables with IQSCAFFOLD_BILLING_ prefix for sensitive configuration
+  - Use environment variables with IQSCAFFOLD*BILLING* prefix for sensitive configuration
   - _Requirements: 3.2.1, 3.2.2, 3.2.3, 3.2.4, 3.2.5, 3.2.6, 3.2.7, 3.2.8_
 
-
-
 - [x] 1.2 Create shared utilities and constants
-
   - Create BillingConstants.java with nested static classes for Headers, MDC, SubscriptionStatus, BillingEvents, CacheNames, PaymentProviders, InvoiceFormat, Defaults, MetricTypes, and ErrorCodes
   - Add Javadoc comments to each nested class
   - Make all constant fields public static final with UPPER_SNAKE_CASE naming
@@ -108,7 +110,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.5.1, 3.5.2, 3.5.3, 3.5.4, 3.5.5, 3.5.6, 3.5.7, 3.5.8, 3.5.9_
 
 - [x] 1.3 Set up internationalization (i18n) support
-
   - Configure Spring messages in application.yml (basename: i18n/messages, encoding: UTF-8, cache-duration: PT1H)
   - Create messages.properties (English), messages_es.properties (Spanish), messages_fr.properties (French)
   - Organize message keys by category (subscription, plan, payment, invoice, usage, feature, validation, error, email)
@@ -116,9 +117,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Implement locale resolution from user preferences, Accept-Language header, or default
   - _Requirements: 3.7.1, 3.7.2, 3.7.3, 3.7.4, 3.7.6, 3.7.7, 3.7.8, 3.7.9, 3.7.10, 3.7.11, 3.7.12, 3.7.13, 3.7.14, 3.7.15_
 
-
 - [x] 1.4 Create custom exception hierarchy
-
   - Create BillingException base class in shared/exception package
   - Create SubscriptionException with nested SubscriptionNotFoundException, SubscriptionAlreadyExistsException, InvalidSubscriptionStateException
   - Create PaymentException with nested PaymentFailedException (with paymentId, reason fields), PaymentMethodNotFoundException, InvalidPaymentMethodException
@@ -130,7 +129,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.6.1, 3.6.2, 3.6.3, 3.6.4, 3.6.5, 3.6.6, 3.6.7, 3.6.8_
 
 - [x] 1.5 Configure OpenAPI documentation with SpringDoc
-
   - Configure SpringDoc in application.yml with API docs path and Swagger UI
   - Define API groups: subscription-plans, subscriptions, payments, invoices, usage, webhooks, admin
   - Configure group paths-to-match for logical organization
@@ -139,13 +137,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.3.7, 3.3.10_
 
 - [x] 2. Set up Liquibase database migration infrastructure
-
-
-
-
-
-
-
   - Create db/changelog/system/ directory for public schema migrations
   - Create db/changelog/tenant/ directory for tenant schema migrations
   - Create system/master.xml and tenant/master.xml files with proper XML headers
@@ -158,17 +149,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Separate table creation, index creation, and constraint addition into distinct changesets
   - _Requirements: 3.4.1, 3.4.2, 3.4.3, 3.4.4, 3.4.5, 3.4.6, 3.4.7, 3.4.8, 3.4.9, 3.4.10, 3.4.11, 3.4.12, 3.4.13, 3.4.14, 3.4.15, 3.4.16, 3.4.17, 3.4.18, 3.4.19, 3.4.20_
 
-
-
 - [x] 3. Set up multi-tenancy infrastructure
-
-
-
-
-
-
-
-
   - Implement Hibernate multi-tenancy configuration with schema-per-tenant strategy
   - Create TenantContext holder for thread-local tenant ID storage
   - Implement TenantIdentifierResolver to extract tenant from request context
@@ -176,11 +157,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
 - [x] 4. Configure external integrations
-
-
-
-
-
   - Set up PostgreSQL datasource with connection pooling (20 connections per instance)
   - Configure Redis for caching with appropriate TTL settings (subscriptions: 5min, plans: 1hr, usage: 1min, quotas: 1min, payment-methods: 10min)
   - Configure RabbitMQ exchanges, queues, and dead letter queues
@@ -190,11 +166,6 @@ This implementation follows the detailed technical standards defined in the desi
 ## Phase 2: Domain Layer - Aggregates, Entities, and Value Objects
 
 - [x] 5. Set up domain package structure following platform conventions
-
-
-
-
-
   - Create package structure: subscription/, plan/, usage/, payment/, paymentmethod/, invoice/, billing/, portal/, webhook/, analytics/, config/, security/, shared/
   - Within each domain package, create entity, repository, service, REST resource (-RestResource suffix), and DTO files
   - Create shared/exception/ package for custom exceptions
@@ -202,11 +173,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.1.1, 3.1.2, 3.1.3, REQ-DDD-045, REQ-DDD-046, REQ-DDD-047, REQ-DDD-048, REQ-DDD-049, REQ-DDD-061, REQ-DDD-062_
 
 - [x] 6. Implement subscription aggregate with Java 21 features
-
-
-
-
-
   - Create Subscription aggregate root entity with identity and lifecycle
   - Create SubscriptionPlan aggregate root entity (public schema)
   - Create PlanTier and BillingCycle enums
@@ -217,12 +183,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Ensure modifications go through aggregate root
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 3.8.2, 3.8.5, 3.8.4, REQ-DDD-005, REQ-DDD-006, REQ-DDD-010, REQ-DDD-011, REQ-DDD-012, REQ-DDD-013, REQ-DDD-015, REQ-DDD-016, REQ-DDD-017_
 
-
 - [x] 7. Implement invoice aggregate with Java records
-
-
-
-
   - Create Invoice aggregate root entity with identity and lifecycle
   - Create InvoiceLineItem as Java record (immutable value object)
   - Create InvoiceStatus enum
@@ -231,11 +192,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-INV-001, REQ-INV-002, REQ-INV-007, 3.8.2, REQ-DDD-007, REQ-DDD-010, REQ-DDD-011, REQ-DDD-012, REQ-DDD-013, REQ-DDD-014_
 
 - [x] 8. Implement payment aggregates
-
-
-
-
-
   - Create Payment aggregate root entity
   - Create PaymentMethod aggregate root entity
   - Create PaymentStatus and PaymentMethodType enums
@@ -244,11 +200,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-PAY-007, REQ-PAY-014, 3.8.5, REQ-DDD-008, REQ-DDD-009, REQ-DDD-010, REQ-DDD-011, REQ-DDD-012, REQ-DDD-013_
 
 - [x] 9. Implement usage entities and value objects as Java records
-
-
-
-
-
   - Create UsageRecord entity
   - Create BillingEvent entity
   - Create MetricType enum
@@ -257,11 +208,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-USAGE-001, REQ-USAGE-002, 3.8.2, REQ-DDD-013, REQ-DDD-015, REQ-DDD-016, REQ-DDD-017_
 
 - [x] 10. Implement value objects for business logic as Java records
-
-
-
-
-
   - Create ProrationResult as Java record with calculation logic
   - Ensure all value objects are immutable (automatic with records)
   - Use records to encapsulate complex business logic with minimal boilerplate
@@ -270,11 +216,6 @@ This implementation follows the detailed technical standards defined in the desi
 ## Phase 3: Domain Layer - Repositories, Domain Services, and Specifications
 
 - [x] 11. Implement repository interfaces in domain layer with text blocks for queries
-
-
-
-
-
   - Create SubscriptionRepository interface in domain layer
   - Create SubscriptionPlanRepository interface in domain layer
   - Create InvoiceRepository interface in domain layer
@@ -287,10 +228,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.8.3, REQ-DDD-024, REQ-DDD-026, REQ-DDD-027, REQ-DDD-028, REQ-DDD-029_
 
 - [x] 12. Implement domain services
-
-
-
-
   - Create ProrationCalculator domain service for proration logic
   - Create QuotaEnforcer domain service for quota validation
   - Create SubscriptionLifecycleManager domain service for state transitions
@@ -299,11 +236,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-DDD-019, REQ-DDD-020, REQ-DDD-021, REQ-DDD-022, REQ-DDD-023_
 
 - [x] 13. Implement specifications
-
-
-
-
-
   - Create ActiveSubscriptionSpecification
   - Create QuotaExceededSpecification
   - Create ValidPlanTransitionSpecification
@@ -313,16 +245,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-DDD-039, REQ-DDD-040, REQ-DDD-041, REQ-DDD-042, REQ-DDD-043, REQ-DDD-044_
 
 - [x] 14. Implement factories
-
-
-
-
-
-
-
-
-
-
   - Create SubscriptionFactory for complex subscription creation
   - Create InvoiceFactory for invoice creation with line items
   - Encapsulate complex object construction and ensure invariants
@@ -330,12 +252,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-DDD-035, REQ-DDD-036, REQ-DDD-037, REQ-DDD-038_
 
 - [x] 15. Implement domain events as Java records
-
-
-
-
-
-
   - Create domain event base class as immutable Java record
   - Create domain events as records: SubscriptionCreated, SubscriptionUpgraded, SubscriptionDowngraded, SubscriptionCanceled, SubscriptionReactivated, TrialStarted, TrialEnding, TrialEnded, InvoiceGenerated, InvoicePaid, InvoiceVoided, PaymentSucceeded, PaymentFailed, PaymentRefunded, UsageRecorded, QuotaExceeded
   - Include timestamp and aggregate identity in all events
@@ -345,10 +261,6 @@ This implementation follows the detailed technical standards defined in the desi
 ## Phase 4: Infrastructure Layer - Persistence and External Integrations
 
 - [x] 16. Implement repository implementations in infrastructure layer
-
-
-
-
   - Create JPA repository implementations for all domain repositories
   - Implement multi-tenant support in repository implementations
   - Ensure repositories return fully reconstituted aggregates
@@ -356,24 +268,12 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.8.6, REQ-DDD-025, REQ-DDD-028, REQ-DATA-001 through REQ-DATA-022_
 
 - [x] 17. Create payment provider anti-corruption layer with sealed interface
-
-
-
-
-
   - Define PaymentProviderAdapter as sealed interface permitting StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider
   - Create PaymentResult, PaymentMethodDetails, and CustomerUpdateRequest as Java records
   - Document interface contract and expected behaviors
   - _Requirements: 3.8.2, 3.8.8, REQ-PAY-001, REQ-DDD-003, REQ-DDD-057, REQ-DDD-058, REQ-DDD-059, REQ-DDD-060_
 
 - [x] 18. Implement Stripe payment adapter with anti-corruption layer
-
-
-
-
-
-
-
   - Create StripePaymentAdapter as final class implementing PaymentProviderAdapter
   - Integrate Stripe Java SDK
   - Translate Stripe models to domain models in the adapter
@@ -386,11 +286,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.8.4, 3.8.8, REQ-PAY-002, REQ-PAY-007, REQ-PAY-008, REQ-PAY-009, REQ-PAY-020, REQ-PAY-030, REQ-PAY-038, REQ-DDD-057, REQ-DDD-059, REQ-DDD-060_
 
 - [x] 19. Implement PayPal payment adapter with anti-corruption layer
-
-
-
-
-
   - Create PayPalPaymentAdapter as final class implementing PaymentProviderAdapter
   - Integrate PayPal Java SDK
   - Translate PayPal models to domain models in the adapter
@@ -402,23 +297,12 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.8.8, REQ-PAY-003, REQ-PAY-009, REQ-DDD-058, REQ-DDD-059, REQ-DDD-060_
 
 - [x] 20. Implement manual payment adapter
-
-
-
-
-
   - Create ManualPaymentAdapter as final class implementing PaymentProviderAdapter
   - Implement manual payment recording for enterprise contracts
   - Implement offline payment tracking
   - _Requirements: 3.8.8, REQ-PAY-004_
 
 - [x] 21. Create payment provider factory
-
-
-
-
-
-
   - Implement PaymentProviderFactory to select provider based on configuration
   - Use switch expression for provider selection
   - Add fallback logic to manual processing when provider unavailable
@@ -428,11 +312,6 @@ This implementation follows the detailed technical standards defined in the desi
 ## Phase 5: Application Layer - Application Services and DTOs
 
 - [x] 22. Create DTOs as Java records
-
-
-
-
-
   - Create SubscriptionDto, SubscriptionPlanDto, CreateSubscriptionRequest, UpdateSubscriptionRequest as Java records
   - Create InvoiceDto, InvoiceLineItemDto, CreateInvoiceRequest as Java records
   - Create PaymentDto, PaymentMethodDto, AddPaymentMethodRequest as Java records
@@ -443,13 +322,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.8.2, 3.8.3, 3.8.15_
 
 - [x] 23. Implement plan application service with i18n
-
-
-
-
-
-
-
   - Create PlanApplicationService as thin orchestration layer
   - Inject MessageService for internationalized messages
   - Delegate business logic to domain services and aggregates
@@ -463,13 +335,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.7.5, 3.7.6, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 5.1, 5.2, 5.3, 5.4, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-056_
 
 - [x] 24. Implement subscription application service - creation and trial management with i18n
-
-
-
-
-
-
-
   - Create SubscriptionApplicationService as thin orchestration layer
   - Inject MessageService for internationalized messages
   - Use SubscriptionFactory for subscription creation
@@ -485,12 +350,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: 3.7.5, 3.7.6, REQ-SUB-001 through REQ-SUB-015, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
 - [x] 25. Implement subscription application service - upgrade and downgrade with i18n
-
-
-
-
-
-
   - Use ProrationCalculator domain service for proration calculations
   - Use ValidPlanTransitionSpecification for validation
   - Use QuotaExceededSpecification for downgrade validation
@@ -502,10 +361,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-SUB-023 through REQ-SUB-038, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055_
 
 - [x] 26. Implement subscription application service - cancellation and reactivation
-
-
-
-
   - Use SubscriptionLifecycleManager domain service for state transitions
   - Use ActiveSubscriptionSpecification for validation
   - Implement cancelSubscription use case with immediate and period-end options
@@ -515,9 +370,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-SUB-039 through REQ-SUB-050, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055_
 
 - [x] 27. Implement payment application service
-
-
-
   - Create PaymentApplicationService as thin orchestration layer
   - Delegate to Payment and PaymentMethod aggregates for business logic
   - Use PaymentProviderAdapter (anti-corruption layer) for external calls
@@ -542,13 +394,7 @@ This implementation follows the detailed technical standards defined in the desi
   - Add payment method caching with 10-minute TTL
   - _Requirements: REQ-PAY-007 through REQ-PAY-036, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
-
 - [x] 28. Implement invoice application service
-
-
-
-
-
   - Create InvoiceApplicationService as thin orchestration layer
   - Use InvoiceFactory for invoice creation
   - Use InvoiceGenerator domain service for invoice generation logic
@@ -569,11 +415,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-INV-001 through REQ-INV-021, REQ-INV-030 through REQ-INV-034, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
 - [x] 29. Implement usage application service
-
-
-
-
-
   - Create UsageApplicationService as thin orchestration layer
   - Use QuotaEnforcer domain service for quota validation
   - Use QuotaExceededSpecification for quota checks
@@ -595,10 +436,6 @@ This implementation follows the detailed technical standards defined in the desi
   - _Requirements: REQ-USAGE-001 through REQ-USAGE-023, REQ-DDD-052, REQ-DDD-053, REQ-DDD-054, REQ-DDD-055, REQ-DDD-056_
 
 - [x] 30. Implement webhook application service
-
-
-
-
   - Create WebhookApplicationService as thin orchestration layer
   - Use PaymentProviderAdapter for webhook signature verification
   - Implement processStripeWebhook and processPayPalWebhook use cases
@@ -626,6 +463,7 @@ This implementation follows the detailed technical standards defined in the desi
 **Event Handling & Async Processing Strategy:**
 
 This phase implements event-driven architecture for operations that benefit from asynchronous processing. Use async processing when:
+
 - **Operations can be eventually consistent** (don't need immediate synchronous response)
 - **Long-running operations** that would block HTTP requests (invoice generation, PDF creation, email sending)
 - **High-volume operations** that need to be buffered and processed in batches (usage recording)
@@ -634,6 +472,7 @@ This phase implements event-driven architecture for operations that benefit from
 - **Decoupling services** to prevent cascading failures (notification sending shouldn't block payment processing)
 
 **Key Async Use Cases in Billing Service:**
+
 1. **Usage Recording** - High volume, can be batched, eventual consistency acceptable
 2. **Invoice Generation** - Long-running (PDF creation), can be scheduled
 3. **Webhook Processing** - External events, need retry logic, idempotency required
@@ -642,16 +481,13 @@ This phase implements event-driven architecture for operations that benefit from
 6. **Trial Expiration** - Scheduled batch processing
 
 **Event Publishing Pattern:**
+
 - Domain events published AFTER successful aggregate persistence (transactional outbox pattern)
 - Events contain aggregate ID and minimal data (consumers fetch full data if needed)
 - Events enable eventual consistency between aggregates
 - Events trigger async workflows without tight coupling
 
 - [x] 31. Set up RabbitMQ infrastructure
-
-
-
-
   - Create billing.events exchange (topic, durable)
   - Create queues: usage, invoice, webhook, notification, payment-retry
   - Configure dead letter queues for all queues
@@ -660,13 +496,7 @@ This phase implements event-driven architecture for operations that benefit from
   - Configure queue priorities for critical operations (payment processing > notifications)
   - _Requirements: 1.5_
 
-
 - [x] 32. Implement domain event publisher
-
-
-
-
-
   - Create DomainEventPublisher in infrastructure layer
   - Implement publishing to RabbitMQ for domain events
   - Publish events after successful aggregate persistence (transactional outbox pattern recommended)
@@ -683,11 +513,6 @@ This phase implements event-driven architecture for operations that benefit from
   - _Requirements: REQ-DDD-032, REQ-DDD-033, REQ-DDD-034, REQ-DDD-055, REQ-USAGE-006, REQ-INV-009, REQ-PAY-046_
 
 - [x] 33. Implement message consumers
-
-
-
-
-
   - **UsageRecordConsumer** for asynchronous usage recording
     - **Why Async:** High volume (10,000+ records/sec), can be batched, eventual consistency acceptable
     - Implement batch processing (process 100 records at a time)
@@ -767,7 +592,6 @@ This phase implements event-driven architecture for operations that benefit from
   - Add @Timed annotation for metrics collection
   - _Requirements: 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.3.5, 3.3.6, 3.3.9, REQ-PORTAL-001 through REQ-PORTAL-015, REQ-API-003 through REQ-API-006, REQ-DDD-049_
 
-
 - [x] 36. Implement customer portal endpoints - invoices and payments
   - Delegate to InvoiceApplicationService, UsageApplicationService, and PaymentApplicationService
   - Implement GET /api/v1/billing/portal/invoices endpoint with pagination and filtering
@@ -823,7 +647,6 @@ This phase implements event-driven architecture for operations that benefit from
   - Add OpenAPI/Swagger documentation with @SecurityRequirement annotations
   - _Requirements: REQ-ADMIN-010 through REQ-ADMIN-027, REQ-API-019 through REQ-API-022, REQ-DDD-049_
 
-
 - [x] 39. Implement webhook endpoints
   - Create WebhookController in presentation layer
   - Delegate to WebhookApplicationService
@@ -860,7 +683,6 @@ This phase implements event-driven architecture for operations that benefit from
   - Add specific error details for quota exceeded, feature not available, and payment failed
   - _Requirements: REQ-ERR-012, REQ-ERR-013, REQ-ERR-014, REQ-ERR-015, REQ-DDD-049_
 
-
 - [x] 43. Implement request validation
   - Add Bean Validation annotations to DTOs and request objects in presentation layer
   - Use specifications in domain layer for business rule validation
@@ -895,12 +717,12 @@ This phase implements event-driven architecture for operations that benefit from
   - Implement email sending logic in NotificationConsumer
   - _Requirements: REQ-INT-010, REQ-INT-011, REQ-INT-012, REQ-INT-013, REQ-INT-014, REQ-INT-015_
 
-
 ## Phase 10: Scheduled Jobs and Background Tasks
 
 **Scheduled Jobs & Async Processing:**
 
 Scheduled jobs identify work to be done and publish events to queues for async processing. This pattern provides:
+
 - **Scalability:** Jobs can run on one instance while consumers scale independently
 - **Resilience:** Failed processing doesn't affect job scheduling
 - **Monitoring:** Separate metrics for job execution vs work processing
@@ -968,7 +790,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Configure warning alerts: response time p95 > 500ms, cache hit rate < 70%, message queue depth > 1000, trial conversion rate drops > 20%
   - _Requirements: REQ-MAINT-016, REQ-DEPLOY-019, REQ-DEPLOY-020, REQ-DEPLOY-021, REQ-DEPLOY-022, REQ-DEPLOY-023_
 
-
 - [x] 52. Implement health checks
   - Create BillingHealthIndicator to check database, Redis, RabbitMQ, and payment provider connectivity
   - Configure Spring Boot Actuator health endpoints
@@ -1006,10 +827,10 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Create UserContext record with userId, username, email, authorities (Set<String>), tenantId, firstName, lastName
   - Implement SecurityContextHolder integration for accessing UserContext in application services
   - Configure SecurityFilterChain with authority-based rules:
-    - Public endpoints: /api/v1/billing/plans/** (no authentication)
-    - Customer portal: /api/v1/billing/portal/** (authenticated)
-    - Admin endpoints: /api/v1/admin/billing/** (hasAnyAuthority("ADMIN", "SUPER_ADMIN"))
-    - Internal endpoints: /internal/billing/** (internal service authentication)
+    - Public endpoints: /api/v1/billing/plans/\*\* (no authentication)
+    - Customer portal: /api/v1/billing/portal/\*\* (authenticated)
+    - Admin endpoints: /api/v1/admin/billing/\*\* (hasAnyAuthority("ADMIN", "SUPER_ADMIN"))
+    - Internal endpoints: /internal/billing/\*\* (internal service authentication)
   - Configure TLS 1.3 for all API communication
   - Implement rate limiting on public endpoints using RateLimitingFilter (following user-service pattern)
   - Configure encryption at rest for sensitive data in PostgreSQL
@@ -1050,7 +871,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Mock domain services and repositories
   - Verify transaction management and DTO translation
   - _Requirements: REQ-TEST-002, REQ-MAINT-004_
-
 
 - [x] 56.1 Write unit tests for proration calculations
   - Test proration calculation correctness for various scenarios
@@ -1103,8 +923,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Write integration tests for multi-tenant data isolation
   - _Requirements: REQ-TEST-008, REQ-TEST-009, REQ-TEST-010, REQ-TEST-011, REQ-TEST-012, REQ-MAINT-005_
 
-
-- [ ]* 58. Write property-based tests
+- [ ]\* 58. Write property-based tests
   - Set up jqwik property-based testing framework
   - Configure property tests to run minimum 100 iterations
   - **Property 1: Tenant Isolation for Subscriptions** - For any two distinct tenants, querying subscriptions for one tenant should never return subscriptions belonging to the other tenant - **Validates: Requirements 2.2**
@@ -1123,7 +942,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - **Property 14: Public Plan Listing Filtering** - For any set of plans, the public listing endpoint should return only plans that are both active and public - **Validates: Requirements 6.1**
   - **Property 15: Plan Listing Completeness** - For any plan in the listing response, the response should include features, quotas, and pricing information - **Validates: Requirements 6.2**
 
-
   - **Property 16: Plan Listing Sort Order** - For any set of plans with different tiers and prices, the listing response should be sorted first by tier then by price - **Validates: Requirements 6.3**
   - **Property 17: Billing Cycle Filtering** - For any billing cycle filter value, the filtered plan listing should return only plans with that billing cycle - **Validates: Requirements 6.4**
   - **Property 18: Admin Plan Listing Completeness** - For any set of plans including private and archived plans, the admin listing endpoint should return all plans - **Validates: Requirements 6.5**
@@ -1135,7 +953,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - **Property 24: Payment Idempotency** - For any payment request with the same idempotency key, processing multiple times should result in only one payment - **Validates: Payment processing requirements**
   - **Property 25: Webhook Idempotency** - For any webhook event with the same event ID, processing multiple times should result in the same system state - **Validates: Webhook handling requirements**
 
-- [ ]* 59. Write architecture tests for DDD compliance
+- [ ]\* 59. Write architecture tests for DDD compliance
   - Set up ArchUnit for architecture testing
   - Write tests to verify layered architecture (Domain → Application → Infrastructure → Presentation)
   - Write tests to verify domain layer has no dependencies on other layers
@@ -1150,7 +968,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Write tests to verify package structure follows DDD conventions
   - _Requirements: REQ-TEST-013, REQ-TEST-014, REQ-TEST-015, REQ-MAINT-006, REQ-DDD-050, REQ-DDD-051, REQ-DDD-063_
 
-- [ ]* 60. Write security tests
+- [ ]\* 60. Write security tests
   - Write tests for JWT authentication and authority-based authorization
     - Test @PreAuthorize with hasAnyAuthority() for admin endpoints
     - Test authenticated user access to customer portal endpoints
@@ -1176,7 +994,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
     - Test output encoding prevents XSS attacks
     - Test input sanitization for user-provided data
   - _Requirements: REQ-TEST-023, REQ-TEST-024, REQ-TEST-025, REQ-TEST-026, REQ-TEST-027, REQ-TEST-028_
-
 
 ## Phase 14: Documentation and Deployment
 
@@ -1215,7 +1032,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Create script to migrate invoice history (if applicable)
   - Create script to validate data integrity after migration
   - _Requirements: REQ-MIG-001, REQ-MIG-002, REQ-MIG-003, REQ-MIG-004, REQ-MIG-005, REQ-MIG-006, REQ-MIG-007, REQ-MIG-008, REQ-MIG-009, REQ-MIG-010, REQ-MIG-011, REQ-MIG-012, REQ-MIG-013_
-
 
 - [ ] 65. Execute migration
   - Execute pre-migration validation
@@ -1264,7 +1080,6 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Verify no deadlocks occur
   - _Requirements: REQ-TEST-016, REQ-TEST-017, REQ-TEST-018, REQ-TEST-019, REQ-TEST-020, REQ-TEST-021, REQ-TEST-022, REQ-PERF-001, REQ-PERF-002, REQ-PERF-003, REQ-PERF-004, REQ-PERF-005, REQ-PERF-006, REQ-PERF-007, REQ-PERF-008, REQ-PERF-009, REQ-PERF-010, REQ-PERF-011, REQ-PERF-012_
 
-
 - [ ] 70. Final checkpoint - Production readiness
   - Verify all monitoring and alerting is configured
   - Verify all documentation is complete
@@ -1279,7 +1094,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Notes
 
-- Tasks marked with "*" are optional and can be skipped for faster MVP delivery
+- Tasks marked with "\*" are optional and can be skipped for faster MVP delivery
 - Each task includes references to specific requirements from the requirements document
 - **The implementation follows tactical Domain-Driven Design (DDD) principles:**
   - Layered architecture: Domain → Application → Infrastructure → Presentation

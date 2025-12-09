@@ -49,6 +49,7 @@ docker-compose -f docker-compose.observability.yml up -d
 ```
 
 This starts:
+
 - **Prometheus** (port 9090) - Metrics collection and alert evaluation
 - **Alertmanager** (port 9093) - Alert routing and notifications
 - **Grafana** (port 3000) - Dashboards and visualization
@@ -77,7 +78,6 @@ curl http://localhost:9093/-/healthy
 - **Prometheus**: http://localhost:9090
   - View metrics and alerts
   - Test alert queries
-  
 - **Alertmanager**: http://localhost:9093
   - View active alerts
   - Manage silences
@@ -112,6 +112,7 @@ curl -X POST http://localhost:9093/api/v1/alerts \
 ```
 
 Check:
+
 1. Alert appears in Alertmanager UI
 2. Email notification received
 3. Slack notification received (if configured)
@@ -144,22 +145,22 @@ Check:
 
 ### Critical Alerts (Immediate Response)
 
-| Alert | Threshold | Impact |
-|-------|-----------|--------|
-| High Payment Failure Rate | > 5% | Revenue loss |
-| High API Error Rate | > 1% | Service degradation |
-| High DB Connection Pool | > 80% | Connection exhaustion |
-| Webhook Processing Failures | > 0 | Event loss |
-| Service Health Check Failure | Down for 1min | Service unavailable |
+| Alert                        | Threshold     | Impact                |
+| ---------------------------- | ------------- | --------------------- |
+| High Payment Failure Rate    | > 5%          | Revenue loss          |
+| High API Error Rate          | > 1%          | Service degradation   |
+| High DB Connection Pool      | > 80%         | Connection exhaustion |
+| Webhook Processing Failures  | > 0           | Event loss            |
+| Service Health Check Failure | Down for 1min | Service unavailable   |
 
 ### Warning Alerts (Response within 1 hour)
 
-| Alert | Threshold | Impact |
-|-------|-----------|--------|
-| High Response Time | P95 > 500ms | Poor UX |
-| Low Cache Hit Rate | < 70% | Increased DB load |
-| High Queue Depth | > 1000 messages | Processing lag |
-| Trial Conversion Drop | > 20% drop | Revenue impact |
+| Alert                 | Threshold       | Impact            |
+| --------------------- | --------------- | ----------------- |
+| High Response Time    | P95 > 500ms     | Poor UX           |
+| Low Cache Hit Rate    | < 70%           | Increased DB load |
+| High Queue Depth      | > 1000 messages | Processing lag    |
+| Trial Conversion Drop | > 20% drop      | Revenue impact    |
 
 ## Monitoring Alerts
 
@@ -172,6 +173,7 @@ Check:
 ### View Alert History
 
 **Grafana**: http://localhost:3000
+
 - Go to Explore
 - Select Loki datasource
 - Query: `{job="alertmanager"}`
@@ -214,11 +216,13 @@ docker exec -it iqscaffold-alertmanager \
 ### Alerts Not Firing
 
 1. Check Prometheus is scraping metrics:
+
    ```bash
    curl http://localhost:9090/api/v1/targets
    ```
 
 2. Verify alert rules are loaded:
+
    ```bash
    curl http://localhost:9090/api/v1/rules
    ```
@@ -231,11 +235,13 @@ docker exec -it iqscaffold-alertmanager \
 ### Notifications Not Sent
 
 1. Check Alertmanager logs:
+
    ```bash
    docker logs iqscaffold-alertmanager
    ```
 
 2. Verify SMTP credentials:
+
    ```bash
    docker exec -it iqscaffold-alertmanager cat /etc/alertmanager/alertmanager.yml
    ```

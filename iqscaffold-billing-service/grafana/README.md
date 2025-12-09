@@ -5,9 +5,11 @@ This directory contains Grafana dashboard definitions for monitoring the Billing
 ## Dashboards
 
 ### 1. Billing Service - Health & Performance
+
 **File:** `dashboards/billing-service-health.json`
 
 Monitors operational health and performance metrics:
+
 - **API Response Time (p95)** - Response time percentiles by endpoint
 - **Request Rate** - Requests per second by endpoint
 - **Error Rate** - Percentage of 5xx errors
@@ -19,9 +21,11 @@ Monitors operational health and performance metrics:
 **Time Range:** Last 1 hour
 
 ### 2. Billing Service - Business Metrics
+
 **File:** `dashboards/billing-business-metrics.json`
 
 Tracks key business KPIs:
+
 - **Monthly Recurring Revenue (MRR)** - Current MRR in USD
 - **Annual Recurring Revenue (ARR)** - Current ARR in USD
 - **Active Subscriptions** - Number of active subscriptions
@@ -36,9 +40,11 @@ Tracks key business KPIs:
 **Time Range:** Last 24 hours
 
 ### 3. Billing Service - Payments & Invoices
+
 **File:** `dashboards/billing-payments-invoices.json`
 
 Monitors payment and invoice processing:
+
 - **Payment Events** - Success, failed, refunded rates
 - **Payment Failure Rate** - Percentage of failed payments
 - **Payment Processing Time** - p95 and p99 latency
@@ -51,9 +57,11 @@ Monitors payment and invoice processing:
 **Time Range:** Last 1 hour
 
 ### 4. Billing Service - Usage & Analytics
+
 **File:** `dashboards/billing-usage-analytics.json`
 
 Tracks usage metering and analytics:
+
 - **Usage Recording Rate** - Usage records created per second
 - **Usage Recording Latency** - p95 and p99 latency
 - **Quota Exceeded Events** - Rate of quota violations
@@ -69,67 +77,68 @@ The Billing Service exposes Prometheus metrics at `/actuator/prometheus`.
 
 ### Business Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_mrr` | Gauge | Monthly Recurring Revenue in cents |
-| `billing_arr` | Gauge | Annual Recurring Revenue in cents |
-| `billing_subscriptions_active` | Gauge | Number of active subscriptions |
-| `billing_subscriptions_trial` | Gauge | Number of trial subscriptions |
-| `billing_subscriptions_canceled` | Gauge | Number of canceled subscriptions |
-| `billing_subscriptions_created_total` | Counter | Total subscriptions created |
-| `billing_subscriptions_upgraded_total` | Counter | Total subscriptions upgraded |
-| `billing_subscriptions_downgraded_total` | Counter | Total subscriptions downgraded |
-| `billing_subscriptions_canceled_total` | Counter | Total subscriptions canceled |
-| `billing_trials_started_total` | Counter | Total trials started |
-| `billing_trials_converted_total` | Counter | Total trials converted to paid |
-| `billing_trials_expired_total` | Counter | Total trials expired |
+| Metric                                   | Type    | Description                        |
+| ---------------------------------------- | ------- | ---------------------------------- |
+| `billing_mrr`                            | Gauge   | Monthly Recurring Revenue in cents |
+| `billing_arr`                            | Gauge   | Annual Recurring Revenue in cents  |
+| `billing_subscriptions_active`           | Gauge   | Number of active subscriptions     |
+| `billing_subscriptions_trial`            | Gauge   | Number of trial subscriptions      |
+| `billing_subscriptions_canceled`         | Gauge   | Number of canceled subscriptions   |
+| `billing_subscriptions_created_total`    | Counter | Total subscriptions created        |
+| `billing_subscriptions_upgraded_total`   | Counter | Total subscriptions upgraded       |
+| `billing_subscriptions_downgraded_total` | Counter | Total subscriptions downgraded     |
+| `billing_subscriptions_canceled_total`   | Counter | Total subscriptions canceled       |
+| `billing_trials_started_total`           | Counter | Total trials started               |
+| `billing_trials_converted_total`         | Counter | Total trials converted to paid     |
+| `billing_trials_expired_total`           | Counter | Total trials expired               |
 
 ### Payment Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_payments_success_total` | Counter | Total successful payments |
-| `billing_payments_failed_total` | Counter | Total failed payments |
-| `billing_payments_refunded_total` | Counter | Total refunded payments |
-| `billing_payments_processing_time_seconds` | Timer | Payment processing duration |
+| Metric                                     | Type    | Description                 |
+| ------------------------------------------ | ------- | --------------------------- |
+| `billing_payments_success_total`           | Counter | Total successful payments   |
+| `billing_payments_failed_total`            | Counter | Total failed payments       |
+| `billing_payments_refunded_total`          | Counter | Total refunded payments     |
+| `billing_payments_processing_time_seconds` | Timer   | Payment processing duration |
 
 ### Invoice Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_invoices_generated_total` | Counter | Total invoices generated |
-| `billing_invoices_paid_total` | Counter | Total invoices paid |
-| `billing_invoices_voided_total` | Counter | Total invoices voided |
-| `billing_invoices_generation_time_seconds` | Timer | Invoice generation duration |
+| Metric                                     | Type    | Description                 |
+| ------------------------------------------ | ------- | --------------------------- |
+| `billing_invoices_generated_total`         | Counter | Total invoices generated    |
+| `billing_invoices_paid_total`              | Counter | Total invoices paid         |
+| `billing_invoices_voided_total`            | Counter | Total invoices voided       |
+| `billing_invoices_generation_time_seconds` | Timer   | Invoice generation duration |
 
 ### Usage Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_usage_recorded_total` | Counter | Total usage records created |
-| `billing_quota_exceeded_total` | Counter | Total quota exceeded events |
-| `billing_usage_recording_time_seconds` | Timer | Usage recording duration |
+| Metric                                 | Type    | Description                 |
+| -------------------------------------- | ------- | --------------------------- |
+| `billing_usage_recorded_total`         | Counter | Total usage records created |
+| `billing_quota_exceeded_total`         | Counter | Total quota exceeded events |
+| `billing_usage_recording_time_seconds` | Timer   | Usage recording duration    |
 
 ### Webhook Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_webhooks_received_total` | Counter | Total webhooks received |
-| `billing_webhooks_processed_total` | Counter | Total webhooks processed successfully |
-| `billing_webhooks_failed_total` | Counter | Total webhook processing failures |
-| `billing_webhooks_processing_time_seconds` | Timer | Webhook processing duration |
+| Metric                                     | Type    | Description                           |
+| ------------------------------------------ | ------- | ------------------------------------- |
+| `billing_webhooks_received_total`          | Counter | Total webhooks received               |
+| `billing_webhooks_processed_total`         | Counter | Total webhooks processed successfully |
+| `billing_webhooks_failed_total`            | Counter | Total webhook processing failures     |
+| `billing_webhooks_processing_time_seconds` | Timer   | Webhook processing duration           |
 
 ### Error Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `billing_errors_api_total` | Counter | Total API errors |
+| Metric                                 | Type    | Description                     |
+| -------------------------------------- | ------- | ------------------------------- |
+| `billing_errors_api_total`             | Counter | Total API errors                |
 | `billing_errors_api_by_endpoint_total` | Counter | API errors by endpoint (tagged) |
-| `billing_errors_database_total` | Counter | Total database errors |
+| `billing_errors_database_total`        | Counter | Total database errors           |
 
 ### Operational Metrics
 
 Standard Spring Boot Actuator metrics are also available:
+
 - `http_server_requests_seconds` - HTTP request metrics
 - `hikaricp_connections_*` - Database connection pool metrics
 - `redis_cache_gets_total` - Redis cache metrics
@@ -176,6 +185,7 @@ Ensure Grafana has a Prometheus datasource configured:
 Consider setting up alerts for:
 
 ### Critical Alerts
+
 - Payment failure rate > 5%
 - API error rate > 1%
 - Database connection pool > 80%
@@ -183,6 +193,7 @@ Consider setting up alerts for:
 - Service health check failures
 
 ### Warning Alerts
+
 - Response time p95 > 500ms
 - Cache hit rate < 70%
 - Message queue depth > 1000
@@ -206,11 +217,12 @@ To add custom metrics to the Billing Service:
    @Service
    @RequiredArgsConstructor
    public class MyService {
-       private final BillingMetrics billingMetrics;
-       
-       public void myMethod() {
-           billingMetrics.recordCounter("my_custom_metric", "tag1", "value1");
-       }
+
+     private final BillingMetrics billingMetrics;
+
+     public void myMethod() {
+       billingMetrics.recordCounter("my_custom_metric", "tag1", "value1");
+     }
    }
    ```
 3. Update dashboard JSON to visualize the new metric
@@ -218,8 +230,9 @@ To add custom metrics to the Billing Service:
 ### Metric Tags
 
 Use tags to add dimensions to metrics:
+
 ```java
-billingMetrics.recordCounter("billing.custom.metric", 
+billingMetrics.recordCounter("billing.custom.metric",
     "tenant", tenantId,
     "plan", planCode,
     "status", status
@@ -235,6 +248,7 @@ billingMetrics.recordCounter("billing.custom.metric",
    - Ensure billing service is listed and UP
 
 2. Verify metrics endpoint is accessible:
+
    ```bash
    curl http://billing-service:8082/actuator/prometheus
    ```
