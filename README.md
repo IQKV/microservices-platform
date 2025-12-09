@@ -8,9 +8,10 @@ A microservices ecosystem that provides:
 
 - **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
 - **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
+- **Billing & Monetization** - Subscription management, payment processing, usage metering, and quota enforcement
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 
-This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
+This platform serves as a reference implementation for organizations building microservices architectures, showcasing patterns for authentication, API management, billing, and business domain services.
 
 ## Platform Services
 
@@ -58,6 +59,30 @@ Reactive API gateway providing unified entry point for all services.
 - API versioning (path and header-based)
 - Type-safe configuration with Java records (IqScaffoldProperties)
 
+### 💳 [Billing Service](iqscaffold-billing-service/README.md)
+
+Subscription billing and usage metering service.
+
+**Core Capabilities:**
+
+- Subscription lifecycle management with state machine (7 states)
+- Multi-provider payment processing (Stripe, PayPal, Manual)
+- Invoice generation with proration and usage charges
+- Real-time quota enforcement with 5% grace period
+- Usage metering for API calls, storage, emails, and custom metrics
+- Trial management with eligibility checking
+- Customer self-service billing portal
+
+**Key Patterns:**
+
+- Payment idempotency with Redis caching (24-hour TTL)
+- Subscription state machine with validated transitions
+- Proration calculations for mid-cycle plan changes
+- Financial precision with 2 decimal places and HALF_UP rounding
+- Quota enforcement with grace period (graceLimit = baseLimit * 1.05)
+- Scheduled jobs for renewals, retries, and cleanup
+- GDPR compliance with data export and deletion
+
 ## Architecture Overview
 
 ### Microservices Architecture
@@ -76,24 +101,29 @@ Reactive API gateway providing unified entry point for all services.
 │  • Circuit Breaker                       │
 └──────┬────────────────────────────────────┘
        │
-       ▼
-┌──────────────────────────────────────────┐
-│            User Service (Port 8080)      │
-│  • Auth/JWT                              │
-│  • Users                                 │
-│  • Roles                                 │
-└──────┬────────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────┐
-│            PostgreSQL (User DB)          │
-└──────────────────────────────────────────┘
+       ├─────────────────────────────────────┐
+       │                                     │
+       ▼                                     ▼
+┌──────────────────────┐      ┌──────────────────────┐
+│  User Service (8080) │      │ Billing Service      │
+│  • Auth/JWT          │      │ (Port 8082)          │
+│  • Users             │      │  • Subscriptions     │
+│  • Roles             │      │  • Payments          │
+└──────┬───────────────┘      │  • Invoices          │
+       │                      │  • Usage Metering    │
+       ▼                      └──────┬───────────────┘
+┌──────────────────────┐             │
+│  PostgreSQL (User)   │             ▼
+└──────────────────────┘      ┌──────────────────────┐
+                              │ PostgreSQL (Billing) │
+                              └──────────────────────┘
 
 Shared Infrastructure
 ┌──────────────────────────────┐   ┌─────────────────────────────┐
 │            Redis             │   │        Observability        │
 │  • Caching                   │   │  • Prometheus / Grafana     │
 │  • Rate Limiting             │   │  • Loki / OpenTelemetry     │
+│  • Payment Idempotency       │   │                             │
 └──────────────────────────────┘   └─────────────────────────────┘
 ```
 
@@ -189,10 +219,13 @@ Each service can be run independently with Docker Compose:
 cd iqscaffold-user-service
 docker-compose up
 
+# Start Billing Service with dependencies
+cd iqscaffold-billing-service
+docker-compose up
+
 # Start Gateway Service
 cd iqscaffold-gateway-service
 docker-compose up
-
 ```
 
 ### API Documentation
@@ -200,6 +233,7 @@ docker-compose up
 Once services are running, access Swagger UI:
 
 - User Service: http://user-service:8080/swagger-ui.html
+- Billing Service: http://billing-service:8082/swagger-ui.html
 - Gateway Service: http://gateway-service:8081/swagger-ui.html
 
 ### Monitoring
@@ -267,13 +301,20 @@ This platform provides reusable patterns for:
 - Public API protection and management
 - Multi-tenant request routing
 
+### Billing & Monetization
+
+- SaaS subscription management
+- Usage-based pricing models
+- API monetization with metering
+- Marketplace transaction billing
+
 ### Domain Services
 
 - Order processing systems
 - Asset management platforms
 - Any CRUD-based business domain
 
-The patterns demonstrated here apply to any organization building microservices architectures requiring centralized authentication, API management, and scalable domain services.
+The patterns demonstrated here apply to any organization building microservices architectures requiring centralized authentication, API management, billing, and scalable domain services.
 
 ---
 
