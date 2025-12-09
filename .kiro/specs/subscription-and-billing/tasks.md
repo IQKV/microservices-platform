@@ -1040,7 +1040,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Achieve minimum 80% code coverage
   - _Requirements: REQ-TEST-001, REQ-TEST-002, REQ-MAINT-004_
 
-- [ ] 55. Write unit tests for application layer
+- [x] 55. Write unit tests for application layer
   - Write unit tests for PlanApplicationService orchestration logic
   - Write unit tests for SubscriptionApplicationService orchestration logic
   - Write unit tests for PaymentApplicationService orchestration logic
