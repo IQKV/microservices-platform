@@ -446,6 +446,7 @@ iqscaffold-billing-service/
 #### Acceptance Criteria
 
 1. THE Billing Service SHALL create a JwtClaimNames class with constants matching the user-service:
+
    ```java
    public static final String SUBJECT = "sub";
 
@@ -461,7 +462,9 @@ iqscaffold-billing-service/
 
    public static final String LAST_NAME = "lastName";
    ```
+
 2. THE Billing Service SHALL create a UserContext record to hold extracted JWT claims:
+
    ```java
    public record UserContext(
      Long userId,
@@ -481,6 +484,7 @@ iqscaffold-billing-service/
      }
    }
    ```
+
 3. THE Billing Service SHALL create a JwtUtils class to extract UserContext from JWT:
    ```java
    public static UserContext extractUserContext(Jwt jwt) {

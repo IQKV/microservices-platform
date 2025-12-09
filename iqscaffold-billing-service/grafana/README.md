@@ -213,6 +213,7 @@ To add custom metrics to the Billing Service:
 
 1. Inject `BillingMetrics` into your service
 2. Call appropriate metric methods:
+
    ```java
    @Service
    @RequiredArgsConstructor
@@ -225,6 +226,7 @@ To add custom metrics to the Billing Service:
      }
    }
    ```
+
 3. Update dashboard JSON to visualize the new metric
 
 ### Metric Tags
