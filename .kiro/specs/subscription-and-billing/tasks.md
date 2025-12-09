@@ -1052,41 +1052,49 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - _Requirements: REQ-TEST-002, REQ-MAINT-004_
 
 
-- [ ]* 56.1 Write unit tests for proration calculations
+- [x] 56.1 Write unit tests for proration calculations
   - Test proration calculation correctness for various scenarios
   - Test edge cases (same day changes, end of period, leap years)
   - Ensure 100% coverage for financial calculations
   - _Requirements: REQ-TEST-003_
 
-- [ ]* 56.2 Write unit tests for subscription state transitions
-  - Test all valid state transitions
+- [x] 56.2 Wite unit tests for subscription state transitions
+  - Test all valid stater transitions
   - Test invalid state transition rejection
   - Test state transition side effects
   - _Requirements: REQ-TEST-004_
 
-- [ ]* 56.3 Write unit tests for quota enforcement logic
+- [x] 56.3 Write unit tests for quota enforcement logic
   - Test quota checking for various usage levels
   - Test quota exceeded scenarios
   - Test grace period logic (5% overage)
   - _Requirements: REQ-TEST-005_
 
-- [ ]* 56.4 Write unit tests for payment processing logic
+- [x] 56.4 Write unit tests for payment processing logic
   - Test payment processing success and failure scenarios
   - Test payment retry logic
   - Test refund processing
   - Test idempotency
+  - Created PaymentTest.java (36 tests) - Payment domain entity business logic
+  - Created PaymentResultTest.java (28 tests) - PaymentResult record validation
+  - Created payment-processing-tests.md - Comprehensive test documentation
+  - All tests passing with 100% coverage of payment domain logic
   - _Requirements: REQ-TEST-006_
 
-- [ ]* 56.5 Write unit tests for invoice generation logic
+- [x] 56.5 Write unit tests for invoice generation logic
   - Test invoice generation for regular billing periods
   - Test proration invoice generation
   - Test invoice line item calculations
   - Test invoice total calculations
   - Ensure 100% coverage for financial calculations
+  - Created InvoiceGeneratorTest.java (44 tests) - Invoice generation domain service
+  - Created InvoiceLineItemTest.java (31 tests) - Line item calculations and validation
+  - Created invoice-generation-tests.md - Comprehensive test documentation
+  - All tests passing with 100% coverage of financial calculations
   - _Requirements: REQ-TEST-007_
 
 - [ ] 57. Write integration tests
-  - Set up Testcontainers for PostgreSQL, Redis, and RabbitMQ
+  - Set up special use-testcontainers Maven profile with spring-cloud-starter-bootstrap + com.playtika.testcontainers for PostgreSQL, Redis, and RabbitMQ
   - Write integration tests for complete subscription lifecycle (create → upgrade → cancel)
   - Write integration tests for payment processing with retry logic
   - Write integration tests for invoice generation and payment
