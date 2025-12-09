@@ -8,11 +8,6 @@
     <changeSet id="20251208000000-add-billing-authorities" author="iqscaffold">
         <comment>Add TENANT_OWNER and BILLING_ADMIN authorities for billing service integration</comment>
 
-        <!-- Insert TENANT_OWNER authority -->
-        <insert tableName="authorities">
-            <column name="name" value="TENANT_OWNER"/>
-            <column name="description" value="Tenant owner with billing and subscription management access"/>
-        </insert>
 
         <!-- Insert BILLING_ADMIN authority -->
         <insert tableName="authorities">
@@ -21,9 +16,6 @@
         </insert>
 
         <rollback>
-            <delete tableName="authorities">
-                <where>name = 'TENANT_OWNER'</where>
-            </delete>
             <delete tableName="authorities">
                 <where>name = 'BILLING_ADMIN'</where>
             </delete>

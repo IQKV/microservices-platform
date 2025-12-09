@@ -74,6 +74,12 @@ public class PaymentMethod {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
+  @Column(name = "deleted_at")
+  private LocalDateTime deletedAt;
+
+  @Column(name = "provider_customer_id", length = 255)
+  private String providerCustomerId;
+
   /**
    * Default constructor for JPA.
    */
@@ -329,5 +335,38 @@ public class PaymentMethod {
 
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
+  }
+
+  public LocalDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
+  public String getProviderCustomerId() {
+    return providerCustomerId;
+  }
+
+  // Setters for GDPR compliance (anonymization)
+  public void setLast4(String last4) {
+    this.last4 = last4;
+  }
+
+  public void setBrand(String brand) {
+    this.brand = brand;
+  }
+
+  public void setProviderCustomerId(String providerCustomerId) {
+    this.providerCustomerId = providerCustomerId;
+  }
+
+  public void setProviderPaymentMethodId(String providerPaymentMethodId) {
+    this.providerPaymentMethodId = providerPaymentMethodId;
+  }
+
+  public void setDeletedAt(LocalDateTime deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public boolean isDefault() {
+    return isDefault != null && isDefault;
   }
 }

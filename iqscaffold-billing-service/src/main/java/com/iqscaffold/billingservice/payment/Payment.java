@@ -337,4 +337,13 @@ public class Payment {
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
   }
+
+  // Setters for GDPR compliance (anonymization)
+  public void setProviderPaymentId(String providerPaymentId) {
+    this.providerPaymentId = providerPaymentId;
+  }
+
+  public void setMetadata(String metadataJson) {
+    this.metadata = new HashMap<>();
+  }
 }

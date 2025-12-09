@@ -587,4 +587,13 @@ public class Subscription {
         ", currentPeriodEnd=" + currentPeriodEnd +
         '}';
   }
+
+  // Setters for GDPR compliance (anonymization)
+  public void setUserId(UUID userId) {
+    this.userId = userId;
+  }
+
+  public void setMetadata(String metadataJson) {
+    this.metadata = new HashMap<>();
+  }
 }

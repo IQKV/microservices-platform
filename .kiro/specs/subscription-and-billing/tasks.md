@@ -1023,7 +1023,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Store audit logs in billing_events table
   - _Requirements: REQ-SEC-011, REQ-SEC-012, REQ-REL-007_
 
-- [ ] 55. Implement GDPR compliance features
+- [x] 55. Implement GDPR compliance features
   - Implement data export functionality for billing data
   - Implement data deletion functionality for billing data
   - Implement data retention policies

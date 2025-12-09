@@ -275,4 +275,21 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
       ORDER BY p.createdAt DESC
       """)
   List<Payment> findByTenantId(@Param("tenantId") UUID tenantId);
+
+  /**
+   * Finds all payments for a tenant (for GDPR export).
+   * 
+   * @param tenantId tenant identifier as string
+   * @return list of all payments for the tenant
+   */
+  @Query("""
+      SELECT p FROM Payment p
+      LEFT JOIN FETCH p.invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH p.paymentMethod
+      WHERE p.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY p.createdAt DESC
+      """)
+  List<Payment> findByTenantId(@Param("tenantId") String tenantId);
 }

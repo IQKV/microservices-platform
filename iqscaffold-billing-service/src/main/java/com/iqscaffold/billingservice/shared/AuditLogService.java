@@ -261,4 +261,59 @@ public class AuditLogService {
 
     return null;
   }
+
+  /**
+   * Log a data export operation (GDPR compliance).
+   * 
+   * @param tenantId the tenant identifier
+   * @param exportId the export request identifier
+   * @param format the export format (JSON, CSV)
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void logDataExport(
+      final String tenantId,
+      final String exportId,
+      final String format) {
+    Map<String, Object> changes = new HashMap<>();
+    changes.put("exportId", exportId);
+    changes.put("format", format);
+    changes.put("gdprArticle", "Article 20 - Right to Data Portability");
+    
+    logOperation(
+        "DATA_EXPORT",
+        null,
+        "DATA_EXPORT_REQUESTED",
+        "GDPR data export requested: " + exportId,
+        changes
+    );
+  }
+
+  /**
+   * Log a data deletion operation (GDPR compliance).
+   * 
+   * @param tenantId the tenant identifier
+   * @param deletionId the deletion request identifier
+   * @param anonymize whether data was anonymized instead of deleted
+   * @param reason the reason for deletion
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void logDataDeletion(
+      final String tenantId,
+      final String deletionId,
+      final boolean anonymize,
+      final String reason) {
+    Map<String, Object> changes = new HashMap<>();
+    changes.put("deletionId", deletionId);
+    changes.put("anonymize", anonymize);
+    changes.put("reason", reason);
+    changes.put("gdprArticle", "Article 17 - Right to Erasure");
+    
+    logOperation(
+        "DATA_DELETION",
+        null,
+        anonymize ? "DATA_ANONYMIZED" : "DATA_DELETED",
+        "GDPR data " + (anonymize ? "anonymization" : "deletion") + " requested: " + deletionId,
+        changes
+    );
+  }
 }

@@ -251,4 +251,46 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
       ORDER BY pm.isDefault DESC, pm.createdAt DESC
       """)
   List<PaymentMethod> findByTenantIdAndActiveTrue(@Param("tenantId") UUID tenantId);
+
+  /**
+   * Finds all payment methods for a tenant (for GDPR export).
+   * 
+   * @param tenantId tenant identifier as string
+   * @return list of all payment methods for the tenant
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY pm.createdAt DESC
+      """)
+  List<PaymentMethod> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
+   * Deletes all payment methods for a tenant (for GDPR deletion).
+   * 
+   * @param tenantId tenant identifier as string
+   * @return number of payment methods deleted
+   */
+  @Query("""
+      DELETE FROM PaymentMethod pm
+      WHERE pm.tenantId = CAST(:tenantId AS uuid)
+      """)
+  int deleteByTenantId(@Param("tenantId") String tenantId);
+
+  /**
+   * Finds payment methods deleted before a specific date that are not anonymized.
+   * Used for retention policy enforcement.
+   * 
+   * @param cutoffDate date before which to find deleted payment methods
+   * @return list of payment methods to anonymize
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.deletedAt IS NOT NULL
+        AND pm.deletedAt < :cutoffDate
+        AND pm.last4 != '****'
+      """)
+  List<PaymentMethod> findByDeletedAtBeforeAndNotAnonymized(
+      @Param("cutoffDate") java.time.LocalDateTime cutoffDate
+  );
 }

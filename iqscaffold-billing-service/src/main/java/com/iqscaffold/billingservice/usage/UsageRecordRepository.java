@@ -276,4 +276,63 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
       WHERE ur.recordedAt < :cutoffDate
       """)
   int deleteOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+  /**
+   * Finds all usage records for a tenant (for GDPR export).
+   * 
+   * @param tenantId tenant identifier
+   * @return list of all usage records for the tenant
+   */
+  @Query("""
+      SELECT ur FROM UsageRecord ur
+      LEFT JOIN FETCH ur.subscription s
+      LEFT JOIN FETCH s.plan
+      WHERE ur.tenantId = :tenantId
+      ORDER BY ur.recordedAt DESC
+      """)
+  List<UsageRecord> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
+   * Finds usage records for a tenant after a specific date.
+   * 
+   * @param tenantId tenant identifier
+   * @param afterDate date after which to find records
+   * @return list of usage records after the date
+   */
+  @Query("""
+      SELECT ur FROM UsageRecord ur
+      LEFT JOIN FETCH ur.subscription s
+      LEFT JOIN FETCH s.plan
+      WHERE ur.tenantId = :tenantId
+        AND ur.recordedAt > :afterDate
+      ORDER BY ur.recordedAt DESC
+      """)
+  List<UsageRecord> findByTenantIdAndRecordedAtAfter(
+      @Param("tenantId") String tenantId,
+      @Param("afterDate") LocalDateTime afterDate
+  );
+
+  /**
+   * Deletes all usage records for a tenant (for GDPR deletion).
+   * 
+   * @param tenantId tenant identifier
+   * @return number of records deleted
+   */
+  @Query("""
+      DELETE FROM UsageRecord ur
+      WHERE ur.tenantId = :tenantId
+      """)
+  int deleteByTenantId(@Param("tenantId") String tenantId);
+
+  /**
+   * Deletes usage records before a specific date (for retention policy).
+   * 
+   * @param cutoffDate date before which to delete records
+   * @return number of records deleted
+   */
+  @Query("""
+      DELETE FROM UsageRecord ur
+      WHERE ur.recordedAt < :cutoffDate
+      """)
+  int deleteByRecordedAtBefore(@Param("cutoffDate") LocalDateTime cutoffDate);
 }

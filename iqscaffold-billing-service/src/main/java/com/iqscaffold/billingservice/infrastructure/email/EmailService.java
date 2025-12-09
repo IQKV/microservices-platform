@@ -168,6 +168,68 @@ public class EmailService {
     }
 
     /**
+     * Sends data export via email (for GDPR compliance).
+     * 
+     * @param recipient email address of the recipient
+     * @param exportId export request ID
+     * @param exportData exported data content
+     * @param format export format (JSON or CSV)
+     */
+    @CircuitBreaker(name = "emailService", fallbackMethod = "sendDataExportFallback")
+    public void sendDataExport(
+        String recipient,
+        String exportId,
+        String exportData,
+        String format
+    ) {
+        log.info("Sending data export: recipient={}, exportId={}, format={}", 
+            recipient, exportId, format);
+
+        try {
+            var subject = "Your Data Export is Ready - " + exportId;
+            var htmlContent = String.format("""
+                <html>
+                <body>
+                    <h2>Your Data Export is Ready</h2>
+                    <p>Your billing data export (ID: %s) has been completed.</p>
+                    <p>Format: %s</p>
+                    <p>Please find your data below:</p>
+                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+                    %s
+                    </pre>
+                    <p>This export contains all your billing data as per GDPR Article 20 (Right to Data Portability).</p>
+                    <p>If you have any questions, please contact our support team.</p>
+                </body>
+                </html>
+                """, exportId, format, exportData);
+            
+            sendViaEmailService(recipient, subject, htmlContent);
+            
+            log.info("Successfully sent data export: recipient={}, exportId={}", recipient, exportId);
+            
+        } catch (Exception e) {
+            log.error("Failed to send data export: recipient={}, exportId={}", 
+                recipient, exportId, e);
+            throw new EmailSendException("Failed to send data export", e);
+        }
+    }
+
+    /**
+     * Fallback method when data export email fails.
+     */
+    private void sendDataExportFallback(
+        String recipient,
+        String exportId,
+        String exportData,
+        String format,
+        Exception e
+    ) {
+        log.error("Failed to send data export email: recipient={}, exportId={}", 
+            recipient, exportId, e);
+        // In production, store for retry or alert operations
+    }
+
+    /**
      * Custom exception for email sending failures.
      */
     public static class EmailSendException extends RuntimeException {
