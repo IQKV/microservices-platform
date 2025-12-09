@@ -1031,7 +1031,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
 
 ## Phase 13: Testing
 
-- [ ] 54. Write unit tests for domain layer
+- [x] 54. Write unit tests for domain layer
   - Write unit tests for aggregates (Subscription, SubscriptionPlan, Invoice, Payment, PaymentMethod)
   - Write unit tests for domain services (ProrationCalculator, QuotaEnforcer, SubscriptionLifecycleManager, InvoiceGenerator)
   - Write unit tests for specifications (ActiveSubscriptionSpecification, QuotaExceededSpecification, ValidPlanTransitionSpecification, TrialEligibilitySpecification)
