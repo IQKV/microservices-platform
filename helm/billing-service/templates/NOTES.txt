@@ -1,0 +1,71 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }} -n {{ .Values.namespace.name }}
+  $ helm get all {{ .Release.Name }} -n {{ .Values.namespace.name }}
+
+The Billing Service has been deployed with the following configuration:
+
+  - Namespace: {{ .Values.namespace.name }}
+  - Replicas: {{ .Values.replicaCount }}
+  - Image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+  - Service Port: {{ .Values.service.port }}
+  - Target Port: {{ .Values.service.targetPort }}
+
+{{- if .Values.autoscaling.enabled }}
+  - Autoscaling: Enabled (min: {{ .Values.autoscaling.minReplicas }}, max: {{ .Values.autoscaling.maxReplicas }})
+{{- else }}
+  - Autoscaling: Disabled
+{{- end }}
+
+To access the Billing Service:
+
+  1. Get the service name:
+     $ kubectl get svc -n {{ .Values.namespace.name }} {{ include "billing-service.fullname" . }}
+
+  2. Port-forward to access locally:
+     $ kubectl port-forward -n {{ .Values.namespace.name }} svc/{{ include "billing-service.fullname" . }} 8082:{{ .Values.service.port }}
+
+  3. Access the service:
+     - Health: http://localhost:8082/actuator/health
+     - Metrics: http://localhost:8082/actuator/prometheus
+     - API Docs: http://localhost:8082/swagger-ui.html
+
+To check the status of the deployment:
+
+  $ kubectl get pods -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-billing-service
+
+To view logs:
+
+  $ kubectl logs -n {{ .Values.namespace.name }} -l app.kubernetes.io/name=iqscaffold-billing-service --tail=100 -f
+
+{{- if .Values.postgresql.enabled }}
+
+PostgreSQL Database:
+  - Service: billing-postgres
+  - Port: {{ .Values.postgresql.service.port }}
+  - Database: {{ .Values.postgresql.env.POSTGRES_DB }}
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+
+Redis Cache:
+  - Service: billing-redis
+  - Port: {{ .Values.redis.service.port }}
+{{- end }}
+
+{{- if .Values.rabbitmq.enabled }}
+
+RabbitMQ Message Queue:
+  - Service: billing-rabbitmq
+  - AMQP Port: {{ .Values.rabbitmq.service.amqpPort }}
+  - Management Port: {{ .Values.rabbitmq.service.managementPort }}
+  - Management UI: kubectl port-forward -n {{ .Values.namespace.name }} svc/billing-rabbitmq {{ .Values.rabbitmq.service.managementPort }}:{{ .Values.rabbitmq.service.managementPort }}
+{{- end }}
+
+For more information, visit:
+  - Documentation: https://docs.iqscaffold.com
+  - GitHub: https://github.com/iqscaffold/backend

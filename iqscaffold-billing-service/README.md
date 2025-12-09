@@ -427,18 +427,14 @@ Other microservices check quotas and record usage:
 private BillingClient billingClient;
 
 public void performOperation() {
-  QuotaCheckResponse quota = billingClient.checkQuota(
-    tenantId, 
-    MetricType.API_CALLS, 
-    1L
-  );
-  
+  QuotaCheckResponse quota = billingClient.checkQuota(tenantId, MetricType.API_CALLS, 1L);
+
   if (!quota.isAllowed()) {
     throw new QuotaExceededException(quota.getMessage());
   }
-  
+
   // Perform operation
-  
+
   // Record usage
   billingClient.recordUsage(tenantId, MetricType.API_CALLS, 1L);
 }
@@ -456,7 +452,7 @@ if (!status.isActive()) {
 
 // Check feature access
 FeatureCheckResponse feature = billingClient.checkFeature(
-  tenantId, 
+  tenantId,
   "advanced_workflows"
 );
 

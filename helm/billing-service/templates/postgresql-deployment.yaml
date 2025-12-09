@@ -1,0 +1,96 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-postgres
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.postgresql.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.postgresql.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "billing-service.postgresql.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "billing-service.postgresql.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.postgresql.priorityClassName }}
+      priorityClassName: {{ .Values.postgresql.priorityClassName }}
+      {{- end }}
+      containers:
+      - name: postgres
+        image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+        imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.postgresql.service.port }}
+          name: postgres
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: IQSCAFFOLD_DATABASE_USERNAME
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: IQSCAFFOLD_DATABASE_PASSWORD
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresql.env.POSTGRES_DB }}
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        resources:
+          {{- toYaml .Values.postgresql.resources | nindent 10 }}
+        {{- if .Values.postgresql.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.postgresql.livenessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.postgresql.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.postgresql.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.postgresql.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.postgresql.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.postgresql.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.postgresql.readinessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.postgresql.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.postgresql.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.postgresql.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.postgresql.readinessProbe.failureThreshold }}
+        {{- end }}
+      volumes:
+      - name: postgres-data
+        {{- if .Values.postgresql.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: billing-postgres-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+{{- if .Values.postgresql.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: billing-postgres-pvc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.postgresql.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.postgresql.persistence.accessModes | nindent 4 }}
+  {{- if .Values.postgresql.persistence.storageClass }}
+  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.postgresql.persistence.size }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,89 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-redis
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.redis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "billing-service.redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "billing-service.redis.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.redis.priorityClassName }}
+      priorityClassName: {{ .Values.redis.priorityClassName }}
+      {{- end }}
+      containers:
+      - name: redis
+        image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+        imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.redis.service.port }}
+          name: redis
+        command:
+        - redis-server
+        - --maxmemory
+        - {{ .Values.redis.config.maxmemory }}
+        - --maxmemory-policy
+        - {{ .Values.redis.config.maxmemoryPolicy }}
+        - --appendonly
+        - {{ .Values.redis.config.appendonly }}
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        resources:
+          {{- toYaml .Values.redis.resources | nindent 10 }}
+        {{- if .Values.redis.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.redis.livenessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.redis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.redis.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.redis.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.redis.readinessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.redis.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.redis.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.redis.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.redis.readinessProbe.failureThreshold }}
+        {{- end }}
+      volumes:
+      - name: redis-data
+        {{- if .Values.redis.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: billing-redis-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+{{- if .Values.redis.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: billing-redis-pvc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.redis.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.redis.persistence.accessModes | nindent 4 }}
+  {{- if .Values.redis.persistence.storageClass }}
+  storageClassName: {{ .Values.redis.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size }}
+{{- end }}
+{{- end }}

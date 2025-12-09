@@ -1,0 +1,22 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-rabbitmq
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.rabbitmq.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.rabbitmq.service.type }}
+  ports:
+    - port: {{ .Values.rabbitmq.service.amqpPort }}
+      targetPort: {{ .Values.rabbitmq.service.amqpPort }}
+      protocol: TCP
+      name: amqp
+    - port: {{ .Values.rabbitmq.service.managementPort }}
+      targetPort: {{ .Values.rabbitmq.service.managementPort }}
+      protocol: TCP
+      name: management
+  selector:
+    {{- include "billing-service.rabbitmq.selectorLabels" . | nindent 4 }}
+{{- end }}

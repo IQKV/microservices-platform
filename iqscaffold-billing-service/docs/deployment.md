@@ -78,6 +78,7 @@ PAYPAL_CLIENT_SECRET=<secret>
 #### Environment-Specific
 
 **Local**:
+
 ```bash
 SPRING_PROFILES_ACTIVE=local
 SERVER_PORT=8082
@@ -86,6 +87,7 @@ LOGGING_LEVEL_COM_IQSCAFFOLD=DEBUG
 ```
 
 **Staging**:
+
 ```bash
 SPRING_PROFILES_ACTIVE=staging
 SERVER_PORT=8082
@@ -94,6 +96,7 @@ LOGGING_LEVEL_COM_IQSCAFFOLD=INFO
 ```
 
 **Production**:
+
 ```bash
 SPRING_PROFILES_ACTIVE=production
 SERVER_PORT=8082
@@ -113,7 +116,7 @@ server:
 spring:
   application:
     name: billing-service
-  
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -124,7 +127,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -132,12 +135,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  
+
   redis:
     host: ${SPRING_REDIS_HOST}
     port: ${SPRING_REDIS_PORT}
     password: ${SPRING_REDIS_PASSWORD}
-  
+
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST}
     port: ${SPRING_RABBITMQ_PORT}
@@ -510,18 +513,18 @@ ENVIRONMENT=$1
 
 # Get list of tenant schemas
 TENANTS=$(psql -h $DB_HOST -U $DB_USER -d $DB_NAME -t -c \
-  "SELECT schema_name FROM information_schema.schemata 
+  "SELECT schema_name FROM information_schema.schemata
    WHERE schema_name LIKE 'tenant_%';")
 
 # Run migrations for each tenant
 for TENANT in $TENANTS; do
   echo "Running migrations for $TENANT..."
-  
+
   ./mvnw liquibase:update \
     -Dliquibase.changeLogFile=db/changelog/tenant/master.xml \
     -Dliquibase.defaultSchemaName=$TENANT \
     -Dspring.profiles.active=$ENVIRONMENT
-  
+
   if [ $? -eq 0 ]; then
     echo "✓ Migrations completed for $TENANT"
   else
@@ -654,7 +657,7 @@ curl https://billing.iqscaffold.com/actuator/health/rabbitmq
 ```yaml
 # prometheus-config.yaml
 scrape_configs:
-  - job_name: 'billing-service'
+  - job_name: "billing-service"
     kubernetes_sd_configs:
       - role: pod
         namespaces:
@@ -694,7 +697,7 @@ groups:
         annotations:
           summary: "High payment failure rate"
           description: "Payment failure rate is {{ $value }}%"
-      
+
       - alert: DatabaseConnectionPoolExhausted
         expr: hikaricp_connections_active / hikaricp_connections_max > 0.8
         for: 5m
@@ -759,12 +762,14 @@ echo "✓ All smoke tests passed"
 ### Issue: Pods Not Starting
 
 **Check**:
+
 ```bash
 kubectl describe pod billing-service-xxx --namespace=production
 kubectl logs billing-service-xxx --namespace=production
 ```
 
 **Common Causes**:
+
 - Image pull errors
 - Configuration errors
 - Resource limits
@@ -773,11 +778,13 @@ kubectl logs billing-service-xxx --namespace=production
 ### Issue: Database Migration Failures
 
 **Check**:
+
 ```bash
 kubectl logs migration-job --namespace=production
 ```
 
 **Resolution**:
+
 - Verify database connectivity
 - Check migration changesets
 - Review Liquibase logs
@@ -786,11 +793,13 @@ kubectl logs migration-job --namespace=production
 ### Issue: High Memory Usage
 
 **Check**:
+
 ```bash
 kubectl top pods -l app=billing-service --namespace=production
 ```
 
 **Resolution**:
+
 - Increase memory limits
 - Check for memory leaks
 - Analyze heap dump

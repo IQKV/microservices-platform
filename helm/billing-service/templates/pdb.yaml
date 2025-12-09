@@ -1,0 +1,14 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "billing-service.fullname" . }}
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "billing-service.selectorLabels" . | nindent 6 }}
+{{- end }}

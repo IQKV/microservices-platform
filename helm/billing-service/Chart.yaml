@@ -1,0 +1,19 @@
+apiVersion: v2
+name: billing-service
+description: Helm chart for IQ Scaffold Billing & Subscription Management Service
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - billing
+  - subscription
+  - payment
+  - invoice
+  - usage
+  - iqscaffold
+home: https://github.com/iqscaffold/backend
+sources:
+  - https://github.com/iqscaffold/backend
+maintainers:
+  - name: IQ Scaffold Team
+    email: dev@iqscaffold.com

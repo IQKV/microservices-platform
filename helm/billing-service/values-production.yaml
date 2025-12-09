@@ -1,0 +1,141 @@
+# Production environment values for billing-service
+# Override default values for production deployment
+
+global:
+  environment: production
+
+namespace:
+  name: iqscaffold-production-env
+  labels:
+    environment: production
+
+# Production replicas for high availability
+replicaCount: 3
+
+image:
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+# Enable autoscaling for production
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+# Enable PDB for production
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Set priority class for production
+priorityClassName: "high-priority"
+
+# Production resource allocation (per REQ-DEPLOY-007: 2 CPU cores and 4GB RAM per instance)
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "1000m"
+  limits:
+    memory: "4Gi"
+    cpu: "2000m"
+
+# Production affinity rules for high availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - iqscaffold-billing-service
+          topologyKey: kubernetes.io/hostname
+
+# Topology spread for production
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: iqscaffold-billing-service
+
+# Environment variables for production
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "production"
+  - name: IQSCAFFOLD_DATABASE_URL
+    value: "jdbc:postgresql://billing-postgres-production:5432/iqscaffold_billing_production"
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
+    value: "billing-redis-production"
+  - name: IQSCAFFOLD_RABBITMQ_HOST
+    value: "billing-rabbitmq-production"
+  - name: IQSCAFFOLD_BILLING_SECURITY_JWT_JWK_SET_URI
+    value: "http://user-service-production:8081/.well-known/jwks.json"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_USER_SERVICE_URL
+    value: "http://user-service-production:8081"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_EMAIL_SERVICE_URL
+    value: "http://email-service-production:8084"
+  - name: IQSCAFFOLD_BILLING_PAYMENT_PROVIDER
+    value: "stripe"
+  - name: IQSCAFFOLD_BILLING_SECURITY_RATE_LIMITING_ENABLED
+    value: "true"
+  - name: IQSCAFFOLD_BILLING_SECURITY_RATE_LIMITING_REQUESTS_PER_MINUTE
+    value: "100"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.name=iqscaffold-billing-service,service.version=1.0.0,deployment.environment=production"
+  - name: JAVA_OPTS
+    value: "-Xms2g -Xmx3g -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/app/logs/heap-dump.hprof"
+
+# PostgreSQL production configuration (per REQ-DEPLOY-008: connection pool of 20 connections per instance)
+postgresql:
+  replicaCount: 1 # Use managed PostgreSQL service in production
+  persistence:
+    size: 100Gi
+    storageClass: fast-ssd # Use high-performance storage
+  env:
+    POSTGRES_DB: iqscaffold_billing_production
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "2000m"
+    limits:
+      memory: "8Gi"
+      cpu: "4000m"
+
+# Redis production configuration (per REQ-DEPLOY-010: minimum 2GB memory with persistence)
+redis:
+  replicaCount: 1 # Use managed Redis service in production
+  persistence:
+    size: 10Gi
+    storageClass: fast-ssd
+  config:
+    maxmemory: "2gb"
+    maxmemoryPolicy: "allkeys-lru"
+    appendonly: "yes"
+    appendfsync: "everysec"
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+
+# RabbitMQ production configuration (per REQ-DEPLOY-011: durable queues and dead letter exchange)
+rabbitmq:
+  replicaCount: 1 # Use managed RabbitMQ service in production
+  persistence:
+    size: 50Gi
+    storageClass: fast-ssd
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"

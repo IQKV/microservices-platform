@@ -69,15 +69,14 @@ We will use **Schema-Per-Tenant** multi-tenancy strategy with Hibernate's multi-
 ```java
 @Configuration
 public class MultiTenancyConfig {
-  
+
   @Bean
   public CurrentTenantIdentifierResolver currentTenantIdentifierResolver() {
     return new CurrentTenantIdentifierResolverImpl();
   }
-  
+
   @Bean
-  public MultiTenantConnectionProvider multiTenantConnectionProvider(
-      DataSource dataSource) {
+  public MultiTenantConnectionProvider multiTenantConnectionProvider(DataSource dataSource) {
     return new SchemaPerTenantConnectionProvider(dataSource);
   }
 }
@@ -87,16 +86,17 @@ public class MultiTenancyConfig {
 
 ```java
 public final class TenantContext {
+
   private static final ThreadLocal<String> currentTenantId = new ThreadLocal<>();
-  
+
   public static void setCurrentTenantId(String tenantId) {
     currentTenantId.set(tenantId);
   }
-  
+
   public static String getCurrentTenantId() {
     return currentTenantId.get();
   }
-  
+
   public static void clear() {
     currentTenantId.remove();
   }
@@ -142,10 +142,12 @@ public final class TenantContext {
 ### Alternative 1: Shared Schema with Row-Level Security
 
 **Pros**:
+
 - Simpler migrations
 - Lower operational overhead
 
 **Cons**:
+
 - Risk of data leakage
 - Performance overhead on every query
 - Complex RLS policies
@@ -155,10 +157,12 @@ public final class TenantContext {
 ### Alternative 2: Database-Per-Tenant
 
 **Pros**:
+
 - Maximum isolation
 - Easy to scale individual tenants
 
 **Cons**:
+
 - Very high operational overhead
 - Connection pool exhaustion
 - Expensive for small tenants

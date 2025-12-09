@@ -1006,7 +1006,7 @@ Scheduled jobs identify work to be done and publish events to queues for async p
   - Document disaster recovery procedures
   - _Requirements: REQ-MAINT-007, REQ-MAINT-008, REQ-MAINT-009, REQ-MAINT-010, REQ-MAINT-011, REQ-DEPLOY-034_
 
-- [ ] 62. Create Docker and Kubernetes configurations
+- [x] 62. Create Docker and Kubernetes configurations
   - Create Dockerfile for billing service
   - Create docker-compose.yaml for local development
   - Create Kubernetes deployment manifests

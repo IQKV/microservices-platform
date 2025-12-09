@@ -23,9 +23,7 @@ We will implement a **Payment Provider Abstraction** using the Strategy pattern 
 ### Core Interface
 
 ```java
-public sealed interface PaymentProviderAdapter 
-    permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
-  
+public sealed interface PaymentProviderAdapter permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
   PaymentResult processPayment(PaymentRequest request);
   PaymentResult refundPayment(String paymentId, BigDecimal amount);
   PaymentMethodDetails addPaymentMethod(String customerId, String token);
@@ -40,24 +38,9 @@ public sealed interface PaymentProviderAdapter
 ### Domain Models (Provider-Agnostic)
 
 ```java
-public record PaymentResult(
-    String paymentId,
-    PaymentStatus status,
-    BigDecimal amount,
-    String currency,
-    String errorCode,
-    String errorMessage,
-    Map<String, Object> metadata
-) {}
+public record PaymentResult(String paymentId, PaymentStatus status, BigDecimal amount, String currency, String errorCode, String errorMessage, Map<String, Object> metadata) {}
 
-public record PaymentMethodDetails(
-    String id,
-    PaymentMethodType type,
-    String brand,
-    String last4,
-    int expiryMonth,
-    int expiryYear
-) {}
+public record PaymentMethodDetails(String id, PaymentMethodType type, String brand, String last4, int expiryMonth, int expiryYear) {}
 ```
 
 ### Provider Implementations
@@ -67,23 +50,22 @@ Each provider implements the interface and translates between provider-specific 
 ```java
 @Service
 public final class StripePaymentProvider implements PaymentProviderAdapter {
-  
+
   private final StripeClient stripeClient;
-  
+
   @Override
   public PaymentResult processPayment(PaymentRequest request) {
     try {
       // Call Stripe API
-      PaymentIntent intent = stripeClient.createPaymentIntent(
-          toStripeRequest(request));
-      
+      PaymentIntent intent = stripeClient.createPaymentIntent(toStripeRequest(request));
+
       // Translate to domain model
       return toPaymentResult(intent);
     } catch (StripeException e) {
       return PaymentResult.failed(e.getCode(), e.getMessage());
     }
   }
-  
+
   private PaymentResult toPaymentResult(PaymentIntent intent) {
     // Translation logic - isolates domain from Stripe models
   }
@@ -122,12 +104,14 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
 ### Trade-offs
 
 **Pros**:
+
 - Clean separation of concerns
 - Easy to maintain and extend
 - Provider changes don't affect domain
 - Testable without external dependencies
 
 **Cons**:
+
 - Additional abstraction layer
 - Translation overhead (minimal)
 - May not expose all provider-specific features
@@ -140,20 +124,19 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
 ```java
 @Component
 public class PaymentProviderFactory {
-  
+
   private final Map<String, PaymentProviderAdapter> providers;
   private final BillingProperties properties;
-  
+
   public PaymentProviderAdapter getProvider(String providerName) {
     return switch (providerName.toUpperCase()) {
       case "STRIPE" -> providers.get("stripe");
       case "PAYPAL" -> providers.get("paypal");
       case "MANUAL" -> providers.get("manual");
-      default -> throw new IllegalArgumentException(
-          "Unknown provider: " + providerName);
+      default -> throw new IllegalArgumentException("Unknown provider: " + providerName);
     };
   }
-  
+
   public PaymentProviderAdapter getDefaultProvider() {
     return getProvider(properties.payment().provider());
   }
@@ -166,7 +149,7 @@ public class PaymentProviderFactory {
 iqscaffold:
   billing:
     payment:
-      provider: stripe  # Default provider
+      provider: stripe # Default provider
       stripe:
         api-key: ${STRIPE_API_KEY}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET}
@@ -181,11 +164,11 @@ All providers translate errors to domain-specific exceptions:
 
 ```java
 public class PaymentFailedException extends BillingException {
+
   private final String paymentId;
   private final String errorCode;
-  
-  public PaymentFailedException(String paymentId, String errorCode, 
-                                 String message) {
+
+  public PaymentFailedException(String paymentId, String errorCode, String message) {
     super(message);
     this.paymentId = paymentId;
     this.errorCode = errorCode;
@@ -224,11 +207,13 @@ public class PaymentFailedException extends BillingException {
 **Approach**: Use Stripe/PayPal SDKs directly in service layer
 
 **Pros**:
+
 - Simpler implementation
 - Access to all provider features
 - No translation overhead
 
 **Cons**:
+
 - Domain model coupled to external APIs
 - Hard to switch providers
 - Difficult to test
@@ -241,10 +226,12 @@ public class PaymentFailedException extends BillingException {
 **Approach**: Use a third-party payment gateway (e.g., Adyen, Braintree)
 
 **Pros**:
+
 - Single integration point
 - Gateway handles multiple providers
 
 **Cons**:
+
 - Additional cost
 - Still need abstraction layer
 - Dependency on third-party service
@@ -257,10 +244,12 @@ public class PaymentFailedException extends BillingException {
 **Approach**: Publish payment events, separate service handles providers
 
 **Pros**:
+
 - Complete decoupling
 - Can scale payment processing independently
 
 **Cons**:
+
 - Much more complex
 - Eventual consistency issues
 - Harder to handle synchronous payment flows
@@ -271,16 +260,19 @@ public class PaymentFailedException extends BillingException {
 ## Migration Strategy
 
 ### Phase 1: Implement Abstraction (Completed)
+
 - Define PaymentProviderAdapter interface
 - Implement StripePaymentProvider
 - Update PaymentService to use abstraction
 
 ### Phase 2: Add Additional Providers
+
 - Implement PayPalPaymentProvider
 - Implement ManualPaymentProvider
 - Add provider selection logic
 
 ### Phase 3: Provider Routing
+
 - Implement routing rules (by region, amount, etc.)
 - Add fallback logic
 - Implement A/B testing support
@@ -288,16 +280,19 @@ public class PaymentFailedException extends BillingException {
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test each provider implementation with mocked SDK
 - Test translation logic
 - Test error handling
 
 ### Integration Tests
+
 - Test with Stripe test mode
 - Test with PayPal sandbox
 - Test provider switching
 
 ### Contract Tests
+
 - Verify provider implementations match interface contract
 - Test with real provider APIs in staging
 

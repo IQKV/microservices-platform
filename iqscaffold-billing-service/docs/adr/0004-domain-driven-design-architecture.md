@@ -25,6 +25,7 @@ We will implement the billing service using **Domain-Driven Design (DDD)** tacti
 **Purpose**: Contains pure business logic, independent of infrastructure
 
 **Components**:
+
 - **Entities**: Objects with identity (Subscription, Invoice, Payment)
 - **Value Objects**: Immutable objects defined by attributes (PlanQuotas, ProrationResult)
 - **Aggregates**: Consistency boundaries (Subscription aggregate, Invoice aggregate)
@@ -35,36 +36,37 @@ We will implement the billing service using **Domain-Driven Design (DDD)** tacti
 - **Factories**: Complex object construction
 
 **Example**:
+
 ```java
 // Subscription Aggregate Root
 @Entity
 public class Subscription {
+
   @Id
   private Long id;
-  
+
   private String tenantId;
   private SubscriptionStatus status;
   private LocalDateTime currentPeriodEnd;
-  
+
   // Business logic methods
   public void cancel(boolean immediately) {
     validateCanCancel();
-    
+
     if (immediately) {
       this.status = SubscriptionStatus.CANCELED;
       this.currentPeriodEnd = LocalDateTime.now();
     } else {
       this.cancelAtPeriodEnd = true;
     }
-    
+
     // Publish domain event
     registerEvent(new SubscriptionCanceled(this.id, immediately));
   }
-  
+
   private void validateCanCancel() {
     if (status == SubscriptionStatus.CANCELED) {
-      throw new InvalidSubscriptionStateException(
-        "Cannot cancel already canceled subscription");
+      throw new InvalidSubscriptionStateException("Cannot cancel already canceled subscription");
     }
   }
 }
@@ -75,38 +77,35 @@ public class Subscription {
 **Purpose**: Orchestrates use cases, manages transactions
 
 **Components**:
+
 - **Application Services**: Thin orchestration layer
 - **DTOs**: Data transfer objects for API
 - **Use Case Implementations**: Coordinate domain objects
 
 **Example**:
+
 ```java
 @Service
 @Transactional
 public class SubscriptionApplicationService {
-  
+
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionFactory subscriptionFactory;
   private final DomainEventPublisher eventPublisher;
-  
+
   public SubscriptionDto createSubscription(CreateSubscriptionRequest request) {
     // 1. Load dependencies
-    SubscriptionPlan plan = planRepository.findById(request.planId())
-      .orElseThrow(() -> new PlanNotFoundException(request.planId()));
-    
+    SubscriptionPlan plan = planRepository.findById(request.planId()).orElseThrow(() -> new PlanNotFoundException(request.planId()));
+
     // 2. Use factory for complex creation
-    Subscription subscription = subscriptionFactory.createTrialSubscription(
-      TenantContext.getCurrentTenantId(),
-      request.userId(),
-      plan
-    );
-    
+    Subscription subscription = subscriptionFactory.createTrialSubscription(TenantContext.getCurrentTenantId(), request.userId(), plan);
+
     // 3. Save aggregate
     subscription = subscriptionRepository.save(subscription);
-    
+
     // 4. Publish events
     eventPublisher.publish(subscription.getDomainEvents());
-    
+
     // 5. Return DTO
     return toDto(subscription);
   }
@@ -118,25 +117,26 @@ public class SubscriptionApplicationService {
 **Purpose**: Implements technical concerns
 
 **Components**:
+
 - **Repository Implementations**: JPA repositories
 - **External Service Adapters**: Payment providers, email service
 - **Database Configuration**: Hibernate, Liquibase
 - **Message Queue**: RabbitMQ integration
 
 **Example**:
+
 ```java
 @Repository
 public class JpaSubscriptionRepository implements SubscriptionRepository {
-  
+
   @PersistenceContext
   private EntityManager entityManager;
-  
+
   @Override
   public Optional<Subscription> findById(Long id) {
-    return Optional.ofNullable(
-      entityManager.find(Subscription.class, id));
+    return Optional.ofNullable(entityManager.find(Subscription.class, id));
   }
-  
+
   @Override
   public Subscription save(Subscription subscription) {
     if (subscription.getId() == null) {
@@ -154,25 +154,25 @@ public class JpaSubscriptionRepository implements SubscriptionRepository {
 **Purpose**: Exposes APIs, handles HTTP concerns
 
 **Components**:
+
 - **REST Controllers**: HTTP endpoints
 - **Request/Response DTOs**: API contracts
 - **Exception Handlers**: Error responses
 - **OpenAPI Documentation**: API docs
 
 **Example**:
+
 ```java
 @RestController
 @RequestMapping("/api/v1/subscriptions")
 @Tag(name = "Subscriptions", description = "Subscription management APIs")
 public class SubscriptionRestResource {
-  
+
   private final SubscriptionApplicationService subscriptionService;
-  
+
   @PostMapping
   @Operation(summary = "Create subscription")
-  public ResponseEntity<SubscriptionDto> createSubscription(
-      @Valid @RequestBody CreateSubscriptionRequest request) {
-    
+  public ResponseEntity<SubscriptionDto> createSubscription(@Valid @RequestBody CreateSubscriptionRequest request) {
     SubscriptionDto subscription = subscriptionService.createSubscription(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(subscription);
   }
@@ -186,40 +186,41 @@ public class SubscriptionRestResource {
 **Definition**: Cluster of entities and value objects with a consistency boundary
 
 **Rules**:
+
 1. One aggregate root per aggregate
 2. External objects can only reference the root
 3. Modifications go through the root
 4. Aggregates are transaction boundaries
 
 **Example**:
+
 ```java
 // Invoice Aggregate
 @Entity
 public class Invoice {
+
   @Id
   private Long id;
-  
+
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   private List<InvoiceLineItem> lineItems = new ArrayList<>();
-  
+
   private BigDecimal total;
-  
+
   // All line item modifications go through aggregate root
   public void addLineItem(InvoiceLineItem item) {
     validateLineItem(item);
     lineItems.add(item);
     recalculateTotal();
   }
-  
+
   public void removeLineItem(int index) {
     lineItems.remove(index);
     recalculateTotal();
   }
-  
+
   private void recalculateTotal() {
-    this.total = lineItems.stream()
-      .map(InvoiceLineItem::amount)
-      .reduce(BigDecimal.ZERO, BigDecimal::add);
+    this.total = lineItems.stream().map(InvoiceLineItem::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }
 ```
@@ -231,13 +232,9 @@ public class Invoice {
 **Implementation**: Use Java records
 
 **Example**:
+
 ```java
-public record PlanQuotas(
-    long apiCalls,
-    long storageGb,
-    long emailSends,
-    long activeUsers
-) {
+public record PlanQuotas(long apiCalls, long storageGb, long emailSends, long activeUsers) {
   public boolean isUnlimited(String metricType) {
     return switch (metricType) {
       case "API_CALLS" -> apiCalls == -1;
@@ -255,23 +252,19 @@ public record PlanQuotas(
 **Definition**: Stateless services for business logic that doesn't fit in entities
 
 **Example**:
+
 ```java
 @Service
 public class ProrationCalculator {
-  
-  public ProrationResult calculate(
-      Subscription subscription,
-      SubscriptionPlan newPlan,
-      LocalDateTime effectiveDate) {
-    
+
+  public ProrationResult calculate(Subscription subscription, SubscriptionPlan newPlan, LocalDateTime effectiveDate) {
     // Complex calculation logic spanning multiple aggregates
     BigDecimal unusedTime = calculateUnusedTime(subscription, effectiveDate);
     BigDecimal creditAmount = calculateCredit(subscription, unusedTime);
     BigDecimal chargeAmount = calculateCharge(newPlan, unusedTime);
     BigDecimal netAmount = chargeAmount.subtract(creditAmount);
-    
-    return new ProrationResult(creditAmount, chargeAmount, netAmount,
-      "Proration for plan change");
+
+    return new ProrationResult(creditAmount, chargeAmount, netAmount, "Proration for plan change");
   }
 }
 ```
@@ -281,9 +274,10 @@ public class ProrationCalculator {
 **Definition**: Reusable business rules that can be combined
 
 **Example**:
+
 ```java
 public class ActiveSubscriptionSpecification implements Specification<Subscription> {
-  
+
   @Override
   public boolean isSatisfiedBy(Subscription subscription) {
     return subscription.getStatus() == SubscriptionStatus.ACTIVE
@@ -306,20 +300,17 @@ if (spec.isSatisfiedBy(subscription)) {
 **Definition**: Encapsulate complex object creation
 
 **Example**:
+
 ```java
 @Component
 public class SubscriptionFactory {
-  
-  public Subscription createTrialSubscription(
-      String tenantId,
-      Long userId,
-      SubscriptionPlan plan) {
-    
+
+  public Subscription createTrialSubscription(String tenantId, Long userId, SubscriptionPlan plan) {
     // Validate business rules
     if (!plan.hasTrialPeriod()) {
       throw new IllegalArgumentException("Plan does not support trials");
     }
-    
+
     // Create subscription with proper initialization
     Subscription subscription = new Subscription();
     subscription.setTenantId(tenantId);
@@ -330,10 +321,10 @@ public class SubscriptionFactory {
     subscription.setTrialEnd(LocalDateTime.now().plusDays(plan.getTrialDays()));
     subscription.setCurrentPeriodStart(LocalDateTime.now());
     subscription.setCurrentPeriodEnd(subscription.getTrialEnd());
-    
+
     // Register domain event
     subscription.registerEvent(new TrialStarted(subscription.getId()));
-    
+
     return subscription;
   }
 }
@@ -344,27 +335,19 @@ public class SubscriptionFactory {
 **Definition**: Significant business occurrences
 
 **Example**:
+
 ```java
-public record SubscriptionCreated(
-    Long subscriptionId,
-    String tenantId,
-    Long planId,
-    LocalDateTime createdAt
-) implements DomainEvent {}
+public record SubscriptionCreated(Long subscriptionId, String tenantId, Long planId, LocalDateTime createdAt) implements DomainEvent {}
 
 // Publishing
 @Service
 public class DomainEventPublisher {
-  
+
   private final RabbitTemplate rabbitTemplate;
-  
+
   public void publish(List<DomainEvent> events) {
-    events.forEach(event -> {
-      rabbitTemplate.convertAndSend(
-        BillingConstants.EXCHANGE_NAME,
-        event.getClass().getSimpleName(),
-        event
-      );
+    events.forEach((event) -> {
+      rabbitTemplate.convertAndSend(BillingConstants.EXCHANGE_NAME, event.getClass().getSimpleName(), event);
     });
   }
 }
@@ -375,6 +358,7 @@ public class DomainEventPublisher {
 **Definition**: Protect domain model from external systems
 
 **Example**:
+
 ```java
 // Domain interface
 public interface PaymentProviderAdapter {
@@ -384,29 +368,27 @@ public interface PaymentProviderAdapter {
 // Implementation translates between Stripe and domain models
 @Service
 public class StripePaymentProvider implements PaymentProviderAdapter {
-  
+
   @Override
   public PaymentResult processPayment(PaymentRequest request) {
     // Translate domain model to Stripe model
     PaymentIntentCreateParams params = toStripeParams(request);
-    
+
     // Call Stripe API
     PaymentIntent intent = PaymentIntent.create(params);
-    
+
     // Translate Stripe model back to domain model
     return toPaymentResult(intent);
   }
-  
+
   private PaymentResult toPaymentResult(PaymentIntent intent) {
     return new PaymentResult(
       intent.getId(),
       mapStatus(intent.getStatus()),
       BigDecimal.valueOf(intent.getAmount()).divide(BigDecimal.valueOf(100)),
       intent.getCurrency().toUpperCase(),
-      intent.getLastPaymentError() != null ? 
-        intent.getLastPaymentError().getCode() : null,
-      intent.getLastPaymentError() != null ? 
-        intent.getLastPaymentError().getMessage() : null,
+      intent.getLastPaymentError() != null ? intent.getLastPaymentError().getCode() : null,
+      intent.getLastPaymentError() != null ? intent.getLastPaymentError().getMessage() : null,
       Map.of()
     );
   }
@@ -445,12 +427,14 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 ### Trade-offs
 
 **Pros**:
+
 - Clean architecture
 - Testable business logic
 - Explicit domain model
 - Maintainable codebase
 
 **Cons**:
+
 - More layers and abstractions
 - Steeper learning curve
 - More initial setup
@@ -528,20 +512,24 @@ com.iqscaffold.billingservice/
 ### Testing Strategy
 
 **Domain Layer**:
+
 - Pure unit tests
 - No mocks needed
 - Test business logic in isolation
 
 **Application Layer**:
+
 - Unit tests with mocked repositories
 - Test use case orchestration
 
 **Infrastructure Layer**:
+
 - Integration tests with real infrastructure
 - Test repository implementations
 - Test external service adapters
 
 **Presentation Layer**:
+
 - Controller tests with MockMvc
 - Test request/response handling
 

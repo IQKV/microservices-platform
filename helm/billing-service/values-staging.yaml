@@ -1,0 +1,100 @@
+# Staging environment values for billing-service
+# Override default values for staging deployment
+
+global:
+  environment: staging
+
+namespace:
+  name: iqscaffold-staging-env
+  labels:
+    environment: staging
+
+# Increase replicas for staging
+replicaCount: 2
+
+image:
+  tag: "staging-latest"
+  pullPolicy: Always
+
+# Enable autoscaling for staging
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+
+# Enable PDB for staging
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Staging resource allocation
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "750m"
+  limits:
+    memory: "2Gi"
+    cpu: "1500m"
+
+# Environment variables for staging
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "staging"
+  - name: IQSCAFFOLD_DATABASE_URL
+    value: "jdbc:postgresql://billing-postgres-staging:5432/iqscaffold_billing_staging"
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
+    value: "billing-redis-staging"
+  - name: IQSCAFFOLD_RABBITMQ_HOST
+    value: "billing-rabbitmq-staging"
+  - name: IQSCAFFOLD_BILLING_SECURITY_JWT_JWK_SET_URI
+    value: "http://user-service-staging:8081/.well-known/jwks.json"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_USER_SERVICE_URL
+    value: "http://user-service-staging:8081"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_EMAIL_SERVICE_URL
+    value: "http://email-service-staging:8084"
+  - name: IQSCAFFOLD_BILLING_PAYMENT_PROVIDER
+    value: "stripe"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.name=iqscaffold-billing-service,service.version=1.0.0,deployment.environment=staging"
+  - name: JAVA_OPTS
+    value: "-Xms768m -Xmx1536m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+# PostgreSQL staging configuration
+postgresql:
+  persistence:
+    size: 20Gi
+  env:
+    POSTGRES_DB: iqscaffold_billing_staging
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "750m"
+    limits:
+      memory: "2Gi"
+      cpu: "1500m"
+
+# Redis staging configuration
+redis:
+  persistence:
+    size: 5Gi
+  config:
+    maxmemory: "512mb"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "400m"
+    limits:
+      memory: "1Gi"
+      cpu: "800m"
+
+# RabbitMQ staging configuration
+rabbitmq:
+  persistence:
+    size: 10Gi
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "750m"
+    limits:
+      memory: "2Gi"
+      cpu: "1500m"

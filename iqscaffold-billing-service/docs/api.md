@@ -43,7 +43,7 @@ The Billing Service provides comprehensive subscription management, payment proc
     "name": "Free Plan",
     "description": "Basic features for individuals",
     "tier": "FREE",
-    "basePrice": 0.00,
+    "basePrice": 0.0,
     "currency": "USD",
     "billingCycle": "MONTHLY",
     "trialDays": 0,
@@ -66,7 +66,7 @@ The Billing Service provides comprehensive subscription management, payment proc
     "name": "Professional Plan",
     "description": "Advanced features for growing teams",
     "tier": "PRO",
-    "basePrice": 49.00,
+    "basePrice": 49.0,
     "currency": "USD",
     "billingCycle": "MONTHLY",
     "trialDays": 14,
@@ -95,6 +95,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: None (public endpoint)
 
 **Path Parameters**:
+
 - `id` (integer, required): Plan ID
 
 **Response**: `200 OK`
@@ -106,7 +107,7 @@ The Billing Service provides comprehensive subscription management, payment proc
   "name": "Professional Plan",
   "description": "Advanced features for growing teams",
   "tier": "PRO",
-  "basePrice": 49.00,
+  "basePrice": 49.0,
   "currency": "USD",
   "billingCycle": "MONTHLY",
   "trialDays": 14,
@@ -203,6 +204,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required
 
 **Path Parameters**:
+
 - `id` (integer, required): Subscription ID
 
 **Request Body**:
@@ -226,16 +228,16 @@ The Billing Service provides comprehensive subscription management, payment proc
   },
   "prorationInvoice": {
     "id": 456,
-    "amount": 150.00,
+    "amount": 150.0,
     "status": "PAID",
     "lineItems": [
       {
         "description": "Credit for unused time on PRO plan",
-        "amount": -25.00
+        "amount": -25.0
       },
       {
         "description": "Charge for ENTERPRISE plan (prorated)",
-        "amount": 175.00
+        "amount": 175.0
       }
     ]
   }
@@ -288,7 +290,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 {
   "invoiceId": 789,
   "paymentMethodId": "pm_1234567890",
-  "amount": 49.00,
+  "amount": 49.0,
   "currency": "USD",
   "idempotencyKey": "payment-123-retry-1"
 }
@@ -300,7 +302,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 {
   "id": 1001,
   "invoiceId": 789,
-  "amount": 49.00,
+  "amount": 49.0,
   "currency": "USD",
   "status": "SUCCEEDED",
   "paymentMethod": "card",
@@ -348,7 +350,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 
 ```json
 {
-  "amount": 49.00,
+  "amount": 49.0,
   "reason": "Customer request"
 }
 ```
@@ -359,7 +361,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 {
   "id": 1002,
   "originalPaymentId": 1001,
-  "amount": 49.00,
+  "amount": 49.0,
   "status": "REFUNDED",
   "refundedAt": "2024-12-09T12:00:00Z"
 }
@@ -450,6 +452,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number (default: 0)
 - `size` (integer, optional): Page size (default: 20)
 - `status` (string, optional): Filter by status (DRAFT, OPEN, PAID, VOID)
@@ -463,7 +466,7 @@ The Billing Service provides comprehensive subscription management, payment proc
       "id": 789,
       "invoiceNumber": "INV-202412-00789",
       "status": "PAID",
-      "amount": 49.00,
+      "amount": 49.0,
       "currency": "USD",
       "dueDate": "2024-12-16T00:00:00Z",
       "paidAt": "2024-12-09T10:30:00Z",
@@ -471,8 +474,8 @@ The Billing Service provides comprehensive subscription management, payment proc
         {
           "description": "PRO Plan - Monthly",
           "quantity": 1,
-          "unitPrice": 49.00,
-          "amount": 49.00
+          "unitPrice": 49.0,
+          "amount": 49.0
         }
       ]
     }
@@ -498,9 +501,9 @@ The Billing Service provides comprehensive subscription management, payment proc
   "invoiceNumber": "INV-202412-00789",
   "subscriptionId": 123,
   "status": "PAID",
-  "subtotal": 49.00,
-  "tax": 0.00,
-  "total": 49.00,
+  "subtotal": 49.0,
+  "tax": 0.0,
+  "total": 49.0,
   "currency": "USD",
   "dueDate": "2024-12-16T00:00:00Z",
   "paidAt": "2024-12-09T10:30:00Z",
@@ -508,14 +511,14 @@ The Billing Service provides comprehensive subscription management, payment proc
     {
       "description": "PRO Plan - Monthly",
       "quantity": 1,
-      "unitPrice": 49.00,
-      "amount": 49.00
+      "unitPrice": 49.0,
+      "amount": 49.0
     }
   ],
   "payments": [
     {
       "id": 1001,
-      "amount": 49.00,
+      "amount": 49.0,
       "status": "SUCCEEDED",
       "processedAt": "2024-12-09T10:30:00Z"
     }
@@ -542,6 +545,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required
 
 **Query Parameters**:
+
 - `startDate` (string, optional): Start date (ISO 8601)
 - `endDate` (string, optional): End date (ISO 8601)
 
@@ -589,6 +593,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required
 
 **Query Parameters**:
+
 - `metricType` (string, required): Metric type (API_CALLS, STORAGE_GB, etc.)
 
 **Response**: `200 OK`
@@ -641,7 +646,7 @@ The Billing Service provides comprehensive subscription management, payment proc
     }
   },
   "upcomingInvoice": {
-    "amount": 49.00,
+    "amount": 49.0,
     "dueDate": "2025-01-01T00:00:00Z"
   },
   "paymentMethod": {
@@ -663,6 +668,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required (ADMIN/SUPER_ADMIN)
 
 **Query Parameters**:
+
 - `page` (integer, optional): Page number
 - `size` (integer, optional): Page size
 - `status` (string, optional): Filter by status
@@ -693,6 +699,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Authentication**: Required (ADMIN/SUPER_ADMIN)
 
 **Query Parameters**:
+
 - `startDate` (string, required): Start date
 - `endDate` (string, required): End date
 
@@ -704,16 +711,16 @@ The Billing Service provides comprehensive subscription management, payment proc
     "start": "2024-11-01T00:00:00Z",
     "end": "2024-12-01T00:00:00Z"
   },
-  "totalRevenue": 15000.00,
-  "mrr": 12500.00,
-  "arr": 150000.00,
+  "totalRevenue": 15000.0,
+  "mrr": 12500.0,
+  "arr": 150000.0,
   "newSubscriptions": 25,
   "canceledSubscriptions": 5,
   "churnRate": 3.2,
   "revenueByPlan": {
-    "FREE": 0.00,
-    "PRO": 9800.00,
-    "ENTERPRISE": 5200.00
+    "FREE": 0.0,
+    "PRO": 9800.0,
+    "ENTERPRISE": 5200.0
   }
 }
 ```
@@ -794,6 +801,7 @@ The Billing Service provides comprehensive subscription management, payment proc
 **Description**: Handles Stripe webhook events for payment processing.
 
 **Supported Events**:
+
 - `payment_intent.succeeded`
 - `payment_intent.failed`
 - `charge.refunded`

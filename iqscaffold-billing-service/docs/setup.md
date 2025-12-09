@@ -161,7 +161,7 @@ services:
       RABBITMQ_DEFAULT_PASS: billing_pass
     ports:
       - "5672:5672"
-      - "15672:15672"  # Management UI
+      - "15672:15672" # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
@@ -224,13 +224,13 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-  
+
   jpa:
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-  
+
   redis:
     host: ${SPRING_REDIS_HOST}
     port: ${SPRING_REDIS_PORT}
@@ -272,7 +272,7 @@ psql -h localhost -U billing_user -d billing_db -f scripts/seed-data.sql
 ```sql
 -- Insert subscription plans
 INSERT INTO subscription_plans (code, name, tier, base_price, currency, billing_cycle, trial_days, active)
-VALUES 
+VALUES
   ('FREE', 'Free Plan', 'FREE', 0.00, 'USD', 'MONTHLY', 0, true),
   ('PRO', 'Professional Plan', 'PRO', 49.00, 'USD', 'MONTHLY', 14, true),
   ('ENTERPRISE', 'Enterprise Plan', 'ENTERPRISE', 199.00, 'USD', 'MONTHLY', 30, true);
@@ -313,6 +313,7 @@ UPDATE subscription_plans SET quotas = '{
    - Copy webhook secret
 
 4. **Update Environment**:
+
 ```bash
 STRIPE_API_KEY=sk_test_your_key
 STRIPE_WEBHOOK_SECRET=whsec_your_secret
@@ -324,6 +325,7 @@ STRIPE_WEBHOOK_SECRET=whsec_your_secret
 2. **Create App**: Dashboard → My Apps & Credentials
 3. **Get Sandbox Credentials**: Copy Client ID and Secret
 4. **Update Environment**:
+
 ```bash
 PAYPAL_CLIENT_ID=your_client_id
 PAYPAL_CLIENT_SECRET=your_client_secret
@@ -436,6 +438,7 @@ PAYPAL_CLIENT_SECRET=your_client_secret
 **Problem**: Cannot connect to PostgreSQL
 
 **Solution**:
+
 ```bash
 # Check if PostgreSQL is running
 docker ps | grep postgres
@@ -452,6 +455,7 @@ docker logs billing-postgres
 **Problem**: Cannot connect to Redis
 
 **Solution**:
+
 ```bash
 # Check if Redis is running
 docker ps | grep redis
@@ -468,6 +472,7 @@ docker logs billing-redis
 **Problem**: Port 8082 already in use
 
 **Solution**:
+
 ```bash
 # Find process using port
 lsof -i :8082
@@ -485,6 +490,7 @@ server:
 **Problem**: Liquibase migration fails
 
 **Solution**:
+
 ```bash
 # Check migration status
 ./mvnw liquibase:status

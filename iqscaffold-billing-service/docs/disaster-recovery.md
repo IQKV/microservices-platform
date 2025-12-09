@@ -56,17 +56,20 @@ The maximum acceptable amount of data loss measured in time.
 **Frequency**: Every 6 hours
 
 **Retention**:
+
 - Hourly backups: 7 days
 - Daily backups: 30 days
 - Weekly backups: 90 days
 - Monthly backups: 1 year
 
-**Location**: 
+**Location**:
+
 - Primary: AWS S3 (us-east-1)
 - Secondary: AWS S3 (us-west-2)
 - Tertiary: Azure Blob Storage (westus2)
 
 **Backup Script**:
+
 ```bash
 #!/bin/bash
 # scripts/backup-database.sh
@@ -110,6 +113,7 @@ aws s3 ls s3://iqscaffold-backups-secondary/billing/${BACKUP_FILE}.gz
 PostgreSQL Write-Ahead Logging (WAL) enables point-in-time recovery:
 
 **Configuration**:
+
 ```ini
 # postgresql.conf
 wal_level = replica
@@ -125,6 +129,7 @@ archive_timeout = 300  # 5 minutes
 **Location**: Git repository + encrypted S3 bucket
 
 **Backup Items**:
+
 - Kubernetes manifests
 - Helm charts
 - Configuration files
@@ -136,6 +141,7 @@ archive_timeout = 300  # 5 minutes
 **Frequency**: Every hour
 
 **Configuration**:
+
 ```conf
 # redis.conf
 save 900 1      # Save after 900 seconds if at least 1 key changed
@@ -151,12 +157,14 @@ dbfilename billing-cache.rdb
 **Frequency**: Daily
 
 **Backup Items**:
+
 - Queue definitions
 - Exchange configurations
 - Bindings
 - Policies
 
 **Backup Script**:
+
 ```bash
 #!/bin/bash
 # scripts/backup-rabbitmq.sh
@@ -180,6 +188,7 @@ aws s3 cp /tmp/rabbitmq_definitions_${TIMESTAMP}.json \
 **Impact**: Complete loss of billing data access
 
 **Symptoms**:
+
 - Database connection errors
 - 500 errors on all endpoints
 - Health checks failing
@@ -191,6 +200,7 @@ aws s3 cp /tmp/rabbitmq_definitions_${TIMESTAMP}.json \
 **Impact**: All services in primary region unavailable
 
 **Symptoms**:
+
 - All health checks failing
 - No response from any endpoint
 - AWS region status page shows outage
@@ -202,6 +212,7 @@ aws s3 cp /tmp/rabbitmq_definitions_${TIMESTAMP}.json \
 **Impact**: Corrupted billing data
 
 **Symptoms**:
+
 - Inconsistent data
 - Calculation errors
 - Failed transactions
@@ -213,6 +224,7 @@ aws s3 cp /tmp/rabbitmq_definitions_${TIMESTAMP}.json \
 **Impact**: Encrypted or deleted data
 
 **Symptoms**:
+
 - Inaccessible data
 - Ransom demands
 - Unusual file modifications
@@ -224,6 +236,7 @@ aws s3 cp /tmp/rabbitmq_definitions_${TIMESTAMP}.json \
 **Impact**: Cannot process payments
 
 **Symptoms**:
+
 - Payment failures
 - Timeout errors
 - Provider status page shows outage
@@ -244,7 +257,7 @@ psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c "SELECT 1"
 
 # Check for corruption
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c \
-  "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) 
+  "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname))
    FROM pg_database;"
 ```
 
@@ -583,12 +596,14 @@ After any recovery procedure:
 ### Incident Communication
 
 **Internal**:
+
 1. Post in #incidents Slack channel
 2. Page on-call engineer
 3. Notify engineering manager
 4. Update status page
 
 **External**:
+
 1. Update status page: https://status.iqscaffold.com
 2. Send email to affected customers
 3. Post on Twitter/social media
@@ -597,11 +612,12 @@ After any recovery procedure:
 ### Status Page Updates
 
 **Template**:
+
 ```
 [INVESTIGATING] Billing Service Outage
 Posted: 2024-12-09 10:30 UTC
 
-We are currently investigating an issue with the Billing Service. 
+We are currently investigating an issue with the Billing Service.
 Payment processing and subscription operations may be affected.
 
 We will provide updates every 30 minutes.
@@ -614,6 +630,7 @@ Next update: 2024-12-09 11:00 UTC
 **Template**: See `docs/templates/post-incident-report.md`
 
 **Required Sections**:
+
 - Incident summary
 - Timeline of events
 - Root cause analysis
@@ -682,7 +699,7 @@ pg_restore -h $DB_HOST -U $DB_USER -d billing_db_verify \
 
 # Verify data
 TABLES=$(psql -h $DB_HOST -U $DB_USER -d billing_db_verify -t -c \
-  "SELECT COUNT(*) FROM information_schema.tables 
+  "SELECT COUNT(*) FROM information_schema.tables
    WHERE table_schema = 'public';")
 
 echo "Restored $TABLES tables"
@@ -695,11 +712,11 @@ echo "Backup verification completed successfully"
 
 ### Recovery Time Log
 
-| Date | Scenario | RTO Target | Actual RTO | Notes |
-|------|----------|------------|------------|-------|
-| 2024-12-01 | Database failure | 4 hours | 2.5 hours | Successful recovery |
-| 2024-11-15 | Region failover test | 4 hours | 3.8 hours | Within target |
-| 2024-10-20 | Data corruption | 4 hours | 5.2 hours | Exceeded target, improved procedures |
+| Date       | Scenario             | RTO Target | Actual RTO | Notes                                |
+| ---------- | -------------------- | ---------- | ---------- | ------------------------------------ |
+| 2024-12-01 | Database failure     | 4 hours    | 2.5 hours  | Successful recovery                  |
+| 2024-11-15 | Region failover test | 4 hours    | 3.8 hours  | Within target                        |
+| 2024-10-20 | Data corruption      | 4 hours    | 5.2 hours  | Exceeded target, improved procedures |
 
 ---
 

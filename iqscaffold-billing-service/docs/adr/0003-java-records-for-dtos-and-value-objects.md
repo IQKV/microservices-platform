@@ -25,33 +25,24 @@ We will use **Java records** for all DTOs, value objects, and immutable data car
 ### DTOs (Request/Response)
 
 ```java
-public record CreateSubscriptionRequest(
-    @NotNull Long planId,
-    String paymentMethodId,
-    boolean startTrial
-) {}
+public record CreateSubscriptionRequest(@NotNull Long planId, String paymentMethodId, boolean startTrial) {}
 
 public record SubscriptionDto(
-    Long id,
-    String tenantId,
-    Long planId,
-    String planCode,
-    SubscriptionStatus status,
-    LocalDateTime currentPeriodStart,
-    LocalDateTime currentPeriodEnd,
-    boolean cancelAtPeriodEnd
+  Long id,
+  String tenantId,
+  Long planId,
+  String planCode,
+  SubscriptionStatus status,
+  LocalDateTime currentPeriodStart,
+  LocalDateTime currentPeriodEnd,
+  boolean cancelAtPeriodEnd
 ) {}
 ```
 
 ### Value Objects
 
 ```java
-public record PlanQuotas(
-    long apiCalls,
-    long storageGb,
-    long emailSends,
-    long activeUsers
-) {
+public record PlanQuotas(long apiCalls, long storageGb, long emailSends, long activeUsers) {
   public boolean isUnlimited(String metricType) {
     return switch (metricType) {
       case "API_CALLS" -> apiCalls == -1;
@@ -63,12 +54,7 @@ public record PlanQuotas(
   }
 }
 
-public record ProrationResult(
-    BigDecimal creditAmount,
-    BigDecimal chargeAmount,
-    BigDecimal netAmount,
-    String description
-) {
+public record ProrationResult(BigDecimal creditAmount, BigDecimal chargeAmount, BigDecimal netAmount, String description) {
   public ProrationResult {
     // Compact constructor for validation
     if (creditAmount.compareTo(BigDecimal.ZERO) < 0) {
@@ -86,46 +72,21 @@ public record ProrationResult(
 ```java
 @ConfigurationProperties(prefix = "iqscaffold.billing")
 @Validated
-public record BillingProperties(
-    @Valid @NotNull Payment payment,
-    @Valid @NotNull Subscription subscription,
-    @Valid @NotNull Usage usage
-) {
-  public record Payment(
-      @NotBlank String provider,
-      @Valid Stripe stripe,
-      @Valid PayPal paypal
-  ) {}
-  
-  public record Stripe(
-      @NotBlank String apiKey,
-      @NotBlank String webhookSecret
-  ) {}
-  
-  public record Subscription(
-      @NotBlank String defaultCurrency,
-      @Min(0) int trialDays,
-      @Min(0) int gracePeriodDays
-  ) {}
+public record BillingProperties(@Valid @NotNull Payment payment, @Valid @NotNull Subscription subscription, @Valid @NotNull Usage usage) {
+  public record Payment(@NotBlank String provider, @Valid Stripe stripe, @Valid PayPal paypal) {}
+
+  public record Stripe(@NotBlank String apiKey, @NotBlank String webhookSecret) {}
+
+  public record Subscription(@NotBlank String defaultCurrency, @Min(0) int trialDays, @Min(0) int gracePeriodDays) {}
 }
 ```
 
 ### Domain Events
 
 ```java
-public record SubscriptionCreated(
-    Long subscriptionId,
-    String tenantId,
-    Long planId,
-    LocalDateTime createdAt
-) implements DomainEvent {}
+public record SubscriptionCreated(Long subscriptionId, String tenantId, Long planId, LocalDateTime createdAt) implements DomainEvent {}
 
-public record PaymentSucceeded(
-    Long paymentId,
-    Long invoiceId,
-    BigDecimal amount,
-    LocalDateTime processedAt
-) implements DomainEvent {}
+public record PaymentSucceeded(Long paymentId, Long invoiceId, BigDecimal amount, LocalDateTime processedAt) implements DomainEvent {}
 ```
 
 ## Rationale
@@ -167,33 +128,42 @@ public record PaymentSucceeded(
 ### Comparison with Traditional Classes
 
 **Traditional Class** (30+ lines):
+
 ```java
 public class SubscriptionDto {
+
   private final Long id;
   private final String tenantId;
   private final SubscriptionStatus status;
-  
-  public SubscriptionDto(Long id, String tenantId, 
-                         SubscriptionStatus status) {
+
+  public SubscriptionDto(Long id, String tenantId, SubscriptionStatus status) {
     this.id = id;
     this.tenantId = tenantId;
     this.status = status;
   }
-  
-  public Long getId() { return id; }
-  public String getTenantId() { return tenantId; }
-  public SubscriptionStatus getStatus() { return status; }
-  
+
+  public Long getId() {
+    return id;
+  }
+
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public SubscriptionStatus getStatus() {
+    return status;
+  }
+
   @Override
   public boolean equals(Object o) {
     // 10+ lines of equals logic
   }
-  
+
   @Override
   public int hashCode() {
     return Objects.hash(id, tenantId, status);
   }
-  
+
   @Override
   public String toString() {
     // toString logic
@@ -202,12 +172,9 @@ public class SubscriptionDto {
 ```
 
 **Record** (3 lines):
+
 ```java
-public record SubscriptionDto(
-    Long id,
-    String tenantId,
-    SubscriptionStatus status
-) {}
+public record SubscriptionDto(Long id, String tenantId, SubscriptionStatus status) {}
 ```
 
 ## Implementation Guidelines
@@ -215,6 +182,7 @@ public record SubscriptionDto(
 ### When to Use Records
 
 ✅ **Use records for**:
+
 - DTOs (request/response objects)
 - Value objects (immutable domain concepts)
 - Configuration properties
@@ -223,6 +191,7 @@ public record SubscriptionDto(
 - API responses
 
 ❌ **Don't use records for**:
+
 - JPA entities (need mutable state for Hibernate)
 - Objects requiring inheritance (records are final)
 - Objects needing custom setters
@@ -234,10 +203,10 @@ Records work seamlessly with Bean Validation:
 
 ```java
 public record CreatePaymentRequest(
-    @NotNull @Positive Long invoiceId,
-    @NotBlank String paymentMethodId,
-    @NotNull @DecimalMin("0.01") BigDecimal amount,
-    @NotBlank @Size(min = 3, max = 3) String currency
+  @NotNull @Positive Long invoiceId,
+  @NotBlank String paymentMethodId,
+  @NotNull @DecimalMin("0.01") BigDecimal amount,
+  @NotBlank @Size(min = 3, max = 3) String currency
 ) {}
 ```
 
@@ -246,19 +215,15 @@ public record CreatePaymentRequest(
 Records can have custom methods:
 
 ```java
-public record UsageSummary(
-    long currentUsage,
-    long limit,
-    MetricType metricType
-) {
+public record UsageSummary(long currentUsage, long limit, MetricType metricType) {
   public long remaining() {
     return limit - currentUsage;
   }
-  
+
   public double percentageUsed() {
-    return (double) currentUsage / limit * 100;
+    return ((double) currentUsage / limit) * 100;
   }
-  
+
   public boolean isApproachingLimit() {
     return percentageUsed() >= 90.0;
   }
@@ -270,11 +235,7 @@ public record UsageSummary(
 Use compact constructors for validation:
 
 ```java
-public record PaymentRequest(
-    Long invoiceId,
-    BigDecimal amount,
-    String currency
-) {
+public record PaymentRequest(Long invoiceId, BigDecimal amount, String currency) {
   public PaymentRequest {
     // Compact constructor - no parameter list
     if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -294,16 +255,11 @@ Records work with OpenAPI annotations:
 ```java
 @Schema(description = "Request to create a new subscription")
 public record CreateSubscriptionRequest(
-    @Schema(description = "ID of the subscription plan", example = "2")
-    @NotNull Long planId,
-    
-    @Schema(description = "Payment method ID from payment provider", 
-            example = "pm_1234567890")
-    String paymentMethodId,
-    
-    @Schema(description = "Whether to start with trial period", 
-            example = "true")
-    boolean startTrial
+  @Schema(description = "ID of the subscription plan", example = "2") @NotNull Long planId,
+
+  @Schema(description = "Payment method ID from payment provider", example = "pm_1234567890") String paymentMethodId,
+
+  @Schema(description = "Whether to start with trial period", example = "true") boolean startTrial
 ) {}
 ```
 
@@ -339,11 +295,13 @@ public record CreateSubscriptionRequest(
 **Approach**: Use Lombok's @Value annotation for immutable classes
 
 **Pros**:
+
 - Similar conciseness to records
 - More flexibility (can extend classes)
 - Familiar to many developers
 
 **Cons**:
+
 - Requires Lombok dependency
 - Not a language feature
 - IDE support varies
@@ -357,11 +315,13 @@ public record CreateSubscriptionRequest(
 **Approach**: Write traditional classes with final fields
 
 **Pros**:
+
 - Maximum flexibility
 - No new concepts to learn
 - Works everywhere
 
 **Cons**:
+
 - Massive boilerplate
 - Error-prone (easy to forget final)
 - Harder to maintain
@@ -374,11 +334,13 @@ public record CreateSubscriptionRequest(
 **Approach**: Use Kotlin instead of Java
 
 **Pros**:
+
 - Excellent data class support
 - Many modern language features
 - Concise syntax
 
 **Cons**:
+
 - Requires adopting Kotlin
 - Mixed language codebase
 - Team training required
@@ -389,16 +351,19 @@ public record CreateSubscriptionRequest(
 ## Migration Strategy
 
 ### Phase 1: New Code (Completed)
+
 - All new DTOs use records
 - All new value objects use records
 - All new configuration properties use records
 
 ### Phase 2: Gradual Migration
+
 - Convert existing DTOs to records during refactoring
 - Convert value objects to records
 - No rush to convert everything
 
 ### Phase 3: Enforcement
+
 - Add ArchUnit rules to enforce record usage
 - Document patterns in coding standards
 
@@ -409,13 +374,8 @@ Records are easy to test:
 ```java
 @Test
 void testProrationResult() {
-  var result = new ProrationResult(
-      new BigDecimal("25.00"),
-      new BigDecimal("49.00"),
-      new BigDecimal("24.00"),
-      "Upgrade proration"
-  );
-  
+  var result = new ProrationResult(new BigDecimal("25.00"), new BigDecimal("49.00"), new BigDecimal("24.00"), "Upgrade proration");
+
   assertEquals(new BigDecimal("25.00"), result.creditAmount());
   assertEquals(new BigDecimal("49.00"), result.chargeAmount());
   assertEquals(new BigDecimal("24.00"), result.netAmount());
@@ -423,15 +383,9 @@ void testProrationResult() {
 
 @Test
 void testRecordEquality() {
-  var result1 = new ProrationResult(
-      new BigDecimal("25.00"), new BigDecimal("49.00"),
-      new BigDecimal("24.00"), "Test"
-  );
-  var result2 = new ProrationResult(
-      new BigDecimal("25.00"), new BigDecimal("49.00"),
-      new BigDecimal("24.00"), "Test"
-  );
-  
+  var result1 = new ProrationResult(new BigDecimal("25.00"), new BigDecimal("49.00"), new BigDecimal("24.00"), "Test");
+  var result2 = new ProrationResult(new BigDecimal("25.00"), new BigDecimal("49.00"), new BigDecimal("24.00"), "Test");
+
   assertEquals(result1, result2); // Value equality
 }
 ```

@@ -1,0 +1,96 @@
+{{- if .Values.rabbitmq.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-rabbitmq
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.rabbitmq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.rabbitmq.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "billing-service.rabbitmq.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "billing-service.rabbitmq.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.rabbitmq.priorityClassName }}
+      priorityClassName: {{ .Values.rabbitmq.priorityClassName }}
+      {{- end }}
+      containers:
+      - name: rabbitmq
+        image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}"
+        imagePullPolicy: {{ .Values.rabbitmq.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.rabbitmq.service.amqpPort }}
+          name: amqp
+        - containerPort: {{ .Values.rabbitmq.service.managementPort }}
+          name: management
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: IQSCAFFOLD_RABBITMQ_USERNAME
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: IQSCAFFOLD_RABBITMQ_PASSWORD
+        - name: RABBITMQ_DEFAULT_VHOST
+          value: {{ .Values.rabbitmq.env.RABBITMQ_DEFAULT_VHOST }}
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+        resources:
+          {{- toYaml .Values.rabbitmq.resources | nindent 10 }}
+        {{- if .Values.rabbitmq.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.rabbitmq.livenessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.rabbitmq.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.rabbitmq.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.rabbitmq.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.rabbitmq.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.rabbitmq.readinessProbe.enabled }}
+        readinessProbe:
+          exec:
+            command:
+            {{- toYaml .Values.rabbitmq.readinessProbe.command | nindent 12 }}
+          initialDelaySeconds: {{ .Values.rabbitmq.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.rabbitmq.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.rabbitmq.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.rabbitmq.readinessProbe.failureThreshold }}
+        {{- end }}
+      volumes:
+      - name: rabbitmq-data
+        {{- if .Values.rabbitmq.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: billing-rabbitmq-pvc
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+---
+{{- if .Values.rabbitmq.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: billing-rabbitmq-pvc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.rabbitmq.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.rabbitmq.persistence.accessModes | nindent 4 }}
+  {{- if .Values.rabbitmq.persistence.storageClass }}
+  storageClassName: {{ .Values.rabbitmq.persistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.rabbitmq.persistence.size }}
+{{- end }}
+{{- end }}

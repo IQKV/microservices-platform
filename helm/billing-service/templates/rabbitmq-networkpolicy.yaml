@@ -1,0 +1,17 @@
+{{- if and .Values.rabbitmq.enabled .Values.rabbitmq.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: billing-rabbitmq-netpol
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "billing-service.rabbitmq.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "billing-service.rabbitmq.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+  {{- toYaml .Values.rabbitmq.networkPolicy.ingress | nindent 2 }}
+{{- end }}

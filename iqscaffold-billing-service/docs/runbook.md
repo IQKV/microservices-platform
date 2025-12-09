@@ -20,11 +20,13 @@ This runbook provides step-by-step procedures for common operational tasks, trou
 ### Check Service Status
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/health
 ```
 
 **Expected Response**:
+
 ```json
 {
   "status": "UP",
@@ -40,6 +42,7 @@ curl http://localhost:8082/actuator/health
 ### Check Database Connectivity
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/health/db
 ```
@@ -47,6 +50,7 @@ curl http://localhost:8082/actuator/health/db
 ### Check Redis Connectivity
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/health/redis
 ```
@@ -54,6 +58,7 @@ curl http://localhost:8082/actuator/health/redis
 ### Check RabbitMQ Connectivity
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/health/rabbitmq
 ```
@@ -61,6 +66,7 @@ curl http://localhost:8082/actuator/health/rabbitmq
 ### View Metrics
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/metrics
 ```
@@ -68,6 +74,7 @@ curl http://localhost:8082/actuator/metrics
 ### View Prometheus Metrics
 
 **Command**:
+
 ```bash
 curl http://localhost:8082/actuator/prometheus
 ```
@@ -273,23 +280,27 @@ curl -X PUT http://localhost:8082/api/v1/admin/plans/{id} \
 ### Issue: Payment Processing Failures
 
 **Symptoms**:
+
 - Payments failing with "payment_failed" error
 - High rate of payment failures in logs
 
 **Diagnosis**:
 
 1. Check payment provider status:
+
 ```bash
 curl https://status.stripe.com
 ```
 
 2. Review recent payment failures:
+
 ```bash
 curl http://localhost:8082/api/v1/admin/payments?status=FAILED&limit=50 \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 3. Check payment provider credentials:
+
 ```bash
 # Verify environment variables
 echo $STRIPE_API_KEY
@@ -299,6 +310,7 @@ echo $STRIPE_WEBHOOK_SECRET
 **Resolution**:
 
 1. If provider is down, enable circuit breaker:
+
 ```bash
 # Update configuration
 curl -X POST http://localhost:8082/actuator/circuitbreaker/stripe/open \
@@ -306,6 +318,7 @@ curl -X POST http://localhost:8082/actuator/circuitbreaker/stripe/open \
 ```
 
 2. If credentials are invalid, update secrets:
+
 ```bash
 # Update Kubernetes secret
 kubectl create secret generic billing-secrets \
@@ -317,6 +330,7 @@ kubectl rollout restart deployment/billing-service
 ```
 
 3. Retry failed payments:
+
 ```bash
 curl -X POST http://localhost:8082/api/v1/admin/payments/retry-failed \
   -H "Authorization: Bearer $ADMIN_TOKEN"
@@ -325,22 +339,26 @@ curl -X POST http://localhost:8082/api/v1/admin/payments/retry-failed \
 ### Issue: Quota Check Failures
 
 **Symptoms**:
+
 - Services reporting quota check errors
 - High latency on quota check endpoints
 
 **Diagnosis**:
 
 1. Check Redis connectivity:
+
 ```bash
 redis-cli -h localhost -p 6379 ping
 ```
 
 2. Check Redis memory usage:
+
 ```bash
 redis-cli -h localhost -p 6379 info memory
 ```
 
 3. Review quota check logs:
+
 ```bash
 kubectl logs -l app=billing-service --tail=100 | grep "quota.check"
 ```
@@ -348,17 +366,20 @@ kubectl logs -l app=billing-service --tail=100 | grep "quota.check"
 **Resolution**:
 
 1. If Redis is down, restart Redis:
+
 ```bash
 kubectl rollout restart statefulset/redis
 ```
 
 2. If Redis is out of memory, increase memory limit:
+
 ```bash
 kubectl edit statefulset/redis
 # Update memory limits
 ```
 
 3. Clear quota cache if stale:
+
 ```bash
 redis-cli -h localhost -p 6379 FLUSHDB
 ```
@@ -366,23 +387,27 @@ redis-cli -h localhost -p 6379 FLUSHDB
 ### Issue: Invoice Generation Failures
 
 **Symptoms**:
+
 - Invoices not being generated
 - Scheduled job failures in logs
 
 **Diagnosis**:
 
 1. Check scheduled job status:
+
 ```bash
 curl http://localhost:8082/actuator/scheduledtasks \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 2. Review invoice generation logs:
+
 ```bash
 kubectl logs -l app=billing-service --tail=100 | grep "invoice.generation"
 ```
 
 3. Check database connectivity:
+
 ```bash
 psql -h localhost -U billing_user -d billing_db -c "SELECT 1"
 ```
@@ -390,6 +415,7 @@ psql -h localhost -U billing_user -d billing_db -c "SELECT 1"
 **Resolution**:
 
 1. Manually trigger invoice generation:
+
 ```bash
 curl -X POST http://localhost:8082/api/v1/admin/invoices/generate-batch \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
@@ -401,11 +427,13 @@ curl -X POST http://localhost:8082/api/v1/admin/invoices/generate-batch \
 ```
 
 2. If database connection issues, check connection pool:
+
 ```bash
 curl http://localhost:8082/actuator/metrics/hikaricp.connections.active
 ```
 
 3. Restart service if needed:
+
 ```bash
 kubectl rollout restart deployment/billing-service
 ```
@@ -413,22 +441,26 @@ kubectl rollout restart deployment/billing-service
 ### Issue: Webhook Processing Delays
 
 **Symptoms**:
+
 - Webhooks timing out
 - Payment status not updating
 
 **Diagnosis**:
 
 1. Check RabbitMQ queue depth:
+
 ```bash
 rabbitmqctl list_queues name messages
 ```
 
 2. Review webhook processing logs:
+
 ```bash
 kubectl logs -l app=billing-service --tail=100 | grep "webhook"
 ```
 
 3. Check webhook consumer status:
+
 ```bash
 curl http://localhost:8082/actuator/health/rabbitmq
 ```
@@ -436,16 +468,19 @@ curl http://localhost:8082/actuator/health/rabbitmq
 **Resolution**:
 
 1. Scale up webhook consumers:
+
 ```bash
 kubectl scale deployment/billing-service --replicas=3
 ```
 
 2. Purge dead letter queue if needed:
+
 ```bash
 rabbitmqctl purge_queue billing.webhooks.dlq
 ```
 
 3. Replay failed webhooks:
+
 ```bash
 curl -X POST http://localhost:8082/api/v1/admin/webhooks/replay \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
@@ -507,6 +542,7 @@ curl -X POST http://localhost:8082/api/v1/admin/webhooks/replay \
 **Response Steps**:
 
 1. **Immediate Action**:
+
 ```bash
 # Check connection pool metrics
 curl http://localhost:8082/actuator/metrics/hikaricp.connections.active
@@ -517,12 +553,13 @@ kubectl set env deployment/billing-service \
 ```
 
 2. **Identify Root Cause**:
+
 ```bash
 # Check for long-running queries
 psql -h localhost -U billing_user -d billing_db -c \
-  "SELECT pid, now() - query_start as duration, query 
-   FROM pg_stat_activity 
-   WHERE state = 'active' 
+  "SELECT pid, now() - query_start as duration, query
+   FROM pg_stat_activity
+   WHERE state = 'active'
    ORDER BY duration DESC;"
 ```
 
@@ -540,6 +577,7 @@ psql -h localhost -U billing_user -d billing_db -c \
 **Response Steps**:
 
 1. **Monitor**:
+
 ```bash
 # Check memory usage
 curl http://localhost:8082/actuator/metrics/jvm.memory.used
@@ -549,6 +587,7 @@ kubectl exec -it billing-service-pod -- jmap -heap 1
 ```
 
 2. **Analyze**:
+
 ```bash
 # Generate heap dump
 kubectl exec -it billing-service-pod -- \
@@ -573,23 +612,27 @@ kubectl exec -it billing-service-pod -- \
 **Procedure**:
 
 1. Create backup:
+
 ```bash
 pg_dump -h localhost -U billing_user -d billing_db \
   -F c -f billing_backup_$(date +%Y%m%d).dump
 ```
 
 2. Verify backup:
+
 ```bash
 pg_restore --list billing_backup_$(date +%Y%m%d).dump
 ```
 
 3. Upload to S3:
+
 ```bash
 aws s3 cp billing_backup_$(date +%Y%m%d).dump \
   s3://iqscaffold-backups/billing/
 ```
 
 4. Verify upload:
+
 ```bash
 aws s3 ls s3://iqscaffold-backups/billing/
 ```
@@ -601,12 +644,14 @@ aws s3 ls s3://iqscaffold-backups/billing/
 1. Backup database (see above)
 
 2. Test migration in staging:
+
 ```bash
 # Run Liquibase update
 ./mvnw liquibase:update -Dspring.profiles.active=staging
 ```
 
 3. Verify migration:
+
 ```bash
 # Check changelog
 psql -h localhost -U billing_user -d billing_db -c \
@@ -614,11 +659,13 @@ psql -h localhost -U billing_user -d billing_db -c \
 ```
 
 4. Deploy to production:
+
 ```bash
 kubectl apply -f k8s/billing-service-deployment.yaml
 ```
 
 5. Monitor for errors:
+
 ```bash
 kubectl logs -f -l app=billing-service
 ```
@@ -628,16 +675,19 @@ kubectl logs -f -l app=billing-service
 **Procedure**:
 
 1. Identify cache keys to invalidate:
+
 ```bash
 redis-cli -h localhost -p 6379 KEYS "billing:*"
 ```
 
 2. Invalidate specific cache:
+
 ```bash
 redis-cli -h localhost -p 6379 DEL "billing:subscription:123"
 ```
 
 3. Invalidate all billing caches:
+
 ```bash
 redis-cli -h localhost -p 6379 EVAL \
   "return redis.call('del', unpack(redis.call('keys', 'billing:*')))" 0
@@ -648,16 +698,19 @@ redis-cli -h localhost -p 6379 EVAL \
 **Procedure**:
 
 1. Check log size:
+
 ```bash
 du -sh /var/log/billing-service/
 ```
 
 2. Rotate logs:
+
 ```bash
 logrotate -f /etc/logrotate.d/billing-service
 ```
 
 3. Verify rotation:
+
 ```bash
 ls -lh /var/log/billing-service/
 ```

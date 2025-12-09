@@ -1,0 +1,97 @@
+# Test environment values for billing-service
+# Override default values for test/QA deployment
+
+global:
+  environment: test
+
+namespace:
+  name: iqscaffold-test-env
+  labels:
+    environment: test
+
+# Single replica for test environment
+replicaCount: 1
+
+image:
+  tag: "test-latest"
+  pullPolicy: Always
+
+# Disable autoscaling for test
+autoscaling:
+  enabled: false
+
+# Disable PDB for test
+podDisruptionBudget:
+  enabled: false
+
+# Test resource allocation (minimal)
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Environment variables for test
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "test"
+  - name: IQSCAFFOLD_DATABASE_URL
+    value: "jdbc:postgresql://billing-postgres-test:5432/iqscaffold_billing_test"
+  - name: IQSCAFFOLD_CACHE_REDIS_HOST
+    value: "billing-redis-test"
+  - name: IQSCAFFOLD_RABBITMQ_HOST
+    value: "billing-rabbitmq-test"
+  - name: IQSCAFFOLD_BILLING_SECURITY_JWT_JWK_SET_URI
+    value: "http://user-service-test:8081/.well-known/jwks.json"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_USER_SERVICE_URL
+    value: "http://user-service-test:8081"
+  - name: IQSCAFFOLD_BILLING_INTEGRATION_EMAIL_SERVICE_URL
+    value: "http://email-service-test:8084"
+  - name: IQSCAFFOLD_BILLING_PAYMENT_PROVIDER
+    value: "manual" # Use manual payment provider for testing
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.name=iqscaffold-billing-service,service.version=1.0.0,deployment.environment=test"
+  - name: JAVA_OPTS
+    value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+# PostgreSQL test configuration
+postgresql:
+  persistence:
+    size: 5Gi
+  env:
+    POSTGRES_DB: iqscaffold_billing_test
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# Redis test configuration
+redis:
+  persistence:
+    size: 1Gi
+  config:
+    maxmemory: "128mb"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# RabbitMQ test configuration
+rabbitmq:
+  persistence:
+    size: 2Gi
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"

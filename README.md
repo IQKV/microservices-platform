@@ -79,7 +79,7 @@ Subscription billing and usage metering service.
 - Subscription state machine with validated transitions
 - Proration calculations for mid-cycle plan changes
 - Financial precision with 2 decimal places and HALF_UP rounding
-- Quota enforcement with grace period (graceLimit = baseLimit * 1.05)
+- Quota enforcement with grace period (graceLimit = baseLimit \* 1.05)
 - Scheduled jobs for renewals, retries, and cleanup
 - GDPR compliance with data export and deletion
 
