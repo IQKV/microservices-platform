@@ -51,6 +51,114 @@ spring:
             - Path=/actuator/health
           filters:
             - StripPrefix=0
+        
+        # Billing Service Routes
+        - id: billing-service-webhooks
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/webhooks/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+        - id: billing-service-plans-public
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/plans,/api/v1/billing/plans/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-portal
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/portal/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-subscriptions
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/subscriptions/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-invoices
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/invoices/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-payments
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/payments/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-payment-methods
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/payment-methods/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-usage
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/usage/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-compliance
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/compliance/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-admin
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/admin/billing/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-internal
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/internal/billing/**
+          filters:
+            - StripPrefix=0
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
 
 # IQ Scaffold Gateway Configuration
 iqscaffold:
@@ -89,6 +197,17 @@ iqscaffold:
             display-name: "User Service APIs"
             description: "Authentication and user management APIs"
             context-path: "user-service"
+        billing-service:
+          uri: ${BILLING_SERVICE_URL:http://localhost:8082}
+          path: /v1/**
+          enabled: ${BILLING_SERVICE_ENABLED:true}
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Billing Service APIs"
+            description: "Subscription, billing, and payment management APIs"
+            context-path: "billing-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -132,6 +251,11 @@ iqscaffold:
         - /actuator/health
         - /actuator/info
         
+        # Billing Service public endpoints
+        - /api/v1/billing/plans
+        - /api/v1/billing/plans/**
+        - /api/v1/billing/webhooks/**
+        
         # API Documentation endpoints (public in development)
         - /api/v1/docs
         - /swagger-ui/**
@@ -140,6 +264,8 @@ iqscaffold:
         - /user-service/api-docs/**
         - /business-service/swagger-ui/**
         - /business-service/api-docs/**
+        - /billing-service/swagger-ui/**
+        - /billing-service/api-docs/**
         
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)
@@ -209,6 +335,46 @@ iqscaffold:
             requests-per-minute: 100
             burst-capacity: 150
             enable-tenant-quotas: true
+          "/api/v1/billing/portal/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscriptions/**":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: true
+          "/api/v1/billing/invoices/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/billing/payments/**":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: true
+          "/api/v1/billing/payment-methods/**":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: true
+          "/api/v1/billing/usage/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: true
+          "/api/v1/billing/compliance/**":
+            requests-per-minute: 10
+            burst-capacity: 15
+            enable-tenant-quotas: true
+          "/api/v1/billing/webhooks/**":
+            requests-per-minute: 100
+            burst-capacity: 200
+            enable-tenant-quotas: false
+          "/api/v1/admin/billing/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/internal/billing/**":
+            requests-per-minute: 500
+            burst-capacity: 750
+            enable-tenant-quotas: false
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000

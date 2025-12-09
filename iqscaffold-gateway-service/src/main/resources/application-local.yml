@@ -68,6 +68,17 @@ iqscaffold:
             display-name: "User Service APIs"
             description: "Authentication and user management APIs"
             context-path: "user-service"
+        billing-service:
+          uri: ${BILLING_SERVICE_URL:http://localhost:8082}
+          path: /v1/**
+          enabled: ${BILLING_SERVICE_ENABLED:true}
+          connect-timeout: 10000  # Extended for development
+          response-timeout: 60000  # Extended for development
+          openapi:
+            enabled: true
+            display-name: "Billing Service APIs"
+            description: "Subscription, billing, and payment management APIs"
+            context-path: "billing-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -115,6 +126,13 @@ iqscaffold:
         - /api-docs/**
         - /user-service/swagger-ui/**
         - /user-service/api-docs/**
+        - /billing-service/swagger-ui/**
+        - /billing-service/api-docs/**
+        
+        # Billing Service public endpoints
+        - /api/v1/billing/plans
+        - /api/v1/billing/plans/**
+        - /api/v1/billing/webhooks/**
 
     
     rate-limiting:
@@ -169,6 +187,46 @@ iqscaffold:
           "/api/v1/users/me/password":
             requests-per-minute: 10
             burst-capacity: 20
+            enable-tenant-quotas: false
+          "/api/v1/billing/portal/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/billing/subscriptions/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: false
+          "/api/v1/billing/invoices/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/api/v1/billing/payments/**":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: false
+          "/api/v1/billing/payment-methods/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: false
+          "/api/v1/billing/usage/**":
+            requests-per-minute: 500
+            burst-capacity: 750
+            enable-tenant-quotas: false
+          "/api/v1/billing/compliance/**":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: false
+          "/api/v1/billing/webhooks/**":
+            requests-per-minute: 200
+            burst-capacity: 400
+            enable-tenant-quotas: false
+          "/api/v1/admin/billing/**":
+            requests-per-minute: 200
+            burst-capacity: 300
+            enable-tenant-quotas: false
+          "/internal/billing/**":
+            requests-per-minute: 1000
+            burst-capacity: 1500
             enable-tenant-quotas: false
       tenant-quotas:
         enabled: false  # Disabled for development
@@ -230,7 +288,7 @@ iqscaffold:
     
     # Integration with external services - Local
     integration:
-      billing-service-enabled: ${BILLING_SERVICE_ENABLED:false}  # Disabled by default in local
+      billing-service-enabled: ${BILLING_SERVICE_ENABLED:true}  # Enabled by default in local
       billing-service-url: ${BILLING_SERVICE_URL:http://localhost:8082}
       billing-service-timeout: PT10S  # Extended for development
     
