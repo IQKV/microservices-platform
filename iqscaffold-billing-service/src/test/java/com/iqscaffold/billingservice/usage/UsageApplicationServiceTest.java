@@ -312,7 +312,7 @@ class UsageApplicationServiceTest {
       assertThat(result).isNotNull();
       assertThat(result.tenantId()).isEqualTo(testTenantId);
       assertThat(result.metrics()).hasSize(1);
-      verify(subscriptionRepository).findActiveByTenantId(testTenantId);
+      verify(subscriptionRepository, times(2)).findActiveByTenantId(testTenantId);
       verify(usageRecordRepository).aggregateUsageByMetricType(
           eq(testTenantId), any(LocalDateTime.class), any(LocalDateTime.class));
     }
@@ -515,7 +515,7 @@ class UsageApplicationServiceTest {
       when(quotaEnforcer.checkQuota(
           eq(testSubscription), eq(MetricType.API_CALLS), eq(10000L), eq(100L)))
           .thenReturn(quotaResult);
-      when(messageService.getMessage(anyString(), (Object[]) any()))
+      when(messageService.getMessage(eq("usage.quota.exceeded"), any(), any(), any()))
           .thenReturn("Quota exceeded");
 
       // Act & Assert

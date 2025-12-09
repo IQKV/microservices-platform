@@ -199,6 +199,7 @@ class SubscriptionApplicationServiceTest {
           .thenReturn(Optional.of(testPlan));
       when(tenantTrialHistoryRepository.findByTenantId(testTenantId))
           .thenReturn(Optional.of(trialHistory));
+      when(trialEligibilitySpecification.isSatisfiedBy(trialHistory)).thenReturn(true);
       when(subscriptionFactory.createTrialSubscription(testTenantId, testUserId, testPlan, trialHistory))
           .thenReturn(testSubscription);
       when(subscriptionRepository.save(any(Subscription.class))).thenReturn(testSubscription);

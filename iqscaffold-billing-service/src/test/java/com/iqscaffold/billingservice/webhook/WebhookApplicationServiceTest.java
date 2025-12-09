@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iqscaffold.billingservice.TestEntityUtils;
 import com.iqscaffold.billingservice.invoice.Invoice;
+import com.iqscaffold.billingservice.invoice.InvoiceLineItem;
 import com.iqscaffold.billingservice.invoice.InvoiceRepository;
 import com.iqscaffold.billingservice.payment.Payment;
 import com.iqscaffold.billingservice.payment.PaymentProviderAdapter;
@@ -138,6 +139,12 @@ class WebhookApplicationServiceTest {
         30
     );
     TestEntityUtils.setId(testInvoice, 1L);
+    // Add a line item and finalize the invoice so it can be marked as paid
+    testInvoice.addLineItem(InvoiceLineItem.subscriptionFee(
+        "Pro Plan - Monthly",
+        new BigDecimal("49.99")
+    ));
+    testInvoice.finalize();
 
     testPayment = new Payment(
         testInvoice,

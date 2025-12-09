@@ -63,8 +63,7 @@ import java.math.BigDecimal;
  * @see PaymentMethodDetails
  * @see CustomerUpdateRequest
  */
-public sealed interface PaymentProviderAdapter 
-    permits StripePaymentProvider, PayPalPaymentProvider, ManualPaymentProvider {
+public interface PaymentProviderAdapter {
     
     /**
      * Creates a customer in the payment provider system.

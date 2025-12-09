@@ -160,14 +160,14 @@ public class UsageApplicationService {
       final UUID tenantId,
       final List<UsageRecordRequest> usageRecords) {
 
-    log.info("Recording usage batch for tenant: {}, count: {}",
-        tenantId, usageRecords.size());
-
     validateTenantId(tenantId);
 
     if (usageRecords == null || usageRecords.isEmpty()) {
       throw new IllegalArgumentException("Usage records list cannot be empty");
     }
+
+    log.info("Recording usage batch for tenant: {}, count: {}",
+        tenantId, usageRecords.size());
 
     // Find active subscription
     var subscription = subscriptionRepository.findActiveByTenantId(tenantId)

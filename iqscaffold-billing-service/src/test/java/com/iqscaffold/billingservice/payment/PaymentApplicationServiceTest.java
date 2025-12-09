@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,14 +13,21 @@ import static org.mockito.Mockito.when;
 
 import com.iqscaffold.billingservice.TestEntityUtils;
 import com.iqscaffold.billingservice.invoice.Invoice;
+import com.iqscaffold.billingservice.invoice.InvoiceLineItem;
 import com.iqscaffold.billingservice.invoice.InvoiceRepository;
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethodRepository;
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethodType;
+import com.iqscaffold.billingservice.plan.BillingCycle;
+import com.iqscaffold.billingservice.plan.PlanQuotas;
+import com.iqscaffold.billingservice.plan.PlanTier;
+import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.shared.event.DomainEventPublisher;
 import com.iqscaffold.billingservice.shared.exception.InvoiceException;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
+import com.iqscaffold.billingservice.subscription.Subscription;
 import java.math.BigDecimal;
+import java.util.Map;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -102,8 +110,30 @@ class PaymentApplicationServiceTest {
     TestEntityUtils.setId(testPaymentMethod, 1L);
     testPaymentMethod.setCardDetails("4242", "Visa", 12, 2025);
 
+    // Create a subscription and plan for the invoice
+    PlanQuotas testQuotas = new PlanQuotas(
+        100L, 50L, 10000L, 5000L, 100L, 1000L, 5L, 10L
+    );
+    SubscriptionPlan testPlan = SubscriptionPlan.create(
+        "PRO_MONTHLY",
+        "Pro Plan",
+        "Professional features",
+        PlanTier.PRO,
+        BillingCycle.MONTHLY,
+        new BigDecimal("49.99"),
+        "USD",
+        Map.of("advanced_workflows", true),
+        testQuotas,
+        14,
+        true
+    );
+    TestEntityUtils.setId(testPlan, 1L);
+
+    Subscription testSubscription = Subscription.createActive(testTenantId, testUserId, testPlan);
+    TestEntityUtils.setId(testSubscription, 1L);
+
     testInvoice = Invoice.createDraft(
-        null,
+        testSubscription,
         testTenantId,
         "INV-001",
         "USD",
@@ -112,6 +142,11 @@ class PaymentApplicationServiceTest {
         30
     );
     TestEntityUtils.setId(testInvoice, 1L);
+    // Add a line item so the invoice has a non-zero amount
+    testInvoice.addLineItem(InvoiceLineItem.subscriptionFee(
+        "Pro Plan - Monthly",
+        new BigDecimal("49.99")
+    ));
 
     testPayment = new Payment(
         testInvoice,
@@ -122,7 +157,7 @@ class PaymentApplicationServiceTest {
     );
     TestEntityUtils.setId(testPayment, 1L);
 
-    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
   }
 
   @Nested
@@ -514,8 +549,21 @@ class PaymentApplicationServiceTest {
           java.time.LocalDateTime.now()
       );
 
+      // Create a new payment object for the retry (simulating what the service does)
+      Payment retryPayment = new Payment(
+          testInvoice,
+          testTenantId,
+          new BigDecimal("49.99"),
+          "USD",
+          testPaymentMethod
+      );
+      TestEntityUtils.setId(retryPayment, 2L);
+
       when(paymentRepository.findById(1L)).thenReturn(Optional.of(testPayment));
-      when(paymentRepository.save(any(Payment.class))).thenReturn(testPayment);
+      when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> {
+        Payment savedPayment = invocation.getArgument(0);
+        return savedPayment;
+      });
       when(paymentProviderFactory.getProvider()).thenReturn(paymentProviderAdapter);
       when(paymentProviderAdapter.processPayment(
           anyString(),
