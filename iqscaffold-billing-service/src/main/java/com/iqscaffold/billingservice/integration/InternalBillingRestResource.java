@@ -1,5 +1,9 @@
 package com.iqscaffold.billingservice.integration;
 
+import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.subscription.SubscriptionApplicationService;
 import com.iqscaffold.billingservice.usage.UsageApplicationService;
@@ -12,13 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for internal billing integration endpoints.
- * 
+ *
  * <p>This controller provides simple REST APIs that business microservices
  * (CRM, Campaign Service, Email Sender, Scoring Service, etc.) can call to:
  * <ul>
@@ -40,45 +39,45 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Record usage for billing and quota tracking</li>
  *   <li>Get current plan details with features and quotas</li>
  * </ul>
- * 
+ *
  * <p>These endpoints are designed for service-to-service communication and require
  * JWT authentication. They are optimized for low latency with Redis caching.
- * 
+ *
  * <p>Integration Pattern:
  * <pre>{@code
  * // In CRM Service - before creating a contact
  * @Service
  * public class ContactService {
  *     private final BillingClient billingClient;
- *     
+ *
  *     public Contact createContact(String tenantId, ContactRequest request) {
  *         // Check subscription status
  *         SubscriptionStatus status = billingClient.getSubscriptionStatus(tenantId);
  *         if (!status.isActive()) {
  *             throw new SubscriptionInactiveException("Please renew your subscription");
  *         }
- *         
+ *
  *         // Check quota
  *         QuotaCheckResult quota = billingClient.checkQuota(tenantId, "CONTACTS", 1);
  *         if (!quota.isAvailable()) {
  *             throw new QuotaExceededException("Contact limit reached. Upgrade your plan.");
  *         }
- *         
+ *
  *         // Create contact
  *         Contact contact = contactRepository.save(new Contact(request));
- *         
+ *
  *         // Record usage
  *         billingClient.recordUsage(tenantId, "CONTACTS", 1);
- *         
+ *
  *         return contact;
  *     }
  * }
  * }</pre>
- * 
+ *
  * <p>Design Rationale: These internal endpoints enable easy integration of billing
  * restrictions across all platform services without tight coupling. Services can
  * enforce quotas and feature access with simple REST calls.
- * 
+ *
  * @see SubscriptionApplicationService
  * @see UsageApplicationService
  */
@@ -110,12 +109,12 @@ public class InternalBillingRestResource {
 
   /**
    * Gets subscription status for a tenant.
-   * 
+   *
    * <p>Returns essential subscription information including status, plan tier,
    * and billing period. Used by services to determine if tenant has active subscription.
-   * 
+   *
    * <p>Results are cached in Redis with 5-minute TTL to minimize database queries.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return subscription status information
    */
@@ -207,10 +206,10 @@ public class InternalBillingRestResource {
 
   /**
    * Gets plan details with features and quotas for a tenant.
-   * 
+   *
    * <p>Returns comprehensive plan information including all features and quota limits.
    * Used by services to understand what capabilities are available.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return plan details with features and quotas
    */
@@ -296,12 +295,12 @@ public class InternalBillingRestResource {
 
   /**
    * Checks if a tenant has access to a specific feature.
-   * 
+   *
    * <p>Verifies if the tenant's subscription plan includes the requested feature.
    * Returns detailed information including upgrade URL if feature not available.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param request feature check request
+   * @param request  feature check request
    * @return feature access information
    */
   @PostMapping("/subscriptions/{tenantId}/check-feature")
@@ -386,15 +385,15 @@ public class InternalBillingRestResource {
 
   /**
    * Checks if a tenant has quota available for an operation.
-   * 
+   *
    * <p>Verifies if the tenant has sufficient quota before performing an operation.
    * Returns detailed quota information including current usage and remaining quota.
-   * 
+   *
    * <p>Results are cached for 1 minute to reduce database load while maintaining
    * reasonable accuracy for quota enforcement.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param request quota check request
+   * @param request  quota check request
    * @return quota availability information
    */
   @PostMapping("/usage/{tenantId}/check-quota")
@@ -475,7 +474,7 @@ public class InternalBillingRestResource {
 
     var message = quotaUsage.allowed()
         ? messageService.getMessage("quota.available",
-            quotaUsage.remainingQuota(), request.metricType().name(), quotaUsage.percentageUsed())
+        quotaUsage.remainingQuota(), request.metricType().name(), quotaUsage.percentageUsed())
         : messageService.getMessage("quota.exceeded",
             request.metricType().name(), quotaUsage.currentUsage(), quotaUsage.limit());
 
@@ -495,15 +494,15 @@ public class InternalBillingRestResource {
 
   /**
    * Records usage for billing and quota tracking.
-   * 
+   *
    * <p>Records usage metrics for a tenant. In production, this would publish to
    * RabbitMQ for async processing to handle high volume (10,000+ records/sec).
    * For now, it processes synchronously and returns updated quota information.
-   * 
+   *
    * <p>Idempotency: Usage records are idempotent based on record ID to prevent duplicates.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param request usage recording request
+   * @param request  usage recording request
    * @return usage recording confirmation with updated quota
    */
   @PostMapping("/usage/{tenantId}/record")

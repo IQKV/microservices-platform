@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,11 +14,11 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for Payment aggregate.
- * 
+ *
  * <p>This repository provides methods to query and persist payment aggregates.
  * All queries return fully reconstituted aggregates with their associated invoice
  * and payment method data.
- * 
+ *
  * <p>Uses text blocks (Java 21) for multi-line JPQL queries to improve readability.
  */
 @Repository
@@ -25,7 +26,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds a payment by its provider payment ID.
-   * 
+   *
    * @param providerPaymentId payment identifier from payment provider
    * @return optional containing the payment, or empty if not found
    */
@@ -41,7 +42,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds all payments for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @param pageable pagination information
    * @return page of payments ordered by creation date descending
@@ -62,7 +63,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds payments by invoice.
-   * 
+   *
    * @param invoiceId invoice identifier
    * @return list of payments for the invoice ordered by creation date descending
    */
@@ -79,8 +80,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds payments by status.
-   * 
-   * @param status payment status
+   *
+   * @param status   payment status
    * @param pageable pagination information
    * @return page of payments with the specified status
    */
@@ -100,9 +101,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds payments by tenant and status.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param status payment status
+   * @param status   payment status
    * @param pageable pagination information
    * @return page of payments matching criteria
    */
@@ -125,7 +126,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
   /**
    * Finds failed payments eligible for retry.
    * Returns payments in FAILED status created within the retry window.
-   * 
+   *
    * @param retryAfter earliest creation date for retry eligibility
    * @return list of failed payments eligible for retry
    */
@@ -143,7 +144,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds the most recent payment for an invoice.
-   * 
+   *
    * @param invoiceId invoice identifier
    * @return optional containing the most recent payment, or empty if none exists
    */
@@ -162,10 +163,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
   /**
    * Finds successful payments for a tenant within a date range.
    * Used for revenue reporting and analytics.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId  tenant identifier
    * @param startDate start of date range
-   * @param endDate end of date range
+   * @param endDate   end of date range
    * @return list of successful payments in the date range
    */
   @Query("""
@@ -188,7 +189,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds payments by payment method.
-   * 
+   *
    * @param paymentMethodId payment method identifier
    * @return list of payments using the payment method
    */
@@ -205,7 +206,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Counts failed payments for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return number of failed payments
    */
@@ -218,7 +219,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Calculates total successful payment amount for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return sum of amounts for successful payments
    */
@@ -232,7 +233,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
   /**
    * Calculates payment success rate for a tenant.
    * Returns the percentage of successful payments.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return success rate as a decimal (0.0 to 1.0)
    */
@@ -248,7 +249,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
   /**
    * Checks if a provider payment ID already exists.
    * Used for idempotency checking.
-   * 
+   *
    * @param providerPaymentId provider payment identifier
    * @return true if payment exists
    */
@@ -261,7 +262,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds all payments for a tenant (without pagination).
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of payments ordered by creation date descending
    */
@@ -278,7 +279,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
   /**
    * Finds all payments for a tenant (for GDPR export).
-   * 
+   *
    * @param tenantId tenant identifier as string
    * @return list of all payments for the tenant
    */

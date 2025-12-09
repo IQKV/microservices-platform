@@ -7,10 +7,10 @@ import java.math.RoundingMode;
 
 /**
  * Immutable value object representing the result of a proration calculation.
- * 
+ *
  * <p>Encapsulates the financial details when a subscription plan changes mid-period,
  * including credits for unused time on the old plan and charges for the new plan.
- * 
+ *
  * <p>Proration ensures fair billing when customers upgrade or downgrade their
  * subscription plans. The calculation considers:
  * <ul>
@@ -20,14 +20,14 @@ import java.math.RoundingMode;
  *   <li>Credit for unused time on the old plan</li>
  *   <li>Charge for the new plan for the remaining period</li>
  * </ul>
- * 
+ *
  * <p>As a Java record, this class is:
  * <ul>
  *   <li>Immutable - all fields are final</li>
  *   <li>Value-based - equality based on field values</li>
  *   <li>Compact - automatic constructor, getters, equals, hashCode, toString</li>
  * </ul>
- * 
+ *
  * <p>Usage example:
  * <pre>{@code
  * ProrationResult result = prorationCalculator.calculate(
@@ -35,7 +35,7 @@ import java.math.RoundingMode;
  *   newPlan,
  *   LocalDateTime.now()
  * );
- * 
+ *
  * if (result.isUpgrade()) {
  *   // Customer owes additional amount
  *   invoice.addLineItem(
@@ -46,14 +46,13 @@ import java.math.RoundingMode;
  *   );
  * }
  * }</pre>
- * 
- * @param creditAmount amount credited for unused time on old plan (always non-negative)
- * @param chargeAmount amount charged for new plan for remaining period (always non-negative)
- * @param netAmount net amount to charge (chargeAmount - creditAmount)
+ *
+ * @param creditAmount  amount credited for unused time on old plan (always non-negative)
+ * @param chargeAmount  amount charged for new plan for remaining period (always non-negative)
+ * @param netAmount     net amount to charge (chargeAmount - creditAmount)
  * @param daysRemaining number of days remaining in the current billing period
- * @param daysInPeriod total number of days in the billing period
- * @param description human-readable description of the proration
- * 
+ * @param daysInPeriod  total number of days in the billing period
+ * @param description   human-readable description of the proration
  * @see com.iqscaffold.billingservice.invoice.InvoiceLineItem
  */
 public record ProrationResult(
@@ -80,13 +79,13 @@ public record ProrationResult(
 
   /**
    * Compact constructor with validation and calculation.
-   * 
-   * @param creditAmount credit for unused time
-   * @param chargeAmount charge for new plan
-   * @param netAmount net amount to charge
+   *
+   * @param creditAmount  credit for unused time
+   * @param chargeAmount  charge for new plan
+   * @param netAmount     net amount to charge
    * @param daysRemaining days remaining in period
-   * @param daysInPeriod total days in period
-   * @param description proration description
+   * @param daysInPeriod  total days in period
+   * @param description   proration description
    * @throws IllegalArgumentException if validation fails
    */
   public ProrationResult {
@@ -150,17 +149,17 @@ public record ProrationResult(
 
   /**
    * Factory method to create a proration result for an upgrade scenario.
-   * 
+   *
    * <p>In an upgrade, the customer receives credit for unused time on the old plan
    * and is charged for the new plan for the remaining period. The net amount is
    * typically positive (customer owes money).
-   * 
-   * @param oldPlanPrice price of the old plan
-   * @param newPlanPrice price of the new plan
+   *
+   * @param oldPlanPrice  price of the old plan
+   * @param newPlanPrice  price of the new plan
    * @param daysRemaining days remaining in the billing period
-   * @param daysInPeriod total days in the billing period
-   * @param oldPlanName name of the old plan
-   * @param newPlanName name of the new plan
+   * @param daysInPeriod  total days in the billing period
+   * @param oldPlanName   name of the old plan
+   * @param newPlanName   name of the new plan
    * @return a ProrationResult for the upgrade
    */
   public static ProrationResult forUpgrade(
@@ -206,17 +205,17 @@ public record ProrationResult(
 
   /**
    * Factory method to create a proration result for a downgrade scenario.
-   * 
+   *
    * <p>In a downgrade, the customer receives credit for unused time on the old plan
    * and is charged for the new plan for the remaining period. The net amount is
    * typically negative (customer receives credit).
-   * 
-   * @param oldPlanPrice price of the old plan
-   * @param newPlanPrice price of the new plan
+   *
+   * @param oldPlanPrice  price of the old plan
+   * @param newPlanPrice  price of the new plan
    * @param daysRemaining days remaining in the billing period
-   * @param daysInPeriod total days in the billing period
-   * @param oldPlanName name of the old plan
-   * @param newPlanName name of the new plan
+   * @param daysInPeriod  total days in the billing period
+   * @param oldPlanName   name of the old plan
+   * @param newPlanName   name of the new plan
    * @return a ProrationResult for the downgrade
    */
   public static ProrationResult forDowngrade(
@@ -262,13 +261,13 @@ public record ProrationResult(
 
   /**
    * Factory method to create a proration result with no proration (full period).
-   * 
+   *
    * <p>Used when a subscription starts at the beginning of a billing period
    * or when no proration is needed.
-   * 
-   * @param planPrice price of the plan
+   *
+   * @param planPrice    price of the plan
    * @param daysInPeriod total days in the billing period
-   * @param planName name of the plan
+   * @param planName     name of the plan
    * @return a ProrationResult with no proration
    */
   public static ProrationResult noProration(
@@ -288,7 +287,7 @@ public record ProrationResult(
 
   /**
    * Checks if this proration represents an upgrade (net amount is positive).
-   * 
+   *
    * @return true if customer owes money (upgrade)
    */
   public boolean isUpgrade() {
@@ -297,7 +296,7 @@ public record ProrationResult(
 
   /**
    * Checks if this proration represents a downgrade (net amount is negative).
-   * 
+   *
    * @return true if customer receives credit (downgrade)
    */
   public boolean isDowngrade() {
@@ -306,7 +305,7 @@ public record ProrationResult(
 
   /**
    * Checks if this proration has no net change (net amount is zero).
-   * 
+   *
    * @return true if no money is owed or credited
    */
   public boolean isNeutral() {
@@ -315,7 +314,7 @@ public record ProrationResult(
 
   /**
    * Gets the absolute value of the net amount.
-   * 
+   *
    * @return absolute net amount
    */
   public BigDecimal getAbsoluteNetAmount() {
@@ -324,7 +323,7 @@ public record ProrationResult(
 
   /**
    * Calculates the proration factor (days remaining / days in period).
-   * 
+   *
    * @return proration factor as a decimal between 0 and 1
    */
   public BigDecimal getProrationFactor() {
@@ -337,7 +336,7 @@ public record ProrationResult(
 
   /**
    * Calculates the percentage of the period remaining.
-   * 
+   *
    * @return percentage remaining (0-100)
    */
   public double getPercentageRemaining() {
@@ -349,7 +348,7 @@ public record ProrationResult(
 
   /**
    * Checks if proration is needed (days remaining is less than total days).
-   * 
+   *
    * @return true if proration is needed
    */
   public boolean requiresProration() {
@@ -358,7 +357,7 @@ public record ProrationResult(
 
   /**
    * Creates a detailed description including all amounts.
-   * 
+   *
    * @return detailed description string
    */
   public String getDetailedDescription() {

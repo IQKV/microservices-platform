@@ -2,11 +2,11 @@ package com.iqscaffold.billingservice.usage;
 
 /**
  * Value object representing usage context for quota validation.
- * 
+ *
  * <p>Encapsulates the current usage and quota limit for a specific metric type.
  * This immutable value object is used by specifications and domain services to
  * evaluate whether usage has exceeded quota limits.
- * 
+ *
  * <p>Example usage:
  * <pre>{@code
  * UsageContext context = new UsageContext(
@@ -14,14 +14,14 @@ package com.iqscaffold.billingservice.usage;
  *   950L,  // current usage
  *   1000L  // quota limit
  * );
- * 
+ *
  * QuotaExceededSpecification spec = new QuotaExceededSpecification();
  * boolean exceeded = spec.isSatisfiedBy(context); // false
  * }</pre>
- * 
- * @param metricType the type of metric being tracked
+ *
+ * @param metricType   the type of metric being tracked
  * @param currentUsage the current usage amount
- * @param quotaLimit the maximum allowed usage
+ * @param quotaLimit   the maximum allowed usage
  */
 public record UsageContext(
     MetricType metricType,
@@ -31,10 +31,10 @@ public record UsageContext(
 
   /**
    * Creates a new usage context with validation.
-   * 
-   * @param metricType the type of metric being tracked
+   *
+   * @param metricType   the type of metric being tracked
    * @param currentUsage the current usage amount
-   * @param quotaLimit the maximum allowed usage
+   * @param quotaLimit   the maximum allowed usage
    * @throws IllegalArgumentException if metricType is null, currentUsage is negative, or quotaLimit is negative
    */
   public UsageContext {
@@ -51,7 +51,7 @@ public record UsageContext(
 
   /**
    * Calculates the remaining quota.
-   * 
+   *
    * @return the amount of quota remaining (0 if exceeded)
    */
   public long remainingQuota() {
@@ -60,7 +60,7 @@ public record UsageContext(
 
   /**
    * Calculates the usage percentage.
-   * 
+   *
    * @return the percentage of quota used (0-100+)
    */
   public double usagePercentage() {
@@ -72,7 +72,7 @@ public record UsageContext(
 
   /**
    * Checks if usage is approaching the quota limit.
-   * 
+   *
    * @param thresholdPercentage the threshold percentage (e.g., 80 for 80%)
    * @return true if usage is at or above the threshold
    */
@@ -82,7 +82,7 @@ public record UsageContext(
 
   /**
    * Checks if the quota is unlimited.
-   * 
+   *
    * @return true if quota limit is Long.MAX_VALUE (unlimited)
    */
   public boolean isUnlimited() {

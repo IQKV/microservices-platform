@@ -1,22 +1,22 @@
 package com.iqscaffold.billingservice.invoice;
 
-import com.iqscaffold.billingservice.billing.ProrationResult;
-import com.iqscaffold.billingservice.config.BillingProperties;
-import com.iqscaffold.billingservice.subscription.Subscription;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
+
+import com.iqscaffold.billingservice.billing.ProrationResult;
+import com.iqscaffold.billingservice.config.BillingProperties;
+import com.iqscaffold.billingservice.subscription.Subscription;
 import org.springframework.stereotype.Component;
 
 /**
  * Factory for creating Invoice aggregates with complex business logic.
- * 
+ *
  * <p>This factory encapsulates the complex logic required to create invoices
  * for various scenarios (subscription billing, proration, usage charges) while
  * ensuring all business rules and invariants are satisfied before object creation.
- * 
+ *
  * <p>The factory handles:
  * <ul>
  *   <li>Invoice number generation following configured format</li>
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  *   <li>Currency and tenant validation</li>
  *   <li>All invoice invariants</li>
  * </ul>
- * 
+ *
  * <p>Example usage:
  * <pre>{@code
  * // Create a subscription invoice
@@ -35,18 +35,18 @@ import org.springframework.stereotype.Component;
  * Invoice invoice = invoiceFactory.createSubscriptionInvoice(
  *     subscription, lineItems, periodStart, periodEnd
  * );
- * 
+ *
  * // Create a proration invoice
  * ProrationResult proration = prorationCalculator.calculate(...);
  * Invoice prorationInvoice = invoiceFactory.createProrationInvoice(
  *     subscription, proration
  * );
  * }</pre>
- * 
+ *
  * <p>Design Rationale: Factories ensure that complex objects are created in a
  * valid state with all invariants satisfied. They centralize creation logic,
  * making it testable and maintainable.
- * 
+ *
  * @see Invoice
  * @see InvoiceLineItem
  * @see ProrationResult
@@ -54,14 +54,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class InvoiceFactory {
 
-  private static final DateTimeFormatter YEAR_MONTH_FORMATTER = 
+  private static final DateTimeFormatter YEAR_MONTH_FORMATTER =
       DateTimeFormatter.ofPattern("yyyyMM");
 
   private final BillingProperties billingProperties;
 
   /**
    * Constructs a new InvoiceFactory.
-   * 
+   *
    * @param billingProperties billing configuration properties
    */
   public InvoiceFactory(BillingProperties billingProperties) {
@@ -70,7 +70,7 @@ public class InvoiceFactory {
 
   /**
    * Creates a new subscription invoice for a regular billing period.
-   * 
+   *
    * <p>This method performs the following validations:
    * <ul>
    *   <li>Validates subscription, line items, and period dates</li>
@@ -80,17 +80,17 @@ public class InvoiceFactory {
    *   <li>Sets due date based on configuration</li>
    *   <li>Ensures all invoice invariants are satisfied</li>
    * </ul>
-   * 
+   *
    * <p>The created invoice will be in DRAFT status and must be finalized
    * before it can be paid.
-   * 
+   *
    * @param subscription the subscription this invoice is for
-   * @param lineItems the line items to include on the invoice
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
+   * @param lineItems    the line items to include on the invoice
+   * @param periodStart  the billing period start date
+   * @param periodEnd    the billing period end date
    * @return a new Invoice in DRAFT status
    * @throws IllegalArgumentException if any parameter is null or invalid
-   * @throws IllegalStateException if line items are empty
+   * @throws IllegalStateException    if line items are empty
    */
   public Invoice createSubscriptionInvoice(
       Subscription subscription,
@@ -124,7 +124,7 @@ public class InvoiceFactory {
     );
 
     // Add all line items
-    for (InvoiceLineItem lineItem : lineItems) {
+    for (final InvoiceLineItem lineItem : lineItems) {
       invoice.addLineItem(lineItem);
     }
 
@@ -133,7 +133,7 @@ public class InvoiceFactory {
 
   /**
    * Creates a new proration invoice for mid-period plan changes.
-   * 
+   *
    * <p>This method creates an invoice with proration line items based on
    * the proration calculation result. The invoice will include:
    * <ul>
@@ -141,12 +141,12 @@ public class InvoiceFactory {
    *   <li>Charge for remaining time on the new plan (if upgrade)</li>
    *   <li>Net amount to charge or credit</li>
    * </ul>
-   * 
+   *
    * <p>The created invoice will be in DRAFT status and must be finalized
    * before it can be paid.
-   * 
-   * @param subscription the subscription this invoice is for
-   * @param proration the proration calculation result
+   *
+   * @param subscription  the subscription this invoice is for
+   * @param proration     the proration calculation result
    * @param effectiveDate the date when the plan change takes effect
    * @return a new Invoice in DRAFT status with proration line items
    * @throws IllegalArgumentException if any parameter is null or invalid
@@ -205,7 +205,7 @@ public class InvoiceFactory {
 
   /**
    * Creates a new invoice with custom line items and period.
-   * 
+   *
    * <p>This is a flexible factory method for creating invoices with custom
    * line items that don't fit the standard subscription or proration patterns.
    * Use cases include:
@@ -214,12 +214,12 @@ public class InvoiceFactory {
    *   <li>Manual adjustments</li>
    *   <li>Custom billing scenarios</li>
    * </ul>
-   * 
+   *
    * @param subscription the subscription this invoice is for
-   * @param lineItems the line items to include
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
-   * @param dueDays number of days until payment is due
+   * @param lineItems    the line items to include
+   * @param periodStart  the billing period start date
+   * @param periodEnd    the billing period end date
+   * @param dueDays      number of days until payment is due
    * @return a new Invoice in DRAFT status
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
@@ -254,7 +254,7 @@ public class InvoiceFactory {
     );
 
     // Add all line items
-    for (InvoiceLineItem lineItem : lineItems) {
+    for (final InvoiceLineItem lineItem : lineItems) {
       invoice.addLineItem(lineItem);
     }
 
@@ -263,15 +263,15 @@ public class InvoiceFactory {
 
   /**
    * Creates a usage-based invoice with metered charges.
-   * 
+   *
    * <p>This method creates an invoice for usage-based billing, typically
    * including both the base subscription fee and usage charges for the period.
-   * 
-   * @param subscription the subscription this invoice is for
+   *
+   * @param subscription    the subscription this invoice is for
    * @param subscriptionFee the base subscription fee line item
-   * @param usageCharges the usage charge line items
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
+   * @param usageCharges    the usage charge line items
+   * @param periodStart     the billing period start date
+   * @param periodEnd       the billing period end date
    * @return a new Invoice in DRAFT status with subscription and usage charges
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
@@ -312,7 +312,7 @@ public class InvoiceFactory {
 
     // Add usage charges if any
     if (usageCharges != null && !usageCharges.isEmpty()) {
-      for (InvoiceLineItem usageCharge : usageCharges) {
+      for (final InvoiceLineItem usageCharge : usageCharges) {
         invoice.addLineItem(usageCharge);
       }
     }
@@ -324,26 +324,26 @@ public class InvoiceFactory {
 
   /**
    * Generates a unique invoice number following the configured format.
-   * 
+   *
    * <p>Default format: INV-{YEAR}{MONTH}-{SEQUENCE}
    * Example: INV-202412-00001
-   * 
+   *
    * <p>Note: This is a simplified implementation. In production, you would
    * typically use a database sequence or distributed ID generator to ensure
    * uniqueness across multiple instances.
-   * 
+   *
    * @return a unique invoice number
    */
   private String generateInvoiceNumber() {
     String format = billingProperties.invoice().numberFormat();
     LocalDateTime now = LocalDateTime.now();
-    
+
     // Generate year-month part
     String yearMonth = now.format(YEAR_MONTH_FORMATTER);
-    
+
     // Generate sequence (simplified - in production use database sequence)
     String sequence = String.format("%05d", generateSequence());
-    
+
     // Replace placeholders in format
     return format
         .replace("{YEAR}", String.valueOf(now.getYear()))
@@ -354,10 +354,10 @@ public class InvoiceFactory {
 
   /**
    * Generates a sequence number for invoice numbering.
-   * 
+   *
    * <p>This is a simplified implementation using timestamp-based sequence.
    * In production, use a database sequence or distributed ID generator.
-   * 
+   *
    * @return a sequence number
    */
   private long generateSequence() {
@@ -392,7 +392,7 @@ public class InvoiceFactory {
     }
 
     // Validate each line item
-    for (InvoiceLineItem lineItem : lineItems) {
+    for (final InvoiceLineItem lineItem : lineItems) {
       validateLineItem(lineItem);
     }
   }

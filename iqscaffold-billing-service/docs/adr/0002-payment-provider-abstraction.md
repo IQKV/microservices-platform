@@ -61,7 +61,7 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
 
       // Translate to domain model
       return toPaymentResult(intent);
-    } catch (StripeException e) {
+    } catch (final StripeException e) {
       return PaymentResult.failed(e.getCode(), e.getMessage());
     }
   }

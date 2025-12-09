@@ -9,7 +9,7 @@ import java.math.RoundingMode;
 
 /**
  * Immutable value object representing a line item on an invoice.
- * 
+ *
  * <p>Line items represent individual charges or credits on an invoice, such as:
  * <ul>
  *   <li>Subscription fees</li>
@@ -19,10 +19,10 @@ import java.math.RoundingMode;
  *   <li>Discounts</li>
  *   <li>Taxes</li>
  * </ul>
- * 
+ *
  * <p>This is implemented as a Java record for immutability and automatic
  * generation of equals(), hashCode(), and toString() methods based on value.
- * 
+ *
  * <p>Line items enforce the following invariants:
  * <ul>
  *   <li>Description cannot be blank</li>
@@ -31,12 +31,12 @@ import java.math.RoundingMode;
  *   <li>Amount is automatically calculated as quantity * unitPrice</li>
  *   <li>All monetary values use 2 decimal places</li>
  * </ul>
- * 
- * @param type the type of line item (SUBSCRIPTION_FEE, USAGE_CHARGE, etc.)
+ *
+ * @param type        the type of line item (SUBSCRIPTION_FEE, USAGE_CHARGE, etc.)
  * @param description human-readable description of the charge
- * @param quantity number of units (e.g., 1 for subscription, 1000 for API calls)
- * @param unitPrice price per unit in the invoice currency
- * @param amount total amount for this line item (quantity * unitPrice)
+ * @param quantity    number of units (e.g., 1 for subscription, 1000 for API calls)
+ * @param unitPrice   price per unit in the invoice currency
+ * @param amount      total amount for this line item (quantity * unitPrice)
  */
 public record InvoiceLineItem(
     @NotNull(message = "Line item type cannot be null")
@@ -57,7 +57,7 @@ public record InvoiceLineItem(
 
   /**
    * Compact constructor that validates invariants and calculates amount.
-   * 
+   *
    * @throws IllegalArgumentException if invariants are violated
    */
   public InvoiceLineItem {
@@ -105,9 +105,9 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a subscription fee line item.
-   * 
+   *
    * @param description description of the subscription
-   * @param price subscription price
+   * @param price       subscription price
    * @return a new InvoiceLineItem for subscription fee
    */
   public static InvoiceLineItem subscriptionFee(String description, BigDecimal price) {
@@ -122,10 +122,10 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a usage charge line item.
-   * 
+   *
    * @param description description of the usage
-   * @param quantity number of units consumed
-   * @param unitPrice price per unit
+   * @param quantity    number of units consumed
+   * @param unitPrice   price per unit
    * @return a new InvoiceLineItem for usage charge
    */
   public static InvoiceLineItem usageCharge(
@@ -148,9 +148,9 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a proration credit line item.
-   * 
+   *
    * @param description description of the credit
-   * @param amount credit amount (positive value)
+   * @param amount      credit amount (positive value)
    * @return a new InvoiceLineItem for proration credit
    */
   public static InvoiceLineItem prorationCredit(String description, BigDecimal amount) {
@@ -165,9 +165,9 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a proration charge line item.
-   * 
+   *
    * @param description description of the charge
-   * @param amount charge amount
+   * @param amount      charge amount
    * @return a new InvoiceLineItem for proration charge
    */
   public static InvoiceLineItem prorationCharge(String description, BigDecimal amount) {
@@ -182,9 +182,9 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a discount line item.
-   * 
+   *
    * @param description description of the discount
-   * @param amount discount amount (positive value, will be negated)
+   * @param amount      discount amount (positive value, will be negated)
    * @return a new InvoiceLineItem for discount
    */
   public static InvoiceLineItem discount(String description, BigDecimal amount) {
@@ -199,9 +199,9 @@ public record InvoiceLineItem(
 
   /**
    * Factory method to create a tax line item.
-   * 
+   *
    * @param description description of the tax
-   * @param amount tax amount
+   * @param amount      tax amount
    * @return a new InvoiceLineItem for tax
    */
   public static InvoiceLineItem tax(String description, BigDecimal amount) {
@@ -216,7 +216,7 @@ public record InvoiceLineItem(
 
   /**
    * Checks if this line item is a credit (negative amount).
-   * 
+   *
    * @return true if amount is negative
    */
   public boolean isCredit() {
@@ -225,7 +225,7 @@ public record InvoiceLineItem(
 
   /**
    * Checks if this line item is a charge (positive amount).
-   * 
+   *
    * @return true if amount is positive
    */
   public boolean isCharge() {
@@ -234,7 +234,7 @@ public record InvoiceLineItem(
 
   /**
    * Gets the absolute value of the amount.
-   * 
+   *
    * @return absolute amount
    */
   public BigDecimal getAbsoluteAmount() {

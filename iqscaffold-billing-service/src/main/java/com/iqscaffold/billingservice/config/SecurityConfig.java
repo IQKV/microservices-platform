@@ -15,10 +15,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Security configuration for the Billing Service.
- * 
+ *
  * <p>Configures JWT-based authentication using OAuth2 Resource Server,
  * following the same security patterns as the User Service.
- * 
+ *
  * <p>Security Features:
  * <ul>
  *   <li>JWT token validation using JWK endpoint from User Service</li>
@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  *   <li>Admin-only endpoints for administrative operations</li>
  *   <li>Security headers (HSTS, frame options, content type options)</li>
  * </ul>
- * 
+ *
  * <p>Authority-Based Access Control:
  * <ul>
  *   <li>Public: /api/v1/billing/plans/** (no authentication)</li>
@@ -61,7 +61,7 @@ public class SecurityConfig {
 
   /**
    * Configure the security filter chain.
-   * 
+   *
    * <p>Implements comprehensive security controls including:
    * <ul>
    *   <li>JWT-based authentication via OAuth2 Resource Server</li>
@@ -70,7 +70,7 @@ public class SecurityConfig {
    *   <li>Stateless session management</li>
    *   <li>Security headers (HSTS, frame options)</li>
    * </ul>
-   * 
+   *
    * @param http the HttpSecurity to configure
    * @return the configured SecurityFilterChain
    * @throws Exception if configuration fails
@@ -82,13 +82,13 @@ public class SecurityConfig {
         .csrf(csrf -> csrf
             .ignoringRequestMatchers("/api/**", "/actuator/**")
         )
-        
+
         // Stateless session management (no server-side sessions)
         // REQ-SEC-008: Use stateless session management
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
-        
+
         // Configure authorization rules
         // REQ-SEC-006: Implement role-based access control (RBAC)
         // REQ-SEC-008: Authenticate API requests via JWT
@@ -98,38 +98,38 @@ public class SecurityConfig {
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .requestMatchers("/error").permitAll()
-            
+
             // Integration APIs - require authentication
             .requestMatchers("/api/v1/billing/subscriptions/*/status").authenticated()
             .requestMatchers("/api/v1/billing/subscriptions/*/check-feature").authenticated()
             .requestMatchers("/api/v1/billing/usage/**").authenticated()
-            
+
             // Customer portal - require authentication
             .requestMatchers("/api/v1/billing/portal/**").authenticated()
-            
+
             // Admin endpoints - require ADMIN or SUPER_ADMIN authority
             .requestMatchers("/api/v1/admin/billing/**").hasAnyAuthority("ADMIN", "SUPER_ADMIN")
-            
+
             // Internal endpoints - require authentication (for service-to-service calls)
             .requestMatchers("/internal/billing/**").authenticated()
-            
+
             // All other requests require authentication
             .anyRequest().authenticated()
         )
-        
+
         // Configure OAuth2 Resource Server with JWT
         // REQ-SEC-008: Authenticate API requests via JWT
         .oauth2ResourceServer(oauth2 -> oauth2
             .jwt(jwt -> jwt.decoder(jwtDecoder()))
         )
-        
+
         // Add rate limiting filter before authentication
         // REQ-SEC-010: Implement rate limiting on public endpoints
         .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
-        
+
         // Add JWT authentication filter after Spring Security's authentication
         .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        
+
         // Configure security headers
         // REQ-SEC-004: Encrypt all data in transit using TLS 1.3
         .headers(headers -> headers
@@ -140,13 +140,13 @@ public class SecurityConfig {
                 .includeSubDomains(true)
             )
         )
-        
+
         .build();
   }
 
   /**
    * Configure JWT decoder to validate tokens using JWK endpoint from User Service.
-   * 
+   *
    * @return the configured JwtDecoder
    */
   @Bean

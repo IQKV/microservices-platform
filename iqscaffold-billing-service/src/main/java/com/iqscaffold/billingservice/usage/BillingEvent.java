@@ -1,6 +1,5 @@
 package com.iqscaffold.billingservice.usage;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,19 +8,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
+
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
 /**
  * BillingEvent entity for audit trail and event tracking.
- * 
+ *
  * <p>Records all significant billing-related events for audit, compliance,
  * and debugging purposes. Events are immutable once created and provide
  * a complete history of billing operations.
- * 
+ *
  * <p>This entity is stored in tenant-scoped schemas for data isolation.
- * 
+ *
  * <p>Event types include:
  * <ul>
  *   <li>Subscription lifecycle events (created, upgraded, canceled, etc.)</li>
@@ -30,11 +30,11 @@ import org.hibernate.annotations.Type;
  *   <li>Usage events (recorded, quota exceeded)</li>
  *   <li>Trial events (started, ending, ended, converted)</li>
  * </ul>
- * 
+ *
  * <p><strong>Immutability:</strong> This entity is marked as immutable to satisfy
  * audit requirements (REQ-SEC-012). Once created, audit records cannot be modified
  * or deleted, ensuring data integrity for compliance and security investigations.
- * 
+ *
  * @see com.iqscaffold.billingservice.shared.BillingConstants.BillingEvents
  */
 @Entity
@@ -87,15 +87,15 @@ public class BillingEvent {
   /**
    * Creates a new billing event.
    *
-   * @param tenantId the tenant identifier
-   * @param userId the user who triggered the event (may be null for system events)
-   * @param eventType the type of event (e.g., SUBSCRIPTION_CREATED)
-   * @param entityType the type of entity (e.g., SUBSCRIPTION, INVOICE)
-   * @param entityId the identifier of the entity
+   * @param tenantId    the tenant identifier
+   * @param userId      the user who triggered the event (may be null for system events)
+   * @param eventType   the type of event (e.g., SUBSCRIPTION_CREATED)
+   * @param entityType  the type of entity (e.g., SUBSCRIPTION, INVOICE)
+   * @param entityId    the identifier of the entity
    * @param description human-readable description of the event
-   * @param changes map of changes made (for audit trail)
-   * @param ipAddress the IP address of the request
-   * @param userAgent the user agent of the request
+   * @param changes     map of changes made (for audit trail)
+   * @param ipAddress   the IP address of the request
+   * @param userAgent   the user agent of the request
    */
   public BillingEvent(
       final String tenantId,

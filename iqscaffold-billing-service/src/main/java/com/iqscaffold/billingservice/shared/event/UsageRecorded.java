@@ -1,33 +1,34 @@
 package com.iqscaffold.billingservice.shared.event;
 
-import com.iqscaffold.billingservice.shared.BillingConstants;
 import java.time.Instant;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.shared.BillingConstants;
 
 /**
  * Domain event published when usage is recorded.
  * This event is triggered after successful usage record persistence.
  *
- * @param eventId unique identifier for this event
- * @param occurredAt timestamp when the event occurred
- * @param aggregateId usage record ID
- * @param tenantId tenant ID
+ * @param eventId        unique identifier for this event
+ * @param occurredAt     timestamp when the event occurred
+ * @param aggregateId    usage record ID
+ * @param tenantId       tenant ID
  * @param subscriptionId subscription ID
- * @param metricType metric type (e.g., API_CALLS, STORAGE_GB)
- * @param quantity usage quantity
- * @param unit usage unit
- * @param recordedAt when the usage was recorded
+ * @param metricType     metric type (e.g., API_CALLS, STORAGE_GB)
+ * @param quantity       usage quantity
+ * @param unit           usage unit
+ * @param recordedAt     when the usage was recorded
  */
 public record UsageRecorded(
-  UUID eventId,
-  Instant occurredAt,
-  Long aggregateId,
-  UUID tenantId,
-  Long subscriptionId,
-  String metricType,
-  Long quantity,
-  String unit,
-  Instant recordedAt
+    UUID eventId,
+    Instant occurredAt,
+    Long aggregateId,
+    UUID tenantId,
+    Long subscriptionId,
+    String metricType,
+    Long quantity,
+    String unit,
+    Instant recordedAt
 ) implements DomainEvent {
 
   public UsageRecorded {

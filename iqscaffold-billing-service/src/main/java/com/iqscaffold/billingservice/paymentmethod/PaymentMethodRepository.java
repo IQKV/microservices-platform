@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.paymentmethod;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,10 +11,10 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for PaymentMethod aggregate.
- * 
+ *
  * <p>This repository provides methods to query and persist payment method aggregates.
  * Payment methods are stored in tenant-scoped schemas for data isolation.
- * 
+ *
  * <p>Uses text blocks (Java 21) for multi-line JPQL queries to improve readability.
  */
 @Repository
@@ -21,7 +22,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds all payment methods for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of payment methods ordered by default flag and creation date
    */
@@ -35,7 +36,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds all active payment methods for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of active payment methods
    */
@@ -49,7 +50,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds the default payment method for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return optional containing the default payment method, or empty if none exists
    */
@@ -63,7 +64,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds a payment method by provider payment method ID.
-   * 
+   *
    * @param providerPaymentMethodId payment method identifier from payment provider
    * @return optional containing the payment method, or empty if not found
    */
@@ -77,7 +78,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds payment methods by user.
-   * 
+   *
    * @param userId user identifier
    * @return list of payment methods created by the user
    */
@@ -91,9 +92,9 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds payment methods by type.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param type payment method type (CARD, BANK_ACCOUNT, PAYPAL)
+   * @param type     payment method type (CARD, BANK_ACCOUNT, PAYPAL)
    * @return list of payment methods of the specified type
    */
   @Query("""
@@ -111,9 +112,9 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   /**
    * Finds expiring payment methods.
    * Returns payment methods expiring in the specified month and year.
-   * 
+   *
    * @param expiryMonth expiration month (1-12)
-   * @param expiryYear expiration year
+   * @param expiryYear  expiration year
    * @return list of expiring payment methods
    */
   @Query("""
@@ -131,9 +132,9 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   /**
    * Finds expired payment methods.
    * Returns payment methods where expiry date is in the past.
-   * 
+   *
    * @param currentMonth current month (1-12)
-   * @param currentYear current year
+   * @param currentYear  current year
    * @return list of expired payment methods
    */
   @Query("""
@@ -152,7 +153,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Counts active payment methods for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return number of active payment methods
    */
@@ -165,7 +166,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Checks if a tenant has a default payment method.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return true if tenant has a default payment method
    */
@@ -181,7 +182,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   /**
    * Checks if a provider payment method ID already exists.
    * Used for idempotency checking.
-   * 
+   *
    * @param providerPaymentMethodId provider payment method identifier
    * @return true if payment method exists
    */
@@ -197,7 +198,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   /**
    * Finds all default payment methods (for validation).
    * Should return at most one per tenant.
-   * 
+   *
    * @return list of default payment methods
    */
   @Query("""
@@ -210,8 +211,8 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds a payment method by ID and tenant ID.
-   * 
-   * @param id payment method ID
+   *
+   * @param id       payment method ID
    * @param tenantId tenant identifier
    * @return optional containing the payment method, or empty if not found
    */
@@ -227,7 +228,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds all default payment methods for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of default payment methods (should be at most one)
    */
@@ -240,7 +241,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds all active payment methods for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of active payment methods
    */
@@ -254,7 +255,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Finds all payment methods for a tenant (for GDPR export).
-   * 
+   *
    * @param tenantId tenant identifier as string
    * @return list of all payment methods for the tenant
    */
@@ -267,7 +268,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
   /**
    * Deletes all payment methods for a tenant (for GDPR deletion).
-   * 
+   *
    * @param tenantId tenant identifier as string
    * @return number of payment methods deleted
    */
@@ -280,7 +281,7 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   /**
    * Finds payment methods deleted before a specific date that are not anonymized.
    * Used for retention policy enforcement.
-   * 
+   *
    * @param cutoffDate date before which to find deleted payment methods
    * @return list of payment methods to anonymize
    */

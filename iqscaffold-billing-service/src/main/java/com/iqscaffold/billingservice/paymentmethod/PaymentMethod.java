@@ -91,17 +91,17 @@ public class PaymentMethod {
   /**
    * Creates a new payment method.
    *
-   * @param tenantId the tenant ID
-   * @param userId the user ID
-   * @param type the payment method type
+   * @param tenantId                the tenant ID
+   * @param userId                  the user ID
+   * @param type                    the payment method type
    * @param providerPaymentMethodId the payment method ID from the provider
    * @throws IllegalArgumentException if required fields are null or invalid
    */
   public PaymentMethod(
-    final UUID tenantId,
-    final UUID userId,
-    final PaymentMethodType type,
-    final String providerPaymentMethodId
+      final UUID tenantId,
+      final UUID userId,
+      final PaymentMethodType type,
+      final String providerPaymentMethodId
   ) {
     if (tenantId == null) {
       throw new IllegalArgumentException("Tenant ID cannot be null");
@@ -128,17 +128,17 @@ public class PaymentMethod {
    * Sets card details for display purposes.
    * Note: Full card numbers are NEVER stored (PCI DSS compliance).
    *
-   * @param last4 the last 4 digits of the card
-   * @param brand the card brand (e.g., "Visa", "Mastercard")
+   * @param last4       the last 4 digits of the card
+   * @param brand       the card brand (e.g., "Visa", "Mastercard")
    * @param expiryMonth the expiry month (1-12)
-   * @param expiryYear the expiry year (4 digits)
+   * @param expiryYear  the expiry year (4 digits)
    * @throws IllegalArgumentException if expiry date is invalid or in the past
    */
   public void setCardDetails(
-    final String last4,
-    final String brand,
-    final Integer expiryMonth,
-    final Integer expiryYear
+      final String last4,
+      final String brand,
+      final Integer expiryMonth,
+      final Integer expiryYear
   ) {
     if (this.type != PaymentMethodType.CARD) {
       throw new IllegalStateException("Can only set card details for CARD payment methods");
@@ -178,7 +178,7 @@ public class PaymentMethod {
   public void deactivate() {
     if (this.isDefault) {
       throw new IllegalStateException(
-        "Cannot deactivate default payment method. Set another payment method as default first."
+          "Cannot deactivate default payment method. Set another payment method as default first."
       );
     }
     this.active = false;
@@ -249,7 +249,7 @@ public class PaymentMethod {
    * Validates the expiry date.
    *
    * @param month the expiry month (1-12)
-   * @param year the expiry year (4 digits)
+   * @param year  the expiry year (4 digits)
    * @throws IllegalArgumentException if expiry date is invalid or in the past
    */
   private void validateExpiryDate(final Integer month, final Integer year) {
@@ -267,7 +267,7 @@ public class PaymentMethod {
     final YearMonth now = YearMonth.now();
     if (expiry.isBefore(now)) {
       throw new IllegalArgumentException(
-        String.format("Expiry date %s/%s is in the past", month, year)
+          String.format("Expiry date %s/%s is in the past", month, year)
       );
     }
   }

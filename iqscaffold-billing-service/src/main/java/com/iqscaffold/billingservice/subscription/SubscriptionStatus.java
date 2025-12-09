@@ -42,7 +42,7 @@ public enum SubscriptionStatus {
 
   /**
    * Checks if the subscription status allows full feature access.
-   * 
+   *
    * @return true if status allows access (TRIAL, ACTIVE, PAST_DUE, CANCELED)
    */
   public boolean allowsAccess() {
@@ -54,7 +54,7 @@ public enum SubscriptionStatus {
 
   /**
    * Checks if the subscription is in an active billing state.
-   * 
+   *
    * @return true if status requires billing (ACTIVE, PAST_DUE)
    */
   public boolean isActiveBilling() {
@@ -66,7 +66,7 @@ public enum SubscriptionStatus {
 
   /**
    * Checks if the subscription can be upgraded or downgraded.
-   * 
+   *
    * @return true if plan changes are allowed
    */
   public boolean canChangePlan() {
@@ -78,7 +78,7 @@ public enum SubscriptionStatus {
 
   /**
    * Checks if the subscription can be canceled.
-   * 
+   *
    * @return true if cancellation is allowed
    */
   public boolean canCancel() {
@@ -90,7 +90,7 @@ public enum SubscriptionStatus {
 
   /**
    * Checks if the subscription can be reactivated.
-   * 
+   *
    * @return true if reactivation is allowed
    */
   public boolean canReactivate() {

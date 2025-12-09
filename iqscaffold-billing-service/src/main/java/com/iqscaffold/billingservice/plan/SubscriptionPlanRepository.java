@@ -2,6 +2,7 @@ package com.iqscaffold.billingservice.plan;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,10 +10,10 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for SubscriptionPlan aggregate.
- * 
+ *
  * <p>This repository provides methods to query and persist subscription plan aggregates.
  * Plans are stored in the public schema and shared across all tenants.
- * 
+ *
  * <p>Uses text blocks (Java 21) for multi-line JPQL queries to improve readability.
  */
 @Repository
@@ -20,7 +21,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds a subscription plan by its unique plan code.
-   * 
+   *
    * @param planCode unique plan identifier
    * @return optional containing the plan, or empty if not found
    */
@@ -33,7 +34,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
   /**
    * Finds all active public subscription plans.
    * Returns plans that are both active and publicly visible.
-   * 
+   *
    * @return list of active public plans ordered by tier and price
    */
   @Query("""
@@ -46,7 +47,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds all active subscription plans (public and private).
-   * 
+   *
    * @return list of active plans ordered by tier and price
    */
   @Query("""
@@ -58,7 +59,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds subscription plans by tier.
-   * 
+   *
    * @param tier plan tier (FREE, PRO, ENTERPRISE)
    * @return list of plans with the specified tier
    */
@@ -72,7 +73,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds subscription plans by billing cycle.
-   * 
+   *
    * @param billingCycle billing frequency (MONTHLY, YEARLY, LIFETIME)
    * @return list of plans with the specified billing cycle
    */
@@ -86,8 +87,8 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds subscription plans by tier and billing cycle.
-   * 
-   * @param tier plan tier
+   *
+   * @param tier         plan tier
    * @param billingCycle billing frequency
    * @return list of plans matching criteria
    */
@@ -106,7 +107,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
   /**
    * Finds plans with trial periods.
    * Returns plans where trial days > 0.
-   * 
+   *
    * @return list of plans offering trials
    */
   @Query("""
@@ -119,7 +120,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds free tier plans.
-   * 
+   *
    * @return list of FREE tier plans
    */
   @Query("""
@@ -132,7 +133,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Checks if a plan code already exists.
-   * 
+   *
    * @param planCode plan code to check
    * @return true if plan code exists
    */
@@ -146,7 +147,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
   /**
    * Counts active subscriptions for a plan.
    * Used to prevent deletion of plans with active subscriptions.
-   * 
+   *
    * @param planId plan identifier
    * @return number of active subscriptions
    */
@@ -159,7 +160,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
   /**
    * Finds all plans (active and inactive) for admin purposes.
-   * 
+   *
    * @return list of all plans ordered by tier and creation date
    */
   @Query("""

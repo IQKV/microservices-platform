@@ -1,27 +1,28 @@
 package com.iqscaffold.billingservice.subscription;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Request DTO for canceling a subscription.
- * 
+ *
  * <p>This record encapsulates the data required to cancel a subscription,
  * including whether the cancellation should be immediate or at period end.
- * 
+ *
  * <p>Cancellation options:
  * <ul>
  *   <li>Immediate: Subscription is canceled immediately, access revoked</li>
  *   <li>Period-end: Subscription remains active until current period ends</li>
  * </ul>
- * 
+ *
  * @param immediate whether to cancel immediately (true) or at period end (false)
- * @param reason the reason for cancellation (required)
- * @param userId the user ID requesting the cancellation (optional)
- * @param metadata additional metadata for the cancellation (optional)
+ * @param reason    the reason for cancellation (required)
+ * @param userId    the user ID requesting the cancellation (optional)
+ * @param metadata  additional metadata for the cancellation (optional)
  */
 @Schema(description = "Request to cancel a subscription")
 public record CancelSubscriptionRequest(
@@ -60,7 +61,7 @@ public record CancelSubscriptionRequest(
 ) {
   /**
    * Creates a cancellation request with default values.
-   * 
+   *
    * @param reason the reason for cancellation
    * @return a new cancellation request with immediate=false
    */
@@ -70,7 +71,7 @@ public record CancelSubscriptionRequest(
 
   /**
    * Creates an immediate cancellation request.
-   * 
+   *
    * @param reason the reason for cancellation
    * @return a new cancellation request with immediate=true
    */

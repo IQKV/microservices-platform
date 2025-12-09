@@ -1,5 +1,9 @@
 package com.iqscaffold.billingservice.invoice;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.billing.ProrationResult;
 import com.iqscaffold.billingservice.config.BillingProperties;
 import com.iqscaffold.billingservice.shared.MessageService;
@@ -8,12 +12,7 @@ import com.iqscaffold.billingservice.shared.event.InvoiceGenerated;
 import com.iqscaffold.billingservice.shared.event.InvoicePaid;
 import com.iqscaffold.billingservice.shared.event.InvoiceVoided;
 import com.iqscaffold.billingservice.shared.exception.InvoiceException;
-import com.iqscaffold.billingservice.subscription.Subscription;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application service for invoice management operations.
- * 
+ *
  * <p>This service acts as a thin orchestration layer that coordinates invoice
  * operations across multiple domain services and aggregates. It handles:
  * <ul>
@@ -33,25 +32,25 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Transaction management</li>
  *   <li>DTO translation</li>
  * </ul>
- * 
+ *
  * <p>The service delegates business logic to domain services (InvoiceGenerator,
  * InvoiceFactory) and aggregates (Invoice, Subscription), maintaining a clean
  * separation between application orchestration and domain logic.
- * 
+ *
  * <p><strong>Async Processing Strategy:</strong>
  * <ul>
  *   <li>Invoice generation is triggered by scheduled jobs and processed asynchronously</li>
  *   <li>PDF generation is published to queue and processed by InvoiceGenerationConsumer</li>
  *   <li>Long-running operations (PDF generation) don't block HTTP requests</li>
  * </ul>
- * 
+ *
  * <p><strong>Event-Driven Architecture:</strong>
  * <ul>
  *   <li>InvoiceGenerated event triggers async email notification with PDF attachment</li>
  *   <li>InvoicePaid event triggers async receipt email and analytics update</li>
  *   <li>InvoiceVoided event triggers async notification</li>
  * </ul>
- * 
+ *
  * <p>Example usage:
  * <pre>{@code
  * // Generate invoice for billing period
@@ -60,14 +59,14 @@ import org.springframework.transaction.annotation.Transactional;
  *     periodStart,
  *     periodEnd
  * );
- * 
+ *
  * // Finalize invoice (triggers PDF generation and email)
  * invoiceApplicationService.finalizeInvoice(invoiceId);
- * 
+ *
  * // Void invoice
  * invoiceApplicationService.voidInvoice(invoiceId, "Customer requested cancellation");
  * }</pre>
- * 
+ *
  * @see InvoiceGenerator
  * @see InvoiceFactory
  * @see Invoice
@@ -87,17 +86,17 @@ public class InvoiceApplicationService {
 
   /**
    * Generates an invoice for a subscription's regular billing period.
-   * 
+   *
    * <p>This method creates a draft invoice with subscription charges for the
    * specified billing period. The invoice must be finalized before it can be paid.
-   * 
+   *
    * <p><strong>Async Processing:</strong> Invoice generation is typically triggered
    * by a scheduled job and processed asynchronously. This method completes quickly
    * (< 2 seconds) to avoid blocking.
-   * 
+   *
    * @param subscriptionId the subscription to invoice
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
+   * @param periodStart    the billing period start date
+   * @param periodEnd      the billing period end date
    * @return the generated invoice DTO
    * @throws InvoiceException.SubscriptionNotFoundException if subscription not found
    */
@@ -107,7 +106,7 @@ public class InvoiceApplicationService {
       final LocalDateTime periodStart,
       final LocalDateTime periodEnd) {
 
-    log.info("Generating invoice for subscription {} for period {} to {}", 
+    log.info("Generating invoice for subscription {} for period {} to {}",
         subscriptionId, periodStart, periodEnd);
 
     // Load subscription
@@ -121,7 +120,7 @@ public class InvoiceApplicationService {
     // Persist invoice
     var savedInvoice = invoiceRepository.save(invoice);
 
-    log.info("Generated invoice {} for subscription {}", 
+    log.info("Generated invoice {} for subscription {}",
         savedInvoice.getInvoiceNumber(), subscriptionId);
 
     // Translate to DTO
@@ -130,13 +129,13 @@ public class InvoiceApplicationService {
 
   /**
    * Generates a proration invoice for a mid-period subscription change.
-   * 
+   *
    * <p>This method creates a draft invoice with proration line items (credits
    * and charges) based on the proration calculation. The invoice is due immediately.
-   * 
-   * @param subscriptionId the subscription being changed
+   *
+   * @param subscriptionId  the subscription being changed
    * @param prorationResult the proration calculation result
-   * @param effectiveDate the date when the change takes effect
+   * @param effectiveDate   the date when the change takes effect
    * @return the generated proration invoice DTO
    * @throws InvoiceException.SubscriptionNotFoundException if subscription not found
    */
@@ -146,7 +145,7 @@ public class InvoiceApplicationService {
       final ProrationResult prorationResult,
       final LocalDateTime effectiveDate) {
 
-    log.info("Generating proration invoice for subscription {} effective {}", 
+    log.info("Generating proration invoice for subscription {} effective {}",
         subscriptionId, effectiveDate);
 
     // Load subscription
@@ -161,7 +160,7 @@ public class InvoiceApplicationService {
     // Persist invoice
     var savedInvoice = invoiceRepository.save(invoice);
 
-    log.info("Generated proration invoice {} for subscription {}", 
+    log.info("Generated proration invoice {} for subscription {}",
         savedInvoice.getInvoiceNumber(), subscriptionId);
 
     // Translate to DTO
@@ -170,23 +169,23 @@ public class InvoiceApplicationService {
 
   /**
    * Finalizes a draft invoice, making it ready for payment.
-   * 
+   *
    * <p>This method:
    * <ul>
    *   <li>Changes invoice status from DRAFT to OPEN</li>
    *   <li>Publishes InvoiceGenerated event (triggers async PDF generation and email)</li>
    *   <li>Returns the finalized invoice</li>
    * </ul>
-   * 
+   *
    * <p><strong>Event-Driven:</strong> The InvoiceGenerated event triggers:
    * <ul>
    *   <li>Async PDF generation via InvoiceGenerationConsumer</li>
    *   <li>Async email notification with PDF attachment</li>
    * </ul>
-   * 
+   *
    * @param invoiceId the invoice to finalize
    * @return the finalized invoice DTO
-   * @throws InvoiceException.InvoiceNotFoundException if invoice not found
+   * @throws InvoiceException.InvoiceNotFoundException     if invoice not found
    * @throws InvoiceException.InvalidInvoiceStateException if invoice is not in DRAFT status
    */
   @Transactional
@@ -207,7 +206,7 @@ public class InvoiceApplicationService {
     // Publish domain event (triggers async PDF generation and email)
     publishInvoiceGeneratedEvent(savedInvoice);
 
-    log.info("Finalized invoice {} with number {}", 
+    log.info("Finalized invoice {} with number {}",
         invoiceId, savedInvoice.getInvoiceNumber());
 
     // Translate to DTO
@@ -216,20 +215,20 @@ public class InvoiceApplicationService {
 
   /**
    * Voids an unpaid invoice, preventing payment.
-   * 
+   *
    * <p>This method:
    * <ul>
    *   <li>Changes invoice status to VOID</li>
    *   <li>Records the void reason</li>
    *   <li>Publishes InvoiceVoided event (triggers async notification)</li>
    * </ul>
-   * 
+   *
    * <p>Only unpaid invoices (DRAFT or OPEN status) can be voided.
-   * 
+   *
    * @param invoiceId the invoice to void
-   * @param reason the reason for voiding
+   * @param reason    the reason for voiding
    * @return the voided invoice DTO
-   * @throws InvoiceException.InvoiceNotFoundException if invoice not found
+   * @throws InvoiceException.InvoiceNotFoundException     if invoice not found
    * @throws InvoiceException.InvalidInvoiceStateException if invoice is already paid
    */
   @Transactional
@@ -250,7 +249,7 @@ public class InvoiceApplicationService {
     // Publish domain event (triggers async notification)
     publishInvoiceVoidedEvent(savedInvoice, reason);
 
-    log.info("Voided invoice {} with number {}", 
+    log.info("Voided invoice {} with number {}",
         invoiceId, savedInvoice.getInvoiceNumber());
 
     // Translate to DTO
@@ -259,19 +258,19 @@ public class InvoiceApplicationService {
 
   /**
    * Marks an invoice as paid.
-   * 
+   *
    * <p>This method is typically called after successful payment processing.
    * It updates the invoice status and publishes events for downstream processing.
-   * 
+   *
    * <p><strong>Event-Driven:</strong> The InvoicePaid event triggers:
    * <ul>
    *   <li>Async receipt email to customer</li>
    *   <li>Async analytics update (MRR, revenue tracking)</li>
    * </ul>
-   * 
-   * @param invoiceId the invoice that was paid
+   *
+   * @param invoiceId       the invoice that was paid
    * @param paymentMethodId the payment method used
-   * @param paidAt the payment timestamp
+   * @param paidAt          the payment timestamp
    * @return the updated invoice DTO
    * @throws InvoiceException.InvoiceNotFoundException if invoice not found
    */
@@ -305,7 +304,7 @@ public class InvoiceApplicationService {
 
   /**
    * Retrieves an invoice by ID.
-   * 
+   *
    * @param invoiceId the invoice ID
    * @return the invoice DTO
    * @throws InvoiceException.InvoiceNotFoundException if invoice not found
@@ -323,7 +322,7 @@ public class InvoiceApplicationService {
 
   /**
    * Retrieves all invoices for a subscription.
-   * 
+   *
    * @param subscriptionId the subscription ID
    * @return list of invoice DTOs
    */
@@ -339,7 +338,7 @@ public class InvoiceApplicationService {
 
   /**
    * Retrieves all invoices for a tenant.
-   * 
+   *
    * @param tenantId the tenant ID
    * @return list of invoice DTOs
    */
@@ -355,12 +354,12 @@ public class InvoiceApplicationService {
 
   /**
    * Generates invoice number following the configured format.
-   * 
+   *
    * <p>Format: INV-{YEAR}{MONTH}-{SEQUENCE}
    * <p>Example: INV-202412-00001
-   * 
+   *
    * <p>This method delegates to InvoiceGenerator for consistent number generation.
-   * 
+   *
    * @return a unique invoice number
    */
   public String generateInvoiceNumber() {
@@ -371,7 +370,7 @@ public class InvoiceApplicationService {
 
   /**
    * Publishes InvoiceGenerated domain event.
-   * 
+   *
    * <p>This event triggers:
    * <ul>
    *   <li>Async PDF generation via message queue</li>
@@ -388,8 +387,8 @@ public class InvoiceApplicationService {
         invoice.getInvoiceNumber(),
         invoice.getTotal(),
         invoice.getCurrency(),
-        invoice.getDueDate() != null ? 
-            invoice.getDueDate().atZone(java.time.ZoneId.systemDefault()).toInstant() : 
+        invoice.getDueDate() != null ?
+            invoice.getDueDate().atZone(java.time.ZoneId.systemDefault()).toInstant() :
             null
     );
 
@@ -399,7 +398,7 @@ public class InvoiceApplicationService {
 
   /**
    * Publishes InvoicePaid domain event.
-   * 
+   *
    * <p>This event triggers:
    * <ul>
    *   <li>Async receipt email to customer</li>
@@ -417,8 +416,8 @@ public class InvoiceApplicationService {
         invoice.getPaymentMethodId(),
         invoice.getTotal(),
         invoice.getCurrency(),
-        invoice.getPaidAt() != null ? 
-            invoice.getPaidAt().atZone(java.time.ZoneId.systemDefault()).toInstant() : 
+        invoice.getPaidAt() != null ?
+            invoice.getPaidAt().atZone(java.time.ZoneId.systemDefault()).toInstant() :
             null
     );
 
@@ -428,7 +427,7 @@ public class InvoiceApplicationService {
 
   /**
    * Publishes InvoiceVoided domain event.
-   * 
+   *
    * <p>This event triggers async notification to customer.
    */
   private void publishInvoiceVoidedEvent(Invoice invoice, String reason) {
@@ -449,7 +448,7 @@ public class InvoiceApplicationService {
 
   /**
    * Translates Invoice entity to InvoiceDto.
-   * 
+   *
    * @param invoice the invoice entity
    * @return the invoice DTO
    */
@@ -481,7 +480,7 @@ public class InvoiceApplicationService {
 
   /**
    * Translates InvoiceLineItem to InvoiceLineItemDto.
-   * 
+   *
    * @param lineItem the line item entity
    * @return the line item DTO
    */
@@ -494,13 +493,13 @@ public class InvoiceApplicationService {
         lineItem.amount()
     );
   }
-  
+
   /**
    * Generates an invoice for a subscription.
-   * 
+   *
    * <p>This method is called by the InvoiceGenerationConsumer for async invoice generation.
    * It generates an invoice for the current billing period including PDF generation.
-   * 
+   *
    * @param subscriptionId the subscription ID
    * @return the generated invoice DTO
    * @throws com.iqscaffold.billingservice.shared.exception.SubscriptionException.SubscriptionNotFoundException if subscription not found
@@ -508,27 +507,27 @@ public class InvoiceApplicationService {
   @Transactional
   public InvoiceDto generateInvoiceForSubscription(Long subscriptionId) {
     log.info("Generating invoice for subscription: {}", subscriptionId);
-    
+
     var subscription = subscriptionRepository.findById(subscriptionId)
         .orElseThrow(() -> {
           var errorMessage = messageService.getMessage("subscription.not.found");
           log.error("Subscription not found: {}", subscriptionId);
           return new com.iqscaffold.billingservice.shared.exception.SubscriptionException.SubscriptionNotFoundException(errorMessage);
         });
-    
+
     // Use invoice generator to create invoice
     var invoice = invoiceGenerator.generate(
         subscription,
         subscription.getCurrentPeriodStart(),
         subscription.getCurrentPeriodEnd()
     );
-    
+
     // Save invoice
     var savedInvoice = invoiceRepository.save(invoice);
-    
+
     log.info("Invoice generated: invoiceId={}, subscriptionId={}, total={}",
         savedInvoice.getId(), subscriptionId, savedInvoice.getTotal());
-    
+
     return toDto(savedInvoice);
   }
 }

@@ -2,16 +2,15 @@ package com.iqscaffold.billingservice.tenancy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.iqscaffold.billingservice.shared.BillingConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -155,7 +154,7 @@ class TenantExtractionFilterTest {
     // Act & Assert
     try {
       tenantExtractionFilter.doFilterInternal(request, response, filterChain);
-    } catch (ServletException e) {
+    } catch (final ServletException e) {
       // Expected exception
     }
 

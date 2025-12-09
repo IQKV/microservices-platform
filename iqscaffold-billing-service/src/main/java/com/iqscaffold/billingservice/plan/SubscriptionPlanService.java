@@ -1,11 +1,12 @@
 package com.iqscaffold.billingservice.plan;
 
-import com.iqscaffold.billingservice.shared.BillingConstants;
-import com.iqscaffold.billingservice.shared.MessageService;
-import com.iqscaffold.billingservice.shared.exception.PlanException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import com.iqscaffold.billingservice.shared.BillingConstants;
+import com.iqscaffold.billingservice.shared.MessageService;
+import com.iqscaffold.billingservice.shared.exception.PlanException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application service for subscription plan orchestration.
- * 
+ *
  * <p>This service acts as a thin orchestration layer that:
  * <ul>
  *   <li>Delegates business logic to domain aggregates and services</li>
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Provides internationalized messages via MessageService</li>
  *   <li>Implements caching for plan lookups with 1-hour TTL</li>
  * </ul>
- * 
+ *
  * <p>Following DDD principles, this service does not contain business logic.
  * All business rules and invariants are enforced by the SubscriptionPlan aggregate.
  */
@@ -39,21 +40,21 @@ public class SubscriptionPlanService {
 
   /**
    * Creates a new subscription plan.
-   * 
+   *
    * <p>Delegates to the SubscriptionPlan aggregate factory method for creation
    * and validation. Returns an internationalized success message.
-   * 
-   * @param planCode unique plan identifier
-   * @param name display name
-   * @param description detailed description
-   * @param tier plan tier (FREE, PRO, ENTERPRISE)
+   *
+   * @param planCode     unique plan identifier
+   * @param name         display name
+   * @param description  detailed description
+   * @param tier         plan tier (FREE, PRO, ENTERPRISE)
    * @param billingCycle billing frequency (MONTHLY, YEARLY, LIFETIME)
-   * @param basePrice price per billing cycle
-   * @param currency currency code (e.g., USD)
-   * @param features feature flags map
-   * @param quotas quota limits
-   * @param trialDays trial period in days
-   * @param publicPlan whether publicly visible
+   * @param basePrice    price per billing cycle
+   * @param currency     currency code (e.g., USD)
+   * @param features     feature flags map
+   * @param quotas       quota limits
+   * @param trialDays    trial period in days
+   * @param publicPlan   whether publicly visible
    * @return DTO representation of the created plan
    * @throws IllegalArgumentException if validation fails
    */
@@ -107,17 +108,17 @@ public class SubscriptionPlanService {
 
   /**
    * Updates an existing subscription plan.
-   * 
+   *
    * <p>Updates plan details, features, quotas, and pricing. Price changes only
    * affect new subscriptions (existing subscriptions maintain their original price).
-   * 
-   * @param planId plan identifier
-   * @param name new display name
+   *
+   * @param planId      plan identifier
+   * @param name        new display name
    * @param description new description
-   * @param features new feature flags
-   * @param quotas new quota limits
-   * @param basePrice new price
-   * @param currency currency code
+   * @param features    new feature flags
+   * @param quotas      new quota limits
+   * @param basePrice   new price
+   * @param currency    currency code
    * @return DTO representation of the updated plan
    * @throws PlanException.PlanNotFoundException if plan not found
    */
@@ -158,11 +159,11 @@ public class SubscriptionPlanService {
 
   /**
    * Archives (deactivates) a subscription plan.
-   * 
+   *
    * <p>Archived plans are no longer available for new subscriptions but
    * existing subscriptions remain active. Plans with active subscriptions
    * can still be archived.
-   * 
+   *
    * @param planId plan identifier
    * @throws PlanException.PlanNotFoundException if plan not found
    */
@@ -190,9 +191,9 @@ public class SubscriptionPlanService {
 
   /**
    * Retrieves a subscription plan by ID.
-   * 
+   *
    * <p>Results are cached with 1-hour TTL to reduce database load.
-   * 
+   *
    * @param planId plan identifier
    * @return DTO representation of the plan
    * @throws PlanException.PlanNotFoundException if plan not found
@@ -214,9 +215,9 @@ public class SubscriptionPlanService {
 
   /**
    * Retrieves a subscription plan by plan code.
-   * 
+   *
    * <p>Results are cached with 1-hour TTL to reduce database load.
-   * 
+   *
    * @param planCode unique plan identifier
    * @return DTO representation of the plan
    * @throws PlanException.PlanNotFoundException if plan not found
@@ -238,10 +239,10 @@ public class SubscriptionPlanService {
 
   /**
    * Retrieves all active public subscription plans.
-   * 
+   *
    * <p>Returns plans that are both active and publicly visible, ordered by
    * tier and price. Results are cached with 1-hour TTL.
-   * 
+   *
    * @return list of public plan DTOs
    */
   @Transactional(readOnly = true)
@@ -260,10 +261,10 @@ public class SubscriptionPlanService {
 
   /**
    * Retrieves all active subscription plans (public and private).
-   * 
+   *
    * <p>Used for admin purposes. Returns all active plans ordered by tier
    * and price. Results are cached with 1-hour TTL.
-   * 
+   *
    * @return list of all active plan DTOs
    */
   @Transactional(readOnly = true)
@@ -282,10 +283,10 @@ public class SubscriptionPlanService {
 
   /**
    * Retrieves plans filtered by billing cycle.
-   * 
+   *
    * <p>Returns active plans with the specified billing cycle, ordered by
    * tier and price. Results are cached with 1-hour TTL.
-   * 
+   *
    * @param billingCycle billing frequency filter
    * @return list of filtered plan DTOs
    */
@@ -305,13 +306,13 @@ public class SubscriptionPlanService {
 
   /**
    * Validates a plan transition using the ValidPlanTransitionSpecification.
-   * 
+   *
    * <p>Checks if transitioning from one plan to another is valid according
    * to business rules. Throws an exception if the transition is invalid.
-   * 
+   *
    * @param fromPlanId source plan identifier
-   * @param toPlanId target plan identifier
-   * @throws PlanException.PlanNotFoundException if either plan not found
+   * @param toPlanId   target plan identifier
+   * @throws PlanException.PlanNotFoundException          if either plan not found
    * @throws PlanException.InvalidPlanTransitionException if transition invalid
    */
   @Transactional(readOnly = true)
@@ -353,10 +354,10 @@ public class SubscriptionPlanService {
 
   /**
    * Translates a SubscriptionPlan aggregate to a DTO.
-   * 
+   *
    * <p>This method handles the translation between the domain layer and
    * the presentation layer, ensuring proper separation of concerns.
-   * 
+   *
    * @param plan domain aggregate
    * @return DTO representation
    */

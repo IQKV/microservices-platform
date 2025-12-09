@@ -1,7 +1,16 @@
 package com.iqscaffold.billingservice.subscription;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.UUID;
 
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethodType;
@@ -10,10 +19,6 @@ import com.iqscaffold.billingservice.plan.PlanQuotas;
 import com.iqscaffold.billingservice.plan.PlanTier;
 import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -507,7 +512,7 @@ class SubscriptionFactoryTest {
       var brandField = PaymentMethod.class.getDeclaredField("brand");
       brandField.setAccessible(true);
       brandField.set(paymentMethod, "Visa");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to create expired payment method", e);
     }
     

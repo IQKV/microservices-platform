@@ -1,6 +1,5 @@
 package com.iqscaffold.billingservice.plan;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,15 +15,17 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 
 /**
  * SubscriptionPlan aggregate root entity representing a subscription plan in the public schema.
- * 
+ *
  * <p>Subscription plans define the service tiers available to customers, including pricing,
  * features, quotas, and billing cycles. Plans are stored in the public schema and shared
  * across all tenants.
- * 
+ *
  * <p>This aggregate enforces the following invariants:
  * <ul>
  *   <li>Plan code must be unique across all plans</li>
@@ -33,7 +34,7 @@ import org.hibernate.annotations.Type;
  *   <li>FREE tier plans must have zero base price</li>
  *   <li>LIFETIME billing cycle plans cannot have trial periods</li>
  * </ul>
- * 
+ *
  * <p>All modifications to the plan must go through this aggregate root to ensure
  * business rules and invariants are maintained.
  */
@@ -100,18 +101,18 @@ public class SubscriptionPlan {
 
   /**
    * Creates a new subscription plan with the specified attributes.
-   * 
-   * @param planCode unique identifier for the plan
-   * @param name display name of the plan
-   * @param description detailed description of the plan
-   * @param tier plan tier (FREE, PRO, ENTERPRISE)
+   *
+   * @param planCode     unique identifier for the plan
+   * @param name         display name of the plan
+   * @param description  detailed description of the plan
+   * @param tier         plan tier (FREE, PRO, ENTERPRISE)
    * @param billingCycle billing frequency (MONTHLY, YEARLY, LIFETIME)
-   * @param basePrice price per billing cycle
-   * @param currency currency code (e.g., USD, EUR)
-   * @param features map of feature flags
-   * @param quotas quota limits for the plan
-   * @param trialDays number of trial days (0 for no trial)
-   * @param publicPlan whether the plan is publicly visible
+   * @param basePrice    price per billing cycle
+   * @param currency     currency code (e.g., USD, EUR)
+   * @param features     map of feature flags
+   * @param quotas       quota limits for the plan
+   * @param trialDays    number of trial days (0 for no trial)
+   * @param publicPlan   whether the plan is publicly visible
    */
   private SubscriptionPlan(
       String planCode,
@@ -142,18 +143,18 @@ public class SubscriptionPlan {
   /**
    * Factory method to create a new subscription plan.
    * Validates business rules and invariants before creation.
-   * 
-   * @param planCode unique identifier for the plan
-   * @param name display name of the plan
-   * @param description detailed description of the plan
-   * @param tier plan tier (FREE, PRO, ENTERPRISE)
+   *
+   * @param planCode     unique identifier for the plan
+   * @param name         display name of the plan
+   * @param description  detailed description of the plan
+   * @param tier         plan tier (FREE, PRO, ENTERPRISE)
    * @param billingCycle billing frequency (MONTHLY, YEARLY, LIFETIME)
-   * @param basePrice price per billing cycle
-   * @param currency currency code (e.g., USD, EUR)
-   * @param features map of feature flags
-   * @param quotas quota limits for the plan
-   * @param trialDays number of trial days (0 for no trial)
-   * @param publicPlan whether the plan is publicly visible
+   * @param basePrice    price per billing cycle
+   * @param currency     currency code (e.g., USD, EUR)
+   * @param features     map of feature flags
+   * @param quotas       quota limits for the plan
+   * @param trialDays    number of trial days (0 for no trial)
+   * @param publicPlan   whether the plan is publicly visible
    * @return a new SubscriptionPlan instance
    * @throws IllegalArgumentException if any business rule is violated
    */
@@ -196,8 +197,8 @@ public class SubscriptionPlan {
 
   /**
    * Updates the plan name and description.
-   * 
-   * @param name new display name
+   *
+   * @param name        new display name
    * @param description new description
    */
   public void updateDetails(String name, String description) {
@@ -208,7 +209,7 @@ public class SubscriptionPlan {
 
   /**
    * Updates the plan features.
-   * 
+   *
    * @param features new feature map
    */
   public void updateFeatures(Map<String, Object> features) {
@@ -217,7 +218,7 @@ public class SubscriptionPlan {
 
   /**
    * Updates the plan quotas.
-   * 
+   *
    * @param quotas new quota limits
    */
   public void updateQuotas(PlanQuotas quotas) {
@@ -227,9 +228,9 @@ public class SubscriptionPlan {
   /**
    * Updates the plan pricing.
    * Note: Price changes only affect new subscriptions, not existing ones.
-   * 
+   *
    * @param basePrice new price per billing cycle
-   * @param currency currency code
+   * @param currency  currency code
    */
   public void updatePricing(BigDecimal basePrice, String currency) {
     validateBasePrice(basePrice);
@@ -270,7 +271,7 @@ public class SubscriptionPlan {
 
   /**
    * Checks if the plan offers a trial period.
-   * 
+   *
    * @return true if trial days > 0
    */
   public boolean hasTrial() {
@@ -279,7 +280,7 @@ public class SubscriptionPlan {
 
   /**
    * Checks if the plan is free.
-   * 
+   *
    * @return true if tier is FREE
    */
   public boolean isFree() {
@@ -288,7 +289,7 @@ public class SubscriptionPlan {
 
   /**
    * Checks if the plan requires payment.
-   * 
+   *
    * @return true if tier is not FREE
    */
   public boolean requiresPayment() {
@@ -297,7 +298,7 @@ public class SubscriptionPlan {
 
   /**
    * Checks if the plan is a lifetime plan.
-   * 
+   *
    * @return true if billing cycle is LIFETIME
    */
   public boolean isLifetime() {
@@ -468,14 +469,14 @@ public class SubscriptionPlan {
   @Override
   public String toString() {
     return "SubscriptionPlan{" +
-        "id=" + id +
-        ", planCode='" + planCode + '\'' +
-        ", name='" + name + '\'' +
-        ", tier=" + tier +
-        ", billingCycle=" + billingCycle +
-        ", basePrice=" + basePrice +
-        ", currency='" + currency + '\'' +
-        ", active=" + active +
-        '}';
+           "id=" + id +
+           ", planCode='" + planCode + '\'' +
+           ", name='" + name + '\'' +
+           ", tier=" + tier +
+           ", billingCycle=" + billingCycle +
+           ", basePrice=" + basePrice +
+           ", currency='" + currency + '\'' +
+           ", active=" + active +
+           '}';
   }
 }

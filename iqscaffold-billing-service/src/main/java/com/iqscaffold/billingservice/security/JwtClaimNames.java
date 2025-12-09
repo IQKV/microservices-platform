@@ -2,7 +2,7 @@ package com.iqscaffold.billingservice.security;
 
 /**
  * JWT claim names used for extracting user context from JWT tokens.
- * 
+ *
  * <p>These claim names match the structure of JWT tokens issued by the User Service.
  * The claims are extracted during authentication and used to populate UserContext.
  */

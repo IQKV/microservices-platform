@@ -1,5 +1,10 @@
 package com.iqscaffold.billingservice.jobs;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.payment.Payment;
 import com.iqscaffold.billingservice.payment.PaymentRepository;
 import com.iqscaffold.billingservice.shared.event.DomainEventPublisher;
@@ -7,10 +12,6 @@ import com.iqscaffold.billingservice.shared.event.PaymentRetryRequested;
 import com.iqscaffold.billingservice.tenancy.TenantContext;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,16 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Scheduled job to retry failed payments according to schedule.
- * 
+ *
  * <p>Runs daily at 3 AM UTC to identify failed payments eligible for retry
  * and publish events for asynchronous processing.
- * 
+ *
  * <p>Async Pattern: Query payments due for retry → publish PaymentRetry events to queue → consumer processes retries
- * 
+ *
  * <p>Why Async: External payment provider calls, need retry logic, may take time
- * 
+ *
  * <p>Retry Schedule: Day 1, Day 3, Day 7, Day 14 after initial failure
- * 
+ *
  * <p>Features:
  * <ul>
  *   <li>Retry schedule logic (Day 1, Day 3, Day 7, Day 14)</li>
@@ -47,7 +48,7 @@ public class PaymentRetryJob {
   private static final String LOCK_KEY = "job:payment-retry:lock";
   private static final long LOCK_TIMEOUT_SECONDS = 300; // 5 minutes
   private static final int BATCH_SIZE = 100;
-  
+
   // Retry schedule in days after initial failure
   private static final int[] RETRY_SCHEDULE_DAYS = {1, 3, 7, 14};
   private static final int MAX_RETRY_ATTEMPTS = 4;
@@ -71,7 +72,7 @@ public class PaymentRetryJob {
 
   /**
    * Executes the payment retry job daily at 3 AM UTC.
-   * 
+   *
    * <p>Cron expression: 0 0 3 * * * (second, minute, hour, day, month, weekday)
    */
   @Scheduled(cron = "0 0 3 * * *")
@@ -95,13 +96,13 @@ public class PaymentRetryJob {
         try {
           processedCount = processPaymentRetries();
           var duration = System.currentTimeMillis() - startTime;
-          
+
           log.info("Payment retry job completed successfully. Processed {} payments in {}ms",
               processedCount, duration);
-          
+
           meterRegistry.counter("billing.job.payment_retry.success",
               "processed", String.valueOf(processedCount)).increment();
-        } catch (Exception e) {
+        } catch (final Exception e) {
           log.error("Payment retry job failed", e);
           meterRegistry.counter("billing.job.payment_retry.failure").increment();
           throw e;
@@ -114,37 +115,37 @@ public class PaymentRetryJob {
 
   /**
    * Processes payment retries in batches.
-   * 
+   *
    * @return number of payments processed
    */
   @Transactional(readOnly = true)
   protected int processPaymentRetries() {
     var now = LocalDateTime.now();
     var processedCount = 0;
-    
+
     // Check each retry schedule day
-    for (var i = 0; i < RETRY_SCHEDULE_DAYS.length; i++) {
+    for (final var i = 0; i < RETRY_SCHEDULE_DAYS.length; i++) {
       var retryAttempt = i + 1;
       var daysAgo = RETRY_SCHEDULE_DAYS[i];
       var retryAfter = now.minusDays(daysAgo);
       var retryBefore = now.minusDays(daysAgo).plusHours(1); // 1-hour window
-      
+
       var failedPayments = findFailedPaymentsForRetry(retryAfter, retryBefore, retryAttempt);
-      
-      log.info("Found {} failed payments for retry attempt {} (day {})", 
+
+      log.info("Found {} failed payments for retry attempt {} (day {})",
           failedPayments.size(), retryAttempt, daysAgo);
-      
+
       processedCount += processPaymentBatch(failedPayments, retryAttempt);
     }
-    
+
     return processedCount;
   }
 
   /**
    * Finds failed payments eligible for retry within a time window.
-   * 
-   * @param retryAfter earliest creation date
-   * @param retryBefore latest creation date
+   *
+   * @param retryAfter   earliest creation date
+   * @param retryBefore  latest creation date
    * @param retryAttempt current retry attempt number
    * @return list of failed payments
    */
@@ -154,7 +155,7 @@ public class PaymentRetryJob {
       int retryAttempt
   ) {
     var allFailedPayments = paymentRepository.findFailedPaymentsForRetry(retryAfter);
-    
+
     // Filter by retry attempt and time window
     return allFailedPayments.stream()
         .filter(p -> {
@@ -172,50 +173,50 @@ public class PaymentRetryJob {
 
   /**
    * Processes a batch of failed payments.
-   * 
-   * @param payments list of failed payments
+   *
+   * @param payments     list of failed payments
    * @param retryAttempt current retry attempt number
    * @return number of payments processed
    */
   private int processPaymentBatch(List<Payment> payments, int retryAttempt) {
     var processedCount = 0;
     var batch = new java.util.ArrayList<PaymentRetryRequested>(BATCH_SIZE);
-    
-    for (var payment : payments) {
+
+    for (final var payment : payments) {
       try {
         // Execute in tenant context
         TenantContext.executeInTenantContext(payment.getTenantId().toString(), () -> {
           var event = createPaymentRetryEvent(payment, retryAttempt);
           batch.add(event);
-          
+
           // Publish batch when full
           if (batch.size() >= BATCH_SIZE) {
             publishBatch(batch);
             batch.clear();
           }
         });
-        
+
         processedCount++;
-      } catch (Exception e) {
-        log.error("Failed to process payment retry for payment {}", 
+      } catch (final Exception e) {
+        log.error("Failed to process payment retry for payment {}",
             payment.getId(), e);
         meterRegistry.counter("billing.job.payment_retry.error",
             "payment_id", String.valueOf(payment.getId())).increment();
       }
     }
-    
+
     // Publish remaining events
     if (!batch.isEmpty()) {
       publishBatch(batch);
     }
-    
+
     return processedCount;
   }
 
   /**
    * Creates a PaymentRetryRequested event from a payment.
-   * 
-   * @param payment failed payment
+   *
+   * @param payment      failed payment
    * @param retryAttempt current retry attempt number
    * @return payment retry requested event
    */
@@ -233,17 +234,17 @@ public class PaymentRetryJob {
 
   /**
    * Publishes a batch of events to RabbitMQ.
-   * 
+   *
    * @param events list of events to publish
    */
   private void publishBatch(List<PaymentRetryRequested> events) {
     log.debug("Publishing batch of {} payment retry events", events.size());
-    
-    for (var event : events) {
+
+    for (final var event : events) {
       try {
         eventPublisher.publish(event);
-      } catch (Exception e) {
-        log.error("Failed to publish payment retry event for payment {}", 
+      } catch (final Exception e) {
+        log.error("Failed to publish payment retry event for payment {}",
             event.aggregateId(), e);
         meterRegistry.counter("billing.job.payment_retry.publish_error",
             "payment_id", String.valueOf(event.aggregateId())).increment();
@@ -253,16 +254,16 @@ public class PaymentRetryJob {
 
   /**
    * Acquires distributed lock using Redis.
-   * 
+   *
    * @return true if lock acquired, false otherwise
    */
   private boolean acquireLock() {
     try {
       var result = redisTemplate.opsForValue()
-          .setIfAbsent(LOCK_KEY, "locked", 
+          .setIfAbsent(LOCK_KEY, "locked",
               java.time.Duration.ofSeconds(LOCK_TIMEOUT_SECONDS));
       return Boolean.TRUE.equals(result);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to acquire lock for payment retry job", e);
       return false;
     }
@@ -274,7 +275,7 @@ public class PaymentRetryJob {
   private void releaseLock() {
     try {
       redisTemplate.delete(LOCK_KEY);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to release lock for payment retry job", e);
     }
   }

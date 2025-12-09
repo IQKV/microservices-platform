@@ -1,7 +1,5 @@
 package com.iqscaffold.billingservice.subscription;
 
-import com.iqscaffold.billingservice.plan.SubscriptionPlan;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,15 +18,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.plan.SubscriptionPlan;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 
 /**
  * Subscription aggregate root entity representing a tenant's subscription to a plan.
- * 
+ *
  * <p>Subscriptions manage the lifecycle of a tenant's access to platform features,
  * including trial periods, billing cycles, cancellations, and status transitions.
  * Subscriptions are stored in tenant-scoped schemas for data isolation.
- * 
+ *
  * <p>This aggregate enforces the following invariants:
  * <ul>
  *   <li>Only one active subscription per tenant</li>
@@ -38,7 +39,7 @@ import org.hibernate.annotations.Type;
  *   <li>Trial end must be after trial start</li>
  *   <li>Canceled subscriptions maintain access until period end</li>
  * </ul>
- * 
+ *
  * <p>All modifications to the subscription must go through this aggregate root
  * to ensure business rules and invariants are maintained.
  */
@@ -101,11 +102,11 @@ public class Subscription {
 
   /**
    * Creates a new subscription with the specified attributes.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param userId user who created the subscription
-   * @param plan subscription plan
-   * @param status initial status
+   * @param userId   user who created the subscription
+   * @param plan     subscription plan
+   * @param status   initial status
    */
   private Subscription(UUID tenantId, UUID userId, SubscriptionPlan plan, SubscriptionStatus status) {
     this.tenantId = tenantId;
@@ -118,10 +119,10 @@ public class Subscription {
 
   /**
    * Factory method to create a new trial subscription.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param userId user who created the subscription
-   * @param plan subscription plan with trial period
+   * @param userId   user who created the subscription
+   * @param plan     subscription plan with trial period
    * @return a new Subscription in TRIAL status
    * @throws IllegalArgumentException if plan doesn't offer trial
    */
@@ -146,10 +147,10 @@ public class Subscription {
 
   /**
    * Factory method to create a new active subscription without trial.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param userId user who created the subscription
-   * @param plan subscription plan
+   * @param userId   user who created the subscription
+   * @param plan     subscription plan
    * @return a new Subscription in ACTIVE status
    */
   public static Subscription createActive(UUID tenantId, UUID userId, SubscriptionPlan plan) {
@@ -168,10 +169,10 @@ public class Subscription {
   /**
    * Factory method to create a new incomplete subscription.
    * Used when subscription creation requires additional steps (e.g., payment method).
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param userId user who created the subscription
-   * @param plan subscription plan
+   * @param userId   user who created the subscription
+   * @param plan     subscription plan
    * @return a new Subscription in INCOMPLETE status
    */
   public static Subscription createIncomplete(UUID tenantId, UUID userId, SubscriptionPlan plan) {
@@ -185,7 +186,7 @@ public class Subscription {
   /**
    * Converts a trial subscription to active status.
    * Typically called when trial ends and payment method is on file.
-   * 
+   *
    * @throws IllegalStateException if subscription is not in TRIAL status
    */
   public void convertTrialToActive() {
@@ -201,7 +202,7 @@ public class Subscription {
 
   /**
    * Marks the subscription as past due when payment fails.
-   * 
+   *
    * @throws IllegalStateException if subscription is not in ACTIVE status
    */
   public void markPastDue() {
@@ -214,7 +215,7 @@ public class Subscription {
 
   /**
    * Reactivates a past due subscription after successful payment.
-   * 
+   *
    * @throws IllegalStateException if subscription is not in PAST_DUE status
    */
   public void reactivateFromPastDue() {
@@ -255,7 +256,7 @@ public class Subscription {
 
   /**
    * Reactivates a canceled subscription before period end.
-   * 
+   *
    * @throws IllegalStateException if subscription cannot be reactivated
    */
   public void reactivate() {
@@ -284,7 +285,7 @@ public class Subscription {
 
   /**
    * Unsuspends the subscription (admin action).
-   * 
+   *
    * @throws IllegalStateException if subscription is not suspended
    */
   public void unsuspend() {
@@ -297,7 +298,7 @@ public class Subscription {
 
   /**
    * Changes the subscription plan (upgrade or downgrade).
-   * 
+   *
    * @param newPlan the new subscription plan
    * @throws IllegalStateException if plan change is not allowed
    */
@@ -317,9 +318,9 @@ public class Subscription {
 
   /**
    * Extends the trial period by the specified number of days.
-   * 
+   *
    * @param additionalDays number of days to extend
-   * @throws IllegalStateException if subscription is not in TRIAL status
+   * @throws IllegalStateException    if subscription is not in TRIAL status
    * @throws IllegalArgumentException if additionalDays is negative
    */
   public void extendTrial(int additionalDays) {
@@ -350,8 +351,8 @@ public class Subscription {
 
   /**
    * Adds or updates metadata for the subscription.
-   * 
-   * @param key metadata key
+   *
+   * @param key   metadata key
    * @param value metadata value
    */
   public void addMetadata(String key, Object value) {
@@ -363,7 +364,7 @@ public class Subscription {
 
   /**
    * Removes metadata from the subscription.
-   * 
+   *
    * @param key metadata key to remove
    */
   public void removeMetadata(String key) {
@@ -374,18 +375,18 @@ public class Subscription {
 
   /**
    * Checks if the subscription is currently in trial period.
-   * 
+   *
    * @return true if in trial and trial hasn't ended
    */
   public boolean isInTrial() {
-    return status == SubscriptionStatus.TRIAL && 
-           trialEnd != null && 
+    return status == SubscriptionStatus.TRIAL &&
+           trialEnd != null &&
            LocalDateTime.now().isBefore(trialEnd);
   }
 
   /**
    * Checks if the subscription allows feature access.
-   * 
+   *
    * @return true if status allows access
    */
   public boolean hasAccess() {
@@ -394,7 +395,7 @@ public class Subscription {
 
   /**
    * Checks if the subscription is in an active billing state.
-   * 
+   *
    * @return true if actively billing
    */
   public boolean isActiveBilling() {
@@ -403,7 +404,7 @@ public class Subscription {
 
   /**
    * Checks if the subscription period has ended.
-   * 
+   *
    * @return true if current period end is in the past
    */
   public boolean isPeriodEnded() {
@@ -412,7 +413,7 @@ public class Subscription {
 
   /**
    * Gets the number of days remaining in the current period.
-   * 
+   *
    * @return days remaining, or 0 if period has ended
    */
   public long getDaysRemainingInPeriod() {
@@ -438,22 +439,22 @@ public class Subscription {
   private static void validateStatusTransition(SubscriptionStatus from, SubscriptionStatus to) {
     // Use switch expression to validate allowed transitions
     var isValid = switch (from) {
-      case TRIAL -> to == SubscriptionStatus.ACTIVE || 
-                    to == SubscriptionStatus.EXPIRED || 
+      case TRIAL -> to == SubscriptionStatus.ACTIVE ||
+                    to == SubscriptionStatus.EXPIRED ||
                     to == SubscriptionStatus.CANCELED;
-      case ACTIVE -> to == SubscriptionStatus.PAST_DUE || 
-                     to == SubscriptionStatus.CANCELED || 
-                     to == SubscriptionStatus.SUSPENDED || 
+      case ACTIVE -> to == SubscriptionStatus.PAST_DUE ||
+                     to == SubscriptionStatus.CANCELED ||
+                     to == SubscriptionStatus.SUSPENDED ||
                      to == SubscriptionStatus.EXPIRED;
-      case PAST_DUE -> to == SubscriptionStatus.ACTIVE || 
-                       to == SubscriptionStatus.EXPIRED || 
+      case PAST_DUE -> to == SubscriptionStatus.ACTIVE ||
+                       to == SubscriptionStatus.EXPIRED ||
                        to == SubscriptionStatus.SUSPENDED;
-      case CANCELED -> to == SubscriptionStatus.ACTIVE || 
+      case CANCELED -> to == SubscriptionStatus.ACTIVE ||
                        to == SubscriptionStatus.EXPIRED;
-      case SUSPENDED -> to == SubscriptionStatus.ACTIVE || 
+      case SUSPENDED -> to == SubscriptionStatus.ACTIVE ||
                         to == SubscriptionStatus.EXPIRED;
-      case INCOMPLETE -> to == SubscriptionStatus.TRIAL || 
-                         to == SubscriptionStatus.ACTIVE || 
+      case INCOMPLETE -> to == SubscriptionStatus.TRIAL ||
+                         to == SubscriptionStatus.ACTIVE ||
                          to == SubscriptionStatus.EXPIRED;
       case EXPIRED -> false; // Cannot transition from EXPIRED
     };
@@ -580,12 +581,12 @@ public class Subscription {
   @Override
   public String toString() {
     return "Subscription{" +
-        "id=" + id +
-        ", tenantId=" + tenantId +
-        ", status=" + status +
-        ", plan=" + (plan != null ? plan.getPlanCode() : null) +
-        ", currentPeriodEnd=" + currentPeriodEnd +
-        '}';
+           "id=" + id +
+           ", tenantId=" + tenantId +
+           ", status=" + status +
+           ", plan=" + (plan != null ? plan.getPlanCode() : null) +
+           ", currentPeriodEnd=" + currentPeriodEnd +
+           '}';
   }
 
   // Setters for GDPR compliance (anonymization)

@@ -1,18 +1,19 @@
 package com.iqscaffold.billingservice.subscription;
 
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
 import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
  * Factory for creating Subscription aggregates with complex business logic.
- * 
+ *
  * <p>This factory encapsulates the complex logic required to create subscriptions
  * in various states (trial, paid, incomplete) while ensuring all business rules
  * and invariants are satisfied before object creation.
- * 
+ *
  * <p>The factory validates:
  * <ul>
  *   <li>Trial eligibility for trial subscriptions</li>
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
  *   <li>Tenant and user identifiers</li>
  *   <li>All subscription invariants</li>
  * </ul>
- * 
+ *
  * <p>Example usage:
  * <pre>{@code
  * // Create a trial subscription
@@ -29,17 +30,17 @@ import org.springframework.stereotype.Component;
  * Subscription trialSub = subscriptionFactory.createTrialSubscription(
  *     tenantId, userId, plan, history
  * );
- * 
+ *
  * // Create a paid subscription
  * Subscription paidSub = subscriptionFactory.createPaidSubscription(
  *     tenantId, userId, plan, paymentMethod
  * );
  * }</pre>
- * 
+ *
  * <p>Design Rationale: Factories ensure that complex objects are created in a
  * valid state with all invariants satisfied. They centralize creation logic,
  * making it testable and maintainable.
- * 
+ *
  * @see Subscription
  * @see SubscriptionPlan
  * @see TrialEligibilitySpecification
@@ -51,7 +52,7 @@ public class SubscriptionFactory {
 
   /**
    * Constructs a new SubscriptionFactory.
-   * 
+   *
    * @param trialEligibilitySpecification specification for checking trial eligibility
    */
   public SubscriptionFactory(TrialEligibilitySpecification trialEligibilitySpecification) {
@@ -60,7 +61,7 @@ public class SubscriptionFactory {
 
   /**
    * Creates a new trial subscription for a tenant.
-   * 
+   *
    * <p>This method performs the following validations:
    * <ul>
    *   <li>Verifies the tenant is eligible for a trial period</li>
@@ -68,7 +69,7 @@ public class SubscriptionFactory {
    *   <li>Validates tenant ID, user ID, and plan</li>
    *   <li>Ensures all subscription invariants are satisfied</li>
    * </ul>
-   * 
+   *
    * <p>The created subscription will be in TRIAL status with:
    * <ul>
    *   <li>Trial start date set to current time</li>
@@ -76,14 +77,14 @@ public class SubscriptionFactory {
    *   <li>Current period matching the trial period</li>
    *   <li>No payment method required</li>
    * </ul>
-   * 
-   * @param tenantId the tenant identifier
-   * @param userId the user who is creating the subscription
-   * @param plan the subscription plan with trial period
+   *
+   * @param tenantId     the tenant identifier
+   * @param userId       the user who is creating the subscription
+   * @param plan         the subscription plan with trial period
    * @param trialHistory the tenant's trial history for eligibility check
    * @return a new Subscription in TRIAL status
-   * @throws IllegalArgumentException if any parameter is null or invalid
-   * @throws SubscriptionException.TrialNotEligibleException if tenant has already used trial
+   * @throws IllegalArgumentException                             if any parameter is null or invalid
+   * @throws SubscriptionException.TrialNotEligibleException      if tenant has already used trial
    * @throws SubscriptionException.PlanDoesNotOfferTrialException if plan doesn't offer trial
    */
   public Subscription createTrialSubscription(
@@ -118,7 +119,7 @@ public class SubscriptionFactory {
 
   /**
    * Creates a new paid subscription with a payment method.
-   * 
+   *
    * <p>This method performs the following validations:
    * <ul>
    *   <li>Validates tenant ID, user ID, and plan</li>
@@ -126,7 +127,7 @@ public class SubscriptionFactory {
    *   <li>Verifies payment method belongs to the tenant (if provided)</li>
    *   <li>Ensures all subscription invariants are satisfied</li>
    * </ul>
-   * 
+   *
    * <p>The created subscription will be in ACTIVE status with:
    * <ul>
    *   <li>Current period start set to current time</li>
@@ -134,16 +135,16 @@ public class SubscriptionFactory {
    *   <li>Payment method attached for billing (if provided)</li>
    *   <li>No trial period</li>
    * </ul>
-   * 
+   *
    * <p>Payment method can be null for FREE plans or manual billing scenarios.
-   * 
-   * @param tenantId the tenant identifier
-   * @param userId the user who is creating the subscription
-   * @param plan the subscription plan
+   *
+   * @param tenantId      the tenant identifier
+   * @param userId        the user who is creating the subscription
+   * @param plan          the subscription plan
    * @param paymentMethod the payment method for billing (can be null for FREE plans)
    * @return a new Subscription in ACTIVE status
-   * @throws IllegalArgumentException if any parameter is null or invalid
-   * @throws SubscriptionException.InvalidPaymentMethodException if payment method is invalid
+   * @throws IllegalArgumentException                             if any parameter is null or invalid
+   * @throws SubscriptionException.InvalidPaymentMethodException  if payment method is invalid
    * @throws SubscriptionException.PaymentMethodMismatchException if payment method doesn't belong to tenant
    */
   public Subscription createPaidSubscription(
@@ -182,7 +183,7 @@ public class SubscriptionFactory {
 
   /**
    * Creates a new incomplete subscription.
-   * 
+   *
    * <p>Incomplete subscriptions are used when the subscription creation process
    * requires additional steps, such as:
    * <ul>
@@ -190,13 +191,13 @@ public class SubscriptionFactory {
    *   <li>Pending payment authorization</li>
    *   <li>Requiring additional user information</li>
    * </ul>
-   * 
+   *
    * <p>The created subscription will be in INCOMPLETE status and must be
    * transitioned to TRIAL or ACTIVE once the required steps are completed.
-   * 
+   *
    * @param tenantId the tenant identifier
-   * @param userId the user who is creating the subscription
-   * @param plan the subscription plan
+   * @param userId   the user who is creating the subscription
+   * @param plan     the subscription plan
    * @return a new Subscription in INCOMPLETE status
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
@@ -216,22 +217,22 @@ public class SubscriptionFactory {
 
   /**
    * Creates a trial subscription that will convert to paid after trial ends.
-   * 
+   *
    * <p>This is a convenience method that creates a trial subscription with
    * a payment method attached, so it can automatically convert to paid status
    * when the trial period ends.
-   * 
+   *
    * <p>This method performs all validations from both createTrialSubscription
    * and createPaidSubscription.
-   * 
-   * @param tenantId the tenant identifier
-   * @param userId the user who is creating the subscription
-   * @param plan the subscription plan with trial period
-   * @param trialHistory the tenant's trial history for eligibility check
+   *
+   * @param tenantId      the tenant identifier
+   * @param userId        the user who is creating the subscription
+   * @param plan          the subscription plan with trial period
+   * @param trialHistory  the tenant's trial history for eligibility check
    * @param paymentMethod the payment method for post-trial billing
    * @return a new Subscription in TRIAL status with payment method attached
    * @throws IllegalArgumentException if any parameter is null or invalid
-   * @throws SubscriptionException if validation fails
+   * @throws SubscriptionException    if validation fails
    */
   public Subscription createTrialWithPaymentMethod(
       UUID tenantId,

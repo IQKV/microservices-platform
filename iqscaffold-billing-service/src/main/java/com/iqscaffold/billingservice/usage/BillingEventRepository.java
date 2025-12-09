@@ -2,6 +2,7 @@ package com.iqscaffold.billingservice.usage;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for BillingEvent entity.
- * 
+ *
  * <p>Provides query methods for retrieving audit logs and billing events.
  * All queries are automatically scoped to the current tenant schema.
- * 
+ *
  * <p><strong>Note:</strong> This repository does not provide update or delete
  * methods as billing events are immutable audit records (REQ-SEC-012).
  */
@@ -23,7 +24,7 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Find all events for a specific tenant.
-   * 
+   *
    * @param tenantId the tenant identifier
    * @param pageable pagination information
    * @return page of billing events
@@ -32,10 +33,10 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Find events by entity type and entity ID.
-   * 
+   *
    * @param entityType the entity type (e.g., SUBSCRIPTION, INVOICE)
-   * @param entityId the entity identifier
-   * @param pageable pagination information
+   * @param entityId   the entity identifier
+   * @param pageable   pagination information
    * @return page of billing events
    */
   Page<BillingEvent> findByEntityTypeAndEntityIdOrderByCreatedAtDesc(
@@ -43,17 +44,17 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Find events by event type.
-   * 
+   *
    * @param eventType the event type (e.g., SUBSCRIPTION_CREATED)
-   * @param pageable pagination information
+   * @param pageable  pagination information
    * @return page of billing events
    */
   Page<BillingEvent> findByEventTypeOrderByCreatedAtDesc(String eventType, Pageable pageable);
 
   /**
    * Find events by user ID.
-   * 
-   * @param userId the user identifier
+   *
+   * @param userId   the user identifier
    * @param pageable pagination information
    * @return page of billing events
    */
@@ -61,10 +62,10 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Find events within a date range.
-   * 
+   *
    * @param startDate the start date
-   * @param endDate the end date
-   * @param pageable pagination information
+   * @param endDate   the end date
+   * @param pageable  pagination information
    * @return page of billing events
    */
   @Query("""
@@ -79,10 +80,10 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Find events for a specific entity.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param entityType the entity type
-   * @param entityId the entity identifier
+   * @param entityId   the entity identifier
    * @return list of billing events
    */
   List<BillingEvent> findByTenantIdAndEntityTypeAndEntityIdOrderByCreatedAtDesc(
@@ -90,10 +91,10 @@ public interface BillingEventRepository extends JpaRepository<BillingEvent, Long
 
   /**
    * Count events by event type within a date range.
-   * 
+   *
    * @param eventType the event type
    * @param startDate the start date
-   * @param endDate the end date
+   * @param endDate   the end date
    * @return count of events
    */
   @Query("""

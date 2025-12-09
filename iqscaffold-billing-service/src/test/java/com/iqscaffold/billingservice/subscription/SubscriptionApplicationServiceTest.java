@@ -6,9 +6,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import com.iqscaffold.billingservice.TestEntityUtils;
 import com.iqscaffold.billingservice.billing.ProrationCalculator;
@@ -30,11 +35,6 @@ import com.iqscaffold.billingservice.usage.MetricType;
 import com.iqscaffold.billingservice.usage.QuotaExceededSpecification;
 import com.iqscaffold.billingservice.usage.UsageContext;
 import com.iqscaffold.billingservice.usage.UsageRecordRepository;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

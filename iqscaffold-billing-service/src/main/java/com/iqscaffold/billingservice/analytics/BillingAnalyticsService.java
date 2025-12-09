@@ -1,13 +1,5 @@
 package com.iqscaffold.billingservice.analytics;
 
-import com.iqscaffold.billingservice.invoice.InvoiceDto;
-import com.iqscaffold.billingservice.invoice.InvoiceRepository;
-import com.iqscaffold.billingservice.invoice.InvoiceStatus;
-import com.iqscaffold.billingservice.plan.BillingCycle;
-import com.iqscaffold.billingservice.plan.PlanTier;
-import com.iqscaffold.billingservice.subscription.Subscription;
-import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
-import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -17,7 +9,14 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+
+import com.iqscaffold.billingservice.invoice.InvoiceDto;
+import com.iqscaffold.billingservice.invoice.InvoiceRepository;
+import com.iqscaffold.billingservice.invoice.InvoiceStatus;
+import com.iqscaffold.billingservice.plan.PlanTier;
+import com.iqscaffold.billingservice.subscription.Subscription;
+import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
+import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for billing analytics and reporting.
- * 
+ *
  * <p>Provides comprehensive analytics including:
  * <ul>
  *   <li>Monthly Recurring Revenue (MRR) calculation and trends</li>
@@ -38,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Subscription metrics and trends</li>
  *   <li>Invoice listing with filtering</li>
  * </ul>
- * 
+ *
  * <p>All analytics methods are read-only and use database queries optimized
  * for reporting. Results are calculated in real-time based on current data.
  */
@@ -52,7 +51,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates Monthly Recurring Revenue (MRR) analytics.
-   * 
+   *
    * <p>MRR calculation:
    * <ul>
    *   <li>Monthly subscriptions: base price</li>
@@ -60,7 +59,7 @@ public class BillingAnalyticsService {
    *   <li>Lifetime subscriptions: excluded from MRR</li>
    *   <li>Only ACTIVE and TRIAL subscriptions counted</li>
    * </ul>
-   * 
+   *
    * <p>Growth components:
    * <ul>
    *   <li>New MRR: from subscriptions created this month</li>
@@ -68,7 +67,7 @@ public class BillingAnalyticsService {
    *   <li>Expansion MRR: from upgrades this month</li>
    *   <li>Contraction MRR: from downgrades this month</li>
    * </ul>
-   * 
+   *
    * @return MRR report with current MRR, growth rate, and breakdown
    */
   @Transactional(readOnly = true)
@@ -126,14 +125,14 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates churn rate analytics.
-   * 
+   *
    * <p>Churn rate calculation:
    * <ul>
    *   <li>Customer Churn Rate = (Canceled Subscriptions / Total Active at Start) × 100</li>
    *   <li>Revenue Churn Rate = (Churned Revenue / Total MRR at Start) × 100</li>
    *   <li>Calculated for current month</li>
    * </ul>
-   * 
+   *
    * @return churn analysis with churn rate, churned count, and breakdown
    */
   @Transactional(readOnly = true)
@@ -209,8 +208,8 @@ public class BillingAnalyticsService {
 
   /**
    * Lists all invoices with optional filtering.
-   * 
-   * @param status optional status filter
+   *
+   * @param status   optional status filter
    * @param tenantId optional tenant ID filter
    * @param pageable pagination parameters
    * @return page of invoice DTOs
@@ -252,7 +251,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates MRR from a list of subscriptions.
-   * 
+   *
    * @param subscriptions list of subscriptions
    * @return total MRR
    */
@@ -264,7 +263,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates MRR for a single subscription.
-   * 
+   *
    * @param subscription the subscription
    * @return MRR value
    */
@@ -281,7 +280,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates MRR breakdown by plan tier.
-   * 
+   *
    * @param subscriptions list of subscriptions
    * @return map of tier to MRR
    */
@@ -291,7 +290,7 @@ public class BillingAnalyticsService {
     mrrByTier.put(PlanTier.PRO.name(), BigDecimal.ZERO);
     mrrByTier.put(PlanTier.ENTERPRISE.name(), BigDecimal.ZERO);
 
-    for (var subscription : subscriptions) {
+    for (final var subscription : subscriptions) {
       var tier = subscription.getPlan().getTier().name();
       var mrr = calculateSubscriptionMrr(subscription);
       mrrByTier.put(tier, mrrByTier.get(tier).add(mrr));
@@ -302,7 +301,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates new MRR from subscriptions created in the specified month.
-   * 
+   *
    * @param month the month to analyze
    * @return new MRR
    */
@@ -319,7 +318,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates churned MRR from subscriptions canceled in the specified month.
-   * 
+   *
    * @param month the month to analyze
    * @return churned MRR
    */
@@ -336,7 +335,7 @@ public class BillingAnalyticsService {
 
   /**
    * Calculates churn breakdown by plan tier.
-   * 
+   *
    * @param churnedSubscriptions list of churned subscriptions
    * @return map of tier to churned count
    */
@@ -346,7 +345,7 @@ public class BillingAnalyticsService {
     churnByTier.put(PlanTier.PRO.name(), 0L);
     churnByTier.put(PlanTier.ENTERPRISE.name(), 0L);
 
-    for (var subscription : churnedSubscriptions) {
+    for (final var subscription : churnedSubscriptions) {
       var tier = subscription.getPlan().getTier().name();
       churnByTier.put(tier, churnByTier.get(tier) + 1);
     }
@@ -356,7 +355,7 @@ public class BillingAnalyticsService {
 
   /**
    * Converts Invoice entity to InvoiceDto.
-   * 
+   *
    * @param invoice the invoice entity
    * @return the invoice DTO
    */

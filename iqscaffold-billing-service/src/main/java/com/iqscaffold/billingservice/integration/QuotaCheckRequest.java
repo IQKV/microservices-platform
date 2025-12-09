@@ -1,13 +1,14 @@
 package com.iqscaffold.billingservice.integration;
 
-import com.iqscaffold.billingservice.usage.MetricType;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import com.iqscaffold.billingservice.usage.MetricType;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Request DTO for checking quota availability.
- * 
+ *
  * <p>Used by business microservices to verify if a tenant has quota available
  * before performing an operation. Supports common metrics:
  * <ul>
@@ -20,8 +21,8 @@ import jakarta.validation.constraints.NotNull;
  *   <li>CUSTOM_DOMAINS - Custom domain names</li>
  *   <li>DATA_EXPORTS - Data export operations</li>
  * </ul>
- * 
- * @param metricType type of metric to check
+ *
+ * @param metricType        type of metric to check
  * @param requestedQuantity amount being requested
  */
 @Schema(description = "Request to check if tenant has quota available for an operation")
@@ -33,7 +34,7 @@ public record QuotaCheckRequest(
     )
     @NotNull(message = "Metric type is required")
     MetricType metricType,
-    
+
     @Schema(
         description = "Amount of quota being requested",
         example = "1",
@@ -42,4 +43,5 @@ public record QuotaCheckRequest(
     @NotNull(message = "Requested quantity is required")
     @Min(value = 1, message = "Requested quantity must be at least 1")
     Long requestedQuantity
-) {}
+) {
+}

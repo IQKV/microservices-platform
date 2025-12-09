@@ -1,12 +1,13 @@
 package com.iqscaffold.billingservice.plan;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Immutable value object representing quota limits for a subscription plan.
  * Defines resource limits for various metrics like users, storage, API calls, etc.
- * 
+ *
  * <p>This record is stored as JSONB in the database and provides type-safe access
  * to quota values. All quotas are optional and null values indicate unlimited access.
  */
@@ -23,7 +24,7 @@ public record PlanQuotas(
 
   /**
    * Creates a PlanQuotas instance with all quotas set to unlimited (null).
-   * 
+   *
    * @return a PlanQuotas with no limits
    */
   public static PlanQuotas unlimited() {
@@ -32,7 +33,7 @@ public record PlanQuotas(
 
   /**
    * Creates a PlanQuotas instance for a free tier plan with basic limits.
-   * 
+   *
    * @return a PlanQuotas with free tier limits
    */
   public static PlanQuotas freeTier() {
@@ -50,7 +51,7 @@ public record PlanQuotas(
 
   /**
    * Creates a PlanQuotas instance for a pro tier plan with enhanced limits.
-   * 
+   *
    * @return a PlanQuotas with pro tier limits
    */
   public static PlanQuotas proTier() {
@@ -68,7 +69,7 @@ public record PlanQuotas(
 
   /**
    * Checks if a specific quota has a limit defined.
-   * 
+   *
    * @param quotaValue the quota value to check
    * @return true if the quota has a limit (not null), false if unlimited
    */
@@ -78,7 +79,7 @@ public record PlanQuotas(
 
   /**
    * Checks if the max users quota is unlimited.
-   * 
+   *
    * @return true if unlimited, false if limited
    */
   public boolean isMaxUsersUnlimited() {
@@ -87,7 +88,7 @@ public record PlanQuotas(
 
   /**
    * Checks if the storage quota is unlimited.
-   * 
+   *
    * @return true if unlimited, false if limited
    */
   public boolean isStorageUnlimited() {
@@ -96,7 +97,7 @@ public record PlanQuotas(
 
   /**
    * Checks if the API calls quota is unlimited.
-   * 
+   *
    * @return true if unlimited, false if limited
    */
   public boolean isApiCallsUnlimited() {

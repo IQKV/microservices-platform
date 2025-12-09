@@ -14,18 +14,18 @@ import java.util.UUID;
 
 /**
  * Entity tracking trial period usage history for tenants.
- * 
+ *
  * <p>This entity enforces the business rule that each tenant receives only one
  * trial period per lifetime. It tracks whether a tenant has ever used a trial
  * period, regardless of whether the trial was completed or canceled.
- * 
+ *
  * <p>Business rules:
  * <ul>
  *   <li>Each tenant can have exactly one trial period</li>
  *   <li>Once a trial is used, the tenant cannot start another trial</li>
  *   <li>Trial history is immutable once marked as used</li>
  * </ul>
- * 
+ *
  * <p>This entity is stored in tenant-scoped schemas for data isolation.
  */
 @Entity
@@ -60,7 +60,7 @@ public class TenantTrialHistory {
 
   /**
    * Creates a new trial history for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    */
   private TenantTrialHistory(UUID tenantId) {
@@ -70,7 +70,7 @@ public class TenantTrialHistory {
 
   /**
    * Factory method to create a new trial history for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return new TenantTrialHistory with no trial used
    * @throws IllegalArgumentException if tenantId is null
@@ -85,7 +85,7 @@ public class TenantTrialHistory {
 
   /**
    * Marks the trial as used for this tenant.
-   * 
+   *
    * <p>This method is idempotent - calling it multiple times has the same
    * effect as calling it once.
    */
@@ -98,7 +98,7 @@ public class TenantTrialHistory {
 
   /**
    * Checks if the tenant has used their trial period.
-   * 
+   *
    * @return true if trial has been used
    */
   public boolean hasUsedTrial() {
@@ -162,10 +162,10 @@ public class TenantTrialHistory {
   @Override
   public String toString() {
     return "TenantTrialHistory{" +
-        "id=" + id +
-        ", tenantId=" + tenantId +
-        ", hasUsedTrial=" + hasUsedTrial +
-        ", firstTrialStartedAt=" + firstTrialStartedAt +
-        '}';
+           "id=" + id +
+           ", tenantId=" + tenantId +
+           ", hasUsedTrial=" + hasUsedTrial +
+           ", firstTrialStartedAt=" + firstTrialStartedAt +
+           '}';
   }
 }

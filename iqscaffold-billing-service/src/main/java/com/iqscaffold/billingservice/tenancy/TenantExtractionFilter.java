@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -13,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Filter for establishing tenant context early in the request processing chain.
- * 
+ *
  * <p>Extracts tenant information from the X-Tenant-ID header (set by API Gateway)
  * and establishes tenant context before other filters and controllers execute.
  * The tenant context is automatically cleared after request processing.

@@ -1,13 +1,14 @@
 package com.iqscaffold.billingservice.portal;
 
-import com.iqscaffold.billingservice.invoice.InvoiceApplicationService;
-import com.iqscaffold.billingservice.subscription.SubscriptionApplicationService;
-import com.iqscaffold.billingservice.usage.UsageApplicationService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.invoice.InvoiceApplicationService;
+import com.iqscaffold.billingservice.subscription.SubscriptionApplicationService;
+import com.iqscaffold.billingservice.usage.UsageApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for customer billing portal operations.
- * 
+ *
  * <p>Provides business logic for the customer billing portal, including:
  * <ul>
  *   <li>Comprehensive billing dashboard generation</li>
@@ -36,7 +37,7 @@ public class BillingPortalService {
 
   /**
    * Retrieves comprehensive billing dashboard for a tenant.
-   * 
+   *
    * <p>Aggregates data from multiple services to provide a complete view of:
    * <ul>
    *   <li>Current subscription status and details</li>
@@ -46,7 +47,7 @@ public class BillingPortalService {
    *   <li>Payment methods on file</li>
    *   <li>Available upgrade and downgrade options</li>
    * </ul>
-   * 
+   *
    * @param tenantId the tenant unique identifier
    * @return comprehensive billing dashboard DTO
    */
@@ -73,19 +74,19 @@ public class BillingPortalService {
 
     // Calculate total paid (sum of all paid invoices)
     var totalPaid = recentInvoices.stream()
-      .filter(invoice -> invoice.status() == com.iqscaffold.billingservice.invoice.InvoiceStatus.PAID)
-      .map(invoice -> invoice.total())
-      .reduce(BigDecimal.ZERO, BigDecimal::add);
+        .filter(invoice -> invoice.status() == com.iqscaffold.billingservice.invoice.InvoiceStatus.PAID)
+        .map(invoice -> invoice.total())
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     // Calculate days remaining in period
     var daysRemaining = ChronoUnit.DAYS.between(
-      LocalDateTime.now(),
-      subscription.currentPeriodEnd()
+        LocalDateTime.now(),
+        subscription.currentPeriodEnd()
     );
 
     // Determine subscription status flags
-    var inTrial = subscription.trialEnd() != null && 
-      subscription.trialEnd().isAfter(LocalDateTime.now());
+    var inTrial = subscription.trialEnd() != null &&
+                  subscription.trialEnd().isAfter(LocalDateTime.now());
     var pastDue = "PAST_DUE".equals(subscription.status());
     var canceled = subscription.cancelAtPeriodEnd() || "CANCELED".equals(subscription.status());
 
@@ -95,19 +96,19 @@ public class BillingPortalService {
     var availableDowngrades = Collections.<BillingDashboardDto.DowngradePlanOption>emptyList();
 
     return new BillingDashboardDto(
-      tenantId,
-      subscription,
-      quotaUsage,
-      recentInvoices,
-      upcomingInvoiceAmount,
-      paymentMethods,
-      totalPaid,
-      daysRemaining,
-      inTrial,
-      pastDue,
-      canceled,
-      availableUpgrades,
-      availableDowngrades
+        tenantId,
+        subscription,
+        quotaUsage,
+        recentInvoices,
+        upcomingInvoiceAmount,
+        paymentMethods,
+        totalPaid,
+        daysRemaining,
+        inTrial,
+        pastDue,
+        canceled,
+        availableUpgrades,
+        availableDowngrades
     );
   }
 }

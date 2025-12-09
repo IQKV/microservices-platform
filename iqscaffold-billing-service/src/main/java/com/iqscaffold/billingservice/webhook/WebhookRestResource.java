@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for webhook endpoints from payment providers.
- * 
+ *
  * <p>This controller provides webhook endpoints for Stripe and PayPal payment providers.
  * Webhooks are processed asynchronously to ensure fast response times (< 5 seconds)
  * as required by payment providers.
- * 
+ *
  * <h2>Processing Pattern</h2>
  * <ol>
  *   <li>Validate webhook signature</li>
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Publish to RabbitMQ for async processing</li>
  *   <li>Return 200 OK immediately</li>
  * </ol>
- * 
+ *
  * <h2>Security</h2>
  * <p>All webhook endpoints verify signatures before processing to prevent
  * malicious webhook injection attacks. Invalid signatures return 401 Unauthorized.
@@ -45,15 +45,15 @@ public class WebhookRestResource {
 
   /**
    * Processes Stripe webhook events.
-   * 
+   *
    * <p><strong>Async Processing:</strong> This endpoint returns 200 OK immediately
    * after validating the signature and queuing the event. Actual processing happens
    * asynchronously via RabbitMQ consumers.
-   * 
+   *
    * <p><strong>Idempotency:</strong> Duplicate webhook events (same event ID) are
    * automatically detected and return success without reprocessing.
-   * 
-   * @param payload the raw webhook payload (JSON string)
+   *
+   * @param payload   the raw webhook payload (JSON string)
    * @param signature the Stripe signature header (Stripe-Signature)
    * @return webhook event ID for tracking
    */
@@ -109,20 +109,20 @@ public class WebhookRestResource {
       @RequestHeader("Stripe-Signature") String signature
   ) {
     log.info("Received Stripe webhook");
-    
+
     String eventId = webhookApplicationService.processStripeWebhook(payload, signature);
-    
+
     return ResponseEntity.ok(new WebhookResponse(eventId, "Webhook received and queued for processing"));
   }
 
   /**
    * Processes PayPal webhook events.
-   * 
+   *
    * <p><strong>Async Processing:</strong> This endpoint returns 200 OK immediately
    * after validating the signature and queuing the event. Actual processing happens
    * asynchronously via RabbitMQ consumers.
-   * 
-   * @param payload the raw webhook payload (JSON string)
+   *
+   * @param payload   the raw webhook payload (JSON string)
    * @param signature the PayPal signature header
    * @return webhook event ID for tracking
    */
@@ -168,9 +168,9 @@ public class WebhookRestResource {
       @RequestHeader("PayPal-Transmission-Sig") String signature
   ) {
     log.info("Received PayPal webhook");
-    
+
     String eventId = webhookApplicationService.processPayPalWebhook(payload, signature);
-    
+
     return ResponseEntity.ok(new WebhookResponse(eventId, "Webhook received and queued for processing"));
   }
 
@@ -180,8 +180,9 @@ public class WebhookRestResource {
   public record WebhookResponse(
       @Schema(description = "Webhook event ID", example = "evt_1234567890")
       String eventId,
-      
+
       @Schema(description = "Status message", example = "Webhook received and queued for processing")
       String message
-  ) {}
+  ) {
+  }
 }

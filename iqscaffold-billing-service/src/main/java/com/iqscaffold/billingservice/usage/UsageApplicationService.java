@@ -1,12 +1,13 @@
 package com.iqscaffold.billingservice.usage;
 
-import com.iqscaffold.billingservice.shared.MessageService;
-import com.iqscaffold.billingservice.subscription.Subscription;
-import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.iqscaffold.billingservice.shared.MessageService;
+import com.iqscaffold.billingservice.subscription.Subscription;
+import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -16,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application service for usage tracking and quota enforcement.
- * 
+ *
  * <p>This service provides a thin orchestration layer for usage-related operations,
  * delegating business logic to domain services and aggregates. It manages transactions,
  * translates between domain objects and DTOs, and publishes domain events.
- * 
+ *
  * <p>Key responsibilities:
  * <ul>
  *   <li>Record usage metrics with idempotency</li>
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Reset usage for new billing periods</li>
  *   <li>Publish domain events (UsageRecorded, QuotaExceeded)</li>
  * </ul>
- * 
+ *
  * <p>Async Processing Strategy:
  * <ul>
  *   <li>recordUsage publishes to RabbitMQ for async processing (high volume)</li>
@@ -37,11 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Quota checks are cached for 1 minute to reduce database load</li>
  *   <li>Quota enforcement is synchronous for immediate feedback</li>
  * </ul>
- * 
+ *
  * <p>Design Rationale: Application services orchestrate use cases without containing
  * business logic. They manage transactions, coordinate domain services, and handle
  * cross-cutting concerns like caching and event publishing.
- * 
+ *
  * @see UsageRecord
  * @see QuotaEnforcer
  * @see QuotaExceededSpecification
@@ -60,13 +61,13 @@ public class UsageApplicationService {
 
   /**
    * Records usage for a tenant and metric type.
-   * 
+   *
    * <p>This method creates a usage record for billing and quota tracking purposes.
    * In production, this would publish to RabbitMQ for async processing to handle
    * high volume (10,000+ records/sec). For now, it processes synchronously.
-   * 
+   *
    * <p>Idempotency: Uses usage record ID to prevent duplicate processing.
-   * 
+   *
    * <p>Async Processing Pattern (to be implemented):
    * <pre>{@code
    * // Publish to RabbitMQ queue
@@ -74,14 +75,14 @@ public class UsageApplicationService {
    * // Return immediately with 202 Accepted
    * return ResponseEntity.accepted().build();
    * }</pre>
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId   tenant identifier
    * @param metricType type of metric being tracked
-   * @param quantity amount of usage
-   * @param unit unit of measurement (optional)
+   * @param quantity   amount of usage
+   * @param unit       unit of measurement (optional)
    * @param recordedAt when the usage occurred
    * @return the created usage record DTO
-   * @throws IllegalArgumentException if parameters are invalid
+   * @throws IllegalArgumentException      if parameters are invalid
    * @throws SubscriptionNotFoundException if no active subscription exists
    */
   @CacheEvict(value = "usage-quotas", key = "#tenantId + '-' + #metricType")
@@ -138,10 +139,10 @@ public class UsageApplicationService {
 
   /**
    * Records multiple usage records in a batch.
-   * 
+   *
    * <p>This method is optimized for high-volume usage recording. In production,
    * this would publish to RabbitMQ for async batch processing (100 records at a time).
-   * 
+   *
    * <p>Async Processing Pattern (to be implemented):
    * <pre>{@code
    * // Publish batch to RabbitMQ queue
@@ -149,8 +150,8 @@ public class UsageApplicationService {
    * // Return immediately with 202 Accepted
    * return ResponseEntity.accepted().build();
    * }</pre>
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId     tenant identifier
    * @param usageRecords list of usage records to create
    * @return list of created usage record DTOs
    * @throws IllegalArgumentException if parameters are invalid
@@ -214,9 +215,9 @@ public class UsageApplicationService {
 
   /**
    * Gets current usage for a tenant across all metrics.
-   * 
+   *
    * <p>Returns aggregated usage for the current billing period.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return usage summary for the current period
    * @throws SubscriptionNotFoundException if no active subscription exists
@@ -240,12 +241,12 @@ public class UsageApplicationService {
 
   /**
    * Gets usage for a specific billing period.
-   * 
+   *
    * <p>Returns aggregated usage metrics for the specified time period.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId    tenant identifier
    * @param periodStart start of the period
-   * @param periodEnd end of the period
+   * @param periodEnd   end of the period
    * @return usage summary for the period
    */
   @Transactional(readOnly = true)
@@ -296,12 +297,12 @@ public class UsageApplicationService {
 
   /**
    * Checks if a tenant has quota available for a metric type.
-   * 
+   *
    * <p>This method is cached for 1 minute to reduce database load.
    * Quota enforcement must be synchronous for immediate feedback.
-   * 
-   * @param tenantId tenant identifier
-   * @param metricType type of metric to check
+   *
+   * @param tenantId          tenant identifier
+   * @param metricType        type of metric to check
    * @param requestedQuantity amount being requested
    * @return quota check result
    * @throws SubscriptionNotFoundException if no active subscription exists
@@ -347,14 +348,14 @@ public class UsageApplicationService {
 
   /**
    * Enforces quota limits by throwing an exception if exceeded.
-   * 
+   *
    * <p>This method performs the same check as {@link #checkQuota} but throws
    * an exception instead of returning a result. Useful for enforcing hard limits.
-   * 
-   * @param tenantId tenant identifier
-   * @param metricType type of metric to check
+   *
+   * @param tenantId          tenant identifier
+   * @param metricType        type of metric to check
    * @param requestedQuantity amount being requested
-   * @throws QuotaExceededException if quota is exceeded
+   * @throws QuotaExceededException        if quota is exceeded
    * @throws SubscriptionNotFoundException if no active subscription exists
    */
   @Transactional(readOnly = true)
@@ -381,10 +382,10 @@ public class UsageApplicationService {
 
   /**
    * Resets usage counters for a new billing period.
-   * 
+   *
    * <p>This method is called when a subscription renews to start fresh usage tracking.
    * It does not delete historical usage records, only marks the start of a new period.
-   * 
+   *
    * @param tenantId tenant identifier
    * @throws SubscriptionNotFoundException if no active subscription exists
    */
@@ -512,7 +513,8 @@ public class UsageApplicationService {
       Long quantity,
       String unit,
       LocalDateTime recordedAt
-  ) {}
+  ) {
+  }
 
   /**
    * Exception thrown when a subscription is not found.

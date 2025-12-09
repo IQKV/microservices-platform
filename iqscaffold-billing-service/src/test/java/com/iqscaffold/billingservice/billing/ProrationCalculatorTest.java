@@ -1,16 +1,21 @@
 package com.iqscaffold.billingservice.billing;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.UUID;
 
 import com.iqscaffold.billingservice.plan.BillingCycle;
 import com.iqscaffold.billingservice.plan.PlanQuotas;
 import com.iqscaffold.billingservice.plan.PlanTier;
 import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.subscription.Subscription;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -86,7 +91,7 @@ class ProrationCalculatorTest {
       idField.set(basicPlan, 1L);
       idField.set(proPlan, 2L);
       idField.set(enterprisePlan, 3L);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException("Failed to set plan IDs", e);
     }
   }
@@ -304,7 +309,7 @@ class ProrationCalculatorTest {
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, leapYearEnd);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
       
@@ -341,7 +346,7 @@ class ProrationCalculatorTest {
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, nonLeapYearEnd);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
       
@@ -374,7 +379,7 @@ class ProrationCalculatorTest {
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, januaryEnd);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
       
@@ -407,7 +412,7 @@ class ProrationCalculatorTest {
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, aprilEnd);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
       
@@ -687,7 +692,7 @@ class ProrationCalculatorTest {
         idField.setAccessible(true);
         idField.set(plan1, 10L);
         idField.set(plan2, 11L);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set plan IDs", e);
       }
       
@@ -758,7 +763,7 @@ class ProrationCalculatorTest {
         var idField = SubscriptionPlan.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(planWithRepeatingDecimal, 20L);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Failed to set plan ID", e);
       }
       
@@ -867,7 +872,7 @@ class ProrationCalculatorTest {
       var daysInPeriod = (int) java.time.temporal.ChronoUnit.DAYS.between(periodStart, periodEnd);
 
       // Test various points in the period
-      for (int daysElapsed = 0; daysElapsed < daysInPeriod; daysElapsed += 5) {
+      for (final int daysElapsed = 0; daysElapsed < daysInPeriod; daysElapsed += 5) {
         var effectiveDate = periodStart.plusDays(daysElapsed);
         var result = prorationCalculator.calculate(subscription, proPlan, effectiveDate);
         

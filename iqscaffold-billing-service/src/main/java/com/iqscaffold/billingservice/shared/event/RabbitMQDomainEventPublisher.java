@@ -85,51 +85,51 @@ public class RabbitMQDomainEventPublisher implements DomainEventPublisher {
     try {
       // Convert event type to routing key format (e.g., "billing.subscription.created")
       var routingKey = event.eventType();
-      
+
       // Serialize event to JSON
       var eventJson = objectMapper.writeValueAsString(event);
 
       // Publish to RabbitMQ with comprehensive metadata
       rabbitTemplate.convertAndSend(EXCHANGE_NAME, routingKey, eventJson, message -> {
         var properties = message.getMessageProperties();
-        
+
         // Core event metadata
         properties.setHeader("eventId", event.eventId().toString());
         properties.setHeader("eventType", event.eventType());
         properties.setHeader("eventVersion", EVENT_VERSION);
-        
+
         // Aggregate metadata
         properties.setHeader("aggregateId", event.aggregateId().toString());
         properties.setHeader("aggregateType", extractAggregateType(event.eventType()));
-        
+
         // Tenant context for multi-tenancy
         properties.setHeader("tenantId", event.tenantId().toString());
-        
+
         // Timestamp
         properties.setTimestamp(java.util.Date.from(event.occurredAt()));
-        
+
         // Content type for proper deserialization
         properties.setContentType("application/json");
-        
+
         return message;
       });
 
       log.info(
-        "Published domain event: type={}, eventId={}, aggregateId={}, tenantId={}, version={}",
-        event.eventType(),
-        event.eventId(),
-        event.aggregateId(),
-        event.tenantId(),
-        EVENT_VERSION
+          "Published domain event: type={}, eventId={}, aggregateId={}, tenantId={}, version={}",
+          event.eventType(),
+          event.eventId(),
+          event.aggregateId(),
+          event.tenantId(),
+          EVENT_VERSION
       );
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error(
-        "Failed to publish domain event: type={}, eventId={}, aggregateId={}, tenantId={}",
-        event.eventType(),
-        event.eventId(),
-        event.aggregateId(),
-        event.tenantId(),
-        e
+          "Failed to publish domain event: type={}, eventId={}, aggregateId={}, tenantId={}",
+          event.eventType(),
+          event.eventId(),
+          event.aggregateId(),
+          event.tenantId(),
+          e
       );
       // In production, consider using transactional outbox pattern
       // to ensure events are not lost on publish failure
@@ -139,7 +139,7 @@ public class RabbitMQDomainEventPublisher implements DomainEventPublisher {
 
   @Override
   public void publishAll(final DomainEvent... events) {
-    for (var event : events) {
+    for (final var event : events) {
       publish(event);
     }
   }

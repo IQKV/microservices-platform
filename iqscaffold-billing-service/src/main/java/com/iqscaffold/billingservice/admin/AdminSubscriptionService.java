@@ -1,5 +1,7 @@
 package com.iqscaffold.billingservice.admin;
 
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
 import com.iqscaffold.billingservice.subscription.Subscription;
@@ -7,7 +9,6 @@ import com.iqscaffold.billingservice.subscription.SubscriptionDto;
 import com.iqscaffold.billingservice.subscription.SubscriptionLifecycleManager;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application service for admin subscription operations.
- * 
+ *
  * <p>This service provides administrative capabilities for managing subscriptions
  * across all tenants, including:
  * <ul>
@@ -26,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Force canceling subscriptions</li>
  *   <li>Viewing subscription details across tenants</li>
  * </ul>
- * 
+ *
  * <p>All operations in this service bypass normal tenant isolation and require
  * ADMIN or SUPER_ADMIN authority.
  */
@@ -41,11 +42,11 @@ public class AdminSubscriptionService {
 
   /**
    * Lists all subscriptions with optional filtering and pagination.
-   * 
+   *
    * <p>This method allows administrators to view subscriptions across all tenants
    * with optional filtering by status, plan code, and tenant ID.
-   * 
-   * @param status optional status filter
+   *
+   * @param status   optional status filter
    * @param planCode optional plan code filter
    * @param tenantId optional tenant ID filter
    * @param pageable pagination parameters
@@ -73,12 +74,12 @@ public class AdminSubscriptionService {
     }
 
     if (planCode != null && !planCode.isBlank()) {
-      spec = spec.and((root, query, cb) -> 
+      spec = spec.and((root, query, cb) ->
           cb.equal(root.get("plan").get("planCode"), planCode));
     }
 
     if (tenantId != null && !tenantId.isBlank()) {
-      spec = spec.and((root, query, cb) -> 
+      spec = spec.and((root, query, cb) ->
           cb.equal(root.get("tenantId"), UUID.fromString(tenantId)));
     }
 
@@ -98,13 +99,13 @@ public class AdminSubscriptionService {
 
   /**
    * Force cancels a subscription immediately.
-   * 
+   *
    * <p>This method bypasses normal cancellation rules and immediately cancels
    * a subscription. It should be used with caution and only for administrative
    * purposes such as policy violations or fraud cases.
-   * 
+   *
    * @param subscriptionId subscription identifier
-   * @param reason reason for the cancellation (required for audit trail)
+   * @param reason         reason for the cancellation (required for audit trail)
    * @return DTO representation of the canceled subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
    */
@@ -158,10 +159,10 @@ public class AdminSubscriptionService {
 
   /**
    * Translates a Subscription aggregate to a DTO.
-   * 
+   *
    * <p>This method handles the translation between the domain layer and
    * the presentation layer, ensuring proper separation of concerns.
-   * 
+   *
    * @param subscription domain aggregate
    * @return DTO representation
    */

@@ -12,27 +12,27 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DataRetentionJob {
-    
-    private static final Logger logger = LoggerFactory.getLogger(DataRetentionJob.class);
-    
-    private final GdprComplianceService gdprComplianceService;
-    
-    public DataRetentionJob(GdprComplianceService gdprComplianceService) {
-        this.gdprComplianceService = gdprComplianceService;
+
+  private static final Logger logger = LoggerFactory.getLogger(DataRetentionJob.class);
+
+  private final GdprComplianceService gdprComplianceService;
+
+  public DataRetentionJob(GdprComplianceService gdprComplianceService) {
+    this.gdprComplianceService = gdprComplianceService;
+  }
+
+  /**
+   * Apply data retention policies daily at 2 AM.
+   */
+  @Scheduled(cron = "0 0 2 * * *")
+  public void applyRetentionPolicies() {
+    logger.info("Starting data retention job");
+
+    try {
+      gdprComplianceService.applyRetentionPolicies();
+      logger.info("Data retention job completed successfully");
+    } catch (final Exception e) {
+      logger.error("Data retention job failed", e);
     }
-    
-    /**
-     * Apply data retention policies daily at 2 AM.
-     */
-    @Scheduled(cron = "0 0 2 * * *")
-    public void applyRetentionPolicies() {
-        logger.info("Starting data retention job");
-        
-        try {
-            gdprComplianceService.applyRetentionPolicies();
-            logger.info("Data retention job completed successfully");
-        } catch (Exception e) {
-            logger.error("Data retention job failed", e);
-        }
-    }
+  }
 }

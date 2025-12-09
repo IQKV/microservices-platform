@@ -1,16 +1,17 @@
 package com.iqscaffold.billingservice.billing;
 
-import com.iqscaffold.billingservice.plan.SubscriptionPlan;
-import com.iqscaffold.billingservice.subscription.Subscription;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+
+import com.iqscaffold.billingservice.plan.SubscriptionPlan;
+import com.iqscaffold.billingservice.subscription.Subscription;
 import org.springframework.stereotype.Service;
 
 /**
  * Domain service for calculating proration when subscription plans change mid-period.
- * 
+ *
  * <p>This service encapsulates the complex business logic for calculating credits
  * and charges when a customer upgrades or downgrades their subscription plan before
  * the current billing period ends. The proration ensures fair billing by:
@@ -19,11 +20,11 @@ import org.springframework.stereotype.Service;
  *   <li>Charging for the new plan for the remaining period</li>
  *   <li>Calculating the net amount owed or credited</li>
  * </ul>
- * 
+ *
  * <p>This logic doesn't naturally belong to either the Subscription or SubscriptionPlan
  * aggregate, as it spans both and involves time-based calculations. Therefore, it's
  * implemented as a stateless domain service.
- * 
+ *
  * <p>The proration calculation follows this formula:
  * <pre>
  * prorationFactor = daysRemaining / daysInPeriod
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
  * chargeAmount = newPlanPrice * prorationFactor
  * netAmount = chargeAmount - creditAmount
  * </pre>
- * 
+ *
  * <p>Usage example:
  * <pre>{@code
  * ProrationResult result = prorationCalculator.calculate(
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Service;
  *   newPlan,
  *   LocalDateTime.now()
  * );
- * 
+ *
  * if (result.isUpgrade()) {
  *   // Customer owes additional amount
  *   paymentService.charge(result.netAmount());
@@ -48,11 +49,11 @@ import org.springframework.stereotype.Service;
  *   creditService.apply(result.getAbsoluteNetAmount());
  * }
  * }</pre>
- * 
+ *
  * <p>Design Rationale: Domain services keep business logic in the domain layer while
  * avoiding artificial assignment to aggregates. They remain stateless and focused on
  * domain operations.
- * 
+ *
  * @see ProrationResult
  * @see Subscription
  * @see SubscriptionPlan
@@ -62,11 +63,11 @@ public class ProrationCalculator {
 
   /**
    * Calculates proration for a subscription plan change.
-   * 
+   *
    * <p>This method determines the credit for unused time on the old plan and the
    * charge for the new plan for the remaining period. It handles both upgrades
    * (net positive amount) and downgrades (net negative amount).
-   * 
+   *
    * <p>The calculation considers:
    * <ul>
    *   <li>Current subscription plan and pricing</li>
@@ -74,13 +75,13 @@ public class ProrationCalculator {
    *   <li>Days remaining in the current billing period</li>
    *   <li>Total days in the billing period</li>
    * </ul>
-   * 
-   * @param subscription the current subscription
-   * @param newPlan the new subscription plan
+   *
+   * @param subscription  the current subscription
+   * @param newPlan       the new subscription plan
    * @param effectiveDate the date when the plan change takes effect
    * @return a ProrationResult containing credit, charge, and net amounts
    * @throws IllegalArgumentException if any parameter is null or invalid
-   * @throws IllegalStateException if subscription is not in a state that allows plan changes
+   * @throws IllegalStateException    if subscription is not in a state that allows plan changes
    */
   public ProrationResult calculate(
       final Subscription subscription,
@@ -162,11 +163,11 @@ public class ProrationCalculator {
 
   /**
    * Calculates proration for a subscription upgrade with immediate effect.
-   * 
+   *
    * <p>Convenience method that uses the current time as the effective date.
-   * 
+   *
    * @param subscription the current subscription
-   * @param newPlan the new subscription plan (higher tier)
+   * @param newPlan      the new subscription plan (higher tier)
    * @return a ProrationResult for the upgrade
    */
   public ProrationResult calculateUpgrade(
@@ -177,11 +178,11 @@ public class ProrationCalculator {
 
   /**
    * Calculates proration for a subscription downgrade with immediate effect.
-   * 
+   *
    * <p>Convenience method that uses the current time as the effective date.
-   * 
+   *
    * @param subscription the current subscription
-   * @param newPlan the new subscription plan (lower tier)
+   * @param newPlan      the new subscription plan (lower tier)
    * @return a ProrationResult for the downgrade
    */
   public ProrationResult calculateDowngrade(
@@ -192,13 +193,13 @@ public class ProrationCalculator {
 
   /**
    * Calculates proration for a scheduled plan change at period end.
-   * 
+   *
    * <p>When a plan change is scheduled for the end of the current period,
    * no proration is needed. This method returns a result indicating the
    * full charge for the new plan starting at the next period.
-   * 
+   *
    * @param subscription the current subscription
-   * @param newPlan the new subscription plan
+   * @param newPlan      the new subscription plan
    * @return a ProrationResult with no proration (full period charge)
    */
   public ProrationResult calculateScheduledChange(
@@ -227,12 +228,12 @@ public class ProrationCalculator {
 
   /**
    * Estimates the annual cost difference between two plans.
-   * 
+   *
    * <p>Useful for showing customers the annual savings or additional cost
    * when considering a plan change.
-   * 
+   *
    * @param currentPlan the current subscription plan
-   * @param newPlan the new subscription plan
+   * @param newPlan     the new subscription plan
    * @return the annual cost difference (positive for increase, negative for decrease)
    */
   public BigDecimal estimateAnnualCostDifference(

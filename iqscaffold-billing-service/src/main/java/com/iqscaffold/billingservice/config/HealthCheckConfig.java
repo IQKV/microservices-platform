@@ -1,8 +1,8 @@
 package com.iqscaffold.billingservice.config;
 
-import com.iqscaffold.billingservice.payment.PaymentProviderFactory;
-import jakarta.annotation.Nullable;
 import javax.sql.DataSource;
+
+import com.iqscaffold.billingservice.payment.PaymentProviderFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.actuate.health.Health;
@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Configuration for custom health checks in the billing service.
- * 
+ *
  * <p>Provides health indicators for critical billing service dependencies:
  * <ul>
  *   <li><strong>Database:</strong> PostgreSQL connectivity and performance</li>
@@ -23,18 +23,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *   <li><strong>RabbitMQ:</strong> Message broker connectivity</li>
  *   <li><strong>Payment Provider:</strong> External payment provider availability</li>
  * </ul>
- * 
+ *
  * <h2>Health Check Strategy</h2>
  * <p>Each health indicator performs lightweight checks to verify connectivity
  * and basic functionality without impacting service performance. Health checks
  * are exposed via Spring Boot Actuator at {@code /actuator/health}.
- * 
+ *
  * <h2>Health Status Levels</h2>
  * <ul>
  *   <li><strong>UP:</strong> Component is healthy and operational</li>
  *   <li><strong>DOWN:</strong> Component is unavailable or failing</li>
  * </ul>
- * 
+ *
  * <h2>Configuration</h2>
  * <p>Health check behavior is configured in application.yml:
  * <pre>{@code
@@ -50,7 +50,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *     readinessstate:
  *       enabled: true
  * }</pre>
- * 
+ *
  * @see HealthIndicator
  * @see Health
  */
@@ -61,11 +61,11 @@ public class HealthCheckConfig {
 
   /**
    * Custom health indicator for database connectivity and performance.
-   * 
+   *
    * <p>Performs a simple query to verify PostgreSQL connectivity and measures
    * response time. This check is critical as the database stores all billing
    * data including subscriptions, invoices, and payments.
-   * 
+   *
    * @param dataSource the PostgreSQL data source
    * @return database health indicator
    */
@@ -76,11 +76,11 @@ public class HealthCheckConfig {
 
   /**
    * Custom health indicator for Redis connectivity and performance.
-   * 
+   *
    * <p>Verifies Redis connectivity using a PING command and measures response
    * time. Redis is used for caching subscription data, rate limiting, and
    * session management.
-   * 
+   *
    * @param redisConnectionFactory the Redis connection factory
    * @return Redis health indicator
    */
@@ -91,11 +91,11 @@ public class HealthCheckConfig {
 
   /**
    * Custom health indicator for RabbitMQ connectivity.
-   * 
+   *
    * <p>Verifies RabbitMQ connectivity by checking the connection status.
    * RabbitMQ is used for asynchronous event processing including usage
    * recording, invoice generation, and webhook processing.
-   * 
+   *
    * @param rabbitTemplate the RabbitMQ template
    * @return RabbitMQ health indicator
    */
@@ -106,11 +106,11 @@ public class HealthCheckConfig {
 
   /**
    * Custom health indicator for payment provider availability.
-   * 
+   *
    * <p>Checks if the configured payment provider (Stripe, PayPal, or Manual)
    * is properly configured and available. This check verifies that required
    * credentials are present but does not make external API calls.
-   * 
+   *
    * @param paymentProviderFactory the payment provider factory
    * @return payment provider health indicator
    */
@@ -121,7 +121,7 @@ public class HealthCheckConfig {
 
   /**
    * Database health indicator implementation.
-   * 
+   *
    * <p>Executes a simple {@code SELECT 1} query to verify database connectivity
    * and measures response time. This is a lightweight check that doesn't impact
    * database performance.
@@ -170,7 +170,7 @@ public class HealthCheckConfig {
 
   /**
    * Redis health indicator implementation.
-   * 
+   *
    * <p>Executes a PING command to verify Redis connectivity and measures
    * response time. Redis is critical for caching and rate limiting.
    */
@@ -220,7 +220,7 @@ public class HealthCheckConfig {
 
   /**
    * RabbitMQ health indicator implementation.
-   * 
+   *
    * <p>Checks RabbitMQ connection status to verify message broker availability.
    * RabbitMQ is used for asynchronous event processing and is critical for
    * usage recording, invoice generation, and webhook processing.
@@ -242,9 +242,9 @@ public class HealthCheckConfig {
         // Test RabbitMQ connectivity by checking connection
         var connectionFactory = rabbitTemplate.getConnectionFactory();
         var connection = connectionFactory.createConnection();
-        
+
         var responseTime = System.currentTimeMillis() - startTime;
-        
+
         if (connection != null && connection.isOpen()) {
           connection.close();
           return Health.up()
@@ -275,12 +275,12 @@ public class HealthCheckConfig {
 
   /**
    * Payment provider health indicator implementation.
-   * 
+   *
    * <p>Verifies that the configured payment provider (Stripe, PayPal, or Manual)
    * is properly configured with required credentials. This check does not make
    * external API calls to avoid impacting health check performance and external
    * rate limits.
-   * 
+   *
    * <h3>Health Check Logic</h3>
    * <ul>
    *   <li><strong>UP:</strong> Configured provider is available with credentials</li>
@@ -304,14 +304,14 @@ public class HealthCheckConfig {
 
         // Get configured provider name
         String configuredProvider = paymentProviderFactory.getConfiguredProviderName();
-        
+
         // Check if configured provider is available
         boolean isConfiguredProviderAvailable = paymentProviderFactory.isConfiguredProviderAvailable();
-        
+
         // Get actual provider (may be fallback)
         var actualProvider = paymentProviderFactory.getProvider();
         String actualProviderName = actualProvider.getProviderName();
-        
+
         var responseTime = System.currentTimeMillis() - startTime;
 
         // Build health status based on provider availability

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * Domain service for enforcing quota limits based on subscription plans.
- * 
+ *
  * <p>This service encapsulates the business logic for validating whether a tenant
  * can perform an operation based on their current usage and subscription plan quotas.
  * It provides quota checking, enforcement, and grace period handling.
- * 
+ *
  * <p>Quota enforcement involves:
  * <ul>
  *   <li>Checking current usage against plan limits</li>
@@ -19,11 +19,11 @@ import org.springframework.stereotype.Service;
  *   <li>Handling unlimited quotas</li>
  *   <li>Providing detailed quota status information</li>
  * </ul>
- * 
+ *
  * <p>This logic spans multiple aggregates (Subscription, SubscriptionPlan, UsageRecord)
  * and doesn't naturally belong to any single aggregate. Therefore, it's implemented
  * as a stateless domain service.
- * 
+ *
  * <p>Usage example:
  * <pre>{@code
  * QuotaCheckResult result = quotaEnforcer.checkQuota(
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
  *   MetricType.API_CALLS,
  *   1
  * );
- * 
+ *
  * if (!result.allowed()) {
  *   throw new QuotaExceededException(
  *     "API call quota exceeded",
@@ -41,11 +41,11 @@ import org.springframework.stereotype.Service;
  *   );
  * }
  * }</pre>
- * 
+ *
  * <p>Design Rationale: Domain services keep business logic in the domain layer while
  * avoiding artificial assignment to aggregates. They remain stateless and focused on
  * domain operations.
- * 
+ *
  * @see QuotaCheckResult
  * @see Subscription
  * @see SubscriptionPlan
@@ -63,7 +63,7 @@ public class QuotaEnforcer {
 
   /**
    * Checks if a requested operation is allowed based on current usage and quota limits.
-   * 
+   *
    * <p>This method performs the following checks:
    * <ul>
    *   <li>Retrieves the quota limit for the metric type from the subscription plan</li>
@@ -71,7 +71,7 @@ public class QuotaEnforcer {
    *   <li>Applies grace period (5% overage) if configured</li>
    *   <li>Returns detailed result with quota status</li>
    * </ul>
-   * 
+   *
    * <p>The check considers:
    * <ul>
    *   <li>Unlimited quotas (always allowed)</li>
@@ -79,9 +79,9 @@ public class QuotaEnforcer {
    *   <li>Requested amount for the operation</li>
    *   <li>Grace period for soft limits</li>
    * </ul>
-   * 
-   * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
+   *
+   * @param subscription      the subscription to check
+   * @param metricType        the type of metric being checked
    * @param requestedQuantity the amount being requested
    * @return a QuotaCheckResult indicating if the operation is allowed
    * @throws IllegalArgumentException if any parameter is null or invalid
@@ -116,13 +116,13 @@ public class QuotaEnforcer {
 
   /**
    * Checks if a requested operation is allowed based on current usage and quota limits.
-   * 
+   *
    * <p>This overloaded method accepts the current usage as a parameter, allowing
    * the caller to provide the usage data from their repository.
-   * 
-   * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
-   * @param currentUsage the current usage amount in the billing period
+   *
+   * @param subscription      the subscription to check
+   * @param metricType        the type of metric being checked
+   * @param currentUsage      the current usage amount in the billing period
    * @param requestedQuantity the amount being requested
    * @return a QuotaCheckResult indicating if the operation is allowed
    * @throws IllegalArgumentException if any parameter is null or invalid
@@ -196,15 +196,15 @@ public class QuotaEnforcer {
 
   /**
    * Enforces quota limits by throwing an exception if the quota is exceeded.
-   * 
+   *
    * <p>This method performs the same check as {@link #checkQuota} but throws
    * an exception instead of returning a result. Useful for enforcing hard limits.
-   * 
-   * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
-   * @param currentUsage the current usage amount in the billing period
+   *
+   * @param subscription      the subscription to check
+   * @param metricType        the type of metric being checked
+   * @param currentUsage      the current usage amount in the billing period
    * @param requestedQuantity the amount being requested
-   * @throws QuotaExceededException if the quota is exceeded
+   * @throws QuotaExceededException   if the quota is exceeded
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
   public void enforceQuota(
@@ -227,12 +227,12 @@ public class QuotaEnforcer {
 
   /**
    * Checks if a subscription has any quota available for a metric type.
-   * 
+   *
    * <p>Returns true if the subscription has any remaining quota (including grace period)
    * or if the quota is unlimited.
-   * 
+   *
    * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
+   * @param metricType   the type of metric being checked
    * @param currentUsage the current usage amount in the billing period
    * @return true if quota is available
    */
@@ -247,12 +247,12 @@ public class QuotaEnforcer {
 
   /**
    * Calculates the remaining quota for a metric type.
-   * 
+   *
    * <p>Returns the amount of quota remaining before the limit is reached.
    * Returns Long.MAX_VALUE for unlimited quotas.
-   * 
+   *
    * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
+   * @param metricType   the type of metric being checked
    * @param currentUsage the current usage amount in the billing period
    * @return the remaining quota amount
    */
@@ -281,12 +281,12 @@ public class QuotaEnforcer {
 
   /**
    * Checks if a subscription is approaching its quota limit.
-   * 
+   *
    * <p>Returns true if current usage is at or above 90% of the quota limit.
    * Useful for sending warning notifications to customers.
-   * 
+   *
    * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
+   * @param metricType   the type of metric being checked
    * @param currentUsage the current usage amount in the billing period
    * @return true if approaching limit (>= 90%)
    */
@@ -315,12 +315,12 @@ public class QuotaEnforcer {
 
   /**
    * Calculates the percentage of quota used.
-   * 
+   *
    * <p>Returns a value between 0 and 100+ indicating the percentage of the
    * quota that has been consumed. Returns 0 for unlimited quotas.
-   * 
+   *
    * @param subscription the subscription to check
-   * @param metricType the type of metric being checked
+   * @param metricType   the type of metric being checked
    * @param currentUsage the current usage amount in the billing period
    * @return the percentage used (0-100+)
    */

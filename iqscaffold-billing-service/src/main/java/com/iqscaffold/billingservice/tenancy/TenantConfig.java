@@ -45,8 +45,8 @@ public class TenantConfig {
    * Hibernate properties customizer to configure multi-tenant settings.
    * Enables tenant-aware data filtering at the Hibernate level.
    *
-   * @param tenantResolver       the tenant identifier resolver
-   * @param connectionProvider   the multi-tenant connection provider
+   * @param tenantResolver     the tenant identifier resolver
+   * @param connectionProvider the multi-tenant connection provider
    * @return the Hibernate properties customizer
    */
   @Bean

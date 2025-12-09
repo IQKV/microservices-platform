@@ -53,19 +53,19 @@ public class SchemaPerTenantConnectionProvider implements MultiTenantConnectionP
     var connection = getAnyConnection();
     var defaultSchema = isH2(connection) ? "PUBLIC" : "public";
     var schema = tenantIdentifier != null ? String.valueOf(tenantIdentifier) : defaultSchema;
-    
+
     // H2 uses uppercase PUBLIC schema by default
     if (isH2(connection) && "public".equalsIgnoreCase(schema)) {
       schema = "PUBLIC";
     }
-    
+
     // Auto-create schema for H2 (test database only)
     if (isH2(connection) && !"PUBLIC".equalsIgnoreCase(schema)) {
       try (var stmt = connection.createStatement()) {
         stmt.execute("CREATE SCHEMA IF NOT EXISTS " + schema);
       }
     }
-    
+
     connection.setSchema(schema);
     return connection;
   }

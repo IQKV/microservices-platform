@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,11 +14,11 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for Invoice aggregate.
- * 
+ *
  * <p>This repository provides methods to query and persist invoice aggregates.
  * All queries return fully reconstituted aggregates with their associated subscription
  * and payment method data.
- * 
+ *
  * <p>Uses text blocks (Java 21) for multi-line JPQL queries to improve readability.
  */
 @Repository
@@ -25,7 +26,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds an invoice by its unique invoice number.
-   * 
+   *
    * @param invoiceNumber unique invoice identifier
    * @return optional containing the invoice, or empty if not found
    */
@@ -40,7 +41,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds all invoices for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @param pageable pagination information
    * @return page of invoices ordered by creation date descending
@@ -60,7 +61,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds all invoices for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier (as string)
    * @return list of invoices ordered by creation date descending
    */
@@ -76,9 +77,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds invoices by tenant and status.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param status invoice status
+   * @param status   invoice status
    * @param pageable pagination information
    * @return page of invoices matching criteria
    */
@@ -99,7 +100,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds invoices by subscription.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @return list of invoices for the subscription ordered by creation date descending
    */
@@ -115,8 +116,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds invoices by status.
-   * 
-   * @param status invoice status
+   *
+   * @param status   invoice status
    * @param pageable pagination information
    * @return page of invoices with the specified status
    */
@@ -136,7 +137,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   /**
    * Finds overdue invoices.
    * Returns invoices in OPEN status where due date has passed.
-   * 
+   *
    * @param now current timestamp
    * @return list of overdue invoices ordered by due date ascending
    */
@@ -155,8 +156,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   /**
    * Finds invoices due soon.
    * Returns invoices in OPEN status where due date is within the specified days.
-   * 
-   * @param now current timestamp
+   *
+   * @param now     current timestamp
    * @param dueDate end of the look-ahead period
    * @return list of invoices due soon ordered by due date ascending
    */
@@ -179,7 +180,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   /**
    * Finds unpaid invoices for a tenant.
    * Returns invoices in OPEN or DRAFT status.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of unpaid invoices ordered by due date ascending
    */
@@ -196,7 +197,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds the most recent invoice for a subscription.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @return optional containing the most recent invoice, or empty if none exists
    */
@@ -214,10 +215,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   /**
    * Finds invoices by period.
    * Returns invoices where period start and end fall within the specified range.
-   * 
+   *
    * @param startDate period start date
-   * @param endDate period end date
-   * @param pageable pagination information
+   * @param endDate   period end date
+   * @param pageable  pagination information
    * @return page of invoices for the specified period
    */
   @Query("""
@@ -237,7 +238,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Counts unpaid invoices for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return number of unpaid invoices
    */
@@ -250,7 +251,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Calculates total amount of unpaid invoices for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return sum of total amounts for unpaid invoices
    */
@@ -263,7 +264,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Checks if an invoice number already exists.
-   * 
+   *
    * @param invoiceNumber invoice number to check
    * @return true if invoice number exists
    */
@@ -277,7 +278,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   /**
    * Finds the next invoice sequence number for a given year and month.
    * Used for generating unique invoice numbers.
-   * 
+   *
    * @param yearMonth year and month prefix (e.g., "202412")
    * @return the highest sequence number for the period, or 0 if none exists
    */
@@ -292,7 +293,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds invoices by status.
-   * 
+   *
    * @param status invoice status
    * @return list of invoices with the specified status
    */
@@ -308,8 +309,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
   /**
    * Finds invoices by status and tenant ID.
-   * 
-   * @param status invoice status
+   *
+   * @param status   invoice status
    * @param tenantId tenant identifier (as string)
    * @return list of invoices matching criteria
    */

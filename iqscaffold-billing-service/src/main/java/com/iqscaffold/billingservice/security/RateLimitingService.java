@@ -1,9 +1,10 @@
 package com.iqscaffold.billingservice.security;
 
-import com.iqscaffold.billingservice.config.BillingProperties;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+
+import com.iqscaffold.billingservice.config.BillingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -11,11 +12,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service for implementing rate limiting using Redis.
- * 
+ *
  * <p>Provides IP-based rate limiting for public endpoints using a sliding window
  * approach with Redis sorted sets. This prevents abuse of public APIs while
  * allowing legitimate traffic.
- * 
+ *
  * <p>Configuration is driven by {@link BillingProperties.Security.RateLimiting}.
  */
 @Service
@@ -38,10 +39,10 @@ public class RateLimitingService {
 
   /**
    * Check if the IP address is within rate limits.
-   * 
+   *
    * <p>Uses sliding window approach with Redis sorted sets to track requests
    * over time. Old requests outside the window are automatically removed.
-   * 
+   *
    * @param ipAddress the client IP address
    * @return true if within rate limit, false if exceeded
    */
@@ -68,9 +69,9 @@ public class RateLimitingService {
       }
 
       int maxRequests = billingProperties.security().rateLimiting().requestsPerMinute();
-      
+
       if (currentCount >= maxRequests) {
-        logger.warn("Rate limit exceeded for IP: {} (count: {}, limit: {})", 
+        logger.warn("Rate limit exceeded for IP: {} (count: {}, limit: {})",
             ipAddress, currentCount, maxRequests);
         return false;
       }
@@ -83,7 +84,7 @@ public class RateLimitingService {
 
       return true;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // If Redis is unavailable, allow the request (fail open)
       logger.error("Rate limiting error for IP {}: {}", ipAddress, e.getMessage(), e);
       return true;
@@ -92,7 +93,7 @@ public class RateLimitingService {
 
   /**
    * Get remaining attempts for an IP address.
-   * 
+   *
    * @param ipAddress the client IP address
    * @return the number of remaining requests allowed in the current window
    */
@@ -115,8 +116,8 @@ public class RateLimitingService {
 
       int maxRequests = billingProperties.security().rateLimiting().requestsPerMinute();
       return Math.max(0, maxRequests - currentCount.intValue());
-      
-    } catch (Exception e) {
+
+    } catch (final Exception e) {
       logger.error("Error getting remaining attempts for IP {}: {}", ipAddress, e.getMessage());
       return billingProperties.security().rateLimiting().requestsPerMinute();
     }
@@ -124,7 +125,7 @@ public class RateLimitingService {
 
   /**
    * Get time until rate limit resets for an IP address.
-   * 
+   *
    * @param ipAddress the client IP address
    * @return the duration until the rate limit window resets
    */
@@ -149,7 +150,7 @@ public class RateLimitingService {
 
       return Duration.ofMillis(Math.max(0, timeUntilReset));
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error getting time until reset for IP {}: {}", ipAddress, e.getMessage());
       return Duration.ZERO;
     }
@@ -157,9 +158,9 @@ public class RateLimitingService {
 
   /**
    * Clear rate limit for an IP address.
-   * 
+   *
    * <p>This is useful for testing or administrative purposes.
-   * 
+   *
    * @param ipAddress the client IP address
    */
   public void clearRateLimit(String ipAddress) {

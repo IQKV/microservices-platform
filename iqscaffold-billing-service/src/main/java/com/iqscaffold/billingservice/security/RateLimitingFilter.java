@@ -1,7 +1,5 @@
 package com.iqscaffold.billingservice.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iqscaffold.billingservice.config.BillingProperties;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iqscaffold.billingservice.config.BillingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -18,14 +19,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Filter for rate limiting public endpoints.
- * 
+ *
  * <p>Uses Redis-backed rate limiting with IP-based tracking to prevent abuse
  * of public APIs. The filter applies to public endpoints that don't require
  * authentication, such as plan listing and webhook endpoints.
- * 
+ *
  * <p>Rate limiting is configured via {@link BillingProperties.Security.RateLimiting}
  * and can be disabled for testing or development environments.
- * 
+ *
  * <p>This filter follows the user-service pattern for consistent rate limiting
  * across the platform.
  */
@@ -85,7 +86,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     // Check rate limit
     if (!rateLimitingService.isWithinRateLimit(ipAddress)) {
       // Rate limit exceeded
-      logger.warn("Rate limit exceeded for IP: {} on path: {} (User-Agent: {})", 
+      logger.warn("Rate limit exceeded for IP: {} on path: {} (User-Agent: {})",
           ipAddress, requestPath, userAgent);
 
       var remainingTime = rateLimitingService.getTimeUntilReset(ipAddress);
@@ -96,7 +97,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     // Add rate limit headers to response
     int remainingAttempts = rateLimitingService.getRemainingAttempts(ipAddress);
     int maxRequests = billingProperties.security().rateLimiting().requestsPerMinute();
-    
+
     response.setHeader("X-RateLimit-Remaining", String.valueOf(remainingAttempts));
     response.setHeader("X-RateLimit-Limit", String.valueOf(maxRequests));
     response.setHeader("X-RateLimit-Window", "60");
@@ -106,7 +107,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
   /**
    * Check if the request path should be rate limited.
-   * 
+   *
    * @param requestPath the request URI
    * @return true if the path should be rate limited
    */
@@ -117,10 +118,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
   /**
    * Get client IP address, considering proxy headers.
-   * 
+   *
    * <p>Checks X-Forwarded-For and X-Real-IP headers commonly used by
    * load balancers and reverse proxies before falling back to remote address.
-   * 
+   *
    * @param request the HTTP request
    * @return the client IP address
    */
@@ -144,10 +145,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
   /**
    * Send rate limit exceeded response.
-   * 
+   *
    * <p>Returns HTTP 429 Too Many Requests with RFC 7807 Problem Details format.
-   * 
-   * @param response the HTTP response
+   *
+   * @param response          the HTTP response
    * @param retryAfterSeconds seconds until rate limit resets
    * @throws IOException if writing response fails
    */

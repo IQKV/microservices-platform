@@ -1,6 +1,8 @@
 package com.iqscaffold.billingservice.subscription;
 
-import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import com.iqscaffold.billingservice.paymentmethod.PaymentMethodRepository;
 import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.plan.SubscriptionPlanRepository;
@@ -8,8 +10,6 @@ import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.shared.exception.PlanException;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
-import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Application service for subscription lifecycle orchestration.
- * 
+ *
  * <p>This service acts as a thin orchestration layer that:
  * <ul>
  *   <li>Delegates business logic to domain aggregates, factories, and services</li>
@@ -29,11 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Implements caching for subscription lookups with 5-minute TTL</li>
  *   <li>Publishes domain events for eventual consistency</li>
  * </ul>
- * 
+ *
  * <p>Following DDD principles, this service does not contain business logic.
  * All business rules and invariants are enforced by the Subscription aggregate,
  * SubscriptionFactory, and domain services.
- * 
+ *
  * <p>This implementation focuses on subscription creation and trial management.
  * Upgrade/downgrade and cancellation/reactivation are handled by separate methods.
  */
@@ -57,7 +57,7 @@ public class SubscriptionApplicationService {
 
   /**
    * Creates a new subscription for a tenant.
-   * 
+   *
    * <p>This method handles both trial and paid subscription creation:
    * <ul>
    *   <li>If startTrial is true and plan offers trial, creates trial subscription</li>
@@ -67,12 +67,12 @@ public class SubscriptionApplicationService {
    *   <li>Ensures only one active subscription per tenant</li>
    *   <li>Publishes SubscriptionCreated and TrialStarted events</li>
    * </ul>
-   * 
+   *
    * @param request subscription creation request
    * @return DTO representation of the created subscription
-   * @throws SubscriptionException.SubscriptionAlreadyExistsException if tenant has active subscription
-   * @throws PlanException.PlanNotFoundException if plan not found
-   * @throws SubscriptionException.TrialNotEligibleException if trial not eligible
+   * @throws SubscriptionException.SubscriptionAlreadyExistsException                                       if tenant has active subscription
+   * @throws PlanException.PlanNotFoundException                                                            if plan not found
+   * @throws SubscriptionException.TrialNotEligibleException                                                if trial not eligible
    * @throws com.iqscaffold.billingservice.shared.exception.PaymentException.PaymentMethodNotFoundException if payment method not found
    */
   @Transactional
@@ -148,17 +148,17 @@ public class SubscriptionApplicationService {
 
   /**
    * Extends the trial period for a subscription.
-   * 
+   *
    * <p>This is typically an admin action to give customers more time to evaluate.
    * Uses SubscriptionLifecycleManager domain service for state transition logic.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @param additionalDays number of days to extend
-   * @param reason reason for the extension
+   * @param reason         reason for the extension
    * @return DTO representation of the updated subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws IllegalStateException if subscription is not in TRIAL status
-   * @throws IllegalArgumentException if additionalDays is negative
+   * @throws IllegalStateException                               if subscription is not in TRIAL status
+   * @throws IllegalArgumentException                            if additionalDays is negative
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
@@ -195,19 +195,19 @@ public class SubscriptionApplicationService {
 
   /**
    * Converts a trial subscription to active status.
-   * 
+   *
    * <p>This is typically called when:
    * <ul>
    *   <li>Trial period ends and payment method is on file</li>
    *   <li>Customer manually converts trial to paid</li>
    * </ul>
-   * 
+   *
    * <p>Uses SubscriptionLifecycleManager domain service for state transition logic.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @return DTO representation of the updated subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws IllegalStateException if subscription is not in TRIAL status
+   * @throws IllegalStateException                               if subscription is not in TRIAL status
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
@@ -242,10 +242,10 @@ public class SubscriptionApplicationService {
 
   /**
    * Retrieves the active subscription for a tenant.
-   * 
+   *
    * <p>Returns the subscription with ACTIVE, TRIAL, or PAST_DUE status.
    * Results are cached with 5-minute TTL to reduce database load.
-   * 
+   *
    * @param tenantId tenant identifier
    * @return DTO representation of the active subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if no active subscription found
@@ -269,9 +269,9 @@ public class SubscriptionApplicationService {
 
   /**
    * Retrieves a subscription by ID.
-   * 
+   *
    * <p>Results are cached with 5-minute TTL to reduce database load.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @return DTO representation of the subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
@@ -293,7 +293,7 @@ public class SubscriptionApplicationService {
 
   /**
    * Upgrades a subscription to a higher-tier plan with immediate proration.
-   * 
+   *
    * <p>This method handles subscription upgrades by:
    * <ul>
    *   <li>Validating the plan transition using ValidPlanTransitionSpecification</li>
@@ -301,16 +301,16 @@ public class SubscriptionApplicationService {
    *   <li>Applying the plan change immediately</li>
    *   <li>Publishing SubscriptionUpgraded domain event</li>
    * </ul>
-   * 
+   *
    * <p>The upgrade is always immediate - the customer is charged the prorated
    * amount for the new plan for the remainder of the current period.
-   * 
+   *
    * @param subscriptionId subscription identifier
-   * @param request upgrade request containing new plan code and metadata
+   * @param request        upgrade request containing new plan code and metadata
    * @return DTO representation of the upgraded subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws PlanException.PlanNotFoundException if new plan not found
-   * @throws PlanException.InvalidPlanTransitionException if transition is invalid
+   * @throws PlanException.PlanNotFoundException                 if new plan not found
+   * @throws PlanException.InvalidPlanTransitionException        if transition is invalid
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
@@ -340,7 +340,7 @@ public class SubscriptionApplicationService {
     // Validate plan transition
     var currentPlan = subscription.getPlan();
     var transition = new com.iqscaffold.billingservice.plan.PlanTransition(currentPlan, newPlan);
-    
+
     if (!validPlanTransitionSpecification.isSatisfiedBy(transition)) {
       var errorMessage = messageService.getMessage(
           "subscription.upgrade.invalid.transition",
@@ -375,7 +375,7 @@ public class SubscriptionApplicationService {
 
     // Calculate proration for immediate upgrade
     var prorationResult = prorationCalculator.calculateUpgrade(subscription, newPlan);
-    
+
     log.info(
         "Proration calculated for subscription {}: credit={}, charge={}, net={}",
         subscriptionId,
@@ -431,7 +431,7 @@ public class SubscriptionApplicationService {
 
   /**
    * Downgrades a subscription to a lower-tier plan.
-   * 
+   *
    * <p>This method handles subscription downgrades by:
    * <ul>
    *   <li>Validating the plan transition using ValidPlanTransitionSpecification</li>
@@ -440,23 +440,23 @@ public class SubscriptionApplicationService {
    *   <li>Applying the plan change immediately or scheduling for period end</li>
    *   <li>Publishing SubscriptionDowngraded domain event</li>
    * </ul>
-   * 
+   *
    * <p>Downgrades can be:
    * <ul>
    *   <li>Immediate: Applied right away with proration credit</li>
    *   <li>Scheduled: Applied at the end of the current billing period (no proration)</li>
    * </ul>
-   * 
+   *
    * <p>Before allowing a downgrade, the method validates that current usage
    * doesn't exceed the new plan's quotas. If usage exceeds quotas, the downgrade
    * is rejected to prevent service disruption.
-   * 
+   *
    * @param subscriptionId subscription identifier
-   * @param request downgrade request containing new plan code, immediate flag, and metadata
+   * @param request        downgrade request containing new plan code, immediate flag, and metadata
    * @return DTO representation of the downgraded subscription
-   * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws PlanException.PlanNotFoundException if new plan not found
-   * @throws PlanException.InvalidPlanTransitionException if transition is invalid
+   * @throws SubscriptionException.SubscriptionNotFoundException                                  if subscription not found
+   * @throws PlanException.PlanNotFoundException                                                  if new plan not found
+   * @throws PlanException.InvalidPlanTransitionException                                         if transition is invalid
    * @throws com.iqscaffold.billingservice.shared.exception.UsageException.QuotaExceededException if current usage exceeds new plan quotas
    */
   @Transactional
@@ -488,7 +488,7 @@ public class SubscriptionApplicationService {
     // Validate plan transition
     var currentPlan = subscription.getPlan();
     var transition = new com.iqscaffold.billingservice.plan.PlanTransition(currentPlan, newPlan);
-    
+
     if (!validPlanTransitionSpecification.isSatisfiedBy(transition)) {
       var errorMessage = messageService.getMessage(
           "subscription.downgrade.invalid.transition",
@@ -549,7 +549,7 @@ public class SubscriptionApplicationService {
 
     // Calculate proration for immediate downgrade
     var prorationResult = prorationCalculator.calculateDowngrade(subscription, newPlan);
-    
+
     log.info(
         "Proration calculated for subscription {}: credit={}, charge={}, net={}",
         subscription.getId(),
@@ -658,12 +658,12 @@ public class SubscriptionApplicationService {
 
   /**
    * Validates that current usage doesn't exceed the new plan's quotas.
-   * 
+   *
    * <p>This prevents downgrades that would immediately put the customer
    * over their quota limits, which would disrupt service.
-   * 
+   *
    * @param subscription current subscription
-   * @param newPlan target plan for downgrade
+   * @param newPlan      target plan for downgrade
    * @throws com.iqscaffold.billingservice.shared.exception.UsageException.QuotaExceededException if usage exceeds new plan quotas
    */
   private void validateQuotasForDowngrade(Subscription subscription, SubscriptionPlan newPlan) {
@@ -675,10 +675,10 @@ public class SubscriptionApplicationService {
     var periodEnd = subscription.getCurrentPeriodEnd();
 
     // Check each quota in the new plan
-    for (var metricType : com.iqscaffold.billingservice.usage.MetricType.values()) {
+    for (final var metricType : com.iqscaffold.billingservice.usage.MetricType.values()) {
       // Map MetricType to the appropriate quota field
       var quotaLimit = getQuotaLimitForMetric(newQuotas, metricType);
-      
+
       // Skip unlimited quotas
       if (quotaLimit == null || quotaLimit == Long.MAX_VALUE) {
         continue;
@@ -729,8 +729,8 @@ public class SubscriptionApplicationService {
 
   /**
    * Maps a MetricType to the corresponding quota limit in PlanQuotas.
-   * 
-   * @param quotas the plan quotas
+   *
+   * @param quotas     the plan quotas
    * @param metricType the metric type
    * @return the quota limit for the metric, or null if unlimited
    */
@@ -750,12 +750,12 @@ public class SubscriptionApplicationService {
 
   /**
    * Creates a trial subscription using the SubscriptionFactory.
-   * 
+   *
    * <p>Validates trial eligibility and creates/updates trial history.
-   * 
+   *
    * @param tenantId tenant identifier
-   * @param userId user identifier
-   * @param plan subscription plan
+   * @param userId   user identifier
+   * @param plan     subscription plan
    * @return created trial subscription
    * @throws SubscriptionException.TrialNotEligibleException if trial not eligible
    */
@@ -793,12 +793,12 @@ public class SubscriptionApplicationService {
 
   /**
    * Creates a paid subscription using the SubscriptionFactory.
-   * 
+   *
    * <p>Validates payment method and creates active subscription.
-   * 
-   * @param tenantId tenant identifier
-   * @param userId user identifier
-   * @param plan subscription plan
+   *
+   * @param tenantId        tenant identifier
+   * @param userId          user identifier
+   * @param plan            subscription plan
    * @param paymentMethodId payment method identifier (optional)
    * @return created paid subscription
    * @throws com.iqscaffold.billingservice.shared.exception.PaymentException.PaymentMethodNotFoundException if payment method not found
@@ -836,7 +836,7 @@ public class SubscriptionApplicationService {
 
   /**
    * Cancels a subscription with immediate or period-end options.
-   * 
+   *
    * <p>This method handles subscription cancellations by:
    * <ul>
    *   <li>Validating the subscription is active using ActiveSubscriptionSpecification</li>
@@ -845,18 +845,18 @@ public class SubscriptionApplicationService {
    *   <li>Supporting period-end cancellation (access until period end)</li>
    *   <li>Publishing SubscriptionCanceled domain event</li>
    * </ul>
-   * 
+   *
    * <p>Cancellation options:
    * <ul>
    *   <li>Immediate: Subscription is canceled immediately, access revoked</li>
    *   <li>Period-end: Subscription remains active until current period ends</li>
    * </ul>
-   * 
+   *
    * @param subscriptionId subscription identifier
-   * @param request cancellation request containing immediate flag and reason
+   * @param request        cancellation request containing immediate flag and reason
    * @return DTO representation of the canceled subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws IllegalStateException if subscription cannot be canceled
+   * @throws IllegalStateException                               if subscription cannot be canceled
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
@@ -934,7 +934,7 @@ public class SubscriptionApplicationService {
     var successMessage = isImmediate
         ? messageService.getMessage("subscription.canceled.immediate")
         : messageService.getMessage("subscription.canceled.period.end", subscription.getCurrentPeriodEnd());
-    
+
     log.info(
         "Successfully canceled subscription: {}, immediate: {}, status: {}",
         updatedSubscription.getId(),
@@ -947,7 +947,7 @@ public class SubscriptionApplicationService {
 
   /**
    * Reactivates a canceled subscription before the period end.
-   * 
+   *
    * <p>This method handles subscription reactivation by:
    * <ul>
    *   <li>Validating the subscription can be reactivated</li>
@@ -955,18 +955,18 @@ public class SubscriptionApplicationService {
    *   <li>Removing the cancel_at_period_end flag</li>
    *   <li>Publishing SubscriptionReactivated domain event</li>
    * </ul>
-   * 
+   *
    * <p>Reactivation is only allowed for:
    * <ul>
    *   <li>Subscriptions with cancel_at_period_end flag set</li>
    *   <li>Subscriptions in CANCELED status before period end</li>
    * </ul>
-   * 
+   *
    * @param subscriptionId subscription identifier
-   * @param request reactivation request containing reason and metadata
+   * @param request        reactivation request containing reason and metadata
    * @return DTO representation of the reactivated subscription
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
-   * @throws IllegalStateException if subscription cannot be reactivated
+   * @throws IllegalStateException                               if subscription cannot be reactivated
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
@@ -1056,10 +1056,10 @@ public class SubscriptionApplicationService {
 
   /**
    * Translates a Subscription aggregate to a DTO.
-   * 
+   *
    * <p>This method handles the translation between the domain layer and
    * the presentation layer, ensuring proper separation of concerns.
-   * 
+   *
    * @param subscription domain aggregate
    * @return DTO representation
    */
@@ -1088,38 +1088,38 @@ public class SubscriptionApplicationService {
         subscription.getUpdatedAt()
     );
   }
-  
+
   /**
    * Updates subscription status.
-   * 
+   *
    * <p>This method is used by async consumers (e.g., PaymentRetryConsumer) to update
    * subscription status based on payment results.
-   * 
+   *
    * @param subscriptionId the subscription ID
-   * @param newStatus the new subscription status
+   * @param newStatus      the new subscription status
    * @throws SubscriptionException.SubscriptionNotFoundException if subscription not found
    */
   @Transactional
   @CacheEvict(value = BillingConstants.CacheNames.SUBSCRIPTIONS, allEntries = true)
   public void updateSubscriptionStatus(Long subscriptionId, SubscriptionStatus newStatus) {
     log.info("Updating subscription status: subscriptionId={}, newStatus={}", subscriptionId, newStatus);
-    
+
     var subscription = subscriptionRepository.findById(subscriptionId)
         .orElseThrow(() -> {
           var errorMessage = messageService.getMessage("subscription.not.found");
           log.error("Subscription not found: {}", subscriptionId);
           return new SubscriptionException.SubscriptionNotFoundException(errorMessage);
         });
-    
+
     // Use lifecycle manager to transition status
     subscriptionLifecycleManager.transitionStatus(
         subscription,
         newStatus,
         "Status updated by payment retry consumer"
     );
-    
+
     subscriptionRepository.save(subscription);
-    
+
     log.info("Subscription status updated: subscriptionId={}, newStatus={}", subscriptionId, newStatus);
   }
 }

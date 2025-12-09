@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.usage;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,10 +13,10 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for UsageRecord entity.
- * 
+ *
  * <p>This repository provides methods to query and persist usage records.
  * Usage records track resource consumption for billing and quota enforcement.
- * 
+ *
  * <p>Uses text blocks (Java 21) for multi-line JPQL queries to improve readability.
  */
 @Repository
@@ -23,7 +24,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds all usage records for a tenant.
-   * 
+   *
    * @param tenantId tenant identifier
    * @param pageable pagination information
    * @return page of usage records ordered by recorded date descending
@@ -42,10 +43,10 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records by tenant and metric type.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId   tenant identifier
    * @param metricType metric type (API_CALLS, STORAGE_GB, ACTIVE_USERS, CUSTOM)
-   * @param pageable pagination information
+   * @param pageable   pagination information
    * @return page of usage records matching criteria
    */
   @Query("""
@@ -64,7 +65,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records by subscription.
-   * 
+   *
    * @param subscriptionId subscription identifier
    * @return list of usage records for the subscription
    */
@@ -79,10 +80,10 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records for a billing period.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId    tenant identifier
    * @param periodStart billing period start date
-   * @param periodEnd billing period end date
+   * @param periodEnd   billing period end date
    * @return list of usage records in the billing period
    */
   @Query("""
@@ -102,11 +103,11 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records by tenant, metric type, and billing period.
-   * 
-   * @param tenantId tenant identifier
-   * @param metricType metric type
+   *
+   * @param tenantId    tenant identifier
+   * @param metricType  metric type
    * @param periodStart billing period start date
-   * @param periodEnd billing period end date
+   * @param periodEnd   billing period end date
    * @return list of usage records matching criteria
    */
   @Query("""
@@ -128,10 +129,10 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records within a date range.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId  tenant identifier
    * @param startDate start of date range
-   * @param endDate end of date range
+   * @param endDate   end of date range
    * @return list of usage records in the date range
    */
   @Query("""
@@ -151,11 +152,11 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Calculates total usage for a tenant and metric type in a billing period.
-   * 
-   * @param tenantId tenant identifier
-   * @param metricType metric type
+   *
+   * @param tenantId    tenant identifier
+   * @param metricType  metric type
    * @param periodStart billing period start date
-   * @param periodEnd billing period end date
+   * @param periodEnd   billing period end date
    * @return sum of quantities for the metric in the period
    */
   @Query("""
@@ -174,11 +175,11 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Calculates total usage for a tenant and metric type within a date range.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId   tenant identifier
    * @param metricType metric type
-   * @param startDate start of date range
-   * @param endDate end of date range
+   * @param startDate  start of date range
+   * @param endDate    end of date range
    * @return sum of quantities for the metric in the date range
    */
   @Query("""
@@ -198,10 +199,10 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
   /**
    * Aggregates usage by metric type for a tenant in a billing period.
    * Returns a list of metric types with their total usage.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId    tenant identifier
    * @param periodStart billing period start date
-   * @param periodEnd billing period end date
+   * @param periodEnd   billing period end date
    * @return list of usage metrics with aggregated quantities
    */
   @Query("""
@@ -225,8 +226,8 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds the most recent usage record for a tenant and metric type.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId   tenant identifier
    * @param metricType metric type
    * @return optional containing the most recent usage record, or empty if none exists
    */
@@ -246,10 +247,10 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Counts usage records for a tenant in a billing period.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId    tenant identifier
    * @param periodStart billing period start date
-   * @param periodEnd billing period end date
+   * @param periodEnd   billing period end date
    * @return number of usage records in the period
    */
   @Query("""
@@ -267,7 +268,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
   /**
    * Deletes usage records older than the specified date.
    * Used for data retention and cleanup.
-   * 
+   *
    * @param cutoffDate date before which records should be deleted
    * @return number of records deleted
    */
@@ -279,7 +280,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds all usage records for a tenant (for GDPR export).
-   * 
+   *
    * @param tenantId tenant identifier
    * @return list of all usage records for the tenant
    */
@@ -294,8 +295,8 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Finds usage records for a tenant after a specific date.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId  tenant identifier
    * @param afterDate date after which to find records
    * @return list of usage records after the date
    */
@@ -314,7 +315,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Deletes all usage records for a tenant (for GDPR deletion).
-   * 
+   *
    * @param tenantId tenant identifier
    * @return number of records deleted
    */
@@ -326,7 +327,7 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
 
   /**
    * Deletes usage records before a specific date (for retention policy).
-   * 
+   *
    * @param cutoffDate date before which to delete records
    * @return number of records deleted
    */

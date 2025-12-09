@@ -2,22 +2,21 @@ package com.iqscaffold.billingservice.usage;
 
 /**
  * Immutable value object representing usage for a specific metric type.
- * 
+ *
  * <p>Encapsulates the total usage quantity and unit for a single metric type
  * within a time period. Used as part of usage summaries and quota checks.
- * 
+ *
  * <p>As a Java record, this class is:
  * <ul>
  *   <li>Immutable - all fields are final</li>
  *   <li>Value-based - equality based on field values</li>
  *   <li>Compact - automatic constructor, getters, equals, hashCode, toString</li>
  * </ul>
- * 
+ *
  * @param metricType the type of metric
- * @param quantity the total quantity used
- * @param unit the unit of measurement (e.g., "requests", "GB", "emails")
- * @param limit the quota limit for this metric (null if unlimited)
- * 
+ * @param quantity   the total quantity used
+ * @param unit       the unit of measurement (e.g., "requests", "GB", "emails")
+ * @param limit      the quota limit for this metric (null if unlimited)
  * @see MetricType
  * @see UsageSummary
  */
@@ -31,9 +30,9 @@ public record UsageMetric(
    * Compact constructor with validation.
    *
    * @param metricType the type of metric
-   * @param quantity the total quantity used
-   * @param unit the unit of measurement
-   * @param limit the quota limit
+   * @param quantity   the total quantity used
+   * @param unit       the unit of measurement
+   * @param limit      the quota limit
    * @throws IllegalArgumentException if validation fails
    */
   public UsageMetric {
@@ -52,8 +51,8 @@ public record UsageMetric(
    * Creates a usage metric without a limit (unlimited).
    *
    * @param metricType the type of metric
-   * @param quantity the total quantity used
-   * @param unit the unit of measurement
+   * @param quantity   the total quantity used
+   * @param unit       the unit of measurement
    * @return a new usage metric
    */
   public static UsageMetric unlimited(

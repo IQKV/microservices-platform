@@ -1,12 +1,13 @@
 package com.iqscaffold.billingservice.shared;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.tenancy.TenantContext;
 import com.iqscaffold.billingservice.usage.BillingEvent;
 import com.iqscaffold.billingservice.usage.BillingEventRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Service for audit logging of billing operations.
- * 
+ *
  * <p>This service creates immutable audit records for all significant billing
  * operations to satisfy compliance requirements (REQ-SEC-011, REQ-SEC-012, REQ-REL-007).
- * 
+ *
  * <p>Audit logs include:
  * <ul>
  *   <li>Tenant and user identification</li>
@@ -29,10 +30,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *   <li>Request metadata (IP address, user agent)</li>
  *   <li>Timestamp of operation</li>
  * </ul>
- * 
+ *
  * <p><strong>Immutability:</strong> All audit records are immutable once created.
  * The BillingEvent entity is marked with @Immutable and provides no update or delete methods.
- * 
+ *
  * <p><strong>Transaction Management:</strong> Audit logging uses REQUIRES_NEW propagation
  * to ensure audit records are persisted even if the main transaction rolls back.
  */
@@ -49,11 +50,11 @@ public class AuditLogService {
 
   /**
    * Log a subscription operation.
-   * 
+   *
    * @param subscriptionId the subscription identifier
-   * @param eventType the event type (e.g., SUBSCRIPTION_CREATED, SUBSCRIPTION_UPGRADED)
-   * @param description human-readable description
-   * @param changes map of changes made
+   * @param eventType      the event type (e.g., SUBSCRIPTION_CREATED, SUBSCRIPTION_UPGRADED)
+   * @param description    human-readable description
+   * @param changes        map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logSubscriptionOperation(
@@ -66,11 +67,11 @@ public class AuditLogService {
 
   /**
    * Log an invoice operation.
-   * 
-   * @param invoiceId the invoice identifier
-   * @param eventType the event type (e.g., INVOICE_GENERATED, INVOICE_PAID)
+   *
+   * @param invoiceId   the invoice identifier
+   * @param eventType   the event type (e.g., INVOICE_GENERATED, INVOICE_PAID)
    * @param description human-readable description
-   * @param changes map of changes made
+   * @param changes     map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logInvoiceOperation(
@@ -83,11 +84,11 @@ public class AuditLogService {
 
   /**
    * Log a payment operation.
-   * 
-   * @param paymentId the payment identifier
-   * @param eventType the event type (e.g., PAYMENT_SUCCEEDED, PAYMENT_FAILED)
+   *
+   * @param paymentId   the payment identifier
+   * @param eventType   the event type (e.g., PAYMENT_SUCCEEDED, PAYMENT_FAILED)
    * @param description human-readable description
-   * @param changes map of changes made
+   * @param changes     map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logPaymentOperation(
@@ -100,11 +101,11 @@ public class AuditLogService {
 
   /**
    * Log a payment method operation.
-   * 
+   *
    * @param paymentMethodId the payment method identifier
-   * @param eventType the event type (e.g., PAYMENT_METHOD_ADDED, PAYMENT_METHOD_REMOVED)
-   * @param description human-readable description
-   * @param changes map of changes made
+   * @param eventType       the event type (e.g., PAYMENT_METHOD_ADDED, PAYMENT_METHOD_REMOVED)
+   * @param description     human-readable description
+   * @param changes         map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logPaymentMethodOperation(
@@ -117,11 +118,11 @@ public class AuditLogService {
 
   /**
    * Log a usage operation.
-   * 
+   *
    * @param usageRecordId the usage record identifier
-   * @param eventType the event type (e.g., USAGE_RECORDED, QUOTA_EXCEEDED)
-   * @param description human-readable description
-   * @param changes map of changes made
+   * @param eventType     the event type (e.g., USAGE_RECORDED, QUOTA_EXCEEDED)
+   * @param description   human-readable description
+   * @param changes       map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logUsageOperation(
@@ -134,11 +135,11 @@ public class AuditLogService {
 
   /**
    * Log a plan operation.
-   * 
-   * @param planId the plan identifier
-   * @param eventType the event type (e.g., PLAN_CREATED, PLAN_UPDATED)
+   *
+   * @param planId      the plan identifier
+   * @param eventType   the event type (e.g., PLAN_CREATED, PLAN_UPDATED)
    * @param description human-readable description
-   * @param changes map of changes made
+   * @param changes     map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logPlanOperation(
@@ -151,12 +152,12 @@ public class AuditLogService {
 
   /**
    * Log a generic billing operation.
-   * 
-   * @param entityType the entity type
-   * @param entityId the entity identifier
-   * @param eventType the event type
+   *
+   * @param entityType  the entity type
+   * @param entityId    the entity identifier
+   * @param eventType   the event type
    * @param description human-readable description
-   * @param changes map of changes made
+   * @param changes     map of changes made
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logOperation(
@@ -199,7 +200,7 @@ public class AuditLogService {
           tenantId, userId, eventType, entityType, entityId
       );
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log error but don't fail the operation
       logger.error("Failed to create audit log: eventType={}, entityType={}, entityId={}",
           eventType, entityType, entityId, e);
@@ -208,7 +209,7 @@ public class AuditLogService {
 
   /**
    * Get the current request's IP address.
-   * 
+   *
    * @return the IP address, or null if not available
    */
   private String getCurrentIpAddress() {
@@ -234,7 +235,7 @@ public class AuditLogService {
         // Fall back to remote address
         return request.getRemoteAddr();
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.debug("Failed to extract IP address", e);
     }
 
@@ -243,7 +244,7 @@ public class AuditLogService {
 
   /**
    * Get the current request's user agent.
-   * 
+   *
    * @return the user agent, or null if not available
    */
   private String getCurrentUserAgent() {
@@ -255,7 +256,7 @@ public class AuditLogService {
         HttpServletRequest request = attributes.getRequest();
         return request.getHeader("User-Agent");
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.debug("Failed to extract user agent", e);
     }
 
@@ -264,10 +265,10 @@ public class AuditLogService {
 
   /**
    * Log a data export operation (GDPR compliance).
-   * 
+   *
    * @param tenantId the tenant identifier
    * @param exportId the export request identifier
-   * @param format the export format (JSON, CSV)
+   * @param format   the export format (JSON, CSV)
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logDataExport(
@@ -278,7 +279,7 @@ public class AuditLogService {
     changes.put("exportId", exportId);
     changes.put("format", format);
     changes.put("gdprArticle", "Article 20 - Right to Data Portability");
-    
+
     logOperation(
         "DATA_EXPORT",
         null,
@@ -290,11 +291,11 @@ public class AuditLogService {
 
   /**
    * Log a data deletion operation (GDPR compliance).
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param deletionId the deletion request identifier
-   * @param anonymize whether data was anonymized instead of deleted
-   * @param reason the reason for deletion
+   * @param anonymize  whether data was anonymized instead of deleted
+   * @param reason     the reason for deletion
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void logDataDeletion(
@@ -307,7 +308,7 @@ public class AuditLogService {
     changes.put("anonymize", anonymize);
     changes.put("reason", reason);
     changes.put("gdprArticle", "Article 17 - Right to Erasure");
-    
+
     logOperation(
         "DATA_DELETION",
         null,

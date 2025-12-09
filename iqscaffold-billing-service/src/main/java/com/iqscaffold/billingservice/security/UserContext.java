@@ -4,10 +4,10 @@ import java.util.Set;
 
 /**
  * User context extracted from JWT token.
- * 
+ *
  * <p>Contains user information from JWT claims for authorization and audit logging.
  * This record is immutable and thread-safe.
- * 
+ *
  * <p>JWT Claims Mapping:
  * <ul>
  *   <li>userId - from JWT 'sub' claim</li>
@@ -31,7 +31,7 @@ public record UserContext(
 
   /**
    * Check if the user has a specific authority.
-   * 
+   *
    * @param authority the authority to check
    * @return true if the user has the authority, false otherwise
    */
@@ -41,7 +41,7 @@ public record UserContext(
 
   /**
    * Check if the user is an admin (has ADMIN or SUPER_ADMIN authority).
-   * 
+   *
    * @return true if the user is an admin, false otherwise
    */
   public boolean isAdmin() {
@@ -50,7 +50,7 @@ public record UserContext(
 
   /**
    * Get the user's full name.
-   * 
+   *
    * @return the full name, or username if names are not available
    */
   public String getFullName() {

@@ -23,7 +23,7 @@ public class TestEntityUtils {
       Field idField = entity.getClass().getDeclaredField("id");
       idField.setAccessible(true);
       idField.set(entity, id);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
+    } catch (final NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException("Failed to set ID on entity", e);
     }
   }
@@ -42,7 +42,7 @@ public class TestEntityUtils {
       Field field = entity.getClass().getDeclaredField(fieldName);
       field.setAccessible(true);
       field.set(entity, value);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
+    } catch (final NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException("Failed to set field " + fieldName + " on entity", e);
     }
   }

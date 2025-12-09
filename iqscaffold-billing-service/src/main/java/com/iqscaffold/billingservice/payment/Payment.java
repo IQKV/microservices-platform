@@ -1,8 +1,5 @@
 package com.iqscaffold.billingservice.payment;
 
-import com.iqscaffold.billingservice.invoice.Invoice;
-import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,6 +17,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.invoice.Invoice;
+import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 
 /**
@@ -96,19 +97,19 @@ public class Payment {
   /**
    * Creates a new payment.
    *
-   * @param invoice the invoice being paid
-   * @param tenantId the tenant ID
-   * @param amount the payment amount
-   * @param currency the currency code
+   * @param invoice       the invoice being paid
+   * @param tenantId      the tenant ID
+   * @param amount        the payment amount
+   * @param currency      the currency code
    * @param paymentMethod the payment method used
    * @throws IllegalArgumentException if amount is not positive or invoice is null
    */
   public Payment(
-    final Invoice invoice,
-    final UUID tenantId,
-    final BigDecimal amount,
-    final String currency,
-    final PaymentMethod paymentMethod
+      final Invoice invoice,
+      final UUID tenantId,
+      final BigDecimal amount,
+      final String currency,
+      final PaymentMethod paymentMethod
   ) {
     validateAmount(amount);
     if (invoice == null) {
@@ -140,7 +141,7 @@ public class Payment {
   public void markAsSucceeded(final String providerPaymentId) {
     if (this.status != PaymentStatus.PENDING) {
       throw new IllegalStateException(
-        "Can only mark PENDING payments as succeeded. Current status: " + this.status
+          "Can only mark PENDING payments as succeeded. Current status: " + this.status
       );
     }
     this.status = PaymentStatus.SUCCEEDED;
@@ -157,7 +158,7 @@ public class Payment {
   public void markAsFailed(final String failureReason) {
     if (this.status != PaymentStatus.PENDING) {
       throw new IllegalStateException(
-        "Can only mark PENDING payments as failed. Current status: " + this.status
+          "Can only mark PENDING payments as failed. Current status: " + this.status
       );
     }
     this.status = PaymentStatus.FAILED;
@@ -168,13 +169,13 @@ public class Payment {
    * Processes a refund for this payment.
    *
    * @param refundAmount the amount to refund
-   * @throws IllegalStateException if payment is not succeeded or already fully refunded
+   * @throws IllegalStateException    if payment is not succeeded or already fully refunded
    * @throws IllegalArgumentException if refund amount exceeds available amount
    */
   public void processRefund(final BigDecimal refundAmount) {
     if (this.status != PaymentStatus.SUCCEEDED && this.status != PaymentStatus.REFUNDED) {
       throw new IllegalStateException(
-        "Can only refund SUCCEEDED or partially REFUNDED payments. Current status: " + this.status
+          "Can only refund SUCCEEDED or partially REFUNDED payments. Current status: " + this.status
       );
     }
 
@@ -183,12 +184,12 @@ public class Payment {
     final BigDecimal totalRefunded = this.refundedAmount.add(refundAmount);
     if (totalRefunded.compareTo(this.amount) > 0) {
       throw new IllegalArgumentException(
-        String.format(
-          "Refund amount (%s) would exceed original payment amount (%s). Already refunded: %s",
-          refundAmount,
-          this.amount,
-          this.refundedAmount
-        )
+          String.format(
+              "Refund amount (%s) would exceed original payment amount (%s). Already refunded: %s",
+              refundAmount,
+              this.amount,
+              this.refundedAmount
+          )
       );
     }
 
@@ -224,8 +225,8 @@ public class Payment {
    */
   public boolean isPartiallyRefunded() {
     return (
-      this.refundedAmount.compareTo(BigDecimal.ZERO) > 0 &&
-      this.refundedAmount.compareTo(this.amount) < 0
+        this.refundedAmount.compareTo(BigDecimal.ZERO) > 0 &&
+        this.refundedAmount.compareTo(this.amount) < 0
     );
   }
 
@@ -240,15 +241,15 @@ public class Payment {
       case SUCCEEDED -> "Payment completed successfully";
       case FAILED -> "Payment failed: " + (failureReason != null ? failureReason : "Unknown reason");
       case REFUNDED -> isFullyRefunded()
-        ? "Payment fully refunded"
-        : String.format("Payment partially refunded (%s of %s)", refundedAmount, amount);
+          ? "Payment fully refunded"
+          : String.format("Payment partially refunded (%s of %s)", refundedAmount, amount);
     };
   }
 
   /**
    * Adds metadata to the payment.
    *
-   * @param key the metadata key
+   * @param key   the metadata key
    * @param value the metadata value
    */
   public void addMetadata(final String key, final Object value) {

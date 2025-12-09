@@ -1,7 +1,5 @@
 package com.iqscaffold.billingservice.usage;
 
-import com.iqscaffold.billingservice.subscription.Subscription;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,17 +13,20 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.subscription.Subscription;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 
 /**
  * UsageRecord entity for tracking resource consumption.
- * 
+ *
  * <p>Tracks usage metrics for billing and quota enforcement purposes.
  * Each record represents a measurement of resource consumption for a specific
  * metric type within a billing period.
- * 
+ *
  * <p>This entity is stored in tenant-scoped schemas for data isolation.
- * 
+ *
  * @see MetricType
  * @see Subscription
  */
@@ -80,14 +81,14 @@ public class UsageRecord {
   /**
    * Creates a new usage record.
    *
-   * @param subscription the subscription this usage belongs to
-   * @param tenantId the tenant identifier
-   * @param metricType the type of metric being tracked
-   * @param quantity the amount of usage
-   * @param unit the unit of measurement (optional)
-   * @param recordedAt when the usage was recorded
+   * @param subscription       the subscription this usage belongs to
+   * @param tenantId           the tenant identifier
+   * @param metricType         the type of metric being tracked
+   * @param quantity           the amount of usage
+   * @param unit               the unit of measurement (optional)
+   * @param recordedAt         when the usage was recorded
    * @param billingPeriodStart start of the billing period
-   * @param billingPeriodEnd end of the billing period
+   * @param billingPeriodEnd   end of the billing period
    */
   public UsageRecord(
       final Subscription subscription,

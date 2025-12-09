@@ -5,88 +5,88 @@ package com.iqscaffold.billingservice.shared.exception;
  */
 public class UsageException extends BillingException {
 
-    public UsageException(String message) {
-        super(message);
+  public UsageException(String message) {
+    super(message);
+  }
+
+  public UsageException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public UsageException(String errorCode, String message) {
+    super(errorCode, message);
+  }
+
+  public UsageException(String errorCode, String message, Throwable cause) {
+    super(errorCode, message, cause);
+  }
+
+  /**
+   * Exception thrown when a quota is exceeded.
+   */
+  public static class QuotaExceededException extends UsageException {
+
+    private final String metricType;
+    private final long limit;
+    private final long used;
+
+    public QuotaExceededException(String metricType, long limit, long used) {
+      super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.QUOTA_EXCEEDED,
+          "Quota exceeded for " + metricType + ": used " + used + " of " + limit);
+      this.metricType = metricType;
+      this.limit = limit;
+      this.used = used;
     }
 
-    public UsageException(String message, Throwable cause) {
-        super(message, cause);
+    public QuotaExceededException(String metricType, long limit, long used, Throwable cause) {
+      super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.QUOTA_EXCEEDED,
+          "Quota exceeded for " + metricType + ": used " + used + " of " + limit, cause);
+      this.metricType = metricType;
+      this.limit = limit;
+      this.used = used;
     }
 
-    public UsageException(String errorCode, String message) {
-        super(errorCode, message);
+    public String getMetricType() {
+      return metricType;
     }
 
-    public UsageException(String errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
+    public long getLimit() {
+      return limit;
     }
 
-    /**
-     * Exception thrown when a quota is exceeded.
-     */
-    public static class QuotaExceededException extends UsageException {
-        
-        private final String metricType;
-        private final long limit;
-        private final long used;
+    public long getUsed() {
+      return used;
+    }
+  }
 
-        public QuotaExceededException(String metricType, long limit, long used) {
-            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.QUOTA_EXCEEDED, 
-                  "Quota exceeded for " + metricType + ": used " + used + " of " + limit);
-            this.metricType = metricType;
-            this.limit = limit;
-            this.used = used;
-        }
+  /**
+   * Exception thrown when a usage limit is exceeded.
+   */
+  public static class UsageLimitExceededException extends UsageException {
 
-        public QuotaExceededException(String metricType, long limit, long used, Throwable cause) {
-            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.QUOTA_EXCEEDED, 
-                  "Quota exceeded for " + metricType + ": used " + used + " of " + limit, cause);
-            this.metricType = metricType;
-            this.limit = limit;
-            this.used = used;
-        }
+    private final String metricType;
+    private final long limit;
 
-        public String getMetricType() {
-            return metricType;
-        }
-
-        public long getLimit() {
-            return limit;
-        }
-
-        public long getUsed() {
-            return used;
-        }
+    public UsageLimitExceededException(String metricType, long limit) {
+      super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.USAGE_LIMIT_EXCEEDED,
+          "Usage limit exceeded for " + metricType + ": limit is " + limit);
+      this.metricType = metricType;
+      this.limit = limit;
     }
 
-    /**
-     * Exception thrown when a usage limit is exceeded.
-     */
-    public static class UsageLimitExceededException extends UsageException {
-        
-        private final String metricType;
-        private final long limit;
-
-        public UsageLimitExceededException(String metricType, long limit) {
-            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.USAGE_LIMIT_EXCEEDED, 
-                  "Usage limit exceeded for " + metricType + ": limit is " + limit);
-            this.metricType = metricType;
-            this.limit = limit;
-        }
-
-        public UsageLimitExceededException(String metricType, long limit, Throwable cause) {
-            super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.USAGE_LIMIT_EXCEEDED, 
-                  "Usage limit exceeded for " + metricType + ": limit is " + limit, cause);
-            this.metricType = metricType;
-            this.limit = limit;
-        }
-
-        public String getMetricType() {
-            return metricType;
-        }
-
-        public long getLimit() {
-            return limit;
-        }
+    public UsageLimitExceededException(String metricType, long limit, Throwable cause) {
+      super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.USAGE_LIMIT_EXCEEDED,
+          "Usage limit exceeded for " + metricType + ": limit is " + limit, cause);
+      this.metricType = metricType;
+      this.limit = limit;
     }
+
+    public String getMetricType() {
+      return metricType;
+    }
+
+    public long getLimit() {
+      return limit;
+    }
+  }
 }

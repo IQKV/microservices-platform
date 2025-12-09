@@ -1,8 +1,5 @@
 package com.iqscaffold.billingservice.invoice;
 
-import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
-import com.iqscaffold.billingservice.subscription.Subscription;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,14 +23,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import com.iqscaffold.billingservice.paymentmethod.PaymentMethod;
+import com.iqscaffold.billingservice.subscription.Subscription;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import org.hibernate.annotations.Type;
 
 /**
  * Invoice aggregate root entity representing a billing document for a subscription period.
- * 
+ *
  * <p>Invoices manage the billing lifecycle including line items, payment tracking,
  * and status transitions. Invoices are stored in tenant-scoped schemas for data isolation.
- * 
+ *
  * <p>This aggregate enforces the following invariants:
  * <ul>
  *   <li>Invoice number must be unique</li>
@@ -44,7 +45,7 @@ import org.hibernate.annotations.Type;
  *   <li>Period end must be after period start</li>
  *   <li>Due date must be after invoice creation</li>
  * </ul>
- * 
+ *
  * <p>All modifications to line items must go through this aggregate root
  * to ensure business rules and invariants are maintained.
  */
@@ -124,11 +125,11 @@ public class Invoice {
 
   /**
    * Creates a new invoice with the specified attributes.
-   * 
-   * @param subscription the subscription this invoice is for
-   * @param tenantId tenant identifier
+   *
+   * @param subscription  the subscription this invoice is for
+   * @param tenantId      tenant identifier
    * @param invoiceNumber unique invoice number
-   * @param currency currency code (e.g., USD, EUR)
+   * @param currency      currency code (e.g., USD, EUR)
    */
   private Invoice(
       Subscription subscription,
@@ -150,14 +151,14 @@ public class Invoice {
 
   /**
    * Factory method to create a new draft invoice.
-   * 
-   * @param subscription the subscription this invoice is for
-   * @param tenantId tenant identifier
+   *
+   * @param subscription  the subscription this invoice is for
+   * @param tenantId      tenant identifier
    * @param invoiceNumber unique invoice number
-   * @param currency currency code
-   * @param periodStart billing period start date
-   * @param periodEnd billing period end date
-   * @param dueDays number of days until payment is due
+   * @param currency      currency code
+   * @param periodStart   billing period start date
+   * @param periodEnd     billing period end date
+   * @param dueDays       number of days until payment is due
    * @return a new Invoice in DRAFT status
    */
   public static Invoice createDraft(
@@ -187,9 +188,9 @@ public class Invoice {
   /**
    * Adds a line item to the invoice.
    * Can only add line items to DRAFT invoices.
-   * 
+   *
    * @param lineItem the line item to add
-   * @throws IllegalStateException if invoice is not in DRAFT status
+   * @throws IllegalStateException    if invoice is not in DRAFT status
    * @throws IllegalArgumentException if line item is null
    */
   public void addLineItem(InvoiceLineItem lineItem) {
@@ -210,9 +211,9 @@ public class Invoice {
   /**
    * Removes a line item from the invoice by index.
    * Can only remove line items from DRAFT invoices.
-   * 
+   *
    * @param index the index of the line item to remove
-   * @throws IllegalStateException if invoice is not in DRAFT status
+   * @throws IllegalStateException     if invoice is not in DRAFT status
    * @throws IndexOutOfBoundsException if index is invalid
    */
   public void removeLineItem(int index) {
@@ -229,7 +230,7 @@ public class Invoice {
   /**
    * Clears all line items from the invoice.
    * Can only clear line items from DRAFT invoices.
-   * 
+   *
    * @throws IllegalStateException if invoice is not in DRAFT status
    */
   public void clearLineItems() {
@@ -246,9 +247,9 @@ public class Invoice {
   /**
    * Sets the tax amount for the invoice.
    * Can only set tax on DRAFT invoices.
-   * 
+   *
    * @param taxAmount the tax amount
-   * @throws IllegalStateException if invoice is not in DRAFT status
+   * @throws IllegalStateException    if invoice is not in DRAFT status
    * @throws IllegalArgumentException if tax amount is negative
    */
   public void setTax(BigDecimal taxAmount) {
@@ -269,7 +270,7 @@ public class Invoice {
   /**
    * Finalizes the invoice, making it ready for payment.
    * Transitions from DRAFT to OPEN status.
-   * 
+   *
    * @throws IllegalStateException if invoice cannot be finalized
    */
   public void finalize() {
@@ -292,7 +293,7 @@ public class Invoice {
   /**
    * Marks the invoice as paid.
    * Transitions from OPEN to PAID status.
-   * 
+   *
    * @param paymentDate the date payment was received
    * @throws IllegalStateException if invoice cannot be paid
    */
@@ -314,9 +315,9 @@ public class Invoice {
   /**
    * Marks the invoice as paid with payment method information.
    * Transitions from OPEN to PAID status.
-   * 
+   *
    * @param paymentMethodId the payment method ID used for payment
-   * @param paymentDate the date payment was received
+   * @param paymentDate     the date payment was received
    * @throws IllegalStateException if invoice cannot be paid
    */
   public void markAsPaid(Long paymentMethodId, LocalDateTime paymentDate) {
@@ -340,7 +341,7 @@ public class Invoice {
   /**
    * Voids the invoice, preventing payment.
    * Can void DRAFT or OPEN invoices.
-   * 
+   *
    * @param reason the reason for voiding
    * @throws IllegalStateException if invoice cannot be voided
    */
@@ -363,7 +364,7 @@ public class Invoice {
   /**
    * Marks the invoice as uncollectible after payment failures.
    * Transitions from OPEN to UNCOLLECTIBLE status.
-   * 
+   *
    * @param reason the reason for marking uncollectible
    * @throws IllegalStateException if invoice is not OPEN
    */
@@ -385,7 +386,7 @@ public class Invoice {
 
   /**
    * Sets the payment method for this invoice.
-   * 
+   *
    * @param paymentMethod the payment method to use
    */
   public void setPaymentMethod(PaymentMethod paymentMethod) {
@@ -394,7 +395,7 @@ public class Invoice {
 
   /**
    * Sets the provider invoice ID (e.g., Stripe invoice ID).
-   * 
+   *
    * @param providerInvoiceId the provider's invoice identifier
    */
   public void setProviderInvoiceId(String providerInvoiceId) {
@@ -403,8 +404,8 @@ public class Invoice {
 
   /**
    * Adds or updates metadata for the invoice.
-   * 
-   * @param key metadata key
+   *
+   * @param key   metadata key
    * @param value metadata value
    */
   public void addMetadata(String key, Object value) {
@@ -416,7 +417,7 @@ public class Invoice {
 
   /**
    * Removes metadata from the invoice.
-   * 
+   *
    * @param key metadata key to remove
    */
   public void removeMetadata(String key) {
@@ -427,7 +428,7 @@ public class Invoice {
 
   /**
    * Checks if the invoice is overdue.
-   * 
+   *
    * @return true if invoice is OPEN and past due date
    */
   public boolean isOverdue() {
@@ -438,7 +439,7 @@ public class Invoice {
 
   /**
    * Checks if the invoice can be modified.
-   * 
+   *
    * @return true if invoice is in DRAFT status
    */
   public boolean canModify() {
@@ -447,7 +448,7 @@ public class Invoice {
 
   /**
    * Gets the number of days until the invoice is due.
-   * 
+   *
    * @return days until due, or 0 if already due or no due date
    */
   public long getDaysUntilDue() {
@@ -465,7 +466,7 @@ public class Invoice {
 
   /**
    * Gets an unmodifiable view of the line items.
-   * 
+   *
    * @return unmodifiable list of line items
    */
   public List<InvoiceLineItem> getLineItems() {
@@ -474,7 +475,7 @@ public class Invoice {
 
   /**
    * Gets the number of line items.
-   * 
+   *
    * @return line item count
    */
   public int getLineItemCount() {
@@ -491,8 +492,8 @@ public class Invoice {
   private static void validateStatusTransition(InvoiceStatus from, InvoiceStatus to) {
     var isValid = switch (from) {
       case DRAFT -> to == InvoiceStatus.OPEN || to == InvoiceStatus.VOID;
-      case OPEN -> to == InvoiceStatus.PAID || 
-                   to == InvoiceStatus.VOID || 
+      case OPEN -> to == InvoiceStatus.PAID ||
+                   to == InvoiceStatus.VOID ||
                    to == InvoiceStatus.UNCOLLECTIBLE;
       case PAID, VOID, UNCOLLECTIBLE -> false; // Final states
     };
@@ -529,14 +530,14 @@ public class Invoice {
 
     if (subtotal.compareTo(calculatedSubtotal) != 0) {
       throw new IllegalStateException(
-          "Invoice subtotal mismatch. Expected: " + calculatedSubtotal + 
+          "Invoice subtotal mismatch. Expected: " + calculatedSubtotal +
           ", Got: " + subtotal
       );
     }
 
     if (total.compareTo(calculatedTotal) != 0) {
       throw new IllegalStateException(
-          "Invoice total mismatch. Expected: " + calculatedTotal + 
+          "Invoice total mismatch. Expected: " + calculatedTotal +
           ", Got: " + total
       );
     }
@@ -685,7 +686,7 @@ public class Invoice {
     if (!(o instanceof Invoice that)) {
       return false;
     }
-    return Objects.equals(id, that.id) && 
+    return Objects.equals(id, that.id) &&
            Objects.equals(invoiceNumber, that.invoiceNumber);
   }
 
@@ -697,12 +698,12 @@ public class Invoice {
   @Override
   public String toString() {
     return "Invoice{" +
-        "id=" + id +
-        ", invoiceNumber='" + invoiceNumber + '\'' +
-        ", status=" + status +
-        ", total=" + total +
-        ", currency='" + currency + '\'' +
-        ", tenantId=" + tenantId +
-        '}';
+           "id=" + id +
+           ", invoiceNumber='" + invoiceNumber + '\'' +
+           ", status=" + status +
+           ", total=" + total +
+           ", currency='" + currency + '\'' +
+           ", tenantId=" + tenantId +
+           '}';
   }
 }

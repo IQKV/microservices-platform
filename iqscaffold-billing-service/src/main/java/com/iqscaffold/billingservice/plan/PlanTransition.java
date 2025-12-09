@@ -2,11 +2,11 @@ package com.iqscaffold.billingservice.plan;
 
 /**
  * Value object representing a subscription plan transition (upgrade or downgrade).
- * 
+ *
  * <p>Encapsulates the source and target plans for a plan change operation.
  * This immutable value object is used by specifications and domain services to
  * validate whether a plan transition is allowed according to business rules.
- * 
+ *
  * <p>Business rules for plan transitions:
  * <ul>
  *   <li>Cannot transition to the same plan</li>
@@ -15,19 +15,19 @@ package com.iqscaffold.billingservice.plan;
  *   <li>Cannot transition from/to inactive plans</li>
  *   <li>Billing cycle changes may have restrictions</li>
  * </ul>
- * 
+ *
  * <p>Example usage:
  * <pre>{@code
  * PlanTransition transition = new PlanTransition(currentPlan, newPlan);
  * ValidPlanTransitionSpecification spec = new ValidPlanTransitionSpecification();
- * 
+ *
  * if (!spec.isSatisfiedBy(transition)) {
  *   throw new InvalidPlanTransitionException("Invalid plan transition");
  * }
  * }</pre>
- * 
+ *
  * @param fromPlan the current subscription plan
- * @param toPlan the target subscription plan
+ * @param toPlan   the target subscription plan
  */
 public record PlanTransition(
     SubscriptionPlan fromPlan,
@@ -36,9 +36,9 @@ public record PlanTransition(
 
   /**
    * Creates a new plan transition with validation.
-   * 
+   *
    * @param fromPlan the current subscription plan
-   * @param toPlan the target subscription plan
+   * @param toPlan   the target subscription plan
    * @throws IllegalArgumentException if either plan is null
    */
   public PlanTransition {
@@ -52,7 +52,7 @@ public record PlanTransition(
 
   /**
    * Checks if this is an upgrade (moving to a higher tier).
-   * 
+   *
    * @return true if moving to a higher tier
    */
   public boolean isUpgrade() {
@@ -61,7 +61,7 @@ public record PlanTransition(
 
   /**
    * Checks if this is a downgrade (moving to a lower tier).
-   * 
+   *
    * @return true if moving to a lower tier
    */
   public boolean isDowngrade() {
@@ -70,7 +70,7 @@ public record PlanTransition(
 
   /**
    * Checks if this is a lateral move (same tier, different billing cycle).
-   * 
+   *
    * @return true if staying in the same tier
    */
   public boolean isLateralMove() {
@@ -79,7 +79,7 @@ public record PlanTransition(
 
   /**
    * Checks if the transition is to the same plan.
-   * 
+   *
    * @return true if from and to plans are the same
    */
   public boolean isSamePlan() {
@@ -88,7 +88,7 @@ public record PlanTransition(
 
   /**
    * Checks if the billing cycle is changing.
-   * 
+   *
    * @return true if billing cycles are different
    */
   public boolean isBillingCycleChange() {
@@ -97,7 +97,7 @@ public record PlanTransition(
 
   /**
    * Gets the tier difference (positive for upgrade, negative for downgrade).
-   * 
+   *
    * @return the difference in tier ordinals
    */
   public int tierDifference() {
@@ -106,7 +106,7 @@ public record PlanTransition(
 
   /**
    * Gets a human-readable description of the transition type.
-   * 
+   *
    * @return description of the transition (e.g., "Upgrade", "Downgrade", "Lateral Move")
    */
   public String transitionType() {

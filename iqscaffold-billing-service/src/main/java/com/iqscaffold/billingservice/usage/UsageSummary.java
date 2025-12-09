@@ -6,24 +6,23 @@ import java.util.UUID;
 
 /**
  * Immutable value object representing a summary of usage for a tenant.
- * 
+ *
  * <p>Aggregates usage metrics across different metric types for a specific
  * time period. Used for displaying usage dashboards, generating reports,
  * and calculating billing amounts.
- * 
+ *
  * <p>As a Java record, this class is:
  * <ul>
  *   <li>Immutable - all fields are final</li>
  *   <li>Value-based - equality based on field values</li>
  *   <li>Compact - automatic constructor, getters, equals, hashCode, toString</li>
  * </ul>
- * 
- * @param tenantId the tenant identifier
- * @param periodStart start of the usage period
- * @param periodEnd end of the usage period
- * @param metrics list of usage metrics by type
+ *
+ * @param tenantId     the tenant identifier
+ * @param periodStart  start of the usage period
+ * @param periodEnd    end of the usage period
+ * @param metrics      list of usage metrics by type
  * @param totalRecords total number of usage records in the period
- * 
  * @see UsageMetric
  * @see MetricType
  */
@@ -37,10 +36,10 @@ public record UsageSummary(
   /**
    * Compact constructor with validation.
    *
-   * @param tenantId the tenant identifier
-   * @param periodStart start of the usage period
-   * @param periodEnd end of the usage period
-   * @param metrics list of usage metrics
+   * @param tenantId     the tenant identifier
+   * @param periodStart  start of the usage period
+   * @param periodEnd    end of the usage period
+   * @param metrics      list of usage metrics
    * @param totalRecords total number of records
    * @throws IllegalArgumentException if validation fails
    */

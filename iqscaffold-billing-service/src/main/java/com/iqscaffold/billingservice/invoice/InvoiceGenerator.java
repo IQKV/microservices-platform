@@ -1,18 +1,18 @@
 package com.iqscaffold.billingservice.invoice;
 
-import com.iqscaffold.billingservice.billing.ProrationResult;
-import com.iqscaffold.billingservice.subscription.Subscription;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+
+import com.iqscaffold.billingservice.billing.ProrationResult;
+import com.iqscaffold.billingservice.subscription.Subscription;
 import org.springframework.stereotype.Service;
 
 /**
  * Domain service for generating invoices for subscriptions.
- * 
+ *
  * <p>This service encapsulates the complex business logic for creating invoices
  * based on subscription billing periods, plan changes, and usage. It handles:
  * <ul>
@@ -22,11 +22,11 @@ import org.springframework.stereotype.Service;
  *   <li>Tax calculations</li>
  *   <li>Invoice number generation</li>
  * </ul>
- * 
+ *
  * <p>This logic spans multiple aggregates (Subscription, SubscriptionPlan, UsageRecord)
  * and involves complex calculations that don't naturally belong to any single aggregate.
  * Therefore, it's implemented as a stateless domain service.
- * 
+ *
  * <p>Usage example:
  * <pre>{@code
  * Invoice invoice = invoiceGenerator.generate(
@@ -34,18 +34,18 @@ import org.springframework.stereotype.Service;
  *   periodStart,
  *   periodEnd
  * );
- * 
+ *
  * // Or for proration
  * Invoice prorationInvoice = invoiceGenerator.generateProrationInvoice(
  *   subscription,
  *   prorationResult
  * );
  * }</pre>
- * 
+ *
  * <p>Design Rationale: Domain services keep business logic in the domain layer while
  * avoiding artificial assignment to aggregates. They remain stateless and focused on
  * domain operations.
- * 
+ *
  * @see Invoice
  * @see InvoiceLineItem
  * @see Subscription
@@ -55,14 +55,14 @@ import org.springframework.stereotype.Service;
 public class InvoiceGenerator {
 
   private static final String INVOICE_NUMBER_FORMAT = "INV-%s-%05d";
-  private static final DateTimeFormatter YEAR_MONTH_FORMATTER = 
+  private static final DateTimeFormatter YEAR_MONTH_FORMATTER =
       DateTimeFormatter.ofPattern("yyyyMM");
   private static final int DEFAULT_DUE_DAYS = 7;
   private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.00"); // 0% default
 
   /**
    * Generates an invoice for a subscription billing period.
-   * 
+   *
    * <p>This method creates a complete invoice including:
    * <ul>
    *   <li>Subscription plan charge for the period</li>
@@ -70,12 +70,12 @@ public class InvoiceGenerator {
    *   <li>Tax calculations</li>
    *   <li>Unique invoice number</li>
    * </ul>
-   * 
+   *
    * <p>The invoice is created in DRAFT status and must be finalized before payment.
-   * 
+   *
    * @param subscription the subscription to invoice
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
+   * @param periodStart  the billing period start date
+   * @param periodEnd    the billing period end date
    * @return a new Invoice in DRAFT status
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
@@ -114,13 +114,13 @@ public class InvoiceGenerator {
 
   /**
    * Generates an invoice for a subscription billing period with usage charges.
-   * 
+   *
    * <p>This overloaded method includes usage-based charges in addition to the
    * subscription plan charge.
-   * 
+   *
    * @param subscription the subscription to invoice
-   * @param periodStart the billing period start date
-   * @param periodEnd the billing period end date
+   * @param periodStart  the billing period start date
+   * @param periodEnd    the billing period end date
    * @param usageCharges list of usage-based charges to include
    * @return a new Invoice in DRAFT status with usage charges
    * @throws IllegalArgumentException if any parameter is null or invalid
@@ -139,7 +139,7 @@ public class InvoiceGenerator {
 
     // Add usage charge line items
     if (usageCharges != null && !usageCharges.isEmpty()) {
-      for (var usageCharge : usageCharges) {
+      for (final var usageCharge : usageCharges) {
         var lineItem = createUsageChargeLineItem(usageCharge);
         invoice.addLineItem(lineItem);
       }
@@ -154,18 +154,18 @@ public class InvoiceGenerator {
 
   /**
    * Generates a proration invoice for a mid-period plan change.
-   * 
+   *
    * <p>This method creates an invoice with:
    * <ul>
    *   <li>Credit line item for unused time on old plan</li>
    *   <li>Charge line item for new plan for remaining period</li>
    *   <li>Net amount calculation</li>
    * </ul>
-   * 
+   *
    * <p>The invoice may have a negative total (credit) or positive total (charge)
    * depending on whether it's an upgrade or downgrade.
-   * 
-   * @param subscription the subscription being changed
+   *
+   * @param subscription    the subscription being changed
    * @param prorationResult the proration calculation result
    * @return a new Invoice in DRAFT status for the proration
    * @throws IllegalArgumentException if any parameter is null
@@ -223,7 +223,7 @@ public class InvoiceGenerator {
 
   /**
    * Generates an invoice for a one-time charge.
-   * 
+   *
    * <p>This method creates an invoice for charges that are not part of the
    * regular subscription billing cycle, such as:
    * <ul>
@@ -231,10 +231,10 @@ public class InvoiceGenerator {
    *   <li>One-time add-ons</li>
    *   <li>Manual adjustments</li>
    * </ul>
-   * 
+   *
    * @param subscription the subscription to invoice
-   * @param description description of the charge
-   * @param amount the charge amount
+   * @param description  description of the charge
+   * @param amount       the charge amount
    * @return a new Invoice in DRAFT status for the one-time charge
    * @throws IllegalArgumentException if any parameter is null or invalid
    */
@@ -275,11 +275,11 @@ public class InvoiceGenerator {
 
   /**
    * Generates an invoice number in the format INV-YYYYMM-XXXXX.
-   * 
+   *
    * <p>The sequence number should be obtained from a database sequence or
    * counter to ensure uniqueness. This implementation uses a placeholder
    * that should be replaced with actual sequence generation.
-   * 
+   *
    * @param date the date to use for the year-month portion
    * @return a unique invoice number
    */
@@ -289,7 +289,7 @@ public class InvoiceGenerator {
     }
 
     var yearMonth = date.format(YEAR_MONTH_FORMATTER);
-    
+
     // TODO: Replace with actual sequence from database
     // This is a placeholder - in production, use a database sequence
     var sequence = (int) (Math.random() * 99999);
@@ -299,10 +299,10 @@ public class InvoiceGenerator {
 
   /**
    * Calculates the next invoice date for a subscription.
-   * 
+   *
    * <p>This is typically the current period end date, when the next
    * invoice should be generated.
-   * 
+   *
    * @param subscription the subscription
    * @return the next invoice date
    */
@@ -319,10 +319,10 @@ public class InvoiceGenerator {
 
   /**
    * Checks if an invoice should be generated for a subscription.
-   * 
+   *
    * <p>Returns true if the subscription is in an active billing state
    * and the current period is ending soon (within the next 3 days).
-   * 
+   *
    * @param subscription the subscription to check
    * @return true if an invoice should be generated
    */
@@ -420,9 +420,9 @@ public class InvoiceGenerator {
 
   /**
    * Value object representing a usage-based charge.
-   * 
+   *
    * @param description description of the usage charge
-   * @param amount the charge amount
+   * @param amount      the charge amount
    */
   public record UsageCharge(
       String description,

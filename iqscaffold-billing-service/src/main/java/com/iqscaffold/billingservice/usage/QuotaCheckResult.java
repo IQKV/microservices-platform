@@ -2,18 +2,18 @@ package com.iqscaffold.billingservice.usage;
 
 /**
  * Immutable value object representing the result of a quota check.
- * 
+ *
  * <p>Encapsulates whether a requested operation is allowed based on current
  * usage and quota limits. Provides detailed information about the quota
  * status for decision-making and error messaging.
- * 
+ *
  * <p>As a Java record, this class is:
  * <ul>
  *   <li>Immutable - all fields are final</li>
  *   <li>Value-based - equality based on field values</li>
  *   <li>Compact - automatic constructor, getters, equals, hashCode, toString</li>
  * </ul>
- * 
+ *
  * <p>Usage example:
  * <pre>{@code
  * QuotaCheckResult result = quotaService.checkQuota(tenantId, MetricType.API_CALLS, 1);
@@ -26,15 +26,14 @@ package com.iqscaffold.billingservice.usage;
  *   );
  * }
  * }</pre>
- * 
- * @param metricType the type of metric being checked
- * @param allowed whether the requested operation is allowed
- * @param currentUsage the current usage amount
+ *
+ * @param metricType      the type of metric being checked
+ * @param allowed         whether the requested operation is allowed
+ * @param currentUsage    the current usage amount
  * @param requestedAmount the amount being requested
- * @param limit the quota limit (null if unlimited)
- * @param remainingQuota the remaining quota after the request
- * @param message optional message explaining the result
- * 
+ * @param limit           the quota limit (null if unlimited)
+ * @param remainingQuota  the remaining quota after the request
+ * @param message         optional message explaining the result
  * @see MetricType
  * @see UsageMetric
  */
@@ -50,13 +49,13 @@ public record QuotaCheckResult(
   /**
    * Compact constructor with validation.
    *
-   * @param metricType the type of metric
-   * @param allowed whether the operation is allowed
-   * @param currentUsage current usage amount
+   * @param metricType      the type of metric
+   * @param allowed         whether the operation is allowed
+   * @param currentUsage    current usage amount
    * @param requestedAmount requested amount
-   * @param limit quota limit
-   * @param remainingQuota remaining quota
-   * @param message optional message
+   * @param limit           quota limit
+   * @param remainingQuota  remaining quota
+   * @param message         optional message
    * @throws IllegalArgumentException if validation fails
    */
   public QuotaCheckResult {
@@ -80,11 +79,11 @@ public record QuotaCheckResult(
   /**
    * Creates a result indicating the quota check passed.
    *
-   * @param metricType the metric type
-   * @param currentUsage current usage
+   * @param metricType      the metric type
+   * @param currentUsage    current usage
    * @param requestedAmount requested amount
-   * @param limit quota limit
-   * @param remainingQuota remaining quota
+   * @param limit           quota limit
+   * @param remainingQuota  remaining quota
    * @return a quota check result indicating success
    */
   public static QuotaCheckResult allowed(
@@ -106,11 +105,11 @@ public record QuotaCheckResult(
   /**
    * Creates a result indicating the quota check failed.
    *
-   * @param metricType the metric type
-   * @param currentUsage current usage
+   * @param metricType      the metric type
+   * @param currentUsage    current usage
    * @param requestedAmount requested amount
-   * @param limit quota limit
-   * @param message explanation of why the check failed
+   * @param limit           quota limit
+   * @param message         explanation of why the check failed
    * @return a quota check result indicating failure
    */
   public static QuotaCheckResult denied(
@@ -132,8 +131,8 @@ public record QuotaCheckResult(
   /**
    * Creates a result for unlimited quota (always allowed).
    *
-   * @param metricType the metric type
-   * @param currentUsage current usage
+   * @param metricType      the metric type
+   * @param currentUsage    current usage
    * @param requestedAmount requested amount
    * @return a quota check result for unlimited quota
    */

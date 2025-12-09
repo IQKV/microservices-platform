@@ -1,7 +1,5 @@
 package com.iqscaffold.billingservice.security;
 
-import com.iqscaffold.billingservice.shared.BillingConstants;
-import com.iqscaffold.billingservice.tenancy.TenantContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +9,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.iqscaffold.billingservice.shared.BillingConstants;
+import com.iqscaffold.billingservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -24,7 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * JWT authentication filter for extracting user context from validated JWT tokens.
- * 
+ *
  * <p>This filter runs after Spring Security's OAuth2 Resource Server has validated
  * the JWT token. It extracts user information from JWT claims and:
  * <ul>
@@ -33,7 +34,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *   <li>Sets tenant ID in TenantContext for multi-tenancy</li>
  *   <li>Adds user ID and tenant ID to MDC for structured logging</li>
  * </ul>
- * 
+ *
  * <p>The filter follows the gateway-service + user-service JWT propagation pattern.
  */
 @Component
@@ -87,7 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   /**
    * Extract UserContext from JWT token claims.
-   * 
+   *
    * @param jwt the JWT token
    * @return the extracted UserContext
    */
@@ -125,7 +126,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /**
    * Extract Long value from JWT claim.
    * Handles different numeric types that might be in the JWT.
-   * 
+   *
    * @param value the claim value
    * @return the Long value, or null if not a valid number
    */
@@ -136,7 +137,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       case String s -> {
         try {
           yield Long.parseLong(s);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
           logger.warn("Failed to parse user ID from string: {}", s);
           yield null;
         }
@@ -148,7 +149,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /**
    * Extract authorities from JWT claim.
    * Handles both List and Set types.
-   * 
+   *
    * @param value the claim value
    * @return the set of authorities
    */
