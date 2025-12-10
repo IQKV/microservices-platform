@@ -62,6 +62,40 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
   );
 
   /**
+   * Finds all payments for a tenant (without pagination).
+   *
+   * @param tenantId tenant identifier
+   * @return list of payments ordered by creation date descending
+   */
+  @Query("""
+      SELECT p FROM Payment p
+      LEFT JOIN FETCH p.invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH p.paymentMethod
+      WHERE p.tenantId = :tenantId
+      ORDER BY p.createdAt DESC
+      """)
+  List<Payment> findByTenantId(@Param("tenantId") UUID tenantId);
+
+  /**
+   * Finds all payments for a tenant (for GDPR export).
+   *
+   * @param tenantId tenant identifier as string
+   * @return list of all payments for the tenant
+   */
+  @Query("""
+      SELECT p FROM Payment p
+      LEFT JOIN FETCH p.invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH p.paymentMethod
+      WHERE p.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY p.createdAt DESC
+      """)
+  List<Payment> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
    * Finds payments by invoice.
    *
    * @param invoiceId invoice identifier
@@ -259,38 +293,4 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
       WHERE p.providerPaymentId = :providerPaymentId
       """)
   boolean existsByProviderPaymentId(@Param("providerPaymentId") String providerPaymentId);
-
-  /**
-   * Finds all payments for a tenant (without pagination).
-   *
-   * @param tenantId tenant identifier
-   * @return list of payments ordered by creation date descending
-   */
-  @Query("""
-      SELECT p FROM Payment p
-      LEFT JOIN FETCH p.invoice i
-      LEFT JOIN FETCH i.subscription s
-      LEFT JOIN FETCH s.plan
-      LEFT JOIN FETCH p.paymentMethod
-      WHERE p.tenantId = :tenantId
-      ORDER BY p.createdAt DESC
-      """)
-  List<Payment> findByTenantId(@Param("tenantId") UUID tenantId);
-
-  /**
-   * Finds all payments for a tenant (for GDPR export).
-   *
-   * @param tenantId tenant identifier as string
-   * @return list of all payments for the tenant
-   */
-  @Query("""
-      SELECT p FROM Payment p
-      LEFT JOIN FETCH p.invoice i
-      LEFT JOIN FETCH i.subscription s
-      LEFT JOIN FETCH s.plan
-      LEFT JOIN FETCH p.paymentMethod
-      WHERE p.tenantId = CAST(:tenantId AS uuid)
-      ORDER BY p.createdAt DESC
-      """)
-  List<Payment> findByTenantId(@Param("tenantId") String tenantId);
 }

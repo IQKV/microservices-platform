@@ -38,10 +38,10 @@ public class EmailService {
   private final RestTemplate restTemplate;
 
   public EmailService(
-      TemplateEngine templateEngine,
-      MessageService messageService,
-      BillingProperties billingProperties,
-      RestTemplate restTemplate
+      final TemplateEngine templateEngine,
+      final MessageService messageService,
+      final BillingProperties billingProperties,
+      final RestTemplate restTemplate
   ) {
     this.templateEngine = templateEngine;
     this.messageService = messageService;
@@ -244,7 +244,7 @@ public class EmailService {
    * Custom exception for email sending failures.
    */
   public static class EmailSendException extends RuntimeException {
-    public EmailSendException(String message, Throwable cause) {
+    public EmailSendException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }

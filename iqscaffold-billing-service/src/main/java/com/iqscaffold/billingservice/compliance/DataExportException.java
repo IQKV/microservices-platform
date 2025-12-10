@@ -5,11 +5,11 @@ package com.iqscaffold.billingservice.compliance;
  */
 public class DataExportException extends RuntimeException {
 
-  public DataExportException(String message) {
+  public DataExportException(final String message) {
     super(message);
   }
 
-  public DataExportException(String message, Throwable cause) {
+  public DataExportException(final String message, final Throwable cause) {
     super(message, cause);
   }
 }

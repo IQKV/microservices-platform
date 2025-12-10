@@ -31,7 +31,7 @@ public class GdprComplianceRestResource {
 
   private final GdprComplianceService gdprComplianceService;
 
-  public GdprComplianceRestResource(GdprComplianceService gdprComplianceService) {
+  public GdprComplianceRestResource(final GdprComplianceService gdprComplianceService) {
     this.gdprComplianceService = gdprComplianceService;
   }
 

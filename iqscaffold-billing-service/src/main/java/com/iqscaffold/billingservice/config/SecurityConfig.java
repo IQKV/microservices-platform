@@ -50,9 +50,9 @@ public class SecurityConfig {
   private final RateLimitingFilter rateLimitingFilter;
 
   public SecurityConfig(
-      BillingProperties billingProperties,
-      JwtAuthenticationFilter jwtAuthenticationFilter,
-      RateLimitingFilter rateLimitingFilter
+      final BillingProperties billingProperties,
+      final JwtAuthenticationFilter jwtAuthenticationFilter,
+      final RateLimitingFilter rateLimitingFilter
   ) {
     this.billingProperties = billingProperties;
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;

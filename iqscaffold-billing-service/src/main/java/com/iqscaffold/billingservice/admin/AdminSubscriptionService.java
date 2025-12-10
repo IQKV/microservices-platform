@@ -41,9 +41,9 @@ public class AdminSubscriptionService {
   private final MessageService messageService;
 
   public AdminSubscriptionService(
-      SubscriptionRepository subscriptionRepository,
-      SubscriptionLifecycleManager subscriptionLifecycleManager,
-      MessageService messageService) {
+      final SubscriptionRepository subscriptionRepository,
+      final SubscriptionLifecycleManager subscriptionLifecycleManager,
+      final MessageService messageService) {
     this.subscriptionRepository = subscriptionRepository;
     this.subscriptionLifecycleManager = subscriptionLifecycleManager;
     this.messageService = messageService;

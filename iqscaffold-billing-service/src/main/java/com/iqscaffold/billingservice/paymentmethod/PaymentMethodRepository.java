@@ -35,6 +35,19 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
   List<PaymentMethod> findByTenantId(@Param("tenantId") UUID tenantId);
 
   /**
+   * Finds all payment methods for a tenant (for GDPR export).
+   *
+   * @param tenantId tenant identifier as string
+   * @return list of all payment methods for the tenant
+   */
+  @Query("""
+      SELECT pm FROM PaymentMethod pm
+      WHERE pm.tenantId = CAST(:tenantId AS uuid)
+      ORDER BY pm.createdAt DESC
+      """)
+  List<PaymentMethod> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
    * Finds all active payment methods for a tenant.
    *
    * @param tenantId tenant identifier
@@ -252,19 +265,6 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
       ORDER BY pm.isDefault DESC, pm.createdAt DESC
       """)
   List<PaymentMethod> findByTenantIdAndActiveTrue(@Param("tenantId") UUID tenantId);
-
-  /**
-   * Finds all payment methods for a tenant (for GDPR export).
-   *
-   * @param tenantId tenant identifier as string
-   * @return list of all payment methods for the tenant
-   */
-  @Query("""
-      SELECT pm FROM PaymentMethod pm
-      WHERE pm.tenantId = CAST(:tenantId AS uuid)
-      ORDER BY pm.createdAt DESC
-      """)
-  List<PaymentMethod> findByTenantId(@Param("tenantId") String tenantId);
 
   /**
    * Deletes all payment methods for a tenant (for GDPR deletion).

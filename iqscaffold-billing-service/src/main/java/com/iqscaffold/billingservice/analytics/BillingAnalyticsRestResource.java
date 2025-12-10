@@ -14,7 +14,7 @@ public class BillingAnalyticsRestResource {
 
   private final BillingAnalyticsService billingAnalyticsService;
 
-  public BillingAnalyticsRestResource(BillingAnalyticsService billingAnalyticsService) {
+  public BillingAnalyticsRestResource(final BillingAnalyticsService billingAnalyticsService) {
     this.billingAnalyticsService = billingAnalyticsService;
   }
 

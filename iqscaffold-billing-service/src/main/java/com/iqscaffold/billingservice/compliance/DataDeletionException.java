@@ -5,11 +5,11 @@ package com.iqscaffold.billingservice.compliance;
  */
 public class DataDeletionException extends RuntimeException {
 
-  public DataDeletionException(String message) {
+  public DataDeletionException(final String message) {
     super(message);
   }
 
-  public DataDeletionException(String message, Throwable cause) {
+  public DataDeletionException(final String message, final Throwable cause) {
     super(message, cause);
   }
 }

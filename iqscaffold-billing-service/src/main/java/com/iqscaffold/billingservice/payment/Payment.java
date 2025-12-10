@@ -227,7 +227,7 @@ public class Payment {
     return (
         this.refundedAmount.compareTo(BigDecimal.ZERO) > 0
         && this.refundedAmount.compareTo(this.amount) < 0
-    );
+        );
   }
 
   /**
@@ -319,6 +319,11 @@ public class Payment {
     return providerPaymentId;
   }
 
+  // Setters for GDPR compliance (anonymization)
+  public void setProviderPaymentId(String providerPaymentId) {
+    this.providerPaymentId = providerPaymentId;
+  }
+
   public String getFailureReason() {
     return failureReason;
   }
@@ -331,20 +336,15 @@ public class Payment {
     return metadata != null ? new HashMap<>(metadata) : new HashMap<>();
   }
 
+  public void setMetadata(String metadataJson) {
+    this.metadata = new HashMap<>();
+  }
+
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }
 
   public LocalDateTime getUpdatedAt() {
     return updatedAt;
-  }
-
-  // Setters for GDPR compliance (anonymization)
-  public void setProviderPaymentId(String providerPaymentId) {
-    this.providerPaymentId = providerPaymentId;
-  }
-
-  public void setMetadata(String metadataJson) {
-    this.metadata = new HashMap<>();
   }
 }

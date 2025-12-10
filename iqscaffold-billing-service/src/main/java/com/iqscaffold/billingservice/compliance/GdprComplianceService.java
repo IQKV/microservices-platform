@@ -50,15 +50,15 @@ public class GdprComplianceService {
   private final ObjectMapper objectMapper;
 
   public GdprComplianceService(
-      SubscriptionRepository subscriptionRepository,
-      InvoiceRepository invoiceRepository,
-      PaymentRepository paymentRepository,
-      PaymentMethodRepository paymentMethodRepository,
-      UsageRecordRepository usageRecordRepository,
-      EmailService emailService,
-      AuditLogService auditLogService,
-      MessageService messageService,
-      ObjectMapper objectMapper
+      final SubscriptionRepository subscriptionRepository,
+      final InvoiceRepository invoiceRepository,
+      final PaymentRepository paymentRepository,
+      final PaymentMethodRepository paymentMethodRepository,
+      final UsageRecordRepository usageRecordRepository,
+      final EmailService emailService,
+      final AuditLogService auditLogService,
+      final MessageService messageService,
+      final ObjectMapper objectMapper
   ) {
     this.subscriptionRepository = subscriptionRepository;
     this.invoiceRepository = invoiceRepository;

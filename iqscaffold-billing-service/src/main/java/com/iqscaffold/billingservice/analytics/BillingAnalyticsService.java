@@ -50,8 +50,8 @@ public class BillingAnalyticsService {
   private final InvoiceRepository invoiceRepository;
 
   public BillingAnalyticsService(
-      SubscriptionRepository subscriptionRepository,
-      InvoiceRepository invoiceRepository) {
+      final SubscriptionRepository subscriptionRepository,
+      final InvoiceRepository invoiceRepository) {
     this.subscriptionRepository = subscriptionRepository;
     this.invoiceRepository = invoiceRepository;
   }
