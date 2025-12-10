@@ -2,7 +2,6 @@ package com.iqscaffold.billingservice.shared;
 
 import java.util.Locale;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -14,10 +13,13 @@ import org.springframework.stereotype.Service;
  * from user preferences, Accept-Language header, or default locale.
  */
 @Service
-@RequiredArgsConstructor
 public class MessageService {
 
   private final MessageSource messageSource;
+
+  public MessageService(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
 
   /**
    * Get message for the given key using the current locale.

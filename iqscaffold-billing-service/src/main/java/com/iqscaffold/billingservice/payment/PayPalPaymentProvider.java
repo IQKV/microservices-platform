@@ -11,7 +11,8 @@ import com.paypal.sdk.Environment;
 import com.paypal.sdk.PaypalServerSdkClient;
 import com.paypal.sdk.authentication.ClientCredentialsAuthModel;
 import com.paypal.sdk.exceptions.ApiException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -81,8 +82,9 @@ import org.springframework.stereotype.Component;
  * @see PaymentMethodDetails
  */
 @Component
-@Slf4j
 public final class PayPalPaymentProvider implements PaymentProviderAdapter {
+
+  private static final Logger log = LoggerFactory.getLogger(PayPalPaymentProvider.class);
 
   private final PaypalServerSdkClient client;
   private final String clientId;

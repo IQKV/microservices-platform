@@ -6,8 +6,8 @@ import java.util.Map;
 import com.iqscaffold.billingservice.config.BillingProperties;
 import com.iqscaffold.billingservice.shared.MessageService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,14 +28,26 @@ import org.thymeleaf.context.Context;
  * </ul>
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class EmailService {
+
+  private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
   private final TemplateEngine templateEngine;
   private final MessageService messageService;
   private final BillingProperties billingProperties;
   private final RestTemplate restTemplate;
+
+  public EmailService(
+      TemplateEngine templateEngine,
+      MessageService messageService,
+      BillingProperties billingProperties,
+      RestTemplate restTemplate
+  ) {
+    this.templateEngine = templateEngine;
+    this.messageService = messageService;
+    this.billingProperties = billingProperties;
+    this.restTemplate = restTemplate;
+  }
 
   /**
    * Sends an email using a template with i18n support.

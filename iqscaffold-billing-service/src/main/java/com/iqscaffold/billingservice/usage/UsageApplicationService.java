@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.subscription.Subscription;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -48,16 +48,28 @@ import org.springframework.transaction.annotation.Transactional;
  * @see QuotaExceededSpecification
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class UsageApplicationService {
+
+  private static final Logger log = LoggerFactory.getLogger(UsageApplicationService.class);
 
   private final UsageRecordRepository usageRecordRepository;
   private final SubscriptionRepository subscriptionRepository;
   private final QuotaEnforcer quotaEnforcer;
   private final QuotaExceededSpecification quotaExceededSpecification;
   private final MessageService messageService;
+
+  public UsageApplicationService(UsageRecordRepository usageRecordRepository,
+                                 SubscriptionRepository subscriptionRepository,
+                                 QuotaEnforcer quotaEnforcer,
+                                 QuotaExceededSpecification quotaExceededSpecification,
+                                 MessageService messageService) {
+    this.usageRecordRepository = usageRecordRepository;
+    this.subscriptionRepository = subscriptionRepository;
+    this.quotaEnforcer = quotaEnforcer;
+    this.quotaExceededSpecification = quotaExceededSpecification;
+    this.messageService = messageService;
+  }
 
   /**
    * Records usage for a tenant and metric type.

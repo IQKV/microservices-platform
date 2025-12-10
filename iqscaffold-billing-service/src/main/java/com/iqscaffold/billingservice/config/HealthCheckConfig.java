@@ -3,7 +3,8 @@ package com.iqscaffold.billingservice.config;
 import javax.sql.DataSource;
 
 import com.iqscaffold.billingservice.payment.PaymentProviderFactory;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -56,8 +57,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 @Configuration
 @EnableConfigurationProperties(BillingProperties.class)
-@Slf4j
 public class HealthCheckConfig {
+
+  private static final Logger log = LoggerFactory.getLogger(HealthCheckConfig.class);
 
   /**
    * Custom health indicator for database connectivity and performance.
@@ -225,8 +227,9 @@ public class HealthCheckConfig {
    * RabbitMQ is used for asynchronous event processing and is critical for
    * usage recording, invoice generation, and webhook processing.
    */
-  @Slf4j
   public static class RabbitMQHealthIndicator implements HealthIndicator {
+
+    private static final Logger log = LoggerFactory.getLogger(RabbitMQHealthIndicator.class);
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -288,8 +291,9 @@ public class HealthCheckConfig {
    *   <li><strong>DOWN:</strong> No provider available (should never happen)</li>
    * </ul>
    */
-  @Slf4j
   public static class PaymentProviderHealthIndicator implements HealthIndicator {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentProviderHealthIndicator.class);
 
     private final PaymentProviderFactory paymentProviderFactory;
 

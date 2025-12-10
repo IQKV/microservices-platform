@@ -13,8 +13,8 @@ import com.iqscaffold.billingservice.shared.event.InvoicePaid;
 import com.iqscaffold.billingservice.shared.event.InvoiceVoided;
 import com.iqscaffold.billingservice.shared.exception.InvoiceException;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,9 +72,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see Invoice
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class InvoiceApplicationService {
+
+  private static final Logger log = LoggerFactory.getLogger(InvoiceApplicationService.class);
 
   private final InvoiceRepository invoiceRepository;
   private final SubscriptionRepository subscriptionRepository;
@@ -83,6 +83,24 @@ public class InvoiceApplicationService {
   private final DomainEventPublisher eventPublisher;
   private final MessageService messageService;
   private final BillingProperties billingProperties;
+
+  public InvoiceApplicationService(
+      InvoiceRepository invoiceRepository,
+      SubscriptionRepository subscriptionRepository,
+      InvoiceFactory invoiceFactory,
+      InvoiceGenerator invoiceGenerator,
+      DomainEventPublisher eventPublisher,
+      MessageService messageService,
+      BillingProperties billingProperties
+  ) {
+    this.invoiceRepository = invoiceRepository;
+    this.subscriptionRepository = subscriptionRepository;
+    this.invoiceFactory = invoiceFactory;
+    this.invoiceGenerator = invoiceGenerator;
+    this.eventPublisher = eventPublisher;
+    this.messageService = messageService;
+    this.billingProperties = billingProperties;
+  }
 
   /**
    * Generates an invoice for a subscription's regular billing period.

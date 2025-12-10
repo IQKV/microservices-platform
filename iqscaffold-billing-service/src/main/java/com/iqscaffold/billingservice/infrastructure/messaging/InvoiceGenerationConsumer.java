@@ -7,7 +7,8 @@ import com.iqscaffold.billingservice.shared.event.DomainEventPublisher;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +26,9 @@ import org.springframework.stereotype.Component;
  * </ul>
  */
 @Component
-@Slf4j
 public class InvoiceGenerationConsumer {
 
+  private static final Logger log = LoggerFactory.getLogger(InvoiceGenerationConsumer.class);
   private static final String QUEUE_NAME = "billing.invoice";
 
   private final InvoiceApplicationService invoiceApplicationService;

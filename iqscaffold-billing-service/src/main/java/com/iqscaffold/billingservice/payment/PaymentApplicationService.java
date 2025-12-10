@@ -18,8 +18,8 @@ import com.iqscaffold.billingservice.shared.exception.InvoiceException;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,9 +45,9 @@ import org.springframework.transaction.annotation.Transactional;
  * </ul>
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class PaymentApplicationService {
+
+  private static final Logger log = LoggerFactory.getLogger(PaymentApplicationService.class);
 
   private final PaymentRepository paymentRepository;
   private final PaymentMethodRepository paymentMethodRepository;
@@ -55,6 +55,20 @@ public class PaymentApplicationService {
   private final PaymentProviderFactory paymentProviderFactory;
   private final DomainEventPublisher eventPublisher;
   private final RedisTemplate<String, Object> redisTemplate;
+
+  public PaymentApplicationService(PaymentRepository paymentRepository,
+                                   PaymentMethodRepository paymentMethodRepository,
+                                   InvoiceRepository invoiceRepository,
+                                   PaymentProviderFactory paymentProviderFactory,
+                                   DomainEventPublisher eventPublisher,
+                                   RedisTemplate<String, Object> redisTemplate) {
+    this.paymentRepository = paymentRepository;
+    this.paymentMethodRepository = paymentMethodRepository;
+    this.invoiceRepository = invoiceRepository;
+    this.paymentProviderFactory = paymentProviderFactory;
+    this.eventPublisher = eventPublisher;
+    this.redisTemplate = redisTemplate;
+  }
 
   private static final String IDEMPOTENCY_KEY_PREFIX = "payment:idempotency:";
   private static final Duration IDEMPOTENCY_TTL = Duration.ofHours(24);

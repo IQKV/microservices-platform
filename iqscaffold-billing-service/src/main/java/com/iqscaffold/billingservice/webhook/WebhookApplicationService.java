@@ -21,8 +21,8 @@ import com.iqscaffold.billingservice.shared.event.PaymentRefunded;
 import com.iqscaffold.billingservice.shared.event.PaymentSucceeded;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +62,9 @@ import org.springframework.transaction.annotation.Transactional;
  * </ul>
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class WebhookApplicationService {
+
+  private static final Logger log = LoggerFactory.getLogger(WebhookApplicationService.class);
 
   private final PaymentProviderFactory paymentProviderFactory;
   private final WebhookEventRepository webhookEventRepository;
@@ -74,6 +74,24 @@ public class WebhookApplicationService {
   private final DomainEventPublisher eventPublisher;
   private final RabbitTemplate rabbitTemplate;
   private final ObjectMapper objectMapper;
+
+  public WebhookApplicationService(PaymentProviderFactory paymentProviderFactory,
+                                   WebhookEventRepository webhookEventRepository,
+                                   PaymentRepository paymentRepository,
+                                   InvoiceRepository invoiceRepository,
+                                   SubscriptionRepository subscriptionRepository,
+                                   DomainEventPublisher eventPublisher,
+                                   RabbitTemplate rabbitTemplate,
+                                   ObjectMapper objectMapper) {
+    this.paymentProviderFactory = paymentProviderFactory;
+    this.webhookEventRepository = webhookEventRepository;
+    this.paymentRepository = paymentRepository;
+    this.invoiceRepository = invoiceRepository;
+    this.subscriptionRepository = subscriptionRepository;
+    this.eventPublisher = eventPublisher;
+    this.rabbitTemplate = rabbitTemplate;
+    this.objectMapper = objectMapper;
+  }
 
   private static final String WEBHOOK_EXCHANGE = "billing.webhooks";
   private static final int WEBHOOK_EVENT_TTL_DAYS = 30;

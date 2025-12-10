@@ -11,8 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,12 +36,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/billing/plans")
-@RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Subscription Plans", description = "Public subscription plan APIs")
 public class SubscriptionPlanRestResource {
 
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionPlanRestResource.class);
+
   private final SubscriptionPlanService subscriptionPlanService;
+
+  public SubscriptionPlanRestResource(SubscriptionPlanService subscriptionPlanService) {
+    this.subscriptionPlanService = subscriptionPlanService;
+  }
 
   /**
    * Retrieves all active public subscription plans.

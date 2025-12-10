@@ -20,7 +20,8 @@ import com.stripe.param.CustomerUpdateParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.PaymentMethodAttachParams;
 import com.stripe.param.RefundCreateParams;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -91,8 +92,9 @@ import org.springframework.stereotype.Component;
  * @see PaymentMethodDetails
  */
 @Component
-@Slf4j
 public final class StripePaymentProvider implements PaymentProviderAdapter {
+
+  private static final Logger log = LoggerFactory.getLogger(StripePaymentProvider.class);
 
   private final String apiKey;
   private final String webhookSecret;

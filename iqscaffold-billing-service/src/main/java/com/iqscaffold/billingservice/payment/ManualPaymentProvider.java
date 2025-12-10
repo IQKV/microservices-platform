@@ -7,7 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -86,8 +87,9 @@ import org.springframework.stereotype.Component;
  * @see PaymentMethodDetails
  */
 @Component
-@Slf4j
 public final class ManualPaymentProvider implements PaymentProviderAdapter {
+
+  private static final Logger log = LoggerFactory.getLogger(ManualPaymentProvider.class);
 
   // In-memory storage for demonstration (in production, use database)
   private final Map<String, CustomerRecord> customers = new ConcurrentHashMap<>();

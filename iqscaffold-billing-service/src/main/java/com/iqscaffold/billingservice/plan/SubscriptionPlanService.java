@@ -7,8 +7,8 @@ import java.util.Map;
 import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.shared.exception.PlanException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -30,13 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
  * All business rules and invariants are enforced by the SubscriptionPlan aggregate.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SubscriptionPlanService {
+
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionPlanService.class);
 
   private final SubscriptionPlanRepository subscriptionPlanRepository;
   private final MessageService messageService;
   private final ValidPlanTransitionSpecification validPlanTransitionSpecification;
+
+  public SubscriptionPlanService(SubscriptionPlanRepository subscriptionPlanRepository,
+                                 MessageService messageService,
+                                 ValidPlanTransitionSpecification validPlanTransitionSpecification) {
+    this.subscriptionPlanRepository = subscriptionPlanRepository;
+    this.messageService = messageService;
+    this.validPlanTransitionSpecification = validPlanTransitionSpecification;
+  }
 
   /**
    * Creates a new subscription plan.

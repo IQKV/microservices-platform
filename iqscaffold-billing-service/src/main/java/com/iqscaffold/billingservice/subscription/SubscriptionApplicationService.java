@@ -10,8 +10,8 @@ import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.shared.exception.PlanException;
 import com.iqscaffold.billingservice.shared.exception.SubscriptionException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -38,9 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
  * Upgrade/downgrade and cancellation/reactivation are handled by separate methods.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SubscriptionApplicationService {
+
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionApplicationService.class);
 
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionPlanRepository subscriptionPlanRepository;
@@ -54,6 +54,32 @@ public class SubscriptionApplicationService {
   private final com.iqscaffold.billingservice.plan.ValidPlanTransitionSpecification validPlanTransitionSpecification;
   private final com.iqscaffold.billingservice.usage.QuotaExceededSpecification quotaExceededSpecification;
   private final com.iqscaffold.billingservice.usage.UsageRecordRepository usageRecordRepository;
+
+  public SubscriptionApplicationService(SubscriptionRepository subscriptionRepository,
+                                        SubscriptionPlanRepository subscriptionPlanRepository,
+                                        PaymentMethodRepository paymentMethodRepository,
+                                        TenantTrialHistoryRepository tenantTrialHistoryRepository,
+                                        SubscriptionFactory subscriptionFactory,
+                                        SubscriptionLifecycleManager subscriptionLifecycleManager,
+                                        TrialEligibilitySpecification trialEligibilitySpecification,
+                                        MessageService messageService,
+                                        com.iqscaffold.billingservice.billing.ProrationCalculator prorationCalculator,
+                                        com.iqscaffold.billingservice.plan.ValidPlanTransitionSpecification validPlanTransitionSpecification,
+                                        com.iqscaffold.billingservice.usage.QuotaExceededSpecification quotaExceededSpecification,
+                                        com.iqscaffold.billingservice.usage.UsageRecordRepository usageRecordRepository) {
+    this.subscriptionRepository = subscriptionRepository;
+    this.subscriptionPlanRepository = subscriptionPlanRepository;
+    this.paymentMethodRepository = paymentMethodRepository;
+    this.tenantTrialHistoryRepository = tenantTrialHistoryRepository;
+    this.subscriptionFactory = subscriptionFactory;
+    this.subscriptionLifecycleManager = subscriptionLifecycleManager;
+    this.trialEligibilitySpecification = trialEligibilitySpecification;
+    this.messageService = messageService;
+    this.prorationCalculator = prorationCalculator;
+    this.validPlanTransitionSpecification = validPlanTransitionSpecification;
+    this.quotaExceededSpecification = quotaExceededSpecification;
+    this.usageRecordRepository = usageRecordRepository;
+  }
 
   /**
    * Creates a new subscription for a tenant.

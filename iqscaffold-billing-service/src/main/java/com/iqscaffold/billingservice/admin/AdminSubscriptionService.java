@@ -9,8 +9,8 @@ import com.iqscaffold.billingservice.subscription.SubscriptionDto;
 import com.iqscaffold.billingservice.subscription.SubscriptionLifecycleManager;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,13 +32,22 @@ import org.springframework.transaction.annotation.Transactional;
  * ADMIN or SUPER_ADMIN authority.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class AdminSubscriptionService {
+
+  private static final Logger log = LoggerFactory.getLogger(AdminSubscriptionService.class);
 
   private final SubscriptionRepository subscriptionRepository;
   private final SubscriptionLifecycleManager subscriptionLifecycleManager;
   private final MessageService messageService;
+
+  public AdminSubscriptionService(
+      SubscriptionRepository subscriptionRepository,
+      SubscriptionLifecycleManager subscriptionLifecycleManager,
+      MessageService messageService) {
+    this.subscriptionRepository = subscriptionRepository;
+    this.subscriptionLifecycleManager = subscriptionLifecycleManager;
+    this.messageService = messageService;
+  }
 
   /**
    * Lists all subscriptions with optional filtering and pagination.

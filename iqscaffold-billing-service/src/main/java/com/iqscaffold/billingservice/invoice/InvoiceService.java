@@ -1,18 +1,22 @@
 package com.iqscaffold.billingservice.invoice;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
  * Service layer for invoice management business logic.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class InvoiceService {
 
+  private static final Logger log = LoggerFactory.getLogger(InvoiceService.class);
+
   private final InvoiceRepository invoiceRepository;
+
+  public InvoiceService(InvoiceRepository invoiceRepository) {
+    this.invoiceRepository = invoiceRepository;
+  }
 
   // Service methods will be added in subsequent tasks
 }

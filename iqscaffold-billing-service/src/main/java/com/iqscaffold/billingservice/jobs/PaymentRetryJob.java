@@ -124,7 +124,7 @@ public class PaymentRetryJob {
     var processedCount = 0;
 
     // Check each retry schedule day
-    for (final var i = 0; i < RETRY_SCHEDULE_DAYS.length; i++) {
+    for (var i = 0; i < RETRY_SCHEDULE_DAYS.length; i++) {
       var retryAttempt = i + 1;
       var daysAgo = RETRY_SCHEDULE_DAYS[i];
       var retryAfter = now.minusDays(daysAgo);

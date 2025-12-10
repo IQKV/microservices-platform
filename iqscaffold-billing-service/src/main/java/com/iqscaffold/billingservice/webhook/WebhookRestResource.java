@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,12 +36,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/billing/webhooks")
-@RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Webhooks", description = "Payment provider webhook endpoints")
 public class WebhookRestResource {
 
+  private static final Logger log = LoggerFactory.getLogger(WebhookRestResource.class);
+
   private final WebhookApplicationService webhookApplicationService;
+
+  public WebhookRestResource(WebhookApplicationService webhookApplicationService) {
+    this.webhookApplicationService = webhookApplicationService;
+  }
 
   /**
    * Processes Stripe webhook events.

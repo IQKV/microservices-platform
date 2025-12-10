@@ -1,18 +1,22 @@
 package com.iqscaffold.billingservice.subscription;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
  * Service layer for subscription business logic.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class SubscriptionService {
 
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionService.class);
+
   private final SubscriptionRepository subscriptionRepository;
+
+  public SubscriptionService(SubscriptionRepository subscriptionRepository) {
+    this.subscriptionRepository = subscriptionRepository;
+  }
 
   // Service methods will be added in subsequent tasks
 }

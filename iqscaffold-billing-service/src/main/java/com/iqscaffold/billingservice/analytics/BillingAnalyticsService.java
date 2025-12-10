@@ -17,8 +17,8 @@ import com.iqscaffold.billingservice.plan.PlanTier;
 import com.iqscaffold.billingservice.subscription.Subscription;
 import com.iqscaffold.billingservice.subscription.SubscriptionRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,12 +42,19 @@ import org.springframework.transaction.annotation.Transactional;
  * for reporting. Results are calculated in real-time based on current data.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class BillingAnalyticsService {
+
+  private static final Logger log = LoggerFactory.getLogger(BillingAnalyticsService.class);
 
   private final SubscriptionRepository subscriptionRepository;
   private final InvoiceRepository invoiceRepository;
+
+  public BillingAnalyticsService(
+      SubscriptionRepository subscriptionRepository,
+      InvoiceRepository invoiceRepository) {
+    this.subscriptionRepository = subscriptionRepository;
+    this.invoiceRepository = invoiceRepository;
+  }
 
   /**
    * Calculates Monthly Recurring Revenue (MRR) analytics.

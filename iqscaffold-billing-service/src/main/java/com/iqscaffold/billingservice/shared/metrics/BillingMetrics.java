@@ -6,7 +6,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,8 +19,9 @@ import org.springframework.stereotype.Component;
  * <p>Metrics are exposed via Prometheus endpoint at /actuator/prometheus
  */
 @Component
-@Slf4j
 public class BillingMetrics {
+
+  private static final Logger log = LoggerFactory.getLogger(BillingMetrics.class);
 
   private final MeterRegistry meterRegistry;
 

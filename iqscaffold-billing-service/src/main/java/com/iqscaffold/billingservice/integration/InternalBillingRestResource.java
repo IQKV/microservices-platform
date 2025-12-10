@@ -16,8 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -83,8 +83,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/internal/billing")
-@RequiredArgsConstructor
-@Slf4j
 @Tag(
     name = "Internal Billing Integration",
     description = """
@@ -103,9 +101,19 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class InternalBillingRestResource {
 
+  private static final Logger log = LoggerFactory.getLogger(InternalBillingRestResource.class);
+
   private final SubscriptionApplicationService subscriptionApplicationService;
   private final UsageApplicationService usageApplicationService;
   private final MessageService messageService;
+
+  public InternalBillingRestResource(SubscriptionApplicationService subscriptionApplicationService,
+                                     UsageApplicationService usageApplicationService,
+                                     MessageService messageService) {
+    this.subscriptionApplicationService = subscriptionApplicationService;
+    this.usageApplicationService = usageApplicationService;
+    this.messageService = messageService;
+  }
 
   /**
    * Gets subscription status for a tenant.

@@ -9,8 +9,8 @@ import java.util.UUID;
 import com.iqscaffold.billingservice.invoice.InvoiceApplicationService;
 import com.iqscaffold.billingservice.subscription.SubscriptionApplicationService;
 import com.iqscaffold.billingservice.usage.UsageApplicationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +27,21 @@ import org.springframework.transaction.annotation.Transactional;
  * </ul>
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class BillingPortalService {
+
+  private static final Logger log = LoggerFactory.getLogger(BillingPortalService.class);
 
   private final SubscriptionApplicationService subscriptionApplicationService;
   private final UsageApplicationService usageApplicationService;
   private final InvoiceApplicationService invoiceApplicationService;
+
+  public BillingPortalService(SubscriptionApplicationService subscriptionApplicationService,
+                              UsageApplicationService usageApplicationService,
+                              InvoiceApplicationService invoiceApplicationService) {
+    this.subscriptionApplicationService = subscriptionApplicationService;
+    this.usageApplicationService = usageApplicationService;
+    this.invoiceApplicationService = invoiceApplicationService;
+  }
 
   /**
    * Retrieves comprehensive billing dashboard for a tenant.

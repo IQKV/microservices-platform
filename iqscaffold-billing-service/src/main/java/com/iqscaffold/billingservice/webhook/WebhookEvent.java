@@ -10,12 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  * Entity representing a webhook event received from a payment provider.
  *
@@ -31,11 +25,6 @@ import lombok.Setter;
  */
 @Entity
 @Table(name = "webhook_events")
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class WebhookEvent {
 
   @Id
@@ -91,7 +80,6 @@ public class WebhookEvent {
    * Number of retry attempts.
    */
   @Column(name = "retry_count", nullable = false)
-  @Builder.Default
   private int retryCount = 0;
 
   /**
@@ -110,13 +98,230 @@ public class WebhookEvent {
    * Timestamp when the webhook was created in the database.
    */
   @Column(name = "created_at", nullable = false, updatable = false)
-  @Builder.Default
   private LocalDateTime createdAt = LocalDateTime.now();
 
   /**
    * Timestamp when the webhook was last updated.
    */
   @Column(name = "updated_at")
-  @Builder.Default
   private LocalDateTime updatedAt = LocalDateTime.now();
+
+  public WebhookEvent() {
+  }
+
+  public WebhookEvent(Long id, String providerEventId, String provider, String eventType,
+                      String payload, String signature, WebhookEventStatus status,
+                      String errorMessage, int retryCount, LocalDateTime receivedAt,
+                      LocalDateTime processedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    this.id = id;
+    this.providerEventId = providerEventId;
+    this.provider = provider;
+    this.eventType = eventType;
+    this.payload = payload;
+    this.signature = signature;
+    this.status = status;
+    this.errorMessage = errorMessage;
+    this.retryCount = retryCount;
+    this.receivedAt = receivedAt;
+    this.processedAt = processedAt;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getProviderEventId() {
+    return providerEventId;
+  }
+
+  public void setProviderEventId(String providerEventId) {
+    this.providerEventId = providerEventId;
+  }
+
+  public String getProvider() {
+    return provider;
+  }
+
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
+  public String getEventType() {
+    return eventType;
+  }
+
+  public void setEventType(String eventType) {
+    this.eventType = eventType;
+  }
+
+  public String getPayload() {
+    return payload;
+  }
+
+  public void setPayload(String payload) {
+    this.payload = payload;
+  }
+
+  public String getSignature() {
+    return signature;
+  }
+
+  public void setSignature(String signature) {
+    this.signature = signature;
+  }
+
+  public WebhookEventStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(WebhookEventStatus status) {
+    this.status = status;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
+
+  public int getRetryCount() {
+    return retryCount;
+  }
+
+  public void setRetryCount(int retryCount) {
+    this.retryCount = retryCount;
+  }
+
+  public LocalDateTime getReceivedAt() {
+    return receivedAt;
+  }
+
+  public void setReceivedAt(LocalDateTime receivedAt) {
+    this.receivedAt = receivedAt;
+  }
+
+  public LocalDateTime getProcessedAt() {
+    return processedAt;
+  }
+
+  public void setProcessedAt(LocalDateTime processedAt) {
+    this.processedAt = processedAt;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public static WebhookEventBuilder builder() {
+    return new WebhookEventBuilder();
+  }
+
+  public static class WebhookEventBuilder {
+    private Long id;
+    private String providerEventId;
+    private String provider;
+    private String eventType;
+    private String payload;
+    private String signature;
+    private WebhookEventStatus status;
+    private String errorMessage;
+    private int retryCount = 0;
+    private LocalDateTime receivedAt;
+    private LocalDateTime processedAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    WebhookEventBuilder() {
+    }
+
+    public WebhookEventBuilder id(Long id) {
+      this.id = id;
+      return this;
+    }
+
+    public WebhookEventBuilder providerEventId(String providerEventId) {
+      this.providerEventId = providerEventId;
+      return this;
+    }
+
+    public WebhookEventBuilder provider(String provider) {
+      this.provider = provider;
+      return this;
+    }
+
+    public WebhookEventBuilder eventType(String eventType) {
+      this.eventType = eventType;
+      return this;
+    }
+
+    public WebhookEventBuilder payload(String payload) {
+      this.payload = payload;
+      return this;
+    }
+
+    public WebhookEventBuilder signature(String signature) {
+      this.signature = signature;
+      return this;
+    }
+
+    public WebhookEventBuilder status(WebhookEventStatus status) {
+      this.status = status;
+      return this;
+    }
+
+    public WebhookEventBuilder errorMessage(String errorMessage) {
+      this.errorMessage = errorMessage;
+      return this;
+    }
+
+    public WebhookEventBuilder retryCount(int retryCount) {
+      this.retryCount = retryCount;
+      return this;
+    }
+
+    public WebhookEventBuilder receivedAt(LocalDateTime receivedAt) {
+      this.receivedAt = receivedAt;
+      return this;
+    }
+
+    public WebhookEventBuilder processedAt(LocalDateTime processedAt) {
+      this.processedAt = processedAt;
+      return this;
+    }
+
+    public WebhookEventBuilder createdAt(LocalDateTime createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public WebhookEventBuilder updatedAt(LocalDateTime updatedAt) {
+      this.updatedAt = updatedAt;
+      return this;
+    }
+
+    public WebhookEvent build() {
+      return new WebhookEvent(id, providerEventId, provider, eventType, payload, signature,
+          status, errorMessage, retryCount, receivedAt, processedAt, createdAt, updatedAt);
+    }
+  }
 }

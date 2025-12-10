@@ -1,15 +1,20 @@
 package com.iqscaffold.billingservice.billing;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
  * Service layer for billing cycle and charge management.
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class BillingService {
+
+  private static final Logger log = LoggerFactory.getLogger(BillingService.class);
+
+  public BillingService() {
+    // Default constructor
+  }
+
   // Service methods will be added in subsequent tasks
 }

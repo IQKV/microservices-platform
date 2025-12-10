@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,16 +62,28 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/billing/portal")
-@RequiredArgsConstructor
-@Slf4j
 @Tag(name = "Customer Portal", description = "Self-service billing portal APIs")
 public class BillingPortalRestResource {
+
+  private static final Logger log = LoggerFactory.getLogger(BillingPortalRestResource.class);
 
   private final BillingPortalService billingPortalService;
   private final SubscriptionApplicationService subscriptionApplicationService;
   private final InvoiceApplicationService invoiceApplicationService;
   private final UsageApplicationService usageApplicationService;
   private final PaymentApplicationService paymentApplicationService;
+
+  public BillingPortalRestResource(BillingPortalService billingPortalService,
+                                   SubscriptionApplicationService subscriptionApplicationService,
+                                   InvoiceApplicationService invoiceApplicationService,
+                                   UsageApplicationService usageApplicationService,
+                                   PaymentApplicationService paymentApplicationService) {
+    this.billingPortalService = billingPortalService;
+    this.subscriptionApplicationService = subscriptionApplicationService;
+    this.invoiceApplicationService = invoiceApplicationService;
+    this.usageApplicationService = usageApplicationService;
+    this.paymentApplicationService = paymentApplicationService;
+  }
 
   /**
    * Retrieves comprehensive billing dashboard for a tenant.
