@@ -1,7 +1,6 @@
 package com.iqscaffold.billingservice.usage;
 
 import com.iqscaffold.billingservice.plan.PlanQuotas;
-import com.iqscaffold.billingservice.plan.SubscriptionPlan;
 import com.iqscaffold.billingservice.subscription.Subscription;
 import org.springframework.stereotype.Service;
 
@@ -405,10 +404,10 @@ public class QuotaEnforcer {
     private final long currentUsage;
 
     public QuotaExceededException(
-        String message,
-        String metricType,
-        Long limit,
-        long currentUsage) {
+        final String message,
+        final String metricType,
+        final Long limit,
+        final long currentUsage) {
       super(message);
       this.metricType = metricType;
       this.limit = limit;

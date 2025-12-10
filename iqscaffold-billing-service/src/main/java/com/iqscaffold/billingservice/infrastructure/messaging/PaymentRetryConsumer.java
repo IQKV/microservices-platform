@@ -49,10 +49,10 @@ public class PaymentRetryConsumer {
   private final Timer processingTimer;
 
   public PaymentRetryConsumer(
-      PaymentApplicationService paymentApplicationService,
-      SubscriptionApplicationService subscriptionApplicationService,
-      DomainEventPublisher eventPublisher,
-      MeterRegistry meterRegistry
+      final PaymentApplicationService paymentApplicationService,
+      final SubscriptionApplicationService subscriptionApplicationService,
+      final DomainEventPublisher eventPublisher,
+      final MeterRegistry meterRegistry
   ) {
     this.paymentApplicationService = paymentApplicationService;
     this.subscriptionApplicationService = subscriptionApplicationService;
@@ -223,10 +223,10 @@ public class PaymentRetryConsumer {
       return false;
     }
 
-    return message.contains("timeout") ||
-           message.contains("connection") ||
-           message.contains("unavailable") ||
-           e instanceof java.net.SocketTimeoutException ||
-           e instanceof java.sql.SQLTransientException;
+    return message.contains("timeout")
+           || message.contains("connection")
+           || message.contains("unavailable")
+           || e instanceof java.net.SocketTimeoutException
+           || e instanceof java.sql.SQLTransientException;
   }
 }

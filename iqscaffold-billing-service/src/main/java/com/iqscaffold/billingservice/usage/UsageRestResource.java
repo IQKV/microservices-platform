@@ -14,7 +14,7 @@ public class UsageRestResource {
 
   private final UsageMeteringService usageMeteringService;
 
-  public UsageRestResource(UsageMeteringService usageMeteringService) {
+  public UsageRestResource(final UsageMeteringService usageMeteringService) {
     this.usageMeteringService = usageMeteringService;
   }
 

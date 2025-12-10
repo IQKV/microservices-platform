@@ -329,7 +329,7 @@ class InvoiceApplicationServiceTest {
           "Pro Plan - Monthly",
           new BigDecimal("49.99")
       ));
-      testInvoice.finalize();
+      testInvoice.finalizeInvoice();
 
       LocalDateTime paidAt = LocalDateTime.now();
 

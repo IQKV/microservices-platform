@@ -73,11 +73,11 @@ public class BillingPortalRestResource {
   private final UsageApplicationService usageApplicationService;
   private final PaymentApplicationService paymentApplicationService;
 
-  public BillingPortalRestResource(BillingPortalService billingPortalService,
-                                   SubscriptionApplicationService subscriptionApplicationService,
-                                   InvoiceApplicationService invoiceApplicationService,
-                                   UsageApplicationService usageApplicationService,
-                                   PaymentApplicationService paymentApplicationService) {
+  public BillingPortalRestResource(final BillingPortalService billingPortalService,
+                                   final SubscriptionApplicationService subscriptionApplicationService,
+                                   final InvoiceApplicationService invoiceApplicationService,
+                                   final UsageApplicationService usageApplicationService,
+                                   final PaymentApplicationService paymentApplicationService) {
     this.billingPortalService = billingPortalService;
     this.subscriptionApplicationService = subscriptionApplicationService;
     this.invoiceApplicationService = invoiceApplicationService;
@@ -374,9 +374,9 @@ public class BillingPortalRestResource {
     var updateRequest = new UpdateSubscriptionRequest(
         request.newPlanCode(),
         request.immediate(),
-        request.reason() != null ?
-            java.util.Map.of("upgrade_reason", request.reason()) :
-            null
+        request.reason() != null
+            ? java.util.Map.of("upgrade_reason", request.reason())
+            : null
     );
 
     // Perform upgrade
@@ -512,9 +512,9 @@ public class BillingPortalRestResource {
     var updateRequest = new UpdateSubscriptionRequest(
         request.newPlanCode(),
         request.immediate(),
-        request.reason() != null ?
-            java.util.Map.of("downgrade_reason", request.reason()) :
-            null
+        request.reason() != null
+            ? java.util.Map.of("downgrade_reason", request.reason())
+            : null
     );
 
     // Perform downgrade

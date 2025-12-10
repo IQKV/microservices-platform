@@ -102,10 +102,10 @@ public class PaymentProviderFactory {
    * @param manualProvider the manual payment provider implementation
    */
   public PaymentProviderFactory(
-      BillingProperties properties,
-      StripePaymentProvider stripeProvider,
-      PayPalPaymentProvider paypalProvider,
-      ManualPaymentProvider manualProvider
+      final BillingProperties properties,
+      final StripePaymentProvider stripeProvider,
+      final PayPalPaymentProvider paypalProvider,
+      final ManualPaymentProvider manualProvider
   ) {
     this.properties = properties;
     this.stripeProvider = stripeProvider;
@@ -239,8 +239,8 @@ public class PaymentProviderFactory {
     String clientId = properties.payment().paypal().clientId();
     String clientSecret = properties.payment().paypal().clientSecret();
 
-    boolean available = clientId != null && !clientId.isBlank() &&
-                        clientSecret != null && !clientSecret.isBlank();
+    boolean available = clientId != null && !clientId.isBlank()
+                        && clientSecret != null && !clientSecret.isBlank();
 
     if (!available) {
       log.debug("PayPal provider unavailable: credentials not configured");

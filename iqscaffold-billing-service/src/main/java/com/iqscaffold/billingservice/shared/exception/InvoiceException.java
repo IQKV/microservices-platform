@@ -5,19 +5,19 @@ package com.iqscaffold.billingservice.shared.exception;
  */
 public class InvoiceException extends BillingException {
 
-  public InvoiceException(String message) {
+  public InvoiceException(final String message) {
     super(message);
   }
 
-  public InvoiceException(String message, Throwable cause) {
+  public InvoiceException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public InvoiceException(String errorCode, String message) {
+  public InvoiceException(final String errorCode, final String message) {
     super(errorCode, message);
   }
 
-  public InvoiceException(String errorCode, String message, Throwable cause) {
+  public InvoiceException(final String errorCode, final String message, final Throwable cause) {
     super(errorCode, message, cause);
   }
 
@@ -28,13 +28,13 @@ public class InvoiceException extends BillingException {
 
     private final String invoiceId;
 
-    public InvoiceNotFoundException(String invoiceId) {
+    public InvoiceNotFoundException(final String invoiceId) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_NOT_FOUND,
           "Invoice not found: " + invoiceId);
       this.invoiceId = invoiceId;
     }
 
-    public InvoiceNotFoundException(String invoiceId, Throwable cause) {
+    public InvoiceNotFoundException(final String invoiceId, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_NOT_FOUND,
           "Invoice not found: " + invoiceId, cause);
       this.invoiceId = invoiceId;
@@ -52,13 +52,13 @@ public class InvoiceException extends BillingException {
 
     private final String invoiceId;
 
-    public InvoiceAlreadyPaidException(String invoiceId) {
+    public InvoiceAlreadyPaidException(final String invoiceId) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_ALREADY_PAID,
           "Invoice already paid: " + invoiceId);
       this.invoiceId = invoiceId;
     }
 
-    public InvoiceAlreadyPaidException(String invoiceId, Throwable cause) {
+    public InvoiceAlreadyPaidException(final String invoiceId, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVOICE_ALREADY_PAID,
           "Invoice already paid: " + invoiceId, cause);
       this.invoiceId = invoiceId;
@@ -74,11 +74,11 @@ public class InvoiceException extends BillingException {
    */
   public static class SubscriptionNotFoundException extends InvoiceException {
 
-    public SubscriptionNotFoundException(String message) {
+    public SubscriptionNotFoundException(final String message) {
       super(message);
     }
 
-    public SubscriptionNotFoundException(String message, Throwable cause) {
+    public SubscriptionNotFoundException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -91,7 +91,7 @@ public class InvoiceException extends BillingException {
     private final String currentState;
     private final String requiredState;
 
-    public InvalidInvoiceStateException(String message, String currentState, String requiredState) {
+    public InvalidInvoiceStateException(final String message, final String currentState, final String requiredState) {
       super(message);
       this.currentState = currentState;
       this.requiredState = requiredState;

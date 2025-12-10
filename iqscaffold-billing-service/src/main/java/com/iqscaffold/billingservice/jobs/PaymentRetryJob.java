@@ -59,10 +59,10 @@ public class PaymentRetryJob {
   private final MeterRegistry meterRegistry;
 
   public PaymentRetryJob(
-      PaymentRepository paymentRepository,
-      DomainEventPublisher eventPublisher,
-      RedisTemplate<String, String> redisTemplate,
-      MeterRegistry meterRegistry
+      final PaymentRepository paymentRepository,
+      final DomainEventPublisher eventPublisher,
+      final RedisTemplate<String, String> redisTemplate,
+      final MeterRegistry meterRegistry
   ) {
     this.paymentRepository = paymentRepository;
     this.eventPublisher = eventPublisher;

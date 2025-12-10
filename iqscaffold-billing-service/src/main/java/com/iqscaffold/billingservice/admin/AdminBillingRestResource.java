@@ -70,11 +70,11 @@ public class AdminBillingRestResource {
   private final com.iqscaffold.billingservice.analytics.BillingAnalyticsService billingAnalyticsService;
 
   public AdminBillingRestResource(
-      SubscriptionPlanService subscriptionPlanService,
-      SubscriptionApplicationService subscriptionApplicationService,
-      AdminSubscriptionService adminSubscriptionService,
-      com.iqscaffold.billingservice.invoice.InvoiceApplicationService invoiceApplicationService,
-      com.iqscaffold.billingservice.analytics.BillingAnalyticsService billingAnalyticsService) {
+      final SubscriptionPlanService subscriptionPlanService,
+      final SubscriptionApplicationService subscriptionApplicationService,
+      final AdminSubscriptionService adminSubscriptionService,
+      final com.iqscaffold.billingservice.invoice.InvoiceApplicationService invoiceApplicationService,
+      final com.iqscaffold.billingservice.analytics.BillingAnalyticsService billingAnalyticsService) {
     this.subscriptionPlanService = subscriptionPlanService;
     this.subscriptionApplicationService = subscriptionApplicationService;
     this.adminSubscriptionService = adminSubscriptionService;

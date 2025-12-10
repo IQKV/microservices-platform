@@ -14,7 +14,7 @@ public class UsageMeteringService {
 
   private final UsageRecordRepository usageRecordRepository;
 
-  public UsageMeteringService(UsageRecordRepository usageRecordRepository) {
+  public UsageMeteringService(final UsageRecordRepository usageRecordRepository) {
     this.usageRecordRepository = usageRecordRepository;
   }
 

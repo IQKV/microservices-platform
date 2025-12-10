@@ -5,19 +5,19 @@ package com.iqscaffold.billingservice.shared.exception;
  */
 public class PlanException extends BillingException {
 
-  public PlanException(String message) {
+  public PlanException(final String message) {
     super(message);
   }
 
-  public PlanException(String message, Throwable cause) {
+  public PlanException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public PlanException(String errorCode, String message) {
+  public PlanException(final String errorCode, final String message) {
     super(errorCode, message);
   }
 
-  public PlanException(String errorCode, String message, Throwable cause) {
+  public PlanException(final String errorCode, final String message, final Throwable cause) {
     super(errorCode, message, cause);
   }
 
@@ -28,13 +28,13 @@ public class PlanException extends BillingException {
 
     private final String planId;
 
-    public PlanNotFoundException(String planId) {
+    public PlanNotFoundException(final String planId) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PLAN_NOT_FOUND,
           "Plan not found: " + planId);
       this.planId = planId;
     }
 
-    public PlanNotFoundException(String planId, Throwable cause) {
+    public PlanNotFoundException(final String planId, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PLAN_NOT_FOUND,
           "Plan not found: " + planId, cause);
       this.planId = planId;
@@ -53,14 +53,14 @@ public class PlanException extends BillingException {
     private final String fromPlan;
     private final String toPlan;
 
-    public InvalidPlanTransitionException(String fromPlan, String toPlan) {
+    public InvalidPlanTransitionException(final String fromPlan, final String toPlan) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PLAN_TRANSITION,
           "Invalid plan transition from " + fromPlan + " to " + toPlan);
       this.fromPlan = fromPlan;
       this.toPlan = toPlan;
     }
 
-    public InvalidPlanTransitionException(String fromPlan, String toPlan, Throwable cause) {
+    public InvalidPlanTransitionException(final String fromPlan, final String toPlan, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_PLAN_TRANSITION,
           "Invalid plan transition from " + fromPlan + " to " + toPlan, cause);
       this.fromPlan = fromPlan;

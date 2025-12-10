@@ -63,7 +63,7 @@ public class TenantTrialHistory {
    *
    * @param tenantId tenant identifier
    */
-  private TenantTrialHistory(UUID tenantId) {
+  private TenantTrialHistory(final UUID tenantId) {
     this.tenantId = tenantId;
     this.hasUsedTrial = false;
   }

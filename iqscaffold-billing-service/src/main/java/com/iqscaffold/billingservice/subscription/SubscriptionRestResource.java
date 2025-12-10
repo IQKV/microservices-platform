@@ -14,7 +14,7 @@ public class SubscriptionRestResource {
 
   private final SubscriptionService subscriptionService;
 
-  public SubscriptionRestResource(SubscriptionService subscriptionService) {
+  public SubscriptionRestResource(final SubscriptionService subscriptionService) {
     this.subscriptionService = subscriptionService;
   }
 

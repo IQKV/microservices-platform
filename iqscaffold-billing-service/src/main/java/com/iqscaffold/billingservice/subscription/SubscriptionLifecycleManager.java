@@ -103,6 +103,7 @@ public class SubscriptionLifecycleManager {
         case SUSPENDED -> suspendSubscription(subscription, reason);
         case EXPIRED -> expireSubscription(subscription, reason);
         case INCOMPLETE -> throw new IllegalStateException("Cannot transition to INCOMPLETE status");
+        default -> throw new IllegalArgumentException("Unknown subscription status: " + newStatus);
       }
 
       // Log successful transition
@@ -454,6 +455,7 @@ public class SubscriptionLifecycleManager {
       );
       case ACTIVE -> throw new IllegalStateException("Subscription is already ACTIVE");
       case EXPIRED -> throw new IllegalStateException("Cannot activate EXPIRED subscription");
+      default -> throw new IllegalArgumentException("Unknown subscription status: " + currentStatus);
     }
   }
 

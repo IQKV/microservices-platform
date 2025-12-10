@@ -95,13 +95,13 @@ public final class PayPalPaymentProvider implements PaymentProviderAdapter {
    *
    * @param properties the billing configuration properties
    */
-  public PayPalPaymentProvider(BillingProperties properties) {
+  public PayPalPaymentProvider(final BillingProperties properties) {
     this.clientId = properties.payment().paypal().clientId();
     this.clientSecret = properties.payment().paypal().clientSecret();
 
     // Initialize PayPal SDK client
-    if (clientId != null && !clientId.isBlank() &&
-        clientSecret != null && !clientSecret.isBlank()) {
+    if (clientId != null && !clientId.isBlank()
+        && clientSecret != null && !clientSecret.isBlank()) {
 
       var auth = new ClientCredentialsAuthModel.Builder(clientId, clientSecret)
           .build();

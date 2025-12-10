@@ -59,11 +59,11 @@ public class UsageApplicationService {
   private final QuotaExceededSpecification quotaExceededSpecification;
   private final MessageService messageService;
 
-  public UsageApplicationService(UsageRecordRepository usageRecordRepository,
-                                 SubscriptionRepository subscriptionRepository,
-                                 QuotaEnforcer quotaEnforcer,
-                                 QuotaExceededSpecification quotaExceededSpecification,
-                                 MessageService messageService) {
+  public UsageApplicationService(final UsageRecordRepository usageRecordRepository,
+                                 final SubscriptionRepository subscriptionRepository,
+                                 final QuotaEnforcer quotaEnforcer,
+                                 final QuotaExceededSpecification quotaExceededSpecification,
+                                 final MessageService messageService) {
     this.usageRecordRepository = usageRecordRepository;
     this.subscriptionRepository = subscriptionRepository;
     this.quotaEnforcer = quotaEnforcer;
@@ -532,7 +532,7 @@ public class UsageApplicationService {
    * Exception thrown when a subscription is not found.
    */
   public static class SubscriptionNotFoundException extends RuntimeException {
-    public SubscriptionNotFoundException(String message) {
+    public SubscriptionNotFoundException(final String message) {
       super(message);
     }
   }

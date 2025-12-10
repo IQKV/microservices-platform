@@ -43,7 +43,7 @@ public class SubscriptionPlanRestResource {
 
   private final SubscriptionPlanService subscriptionPlanService;
 
-  public SubscriptionPlanRestResource(SubscriptionPlanService subscriptionPlanService) {
+  public SubscriptionPlanRestResource(final SubscriptionPlanService subscriptionPlanService) {
     this.subscriptionPlanService = subscriptionPlanService;
   }
 

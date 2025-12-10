@@ -40,8 +40,8 @@ public class UsageRecordConsumer {
   private final Timer processingTimer;
 
   public UsageRecordConsumer(
-      UsageApplicationService usageApplicationService,
-      MeterRegistry meterRegistry
+      final UsageApplicationService usageApplicationService,
+      final MeterRegistry meterRegistry
   ) {
     this.usageApplicationService = usageApplicationService;
     this.processedRecordIds = ConcurrentHashMap.newKeySet();
@@ -132,9 +132,9 @@ public class UsageRecordConsumer {
         usageDto.tenantId(),
         usageDto.metricType(),
         usageDto.quantity(),
-        usageDto.recordedAt() != null ?
-            usageDto.recordedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli() :
-            System.currentTimeMillis()
+        usageDto.recordedAt() != null
+            ? usageDto.recordedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            : System.currentTimeMillis()
     );
   }
 
@@ -148,10 +148,10 @@ public class UsageRecordConsumer {
       return false;
     }
 
-    return message.contains("timeout") ||
-           message.contains("connection") ||
-           message.contains("unavailable") ||
-           e instanceof java.net.SocketTimeoutException ||
-           e instanceof java.sql.SQLTransientException;
+    return message.contains("timeout")
+           || message.contains("connection")
+           || message.contains("unavailable")
+           || e instanceof java.net.SocketTimeoutException
+           || e instanceof java.sql.SQLTransientException;
   }
 }

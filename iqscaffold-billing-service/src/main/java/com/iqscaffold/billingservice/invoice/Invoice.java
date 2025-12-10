@@ -132,10 +132,10 @@ public class Invoice {
    * @param currency      currency code (e.g., USD, EUR)
    */
   private Invoice(
-      Subscription subscription,
-      UUID tenantId,
-      String invoiceNumber,
-      String currency
+      final Subscription subscription,
+      final UUID tenantId,
+      final String invoiceNumber,
+      final String currency
   ) {
     this.subscription = subscription;
     this.tenantId = tenantId;
@@ -273,7 +273,7 @@ public class Invoice {
    *
    * @throws IllegalStateException if invoice cannot be finalized
    */
-  public void finalize() {
+  public void finalizeInvoice() {
     if (!status.canFinalize()) {
       throw new IllegalStateException(
           "Cannot finalize invoice in " + status + " status"
@@ -432,9 +432,9 @@ public class Invoice {
    * @return true if invoice is OPEN and past due date
    */
   public boolean isOverdue() {
-    return status == InvoiceStatus.OPEN &&
-           dueDate != null &&
-           LocalDateTime.now().isAfter(dueDate);
+    return status == InvoiceStatus.OPEN
+           && dueDate != null
+           && LocalDateTime.now().isAfter(dueDate);
   }
 
   /**
@@ -492,9 +492,9 @@ public class Invoice {
   private static void validateStatusTransition(InvoiceStatus from, InvoiceStatus to) {
     var isValid = switch (from) {
       case DRAFT -> to == InvoiceStatus.OPEN || to == InvoiceStatus.VOID;
-      case OPEN -> to == InvoiceStatus.PAID ||
-                   to == InvoiceStatus.VOID ||
-                   to == InvoiceStatus.UNCOLLECTIBLE;
+      case OPEN -> to == InvoiceStatus.PAID
+                   || to == InvoiceStatus.VOID
+                   || to == InvoiceStatus.UNCOLLECTIBLE;
       case PAID, VOID, UNCOLLECTIBLE -> false; // Final states
     };
 
@@ -686,8 +686,8 @@ public class Invoice {
     if (!(o instanceof Invoice that)) {
       return false;
     }
-    return Objects.equals(id, that.id) &&
-           Objects.equals(invoiceNumber, that.invoiceNumber);
+    return Objects.equals(id, that.id)
+           && Objects.equals(invoiceNumber, that.invoiceNumber);
   }
 
   @Override

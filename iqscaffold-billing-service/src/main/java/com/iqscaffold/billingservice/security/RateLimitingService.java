@@ -30,8 +30,8 @@ public class RateLimitingService {
   private final BillingProperties billingProperties;
 
   public RateLimitingService(
-      RedisTemplate<String, String> redisTemplate,
-      BillingProperties billingProperties
+      final RedisTemplate<String, String> redisTemplate,
+      final BillingProperties billingProperties
   ) {
     this.redisTemplate = redisTemplate;
     this.billingProperties = billingProperties;

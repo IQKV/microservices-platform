@@ -75,14 +75,14 @@ public class WebhookApplicationService {
   private final RabbitTemplate rabbitTemplate;
   private final ObjectMapper objectMapper;
 
-  public WebhookApplicationService(PaymentProviderFactory paymentProviderFactory,
-                                   WebhookEventRepository webhookEventRepository,
-                                   PaymentRepository paymentRepository,
-                                   InvoiceRepository invoiceRepository,
-                                   SubscriptionRepository subscriptionRepository,
-                                   DomainEventPublisher eventPublisher,
-                                   RabbitTemplate rabbitTemplate,
-                                   ObjectMapper objectMapper) {
+  public WebhookApplicationService(final PaymentProviderFactory paymentProviderFactory,
+                                   final WebhookEventRepository webhookEventRepository,
+                                   final PaymentRepository paymentRepository,
+                                   final InvoiceRepository invoiceRepository,
+                                   final SubscriptionRepository subscriptionRepository,
+                                   final DomainEventPublisher eventPublisher,
+                                   final RabbitTemplate rabbitTemplate,
+                                   final ObjectMapper objectMapper) {
     this.paymentProviderFactory = paymentProviderFactory;
     this.webhookEventRepository = webhookEventRepository;
     this.paymentRepository = paymentRepository;

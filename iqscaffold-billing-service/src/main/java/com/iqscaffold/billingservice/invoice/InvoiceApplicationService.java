@@ -85,13 +85,13 @@ public class InvoiceApplicationService {
   private final BillingProperties billingProperties;
 
   public InvoiceApplicationService(
-      InvoiceRepository invoiceRepository,
-      SubscriptionRepository subscriptionRepository,
-      InvoiceFactory invoiceFactory,
-      InvoiceGenerator invoiceGenerator,
-      DomainEventPublisher eventPublisher,
-      MessageService messageService,
-      BillingProperties billingProperties
+      final InvoiceRepository invoiceRepository,
+      final SubscriptionRepository subscriptionRepository,
+      final InvoiceFactory invoiceFactory,
+      final InvoiceGenerator invoiceGenerator,
+      final DomainEventPublisher eventPublisher,
+      final MessageService messageService,
+      final BillingProperties billingProperties
   ) {
     this.invoiceRepository = invoiceRepository;
     this.subscriptionRepository = subscriptionRepository;
@@ -216,7 +216,7 @@ public class InvoiceApplicationService {
             messageService.getMessage("invoice.not.found", invoiceId)));
 
     // Finalize invoice (domain logic)
-    invoice.finalize();
+    invoice.finalizeInvoice();
 
     // Persist changes
     var savedInvoice = invoiceRepository.save(invoice);
@@ -405,9 +405,9 @@ public class InvoiceApplicationService {
         invoice.getInvoiceNumber(),
         invoice.getTotal(),
         invoice.getCurrency(),
-        invoice.getDueDate() != null ?
-            invoice.getDueDate().atZone(java.time.ZoneId.systemDefault()).toInstant() :
-            null
+        invoice.getDueDate() != null
+            ? invoice.getDueDate().atZone(java.time.ZoneId.systemDefault()).toInstant()
+            : null
     );
 
     eventPublisher.publish(event);
@@ -434,9 +434,9 @@ public class InvoiceApplicationService {
         invoice.getPaymentMethodId(),
         invoice.getTotal(),
         invoice.getCurrency(),
-        invoice.getPaidAt() != null ?
-            invoice.getPaidAt().atZone(java.time.ZoneId.systemDefault()).toInstant() :
-            null
+        invoice.getPaidAt() != null
+            ? invoice.getPaidAt().atZone(java.time.ZoneId.systemDefault()).toInstant()
+            : null
     );
 
     eventPublisher.publish(event);

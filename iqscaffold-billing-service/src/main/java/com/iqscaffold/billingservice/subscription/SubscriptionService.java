@@ -14,7 +14,7 @@ public class SubscriptionService {
 
   private final SubscriptionRepository subscriptionRepository;
 
-  public SubscriptionService(SubscriptionRepository subscriptionRepository) {
+  public SubscriptionService(final SubscriptionRepository subscriptionRepository) {
     this.subscriptionRepository = subscriptionRepository;
   }
 

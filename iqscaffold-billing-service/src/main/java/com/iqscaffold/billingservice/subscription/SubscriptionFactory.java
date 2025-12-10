@@ -55,7 +55,7 @@ public class SubscriptionFactory {
    *
    * @param trialEligibilitySpecification specification for checking trial eligibility
    */
-  public SubscriptionFactory(TrialEligibilitySpecification trialEligibilitySpecification) {
+  public SubscriptionFactory(final TrialEligibilitySpecification trialEligibilitySpecification) {
     this.trialEligibilitySpecification = trialEligibilitySpecification;
   }
 

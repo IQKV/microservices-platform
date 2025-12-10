@@ -38,9 +38,9 @@ public class InvoiceGenerationConsumer {
   private final Timer processingTimer;
 
   public InvoiceGenerationConsumer(
-      InvoiceApplicationService invoiceApplicationService,
-      DomainEventPublisher eventPublisher,
-      MeterRegistry meterRegistry
+      final InvoiceApplicationService invoiceApplicationService,
+      final DomainEventPublisher eventPublisher,
+      final MeterRegistry meterRegistry
   ) {
     this.invoiceApplicationService = invoiceApplicationService;
     this.eventPublisher = eventPublisher;
@@ -120,11 +120,11 @@ public class InvoiceGenerationConsumer {
       return false;
     }
 
-    return message.contains("timeout") ||
-           message.contains("connection") ||
-           message.contains("unavailable") ||
-           message.contains("PDF generation") ||
-           e instanceof java.net.SocketTimeoutException ||
-           e instanceof java.sql.SQLTransientException;
+    return message.contains("timeout")
+           || message.contains("connection")
+           || message.contains("unavailable")
+           || message.contains("PDF generation")
+           || e instanceof java.net.SocketTimeoutException
+           || e instanceof java.sql.SQLTransientException;
   }
 }

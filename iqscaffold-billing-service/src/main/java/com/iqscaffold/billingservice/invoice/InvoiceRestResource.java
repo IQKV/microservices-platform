@@ -14,7 +14,7 @@ public class InvoiceRestResource {
 
   private final InvoiceService invoiceService;
 
-  public InvoiceRestResource(InvoiceService invoiceService) {
+  public InvoiceRestResource(final InvoiceService invoiceService) {
     this.invoiceService = invoiceService;
   }
 

@@ -42,6 +42,21 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
   );
 
   /**
+   * Finds all usage records for a tenant (for GDPR export).
+   *
+   * @param tenantId tenant identifier
+   * @return list of all usage records for the tenant
+   */
+  @Query("""
+      SELECT ur FROM UsageRecord ur
+      LEFT JOIN FETCH ur.subscription s
+      LEFT JOIN FETCH s.plan
+      WHERE ur.tenantId = :tenantId
+      ORDER BY ur.recordedAt DESC
+      """)
+  List<UsageRecord> findByTenantId(@Param("tenantId") String tenantId);
+
+  /**
    * Finds usage records by tenant and metric type.
    *
    * @param tenantId   tenant identifier
@@ -278,20 +293,6 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, Long> 
       """)
   int deleteOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
 
-  /**
-   * Finds all usage records for a tenant (for GDPR export).
-   *
-   * @param tenantId tenant identifier
-   * @return list of all usage records for the tenant
-   */
-  @Query("""
-      SELECT ur FROM UsageRecord ur
-      LEFT JOIN FETCH ur.subscription s
-      LEFT JOIN FETCH s.plan
-      WHERE ur.tenantId = :tenantId
-      ORDER BY ur.recordedAt DESC
-      """)
-  List<UsageRecord> findByTenantId(@Param("tenantId") String tenantId);
 
   /**
    * Finds usage records for a tenant after a specific date.

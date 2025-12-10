@@ -145,7 +145,7 @@ class WebhookApplicationServiceTest {
         "Pro Plan - Monthly",
         new BigDecimal("49.99")
     ));
-    testInvoice.finalize();
+    testInvoice.finalizeInvoice();
 
     testPayment = new Payment(
         testInvoice,

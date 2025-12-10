@@ -35,7 +35,7 @@ class RateLimitingServiceTest {
   private RedisTemplate<String, String> redisTemplate;
 
   @Mock
-  private ZSetOperations<String, String> zSetOperations;
+  private ZSetOperations<String, String> zsetOperations;
 
   private RateLimitingService rateLimitingService;
   private BillingProperties billingProperties;
@@ -67,7 +67,7 @@ class RateLimitingServiceTest {
         new BillingProperties.Features(true, true, true, true)
     );
 
-    lenient().when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
+    lenient().when(redisTemplate.opsForZSet()).thenReturn(zsetOperations);
 
     rateLimitingService = new RateLimitingService(redisTemplate, billingProperties);
   }
@@ -77,16 +77,16 @@ class RateLimitingServiceTest {
   void shouldAllowRequestWhenWithinRateLimit() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(50L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(50L);
 
     // When
     boolean result = rateLimitingService.isWithinRateLimit(ipAddress);
 
     // Then
     assertThat(result).isTrue();
-    verify(zSetOperations).removeRangeByScore(anyString(), anyDouble(), anyDouble());
-    verify(zSetOperations).count(anyString(), anyDouble(), anyDouble());
-    verify(zSetOperations).add(anyString(), anyString(), anyDouble());
+    verify(zsetOperations).removeRangeByScore(anyString(), anyDouble(), anyDouble());
+    verify(zsetOperations).count(anyString(), anyDouble(), anyDouble());
+    verify(zsetOperations).add(anyString(), anyString(), anyDouble());
     verify(redisTemplate).expire(anyString(), anyLong(), any());
   }
 
@@ -95,16 +95,16 @@ class RateLimitingServiceTest {
   void shouldDenyRequestWhenRateLimitExceeded() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(100L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(100L);
 
     // When
     boolean result = rateLimitingService.isWithinRateLimit(ipAddress);
 
     // Then
     assertThat(result).isFalse();
-    verify(zSetOperations).removeRangeByScore(anyString(), anyDouble(), anyDouble());
-    verify(zSetOperations).count(anyString(), anyDouble(), anyDouble());
-    verify(zSetOperations, never()).add(anyString(), anyString(), anyDouble());
+    verify(zsetOperations).removeRangeByScore(anyString(), anyDouble(), anyDouble());
+    verify(zsetOperations).count(anyString(), anyDouble(), anyDouble());
+    verify(zsetOperations, never()).add(anyString(), anyString(), anyDouble());
   }
 
   @Test
@@ -143,7 +143,7 @@ class RateLimitingServiceTest {
 
     // Then
     assertThat(result).isTrue();
-    verifyNoInteractions(zSetOperations);
+    verifyNoInteractions(zsetOperations);
   }
 
   @Test
@@ -151,7 +151,7 @@ class RateLimitingServiceTest {
   void shouldFailOpenWhenRedisReturnsNull() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(null);
 
     // When
     boolean result = rateLimitingService.isWithinRateLimit(ipAddress);
@@ -165,7 +165,7 @@ class RateLimitingServiceTest {
   void shouldFailOpenWhenRedisThrowsException() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble()))
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble()))
         .thenThrow(new RuntimeException("Redis connection error"));
 
     // When
@@ -180,7 +180,7 @@ class RateLimitingServiceTest {
   void shouldCalculateRemainingAttemptsCorrectly() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(30L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(30L);
 
     // When
     int remaining = rateLimitingService.getRemainingAttempts(ipAddress);
@@ -194,7 +194,7 @@ class RateLimitingServiceTest {
   void shouldReturnZeroRemainingAttemptsWhenLimitExceeded() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(150L);
+    when(zsetOperations.count(anyString(), anyDouble(), anyDouble())).thenReturn(150L);
 
     // When
     int remaining = rateLimitingService.getRemainingAttempts(ipAddress);

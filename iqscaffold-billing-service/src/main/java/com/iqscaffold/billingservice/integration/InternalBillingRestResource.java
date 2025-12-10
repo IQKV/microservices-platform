@@ -107,9 +107,9 @@ public class InternalBillingRestResource {
   private final UsageApplicationService usageApplicationService;
   private final MessageService messageService;
 
-  public InternalBillingRestResource(SubscriptionApplicationService subscriptionApplicationService,
-                                     UsageApplicationService usageApplicationService,
-                                     MessageService messageService) {
+  public InternalBillingRestResource(final SubscriptionApplicationService subscriptionApplicationService,
+                                     final UsageApplicationService usageApplicationService,
+                                     final MessageService messageService) {
     this.subscriptionApplicationService = subscriptionApplicationService;
     this.usageApplicationService = usageApplicationService;
     this.messageService = messageService;

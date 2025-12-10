@@ -225,8 +225,8 @@ public class Payment {
    */
   public boolean isPartiallyRefunded() {
     return (
-        this.refundedAmount.compareTo(BigDecimal.ZERO) > 0 &&
-        this.refundedAmount.compareTo(this.amount) < 0
+        this.refundedAmount.compareTo(BigDecimal.ZERO) > 0
+        && this.refundedAmount.compareTo(this.amount) < 0
     );
   }
 

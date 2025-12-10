@@ -17,7 +17,7 @@ public class DataRetentionJob {
 
   private final GdprComplianceService gdprComplianceService;
 
-  public DataRetentionJob(GdprComplianceService gdprComplianceService) {
+  public DataRetentionJob(final GdprComplianceService gdprComplianceService) {
     this.gdprComplianceService = gdprComplianceService;
   }
 

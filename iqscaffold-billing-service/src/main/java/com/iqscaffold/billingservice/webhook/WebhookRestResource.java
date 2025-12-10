@@ -43,7 +43,7 @@ public class WebhookRestResource {
 
   private final WebhookApplicationService webhookApplicationService;
 
-  public WebhookRestResource(WebhookApplicationService webhookApplicationService) {
+  public WebhookRestResource(final WebhookApplicationService webhookApplicationService) {
     this.webhookApplicationService = webhookApplicationService;
   }
 

@@ -58,10 +58,10 @@ public class TrialReminderJob {
   private final MeterRegistry meterRegistry;
 
   public TrialReminderJob(
-      SubscriptionRepository subscriptionRepository,
-      DomainEventPublisher eventPublisher,
-      RedisTemplate<String, String> redisTemplate,
-      MeterRegistry meterRegistry
+      final SubscriptionRepository subscriptionRepository,
+      final DomainEventPublisher eventPublisher,
+      final RedisTemplate<String, String> redisTemplate,
+      final MeterRegistry meterRegistry
   ) {
     this.subscriptionRepository = subscriptionRepository;
     this.eventPublisher = eventPublisher;

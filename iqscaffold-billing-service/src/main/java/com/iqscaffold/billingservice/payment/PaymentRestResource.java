@@ -14,7 +14,7 @@ public class PaymentRestResource {
 
   private final PaymentService paymentService;
 
-  public PaymentRestResource(PaymentService paymentService) {
+  public PaymentRestResource(final PaymentService paymentService) {
     this.paymentService = paymentService;
   }
 

@@ -5,19 +5,19 @@ package com.iqscaffold.billingservice.shared.exception;
  */
 public class SubscriptionException extends BillingException {
 
-  public SubscriptionException(String message) {
+  public SubscriptionException(final String message) {
     super(message);
   }
 
-  public SubscriptionException(String message, Throwable cause) {
+  public SubscriptionException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
-  public SubscriptionException(String errorCode, String message) {
+  public SubscriptionException(final String errorCode, final String message) {
     super(errorCode, message);
   }
 
-  public SubscriptionException(String errorCode, String message, Throwable cause) {
+  public SubscriptionException(final String errorCode, final String message, final Throwable cause) {
     super(errorCode, message, cause);
   }
 
@@ -28,13 +28,13 @@ public class SubscriptionException extends BillingException {
 
     private final String subscriptionId;
 
-    public SubscriptionNotFoundException(String subscriptionId) {
+    public SubscriptionNotFoundException(final String subscriptionId) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_NOT_FOUND,
           "Subscription not found: " + subscriptionId);
       this.subscriptionId = subscriptionId;
     }
 
-    public SubscriptionNotFoundException(String subscriptionId, Throwable cause) {
+    public SubscriptionNotFoundException(final String subscriptionId, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_NOT_FOUND,
           "Subscription not found: " + subscriptionId, cause);
       this.subscriptionId = subscriptionId;
@@ -52,13 +52,13 @@ public class SubscriptionException extends BillingException {
 
     private final String tenantId;
 
-    public SubscriptionAlreadyExistsException(String tenantId) {
+    public SubscriptionAlreadyExistsException(final String tenantId) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_ALREADY_EXISTS,
           "Subscription already exists for tenant: " + tenantId);
       this.tenantId = tenantId;
     }
 
-    public SubscriptionAlreadyExistsException(String tenantId, Throwable cause) {
+    public SubscriptionAlreadyExistsException(final String tenantId, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.SUBSCRIPTION_ALREADY_EXISTS,
           "Subscription already exists for tenant: " + tenantId, cause);
       this.tenantId = tenantId;
@@ -77,14 +77,14 @@ public class SubscriptionException extends BillingException {
     private final String currentState;
     private final String targetState;
 
-    public InvalidSubscriptionStateException(String currentState, String targetState) {
+    public InvalidSubscriptionStateException(final String currentState, final String targetState) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_SUBSCRIPTION_STATE,
           "Invalid subscription state transition from " + currentState + " to " + targetState);
       this.currentState = currentState;
       this.targetState = targetState;
     }
 
-    public InvalidSubscriptionStateException(String currentState, String targetState, Throwable cause) {
+    public InvalidSubscriptionStateException(final String currentState, final String targetState, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.INVALID_SUBSCRIPTION_STATE,
           "Invalid subscription state transition from " + currentState + " to " + targetState, cause);
       this.currentState = currentState;
@@ -105,11 +105,11 @@ public class SubscriptionException extends BillingException {
    */
   public static class TrialNotEligibleException extends SubscriptionException {
 
-    public TrialNotEligibleException(String message) {
+    public TrialNotEligibleException(final String message) {
       super(message);
     }
 
-    public TrialNotEligibleException(String message, Throwable cause) {
+    public TrialNotEligibleException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -119,11 +119,11 @@ public class SubscriptionException extends BillingException {
    */
   public static class PlanDoesNotOfferTrialException extends SubscriptionException {
 
-    public PlanDoesNotOfferTrialException(String message) {
+    public PlanDoesNotOfferTrialException(final String message) {
       super(message);
     }
 
-    public PlanDoesNotOfferTrialException(String message, Throwable cause) {
+    public PlanDoesNotOfferTrialException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -133,11 +133,11 @@ public class SubscriptionException extends BillingException {
    */
   public static class InvalidPaymentMethodException extends SubscriptionException {
 
-    public InvalidPaymentMethodException(String message) {
+    public InvalidPaymentMethodException(final String message) {
       super(message);
     }
 
-    public InvalidPaymentMethodException(String message, Throwable cause) {
+    public InvalidPaymentMethodException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -147,11 +147,11 @@ public class SubscriptionException extends BillingException {
    */
   public static class PaymentMethodMismatchException extends SubscriptionException {
 
-    public PaymentMethodMismatchException(String message) {
+    public PaymentMethodMismatchException(final String message) {
       super(message);
     }
 
-    public PaymentMethodMismatchException(String message, Throwable cause) {
+    public PaymentMethodMismatchException(final String message, final Throwable cause) {
       super(message, cause);
     }
   }
@@ -164,14 +164,14 @@ public class SubscriptionException extends BillingException {
     private final String featureName;
     private final String currentPlan;
 
-    public FeatureNotAvailableException(String featureName, String currentPlan) {
+    public FeatureNotAvailableException(final String featureName, final String currentPlan) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.FEATURE_NOT_AVAILABLE,
           "Feature '" + featureName + "' is not available in plan: " + currentPlan);
       this.featureName = featureName;
       this.currentPlan = currentPlan;
     }
 
-    public FeatureNotAvailableException(String featureName, String currentPlan, Throwable cause) {
+    public FeatureNotAvailableException(final String featureName, final String currentPlan, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.FEATURE_NOT_AVAILABLE,
           "Feature '" + featureName + "' is not available in plan: " + currentPlan, cause);
       this.featureName = featureName;
@@ -195,14 +195,14 @@ public class SubscriptionException extends BillingException {
     private final String operation;
     private final String reason;
 
-    public PaymentRequiredException(String operation, String reason) {
+    public PaymentRequiredException(final String operation, final String reason) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_REQUIRED,
           "Payment required for operation '" + operation + "': " + reason);
       this.operation = operation;
       this.reason = reason;
     }
 
-    public PaymentRequiredException(String operation, String reason, Throwable cause) {
+    public PaymentRequiredException(final String operation, final String reason, final Throwable cause) {
       super(com.iqscaffold.billingservice.shared.BillingConstants.ErrorCodes.PAYMENT_REQUIRED,
           "Payment required for operation '" + operation + "': " + reason, cause);
       this.operation = operation;

@@ -40,8 +40,8 @@ public class NotificationConsumer {
   private final Timer processingTimer;
 
   public NotificationConsumer(
-      EmailService emailService,
-      MeterRegistry meterRegistry
+      final EmailService emailService,
+      final MeterRegistry meterRegistry
   ) {
     this.emailService = emailService;
 
@@ -151,10 +151,10 @@ public class NotificationConsumer {
       return false;
     }
 
-    return message.contains("timeout") ||
-           message.contains("connection") ||
-           message.contains("unavailable") ||
-           e instanceof java.net.SocketTimeoutException;
+    return message.contains("timeout")
+           || message.contains("connection")
+           || message.contains("unavailable")
+           || e instanceof java.net.SocketTimeoutException;
   }
 
   /**
@@ -166,8 +166,8 @@ public class NotificationConsumer {
       return false;
     }
 
-    return message.contains("rate limit") ||
-           message.contains("429") ||
-           message.contains("too many requests");
+    return message.contains("rate limit")
+           || message.contains("429")
+           || message.contains("too many requests");
   }
 }

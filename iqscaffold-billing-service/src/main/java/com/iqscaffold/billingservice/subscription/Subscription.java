@@ -108,7 +108,7 @@ public class Subscription {
    * @param plan     subscription plan
    * @param status   initial status
    */
-  private Subscription(UUID tenantId, UUID userId, SubscriptionPlan plan, SubscriptionStatus status) {
+  private Subscription(final UUID tenantId, final UUID userId, final SubscriptionPlan plan, final SubscriptionStatus status) {
     this.tenantId = tenantId;
     this.userId = userId;
     this.plan = plan;
@@ -379,9 +379,9 @@ public class Subscription {
    * @return true if in trial and trial hasn't ended
    */
   public boolean isInTrial() {
-    return status == SubscriptionStatus.TRIAL &&
-           trialEnd != null &&
-           LocalDateTime.now().isBefore(trialEnd);
+    return status == SubscriptionStatus.TRIAL
+           && trialEnd != null
+           && LocalDateTime.now().isBefore(trialEnd);
   }
 
   /**
@@ -439,23 +439,23 @@ public class Subscription {
   private static void validateStatusTransition(SubscriptionStatus from, SubscriptionStatus to) {
     // Use switch expression to validate allowed transitions
     var isValid = switch (from) {
-      case TRIAL -> to == SubscriptionStatus.ACTIVE ||
-                    to == SubscriptionStatus.EXPIRED ||
-                    to == SubscriptionStatus.CANCELED;
-      case ACTIVE -> to == SubscriptionStatus.PAST_DUE ||
-                     to == SubscriptionStatus.CANCELED ||
-                     to == SubscriptionStatus.SUSPENDED ||
-                     to == SubscriptionStatus.EXPIRED;
-      case PAST_DUE -> to == SubscriptionStatus.ACTIVE ||
-                       to == SubscriptionStatus.EXPIRED ||
-                       to == SubscriptionStatus.SUSPENDED;
-      case CANCELED -> to == SubscriptionStatus.ACTIVE ||
-                       to == SubscriptionStatus.EXPIRED;
-      case SUSPENDED -> to == SubscriptionStatus.ACTIVE ||
-                        to == SubscriptionStatus.EXPIRED;
-      case INCOMPLETE -> to == SubscriptionStatus.TRIAL ||
-                         to == SubscriptionStatus.ACTIVE ||
-                         to == SubscriptionStatus.EXPIRED;
+      case TRIAL -> to == SubscriptionStatus.ACTIVE
+                    || to == SubscriptionStatus.EXPIRED
+                    || to == SubscriptionStatus.CANCELED;
+      case ACTIVE -> to == SubscriptionStatus.PAST_DUE
+                     || to == SubscriptionStatus.CANCELED
+                     || to == SubscriptionStatus.SUSPENDED
+                     || to == SubscriptionStatus.EXPIRED;
+      case PAST_DUE -> to == SubscriptionStatus.ACTIVE
+                       || to == SubscriptionStatus.EXPIRED
+                       || to == SubscriptionStatus.SUSPENDED;
+      case CANCELED -> to == SubscriptionStatus.ACTIVE
+                       || to == SubscriptionStatus.EXPIRED;
+      case SUSPENDED -> to == SubscriptionStatus.ACTIVE
+                        || to == SubscriptionStatus.EXPIRED;
+      case INCOMPLETE -> to == SubscriptionStatus.TRIAL
+                         || to == SubscriptionStatus.ACTIVE
+                         || to == SubscriptionStatus.EXPIRED;
       case EXPIRED -> false; // Cannot transition from EXPIRED
     };
 

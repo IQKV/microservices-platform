@@ -135,6 +135,22 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   );
 
   /**
+   * Finds invoices by status.
+   *
+   * @param status invoice status
+   * @return list of invoices with the specified status
+   */
+  @Query("""
+      SELECT i FROM Invoice i
+      LEFT JOIN FETCH i.subscription s
+      LEFT JOIN FETCH s.plan
+      LEFT JOIN FETCH i.paymentMethod
+      WHERE i.status = :status
+      ORDER BY i.createdAt DESC
+      """)
+  List<Invoice> findByStatus(@Param("status") InvoiceStatus status);
+
+  /**
    * Finds overdue invoices.
    * Returns invoices in OPEN status where due date has passed.
    *
@@ -291,21 +307,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
       """)
   int findMaxSequenceForPeriod(@Param("yearMonth") String yearMonth);
 
-  /**
-   * Finds invoices by status.
-   *
-   * @param status invoice status
-   * @return list of invoices with the specified status
-   */
-  @Query("""
-      SELECT i FROM Invoice i
-      LEFT JOIN FETCH i.subscription s
-      LEFT JOIN FETCH s.plan
-      LEFT JOIN FETCH i.paymentMethod
-      WHERE i.status = :status
-      ORDER BY i.createdAt DESC
-      """)
-  List<Invoice> findByStatus(@Param("status") InvoiceStatus status);
+
 
   /**
    * Finds invoices by status and tenant ID.

@@ -5,11 +5,11 @@ package com.iqscaffold.billingservice.shared.exception;
  */
 public class TenantContextException extends RuntimeException {
 
-  public TenantContextException(String message) {
+  public TenantContextException(final String message) {
     super(message);
   }
 
-  public TenantContextException(String message, Throwable cause) {
+  public TenantContextException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
@@ -17,7 +17,7 @@ public class TenantContextException extends RuntimeException {
    * Exception thrown when an invalid tenant ID is provided.
    */
   public static class InvalidTenantIdException extends TenantContextException {
-    public InvalidTenantIdException(String message) {
+    public InvalidTenantIdException(final String message) {
       super(message);
     }
   }
@@ -26,7 +26,7 @@ public class TenantContextException extends RuntimeException {
    * Exception thrown when tenant context is required but not set.
    */
   public static class MissingTenantContextException extends TenantContextException {
-    public MissingTenantContextException(String message) {
+    public MissingTenantContextException(final String message) {
       super(message);
     }
   }
@@ -35,7 +35,7 @@ public class TenantContextException extends RuntimeException {
    * Exception thrown when attempting to access another tenant's data.
    */
   public static class TenantAccessDeniedException extends TenantContextException {
-    public TenantAccessDeniedException(String message) {
+    public TenantAccessDeniedException(final String message) {
       super(message);
     }
   }

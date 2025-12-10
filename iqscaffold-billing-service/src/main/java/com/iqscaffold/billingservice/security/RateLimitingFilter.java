@@ -48,9 +48,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
   );
 
   public RateLimitingFilter(
-      RateLimitingService rateLimitingService,
-      BillingProperties billingProperties,
-      ObjectMapper objectMapper
+      final RateLimitingService rateLimitingService,
+      final BillingProperties billingProperties,
+      final ObjectMapper objectMapper
   ) {
     this.rateLimitingService = rateLimitingService;
     this.billingProperties = billingProperties;
@@ -127,16 +127,16 @@ public class RateLimitingFilter extends OncePerRequestFilter {
    */
   private String getClientIpAddress(HttpServletRequest request) {
     // Check for X-Forwarded-For header (common in load balancers)
-    String xForwardedFor = request.getHeader("X-Forwarded-For");
-    if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+    String xforwardedFor = request.getHeader("X-Forwarded-For");
+    if (xforwardedFor != null && !xforwardedFor.isEmpty()) {
       // Take the first IP in the chain (original client)
-      return xForwardedFor.split(",")[0].trim();
+      return xforwardedFor.split(",")[0].trim();
     }
 
     // Check for X-Real-IP header (nginx)
-    String xRealIp = request.getHeader("X-Real-IP");
-    if (xRealIp != null && !xRealIp.isEmpty()) {
-      return xRealIp;
+    String xrealIp = request.getHeader("X-Real-IP");
+    if (xrealIp != null && !xrealIp.isEmpty()) {
+      return xrealIp;
     }
 
     // Fall back to remote address

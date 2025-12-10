@@ -26,7 +26,7 @@ public class MetricsUpdateService {
   private final SubscriptionRepository subscriptionRepository;
   private final BillingMetrics billingMetrics;
 
-  public MetricsUpdateService(SubscriptionRepository subscriptionRepository, BillingMetrics billingMetrics) {
+  public MetricsUpdateService(final SubscriptionRepository subscriptionRepository, final BillingMetrics billingMetrics) {
     this.subscriptionRepository = subscriptionRepository;
     this.billingMetrics = billingMetrics;
   }

@@ -17,7 +17,7 @@ public class MessageService {
 
   private final MessageSource messageSource;
 
-  public MessageService(MessageSource messageSource) {
+  public MessageService(final MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 

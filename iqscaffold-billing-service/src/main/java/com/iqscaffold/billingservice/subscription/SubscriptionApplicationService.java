@@ -55,18 +55,18 @@ public class SubscriptionApplicationService {
   private final com.iqscaffold.billingservice.usage.QuotaExceededSpecification quotaExceededSpecification;
   private final com.iqscaffold.billingservice.usage.UsageRecordRepository usageRecordRepository;
 
-  public SubscriptionApplicationService(SubscriptionRepository subscriptionRepository,
-                                        SubscriptionPlanRepository subscriptionPlanRepository,
-                                        PaymentMethodRepository paymentMethodRepository,
-                                        TenantTrialHistoryRepository tenantTrialHistoryRepository,
-                                        SubscriptionFactory subscriptionFactory,
-                                        SubscriptionLifecycleManager subscriptionLifecycleManager,
-                                        TrialEligibilitySpecification trialEligibilitySpecification,
-                                        MessageService messageService,
-                                        com.iqscaffold.billingservice.billing.ProrationCalculator prorationCalculator,
-                                        com.iqscaffold.billingservice.plan.ValidPlanTransitionSpecification validPlanTransitionSpecification,
-                                        com.iqscaffold.billingservice.usage.QuotaExceededSpecification quotaExceededSpecification,
-                                        com.iqscaffold.billingservice.usage.UsageRecordRepository usageRecordRepository) {
+  public SubscriptionApplicationService(final SubscriptionRepository subscriptionRepository,
+                                        final SubscriptionPlanRepository subscriptionPlanRepository,
+                                        final PaymentMethodRepository paymentMethodRepository,
+                                        final TenantTrialHistoryRepository tenantTrialHistoryRepository,
+                                        final SubscriptionFactory subscriptionFactory,
+                                        final SubscriptionLifecycleManager subscriptionLifecycleManager,
+                                        final TrialEligibilitySpecification trialEligibilitySpecification,
+                                        final MessageService messageService,
+                                        final com.iqscaffold.billingservice.billing.ProrationCalculator prorationCalculator,
+                                        final com.iqscaffold.billingservice.plan.ValidPlanTransitionSpecification validPlanTransitionSpecification,
+                                        final com.iqscaffold.billingservice.usage.QuotaExceededSpecification quotaExceededSpecification,
+                                        final com.iqscaffold.billingservice.usage.UsageRecordRepository usageRecordRepository) {
     this.subscriptionRepository = subscriptionRepository;
     this.subscriptionPlanRepository = subscriptionPlanRepository;
     this.paymentMethodRepository = paymentMethodRepository;

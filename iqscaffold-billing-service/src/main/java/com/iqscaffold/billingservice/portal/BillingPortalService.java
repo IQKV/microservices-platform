@@ -35,9 +35,9 @@ public class BillingPortalService {
   private final UsageApplicationService usageApplicationService;
   private final InvoiceApplicationService invoiceApplicationService;
 
-  public BillingPortalService(SubscriptionApplicationService subscriptionApplicationService,
-                              UsageApplicationService usageApplicationService,
-                              InvoiceApplicationService invoiceApplicationService) {
+  public BillingPortalService(final SubscriptionApplicationService subscriptionApplicationService,
+                              final UsageApplicationService usageApplicationService,
+                              final InvoiceApplicationService invoiceApplicationService) {
     this.subscriptionApplicationService = subscriptionApplicationService;
     this.usageApplicationService = usageApplicationService;
     this.invoiceApplicationService = invoiceApplicationService;
@@ -93,8 +93,8 @@ public class BillingPortalService {
     );
 
     // Determine subscription status flags
-    var inTrial = subscription.trialEnd() != null &&
-                  subscription.trialEnd().isAfter(LocalDateTime.now());
+    var inTrial = subscription.trialEnd() != null
+                  && subscription.trialEnd().isAfter(LocalDateTime.now());
     var pastDue = "PAST_DUE".equals(subscription.status());
     var canceled = subscription.cancelAtPeriodEnd() || "CANCELED".equals(subscription.status());
 

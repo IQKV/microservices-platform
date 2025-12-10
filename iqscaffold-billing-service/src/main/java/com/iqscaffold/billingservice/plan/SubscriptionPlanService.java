@@ -38,9 +38,9 @@ public class SubscriptionPlanService {
   private final MessageService messageService;
   private final ValidPlanTransitionSpecification validPlanTransitionSpecification;
 
-  public SubscriptionPlanService(SubscriptionPlanRepository subscriptionPlanRepository,
-                                 MessageService messageService,
-                                 ValidPlanTransitionSpecification validPlanTransitionSpecification) {
+  public SubscriptionPlanService(final SubscriptionPlanRepository subscriptionPlanRepository,
+                                 final MessageService messageService,
+                                 final ValidPlanTransitionSpecification validPlanTransitionSpecification) {
     this.subscriptionPlanRepository = subscriptionPlanRepository;
     this.messageService = messageService;
     this.validPlanTransitionSpecification = validPlanTransitionSpecification;

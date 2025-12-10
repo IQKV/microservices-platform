@@ -104,7 +104,7 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
    *
    * @param properties the billing configuration properties
    */
-  public StripePaymentProvider(BillingProperties properties) {
+  public StripePaymentProvider(final BillingProperties properties) {
     this.apiKey = properties.payment().stripe().apiKey();
     this.webhookSecret = properties.payment().stripe().webhookSecret();
 

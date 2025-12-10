@@ -269,7 +269,7 @@ class InvoiceTest {
       );
 
       invoice.addLineItem(lineItem);
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       var newLineItem = InvoiceLineItem.usageCharge(
           "Additional charge",
@@ -419,7 +419,7 @@ class InvoiceTest {
           new BigDecimal("100.00")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // When & Then
       assertThrows(
@@ -453,7 +453,7 @@ class InvoiceTest {
       ));
 
       // When
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // Then
       assertEquals(InvoiceStatus.OPEN, invoice.getStatus());
@@ -499,7 +499,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       var paymentDate = LocalDateTime.now();
 
@@ -572,7 +572,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // When
       invoice.voidInvoice("Billing error");
@@ -621,7 +621,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // When
       invoice.markAsUncollectible("Payment retries exhausted");
@@ -678,7 +678,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // Wait a tiny bit to ensure the due date is in the past
       Thread.sleep(10);
@@ -717,7 +717,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      openInvoice.finalize();
+      openInvoice.finalizeInvoice();
 
       // Then
       assertTrue(draftInvoice.canModify());
@@ -743,7 +743,7 @@ class InvoiceTest {
           new BigDecimal("29.99")
       ));
 
-      invoice.finalize();
+      invoice.finalizeInvoice();
 
       // When
       var daysUntilDue = invoice.getDaysUntilDue();

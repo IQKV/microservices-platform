@@ -115,17 +115,17 @@ public class SubscriptionPlan {
    * @param publicPlan   whether the plan is publicly visible
    */
   private SubscriptionPlan(
-      String planCode,
-      String name,
-      String description,
-      PlanTier tier,
-      BillingCycle billingCycle,
-      BigDecimal basePrice,
-      String currency,
-      Map<String, Object> features,
-      PlanQuotas quotas,
-      Integer trialDays,
-      Boolean publicPlan) {
+      final String planCode,
+      final String name,
+      final String description,
+      final PlanTier tier,
+      final BillingCycle billingCycle,
+      final BigDecimal basePrice,
+      final String currency,
+      final Map<String, Object> features,
+      final PlanQuotas quotas,
+      final Integer trialDays,
+      final Boolean publicPlan) {
     this.planCode = planCode;
     this.name = name;
     this.description = description;

@@ -14,7 +14,7 @@ public class PaymentMethodService {
 
   private final PaymentMethodRepository paymentMethodRepository;
 
-  public PaymentMethodService(PaymentMethodRepository paymentMethodRepository) {
+  public PaymentMethodService(final PaymentMethodRepository paymentMethodRepository) {
     this.paymentMethodRepository = paymentMethodRepository;
   }
 

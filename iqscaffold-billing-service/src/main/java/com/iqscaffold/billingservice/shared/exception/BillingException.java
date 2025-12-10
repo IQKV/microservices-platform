@@ -19,7 +19,7 @@ public class BillingException extends RuntimeException {
    *
    * @param message the detail message
    */
-  public BillingException(String message) {
+  public BillingException(final String message) {
     super(message);
     this.errorCode = null;
   }
@@ -30,7 +30,7 @@ public class BillingException extends RuntimeException {
    * @param message the detail message
    * @param cause   the cause of this exception
    */
-  public BillingException(String message, Throwable cause) {
+  public BillingException(final String message, final Throwable cause) {
     super(message, cause);
     this.errorCode = null;
   }
@@ -41,7 +41,7 @@ public class BillingException extends RuntimeException {
    * @param errorCode the error code
    * @param message   the detail message
    */
-  public BillingException(String errorCode, String message) {
+  public BillingException(final String errorCode, final String message) {
     super(message);
     this.errorCode = errorCode;
   }
@@ -53,7 +53,7 @@ public class BillingException extends RuntimeException {
    * @param message   the detail message
    * @param cause     the cause of this exception
    */
-  public BillingException(String errorCode, String message, Throwable cause) {
+  public BillingException(final String errorCode, final String message, final Throwable cause) {
     super(message, cause);
     this.errorCode = errorCode;
   }

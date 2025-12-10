@@ -56,12 +56,12 @@ public class PaymentApplicationService {
   private final DomainEventPublisher eventPublisher;
   private final RedisTemplate<String, Object> redisTemplate;
 
-  public PaymentApplicationService(PaymentRepository paymentRepository,
-                                   PaymentMethodRepository paymentMethodRepository,
-                                   InvoiceRepository invoiceRepository,
-                                   PaymentProviderFactory paymentProviderFactory,
-                                   DomainEventPublisher eventPublisher,
-                                   RedisTemplate<String, Object> redisTemplate) {
+  public PaymentApplicationService(final PaymentRepository paymentRepository,
+                                   final PaymentMethodRepository paymentMethodRepository,
+                                   final InvoiceRepository invoiceRepository,
+                                   final PaymentProviderFactory paymentProviderFactory,
+                                   final DomainEventPublisher eventPublisher,
+                                   final RedisTemplate<String, Object> redisTemplate) {
     this.paymentRepository = paymentRepository;
     this.paymentMethodRepository = paymentMethodRepository;
     this.invoiceRepository = invoiceRepository;
@@ -594,8 +594,8 @@ public class PaymentApplicationService {
               "Payment not found: " + paymentId
           ));
 
-      if (payment.getStatus() != PaymentStatus.SUCCEEDED &&
-          payment.getStatus() != PaymentStatus.REFUNDED) {
+      if (payment.getStatus() != PaymentStatus.SUCCEEDED
+          && payment.getStatus() != PaymentStatus.REFUNDED) {
         throw new PaymentException(
             "Can only refund SUCCEEDED or partially REFUNDED payments. Current status: " +
             payment.getStatus()

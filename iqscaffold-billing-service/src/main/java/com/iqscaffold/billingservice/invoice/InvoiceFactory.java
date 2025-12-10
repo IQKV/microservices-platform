@@ -64,7 +64,7 @@ public class InvoiceFactory {
    *
    * @param billingProperties billing configuration properties
    */
-  public InvoiceFactory(BillingProperties billingProperties) {
+  public InvoiceFactory(final BillingProperties billingProperties) {
     this.billingProperties = billingProperties;
   }
 

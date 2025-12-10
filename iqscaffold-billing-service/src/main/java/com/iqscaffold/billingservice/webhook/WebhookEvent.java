@@ -109,10 +109,10 @@ public class WebhookEvent {
   public WebhookEvent() {
   }
 
-  public WebhookEvent(Long id, String providerEventId, String provider, String eventType,
-                      String payload, String signature, WebhookEventStatus status,
-                      String errorMessage, int retryCount, LocalDateTime receivedAt,
-                      LocalDateTime processedAt, LocalDateTime createdAt, LocalDateTime updatedAt) {
+  public WebhookEvent(final Long id, final String providerEventId, final String provider, final String eventType,
+                      final String payload, final String signature, final WebhookEventStatus status,
+                      final String errorMessage, final int retryCount, final LocalDateTime receivedAt,
+                      final LocalDateTime processedAt, final LocalDateTime createdAt, final LocalDateTime updatedAt) {
     this.id = id;
     this.providerEventId = providerEventId;
     this.provider = provider;

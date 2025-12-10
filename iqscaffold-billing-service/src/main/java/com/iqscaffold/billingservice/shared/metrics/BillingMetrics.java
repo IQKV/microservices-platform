@@ -68,7 +68,7 @@ public class BillingMetrics {
   private final Counter apiErrorCounter;
   private final Counter databaseErrorCounter;
 
-  public BillingMetrics(MeterRegistry meterRegistry) {
+  public BillingMetrics(final MeterRegistry meterRegistry) {
     this.meterRegistry = meterRegistry;
 
     // Register business metric gauges

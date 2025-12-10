@@ -45,9 +45,9 @@ public class WebhookProcessingConsumer {
   private final Timer processingTimer;
 
   public WebhookProcessingConsumer(
-      WebhookApplicationService webhookApplicationService,
-      WebhookEventRepository webhookEventRepository,
-      MeterRegistry meterRegistry
+      final WebhookApplicationService webhookApplicationService,
+      final WebhookEventRepository webhookEventRepository,
+      final MeterRegistry meterRegistry
   ) {
     this.webhookApplicationService = webhookApplicationService;
     this.webhookEventRepository = webhookEventRepository;
@@ -98,8 +98,8 @@ public class WebhookProcessingConsumer {
 
         // Check if event exists in database (for replay protection)
         var existingEvent = webhookEventRepository.findByProviderEventId(eventId);
-        if (existingEvent.isPresent() &&
-            existingEvent.get().getStatus() == WebhookEventStatus.PROCESSED) {
+        if (existingEvent.isPresent()
+            && existingEvent.get().getStatus() == WebhookEventStatus.PROCESSED) {
           log.debug("Webhook event already processed in database, skipping: {}", eventId);
           processedEventIds.add(eventId);
           duplicateCounter.increment();
@@ -179,11 +179,11 @@ public class WebhookProcessingConsumer {
       return false;
     }
 
-    return message.contains("timeout") ||
-           message.contains("connection") ||
-           message.contains("unavailable") ||
-           message.contains("rate limit") ||
-           e instanceof java.net.SocketTimeoutException ||
-           e instanceof java.sql.SQLTransientException;
+    return message.contains("timeout")
+           || message.contains("connection")
+           || message.contains("unavailable")
+           || message.contains("rate limit")
+           || e instanceof java.net.SocketTimeoutException
+           || e instanceof java.sql.SQLTransientException;
   }
 }
