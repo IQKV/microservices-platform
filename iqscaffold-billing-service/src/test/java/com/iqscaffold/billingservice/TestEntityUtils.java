@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 /**
  * Utility class for test entity manipulation.
- * 
+ *
  * <p>Provides helper methods to set private fields on entities for testing purposes.
  * This is necessary because JPA entities don't have public setters for ID fields.
  */
@@ -12,10 +12,10 @@ public class TestEntityUtils {
 
   /**
    * Sets the ID field on an entity using reflection.
-   * 
+   *
    * @param entity the entity to modify
-   * @param id the ID value to set
-   * @param <T> the entity type
+   * @param id     the ID value to set
+   * @param <T>    the entity type
    * @throws RuntimeException if reflection fails
    */
   public static <T> void setId(T entity, Long id) {
@@ -30,11 +30,11 @@ public class TestEntityUtils {
 
   /**
    * Sets a private field on an entity using reflection.
-   * 
-   * @param entity the entity to modify
+   *
+   * @param entity    the entity to modify
    * @param fieldName the name of the field to set
-   * @param value the value to set
-   * @param <T> the entity type
+   * @param value     the value to set
+   * @param <T>       the entity type
    * @throws RuntimeException if reflection fails
    */
   public static <T> void setField(T entity, String fieldName, Object value) {

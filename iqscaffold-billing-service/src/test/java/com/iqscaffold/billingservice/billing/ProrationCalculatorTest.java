@@ -82,7 +82,7 @@ class ProrationCalculatorTest {
         0,
         true
     );
-    
+
     // Set IDs on plans using reflection since they're not persisted
     // This is needed because ProrationCalculator compares plan IDs
     try {
@@ -298,21 +298,21 @@ class ProrationCalculatorTest {
       // Given - Create subscription starting in leap year February
       var leapYearStart = LocalDateTime.of(2024, 2, 1, 0, 0);
       var leapYearEnd = LocalDateTime.of(2024, 3, 1, 0, 0); // End is start of next month
-      
+
       var subscription = Subscription.createActive(tenantId, userId, basicPlan);
       // Set period dates using reflection
       try {
         var startField = Subscription.class.getDeclaredField("currentPeriodStart");
         startField.setAccessible(true);
         startField.set(subscription, leapYearStart);
-        
+
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, leapYearEnd);
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
-      
+
       var effectiveDate = leapYearStart.plusDays(14); // Mid-February
       var expectedDaysInPeriod = (int) java.time.temporal.ChronoUnit.DAYS.between(leapYearStart, leapYearEnd);
       var expectedDaysRemaining = (int) java.time.temporal.ChronoUnit.DAYS.between(effectiveDate, leapYearEnd);
@@ -335,21 +335,21 @@ class ProrationCalculatorTest {
       // Given - Create subscription starting in non-leap year February
       var nonLeapYearStart = LocalDateTime.of(2023, 2, 1, 0, 0);
       var nonLeapYearEnd = LocalDateTime.of(2023, 3, 1, 0, 0); // End is start of next month
-      
+
       var subscription = Subscription.createActive(tenantId, userId, basicPlan);
       // Set period dates using reflection
       try {
         var startField = Subscription.class.getDeclaredField("currentPeriodStart");
         startField.setAccessible(true);
         startField.set(subscription, nonLeapYearStart);
-        
+
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, nonLeapYearEnd);
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
-      
+
       var effectiveDate = nonLeapYearStart.plusDays(14); // Mid-February
 
       // When
@@ -368,21 +368,21 @@ class ProrationCalculatorTest {
       // Given - Create subscription in January (31 days)
       var januaryStart = LocalDateTime.of(2024, 1, 1, 0, 0);
       var januaryEnd = LocalDateTime.of(2024, 2, 1, 0, 0); // End is start of next month
-      
+
       var subscription = Subscription.createActive(tenantId, userId, basicPlan);
       // Set period dates using reflection
       try {
         var startField = Subscription.class.getDeclaredField("currentPeriodStart");
         startField.setAccessible(true);
         startField.set(subscription, januaryStart);
-        
+
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, januaryEnd);
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
-      
+
       var effectiveDate = januaryStart.plusDays(15); // Mid-January
 
       // When
@@ -401,21 +401,21 @@ class ProrationCalculatorTest {
       // Given - Create subscription in April (30 days)
       var aprilStart = LocalDateTime.of(2024, 4, 1, 0, 0);
       var aprilEnd = LocalDateTime.of(2024, 5, 1, 0, 0); // End is start of next month
-      
+
       var subscription = Subscription.createActive(tenantId, userId, basicPlan);
       // Set period dates using reflection
       try {
         var startField = Subscription.class.getDeclaredField("currentPeriodStart");
         startField.setAccessible(true);
         startField.set(subscription, aprilStart);
-        
+
         var endField = Subscription.class.getDeclaredField("currentPeriodEnd");
         endField.setAccessible(true);
         endField.set(subscription, aprilEnd);
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set period dates", e);
       }
-      
+
       var effectiveDate = aprilStart.plusDays(15); // Mid-April
 
       // When
@@ -589,19 +589,19 @@ class ProrationCalculatorTest {
       var daysRemaining = (int) java.time.temporal.ChronoUnit.DAYS.between(effectiveDate, periodEnd);
       var prorationFactor = new BigDecimal(daysRemaining)
           .divide(new BigDecimal(daysInPeriod), 10, java.math.RoundingMode.HALF_UP);
-      
+
       // Credit should be based on actual proration factor
       var expectedCredit = basicPlan.getBasePrice()
           .multiply(prorationFactor)
           .setScale(2, java.math.RoundingMode.HALF_UP);
       assertEquals(expectedCredit, result.creditAmount());
-      
+
       // Charge should be based on actual proration factor
       var expectedCharge = proPlan.getBasePrice()
           .multiply(prorationFactor)
           .setScale(2, java.math.RoundingMode.HALF_UP);
       assertEquals(expectedCharge, result.chargeAmount());
-      
+
       // Net should be charge - credit
       var expectedNet = expectedCharge.subtract(expectedCredit);
       assertEquals(expectedNet, result.netAmount());
@@ -623,7 +623,7 @@ class ProrationCalculatorTest {
       // Then
       assertNotNull(result);
       assertTrue(result.getPercentageRemaining() >= 24.0 && result.getPercentageRemaining() <= 26.0);
-      
+
       // Verify net amount calculation
       var calculatedNet = result.chargeAmount().subtract(result.creditAmount());
       assertEquals(calculatedNet, result.netAmount());
@@ -648,7 +648,7 @@ class ProrationCalculatorTest {
       var percentageRemaining = result.getPercentageRemaining();
       assertTrue(percentageRemaining >= 73.0 && percentageRemaining <= 78.0,
           "Expected percentage between 73.0 and 78.0, but got: " + percentageRemaining);
-      
+
       // Verify net amount calculation
       var calculatedNet = result.chargeAmount().subtract(result.creditAmount());
       assertEquals(calculatedNet, result.netAmount());
@@ -671,7 +671,7 @@ class ProrationCalculatorTest {
           0,
           true
       );
-      
+
       var plan2 = SubscriptionPlan.create(
           "PLAN2",
           "Plan 2",
@@ -685,7 +685,7 @@ class ProrationCalculatorTest {
           0,
           true
       );
-      
+
       // Set IDs
       try {
         var idField = SubscriptionPlan.class.getDeclaredField("id");
@@ -695,7 +695,7 @@ class ProrationCalculatorTest {
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set plan IDs", e);
       }
-      
+
       var subscription = Subscription.createActive(tenantId, userId, plan1);
       var effectiveDate = subscription.getCurrentPeriodStart().plusDays(15);
 
@@ -708,7 +708,7 @@ class ProrationCalculatorTest {
       // Net amount should be very small but positive
       assertTrue(result.netAmount().compareTo(BigDecimal.ZERO) > 0);
       assertTrue(result.netAmount().compareTo(new BigDecimal("1.00")) < 0);
-      
+
       // Verify precision (2 decimal places)
       assertEquals(2, result.netAmount().scale());
       assertEquals(2, result.creditAmount().scale());
@@ -730,12 +730,12 @@ class ProrationCalculatorTest {
       assertTrue(result.isUpgrade());
       // Net amount should be significant
       assertTrue(result.netAmount().compareTo(new BigDecimal("40.00")) > 0);
-      
+
       // Verify all amounts are properly scaled
       assertEquals(2, result.netAmount().scale());
       assertEquals(2, result.creditAmount().scale());
       assertEquals(2, result.chargeAmount().scale());
-      
+
       // Verify calculation integrity
       var calculatedNet = result.chargeAmount().subtract(result.creditAmount());
       assertEquals(calculatedNet, result.netAmount());
@@ -758,7 +758,7 @@ class ProrationCalculatorTest {
           0,
           true
       );
-      
+
       try {
         var idField = SubscriptionPlan.class.getDeclaredField("id");
         idField.setAccessible(true);
@@ -766,7 +766,7 @@ class ProrationCalculatorTest {
       } catch (final Exception e) {
         throw new RuntimeException("Failed to set plan ID", e);
       }
-      
+
       var subscription = Subscription.createActive(tenantId, userId, basicPlan);
       var effectiveDate = subscription.getCurrentPeriodStart().plusDays(10);
 
@@ -779,7 +779,7 @@ class ProrationCalculatorTest {
       assertEquals(2, result.netAmount().scale());
       assertEquals(2, result.creditAmount().scale());
       assertEquals(2, result.chargeAmount().scale());
-      
+
       // Verify calculation integrity despite rounding
       var calculatedNet = result.chargeAmount().subtract(result.creditAmount());
       assertEquals(calculatedNet, result.netAmount());
@@ -799,19 +799,19 @@ class ProrationCalculatorTest {
       assertNotNull(result);
       assertEquals(1, result.daysRemaining());
       assertTrue(result.requiresProration());
-      
+
       // Amounts should be very small (1 day worth)
       var periodStart = subscription.getCurrentPeriodStart();
       var periodEnd = subscription.getCurrentPeriodEnd();
       var daysInPeriod = (int) java.time.temporal.ChronoUnit.DAYS.between(periodStart, periodEnd);
       var expectedFactor = new BigDecimal("1").divide(
           new BigDecimal(daysInPeriod), 10, java.math.RoundingMode.HALF_UP);
-      
+
       var expectedCredit = basicPlan.getBasePrice()
           .multiply(expectedFactor)
           .setScale(2, java.math.RoundingMode.HALF_UP);
       assertEquals(expectedCredit, result.creditAmount());
-      
+
       // Verify all amounts are properly scaled
       assertEquals(2, result.netAmount().scale());
       assertEquals(2, result.creditAmount().scale());
@@ -848,14 +848,14 @@ class ProrationCalculatorTest {
       assertTrue(result.isDowngrade());
       // Net amount should be negative (customer gets credit)
       assertTrue(result.netAmount().compareTo(BigDecimal.ZERO) < 0);
-      
+
       // Credit should be larger than charge
       assertTrue(result.creditAmount().compareTo(result.chargeAmount()) > 0);
-      
+
       // Verify calculation integrity
       var calculatedNet = result.chargeAmount().subtract(result.creditAmount());
       assertEquals(calculatedNet, result.netAmount());
-      
+
       // Verify all amounts are properly scaled
       assertEquals(2, result.netAmount().scale());
       assertEquals(2, result.creditAmount().scale());
@@ -872,16 +872,16 @@ class ProrationCalculatorTest {
       var daysInPeriod = (int) java.time.temporal.ChronoUnit.DAYS.between(periodStart, periodEnd);
 
       // Test various points in the period
-      for (final int daysElapsed = 0; daysElapsed < daysInPeriod; daysElapsed += 5) {
-        var effectiveDate = periodStart.plusDays(daysElapsed);
-        var result = prorationCalculator.calculate(subscription, proPlan, effectiveDate);
-        
-        var expectedFactor = new BigDecimal(result.daysRemaining())
+      java.util.stream.IntStream.iterate(0, d -> d < daysInPeriod, d -> d + 5).forEach(daysElapsed -> {
+        final var effectiveDate = periodStart.plusDays(daysElapsed);
+        final var result = prorationCalculator.calculate(subscription, proPlan, effectiveDate);
+
+        final var expectedFactor = new BigDecimal(result.daysRemaining())
             .divide(new BigDecimal(daysInPeriod), 10, java.math.RoundingMode.HALF_UP);
-        
-        assertEquals(expectedFactor.setScale(10, java.math.RoundingMode.HALF_UP), 
+
+        assertEquals(expectedFactor.setScale(10, java.math.RoundingMode.HALF_UP),
             result.getProrationFactor().setScale(10, java.math.RoundingMode.HALF_UP));
-      }
+      });
     }
   }
 }

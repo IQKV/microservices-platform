@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Comprehensive unit tests for quota enforcement logic.
  * Tests quota checking for various usage levels, exceeded scenarios, and grace period (5% overage).
- * 
+ *
  * <p>Test Coverage:
  * <ul>
  *   <li>Various usage levels (0%, 25%, 50%, 75%, 90%, 100%)</li>

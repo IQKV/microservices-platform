@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for UsageApplicationService.
- * 
+ *
  * <p>Tests the orchestration logic of the usage application service, verifying:
  * <ul>
  *   <li>Delegation to domain services (QuotaEnforcer, QuotaExceededSpecification)</li>

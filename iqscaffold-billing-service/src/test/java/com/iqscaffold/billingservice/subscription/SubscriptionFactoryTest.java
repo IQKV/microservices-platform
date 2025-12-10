@@ -494,28 +494,28 @@ class SubscriptionFactoryTest {
         PaymentMethodType.CARD,
         "pm_test_expired"
     );
-    
+
     // Use reflection to set expired card details
     try {
       var expiryMonthField = PaymentMethod.class.getDeclaredField("expiryMonth");
       expiryMonthField.setAccessible(true);
       expiryMonthField.set(paymentMethod, 1);
-      
+
       var expiryYearField = PaymentMethod.class.getDeclaredField("expiryYear");
       expiryYearField.setAccessible(true);
       expiryYearField.set(paymentMethod, 2020);
-      
+
       var last4Field = PaymentMethod.class.getDeclaredField("last4");
       last4Field.setAccessible(true);
       last4Field.set(paymentMethod, "4242");
-      
+
       var brandField = PaymentMethod.class.getDeclaredField("brand");
       brandField.setAccessible(true);
       brandField.set(paymentMethod, "Visa");
     } catch (final Exception e) {
       throw new RuntimeException("Failed to create expired payment method", e);
     }
-    
+
     return paymentMethod;
   }
 }

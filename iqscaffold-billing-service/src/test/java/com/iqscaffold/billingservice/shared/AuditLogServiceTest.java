@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for AuditLogService.
- * 
+ *
  * <p>Tests audit logging functionality for billing operations.
  */
 @ExtendWith(MockitoExtension.class)

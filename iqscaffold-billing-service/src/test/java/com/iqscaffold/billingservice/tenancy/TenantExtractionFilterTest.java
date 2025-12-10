@@ -146,7 +146,7 @@ class TenantExtractionFilterTest {
   void shouldClearTenantContextOnException() throws Exception {
     // Arrange
     when(request.getRequestURI()).thenReturn("/api/v1/subscriptions");
-    
+
     // Simulate exception during filter chain
     org.mockito.Mockito.doThrow(new ServletException("Test exception"))
         .when(filterChain).doFilter(any(), any());

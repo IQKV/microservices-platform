@@ -38,7 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for InvoiceApplicationService.
- * 
+ *
  * <p>Tests the orchestration logic of the invoice application service, verifying:
  * <ul>
  *   <li>Delegation to InvoiceGenerator and InvoiceFactory</li>
@@ -159,7 +159,7 @@ class InvoiceApplicationServiceTest {
           .thenReturn("Subscription not found");
 
       // Act & Assert
-      assertThatThrownBy(() -> 
+      assertThatThrownBy(() ->
           invoiceApplicationService.generateInvoice(999L, periodStart, periodEnd))
           .isInstanceOf(InvoiceException.SubscriptionNotFoundException.class);
 
@@ -224,7 +224,7 @@ class InvoiceApplicationServiceTest {
           .thenReturn("Subscription not found");
 
       // Act & Assert
-      assertThatThrownBy(() -> 
+      assertThatThrownBy(() ->
           invoiceApplicationService.generateProrationInvoice(999L, prorationResult, effectiveDate))
           .isInstanceOf(InvoiceException.SubscriptionNotFoundException.class);
 
@@ -357,7 +357,7 @@ class InvoiceApplicationServiceTest {
           .thenReturn("Invoice not found");
 
       // Act & Assert
-      assertThatThrownBy(() -> 
+      assertThatThrownBy(() ->
           invoiceApplicationService.markInvoiceAsPaid(999L, 1L, paidAt))
           .isInstanceOf(InvoiceException.InvoiceNotFoundException.class);
 
@@ -529,7 +529,7 @@ class InvoiceApplicationServiceTest {
           .thenReturn("Subscription not found");
 
       // Act & Assert
-      assertThatThrownBy(() -> 
+      assertThatThrownBy(() ->
           invoiceApplicationService.generateInvoiceForSubscription(999L))
           .isInstanceOf(com.iqscaffold.billingservice.shared.exception.SubscriptionException.SubscriptionNotFoundException.class);
 

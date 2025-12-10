@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for Payment domain entity.
- * 
+ *
  * <p>Tests payment business logic including:
  * <ul>
  *   <li>Payment creation and validation</li>

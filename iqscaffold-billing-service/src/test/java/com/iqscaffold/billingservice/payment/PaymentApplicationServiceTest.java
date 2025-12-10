@@ -47,7 +47,7 @@ import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * Unit tests for PaymentApplicationService.
- * 
+ *
  * <p>Tests the orchestration logic of the payment application service, verifying:
  * <ul>
  *   <li>Delegation to Payment and PaymentMethod aggregates</li>

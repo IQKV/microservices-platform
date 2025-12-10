@@ -51,14 +51,14 @@ class RabbitMQDomainEventPublisherTest {
     var occurredAt = Instant.now();
 
     var event = new SubscriptionCreated(
-      eventId,
-      occurredAt,
-      aggregateId,
-      tenantId,
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        eventId,
+        occurredAt,
+        aggregateId,
+        tenantId,
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     when(objectMapper.writeValueAsString(any())).thenReturn("{\"eventId\":\"" + eventId + "\"}");
@@ -68,10 +68,10 @@ class RabbitMQDomainEventPublisherTest {
 
     // Assert
     verify(rabbitTemplate).convertAndSend(
-      eq("billing.events"),
-      eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
-      anyString(),
-      any(MessagePostProcessor.class)
+        eq("billing.events"),
+        eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
+        anyString(),
+        any(MessagePostProcessor.class)
     );
   }
 
@@ -85,14 +85,14 @@ class RabbitMQDomainEventPublisherTest {
     var occurredAt = Instant.now();
 
     var event = new SubscriptionCreated(
-      eventId,
-      occurredAt,
-      aggregateId,
-      tenantId,
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        eventId,
+        occurredAt,
+        aggregateId,
+        tenantId,
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     when(objectMapper.writeValueAsString(any())).thenReturn("{\"eventId\":\"" + eventId + "\"}");
@@ -104,10 +104,10 @@ class RabbitMQDomainEventPublisherTest {
 
     // Assert
     verify(rabbitTemplate).convertAndSend(
-      eq("billing.events"),
-      eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
-      anyString(),
-      messageProcessorCaptor.capture()
+        eq("billing.events"),
+        eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
+        anyString(),
+        messageProcessorCaptor.capture()
     );
 
     // Verify message processor was captured
@@ -119,25 +119,25 @@ class RabbitMQDomainEventPublisherTest {
   void shouldPublishMultipleEventsInBatch() throws Exception {
     // Arrange
     var event1 = new SubscriptionCreated(
-      UUID.randomUUID(),
-      Instant.now(),
-      1L,
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        UUID.randomUUID(),
+        Instant.now(),
+        1L,
+        UUID.randomUUID(),
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     var event2 = new SubscriptionCreated(
-      UUID.randomUUID(),
-      Instant.now(),
-      2L,
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        UUID.randomUUID(),
+        Instant.now(),
+        2L,
+        UUID.randomUUID(),
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     when(objectMapper.writeValueAsString(any())).thenReturn("{}");
@@ -147,10 +147,10 @@ class RabbitMQDomainEventPublisherTest {
 
     // Assert - verify it was called twice (once for each event)
     verify(rabbitTemplate, org.mockito.Mockito.times(2)).convertAndSend(
-      eq("billing.events"),
-      eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
-      anyString(),
-      any(MessagePostProcessor.class)
+        eq("billing.events"),
+        eq(BillingConstants.BillingEvents.SUBSCRIPTION_CREATED),
+        anyString(),
+        any(MessagePostProcessor.class)
     );
   }
 
@@ -159,22 +159,22 @@ class RabbitMQDomainEventPublisherTest {
   void shouldThrowExceptionWhenEventPublishingFails() throws Exception {
     // Arrange
     var event = new SubscriptionCreated(
-      UUID.randomUUID(),
-      Instant.now(),
-      1L,
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        UUID.randomUUID(),
+        Instant.now(),
+        1L,
+        UUID.randomUUID(),
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     when(objectMapper.writeValueAsString(any())).thenThrow(new RuntimeException("Serialization failed"));
 
     // Act & Assert
     assertThatThrownBy(() -> publisher.publish(event))
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Failed to publish domain event");
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Failed to publish domain event");
   }
 
   @Test
@@ -182,24 +182,24 @@ class RabbitMQDomainEventPublisherTest {
   void shouldThrowExceptionWhenRabbitMQIsUnavailable() throws Exception {
     // Arrange
     var event = new SubscriptionCreated(
-      UUID.randomUUID(),
-      Instant.now(),
-      1L,
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      1L,
-      "ACTIVE",
-      false
+        UUID.randomUUID(),
+        Instant.now(),
+        1L,
+        UUID.randomUUID(),
+        UUID.randomUUID(),
+        1L,
+        "ACTIVE",
+        false
     );
 
     when(objectMapper.writeValueAsString(any())).thenReturn("{}");
     doThrow(new RuntimeException("RabbitMQ connection failed"))
-      .when(rabbitTemplate)
-      .convertAndSend(anyString(), anyString(), anyString(), any(MessagePostProcessor.class));
+        .when(rabbitTemplate)
+        .convertAndSend(anyString(), anyString(), anyString(), any(MessagePostProcessor.class));
 
     // Act & Assert
     assertThatThrownBy(() -> publisher.publish(event))
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Failed to publish domain event");
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Failed to publish domain event");
   }
 }

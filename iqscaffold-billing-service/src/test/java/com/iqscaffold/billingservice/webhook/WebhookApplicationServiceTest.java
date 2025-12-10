@@ -47,7 +47,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
  * Unit tests for WebhookApplicationService.
- * 
+ *
  * <p>Tests the orchestration logic of the webhook application service, verifying:
  * <ul>
  *   <li>Webhook signature verification</li>

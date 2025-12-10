@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for InvoiceGenerator domain service.
- * 
+ *
  * <p>Tests invoice generation logic including:
  * <ul>
  *   <li>Regular billing period invoice generation</li>
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
  *   <li>Tax calculations</li>
  *   <li>Invoice number generation</li>
  * </ul>
- * 
+ *
  * <p>Ensures 100% coverage for financial calculations.
  */
 @DisplayName("InvoiceGenerator Domain Service Tests")
@@ -121,7 +121,7 @@ class InvoiceGeneratorTest {
       // Assert
       List<InvoiceLineItem> lineItems = invoice.getLineItems();
       assertThat(lineItems).hasSize(1);
-      
+
       InvoiceLineItem lineItem = lineItems.get(0);
       assertThat(lineItem.type()).isEqualTo(InvoiceLineItem.LineItemType.SUBSCRIPTION_FEE);
       assertThat(lineItem.description()).contains("Pro Plan");
@@ -338,7 +338,7 @@ class InvoiceGeneratorTest {
       assertThat(invoice).isNotNull();
       assertThat(invoice.getStatus()).isEqualTo(InvoiceStatus.DRAFT);
       assertThat(invoice.getLineItemCount()).isEqualTo(2); // Credit + Charge
-      
+
       // Credit: 49.99 * (15/30) = 24.995 ≈ 25.00
       // Charge: 99.99 * (15/30) = 49.995 ≈ 50.00
       // Net: 50.00 - 25.00 = 25.00
@@ -367,7 +367,7 @@ class InvoiceGeneratorTest {
       // Assert
       assertThat(invoice).isNotNull();
       assertThat(invoice.getLineItemCount()).isEqualTo(2); // Credit + Charge
-      
+
       // Credit: 99.99 * (15/30) = 49.995 ≈ 50.00
       // Charge: 49.99 * (15/30) = 24.995 ≈ 25.00
       // Net: 25.00 - 50.00 = -25.00 (credit to customer)
@@ -500,7 +500,7 @@ class InvoiceGeneratorTest {
       // Assert
       List<InvoiceLineItem> lineItems = invoice.getLineItems();
       assertThat(lineItems).hasSize(1);
-      
+
       InvoiceLineItem lineItem = lineItems.get(0);
       assertThat(lineItem.description()).isEqualTo("Custom development fee");
       assertThat(lineItem.amount()).isEqualByComparingTo(new BigDecimal("500.00"));

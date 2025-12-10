@@ -46,7 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Unit tests for SubscriptionApplicationService.
- * 
+ *
  * <p>Tests the orchestration logic of the subscription application service, verifying:
  * <ul>
  *   <li>Delegation to domain aggregates, factories, and services</li>

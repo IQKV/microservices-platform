@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for InvoiceLineItem value object.
- * 
+ *
  * <p>Tests line item calculations including:
  * <ul>
  *   <li>Amount calculations (quantity * unitPrice)</li>
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  *   <li>Validation of invariants</li>
  *   <li>Precision and rounding for financial calculations</li>
  * </ul>
- * 
+ *
  * <p>Ensures 100% coverage for financial calculations.
  */
 @DisplayName("InvoiceLineItem Value Object Tests")

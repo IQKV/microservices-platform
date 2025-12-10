@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for PaymentResult record.
- * 
+ *
  * <p>Tests the immutable payment result record including:
  * <ul>
  *   <li>Factory methods for success and failure results</li>

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Comprehensive unit tests for Subscription state transitions.
  * Tests all valid state transitions, invalid transition rejection, and side effects.
- * 
+ *
  * <p>State Machine:
  * <pre>
  * INCOMPLETE -> TRIAL, ACTIVE, EXPIRED

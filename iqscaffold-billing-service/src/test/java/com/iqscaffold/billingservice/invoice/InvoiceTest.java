@@ -662,7 +662,7 @@ class InvoiceTest {
       // Given
       var pastPeriodStart = LocalDateTime.now().minusDays(30);
       var pastPeriodEnd = LocalDateTime.now();
-      
+
       var invoice = Invoice.createDraft(
           subscription,
           tenantId,

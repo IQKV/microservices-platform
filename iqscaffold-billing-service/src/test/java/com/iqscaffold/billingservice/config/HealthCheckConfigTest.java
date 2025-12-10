@@ -17,7 +17,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
  * Unit tests for health check configuration.
- * 
+ *
  * <p>Tests verify that health indicators correctly report UP/DOWN status
  * based on component availability.
  */
@@ -110,7 +110,7 @@ class HealthCheckConfigTest {
     var rabbitTemplate = mock(RabbitTemplate.class);
     var connectionFactory = mock(ConnectionFactory.class);
     var connection = mock(org.springframework.amqp.rabbit.connection.Connection.class);
-    
+
     when(rabbitTemplate.getConnectionFactory()).thenReturn(connectionFactory);
     when(connectionFactory.createConnection()).thenReturn(connection);
     when(connection.isOpen()).thenReturn(true);
@@ -135,7 +135,7 @@ class HealthCheckConfigTest {
     var rabbitTemplate = mock(RabbitTemplate.class);
     var connectionFactory = mock(ConnectionFactory.class);
     var connection = mock(org.springframework.amqp.rabbit.connection.Connection.class);
-    
+
     when(rabbitTemplate.getConnectionFactory()).thenReturn(connectionFactory);
     when(connectionFactory.createConnection()).thenReturn(connection);
     when(connection.isOpen()).thenReturn(false);
@@ -158,7 +158,7 @@ class HealthCheckConfigTest {
     // Arrange
     var rabbitTemplate = mock(RabbitTemplate.class);
     var connectionFactory = mock(ConnectionFactory.class);
-    
+
     when(rabbitTemplate.getConnectionFactory()).thenReturn(connectionFactory);
     when(connectionFactory.createConnection()).thenThrow(new RuntimeException("Connection failed"));
 
@@ -181,14 +181,14 @@ class HealthCheckConfigTest {
     // Arrange - This test verifies the health indicator doesn't throw exceptions
     // We're testing the error handling path by not mocking getProvider()
     var paymentProviderFactory = mock(PaymentProviderFactory.class);
-    
+
     when(paymentProviderFactory.getConfiguredProviderName()).thenReturn("stripe");
 
     var healthIndicator = new HealthCheckConfig.PaymentProviderHealthIndicator(paymentProviderFactory);
 
     // Act
     var health = healthIndicator.health();
-    
+
     // Assert - Should handle errors gracefully
     assertThat(health).isNotNull();
     assertThat(health.getStatus()).isEqualTo(Status.DOWN);
@@ -202,7 +202,7 @@ class HealthCheckConfigTest {
   void shouldReportPaymentProviderHealthDownOnException() {
     // Arrange
     var paymentProviderFactory = mock(PaymentProviderFactory.class);
-    
+
     when(paymentProviderFactory.getConfiguredProviderName()).thenThrow(new RuntimeException("Configuration error"));
 
     var healthIndicator = new HealthCheckConfig.PaymentProviderHealthIndicator(paymentProviderFactory);
