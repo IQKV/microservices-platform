@@ -1,20 +1,24 @@
 package com.iqscaffold.userservice.infrastructure.messaging;
 
 import com.iqscaffold.userservice.config.RabbitMQConfig;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 /**
  * Service for publishing messages to RabbitMQ
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class MessagingService {
 
+  private static final Logger log = LoggerFactory.getLogger(MessagingService.class);
+
   private final RabbitTemplate rabbitTemplate;
+
+  public MessagingService(RabbitTemplate rabbitTemplate) {
+    this.rabbitTemplate = rabbitTemplate;
+  }
 
   /**
    * Publish a user event
@@ -55,6 +59,7 @@ public class MessagingService {
       throw new MessagingException("Failed to publish notification event", e);
     }
   }
+
 
   /**
    * Publish user created event

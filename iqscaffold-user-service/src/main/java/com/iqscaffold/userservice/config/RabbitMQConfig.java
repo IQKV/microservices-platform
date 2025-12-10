@@ -1,8 +1,8 @@
 package com.iqscaffold.userservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.ExchangeBuilder;
@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Configuration;
  * RabbitMQ Configuration for IQScaffold User Service
  * Configures exchanges, queues, bindings, and message converters
  */
-@Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class RabbitMQConfig {
+
+  private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);
 
   private final IqScaffoldProperties properties;
   private final ObjectMapper objectMapper;
@@ -46,6 +46,12 @@ public class RabbitMQConfig {
   public static final String USER_VERIFIED_KEY = "user.verified";
   public static final String PASSWORD_RESET_KEY = "user.password.reset";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
+
+  public RabbitMQConfig(IqScaffoldProperties properties, ObjectMapper objectMapper) {
+    this.properties = properties;
+    this.objectMapper = objectMapper;
+  }
+
 
   /**
    * Main events exchange for application events

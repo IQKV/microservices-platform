@@ -2,20 +2,13 @@ package com.iqscaffold.userservice.infrastructure.messaging;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Base event for user-related events
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserEvent {
 
   private String eventId;
@@ -28,6 +21,162 @@ public class UserEvent {
   private Instant timestamp;
 
   private Map<String, Object> metadata;
+
+  public UserEvent() {
+  }
+
+  public UserEvent(String eventId, String eventType, String userId, String tenantId,
+                   String email, Instant timestamp, Map<String, Object> metadata) {
+    this.eventId = eventId;
+    this.eventType = eventType;
+    this.userId = userId;
+    this.tenantId = tenantId;
+    this.email = email;
+    this.timestamp = timestamp;
+    this.metadata = metadata;
+  }
+
+  public String getEventId() {
+    return eventId;
+  }
+
+  public void setEventId(String eventId) {
+    this.eventId = eventId;
+  }
+
+  public String getEventType() {
+    return eventType;
+  }
+
+  public void setEventType(String eventType) {
+    this.eventType = eventType;
+  }
+
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId) {
+    this.tenantId = tenantId;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public Instant getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Instant timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public Map<String, Object> getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(Map<String, Object> metadata) {
+    this.metadata = metadata;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    UserEvent userEvent = (UserEvent) o;
+    return Objects.equals(eventId, userEvent.eventId)
+        && Objects.equals(eventType, userEvent.eventType)
+        && Objects.equals(userId, userEvent.userId)
+        && Objects.equals(tenantId, userEvent.tenantId)
+        && Objects.equals(email, userEvent.email)
+        && Objects.equals(timestamp, userEvent.timestamp)
+        && Objects.equals(metadata, userEvent.metadata);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(eventId, eventType, userId, tenantId, email, timestamp, metadata);
+  }
+
+  @Override
+  public String toString() {
+    return "UserEvent{"
+        + "eventId='" + eventId + '\''
+        + ", eventType='" + eventType + '\''
+        + ", userId='" + userId + '\''
+        + ", tenantId='" + tenantId + '\''
+        + ", email='" + email + '\''
+        + ", timestamp=" + timestamp
+        + ", metadata=" + metadata
+        + '}';
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private String eventId;
+    private String eventType;
+    private String userId;
+    private String tenantId;
+    private String email;
+    private Instant timestamp;
+    private Map<String, Object> metadata;
+
+    public Builder eventId(String eventId) {
+      this.eventId = eventId;
+      return this;
+    }
+
+    public Builder eventType(String eventType) {
+      this.eventType = eventType;
+      return this;
+    }
+
+    public Builder userId(String userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder tenantId(String tenantId) {
+      this.tenantId = tenantId;
+      return this;
+    }
+
+    public Builder email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder timestamp(Instant timestamp) {
+      this.timestamp = timestamp;
+      return this;
+    }
+
+    public Builder metadata(Map<String, Object> metadata) {
+      this.metadata = metadata;
+      return this;
+    }
+
+    public UserEvent build() {
+      return new UserEvent(eventId, eventType, userId, tenantId, email, timestamp, metadata);
+    }
+  }
 
   public static UserEvent userCreated(String userId, String tenantId, String email) {
     return UserEvent.builder()

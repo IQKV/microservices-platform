@@ -1,8 +1,8 @@
 package com.iqscaffold.userservice.infrastructure.messaging;
 
 import com.iqscaffold.userservice.config.RabbitMQConfig;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +10,13 @@ import org.springframework.stereotype.Component;
  * Example listener for user events
  * This demonstrates how to consume messages from RabbitMQ
  */
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class UserEventListener {
+
+  private static final Logger log = LoggerFactory.getLogger(UserEventListener.class);
+
+  public UserEventListener() {
+  }
 
   /**
    * Listen to user events queue
