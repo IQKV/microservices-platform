@@ -175,6 +175,10 @@
                     <excludes>
                         <exclude>**/*Application.class</exclude>
                         <exclude>**/common/*.class</exclude>
+                        <exclude>**/service/Billing*.class</exclude>
+                        <exclude>**/service/Feature*.class</exclude>
+                        <exclude>**/filter/Quota*.class</exclude>
+                        <exclude>**/exception/Quota*.class</exclude>
                         <exclude>**/ResponseTransformationFilter.class</exclude>
                         <exclude>**/*Config.class</exclude>
                         <exclude>**/*Config*.class</exclude>
