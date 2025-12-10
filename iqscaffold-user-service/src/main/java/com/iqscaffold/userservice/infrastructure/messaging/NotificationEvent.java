@@ -28,10 +28,10 @@ public class NotificationEvent {
   public NotificationEvent() {
   }
 
-  public NotificationEvent(String eventId, String notificationType, String recipientEmail,
-                           String recipientName, String subject, String templateName,
-                           Map<String, Object> templateData, Instant timestamp,
-                           String tenantId, String userId) {
+  public NotificationEvent(final String eventId, final String notificationType, final String recipientEmail,
+                           final String recipientName, final String subject, final String templateName,
+                           final Map<String, Object> templateData, final Instant timestamp,
+                           final String tenantId, final String userId) {
     this.eventId = eventId;
     this.notificationType = notificationType;
     this.recipientEmail = recipientEmail;
