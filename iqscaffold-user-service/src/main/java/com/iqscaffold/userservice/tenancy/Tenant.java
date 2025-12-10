@@ -217,8 +217,7 @@ public class Tenant {
   }
 
   public boolean hasActiveSubscription() {
-    return subscriptionStatus != null &&
-           ("ACTIVE".equals(subscriptionStatus) || "TRIAL".equals(subscriptionStatus));
+    return ("ACTIVE".equals(subscriptionStatus) || "TRIAL".equals(subscriptionStatus));
   }
 
   public String getDisplayName() {

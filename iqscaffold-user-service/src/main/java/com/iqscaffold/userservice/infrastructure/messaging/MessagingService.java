@@ -16,14 +16,14 @@ public class MessagingService {
 
   private final RabbitTemplate rabbitTemplate;
 
-  public MessagingService(RabbitTemplate rabbitTemplate) {
+  public MessagingService(final RabbitTemplate rabbitTemplate) {
     this.rabbitTemplate = rabbitTemplate;
   }
 
   /**
    * Publish a user event
    */
-  public void publishUserEvent(UserEvent event, String routingKey) {
+  public void publishUserEvent(final UserEvent event, final String routingKey) {
     try {
       log.debug("Publishing user event: {} with routing key: {}", event.getEventType(), routingKey);
       rabbitTemplate.convertAndSend(
@@ -33,7 +33,7 @@ public class MessagingService {
       );
       log.info("Successfully published user event: {} for user: {}",
           event.getEventType(), event.getUserId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish user event: {} for user: {}",
           event.getEventType(), event.getUserId(), e);
       throw new MessagingException("Failed to publish user event", e);
@@ -43,7 +43,7 @@ public class MessagingService {
   /**
    * Publish a notification event
    */
-  public void publishNotificationEvent(NotificationEvent event) {
+  public void publishNotificationEvent(final NotificationEvent event) {
     try {
       log.debug("Publishing notification event: {} to: {}",
           event.getNotificationType(), event.getRecipientEmail());
@@ -53,7 +53,7 @@ public class MessagingService {
           event
       );
       log.info("Successfully published notification event to: {}", event.getRecipientEmail());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish notification event to: {}",
           event.getRecipientEmail(), e);
       throw new MessagingException("Failed to publish notification event", e);

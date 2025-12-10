@@ -47,7 +47,7 @@ public class RabbitMQConfig {
   public static final String PASSWORD_RESET_KEY = "user.password.reset";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
 
-  public RabbitMQConfig(IqScaffoldProperties properties, ObjectMapper objectMapper) {
+  public RabbitMQConfig(final IqScaffoldProperties properties, final ObjectMapper objectMapper) {
     this.properties = properties;
     this.objectMapper = objectMapper;
   }
