@@ -308,7 +308,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   int findMaxSequenceForPeriod(@Param("yearMonth") String yearMonth);
 
 
-
   /**
    * Finds invoices by status and tenant ID.
    *
