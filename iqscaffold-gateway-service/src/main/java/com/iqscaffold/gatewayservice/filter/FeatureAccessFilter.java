@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
-
 /**
  * Filter to check feature access based on tenant subscription plan.
  * Integrates with billing service to verify if the tenant has access to features required by the endpoint.
@@ -62,7 +60,7 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
       return chain.filter(exchange);
     }
 
-    logger.debug("Checking feature access for tenant: {}, path: {}, required feature: {}", 
+    logger.debug("Checking feature access for tenant: {}, path: {}, required feature: {}",
         tenantId, path, requiredFeature);
 
     // Check feature access with billing service
@@ -72,7 +70,7 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
             logger.debug("Feature access granted for tenant: {}, feature: {}", tenantId, requiredFeature);
             return chain.filter(exchange);
           } else {
-            logger.warn("Feature access denied for tenant: {}, feature: {}, plan: {}", 
+            logger.warn("Feature access denied for tenant: {}, feature: {}, plan: {}",
                 tenantId, requiredFeature, response.planTier());
             return Mono.error(new FeatureNotAvailableException(tenantId, requiredFeature, path));
           }
@@ -127,8 +125,8 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
   }
 
   private boolean isEnabled() {
-    return properties.gateway().featureAccess() != null 
-        && properties.gateway().featureAccess().enabled();
+    return properties.gateway().featureAccess() != null
+           && properties.gateway().featureAccess().enabled();
   }
 
   @Override

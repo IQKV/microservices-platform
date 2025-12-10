@@ -152,7 +152,7 @@ class TenantRateLimitingFilterTest {
   void shouldHandleTenantContextAndApplyTenantQuotas() {
     var request = MockServerHttpRequest.get("/api/test").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 
@@ -180,7 +180,7 @@ class TenantRateLimitingFilterTest {
     var endpointPolicy = new IqScaffoldProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties.EndpointPolicyProperties(
         50, 100, true
     );
-    
+
     var policies = new IqScaffoldProperties.GatewayProperties.RateLimitingProperties.PoliciesProperties(
         100, 200, Map.of("/api/admin/**", endpointPolicy)
     );
@@ -199,7 +199,8 @@ class TenantRateLimitingFilterTest {
 
     var updatedProps = new IqScaffoldProperties(
         properties.cache(),
-        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(), properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
+        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(),
+            properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
         properties.observability()
     );
 
@@ -207,7 +208,7 @@ class TenantRateLimitingFilterTest {
 
     var request = MockServerHttpRequest.get("/api/admin/users").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 
@@ -224,14 +225,15 @@ class TenantRateLimitingFilterTest {
     );
 
     var rateLimiting = new IqScaffoldProperties.GatewayProperties.RateLimitingProperties(
-        true, properties.gateway().rateLimiting().redis(), 
-        properties.gateway().rateLimiting().policies(), 
+        true, properties.gateway().rateLimiting().redis(),
+        properties.gateway().rateLimiting().policies(),
         tenantQuotas
     );
 
     var updatedProps = new IqScaffoldProperties(
         properties.cache(),
-        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(), properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
+        new IqScaffoldProperties.GatewayProperties(properties.gateway().routing(), properties.gateway().security(), rateLimiting, properties.gateway().circuitBreaker(),
+            properties.gateway().cors(), properties.gateway().transformation(), properties.gateway().integration(), properties.gateway().featureAccess()),
         properties.observability()
     );
 
@@ -239,7 +241,7 @@ class TenantRateLimitingFilterTest {
 
     var request = MockServerHttpRequest.get("/api/test").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("premium-tenant");
     exchange.getAttributes().put("tenantContext", tenantContext);
 

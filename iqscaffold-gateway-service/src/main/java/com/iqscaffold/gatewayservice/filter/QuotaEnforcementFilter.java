@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Quota enforcement filter for API call quotas.
- * 
+ *
  * <p>This filter enforces API call quotas based on subscription plans by:
  * <ul>
  *   <li>Checking quota availability with billing service before processing request</li>
@@ -22,11 +22,11 @@ import reactor.core.publisher.Mono;
  *   <li>Rejecting requests with HTTP 429 when quota is exceeded</li>
  *   <li>Gracefully degrading when billing service is unavailable</li>
  * </ul>
- * 
+ *
  * <p>The filter runs after authentication (order -40) but before routing to ensure
  * tenant context is available and quota is enforced before downstream services
  * process the request.
- * 
+ *
  * <p>Configuration:
  * <pre>
  * iqscaffold:
@@ -53,7 +53,7 @@ public class QuotaEnforcementFilter implements GlobalFilter, Ordered {
   private final BillingServiceClient billingServiceClient;
 
   public QuotaEnforcementFilter(final IqScaffoldProperties properties,
-                                 final BillingServiceClient billingServiceClient) {
+                                final BillingServiceClient billingServiceClient) {
     this.properties = properties;
     this.billingServiceClient = billingServiceClient;
   }
@@ -126,7 +126,7 @@ public class QuotaEnforcementFilter implements GlobalFilter, Ordered {
 
   /**
    * Records API call usage asynchronously.
-   * 
+   *
    * <p>This method is called after the request is processed successfully.
    * It runs asynchronously and does not block the response.
    */
@@ -139,7 +139,7 @@ public class QuotaEnforcementFilter implements GlobalFilter, Ordered {
 
   /**
    * Checks if the path should be excluded from quota enforcement.
-   * 
+   *
    * <p>Excluded paths:
    * <ul>
    *   <li>Authentication endpoints (/api/v1/auth/**)</li>
@@ -150,12 +150,12 @@ public class QuotaEnforcementFilter implements GlobalFilter, Ordered {
    */
   private boolean isExcludedPath(String path) {
     return path.startsWith("/api/v1/auth/")
-        || path.startsWith("/actuator/")
-        || path.startsWith("/swagger-ui/")
-        || path.startsWith("/api-docs/")
-        || path.equals("/.well-known/jwks.json")
-        || path.contains("/swagger-ui/")
-        || path.contains("/api-docs/");
+           || path.startsWith("/actuator/")
+           || path.startsWith("/swagger-ui/")
+           || path.startsWith("/api-docs/")
+           || path.equals("/.well-known/jwks.json")
+           || path.contains("/swagger-ui/")
+           || path.contains("/api-docs/");
   }
 
   @Override

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 /**
  * Exception thrown when API quota is exceeded.
- * 
+ *
  * <p>This exception is thrown by the QuotaEnforcementFilter when a tenant
  * has exceeded their API call quota for the current billing period.
  */

@@ -7,10 +7,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
 import com.iqscaffold.gatewayservice.exception.FeatureNotAvailableException;
 import com.iqscaffold.gatewayservice.service.BillingServiceClient;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -108,7 +107,7 @@ class FeatureAccessFilterTest {
 
     var request = MockServerHttpRequest.get("/api/v1/crm/bulk-import").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 
@@ -137,7 +136,7 @@ class FeatureAccessFilterTest {
 
     var request = MockServerHttpRequest.get("/api/v1/crm/bulk-import").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 
@@ -164,7 +163,7 @@ class FeatureAccessFilterTest {
 
     var request = MockServerHttpRequest.get("/api/v1/other/endpoint").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 
@@ -194,7 +193,7 @@ class FeatureAccessFilterTest {
 
     var request = MockServerHttpRequest.get("/api/v1/crm/bulk-import/execute").build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put("tenantContext", tenantContext);
 

@@ -1,5 +1,7 @@
 package com.iqscaffold.gatewayservice.service;
 
+import java.time.LocalDateTime;
+
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,12 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 /**
  * Reactive client for billing service integration.
- * 
+ *
  * <p>Provides methods to check quotas and record usage asynchronously.
  * Implements circuit breaker pattern and graceful degradation.
  */
@@ -36,8 +35,8 @@ public class BillingServiceClient {
 
   /**
    * Checks if tenant has quota available for API calls.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId          tenant identifier
    * @param requestedQuantity number of API calls requested (typically 1)
    * @return quota check response, or empty if billing service unavailable
    */
@@ -55,12 +54,12 @@ public class BillingServiceClient {
         .bodyValue(request)
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, response -> {
-          logger.warn("Client error checking quota for tenant: {}, status: {}", 
+          logger.warn("Client error checking quota for tenant: {}, status: {}",
               tenantId, response.statusCode());
           return Mono.empty();
         })
         .onStatus(HttpStatusCode::is5xxServerError, response -> {
-          logger.error("Server error checking quota for tenant: {}, status: {}", 
+          logger.error("Server error checking quota for tenant: {}, status: {}",
               tenantId, response.statusCode());
           return Mono.empty();
         })
@@ -76,7 +75,7 @@ public class BillingServiceClient {
 
   /**
    * Records API call usage asynchronously.
-   * 
+   *
    * @param tenantId tenant identifier
    * @param quantity number of API calls to record (typically 1)
    * @return completion signal
@@ -94,7 +93,7 @@ public class BillingServiceClient {
         .bodyValue(request)
         .retrieve()
         .onStatus(HttpStatusCode::isError, response -> {
-          logger.warn("Error recording usage for tenant: {}, status: {}", 
+          logger.warn("Error recording usage for tenant: {}, status: {}",
               tenantId, response.statusCode());
           return Mono.empty();
         })
@@ -107,8 +106,8 @@ public class BillingServiceClient {
 
   /**
    * Checks if tenant has access to a specific feature.
-   * 
-   * @param tenantId tenant identifier
+   *
+   * @param tenantId    tenant identifier
    * @param featureCode feature code to check
    * @return feature access response, or allowed response if billing service unavailable
    */
@@ -126,12 +125,12 @@ public class BillingServiceClient {
         .bodyValue(request)
         .retrieve()
         .onStatus(HttpStatusCode::is4xxClientError, response -> {
-          logger.warn("Client error checking feature access for tenant: {}, status: {}", 
+          logger.warn("Client error checking feature access for tenant: {}, status: {}",
               tenantId, response.statusCode());
           return Mono.empty();
         })
         .onStatus(HttpStatusCode::is5xxServerError, response -> {
-          logger.error("Server error checking feature access for tenant: {}, status: {}", 
+          logger.error("Server error checking feature access for tenant: {}, status: {}",
               tenantId, response.statusCode());
           return Mono.empty();
         })
@@ -164,7 +163,8 @@ public class BillingServiceClient {
   public record QuotaCheckRequest(
       String metricType,
       long requestedQuantity
-  ) {}
+  ) {
+  }
 
   /**
    * Response DTO for quota check.
@@ -178,7 +178,8 @@ public class BillingServiceClient {
       double percentageUsed,
       LocalDateTime resetsAt,
       String message
-  ) {}
+  ) {
+  }
 
   /**
    * Request DTO for recording usage.
@@ -186,14 +187,16 @@ public class BillingServiceClient {
   public record RecordUsageRequest(
       String metricType,
       long quantity
-  ) {}
+  ) {
+  }
 
   /**
    * Request DTO for feature access check.
    */
   public record FeatureCheckRequest(
       String featureCode
-  ) {}
+  ) {
+  }
 
   /**
    * Response DTO for feature access check.
@@ -202,5 +205,6 @@ public class BillingServiceClient {
       boolean available,
       String planTier,
       String message
-  ) {}
+  ) {
+  }
 }
