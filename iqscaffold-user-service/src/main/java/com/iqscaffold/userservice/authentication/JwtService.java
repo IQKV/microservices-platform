@@ -50,7 +50,7 @@ public class JwtService {
     var expiry = now.plus(jwtConfiguration.getAccessTokenExpiry());
 
     var userContext = createUserContext(user);
-    
+
     // Add subscription claims to custom claims
     var subscriptionClaims = getSubscriptionClaims(user);
     var enrichedContext = new UserContext(
@@ -64,7 +64,7 @@ public class JwtService {
         userContext.tenantId(),
         subscriptionClaims
     );
-    
+
     var claims = createTokenClaims(enrichedContext, now, expiry, "access");
 
     var jwt = jwtEncoder.encode(JwtEncoderParameters.from(claims));
@@ -226,26 +226,26 @@ public class JwtService {
    */
   private Map<String, Object> getSubscriptionClaims(User user) {
     var claims = new java.util.HashMap<String, Object>();
-    
+
     // Fetch tenant to get subscription information
     var tenantOptional = tenantRepository.findByTenantId(user.getTenantId());
-    
+
     if (tenantOptional.isPresent()) {
       var tenant = tenantOptional.get();
-      
+
       if (tenant.getSubscriptionStatus() != null) {
         claims.put(JwtClaimNames.SUBSCRIPTION_STATUS, tenant.getSubscriptionStatus());
       }
-      
+
       if (tenant.getSubscriptionPlanCode() != null) {
         claims.put(JwtClaimNames.SUBSCRIPTION_PLAN, tenant.getSubscriptionPlanCode());
       }
     }
-    
+
     // Features will be populated by billing service based on plan
     // For now, we include an empty list that can be enriched later
     claims.put(JwtClaimNames.SUBSCRIPTION_FEATURES, java.util.List.of());
-    
+
     return claims;
   }
 
@@ -267,13 +267,13 @@ public class JwtService {
         .claim(JwtClaimNames.FIRST_NAME, userContext.firstName())
         .claim(JwtClaimNames.LAST_NAME, userContext.lastName())
         .claim(JwtClaimNames.TENANT_ID, userContext.tenantId());
-    
+
     // Add subscription claims from custom claims if present
     var customClaims = userContext.customClaims();
     if (customClaims != null && !customClaims.isEmpty()) {
       customClaims.forEach(builder::claim);
     }
-    
+
     return builder.build();
   }
 

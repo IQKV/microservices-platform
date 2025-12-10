@@ -95,16 +95,20 @@ public class UserEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     UserEvent userEvent = (UserEvent) o;
     return Objects.equals(eventId, userEvent.eventId)
-        && Objects.equals(eventType, userEvent.eventType)
-        && Objects.equals(userId, userEvent.userId)
-        && Objects.equals(tenantId, userEvent.tenantId)
-        && Objects.equals(email, userEvent.email)
-        && Objects.equals(timestamp, userEvent.timestamp)
-        && Objects.equals(metadata, userEvent.metadata);
+           && Objects.equals(eventType, userEvent.eventType)
+           && Objects.equals(userId, userEvent.userId)
+           && Objects.equals(tenantId, userEvent.tenantId)
+           && Objects.equals(email, userEvent.email)
+           && Objects.equals(timestamp, userEvent.timestamp)
+           && Objects.equals(metadata, userEvent.metadata);
   }
 
   @Override
@@ -115,14 +119,14 @@ public class UserEvent {
   @Override
   public String toString() {
     return "UserEvent{"
-        + "eventId='" + eventId + '\''
-        + ", eventType='" + eventType + '\''
-        + ", userId='" + userId + '\''
-        + ", tenantId='" + tenantId + '\''
-        + ", email='" + email + '\''
-        + ", timestamp=" + timestamp
-        + ", metadata=" + metadata
-        + '}';
+           + "eventId='" + eventId + '\''
+           + ", eventType='" + eventType + '\''
+           + ", userId='" + userId + '\''
+           + ", tenantId='" + tenantId + '\''
+           + ", email='" + email + '\''
+           + ", timestamp=" + timestamp
+           + ", metadata=" + metadata
+           + '}';
   }
 
   public static Builder builder() {

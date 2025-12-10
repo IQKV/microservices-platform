@@ -401,7 +401,7 @@ public class TenantManagementService {
       @CacheEvict(value = "tenants", key = "'valid_' + #tenantId")
   })
   public TenantResponse updateTenantSubscription(String tenantId, TenantSubscriptionUpdateRequest request) {
-    logger.info("Updating subscription for tenant: {} - Status: {}, Plan: {}", 
+    logger.info("Updating subscription for tenant: {} - Status: {}, Plan: {}",
         tenantId, request.subscriptionStatus(), request.subscriptionPlanCode());
 
     var tenant = tenantRepository.findByTenantId(tenantId)

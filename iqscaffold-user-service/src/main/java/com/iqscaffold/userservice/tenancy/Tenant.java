@@ -217,7 +217,7 @@ public class Tenant {
   }
 
   public boolean hasActiveSubscription() {
-    return subscriptionStatus != null && 
+    return subscriptionStatus != null &&
            ("ACTIVE".equals(subscriptionStatus) || "TRIAL".equals(subscriptionStatus));
   }
 

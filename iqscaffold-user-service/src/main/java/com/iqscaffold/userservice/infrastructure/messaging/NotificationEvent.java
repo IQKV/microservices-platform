@@ -127,19 +127,23 @@ public class NotificationEvent {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     NotificationEvent that = (NotificationEvent) o;
     return Objects.equals(eventId, that.eventId)
-        && Objects.equals(notificationType, that.notificationType)
-        && Objects.equals(recipientEmail, that.recipientEmail)
-        && Objects.equals(recipientName, that.recipientName)
-        && Objects.equals(subject, that.subject)
-        && Objects.equals(templateName, that.templateName)
-        && Objects.equals(templateData, that.templateData)
-        && Objects.equals(timestamp, that.timestamp)
-        && Objects.equals(tenantId, that.tenantId)
-        && Objects.equals(userId, that.userId);
+           && Objects.equals(notificationType, that.notificationType)
+           && Objects.equals(recipientEmail, that.recipientEmail)
+           && Objects.equals(recipientName, that.recipientName)
+           && Objects.equals(subject, that.subject)
+           && Objects.equals(templateName, that.templateName)
+           && Objects.equals(templateData, that.templateData)
+           && Objects.equals(timestamp, that.timestamp)
+           && Objects.equals(tenantId, that.tenantId)
+           && Objects.equals(userId, that.userId);
   }
 
   @Override
@@ -151,17 +155,17 @@ public class NotificationEvent {
   @Override
   public String toString() {
     return "NotificationEvent{"
-        + "eventId='" + eventId + '\''
-        + ", notificationType='" + notificationType + '\''
-        + ", recipientEmail='" + recipientEmail + '\''
-        + ", recipientName='" + recipientName + '\''
-        + ", subject='" + subject + '\''
-        + ", templateName='" + templateName + '\''
-        + ", templateData=" + templateData
-        + ", timestamp=" + timestamp
-        + ", tenantId='" + tenantId + '\''
-        + ", userId='" + userId + '\''
-        + '}';
+           + "eventId='" + eventId + '\''
+           + ", notificationType='" + notificationType + '\''
+           + ", recipientEmail='" + recipientEmail + '\''
+           + ", recipientName='" + recipientName + '\''
+           + ", subject='" + subject + '\''
+           + ", templateName='" + templateName + '\''
+           + ", templateData=" + templateData
+           + ", timestamp=" + timestamp
+           + ", tenantId='" + tenantId + '\''
+           + ", userId='" + userId + '\''
+           + '}';
   }
 
   public static Builder builder() {

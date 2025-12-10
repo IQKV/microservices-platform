@@ -1,5 +1,7 @@
 package com.iqscaffold.userservice.tenancy;
 
+import jakarta.validation.Valid;
+
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantResponse;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -98,16 +99,16 @@ public class InternalBillingRestResource {
   public ResponseEntity<TenantResponse> updateTenantSubscription(
       @Parameter(description = "Tenant ID", required = true, example = "tenant-abc-123")
       @PathVariable String tenantId,
-      
+
       @Parameter(description = "Subscription update request", required = true)
       @Valid @RequestBody TenantSubscriptionUpdateRequest request
   ) {
     logger.info("Received subscription update request for tenant: {} from billing service", tenantId);
-    
+
     var response = tenantManagementService.updateTenantSubscription(tenantId, request);
-    
+
     logger.info("Successfully updated subscription for tenant: {}", tenantId);
-    
+
     return ResponseEntity.ok(response);
   }
 }
