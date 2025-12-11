@@ -209,7 +209,7 @@ class RateLimitingServiceTest {
     // Given
     String ipAddress = "192.168.1.1";
     long oldestRequestTime = System.currentTimeMillis() - 30000; // 30 seconds ago
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenReturn(Set.of(String.valueOf(oldestRequestTime)));
 
     // When
@@ -225,7 +225,7 @@ class RateLimitingServiceTest {
   void shouldReturnZeroDurationWhenNoRequestsInWindow() {
     // Given
     String ipAddress = "192.168.1.1";
-    when(zSetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
+    when(zsetOperations.rangeByScore(anyString(), anyDouble(), anyDouble(), anyLong(), anyLong()))
         .thenReturn(Set.of());
 
     // When

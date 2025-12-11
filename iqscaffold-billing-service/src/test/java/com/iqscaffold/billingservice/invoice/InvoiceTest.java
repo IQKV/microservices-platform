@@ -476,7 +476,7 @@ class InvoiceTest {
       // When & Then
       assertThrows(
           IllegalStateException.class,
-          invoice::finalize
+          invoice::finalizeInvoice
       );
     }
 
