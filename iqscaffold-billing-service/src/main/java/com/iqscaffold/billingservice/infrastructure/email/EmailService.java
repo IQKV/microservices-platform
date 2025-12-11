@@ -137,8 +137,6 @@ public class EmailService {
    * Sends email via external Email Service API.
    */
   private void sendViaEmailService(String recipient, String subject, String htmlContent) {
-    var emailServiceUrl = billingProperties.integration().emailService().url();
-
     var request = Map.of(
         "to", recipient,
         "subject", subject,
@@ -149,13 +147,13 @@ public class EmailService {
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    var entity = new HttpEntity<>(request, headers);
-
     // TODO: Replace with actual Email Service API call
     // For now, just log the email details
     log.info("Would send email via Email Service: to={}, subject={}", recipient, subject);
 
     // In production, uncomment this:
+    // var emailServiceUrl = billingProperties.integration().emailService().url();
+    // var entity = new HttpEntity<>(request, headers);
     // restTemplate.postForEntity(emailServiceUrl + "/send", entity, Void.class);
   }
 
@@ -212,7 +210,7 @@ public class EmailService {
               <p>If you have any questions, please contact our support team.</p>
           </body>
           </html>
-          """, exportId, format, exportData);
+          """.formatted(exportId, format, exportData));
 
       sendViaEmailService(recipient, subject, htmlContent);
 

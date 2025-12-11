@@ -617,12 +617,7 @@ class InvoiceGeneratorTest {
     @Test
     @DisplayName("Should determine invoice should be generated when period ending soon")
     void shouldDetermineInvoiceShouldBeGeneratedWhenPeriodEndingSoon() {
-      // Arrange - Create new subscription with period ending in 2 days
-      LocalDateTime nearStart = LocalDateTime.now().minusDays(28);
-      LocalDateTime nearEnd = LocalDateTime.now().plusDays(2);
-      Subscription nearEndSubscription = Subscription.createActive(testTenantId, testUserId, testPlan);
-      TestEntityUtils.setId(nearEndSubscription, 2L);
-      // Note: Cannot directly set billing period, so this test verifies the logic
+      // Arrange - Note: Cannot directly set billing period, so this test verifies the logic
       // In production, the subscription would have its period set during creation/renewal
 
       // Act

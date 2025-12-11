@@ -293,7 +293,8 @@ public class InvoiceGenerator {
 
     // TODO: Replace with actual sequence from database
     // This is a placeholder - in production, use a database sequence
-    var sequence = (int) (Math.random() * 99999);
+    var random = new java.util.Random();
+    var sequence = random.nextInt(99999);
 
     return String.format(INVOICE_NUMBER_FORMAT, yearMonth, sequence);
   }

@@ -83,7 +83,6 @@ public class BillingAnalyticsService {
 
     var now = LocalDateTime.now();
     var currentMonth = YearMonth.from(now);
-    var previousMonth = currentMonth.minusMonths(1);
 
     // Get all active subscriptions
     var activeSubscriptions = subscriptionRepository.findByStatusIn(

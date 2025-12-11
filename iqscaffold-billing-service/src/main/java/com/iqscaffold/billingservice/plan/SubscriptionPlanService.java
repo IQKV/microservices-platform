@@ -329,14 +329,12 @@ public class SubscriptionPlanService {
 
     var fromPlan = subscriptionPlanRepository.findById(fromPlanId)
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("plan.not.found");
           log.error("Source plan not found: {}", fromPlanId);
           return new PlanException.PlanNotFoundException(fromPlanId.toString());
         });
 
     var toPlan = subscriptionPlanRepository.findById(toPlanId)
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("plan.not.found");
           log.error("Target plan not found: {}", toPlanId);
           return new PlanException.PlanNotFoundException(toPlanId.toString());
         });

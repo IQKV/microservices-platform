@@ -95,8 +95,9 @@ public class BillingPortalService {
     // Determine subscription status flags
     var inTrial = subscription.trialEnd() != null
                   && subscription.trialEnd().isAfter(LocalDateTime.now());
-    var pastDue = "PAST_DUE".equals(subscription.status());
-    var canceled = subscription.cancelAtPeriodEnd() || "CANCELED".equals(subscription.status());
+    var pastDue = subscription.status() == com.iqscaffold.billingservice.subscription.SubscriptionStatus.PAST_DUE;
+    var canceled = subscription.cancelAtPeriodEnd() 
+                   || subscription.status() == com.iqscaffold.billingservice.subscription.SubscriptionStatus.CANCELED;
 
     // Get available upgrade and downgrade options
     // TODO: Implement plan comparison logic in future task

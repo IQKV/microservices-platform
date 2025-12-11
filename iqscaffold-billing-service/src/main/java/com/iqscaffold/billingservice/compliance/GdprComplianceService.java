@@ -335,11 +335,11 @@ public class GdprComplianceService {
   private String convertToCSV(BillingDataExport export) {
     // Simple CSV conversion - in production, use a proper CSV library
     StringBuilder csv = new StringBuilder();
-    csv.append("Data Type,ID,Date,Amount,Status\n");
+    csv.append("Data Type,ID,Date,Amount,Status").append(System.lineSeparator());
 
     // Add subscriptions
     if (export.currentSubscription() != null) {
-      csv.append(String.format("Subscription,%s,%s,%s,%s\n",
+      csv.append(String.format("Subscription,%s,%s,%s,%s%n",
           export.currentSubscription().id(),
           export.currentSubscription().createdAt(),
           export.currentSubscription().planName(),
@@ -349,7 +349,7 @@ public class GdprComplianceService {
 
     // Add invoices
     for (final InvoiceDto invoice : export.invoices()) {
-      csv.append(String.format("Invoice,%s,%s,%.2f,%s\n",
+      csv.append(String.format("Invoice,%s,%s,%.2f,%s%n",
           invoice.id(),
           invoice.createdAt(),
           invoice.total(),

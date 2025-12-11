@@ -104,11 +104,13 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
    *
    * @param properties the billing configuration properties
    */
+  @SuppressWarnings("java:S2696") // Stripe SDK requires setting static field
   public StripePaymentProvider(final BillingProperties properties) {
     this.apiKey = properties.payment().stripe().apiKey();
     this.webhookSecret = properties.payment().stripe().webhookSecret();
 
     // Initialize Stripe API key
+    // Note: Stripe SDK requires setting a static field - this is their API design
     if (apiKey != null && !apiKey.isBlank()) {
       Stripe.apiKey = apiKey;
       log.info("Stripe payment provider initialized");
@@ -216,7 +218,7 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
       log.error("Failed to retrieve payment method: {}", paymentMethodId, e);
 
       // Use pattern matching for instanceof (Java 21 feature)
-      if (e instanceof com.stripe.exception.InvalidRequestException invalidRequest) {
+      if (e instanceof com.stripe.exception.InvalidRequestException) {
         throw new PaymentException.PaymentMethodNotFoundException(paymentMethodId, e);
       }
 

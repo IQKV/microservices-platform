@@ -113,7 +113,6 @@ public class SubscriptionApplicationService {
 
     // Check if tenant already has an active subscription
     if (subscriptionRepository.existsActiveByTenantId(request.tenantId())) {
-      var errorMessage = messageService.getMessage("subscription.already.exists");
       log.error("Tenant {} already has an active subscription", request.tenantId());
       throw new SubscriptionException.SubscriptionAlreadyExistsException(
           "Tenant already has an active subscription"
@@ -123,7 +122,6 @@ public class SubscriptionApplicationService {
     // Retrieve the subscription plan
     var plan = subscriptionPlanRepository.findByPlanCode(request.planCode())
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("plan.not.found");
           log.error("Plan not found: {}", request.planCode());
           return new PlanException.PlanNotFoundException(request.planCode());
         });
@@ -350,7 +348,6 @@ public class SubscriptionApplicationService {
     // Retrieve the subscription
     var subscription = subscriptionRepository.findById(subscriptionId)
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("subscription.not.found");
           log.error("Subscription not found: {}", subscriptionId);
           return new SubscriptionException.SubscriptionNotFoundException(subscriptionId.toString());
         });
@@ -358,7 +355,6 @@ public class SubscriptionApplicationService {
     // Retrieve the new plan
     var newPlan = subscriptionPlanRepository.findByPlanCode(request.newPlanCode())
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("plan.not.found");
           log.error("Plan not found: {}", request.newPlanCode());
           return new PlanException.PlanNotFoundException(request.newPlanCode());
         });
@@ -368,11 +364,6 @@ public class SubscriptionApplicationService {
     var transition = new com.iqscaffold.billingservice.plan.PlanTransition(currentPlan, newPlan);
 
     if (!validPlanTransitionSpecification.isSatisfiedBy(transition)) {
-      var errorMessage = messageService.getMessage(
-          "subscription.upgrade.invalid.transition",
-          currentPlan.getName(),
-          newPlan.getName()
-      );
       log.error(
           "Invalid plan transition from {} to {} for subscription: {}",
           currentPlan.getName(),
@@ -387,7 +378,6 @@ public class SubscriptionApplicationService {
 
     // Verify this is actually an upgrade (new plan price > current plan price)
     if (newPlan.getBasePrice().compareTo(currentPlan.getBasePrice()) <= 0) {
-      var errorMessage = messageService.getMessage("subscription.upgrade.not.higher.tier");
       log.error(
           "Cannot upgrade to lower or same tier plan. Current: {}, New: {}",
           currentPlan.getBasePrice(),
@@ -498,7 +488,6 @@ public class SubscriptionApplicationService {
     // Retrieve the subscription
     var subscription = subscriptionRepository.findById(subscriptionId)
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("subscription.not.found");
           log.error("Subscription not found: {}", subscriptionId);
           return new SubscriptionException.SubscriptionNotFoundException(subscriptionId.toString());
         });
@@ -506,7 +495,6 @@ public class SubscriptionApplicationService {
     // Retrieve the new plan
     var newPlan = subscriptionPlanRepository.findByPlanCode(request.newPlanCode())
         .orElseThrow(() -> {
-          var errorMessage = messageService.getMessage("plan.not.found");
           log.error("Plan not found: {}", request.newPlanCode());
           return new PlanException.PlanNotFoundException(request.newPlanCode());
         });
@@ -516,11 +504,6 @@ public class SubscriptionApplicationService {
     var transition = new com.iqscaffold.billingservice.plan.PlanTransition(currentPlan, newPlan);
 
     if (!validPlanTransitionSpecification.isSatisfiedBy(transition)) {
-      var errorMessage = messageService.getMessage(
-          "subscription.downgrade.invalid.transition",
-          currentPlan.getName(),
-          newPlan.getName()
-      );
       log.error(
           "Invalid plan transition from {} to {} for subscription: {}",
           currentPlan.getName(),
@@ -535,7 +518,6 @@ public class SubscriptionApplicationService {
 
     // Verify this is actually a downgrade (new plan price < current plan price)
     if (newPlan.getBasePrice().compareTo(currentPlan.getBasePrice()) >= 0) {
-      var errorMessage = messageService.getMessage("subscription.downgrade.not.lower.tier");
       log.error(
           "Cannot downgrade to higher or same tier plan. Current: {}, New: {}",
           currentPlan.getBasePrice(),
