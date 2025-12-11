@@ -257,7 +257,6 @@ class SubscriptionApplicationServiceTest {
       when(subscriptionRepository.existsActiveByTenantId(testTenantId)).thenReturn(false);
       when(subscriptionPlanRepository.findByPlanCode("INVALID_PLAN"))
           .thenReturn(Optional.empty());
-      when(messageService.getMessage("plan.not.found")).thenReturn("Plan not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.createSubscription(request))
@@ -471,8 +470,6 @@ class SubscriptionApplicationServiceTest {
       );
 
       when(subscriptionRepository.findById(999L)).thenReturn(Optional.empty());
-      when(messageService.getMessage("subscription.not.found"))
-          .thenReturn("Subscription not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.upgradeSubscription(999L, request))
@@ -495,7 +492,6 @@ class SubscriptionApplicationServiceTest {
       when(subscriptionRepository.findById(1L)).thenReturn(Optional.of(testSubscription));
       when(subscriptionPlanRepository.findByPlanCode("INVALID_PLAN"))
           .thenReturn(Optional.empty());
-      when(messageService.getMessage("plan.not.found")).thenReturn("Plan not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.upgradeSubscription(1L, request))
@@ -546,8 +542,6 @@ class SubscriptionApplicationServiceTest {
           .thenReturn(Optional.of(lowerTierPlan));
       when(validPlanTransitionSpecification.isSatisfiedBy(any(PlanTransition.class)))
           .thenReturn(true);
-      when(messageService.getMessage("subscription.upgrade.not.higher.tier"))
-          .thenReturn("Not a higher tier");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.upgradeSubscription(1L, request))
@@ -655,8 +649,6 @@ class SubscriptionApplicationServiceTest {
       );
 
       when(subscriptionRepository.findById(999L)).thenReturn(Optional.empty());
-      when(messageService.getMessage("subscription.not.found"))
-          .thenReturn("Subscription not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.downgradeSubscription(999L, request))
@@ -681,8 +673,6 @@ class SubscriptionApplicationServiceTest {
           .thenReturn(Optional.of(higherTierPlan));
       when(validPlanTransitionSpecification.isSatisfiedBy(any(PlanTransition.class)))
           .thenReturn(true);
-      when(messageService.getMessage("subscription.downgrade.not.lower.tier"))
-          .thenReturn("Not a lower tier");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.downgradeSubscription(1L, request))

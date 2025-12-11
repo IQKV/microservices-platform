@@ -421,7 +421,6 @@ class SubscriptionPlanServiceTest {
     void shouldThrowExceptionWhenSourcePlanNotFound() {
       // Arrange
       when(subscriptionPlanRepository.findById(999L)).thenReturn(Optional.empty());
-      when(messageService.getMessage("plan.not.found")).thenReturn("Plan not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionPlanService.validatePlanTransition(999L, 2L))
@@ -436,7 +435,6 @@ class SubscriptionPlanServiceTest {
       // Arrange
       when(subscriptionPlanRepository.findById(1L)).thenReturn(Optional.of(testPlan));
       when(subscriptionPlanRepository.findById(999L)).thenReturn(Optional.empty());
-      when(messageService.getMessage("plan.not.found")).thenReturn("Plan not found");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionPlanService.validatePlanTransition(1L, 999L))
