@@ -229,8 +229,6 @@ class SubscriptionApplicationServiceTest {
       );
 
       when(subscriptionRepository.existsActiveByTenantId(testTenantId)).thenReturn(true);
-      when(messageService.getMessage("subscription.already.exists"))
-          .thenReturn("Subscription already exists");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.createSubscription(request))
@@ -516,8 +514,6 @@ class SubscriptionApplicationServiceTest {
           .thenReturn(Optional.of(higherTierPlan));
       when(validPlanTransitionSpecification.isSatisfiedBy(any(PlanTransition.class)))
           .thenReturn(false);
-      when(messageService.getMessage(eq("subscription.upgrade.invalid.transition"), anyString(), anyString()))
-          .thenReturn("Invalid transition");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionApplicationService.upgradeSubscription(1L, request))
