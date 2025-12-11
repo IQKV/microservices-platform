@@ -437,7 +437,7 @@ iqscaffold:
     # Feature access control based on subscription plans
     feature-access:
       enabled: ${FEATURE_ACCESS_ENABLED:false}
-      endpoint-feature-mapping:
+      endpoint-feature-mapping: {}
         # Example mappings - configure based on your feature requirements
         # "/api/v1/crm/bulk-import/**": "CRM.BULK_IMPORT"
         # "/api/v1/email/custom-templates/**": "EMAIL.CUSTOM_TEMPLATES"

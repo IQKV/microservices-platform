@@ -357,8 +357,6 @@ management:
   endpoint:
     health:
       show-details: always  # Always show health details in development
-    prometheus:
-      enabled: true
   metrics:
     distribution:
       percentiles-histogram:
