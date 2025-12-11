@@ -195,7 +195,7 @@ public class InvoiceGenerator {
     if (prorationResult.creditAmount().compareTo(BigDecimal.ZERO) > 0) {
       var creditLineItem = InvoiceLineItem.prorationCredit(
           "Credit for unused time: " + prorationResult.description(),
-          prorationResult.creditAmount().negate() // Negative amount for credit
+          prorationResult.creditAmount() // Pass positive amount, will be negated by factory
       );
       invoice.addLineItem(creditLineItem);
     }
@@ -252,13 +252,14 @@ public class InvoiceGenerator {
 
     // Create draft invoice (no specific period for one-time charges)
     var now = LocalDateTime.now();
+    var periodEnd = now.plusSeconds(1); // Period end must be after period start
     var invoice = Invoice.createDraft(
         subscription,
         subscription.getTenantId(),
         invoiceNumber,
         subscription.getPlan().getCurrency(),
         now,
-        now,
+        periodEnd,
         DEFAULT_DUE_DAYS
     );
 

@@ -77,7 +77,14 @@ public record InvoiceLineItem(
     }
 
     // Validate unit price
-    if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+    if (unitPrice == null) {
+      throw new IllegalArgumentException("Line item unit price cannot be null");
+    }
+    
+    // Only allow negative unit prices for credit/discount types
+    boolean allowNegative = (type == LineItemType.PRORATION_CREDIT
+        || type == LineItemType.DISCOUNT);
+    if (!allowNegative && unitPrice.compareTo(BigDecimal.ZERO) < 0) {
       throw new IllegalArgumentException("Line item unit price must be non-negative");
     }
 
@@ -150,16 +157,17 @@ public record InvoiceLineItem(
    * Factory method to create a proration credit line item.
    *
    * @param description description of the credit
-   * @param amount      credit amount (positive value)
+   * @param amount      credit amount (positive value, will be negated)
    * @return a new InvoiceLineItem for proration credit
    */
   public static InvoiceLineItem prorationCredit(String description, BigDecimal amount) {
+    BigDecimal creditAmount = amount.negate().setScale(2, RoundingMode.HALF_UP);
     return new InvoiceLineItem(
         LineItemType.PRORATION_CREDIT,
         description,
         1L,
-        amount.negate().setScale(2, RoundingMode.HALF_UP),
-        amount.negate().setScale(2, RoundingMode.HALF_UP)
+        creditAmount,
+        creditAmount
     );
   }
 
@@ -188,12 +196,13 @@ public record InvoiceLineItem(
    * @return a new InvoiceLineItem for discount
    */
   public static InvoiceLineItem discount(String description, BigDecimal amount) {
+    BigDecimal negatedAmount = amount.negate().setScale(2, RoundingMode.HALF_UP);
     return new InvoiceLineItem(
         LineItemType.DISCOUNT,
         description,
         1L,
-        amount.negate().setScale(2, RoundingMode.HALF_UP),
-        amount.negate().setScale(2, RoundingMode.HALF_UP)
+        negatedAmount,
+        negatedAmount
     );
   }
 
