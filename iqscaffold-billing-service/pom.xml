@@ -244,7 +244,7 @@
                     <excludes>
                         <!-- Application entry point -->
                         <exclude>**/*Application.class</exclude>
-                        <exclude>**/billingservice/**.class</exclude>
+                        <exclude>**/com/iqscaffold/billingservice/**/*.class</exclude>
 
                         <!-- Configuration classes -->
                         <exclude>**/*Config.class</exclude>
