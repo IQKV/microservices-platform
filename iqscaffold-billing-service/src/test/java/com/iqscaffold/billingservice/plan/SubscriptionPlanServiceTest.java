@@ -467,8 +467,6 @@ class SubscriptionPlanServiceTest {
       when(subscriptionPlanRepository.findById(2L)).thenReturn(Optional.of(targetPlan));
       when(validPlanTransitionSpecification.isSatisfiedBy(any(PlanTransition.class)))
           .thenReturn(false);
-      when(messageService.getMessage(anyString(), anyString(), anyString()))
-          .thenReturn("Invalid transition");
 
       // Act & Assert
       assertThatThrownBy(() -> subscriptionPlanService.validatePlanTransition(1L, 2L))
