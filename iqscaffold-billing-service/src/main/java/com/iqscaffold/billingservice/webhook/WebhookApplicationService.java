@@ -259,8 +259,6 @@ public class WebhookApplicationService {
       JsonNode paymentIntent = event.get("data").get("object");
 
       String providerPaymentId = paymentIntent.get("id").asText();
-      BigDecimal amount = new BigDecimal(paymentIntent.get("amount").asText()).divide(new BigDecimal("100"));
-      String currency = paymentIntent.get("currency").asText().toUpperCase();
 
       // Find payment by provider ID
       Optional<Payment> paymentOpt = paymentRepository.findByProviderPaymentId(providerPaymentId);

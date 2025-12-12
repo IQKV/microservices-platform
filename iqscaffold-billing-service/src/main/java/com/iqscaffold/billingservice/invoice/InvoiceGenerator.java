@@ -59,6 +59,7 @@ public class InvoiceGenerator {
       DateTimeFormatter.ofPattern("yyyyMM");
   private static final int DEFAULT_DUE_DAYS = 7;
   private static final BigDecimal DEFAULT_TAX_RATE = new BigDecimal("0.00"); // 0% default
+  private static final java.util.Random RANDOM = new java.util.Random();
 
   /**
    * Generates an invoice for a subscription billing period.
@@ -293,8 +294,7 @@ public class InvoiceGenerator {
 
     // TODO: Replace with actual sequence from database
     // This is a placeholder - in production, use a database sequence
-    var random = new java.util.Random();
-    var sequence = random.nextInt(99999);
+    var sequence = RANDOM.nextInt(99999);
 
     return String.format(INVOICE_NUMBER_FORMAT, yearMonth, sequence);
   }

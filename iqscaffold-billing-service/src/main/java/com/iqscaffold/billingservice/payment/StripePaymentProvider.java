@@ -104,7 +104,7 @@ public final class StripePaymentProvider implements PaymentProviderAdapter {
    *
    * @param properties the billing configuration properties
    */
-  @SuppressWarnings("java:S2696") // Stripe SDK requires setting static field
+  @SuppressWarnings({"java:S2696", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"})
   public StripePaymentProvider(final BillingProperties properties) {
     this.apiKey = properties.payment().stripe().apiKey();
     this.webhookSecret = properties.payment().stripe().webhookSecret();

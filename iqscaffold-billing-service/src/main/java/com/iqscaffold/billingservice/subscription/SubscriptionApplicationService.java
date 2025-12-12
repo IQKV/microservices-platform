@@ -708,12 +708,6 @@ public class SubscriptionApplicationService {
       );
 
       if (quotaExceededSpecification.isSatisfiedBy(usageContext)) {
-        var errorMessage = messageService.getMessage(
-            "subscription.downgrade.quota.exceeded",
-            metricType.name(),
-            String.valueOf(currentUsage),
-            String.valueOf(quotaLimit)
-        );
         log.error(
             "Cannot downgrade subscription {}: current usage {} exceeds new plan quota {} for metric {}",
             subscription.getId(),
@@ -777,7 +771,6 @@ public class SubscriptionApplicationService {
 
     // Validate trial eligibility using specification
     if (!trialEligibilitySpecification.isSatisfiedBy(trialHistory)) {
-      var errorMessage = messageService.getMessage("subscription.trial.not.eligible");
       log.error("Tenant {} is not eligible for trial", tenantId);
       throw new SubscriptionException.TrialNotEligibleException(
           "Tenant has already used their trial period"
@@ -887,7 +880,6 @@ public class SubscriptionApplicationService {
     // Validate subscription is active using specification
     var activeSpec = new ActiveSubscriptionSpecification();
     if (!activeSpec.isSatisfiedBy(subscription) && subscription.getStatus() != SubscriptionStatus.TRIAL) {
-      var errorMessage = messageService.getMessage("subscription.cancel.not.active");
       log.error(
           "Cannot cancel subscription {} in status: {}",
           subscriptionId,
@@ -938,10 +930,6 @@ public class SubscriptionApplicationService {
     // - canceledAt (timestamp)
     // - effectiveDate (now for immediate, period end for scheduled)
     // Event will be published using BillingConstants.BillingEvents constants
-
-    var successMessage = isImmediate
-        ? messageService.getMessage("subscription.canceled.immediate")
-        : messageService.getMessage("subscription.canceled.period.end", subscription.getCurrentPeriodEnd());
 
     log.info(
         "Successfully canceled subscription: {}, immediate: {}, status: {}",
@@ -995,7 +983,6 @@ public class SubscriptionApplicationService {
 
     // Validate subscription can be reactivated
     if (!subscription.getStatus().canReactivate()) {
-      var errorMessage = messageService.getMessage("subscription.reactivate.invalid.status");
       log.error(
           "Cannot reactivate subscription {} in status: {}",
           subscriptionId,
@@ -1012,7 +999,6 @@ public class SubscriptionApplicationService {
       if (subscription.getStatus() == SubscriptionStatus.CANCELED) {
         var now = LocalDateTime.now();
         if (subscription.getCurrentPeriodEnd() == null || subscription.getCurrentPeriodEnd().isBefore(now)) {
-          var errorMessage = messageService.getMessage("subscription.reactivate.period.ended");
           log.error(
               "Cannot reactivate subscription {} - period has ended: {}",
               subscriptionId,
@@ -1052,7 +1038,6 @@ public class SubscriptionApplicationService {
     // - reactivatedAt (timestamp)
     // Event will be published using BillingConstants.BillingEvents constants
 
-    var successMessage = messageService.getMessage("subscription.reactivated");
     log.info(
         "Successfully reactivated subscription: {}, status: {}",
         updatedSubscription.getId(),

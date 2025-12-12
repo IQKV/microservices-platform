@@ -343,11 +343,6 @@ public class SubscriptionPlanService {
 
     // Use specification for validation
     if (!validPlanTransitionSpecification.isSatisfiedBy(transition)) {
-      var errorMessage = messageService.getMessage(
-          "plan.invalid.transition",
-          fromPlan.getName(),
-          toPlan.getName()
-      );
       log.error("Invalid plan transition from {} to {}", fromPlan.getPlanCode(), toPlan.getPlanCode());
       throw new PlanException.InvalidPlanTransitionException(
           fromPlan.getPlanCode(),

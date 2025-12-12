@@ -407,8 +407,8 @@ public class UsageApplicationService {
 
     validateTenantId(tenantId);
 
-    // Find active subscription
-    var subscription = subscriptionRepository.findActiveByTenantId(tenantId)
+    // Find active subscription to validate tenant has an active subscription
+    subscriptionRepository.findActiveByTenantId(tenantId)
         .orElseThrow(() -> new SubscriptionNotFoundException(
             messageService.getMessage("subscription.not.found", tenantId)));
 

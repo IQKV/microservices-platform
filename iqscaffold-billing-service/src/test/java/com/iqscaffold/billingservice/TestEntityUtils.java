@@ -36,9 +36,8 @@ public class TestEntityUtils {
    * @param value     the value to set
    * @param <T>       the entity type
    * @throws RuntimeException if reflection fails
-   * @SuppressWarnings("REFLF_REFLECTION_MAY_INCREASE_ACCESSIBILITY_OF_FIELD")
    */
-  @SuppressWarnings("java:S3011") // Reflection is needed for testing
+  @SuppressWarnings({"java:S3011", "REFLF_REFLECTION_MAY_INCREASE_ACCESSIBILITY_OF_FIELD"})
   public static <T> void setField(T entity, String fieldName, Object value) {
     try {
       Field field = entity.getClass().getDeclaredField(fieldName);

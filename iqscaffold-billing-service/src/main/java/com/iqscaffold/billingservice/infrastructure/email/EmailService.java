@@ -136,13 +136,6 @@ public class EmailService {
    * Sends email via external Email Service API.
    */
   private void sendViaEmailService(String recipient, String subject, String htmlContent) {
-    var request = Map.of(
-        "to", recipient,
-        "subject", subject,
-        "html", htmlContent,
-        "from", "noreply@iqscaffold.com"
-    );
-
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -152,6 +145,12 @@ public class EmailService {
 
     // In production, uncomment this:
     // var emailServiceUrl = billingProperties.integration().emailService().url();
+    // var request = Map.of(
+    //     "to", recipient,
+    //     "subject", subject,
+    //     "html", htmlContent,
+    //     "from", "noreply@iqscaffold.com"
+    // );
     // var entity = new HttpEntity<>(request, headers);
     // restTemplate.postForEntity(emailServiceUrl + "/send", entity, Void.class);
   }
@@ -195,7 +194,7 @@ public class EmailService {
 
     try {
       var subject = "Your Data Export is Ready - " + exportId;
-      var htmlContent = String.format("""
+      var htmlContent = """
           <html>
           <body>
               <h2>Your Data Export is Ready</h2>
@@ -209,7 +208,7 @@ public class EmailService {
               <p>If you have any questions, please contact our support team.</p>
           </body>
           </html>
-          """.formatted(exportId, format, exportData));
+          """.formatted(exportId, format, exportData);
 
       sendViaEmailService(recipient, subject, htmlContent);
 
