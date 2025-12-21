@@ -75,13 +75,6 @@
                     <configuration>
                         <source>21</source>
                         <target>21</target>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>1.18.42</version>
-                            </path>
-                        </annotationProcessorPaths>
                         <compilerArgs>
                             <arg>--enable-preview</arg>
                         </compilerArgs>
@@ -149,10 +142,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
