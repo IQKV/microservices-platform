@@ -18,6 +18,19 @@ import java.util.Optional;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
+/**
+ * Stripe implementation of the {@link PaymentProviderAdapter}.
+ * <p>
+ * This class handles low-level interactions with the Stripe API, including:
+ * <ul>
+ *     <li>Creating Payment Intents with support for Automatic Payment Methods.</li>
+ *     <li>Managing Stripe Customers (upserting based on email to avoid duplicates).</li>
+ *     <li>Handling Stripe Connect flows (creating accounts, account links).</li>
+ *     <li>Processing Refunds.</li>
+ * </ul>
+ * <p>
+ * It uses {@link StripeCustomerRepository} to maintain a mapping between local payments and Stripe Customer IDs.
+ */
 @Service
 public class StripePaymentProvider implements PaymentProviderAdapter {
 
@@ -37,6 +50,23 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     Stripe.apiKey = billingProperties.payment().stripe().apiKey();
   }
 
+  /**
+   * Creates a Stripe PaymentIntent.
+   * <p>
+   * If {@code customerEmail} is provided, this method ensures a corresponding Stripe Customer exists
+   * (creating one or updating the existing one) and attaches it to the Intent. This enables
+   * "Save my card" functionality and better tracking in the Stripe Dashboard.
+   *
+   * @param amount             The amount in major units (e.g., Dollars). Converted to cents internally.
+   * @param currency           The 3-letter currency code (e.g., "usd").
+   * @param description        Description to appear on the statement/dashboard.
+   * @param customerEmail      Email of the payer (optional).
+   * @param customerName       Name of the payer (optional).
+   * @param metadata           Additional key-value pairs to attach to the Stripe object.
+   * @param applicationFeeAmount Fee to capture for the platform (if using Connect).
+   * @param connectedAccountId The target merchant account ID (if using Connect).
+   * @return The ID of the created PaymentIntent (e.g., "pi_123...").
+   */
   @Override
   public String createPaymentIntent(
       BigDecimal amount, 
@@ -87,6 +117,16 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     }
   }
 
+  /**
+   * Ensures a Stripe Customer exists for the given email and account.
+   * <p>
+   * <ul>
+   *     <li>Checks the local {@link StripeCustomerRepository} first.</li>
+   *     <li>If found, updates the name in Stripe if it changed.</li>
+   *     <li>If not found, creates a new Customer in Stripe and persists the mapping locally.</li>
+   * </ul>
+   * This logic mimics the `Hi.Events` reference implementation for customer consistency.
+   */
   private String upsertCustomer(String email, String name, Optional<String> connectedAccountId) throws StripeException {
       String accountId = connectedAccountId.orElse(null); // Null for platform
       // Note: Tenant ID is needed for local persistence. 
@@ -184,6 +224,12 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     }
   }
 
+  /**
+   * Converts a decimal amount (e.g., 10.50) to the minor unit integer required by Stripe (e.g., 1050 cents).
+   * <p>
+   * Note: Currently assumes 2 decimal places for all currencies.
+   * TODO: Enhance to use {@link java.util.Currency} for currency-specific scaling (e.g., JPY has 0 decimals).
+   */
   private Long toMinorUnits(BigDecimal amount, String currency) {
     // Simplified logic: assume 2 decimals for now.
     // In production, use Currency.getInstance(currency).getDefaultFractionDigits()

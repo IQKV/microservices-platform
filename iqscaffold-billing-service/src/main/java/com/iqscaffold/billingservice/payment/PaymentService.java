@@ -10,6 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+/**
+ * Core service for managing the lifecycle of Payments.
+ * <p>
+ * Responsibilities:
+ * <ul>
+ *     <li>Coordination of payment creation, state transitions, and auditing.</li>
+ *     <li>Validation of transitions via {@link PaymentStateMachine}.</li>
+ *     <li>Integration with {@link PaymentProviderAdapter} for external gateway interaction.</li>
+ *     <li>Resolution of multi-tenant merchant configurations.</li>
+ * </ul>
+ */
 @Service
 public class PaymentService {
 
@@ -33,6 +44,23 @@ public class PaymentService {
         this.auditService = auditService;
     }
 
+    /**
+     * Initiates a new payment flow by creating a local record and interfacing with the payment provider.
+     * <p>
+     * Steps:
+     * <ol>
+     *     <li>Validates the initial state transition (to PENDING).</li>
+     *     <li>Resolves the tenant's merchant configuration (if any) for Stripe Connect.</li>
+     *     <li>Calculates platform fees (application fees) if a connected account is involved.</li>
+     *     <li>Persists the initial {@link Payment} entity to generate a unique ID.</li>
+     *     <li>Logs the attempt to the audit trail.</li>
+     *     <li>Calls the payment provider (Stripe) to create a Payment Intent.</li>
+     *     <li>Updates the local record with the external provider's Intent ID.</li>
+     * </ol>
+     *
+     * @param request The payment creation request containing amount, currency, and customer details.
+     * @return A response DTO containing the payment status and ID.
+     */
     @Transactional
     public PaymentDtos.PaymentResponse createPaymentIntent(PaymentDtos.CreatePaymentRequest request) {
         String tenantId = SecurityContextHelper.getCurrentTenantId();
@@ -90,6 +118,18 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
+    /**
+     * Updates the status of a payment based on external webhook events.
+     * <p>
+     * This method is critical for maintaining consistency between the gateway and local state.
+     * It enforces state transitions via the {@link PaymentStateMachine} to prevent invalid updates
+     * (e.g., preventing a 'COMPLETED' payment from moving back to 'PENDING').
+     *
+     * @param paymentIntentId The external ID derived from the webhook event (e.g., Stripe PaymentIntent ID).
+     * @param newStatus       The new status reported by the gateway.
+     * @throws com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException     If no matching payment exists.
+     * @throws com.iqscaffold.billingservice.shared.exception.InvalidPaymentStateException If the transition is illegal.
+     */
     @Transactional
     public void updateStatus(String paymentIntentId, String newStatus) {
         Payment payment = paymentRepository.findByPaymentIntentId(paymentIntentId)

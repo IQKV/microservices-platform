@@ -11,6 +11,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+/**
+ * Handles incoming webhooks from Stripe to synchronize local state with gateway state.
+ * <p>
+ * Key Security Features:
+ * <ul>
+ *     <li>Validates the {@code Stripe-Signature} header using the configured webhook secret.</li>
+ *     <li>Throws specific exceptions for invalid signatures to return 400 Bad Request to Stripe.</li>
+ * </ul>
+ * <p>
+ * Supported Events:
+ * <ul>
+ *     <li>{@code payment_intent.succeeded}, {@code payment_intent.payment_failed}: Updates payment status.</li>
+ *     <li>{@code charge.refunded}: Syncs refund status (placeholder logic).</li>
+ *     <li>{@code payout.paid}: Records Payout entities via {@link com.iqscaffold.billingservice.payout.PayoutService}.</li>
+ *     <li>{@code account.updated}: Updates local {@link com.iqscaffold.billingservice.admin.MerchantStripeConfig} capabilities.</li>
+ * </ul>
+ */
 @Service
 public class StripeWebhookService {
   private static final Logger logger = LoggerFactory.getLogger(StripeWebhookService.class);
@@ -32,6 +49,19 @@ public class StripeWebhookService {
     this.billingProperties = billingProperties;
   }
 
+  /**
+   * Main entry point for processing webhook payloads.
+   * <p>
+   * 1. Constructs the Stripe {@link Event} object, verifying the cryptographic signature.
+   * 2. Dispatches the event to the appropriate handler based on {@code event.getType()}.
+   * <p>
+   * Note: This method is designed to be idempotent-safe. Repeated calls for the same event
+   * should generally result in the same outcome (e.g., updating status to 'SUCCEEDED' is safe to do twice).
+   *
+   * @param payload   The raw JSON payload from the request body.
+   * @param sigHeader The {@code Stripe-Signature} header value.
+   * @throws IllegalArgumentException If signature verification fails.
+   */
   public void processWebhook(String payload, String sigHeader) {
     Event event;
     try {

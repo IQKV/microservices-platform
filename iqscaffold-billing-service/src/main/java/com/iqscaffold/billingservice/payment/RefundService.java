@@ -15,6 +15,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Manages the refund process for payments.
+ * <p>
+ * This service ensures that strictly business-valid refunds are processed:
+ * <ul>
+ *     <li>Only 'SUCCEEDED' payments can be refunded.</li>
+ *     <li>Interacts with Stripe to process the actual money movement.</li>
+ *     <li>Updates local payment state to 'REFUNDED'.</li>
+ *     <li>Triggers customer notification emails.</li>
+ * </ul>
+ */
 @Service
 public class RefundService {
   private static final Logger logger = LoggerFactory.getLogger(RefundService.class);
@@ -36,6 +47,25 @@ public class RefundService {
     this.emailService = emailService;
   }
 
+  /**
+   * Processes a full refund for a specific payment.
+   * <p>
+   * Validation:
+   * <ul>
+   *     <li>Checks if payment exists for the current tenant.</li>
+   *     <li>Ensures payment is in {@link BillingConstants.PaymentStatus#SUCCEEDED} state.</li>
+   * </ul>
+   * <p>
+   * Execution Flow:
+   * 1. Retrieve Payment.
+   * 2. Call Stripe API to refund the associated PaymentIntent.
+   * 3. Update local status to {@code REFUNDED}.
+   * 4. Audit the transaction.
+   * 5. Send confirmation email to the user.
+   *
+   * @param paymentId The internal UUID of the payment to refund.
+   * @throws InvalidPaymentStateException If the payment is not in a refundable state.
+   */
   @Transactional
   public void processRefund(UUID paymentId) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
