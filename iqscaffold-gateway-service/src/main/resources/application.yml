@@ -6,8 +6,24 @@ spring:
     name: iqscaffold-gateway-service
   profiles:
     active: local
+  data:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: false
       routes:
         - id: user-service-auth
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
@@ -79,7 +95,7 @@ iqscaffold:
         strip-count: 0  # Number of path segments to strip (0 = no stripping, 1 = strip first segment)
       services:
         user-service:
-          uri: http://localhost:8080
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI:http://localhost:8080}
           path: /v1/**
           enabled: true
           connect-timeout: 5000
@@ -89,6 +105,28 @@ iqscaffold:
             display-name: "User Service APIs"
             description: "Authentication and user management APIs"
             context-path: "user-service"
+        business-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BUSINESS_SERVICE_URI:http://localhost:8081}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Business Service APIs"
+            description: "Business domain logic and processes"
+            context-path: "business-service"
+        billing-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI:http://localhost:8082}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Billing Service APIs"
+            description: "Payments, subscriptions and invoicing"
+            context-path: "billing-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -105,7 +143,7 @@ iqscaffold:
         jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
       authentication:
         enabled: true
-        user-service-url: http://localhost:8080
+        user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:
@@ -140,6 +178,9 @@ iqscaffold:
         - /user-service/api-docs/**
         - /business-service/swagger-ui/**
         - /business-service/api-docs/**
+        - /billing-service/swagger-ui/**
+        - /billing-service/api-docs/**
+        - /actuator/prometheus
         
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)
@@ -181,6 +222,18 @@ iqscaffold:
             requests-per-minute: 5
             burst-capacity: 10
             enable-tenant-quotas: true
+          "/api/v1/users/me":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/users/me/password":
+            requests-per-minute: 5
+            burst-capacity: 10
+            enable-tenant-quotas: true
+          "/api/v1/users/me/preferences":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
           "/api/v1/admin/users/**":
             requests-per-minute: 100
             burst-capacity: 150
@@ -196,18 +249,6 @@ iqscaffold:
           "/api/v1/admin/tenants/**":
             requests-per-minute: 50
             burst-capacity: 75
-            enable-tenant-quotas: true
-          "/api/v1/users/me":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/users/me/password":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/users/me/preferences":
-            requests-per-minute: 100
-            burst-capacity: 150
             enable-tenant-quotas: true
       tenant-quotas:
         enabled: true
@@ -267,7 +308,7 @@ iqscaffold:
       enabled: true
       service-name: ${spring.application.name}
       sampling-rate: 1.0
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
       timeout: PT10S
       export-timeout: PT30S
       batch-size: 512
@@ -278,7 +319,8 @@ iqscaffold:
       include-host-tag: true
       include-application-tag: true
       include-environment-tag: true
-      custom-tags: { }
+      custom-tags:
+        service: gateway-service
       enabled-metrics:
         - gateway.requests
         - gateway.response.time
@@ -307,6 +349,7 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
     urls-primary-name: Gateway APIs
+    try-it-out-enabled: true
 
 management:
   endpoints:
@@ -316,6 +359,8 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+    prometheus:
+      access: read_only
   metrics:
     distribution:
       percentiles-histogram:

@@ -5,21 +5,6 @@ server:
   port: 8080
 
 spring:
-  # Redis Configuration - Production Redis
-  data:
-    redis:
-      host: ${IQSCAFFOLD_CACHE_REDIS_HOST}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 32
-          max-idle: 16
-          min-idle: 4
-          max-wait: -1ms
-
   # Cloud Gateway Configuration - Production
   # Note: Routes are defined in main application.yml
   # Environment-specific overrides only
@@ -90,79 +75,14 @@ iqscaffold:
       public-paths:
         # JWK endpoint for public key distribution
         - /.well-known/jwks.json
-        
-        # Authentication endpoints (public)
-        - /api/v1/auth/login
-        - /api/v1/auth/signup
-        - /api/v1/auth/refresh
-        - /api/v1/auth/validate
-        - /api/v1/auth/health
-        
-        # Email verification endpoints (public)
-        - /api/v1/auth/email/verify
-        - /api/v1/auth/email/resend
-        - /api/v1/auth/email/status
-        
-        # Password reset endpoints (public)
-        - /api/v1/auth/password/forgot
-        - /api/v1/auth/password/reset
-        
-        # Actuator endpoints (public health checks)
-        - /actuator/health
     
     rate-limiting:
       enabled: true
       redis:
         key-prefix: "iqscaffold:gateway:rate-limit:production"
         key-expiry: PT1M
-      policies:
-        default-requests-per-minute: 60
-        default-burst-capacity: 100
-        endpoints:
-          "/api/v1/auth/login":
-            requests-per-minute: 10
-            burst-capacity: 20
-            enable-tenant-quotas: true
-          "/api/v1/auth/signup":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/auth/email/resend":
-            requests-per-minute: 3
-            burst-capacity: 5
-            enable-tenant-quotas: true
-          "/api/v1/auth/email/verify":
-            requests-per-minute: 10
-            burst-capacity: 15
-            enable-tenant-quotas: true
-          "/api/v1/auth/password/forgot":
-            requests-per-minute: 3
-            burst-capacity: 5
-            enable-tenant-quotas: true
-          "/api/v1/auth/password/reset":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/users/me":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/users/me/password":
-            requests-per-minute: 5
-            burst-capacity: 10
-            enable-tenant-quotas: true
-          "/api/v1/admin/users/**":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/admin/organizations/**":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
-          "/api/v1/admin/tenants/**":
-            requests-per-minute: 50
-            burst-capacity: 75
-            enable-tenant-quotas: true
+      # Note: Policies are defined in main application.yml
+      # Overrides can be added here if needed
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000
@@ -215,44 +135,19 @@ iqscaffold:
           - X-Internal-Service
           - X-Database-Query-Time
 
-  # Observability Configuration - Production
   observability:
     tracing:
-      enabled: true
-      service-name: ${spring.application.name}
       sampling-rate: 0.01  # Minimal sampling for production
       endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT}
-      timeout: PT10S
-      export-timeout: PT30S
       batch-size: 1024
     metrics:
-      enabled: true
-      path: /actuator/prometheus
-      prefix: iqscaffold_gateway
-      include-host-tag: true
-      include-application-tag: true
-      include-environment-tag: true
       custom-tags:
         environment: production
-        service: gateway-service
-      enabled-metrics:
-        - gateway.requests
-        - gateway.response.time
-        - gateway.circuit.breaker
-        - gateway.rate.limit
     logging:
       level: WARN
       format: json  # JSON format for production
       enable-request-logging: false  # Disabled for performance
-      enable-response-logging: false
-      enable-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
       include-user-id: false  # Disabled for privacy in production
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
 
 # Logging Configuration - Production
 logging:
@@ -275,28 +170,13 @@ management:
   endpoint:
     health:
       show-details: never
-    prometheus:
-      enabled: true
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5,0.95,0.99
   tracing:
     sampling:
       probability: 0.01  # Minimal sampling for production
-  prometheus:
-    metrics:
-      export:
-        enabled: true
 
 # SpringDoc Configuration - Production
 springdoc:
   api-docs:
     enabled: false  # Disabled in production
-    path: /api-docs
   swagger-ui:
     enabled: false  # Disabled in production
-    path: /swagger-ui.html
-    urls-primary-name: Gateway APIs
