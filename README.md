@@ -8,6 +8,7 @@ A microservices ecosystem that provides:
 
 - **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
 - **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
+- **Billing & Payments** - Multi-tenant payment orchestration with Stripe Connect, automated onboarding, and lifecycle management
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
@@ -57,6 +58,28 @@ Reactive API gateway providing unified entry point for all services.
 - Request/response transformation with GlobalFilter chain
 - API versioning (path and header-based)
 - Type-safe configuration with Java records (IqScaffoldProperties)
+
+### 💰 [Billing Service](iqscaffold-billing-service/README.md)
+
+Multi-tenant payment orchestration and merchant management service.
+
+**Core Capabilities:**
+
+- End-to-end payment orchestration with Stripe Payment Intents
+- Automated merchant onboarding using Stripe Connect (Standard/Express)
+- Schema-per-tenant financial data isolation
+- Idempotent webhook synchronization for external payment events
+- Platform fee management and automated revenue sharing
+- Asynchronous business notifications for financial events
+
+**Key Patterns:**
+
+- State machine-driven payment lifecycle management
+- Cryptographic signature verification for webhooks
+- Multi-tenant connection routing for transactional integrity
+- Comprehensive financial audit logging for all state transitions
+- Secure user context propagation for transaction attribution
+- Asynchronous email delivery with Thymeleaf templates
 
 ## Architecture Overview
 
