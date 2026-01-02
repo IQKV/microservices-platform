@@ -26,18 +26,19 @@ spring:
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
+        multiTenancy: SCHEMA
         jdbc:
           batch_size: 20
         order_inserts: true
         order_updates: true
 
   # Liquibase Configuration
-  # Using Shared Database (Discriminator Column) strategy
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: false
 
   security:
     oauth2:
