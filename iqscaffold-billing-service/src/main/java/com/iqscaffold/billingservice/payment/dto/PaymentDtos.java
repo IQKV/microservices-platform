@@ -12,7 +12,11 @@ public class PaymentDtos {
 
     public record CreatePaymentRequest(
         @NotNull @DecimalMin("0.01") BigDecimal amount,
-        @NotBlank String currency
+        @NotBlank String currency,
+        @NotBlank String description, // Order ID or similar
+        String customerEmail, // For creating Stripe Customer
+        String customerName,
+        java.util.Map<String, String> metadata
     ) {}
 
     public record PaymentResponse(

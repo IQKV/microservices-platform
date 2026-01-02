@@ -66,6 +66,10 @@ public class PaymentService {
         String intentId = paymentProvider.createPaymentIntent(
             request.amount(), 
             request.currency(), 
+            request.description(),
+            request.customerEmail(),
+            request.customerName(),
+            request.metadata(),
             applicationFee, 
             connectedAccountId
         );

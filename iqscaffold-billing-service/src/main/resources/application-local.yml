@@ -39,6 +39,7 @@ iqscaffold:
         url: http://localhost:8084
     payment:
       provider: stripe
+      saas-mode: true
       stripe:
         api-key: ${STRIPE_API_KEY:sk_test_dummy}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_dummy}

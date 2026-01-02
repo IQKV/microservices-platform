@@ -1,3 +1,89 @@
 {
-
+    "groups": [
+        {
+            "name": "iqscaffold.billing",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.security",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Security",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.security.jwt",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Security$Jwt",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.integration",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Integration",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Integration$EmailService",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.payment",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Payment",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe",
+            "type": "com.iqscaffold.billingservice.config.BillingProperties$Payment$Stripe",
+            "sourceType": "com.iqscaffold.billingservice.config.BillingProperties"
+        }
+    ],
+    "properties": [
+        {
+            "name": "iqscaffold.billing.security.jwt.jwk-set-uri",
+            "type": "java.lang.String",
+            "description": "URI to the JWK Set for token validation."
+        },
+        {
+            "name": "iqscaffold.billing.security.jwt.issuer-uri",
+            "type": "java.lang.String",
+            "description": "Issuer URI for JWT tokens (optional validation)."
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service.url",
+            "type": "java.lang.String",
+            "description": "Base URL of the Email Service."
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service.timeout-ms",
+            "type": "java.lang.Integer",
+            "description": "Timeout in milliseconds for Email Service calls.",
+            "defaultValue": 5000
+        },
+        {
+            "name": "iqscaffold.billing.payment.provider",
+            "type": "java.lang.String",
+            "description": "Payment provider to use (e.g., stripe).",
+            "defaultValue": "stripe"
+        },
+        {
+            "name": "iqscaffold.billing.payment.saas-mode",
+            "type": "java.lang.Boolean",
+            "description": "Enable SaaS mode (Platform acts as Merchant of Record if false, or handles Connect if true? Actually defines if multi-tenancy/Connect is active vs simple mode).",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.api-key",
+            "type": "java.lang.String",
+            "description": "Stripe Secret API Key."
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.webhook-secret",
+            "type": "java.lang.String",
+            "description": "Stripe Webhook Signing Secret."
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.client-id",
+            "type": "java.lang.String",
+            "description": "Stripe Client ID for Connect OAuth flow."
+        }
+    ]
 }

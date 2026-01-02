@@ -37,7 +37,7 @@ spring:
   # Using Shared Database (Discriminator Column) strategy
   liquibase:
     enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
   cache:
     type: redis
@@ -125,6 +125,7 @@ iqscaffold:
         timeout-ms: 10000
     payment:
       provider: stripe
+      saas-mode: ${BILLING_SAAS_MODE:true}
       stripe:
         api-key: ${STRIPE_API_KEY:}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET:}

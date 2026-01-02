@@ -38,6 +38,7 @@ public record BillingProperties(
 
   public record Payment(
       @NotBlank @Pattern(regexp = "stripe|manual") String provider,
+      boolean saasMode,
       @Valid @NotNull Stripe stripe
   ) {
     public record Stripe(

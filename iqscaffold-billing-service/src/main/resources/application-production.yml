@@ -41,6 +41,7 @@ iqscaffold:
         url: ${EMAIL_SERVICE_URL}
     payment:
       provider: ${PAYMENT_PROVIDER:stripe}
+      saas-mode: ${BILLING_SAAS_MODE:true}
       stripe:
         api-key: ${STRIPE_API_KEY}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET}

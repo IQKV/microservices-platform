@@ -1,4 +1,4 @@
-package com.iqscaffold.billingservice.admin;
+package com.iqscaffold.billingservice.payment;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,26 +13,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "merchant_stripe_config")
+@Table(name = "stripe_customer")
 @Getter
 @Setter
 @NoArgsConstructor
-public class MerchantStripeConfig {
+public class StripeCustomer {
+
   @Id
   private UUID id;
 
   @Column(name = "tenant_id", nullable = false)
-  // In a real multi-tenant app, might be unique
   private String tenantId;
 
-  @Column(name = "stripe_account_id")
-  private String stripeAccountId;
-  
-  @Column(name = "charges_enabled")
-  private boolean chargesEnabled;
+  @Column(name = "email", nullable = false)
+  private String email;
 
-  @Column(name = "payouts_enabled")
-  private boolean payoutsEnabled;
+  @Column(name = "name")
+  private String name;
+
+  @Column(name = "stripe_customer_id", nullable = false)
+  private String stripeCustomerId;
+
+  @Column(name = "stripe_account_id")
+  private String stripeAccountId; // If customer belongs to a connected account? PHP implies this uniqueness.
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;

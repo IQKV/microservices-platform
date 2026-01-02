@@ -51,6 +51,7 @@ public class RefundService {
       paymentProvider.refundPayment(
           payment.getPaymentIntentId(), 
           Optional.empty(), // Full refund
+          payment.getCurrency(),
           Optional.ofNullable(payment.getMerchantAccountId())
       );
 

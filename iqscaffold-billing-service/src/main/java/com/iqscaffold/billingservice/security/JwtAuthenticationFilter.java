@@ -24,6 +24,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
+    String correlationId = request.getHeader("X-Correlation-ID");
+    if (correlationId != null) {
+      org.slf4j.MDC.put("correlationId", correlationId);
+    }
+
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication instanceof JwtAuthenticationToken jwtAuthToken) {
@@ -40,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } finally {
       TenantContext.clear();
+      org.slf4j.MDC.clear();
     }
   }
 
@@ -47,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     Long userId = extractLong(jwt.getClaim(JwtClaimNames.SUBJECT));
     String username = jwt.getClaim(JwtClaimNames.USERNAME);
     String email = jwt.getClaim(JwtClaimNames.EMAIL);
-    Set<String> authorities = extractAuthorities(jwt.getClaim(JwtClaimNames.ROLES));
+    Set<String> authorities = extractAuthorities(jwt.getClaim(JwtClaimNames.AUTHORITIES));
     String tenantId = jwt.getClaim(JwtClaimNames.TENANT_ID);
     String firstName = jwt.getClaim(JwtClaimNames.FIRST_NAME);
     String lastName = jwt.getClaim(JwtClaimNames.LAST_NAME);

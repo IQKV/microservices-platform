@@ -22,9 +22,14 @@ import org.springframework.stereotype.Service;
 public class StripePaymentProvider implements PaymentProviderAdapter {
 
   private final BillingProperties billingProperties;
+  private final StripeCustomerRepository stripeCustomerRepository;
+  private final com.iqscaffold.billingservice.security.SecurityContextHelper securityHelper; // To get tenant if needed, though we can pass it down.
 
-  public StripePaymentProvider(BillingProperties billingProperties) {
+  public StripePaymentProvider(BillingProperties billingProperties, StripeCustomerRepository stripeCustomerRepository) {
     this.billingProperties = billingProperties;
+    this.stripeCustomerRepository = stripeCustomerRepository;
+    this.securityHelper = null; // We'll just rely on passed args or context if we inject it properly.
+    // Actually, let's keep it simple and just use the repo.
   }
 
   @PostConstruct
@@ -33,14 +38,38 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   }
 
   @Override
-  public String createPaymentIntent(BigDecimal amount, String currency, BigDecimal applicationFeeAmount, Optional<String> connectedAccountId) {
+  public String createPaymentIntent(
+      BigDecimal amount, 
+      String currency, 
+      String description,
+      String customerEmail,
+      String customerName,
+      java.util.Map<String, String> metadata,
+      BigDecimal applicationFeeAmount, 
+      Optional<String> connectedAccountId
+  ) {
     try {
+      // 1. Upsert Customer if email provided
+      String customerId = null;
+      if (customerEmail != null) {
+          customerId = upsertCustomer(customerEmail, customerName, connectedAccountId);
+      }
+
       PaymentIntentCreateParams.Builder paramsBuilder = PaymentIntentCreateParams.builder()
           .setAmount(toMinorUnits(amount, currency))
           .setCurrency(currency)
+          .setDescription(description)
           .setAutomaticPaymentMethods(
               PaymentIntentCreateParams.AutomaticPaymentMethods.builder().setEnabled(true).build()
           );
+
+      if (customerId != null) {
+          paramsBuilder.setCustomer(customerId);
+      }
+      
+      if (metadata != null) {
+          paramsBuilder.putAllMetadata(metadata);
+      }
 
       if (applicationFeeAmount != null && applicationFeeAmount.compareTo(BigDecimal.ZERO) > 0) {
         paramsBuilder.setApplicationFeeAmount(toMinorUnits(applicationFeeAmount, currency));
@@ -58,13 +87,60 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     }
   }
 
+  private String upsertCustomer(String email, String name, Optional<String> connectedAccountId) throws StripeException {
+      String accountId = connectedAccountId.orElse(null); // Null for platform
+      // Note: Tenant ID is needed for local persistence. 
+      // In a real app we'd pass it or fetch from context.
+      // Assuming context is available via SecurityContextHelper static call.
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+
+      var existing = stripeCustomerRepository.findByEmailAndStripeAccountId(email, accountId);
+      
+      RequestOptions options = accountId != null 
+          ? RequestOptions.builder().setStripeAccount(accountId).build() 
+          : null;
+
+      if (existing.isPresent()) {
+          StripeCustomer localParams = existing.get();
+          // Update name if changed
+          if (name != null && !name.equals(localParams.getName())) {
+              com.stripe.model.Customer.update(
+                  localParams.getStripeCustomerId(), 
+                  com.stripe.param.CustomerUpdateParams.builder().setName(name).build(),
+                  options
+              );
+              localParams.setName(name);
+              stripeCustomerRepository.save(localParams);
+          }
+          return localParams.getStripeCustomerId();
+      } else {
+          // Create new
+          var params = com.stripe.param.CustomerCreateParams.builder()
+              .setEmail(email)
+              .setName(name)
+              .build();
+          
+          var stripeCustomer = com.stripe.model.Customer.create(params, options);
+          
+          StripeCustomer newRecord = new StripeCustomer();
+          newRecord.setTenantId(tenantId);
+          newRecord.setEmail(email);
+          newRecord.setName(name);
+          newRecord.setStripeCustomerId(stripeCustomer.getId());
+          newRecord.setStripeAccountId(accountId);
+          stripeCustomerRepository.save(newRecord);
+          
+          return stripeCustomer.getId();
+      }
+  }
+
   @Override
-  public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, Optional<String> connectedAccountId) {
+  public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency, Optional<String> connectedAccountId) {
     try {
       RefundCreateParams.Builder paramsBuilder = RefundCreateParams.builder()
           .setPaymentIntent(paymentIntentId);
 
-      amount.ifPresent(a -> paramsBuilder.setAmount(toMinorUnits(a, "USD"))); // TODO: Currency needed for refund? usually inferred from PI
+      amount.ifPresent(a -> paramsBuilder.setAmount(toMinorUnits(a, currency)));
 
       RequestOptions options = connectedAccountId
           .map(id -> RequestOptions.builder().setStripeAccount(id).build())

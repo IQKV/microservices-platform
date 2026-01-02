@@ -6,21 +6,35 @@ import java.util.Optional;
 public interface PaymentProviderAdapter {
   /**
    * Create a Payment Intent.
-   * @param amount amount in major units (e.g., 10.50)
-   * @param currency currency code (e.g., USD)
-   * @param applicationFeeAmount platform fee in major units
-   * @param connectedAccountId Stripe Connect Account ID (optional)
+   * @param amount amount in major units
+   * @param currency currency code
+   * @param description description of payment
+   * @param customerEmail email of the customer (for lookup/creation)
+   * @param customerName name of the customer
+   * @param metadata arbitrary metadata
+   * @param applicationFeeAmount platform fee
+   * @param connectedAccountId Stripe Connect Account ID
    * @return the provider's payment intent ID
    */
-  String createPaymentIntent(BigDecimal amount, String currency, BigDecimal applicationFeeAmount, Optional<String> connectedAccountId);
+  String createPaymentIntent(
+      BigDecimal amount, 
+      String currency, 
+      String description,
+      String customerEmail,
+      String customerName,
+      java.util.Map<String, String> metadata,
+      BigDecimal applicationFeeAmount, 
+      Optional<String> connectedAccountId
+  );
 
   /**
    * Refund a payment.
-   * @param paymentIntentId the provider's payment intent ID
-   * @param amount amount to refund (optional, full refund if empty)
+   * @param paymentIntentId the ID of the payment intent
+   * @param amount optional amount to refund (if empty, full refund)
+   * @param currency currency code (required if amount is present)
    * @param connectedAccountId Stripe Connect Account ID (optional)
    */
-  void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, Optional<String> connectedAccountId);
+  void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency, Optional<String> connectedAccountId);
 
   /**
    * Create a Stripe Connect Account.

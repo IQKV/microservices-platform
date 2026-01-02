@@ -17,15 +17,18 @@ public class StripeWebhookService {
   
   private final PaymentService paymentService;
   private final com.iqscaffold.billingservice.payout.PayoutService payoutService;
+  private final com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository;
   private final BillingProperties billingProperties;
 
   public StripeWebhookService(
       PaymentService paymentService, 
       com.iqscaffold.billingservice.payout.PayoutService payoutService,
+      com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository,
       BillingProperties billingProperties
   ) {
     this.paymentService = paymentService;
     this.payoutService = payoutService;
+    this.merchantConfigRepository = merchantConfigRepository;
     this.billingProperties = billingProperties;
   }
 
@@ -49,6 +52,7 @@ public class StripeWebhookService {
       case "payment_intent.payment_failed" -> handlePaymentFailure(event);
       case "charge.refunded" -> handleRefund(event);
       case "payout.paid" -> handlePayout(event);
+      case "account.updated" -> handleAccountUpdated(event);
       default -> logger.debug("Unhandled event type: {}", event.getType());
     }
   }
@@ -76,10 +80,21 @@ public class StripeWebhookService {
       // For simplicity in this demo, skipping complex reverse lookups.
   }
 
-  private void handlePayout(Event event) {
-      com.stripe.model.Payout stripePayout = (com.stripe.model.Payout) event.getDataObjectDeserializer().getObject().orElse(null);
-      if (stripePayout != null) {
-          payoutService.processPayout(stripePayout);
-      }
+  private void handleAccountUpdated(Event event) {
+     com.stripe.model.Account account = (com.stripe.model.Account) event.getDataObjectDeserializer().getObject().orElse(null);
+     if (account != null) {
+         String accountId = account.getId();
+         // Find config by stripe account id
+         var config = merchantConfigRepository.findByStripeAccountId(accountId); // Need to add this method to repo
+         if (config.isPresent()) {
+             var merchant = config.get();
+             merchant.setChargesEnabled(Boolean.TRUE.equals(account.getChargesEnabled()));
+             merchant.setPayoutsEnabled(Boolean.TRUE.equals(account.getPayoutsEnabled()));
+             merchantConfigRepository.save(merchant);
+             logger.info("Updated merchant capabilities for account: {}", accountId);
+         } else {
+             logger.warn("Received account update for unknown account: {}", accountId);
+         }
+     }
   }
 }

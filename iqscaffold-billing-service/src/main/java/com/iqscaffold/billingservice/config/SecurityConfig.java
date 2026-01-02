@@ -34,7 +34,10 @@ public class SecurityConfig {
             .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
             .anyRequest().authenticated()
         )
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
+            .decoder(jwtDecoder())
+            .jwtAuthenticationConverter(jwtAuthenticationConverter())
+        ))
         .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
@@ -42,5 +45,16 @@ public class SecurityConfig {
   @Bean
   public JwtDecoder jwtDecoder() {
     return NimbusJwtDecoder.withJwkSetUri(billingProperties.security().jwt().jwkSetUri()).build();
+  }
+
+  @Bean
+  public org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter jwtAuthenticationConverter() {
+    var grantedAuthoritiesConverter = new org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter();
+    grantedAuthoritiesConverter.setAuthoritiesClaimName(JwtClaimNames.AUTHORITIES);
+    grantedAuthoritiesConverter.setAuthorityPrefix(""); // usage: authorities are strict
+
+    var jwtAuthenticationConverter = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter();
+    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+    return jwtAuthenticationConverter;
   }
 }
