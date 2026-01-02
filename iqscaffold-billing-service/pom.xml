@@ -201,6 +201,7 @@
                     <excludes>
                         <!-- Application entry point -->
                         <exclude>**/*Application.class</exclude>
+                        <exclude>**/billingservice/*/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
