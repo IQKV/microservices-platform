@@ -63,13 +63,14 @@ public class PaymentService {
      */
     @Transactional
     public PaymentDtos.PaymentResponse createPaymentIntent(PaymentDtos.CreatePaymentRequest request) {
-        String tenantId = SecurityContextHelper.getCurrentTenantId();
-
+        // String tenantId = SecurityContextHelper.getCurrentTenantId(); // Not needed for entity field
+        
         // 1. Initial State Validation
         stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
 
         // 2. Resolve Merchant Account (if any)
-        Optional<String> connectedAccountId = merchantConfigRepository.findByTenantId(tenantId)
+        // In schema-per-tenant, we fetch the config for the current schema
+        Optional<String> connectedAccountId = merchantConfigRepository.findTopByOrderByIdAsc()
             .map(config -> config.getStripeAccountId());
 
         // Platform fee logic (simplified for now: 10% if connected account exists)
@@ -81,7 +82,7 @@ public class PaymentService {
         Payment payment = new Payment();
         payment.setAmount(request.amount());
         payment.setCurrency(request.currency());
-        payment.setTenantId(tenantId);
+        // payment.setTenantId(tenantId); // Schema isolation handles this
         payment.setStatus(BillingConstants.PaymentStatus.PENDING);
         payment.setApplicationFeeAmount(applicationFee);
         connectedAccountId.ifPresent(payment::setMerchantAccountId);
@@ -111,17 +112,16 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public PaymentDtos.PaymentResponse getPayment(java.util.UUID id) {
-        String tenantId = SecurityContextHelper.getCurrentTenantId();
+        // No need to filter by tenantId, schema is already isolated
         Payment payment = paymentRepository.findById(id)
-            .filter(p -> p.getTenantId().equals(tenantId))
             .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException("Payment not found"));
         return mapToResponse(payment);
     }
 
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<PaymentDtos.PaymentResponse> getPayments(org.springframework.data.domain.Pageable pageable) {
-        String tenantId = SecurityContextHelper.getCurrentTenantId();
-        return paymentRepository.findAllByTenantId(tenantId, pageable)
+        // Simply findAll, scoped to current schema
+        return paymentRepository.findAll(pageable)
             .map(this::mapToResponse);
     }
 
@@ -142,7 +142,12 @@ public class PaymentService {
         Payment payment = paymentRepository.findByPaymentIntentId(paymentIntentId)
             .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException("Payment not found for intent: " + paymentIntentId));
         
-        try (var ignored = org.slf4j.MDC.putCloseable(BillingConstants.MDC.TENANT_ID, payment.getTenantId())) {
+        // Context setup logic might be complex for webhooks if we don't know the tenant from the payload
+        // But assuming the WebhookService or Filter sets up the context (via header or meta lookup)
+        // Actually, for schema-per-tenant, we MUST know the tenant to even FIND the payment
+        // So this method assumes the correct context is ALREADY active.
+        
+        try (var ignored = org.slf4j.MDC.putCloseable("paymentId", payment.getId().toString())) {
              stateMachine.validateTransition(payment.getStatus(), newStatus);
              payment.setStatus(newStatus);
              paymentRepository.save(payment);

@@ -132,7 +132,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       // Note: Tenant ID is needed for local persistence. 
       // In a real app we'd pass it or fetch from context.
       // Assuming context is available via SecurityContextHelper static call.
-      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      // Note: Tenant ID is implicitly handled by the schema context
 
       var existing = stripeCustomerRepository.findByEmailAndStripeAccountId(email, accountId);
       
@@ -163,7 +163,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
           var stripeCustomer = com.stripe.model.Customer.create(params, options);
           
           StripeCustomer newRecord = new StripeCustomer();
-          newRecord.setTenantId(tenantId);
+          // newRecord.setTenantId(tenantId); // Schema isolation
           newRecord.setEmail(email);
           newRecord.setName(name);
           newRecord.setStripeCustomerId(stripeCustomer.getId());

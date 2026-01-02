@@ -21,9 +21,6 @@ public class MerchantStripeConfig {
   @Id
   private UUID id;
 
-  @Column(name = "tenant_id", nullable = false)
-  // In a real multi-tenant app, might be unique
-  private String tenantId;
 
   @Column(name = "stripe_account_id")
   private String stripeAccountId;

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MerchantStripeConfigRepository extends JpaRepository<MerchantStripeConfig, UUID> {
-    Optional<MerchantStripeConfig> findByTenantId(String tenantId);
+    Optional<MerchantStripeConfig> findTopByOrderByIdAsc();
     Optional<MerchantStripeConfig> findByStripeAccountId(String stripeAccountId);
 }

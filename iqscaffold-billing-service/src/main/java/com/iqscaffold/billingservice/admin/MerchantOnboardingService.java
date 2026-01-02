@@ -27,19 +27,34 @@ public class MerchantOnboardingService {
 
   @Transactional
   public String initiateOnboarding(String refreshUrl, String returnUrl) {
-    String tenantId = SecurityContextHelper.getCurrentTenantId();
+    // String tenantId = SecurityContextHelper.getCurrentTenantId();
     UserContext user = SecurityContextHelper.getCurrentUserContextOrThrow();
 
-    MerchantStripeConfig config = repository.findByTenantId(tenantId)
-        .orElseGet(() -> createNewConfig(tenantId));
+    // Check if config exists
+    Optional<MerchantStripeConfig> existingConfig = repository.findTopByOrderByIdAsc();
 
-    if (config.getStripeAccountId() == null) {
-      String accountId = paymentProvider.createConnectAccount();
-      config.setStripeAccountId(accountId);
-      repository.save(config);
+    if (existingConfig.isPresent() && existingConfig.get().isChargesEnabled() && existingConfig.get().isPayoutsEnabled()) {
+         throw new IllegalStateException("Merchant already fully onboarded");
+    }
+    
+    String accountId;
+    if (existingConfig.isPresent()) {
+        accountId = existingConfig.get().getStripeAccountId();
+    } else {
+        // Create Stripe Connect Account
+        accountId = paymentProvider.createConnectAccount();
+        
+        // Save local config
+        MerchantStripeConfig config = new MerchantStripeConfig();
+        // config.setTenantId(tenantId); // tenantId usage removed
+        config.setStripeAccountId(accountId);
+        config.setChargesEnabled(false);
+        config.setPayoutsEnabled(false);
+        repository.save(config);
     }
 
-    String accountLink = paymentProvider.createAccountLink(config.getStripeAccountId(), refreshUrl, returnUrl);
+    // Create Account Link
+    String accountLink = paymentProvider.createAccountLink(accountId, refreshUrl, returnUrl);
 
     // Send email notification
     if (user.email() != null) {

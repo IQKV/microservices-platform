@@ -22,8 +22,6 @@ public class StripeCustomer {
   @Id
   private UUID id;
 
-  @Column(name = "tenant_id", nullable = false)
-  private String tenantId;
 
   @Column(name = "email", nullable = false)
   private String email;

@@ -23,8 +23,6 @@ public class Payment {
   @Id
   private UUID id;
 
-  @Column(name = "tenant_id", nullable = false)
-  private String tenantId;
 
   @Column(nullable = false)
   private BigDecimal amount;
