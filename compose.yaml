@@ -23,6 +23,28 @@ services:
       retries: 5
       start_period: 30s
 
+  # PostgreSQL Database for Billing Service
+  postgres-billing:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-billing
+    environment:
+      POSTGRES_DB: iqscaffold_billing
+      POSTGRES_USER: iqscaffold_billing
+      POSTGRES_PASSWORD: iqscaffold_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_billing_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_billing -d iqscaffold_billing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
@@ -73,15 +95,15 @@ services:
     container_name: iqscaffold-user-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user
-      SPRING_DATASOURCE_USERNAME: iqscaffold_user
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: iqscaffold
-      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user
+      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_user
+      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
+      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
       IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
       IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
       IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
@@ -104,6 +126,50 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+  # Billing Service
+  billing-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-billing-service/Dockerfile
+    container_name: iqscaffold-billing-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/iqscaffold_billing
+      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_billing
+      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
+      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
+      USER_SERVICE_URL: http://user-service:8080
+      EMAIL_SERVICE_URL: http://email-service:8080
+      PAYMENT_PROVIDER: stripe
+      BILLING_SAAS_MODE: "true"
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-billing:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
   # Gateway Service
   gateway-service:
     build:
@@ -112,19 +178,22 @@ services:
     container_name: iqscaffold-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: iqscaffold
-      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
-      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service:8080
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
+      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
+      IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI: http://user-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8082
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     ports:
       - "8080:8080"
     depends_on:
       user-service:
+        condition: service_healthy
+      billing-service:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -208,6 +277,8 @@ networks:
 volumes:
   postgres_user_data:
     name: iqscaffold_postgres_user_data
+  postgres_billing_data:
+    name: iqscaffold_postgres_billing_data
   redis_data:
     name: iqscaffold_redis_data
   rabbitmq_data:

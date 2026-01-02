@@ -1,0 +1,170 @@
+services:
+  # PostgreSQL Database for Billing Service - Local Development
+  postgres-billing:
+    image: postgres:15.8-alpine
+    container_name: iqscaffold-billing-postgres-dev
+    environment:
+      POSTGRES_DB: iqscaffold_billing_local
+      POSTGRES_USER: iqscaffold_billing
+      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_billing_data:/var/lib/postgresql/data
+    networks:
+      - billing-service-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_billing -d iqscaffold_billing_local -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
+  # Redis for Billing Service - Local Development
+  redis-billing:
+    image: redis:7.2-alpine
+    container_name: iqscaffold-billing-redis-dev
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_billing_data:/data
+    networks:
+      - billing-service-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+
+  # Billing Service - Local Development
+  billing-service:
+    build:
+      context: ..
+      dockerfile: iqscaffold-billing-service/Dockerfile
+      target: builder
+    image: iqscaffold/iqscaffold-billing-service:dev
+    container_name: iqscaffold-billing-service-dev
+    environment:
+      # Spring Configuration
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_APPLICATION_NAME: iqscaffold-billing-service
+
+      # Database Configuration
+      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/iqscaffold_billing_local
+      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_billing
+      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+
+      # Redis Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis-billing
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      IQSCAFFOLD_CACHE_REDIS_DATABASE: 0
+      IQSCAFFOLD_CACHE_REDIS_PASSWORD: ""
+
+      # Messaging Configuration
+      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
+      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
+      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
+
+      # JWT Configuration
+      USER_SERVICE_URL: http://user-service:8080
+      JWT_ISSUER: iqscaffold-user-service
+
+      # Billing Configuration
+      PAYMENT_PROVIDER: stripe
+      BILLING_SAAS_MODE: "true"
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_placeholder}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+
+      # Observability Configuration
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED: "true"
+      IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE: "1.0"
+      IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_SERVICE_NAME: iqscaffold-billing-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=iqscaffold-billing-service,service.version=1.0.0,deployment.environment=dev
+
+      # JVM Configuration
+      JAVA_OPTS: >-
+        -Xms256m
+        -Xmx512m
+        -XX:+UseG1GC
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -Djava.security.egd=file:/dev/./urandom
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-billing:
+        condition: service_healthy
+      redis-billing:
+        condition: service_healthy
+    networks:
+      - billing-service-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+    volumes:
+      - billing_logs:/app/logs
+      - billing_tmp:/tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 768m
+        reservations:
+          cpus: "0.25"
+          memory: 384m
+
+networks:
+  billing-service-network:
+    driver: bridge
+    name: iqscaffold-billing-network-dev
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+volumes:
+  postgres_billing_data:
+    name: iqscaffold_billing_postgres_data_dev
+    driver: local
+  redis_billing_data:
+    name: iqscaffold_billing_redis_data_dev
+    driver: local
+  billing_logs:
+    name: iqscaffold_billing_logs_dev
+    driver: local
+  billing_tmp:
+    name: iqscaffold_billing_tmp_dev
+    driver: local
