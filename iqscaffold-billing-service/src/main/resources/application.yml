@@ -1,0 +1,131 @@
+server:
+  port: 8082
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  application:
+    name: iqscaffold-billing-service
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Liquibase Configuration
+  # Using Shared Database (Discriminator Column) strategy
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: PT5M
+      cache-null-values: false
+    cache-names:
+      - payment-intents
+      - webhooks
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
+          issuer-uri: ${USER_SERVICE_URL:http://localhost:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase,openapi
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+  group-configs:
+    - group: payments
+      paths-to-match: /api/v1/billing/payments/**
+    - group: webhooks
+      paths-to-match: /api/v1/billing/webhooks/**
+    - group: admin
+      paths-to-match: /api/v1/admin/billing/**
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: INFO
+    liquibase: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+iqscaffold:
+  billing:
+    security:
+      jwt:
+        jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
+        issuer: iqscaffold-user-service
+    integration:
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
+        timeout-ms: 10000
+    payment:
+      provider: stripe
+      stripe:
+        api-key: ${STRIPE_API_KEY:}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+        client-id: ${STRIPE_CLIENT_ID:} # For Connect

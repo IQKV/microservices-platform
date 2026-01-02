@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{email.merchant.onboarding.title}">Welcome</title>
+</head>
+
+<body>
+    <h1 th:text="#{email.merchant.onboarding.title}">Welcome to IQ Scaffold Billing</h1>
+    <p th:text="#{email.merchant.onboarding.greeting(${merchantName})}">Hello Merchant,</p>
+    <p th:text="#{email.merchant.onboarding.body}">Your onboarding process has started.</p>
+    <a th:href="${onboardingUrl}" th:text="#{email.merchant.onboarding.cta}">Complete Setup</a>
+    <p th:text="#{email.merchant.onboarding.ignore}">If you did not request this, ignore.</p>
+</body>
+
+</html>

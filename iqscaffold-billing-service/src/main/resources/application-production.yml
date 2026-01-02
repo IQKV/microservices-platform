@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: BillingServiceHikariPool-Production
+      auto-commit: false
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
+
+logging:
+  level:
+    root: WARN
+    com.iqscaffold.billingservice: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    liquibase: WARN
+
+iqscaffold:
+  billing:
+    integration:
+      email-service:
+        url: ${EMAIL_SERVICE_URL}
+    payment:
+      provider: ${PAYMENT_PROVIDER:stripe}
+      stripe:
+        api-key: ${STRIPE_API_KEY}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+        client-id: ${STRIPE_CLIENT_ID}

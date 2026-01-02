@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://staging-db:5432/billing_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: BillingServiceHikariPool-Staging
+      auto-commit: false
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+  data:
+    redis:
+      host: ${REDIS_HOST:staging-redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
+    liquibase: INFO
+
+iqscaffold:
+  billing:
+    integration:
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://email-service:8084}
+    payment:
+      provider: ${PAYMENT_PROVIDER:stripe}
+      stripe:
+        api-key: ${STRIPE_API_KEY}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+        client-id: ${STRIPE_CLIENT_ID}
