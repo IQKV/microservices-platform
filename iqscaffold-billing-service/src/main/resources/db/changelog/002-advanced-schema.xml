@@ -10,9 +10,6 @@
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="tenant_id" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
             <column name="email" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>

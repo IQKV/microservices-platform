@@ -76,15 +76,47 @@ public class StripeWebhookService {
        throw new IllegalArgumentException("Webhook parsing failed");
     }
 
-    // Handle the event
-    switch (event.getType()) {
-      case "payment_intent.succeeded" -> handlePaymentSuccess(event);
-      case "payment_intent.payment_failed" -> handlePaymentFailure(event);
-      case "charge.refunded" -> handleRefund(event);
-      case "payout.paid" -> handlePayout(event);
-      case "account.updated" -> handleAccountUpdated(event);
-      default -> logger.debug("Unhandled event type: {}", event.getType());
+    // Resolve tenant from event and set context
+    resolveAndSetTenant(event);
+
+    try {
+      // Handle the event
+      switch (event.getType()) {
+        case "payment_intent.succeeded" -> handlePaymentSuccess(event);
+        case "payment_intent.payment_failed" -> handlePaymentFailure(event);
+        case "charge.refunded" -> handleRefund(event);
+        case "payout.paid" -> handlePayout(event);
+        case "account.updated" -> handleAccountUpdated(event);
+        default -> logger.debug("Unhandled event type: {}", event.getType());
+      }
+    } finally {
+        com.iqscaffold.billingservice.tenancy.TenantContext.clear();
     }
+  }
+
+  private void resolveAndSetTenant(Event event) {
+      String tenantId = null;
+      var dataObject = event.getDataObjectDeserializer().getObject().orElse(null);
+      
+      if (dataObject instanceof PaymentIntent pi) {
+          tenantId = pi.getMetadata().get("tenant_id");
+      } else if (dataObject instanceof com.stripe.model.Charge charge) {
+          tenantId = charge.getMetadata().get("tenant_id");
+          if (tenantId == null && charge.getPaymentIntent() != null) {
+              // Try to get from PI if available in metadata (unlikely to be auto-expanded here)
+          }
+      } else if (dataObject instanceof com.stripe.model.Account account) {
+          // For account events, we might need to look up by account ID
+          var config = merchantConfigRepository.findByStripeAccountId(account.getId());
+          tenantId = config.map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getTenantId).orElse(null);
+      }
+      
+      if (tenantId != null) {
+          com.iqscaffold.billingservice.tenancy.TenantContext.setCurrentTenantId(tenantId);
+          logger.debug("Resolved tenant {} from event {}", tenantId, event.getType());
+      } else {
+          logger.warn("Could not resolve tenant for event {}", event.getType());
+      }
   }
 
   private void handlePaymentSuccess(Event event) {
@@ -102,12 +134,19 @@ public class StripeWebhookService {
   }
 
   private void handleRefund(Event event) {
-      // Logic to sync refund status to Payment entity if not already done via API
-      // For now, simplistically relying on PaymentService to guard state overrides if needed,
-      // or we can explicitly look up payment by charge ID.
-      // Given Payment Entity stores PaymentIntentID, we might need to fetch PI from Charge.
-      // But typically charge.refunded comes with a Charge object which refers to PI.
-      // For simplicity in this demo, skipping complex reverse lookups.
+      com.stripe.model.Charge charge = (com.stripe.model.Charge) event.getDataObjectDeserializer().getObject().orElse(null);
+      if (charge != null && charge.getPaymentIntent() != null) {
+          String status = charge.getRefunded() ? BillingConstants.PaymentStatus.REFUNDED : BillingConstants.PaymentStatus.PARTIALLY_REFUNDED;
+          paymentService.updateStatus(charge.getPaymentIntent(), status);
+          logger.info("Syncing refund status via webhook for PI: {} | Status: {}", charge.getPaymentIntent(), status);
+      }
+  }
+
+  private void handlePayout(Event event) {
+    com.stripe.model.Payout payout = (com.stripe.model.Payout) event.getDataObjectDeserializer().getObject().orElse(null);
+    if (payout != null) {
+      payoutService.processPayout(payout);
+    }
   }
 
   private void handleAccountUpdated(Event event) {

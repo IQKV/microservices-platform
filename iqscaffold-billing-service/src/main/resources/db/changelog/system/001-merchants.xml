@@ -5,23 +5,19 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <changeSet id="001-initial-schema" author="antigravity">
-        <createTable tableName="payment">
+    <changeSet id="001-system-merchants" author="antigravity">
+        <createTable tableName="merchant_stripe_config">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="amount" type="decimal(19, 2)">
-                <constraints nullable="false"/>
+            <column name="tenant_id" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
             </column>
-            <column name="currency" type="varchar(3)">
-                <constraints nullable="false"/>
+            <column name="stripe_account_id" type="varchar(255)">
+                <constraints unique="true"/>
             </column>
-            <column name="status" type="varchar(50)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="payment_intent_id" type="varchar(255)"/>
-            <column name="application_fee_amount" type="decimal(19, 2)"/>
-            <column name="merchant_account_id" type="varchar(255)"/>
+            <column name="charges_enabled" type="boolean" defaultValueBoolean="false"/>
+            <column name="payouts_enabled" type="boolean" defaultValueBoolean="false"/>
             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>

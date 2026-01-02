@@ -22,6 +22,19 @@ public final class SecurityContextHelper {
     }
     return null;
   }
+
+  public static UserContext getCurrentUserContextOrThrow() {
+    UserContext context = getCurrentUserContext();
+    if (context == null) {
+      throw new IllegalStateException("User context not found in request");
+    }
+    return context;
+  }
+
+  public static Long getCurrentUserId() {
+    UserContext uc = getCurrentUserContext();
+    return uc != null ? uc.userId() : null;
+  }
   
   public static String getCurrentTenantId() {
       UserContext uc = getCurrentUserContext();

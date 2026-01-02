@@ -100,6 +100,12 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       if (metadata != null) {
           paramsBuilder.putAllMetadata(metadata);
       }
+      
+      // Add Tenant ID to metadata for webhook resolution
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      if (tenantId != null) {
+          paramsBuilder.putMetadata("tenant_id", tenantId);
+      }
 
       if (applicationFeeAmount != null && applicationFeeAmount.compareTo(BigDecimal.ZERO) > 0) {
         paramsBuilder.setApplicationFeeAmount(toMinorUnits(applicationFeeAmount, currency));
@@ -144,8 +150,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
           StripeCustomer localParams = existing.get();
           // Update name if changed
           if (name != null && !name.equals(localParams.getName())) {
-              com.stripe.model.Customer.update(
-                  localParams.getStripeCustomerId(), 
+              com.stripe.model.Customer customer = com.stripe.model.Customer.retrieve(localParams.getStripeCustomerId(), options);
+              customer.update(
                   com.stripe.param.CustomerUpdateParams.builder().setName(name).build(),
                   options
               );
@@ -163,7 +169,6 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
           var stripeCustomer = com.stripe.model.Customer.create(params, options);
           
           StripeCustomer newRecord = new StripeCustomer();
-          // newRecord.setTenantId(tenantId); // Schema isolation
           newRecord.setEmail(email);
           newRecord.setName(name);
           newRecord.setStripeCustomerId(stripeCustomer.getId());

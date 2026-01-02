@@ -1,6 +1,6 @@
 package com.iqscaffold.billingservice.config;
-
 import com.iqscaffold.billingservice.security.JwtAuthenticationFilter;
+import com.iqscaffold.billingservice.security.JwtClaimNames;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

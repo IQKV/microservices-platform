@@ -8,20 +8,13 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "stripe_customer")
-@Getter
-@Setter
-@NoArgsConstructor
 public class StripeCustomer {
 
   @Id
   private UUID id;
-
 
   @Column(name = "email", nullable = false)
   private String email;
@@ -40,6 +33,65 @@ public class StripeCustomer {
 
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
+
+  public StripeCustomer() {
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getStripeCustomerId() {
+    return stripeCustomerId;
+  }
+
+  public void setStripeCustomerId(String stripeCustomerId) {
+    this.stripeCustomerId = stripeCustomerId;
+  }
+
+  public String getStripeAccountId() {
+    return stripeAccountId;
+  }
+
+  public void setStripeAccountId(String stripeAccountId) {
+    this.stripeAccountId = stripeAccountId;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
   @PrePersist
   void onCreate() {

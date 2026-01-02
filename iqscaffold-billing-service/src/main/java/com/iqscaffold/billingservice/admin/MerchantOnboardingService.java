@@ -5,6 +5,7 @@ import com.iqscaffold.billingservice.payment.PaymentProviderAdapter;
 import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.security.UserContext;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +28,11 @@ public class MerchantOnboardingService {
 
   @Transactional
   public String initiateOnboarding(String refreshUrl, String returnUrl) {
-    // String tenantId = SecurityContextHelper.getCurrentTenantId();
+    String tenantId = SecurityContextHelper.getCurrentTenantId();
     UserContext user = SecurityContextHelper.getCurrentUserContextOrThrow();
 
     // Check if config exists
-    Optional<MerchantStripeConfig> existingConfig = repository.findTopByOrderByIdAsc();
+    Optional<MerchantStripeConfig> existingConfig = repository.findByTenantId(tenantId);
 
     if (existingConfig.isPresent() && existingConfig.get().isChargesEnabled() && existingConfig.get().isPayoutsEnabled()) {
          throw new IllegalStateException("Merchant already fully onboarded");
@@ -46,7 +47,7 @@ public class MerchantOnboardingService {
         
         // Save local config
         MerchantStripeConfig config = new MerchantStripeConfig();
-        // config.setTenantId(tenantId); // tenantId usage removed
+        config.setTenantId(tenantId);
         config.setStripeAccountId(accountId);
         config.setChargesEnabled(false);
         config.setPayoutsEnabled(false);

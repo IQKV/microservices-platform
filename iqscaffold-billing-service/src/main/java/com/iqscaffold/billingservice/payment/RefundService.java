@@ -67,7 +67,6 @@ public class RefundService {
    * @throws InvalidPaymentStateException If the payment is not in a refundable state.
    */
   @Transactional
-  @Transactional
   public void processRefund(UUID paymentId) {
     // Schema isolation ensures we only find payments for the current tenant
     Payment payment = paymentRepository.findById(paymentId)

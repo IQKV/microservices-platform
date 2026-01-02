@@ -69,8 +69,9 @@ public class PaymentService {
         stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
 
         // 2. Resolve Merchant Account (if any)
-        // In schema-per-tenant, we fetch the config for the current schema
-        Optional<String> connectedAccountId = merchantConfigRepository.findTopByOrderByIdAsc()
+        // In schema-per-tenant, the merchant config is stored in the public schema
+        String tenantId = SecurityContextHelper.getCurrentTenantId();
+        Optional<String> connectedAccountId = merchantConfigRepository.findByTenantId(tenantId)
             .map(config -> config.getStripeAccountId());
 
         // Platform fee logic (simplified for now: 10% if connected account exists)
@@ -78,11 +79,9 @@ public class PaymentService {
             ? request.amount().multiply(BigDecimal.valueOf(0.10)) 
             : BigDecimal.ZERO;
 
-        // 3. Create Record
         Payment payment = new Payment();
         payment.setAmount(request.amount());
         payment.setCurrency(request.currency());
-        // payment.setTenantId(tenantId); // Schema isolation handles this
         payment.setStatus(BillingConstants.PaymentStatus.PENDING);
         payment.setApplicationFeeAmount(applicationFee);
         connectedAccountId.ifPresent(payment::setMerchantAccountId);

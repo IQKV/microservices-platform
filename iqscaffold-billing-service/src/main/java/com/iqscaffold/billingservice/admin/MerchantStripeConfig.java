@@ -8,15 +8,9 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Table(name = "merchant_stripe_config")
-@Getter
-@Setter
-@NoArgsConstructor
+@Table(name = "merchant_stripe_config", schema = "public")
 public class MerchantStripeConfig {
   @Id
   private UUID id;
@@ -25,6 +19,9 @@ public class MerchantStripeConfig {
   @Column(name = "stripe_account_id")
   private String stripeAccountId;
   
+  @Column(name = "tenant_id", nullable = false)
+  private String tenantId;
+
   @Column(name = "charges_enabled")
   private boolean chargesEnabled;
 
@@ -36,6 +33,65 @@ public class MerchantStripeConfig {
 
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
+
+  public MerchantStripeConfig() {
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public String getStripeAccountId() {
+    return stripeAccountId;
+  }
+
+  public void setStripeAccountId(String stripeAccountId) {
+    this.stripeAccountId = stripeAccountId;
+  }
+
+  public String getTenantId() {
+    return tenantId;
+  }
+
+  public void setTenantId(String tenantId) {
+    this.tenantId = tenantId;
+  }
+
+  public boolean isChargesEnabled() {
+    return chargesEnabled;
+  }
+
+  public void setChargesEnabled(boolean chargesEnabled) {
+    this.chargesEnabled = chargesEnabled;
+  }
+
+  public boolean isPayoutsEnabled() {
+    return payoutsEnabled;
+  }
+
+  public void setPayoutsEnabled(boolean payoutsEnabled) {
+    this.payoutsEnabled = payoutsEnabled;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
   @PrePersist
   void onCreate() {
