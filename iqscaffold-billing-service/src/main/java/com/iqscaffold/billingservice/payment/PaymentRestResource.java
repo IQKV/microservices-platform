@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentRestResource {
 
   private final PaymentService paymentService;
+  private final RefundService refundService;
 
-  public PaymentRestResource(PaymentService paymentService) {
+  public PaymentRestResource(PaymentService paymentService, RefundService refundService) {
     this.paymentService = paymentService;
+    this.refundService = refundService;
   }
 
   @Operation(summary = "Create a payment intent", description = "Initiates a new payment flow by creating a Stripe PaymentIntent")
@@ -51,5 +53,25 @@ public class PaymentRestResource {
   @PreAuthorize("hasAuthority('USER')")
   public ResponseEntity<PaymentDtos.PaymentResponse> getPayment(@PathVariable UUID id) {
     return ResponseEntity.ok(paymentService.getPayment(id));
+  }
+
+  @Operation(summary = "List payments", description = "Retrieves a paginated list of payments for the current tenant")
+  @GetMapping
+  @PreAuthorize("hasAuthority('USER')")
+  public ResponseEntity<org.springframework.data.domain.Page<PaymentDtos.PaymentResponse>> listPayments(org.springframework.data.domain.Pageable pageable) {
+    return ResponseEntity.ok(paymentService.getPayments(pageable));
+  }
+
+  @Operation(summary = "Refund payment", description = "Initiates a full refund for a successful payment")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Refund initiated successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid state for refund"),
+      @ApiResponse(responseCode = "404", description = "Payment not found")
+  })
+  @PostMapping("/{id}/refund")
+  @PreAuthorize("hasAuthority('ADMIN')")
+  public ResponseEntity<Void> refundPayment(@PathVariable UUID id) {
+    refundService.processRefund(id);
+    return ResponseEntity.noContent().build();
   }
 }

@@ -118,6 +118,13 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<PaymentDtos.PaymentResponse> getPayments(org.springframework.data.domain.Pageable pageable) {
+        String tenantId = SecurityContextHelper.getCurrentTenantId();
+        return paymentRepository.findAllByTenantId(tenantId, pageable)
+            .map(this::mapToResponse);
+    }
+
     /**
      * Updates the status of a payment based on external webhook events.
      * <p>
