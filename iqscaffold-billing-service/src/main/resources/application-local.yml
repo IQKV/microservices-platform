@@ -19,10 +19,6 @@ spring:
     hibernate:
       ddl-auto: validate
 
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
 logging:
   level:

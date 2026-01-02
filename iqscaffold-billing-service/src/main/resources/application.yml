@@ -39,22 +39,6 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
 
-  cache:
-    type: redis
-    redis:
-      time-to-live: PT5M
-      cache-null-values: false
-    cache-names:
-      - payment-intents
-      - webhooks
-
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
-
   security:
     oauth2:
       resourceserver:
