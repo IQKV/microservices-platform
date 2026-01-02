@@ -20,119 +20,40 @@ iqscaffold:
   cache:
     redis:
       host: ${IQSCAFFOLD_CACHE_REDIS_HOST:redis-staging}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
       password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout: PT2S
       pool:
         max-active: 16
         max-idle: 8
         min-idle: 2
-        max-wait: PT-1S
       key-prefix: "iqscaffold:gateway:staging"
       default-ttl: PT30M
-      enable-statistics: false
 
   # Gateway Configuration
   gateway:
     routing:
-      # API prefix configuration - keep /api prefix in staging for testing
-      api-prefix:
-        enabled: true
-        prefix: /api
-        strip-count: 0  # Don't strip in staging
       services:
         user-service:
           uri: ${IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI:http://user-service:8080}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "User Service APIs"
-            description: "Authentication and user management APIs"
-            context-path: "user-service"
-      enable-service-discovery: false
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: true
-        health-check-interval: PT30S
     
     security:
       jwt:
-        access-token-expiry: PT15M
-        refresh-token-expiry: P7D
-        issuer: iqscaffold-user-service
-        audience: iqscaffold-services
-        algorithm: RS256
         jwk-set-uri: ${USER_SERVICE_JWK_URI:http://user-service:8080/.well-known/jwks.json}
       authentication:
-        enabled: true
         user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://user-service:8080}
-        token-validation-timeout: PT5S
-        enable-user-context-propagation: true
-      public-paths:
-        # JWK endpoint for public key distribution
-        - /.well-known/jwks.json
     
     rate-limiting:
-      enabled: true
       redis:
         key-prefix: "iqscaffold:gateway:rate-limit:staging"
-        key-expiry: PT1M
-      # Note: Policies are defined in main application.yml
-      tenant-quotas:
-        enabled: true
-        default-tenant-requests-per-minute: 1000
-        tenant-specific-quotas: { }
-    
-    circuit-breaker:
-      enabled: true
-      failure-rate-threshold: 50
-      slow-call-rate-threshold: 50
-      slow-call-duration-threshold: PT2S
-      minimum-number-of-calls: 10
-      wait-duration-in-open-state: PT30S
-      sliding-window-size: 100
-      sliding-window-type: COUNT_BASED
     
     cors:
-      enabled: true
       allowed-origins:
         - ${IQSCAFFOLD_GATEWAY_CORS_ALLOWED_ORIGINS:https://iqscaffold.website}
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - PATCH
-        - DELETE
-        - OPTIONS
-      allowed-headers:
-        - "*"
-      allow-credentials: true
-      max-age: 3600
     
     transformation:
       request:
-        enabled: true
-        enable-header-enrichment: true
-        enable-user-context-propagation: true
-        enable-tenant-context-propagation: true
-        headers-to-remove:
-          - Authorization-Internal
-          - X-Internal-Token
         additional-headers:
           X-Gateway-Version: "1.0.0-staging"
           X-Environment: "staging"
-      response:
-        enabled: true
-        enable-security-headers: true
-        enable-correlation-headers: true
-        remove-internal-headers: true
-        additional-headers-to-remove:
-          - X-Internal-Service
-          - X-Database-Query-Time
 
   observability:
     tracing:

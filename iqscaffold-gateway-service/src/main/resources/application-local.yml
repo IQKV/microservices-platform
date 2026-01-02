@@ -19,18 +19,7 @@ iqscaffold:
   # Cache Configuration - Redis
   cache:
     redis:
-      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
-      timeout: PT2S
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: PT-1S
       key-prefix: "iqscaffold:gateway:local"
-      default-ttl: PT1H
       enable-statistics: true
 
   # Gateway Configuration
@@ -38,50 +27,22 @@ iqscaffold:
     routing:
       # API prefix configuration - keep /api prefix in local development
       api-prefix:
-        enabled: true
-        prefix: /api
         strip-count: 0  # Don't strip in local development
       services:
         user-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI:http://localhost:8080}
-          path: /v1/**
-          enabled: true
           connect-timeout: 10000  # Extended for development
           response-timeout: 60000  # Extended for development
-          openapi:
-            enabled: true
-            display-name: "User Service APIs"
-            description: "Authentication and user management APIs"
-            context-path: "user-service"
-      enable-service-discovery: false
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: true
-        health-check-interval: PT30S
     
     security:
       jwt:
         access-token-expiry: PT30M  # Extended for development
         refresh-token-expiry: P30D  # Extended for development
-        issuer: iqscaffold-user-service
-        audience: iqscaffold-services
-        algorithm: RS256
-        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
       authentication:
-        enabled: true
-        user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
         token-validation-timeout: PT10S  # Extended for development
-        enable-user-context-propagation: true
-      public-paths:
-        # JWK endpoint for public key distribution
-        - /.well-known/jwks.json
-
     
     rate-limiting:
-      enabled: true
       redis:
         key-prefix: "iqscaffold:gateway:rate-limit:local"
-        key-expiry: PT1M
       policies:
         default-requests-per-minute: 120  # More lenient for development
         default-burst-capacity: 200
@@ -92,66 +53,24 @@ iqscaffold:
             enable-tenant-quotas: false  # Disabled for development
       tenant-quotas:
         enabled: false  # Disabled for development
-        default-tenant-requests-per-minute: 5000
-        tenant-specific-quotas: { }
     
     circuit-breaker:
-      enabled: true
       failure-rate-threshold: 70  # More lenient for development
       slow-call-rate-threshold: 70
       slow-call-duration-threshold: PT5S  # More lenient for development
       minimum-number-of-calls: 5  # Lower threshold for development
       wait-duration-in-open-state: PT10S  # Shorter for development
       sliding-window-size: 50
-      sliding-window-type: COUNT_BASED
-    
-    cors:
-      enabled: true
-      allowed-origins:
-        - http://localhost:3000
-        - http://localhost:5173
-        - http://localhost:8080
-        - http://localhost:8080
-        - http://127.0.0.1:3000
-        - http://127.0.0.1:5173
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - PATCH
-        - DELETE
-        - OPTIONS
-        - HEAD
-      allowed-headers:
-        - "*"
-      allow-credentials: true
-      max-age: 3600
     
     transformation:
       request:
-        enabled: true
-        enable-header-enrichment: true
-        enable-user-context-propagation: true
-        enable-tenant-context-propagation: true
-        headers-to-remove:
-          - Authorization-Internal
-          - X-Internal-Token
         additional-headers:
           X-Gateway-Version: "1.0.0-local"
           X-Environment: "local"
       response:
-        enabled: true
         enable-security-headers: false  # Relaxed for development
-        enable-correlation-headers: true
-        remove-internal-headers: true
-        additional-headers-to-remove:
-          - X-Internal-Service
-          - X-Database-Query-Time
 
   observability:
-    tracing:
-      # Inherit tracing settings from application.yml
-      sampling-rate: 1.0  # Full sampling for development
     metrics:
       prefix: iqscaffold_gateway_local
       custom-tags:

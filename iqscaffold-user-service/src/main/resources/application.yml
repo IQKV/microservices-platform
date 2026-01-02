@@ -15,6 +15,20 @@ spring:
     fallback-to-system-locale: false
     use-code-as-default-message: true
   
+  # Database Configuration
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5432/iqscaffold_user}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_user}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
   # JPA Configuration
   jpa:
     hibernate:
@@ -31,6 +45,52 @@ spring:
         order_inserts: true
         order_updates: true
     open-in-view: false
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Messaging Configuration - RabbitMQ
+  rabbitmq:
+    host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:localhost}
+    port: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PORT:5672}
+    username: ${IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME:iqscaffold}
+    password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD:iqscaffold_password}
+    virtual-host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_VHOST:/}
+    connection-timeout: 30000ms
+    requested-heartbeat: 60s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
 
   # Liquibase Configuration
   # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
@@ -219,7 +279,7 @@ iqscaffold:
       enabled: true
       service-name: ${spring.application.name}
       sampling-rate: 1.0
-      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
       timeout: PT10S
       export-timeout: PT30S
       batch-size: 512
@@ -229,8 +289,9 @@ iqscaffold:
       prefix: iqscaffold_user
       include-host-tag: true
       include-application-tag: true
-      include-environment-tag: false
-      custom-tags: { }
+      include-environment-tag: true
+      custom-tags:
+        service: user-service
     logging:
       level: INFO
       format: console
