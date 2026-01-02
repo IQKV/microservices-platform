@@ -52,6 +52,7 @@ public class EmailService {
       String subject = messageSource.getMessage(subjectKey, null, subjectKey, locale);
 
       helper.setTo(to);
+      assert subject != null;
       helper.setSubject(subject);
       helper.setText(html, true);
       helper.setFrom("noreply@iqscaffold.com"); // Could be configurable
