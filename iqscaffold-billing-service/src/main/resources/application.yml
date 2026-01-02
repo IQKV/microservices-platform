@@ -21,6 +21,16 @@ spring:
     cache-duration: PT1H
     fallback-to-system-locale: false
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: false
+
   jpa:
     open-in-view: false
     show-sql: false
@@ -34,6 +44,8 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+    hibernate:
+      ddl-auto: validate
 
   # Liquibase Configuration
   # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
@@ -103,13 +115,13 @@ iqscaffold:
     security:
       jwt:
         jwk-set-uri: ${USER_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
-        issuer: iqscaffold-user-service
+        issuer: ${JWT_ISSUER:iqscaffold-user-service}
     integration:
       email-service:
         url: ${EMAIL_SERVICE_URL:http://localhost:8084}
         timeout-ms: 10000
     payment:
-      provider: stripe
+      provider: ${PAYMENT_PROVIDER:stripe}
       saas-mode: ${BILLING_SAAS_MODE:true}
       stripe:
         api-key: ${STRIPE_API_KEY:}
