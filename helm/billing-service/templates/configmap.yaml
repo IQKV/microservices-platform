@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "billing-service.fullname" . }}-config
+  labels:
+    {{- include "billing-service.labels" . | nindent 4 }}
+data:
+  application.yml: |
+    spring:
+      profiles:
+        active: ${SPRING_PROFILES_ACTIVE:local}
+    # Additional application-level config here

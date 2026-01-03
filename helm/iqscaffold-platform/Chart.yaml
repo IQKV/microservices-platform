@@ -22,3 +22,7 @@ dependencies:
     version: "1.0.0"
     repository: "file://../gateway-service"
     condition: gateway-service.enabled
+  - name: billing-service
+    version: "1.0.0"
+    repository: "file://../billing-service"
+    condition: billing-service.enabled

@@ -1,0 +1,138 @@
+# Default values for billing-service Helm chart
+global:
+  environment: dev
+  platform: iqscaffold
+
+namespace:
+  create: true
+  name: iqscaffold-dev-env
+
+replicaCount: 1
+
+image:
+  repository: iqscaffold/iqscaffold-billing-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8082
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8082
+  initialDelaySeconds: 90
+  periodSeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8082
+  initialDelaySeconds: 60
+  periodSeconds: 10
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "local"
+  - name: USER_SERVICE_URL
+    value: "http://user-service:80"
+  - name: BILLING_SAAS_MODE
+    value: "true"
+
+secretEnv:
+  - name: STRIPE_API_KEY
+    secretKeyRef:
+      name: billing-service-secrets
+      key: STRIPE_API_KEY
+  - name: STRIPE_WEBHOOK_SECRET
+    secretKeyRef:
+      name: billing-service-secrets
+      key: STRIPE_WEBHOOK_SECRET
+  - name: STRIPE_CLIENT_ID
+    secretKeyRef:
+      name: billing-service-secrets
+      key: STRIPE_CLIENT_ID
+  - name: SPRING_DATASOURCE_USERNAME
+    secretKeyRef:
+      name: billing-service-secrets
+      key: DB_USERNAME
+  - name: SPRING_DATASOURCE_PASSWORD
+    secretKeyRef:
+      name: billing-service-secrets
+      key: DB_PASSWORD
+
+secrets:
+  enabled: true
+  data:
+    STRIPE_API_KEY: ""
+    STRIPE_WEBHOOK_SECRET: ""
+    STRIPE_CLIENT_ID: ""
+    DB_USERNAME: Z3JpcGRheV91c2Vy
+    DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
+
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15.8-alpine"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  priorityClassName: ""
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    storageClass: local-path
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+  env:
+    POSTGRES_DB: iqscaffold_billing_local
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  initConfig:
+    enabled: true
+    scripts:
+      01-init-extensions.sql: |
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+  livenessProbe:
+    enabled: true
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+      - -d
+      - $(POSTGRES_DB)
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    command:
+      - pg_isready
+      - -U
+      - $(POSTGRES_USER)
+      - -d
+      - $(POSTGRES_DB)
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
