@@ -28,11 +28,14 @@ public class Payment {
 
   @Column(name = "payment_intent_id")
   private String paymentIntentId;
-  
+
+  @Column(name = "client_secret")
+  private String clientSecret;
+
   // Platform fees for Connect
   @Column(name = "application_fee_amount")
   private BigDecimal applicationFeeAmount;
-  
+
   // Connect Account ID
   @Column(name = "merchant_account_id")
   private String merchantAccountId;
@@ -84,6 +87,14 @@ public class Payment {
 
   public void setPaymentIntentId(String paymentIntentId) {
     this.paymentIntentId = paymentIntentId;
+  }
+
+  public String getClientSecret() {
+    return clientSecret;
+  }
+
+  public void setClientSecret(String clientSecret) {
+    this.clientSecret = clientSecret;
   }
 
   public BigDecimal getApplicationFeeAmount() {

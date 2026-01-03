@@ -15,10 +15,9 @@ public class MerchantStripeConfig {
   @Id
   private UUID id;
 
-
   @Column(name = "stripe_account_id")
   private String stripeAccountId;
-  
+
   @Column(name = "tenant_id", nullable = false)
   private String tenantId;
 
@@ -27,6 +26,9 @@ public class MerchantStripeConfig {
 
   @Column(name = "payouts_enabled")
   private boolean payoutsEnabled;
+
+  @Column(name = "application_fee_percent", precision = 5, scale = 2)
+  private java.math.BigDecimal applicationFeePercent;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -75,6 +77,14 @@ public class MerchantStripeConfig {
 
   public void setPayoutsEnabled(boolean payoutsEnabled) {
     this.payoutsEnabled = payoutsEnabled;
+  }
+
+  public java.math.BigDecimal getApplicationFeePercent() {
+    return applicationFeePercent;
+  }
+
+  public void setApplicationFeePercent(java.math.BigDecimal applicationFeePercent) {
+    this.applicationFeePercent = applicationFeePercent;
   }
 
   public Instant getCreatedAt() {

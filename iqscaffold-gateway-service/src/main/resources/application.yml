@@ -191,6 +191,7 @@ iqscaffold:
         - /billing-service/swagger-ui/**
         - /billing-service/api-docs/**
         - /actuator/prometheus
+        - /api/v1/billing/webhooks/**
         
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)

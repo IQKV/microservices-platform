@@ -6,5 +6,6 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <include file="db/changelog/system/001-merchants.xml"/>
+    <include file="db/changelog/004-merchant-fees.xml"/>
 
 </databaseChangeLog>

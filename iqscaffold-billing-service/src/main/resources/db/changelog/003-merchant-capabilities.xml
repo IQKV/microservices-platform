@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <changeSet id="003-merchant-capabilities" author="antigravity">
+    <changeSet id="003-merchant-capabilities" author="iqscaffold">
         <!-- 
           NOTE: This changeSet corresponds to the YAML version that added columns.
           However, in the XML migration strategy, I realized I already included these columns 

@@ -8,22 +8,24 @@ import java.time.Instant;
 import java.util.UUID;
 
 public class PaymentDtos {
-    private PaymentDtos() {}
+    private PaymentDtos() {
+    }
 
     public record CreatePaymentRequest(
-        @NotNull @DecimalMin("0.01") BigDecimal amount,
-        @NotBlank String currency,
-        @NotBlank String description, // Order ID or similar
-        String customerEmail, // For creating Stripe Customer
-        String customerName,
-        java.util.Map<String, String> metadata
-    ) {}
+            @NotNull @DecimalMin("0.01") BigDecimal amount,
+            @NotBlank String currency,
+            @NotBlank String description, // Order ID or similar
+            String customerEmail, // For creating Stripe Customer
+            String customerName,
+            java.util.Map<String, String> metadata) {
+    }
 
     public record PaymentResponse(
-        UUID id,
-        BigDecimal amount,
-        String currency,
-        String status,
-        Instant createdAt
-    ) {}
+            UUID id,
+            String clientSecret,
+            BigDecimal amount,
+            String currency,
+            String status,
+            Instant createdAt) {
+    }
 }

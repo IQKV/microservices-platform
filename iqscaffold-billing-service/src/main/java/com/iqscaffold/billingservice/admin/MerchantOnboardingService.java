@@ -19,8 +19,7 @@ public class MerchantOnboardingService {
   public MerchantOnboardingService(
       MerchantStripeConfigRepository repository,
       PaymentProviderAdapter paymentProvider,
-      EmailService emailService
-  ) {
+      EmailService emailService) {
     this.repository = repository;
     this.paymentProvider = paymentProvider;
     this.emailService = emailService;
@@ -34,24 +33,25 @@ public class MerchantOnboardingService {
     // Check if config exists
     Optional<MerchantStripeConfig> existingConfig = repository.findByTenantId(tenantId);
 
-    if (existingConfig.isPresent() && existingConfig.get().isChargesEnabled() && existingConfig.get().isPayoutsEnabled()) {
-         throw new IllegalStateException("Merchant already fully onboarded");
+    if (existingConfig.isPresent() && existingConfig.get().isChargesEnabled()
+        && existingConfig.get().isPayoutsEnabled()) {
+      throw new IllegalStateException("Merchant already fully onboarded");
     }
-    
+
     String accountId;
     if (existingConfig.isPresent()) {
-        accountId = existingConfig.get().getStripeAccountId();
+      accountId = existingConfig.get().getStripeAccountId();
     } else {
-        // Create Stripe Connect Account
-        accountId = paymentProvider.createConnectAccount();
-        
-        // Save local config
-        MerchantStripeConfig config = new MerchantStripeConfig();
-        config.setTenantId(tenantId);
-        config.setStripeAccountId(accountId);
-        config.setChargesEnabled(false);
-        config.setPayoutsEnabled(false);
-        repository.save(config);
+      // Create Stripe Connect Account
+      accountId = paymentProvider.createConnectAccount();
+
+      // Save local config
+      MerchantStripeConfig config = new MerchantStripeConfig();
+      config.setTenantId(tenantId);
+      config.setStripeAccountId(accountId);
+      config.setChargesEnabled(false);
+      config.setPayoutsEnabled(false);
+      repository.save(config);
     }
 
     // Create Account Link
@@ -59,19 +59,23 @@ public class MerchantOnboardingService {
 
     // Send email notification
     if (user.email() != null) {
-        emailService.sendEmail(
-            user.email(),
-            "email.merchant.onboarding.subject",
-            "merchant-onboarding",
-            Map.of(
-                "merchantName", user.firstName() != null ? user.firstName() : "Merchant",
-                "onboardingUrl", accountLink
-            ),
-            java.util.Locale.ROOT // Should come from UserContext or request
-        );
+      emailService.sendEmail(
+          user.email(),
+          "email.merchant.onboarding.subject",
+          "merchant-onboarding",
+          Map.of(
+              "merchantName", user.firstName() != null ? user.firstName() : "Merchant",
+              "onboardingUrl", accountLink),
+          java.util.Locale.ROOT // Should come from UserContext or request
+      );
     }
 
     return accountLink;
+  }
+
+  public Optional<MerchantStripeConfig> getMerchantStatus() {
+    String tenantId = SecurityContextHelper.getCurrentTenantId();
+    return repository.findByTenantId(tenantId);
   }
 
   private MerchantStripeConfig createNewConfig(String tenantId) {
