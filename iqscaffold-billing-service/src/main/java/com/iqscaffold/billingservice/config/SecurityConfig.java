@@ -1,4 +1,5 @@
 package com.iqscaffold.billingservice.config;
+
 import com.iqscaffold.billingservice.security.JwtAuthenticationFilter;
 import com.iqscaffold.billingservice.security.JwtClaimNames;
 import org.springframework.context.annotation.Bean;
@@ -31,13 +32,13 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
-            .anyRequest().authenticated()
-        )
+            .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**", "/error",
+                "/api/v1/billing/webhooks/**")
+            .permitAll()
+            .anyRequest().authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
             .decoder(jwtDecoder())
-            .jwtAuthenticationConverter(jwtAuthenticationConverter())
-        ))
+            .jwtAuthenticationConverter(jwtAuthenticationConverter())))
         .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

@@ -61,6 +61,16 @@ spring:
             - Path=/.well-known/jwks.json
           filters:
             - StripPrefix=0
+        - id: billing-service
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/billing/**, /api/v1/admin/billing/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
         - id: health-check
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates:
