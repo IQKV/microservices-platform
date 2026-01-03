@@ -21,11 +21,11 @@ The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. I
 
 ### 💳 Payment Lifecycle Patterns
 
-- State machine-driven payment transitions (PENDING → SUCCEEDED/FAILED → REFUNDED).
-- Idempotent webhook processing for external event synchronization.
-- Asynchronous payment status updates via Stripe webhooks.
-- Support for multiple payment statuses including partial refunds.
-- Detailed audit logging for every step of the payment journey.
+- State machine-driven payment transitions (PENDING → PROCESSING → SUCCEEDED/FAILED → REFUNDED).
+- Idempotent webhook processing for external event synchronization via `PaymentIntent` ID.
+- Asynchronous payment status updates via Stripe webhooks with cryptographic validation.
+- Support for platform fees (SaaS commission logic) automatically calculated per transaction.
+- Detailed audit logging for every step of the payment journey using a dedicated audit entity.
 
 ### 🏦 Stripe Connect Integration
 
@@ -74,9 +74,52 @@ Request Flow:
 ### Key Components
 
 - **PaymentStateMachine**: Encapsulates legal state transitions for financial integrity.
-- **StripePaymentProvider**: Adapter for Stripe API, handling Connect accounts and fees.
+- **StripePaymentProvider**: Adapter for Stripe API, handling Connect accounts and application fees.
 - **StripeWebhookService**: Secured entry point for external events with signature validation.
 - **MerchantOnboardingService**: Orchestrates the Stripe Connect onboarding journey.
+- **RefundService**: Manages the business logic and external calls for payment reversals.
+
+## API Endpoints
+
+### Payment Operations
+
+- `POST /api/v1/billing/payments/intent` - Create a payment intent (amount, currency, description)
+- `GET /api/v1/billing/payments/{id}` - Retrieve detailed payment status and history
+- `GET /api/v1/billing/payments` - Paginated list of payments for the current tenant
+- `POST /api/v1/billing/payments/{id}/refund` - Process a full refund (Requires `ADMIN` role)
+
+### Merchant Administration
+
+- `POST /api/v1/admin/billing/merchants/onboard` - Initiate Stripe Connect onboarding (Requires `ADMIN` role)
+- `GET /api/v1/admin/billing/merchants/status` - Check current merchant configuration and capability status
+
+### Internal/Webhook
+
+- `POST /api/v1/billing/webhooks/stripe` - Public endpoint for Stripe event consumption (Crypto-secured)
+
+## Payment State Machine
+
+The service enforces strict transitions to ensure financial consistency:
+
+| Initial State | Event        | Target State | Notes                      |
+| :------------ | :----------- | :----------- | :------------------------- |
+| `null`        | Create       | `PENDING`    | Initial record creation    |
+| `PENDING`     | API Call     | `PROCESSING` | Intent sent to Stripe      |
+| `PROCESSING`  | Webhook      | `SUCCEEDED`  | Success confirmation       |
+| `PROCESSING`  | Webhook      | `FAILED`     | Payment failed/declined    |
+| `SUCCEEDED`   | Admin Action | `REFUNDED`   | Money returned to customer |
+| `*`           | Webhook      | `CANCELED`   | Intent expired or canceled |
+
+## Database & Multi-Tenancy
+
+The service uses **Liquibase** for evolutionary database design with a schema-per-tenant isolation strategy:
+
+1. **Public Schema**: Stores shared platform registry (e.g., `merchant_stripe_config` mapping tenants to Stripe Account IDs).
+2. **Tenant Schemas**: Isolated storage for `payment`, `payment_audit_trail`, and `payout` records.
+
+### Implementation Detail
+
+On every request, the `TenantIdentifierResolver` extracts the tenant ID from the `X-Tenant-ID` header (propagated by the Gateway) and routes Hibernate sessions to the appropriate schema.
 
 ## Technical Highlights
 

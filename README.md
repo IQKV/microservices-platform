@@ -100,17 +100,17 @@ Multi-tenant payment orchestration and merchant management service.
 └──────┬────────────────────────────────────┘
        │
        ▼
-┌──────────────────────────────────────────┐
-│            User Service (Port 8080)      │
-│  • Auth/JWT                              │
-│  • Users                                 │
-│  • Roles                                 │
-└──────┬────────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────┐
-│            PostgreSQL (User DB)          │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
+│            User Service (Port 8080)      │   │          Billing Service (Port 8082)     │
+│  • Auth/JWT                              │   │  • Payment Intents                       │
+│  • Users                                 │   │  • Stripe Connect                        │
+│  • Roles                                 │   │  • Lifecycle Management                  │
+└──────┬───────────────────────────────────┘   └──────┬───────────────────────────────────┘
+       │                                              │
+       ▼                                              ▼
+┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
+│            PostgreSQL (User DB)          │   │          PostgreSQL (Billing DB)         │
+└──────────────────────────────────────────┘   └──────────────────────────────────────────┘
 
 Shared Infrastructure
 ┌──────────────────────────────┐   ┌─────────────────────────────┐
@@ -212,6 +212,10 @@ Each service can be run independently with Docker Compose:
 cd iqscaffold-user-service
 docker-compose up
 
+# Start Billing Service with dependencies
+cd iqscaffold-billing-service
+docker-compose up
+
 # Start Gateway Service
 cd iqscaffold-gateway-service
 docker-compose up
@@ -223,6 +227,7 @@ docker-compose up
 Once services are running, access Swagger UI:
 
 - User Service: http://user-service:8080/swagger-ui.html
+- Billing Service: http://billing-service:8082/swagger-ui.html
 - Gateway Service: http://gateway-service:8081/swagger-ui.html
 
 ### Monitoring
