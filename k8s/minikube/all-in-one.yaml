@@ -21,6 +21,7 @@ metadata:
 data:
   # Database URLs
   AUTH_DB_URL: "jdbc:postgresql://postgres-user:5432/iqscaffold_user"
+  BILLING_DB_URL: "jdbc:postgresql://postgres-billing:5432/iqscaffold_billing"
 
   # Redis
   REDIS_HOST: "redis"
@@ -28,6 +29,7 @@ data:
 
   # Service URLs
   USER_SERVICE_URL: "http://user-service:8080"
+  BILLING_SERVICE_URL: "http://billing-service:8082"
 
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "local"
@@ -50,6 +52,10 @@ data:
 
   # JWT Secret (local-dev-secret-key-change-in-production)
   JWT_SECRET: bG9jYWwtZGV2LXNlY3JldC1rZXktY2hhbmdlLWluLXByb2R1Y3Rpb24=
+
+  # Stripe Secrets (placeholder-values)
+  STRIPE_API_KEY: cGxhY2Vob2xkZXI=
+  STRIPE_WEBHOOK_SECRET: cGxhY2Vob2xkZXI=
 
   # Redis password (empty for local)
   REDIS_PASSWORD: ""
@@ -140,6 +146,93 @@ spec:
       targetPort: 5432
   selector:
     app: postgres-user
+
+---
+# PostgreSQL for Billing Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-billing
+  namespace: iqscaffold-dev-env
+  labels:
+    app: postgres-billing
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-billing
+  template:
+    metadata:
+      labels:
+        app: postgres-billing
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: iqscaffold_billing
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - iqscaffold_user
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - iqscaffold_user
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: postgres-data
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-billing
+  namespace: iqscaffold-dev-env
+  labels:
+    app: postgres-billing
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres-billing
 
 ---
 # Redis
@@ -355,6 +448,217 @@ spec:
       name: http
   selector:
     app: user-service
+
+---
+# Billing Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-service
+  namespace: iqscaffold-dev-env
+  labels:
+    app: billing-service
+    component: microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-service
+  template:
+    metadata:
+      labels:
+        app: billing-service
+        component: microservice
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until nc -z postgres-billing 5432; do
+                echo "Waiting for postgres-billing..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+      containers:
+        - name: billing-service
+          image: iqscaffold/iqscaffold-billing-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: BILLING_DB_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: DB_PASSWORD
+            - name: USER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: USER_SERVICE_URL
+            - name: STRIPE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_API_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: JAVA_OPTS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 12
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+  namespace: iqscaffold-dev-env
+  labels:
+    app: billing-service
+spec:
+  type: NodePort
+  ports:
+    - port: 8082
+      targetPort: 8082
+      nodePort: 30082
+      name: http
+  selector:
+    app: billing-service
+
+---
+# Gateway Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+  namespace: iqscaffold-dev-env
+  labels:
+    app: gateway-service
+    component: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+        component: gateway
+    spec:
+      initContainers:
+        - name: wait-for-redis
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Redis to be ready..."
+              until nc -z redis 6379; do
+                echo "Waiting for redis..."
+                sleep 2
+              done
+              echo "Redis is ready!"
+      containers:
+        - name: gateway-service
+          image: iqscaffold/iqscaffold-gateway-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: IQSCAFFOLD_GATEWAY_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: REDIS_HOST
+            - name: IQSCAFFOLD_GATEWAY_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: REDIS_PORT
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: JAVA_OPTS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
 
 ---
 apiVersion: v1

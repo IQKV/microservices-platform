@@ -33,9 +33,9 @@ if [ "$BUILD_IMAGES" = true ]; then
     eval $(minikube docker-env)
     cd "$PROJECT_ROOT"
     
-    for svc in user gateway; do
+    for svc in user billing gateway; do
         log "Building ${svc} service..."
-        docker build -t iqscaffold/${svc}-service:latest -f iqscaffold-${svc}-service/Dockerfile .
+        docker build -t iqscaffold/iqscaffold-${svc}-service:latest -f iqscaffold-${svc}-service/Dockerfile .
     done
     
     cd - > /dev/null
@@ -50,7 +50,7 @@ if minikube addons list | grep -q "ingress.*enabled"; then
     log "Applying ingress..."
     kubectl apply -f ingress.yaml
     ok "Ingress applied"
-    log "Add to /etc/hosts: $MINIKUBE_IP api.iqscaffold.site user.iqscaffold.site"
+    log "Add to /etc/hosts: $MINIKUBE_IP api.iqscaffold.site user.iqscaffold.site billing.iqscaffold.site"
 else
     warn "Ingress addon not enabled. Enable with: minikube addons enable ingress"
 fi
@@ -58,8 +58,10 @@ fi
 if [ "$WAIT_FOR_READY" = true ]; then
     log "Waiting for pods..."
     kubectl wait --for=condition=ready pod -l app=postgres-user -n iqscaffold-dev-env --timeout=300s || warn "Postgres user not ready"
+    kubectl wait --for=condition=ready pod -l app=postgres-billing -n iqscaffold-dev-env --timeout=300s || warn "Postgres billing not ready"
     kubectl wait --for=condition=ready pod -l app=redis -n iqscaffold-dev-env --timeout=300s || warn "Redis not ready"
     kubectl wait --for=condition=ready pod -l app=user-service -n iqscaffold-dev-env --timeout=300s || warn "User service not ready"
+    kubectl wait --for=condition=ready pod -l app=billing-service -n iqscaffold-dev-env --timeout=300s || warn "Billing service not ready"
     kubectl wait --for=condition=ready pod -l app=gateway-service -n iqscaffold-dev-env --timeout=300s || warn "Gateway service not ready"
     ok "All pods ready"
 fi
@@ -71,11 +73,13 @@ echo ""
 log "Service URLs:"
 echo "  Gateway:   http://${MINIKUBE_IP}:30080"
 echo "  User:      http://${MINIKUBE_IP}:30081"
+echo "  Billing:   http://${MINIKUBE_IP}:30082"
 echo ""
 
 if minikube addons list | grep -q "ingress.*enabled"; then
     echo "  API Gateway: http://api.iqscaffold.site"
     echo "  User:        http://user.iqscaffold.site"
+    echo "  Billing:     http://billing.iqscaffold.site"
     echo ""
 fi
 
