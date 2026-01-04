@@ -58,8 +58,8 @@ public class SecurityConfig {
             .requestMatchers("/.well-known/jwks.json").permitAll()
             // Protected endpoints
             .requestMatchers("/api/v1/auth/refresh", "/api/v1/auth/logout").authenticated()
-            .requestMatchers("/api/v1/admin/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-            .requestMatchers("/api/v1/tenants/**").hasRole("SUPER_ADMIN")
+            .requestMatchers("/api/v1/admin/users/**").hasAnyAuthority("ADMIN", "SUPER_ADMIN")
+            .requestMatchers("/api/v1/tenants/**").hasAnyAuthority("SUPER_ADMIN")
             // All other requests require authentication
             .anyRequest().authenticated()
         )
