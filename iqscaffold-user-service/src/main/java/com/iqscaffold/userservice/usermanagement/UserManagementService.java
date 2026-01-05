@@ -23,7 +23,95 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for user management operations with admin-only access and tenant isolation. Implements role-based access control and audit logging.
+ * Comprehensive user management service providing administrative operations with enterprise-grade security.
+ * 
+ * <p>This service implements secure user lifecycle management with strict access controls, audit logging,
+ * and multi-tenant isolation. All operations are restricted to users with administrative privileges
+ * and include comprehensive security validations.
+ * 
+ * <h3>Core Capabilities</h3>
+ * <ul>
+ *   <li><strong>User CRUD Operations</strong> - Create, read, update, and delete user accounts</li>
+ *   <li><strong>Role-Based Access Control</strong> - Hierarchical permission system (USER, ADMIN, SUPER_ADMIN)</li>
+ *   <li><strong>Multi-Tenant Isolation</strong> - Tenant-aware operations with data segregation</li>
+ *   <li><strong>Audit Logging</strong> - Complete audit trail for all administrative actions</li>
+ *   <li><strong>Caching Support</strong> - Redis-based caching with tenant-aware keys</li>
+ * </ul>
+ * 
+ * <h3>Security Architecture</h3>
+ * <ul>
+ *   <li><strong>Administrative Access Only</strong> - All methods require ADMIN or SUPER_ADMIN roles</li>
+ *   <li><strong>Tenant Isolation</strong> - Users can only manage accounts within their tenant</li>
+ *   <li><strong>Role Hierarchy</strong> - SUPER_ADMIN can manage all users, ADMIN limited to tenant</li>
+ *   <li><strong>Input Validation</strong> - Comprehensive validation of all user data</li>
+ *   <li><strong>Password Security</strong> - BCrypt hashing with configurable strength</li>
+ * </ul>
+ * 
+ * <h3>Role-Based Filtering</h3>
+ * <ul>
+ *   <li><strong>SUPER_ADMIN</strong> - Can view and manage all users across all tenants</li>
+ *   <li><strong>ADMIN</strong> - Can view and manage users within their tenant only</li>
+ *   <li><strong>Tenant Isolation</strong> - Automatic filtering based on current user's tenant context</li>
+ * </ul>
+ * 
+ * <h3>Caching Strategy</h3>
+ * <ul>
+ *   <li><strong>User Lookups</strong> - Individual user data cached with tenant-aware keys</li>
+ *   <li><strong>User Lists</strong> - Paginated results cached per tenant</li>
+ *   <li><strong>Cache Invalidation</strong> - Automatic cache eviction on user modifications</li>
+ *   <li><strong>TTL Management</strong> - Configurable cache expiration times</li>
+ * </ul>
+ * 
+ * <h3>Audit Trail</h3>
+ * <p>All operations are logged with:
+ * <ul>
+ *   <li>Action performed (CREATE_USER, UPDATE_USER, DELETE_USER, etc.)</li>
+ *   <li>Administrator who performed the action</li>
+ *   <li>Target user affected</li>
+ *   <li>Timestamp and tenant context</li>
+ *   <li>IP address and user agent (when available)</li>
+ * </ul>
+ * 
+ * <h3>Data Transfer Objects</h3>
+ * <ul>
+ *   <li><strong>UserDto</strong> - Safe user representation without sensitive data</li>
+ *   <li><strong>CreateUserRequest</strong> - User creation with validation</li>
+ *   <li><strong>UpdateUserRequest</strong> - User modification with partial updates</li>
+ *   <li><strong>UserContext</strong> - Current user context for authorization</li>
+ * </ul>
+ * 
+ * <h3>Exception Handling</h3>
+ * <ul>
+ *   <li>{@code AccessDeniedException} - Insufficient privileges</li>
+ *   <li>{@code UserNotFoundException} - User not found or not accessible</li>
+ *   <li>{@code UserAlreadyExistsException} - Duplicate username or email</li>
+ *   <li>{@code TenantContextException} - Invalid tenant context</li>
+ * </ul>
+ * 
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * @Autowired
+ * private UserManagementService userService;
+ * 
+ * // Get paginated user list (admin only)
+ * Page<UserDto> users = userService.getAllUsers(pageable, currentUser);
+ * 
+ * // Create new user (admin only)
+ * CreateUserRequest request = new CreateUserRequest(...);
+ * UserDto newUser = userService.createUser(request, currentUser);
+ * 
+ * // Update user roles (admin only)
+ * Set<String> newRoles = Set.of("USER", "ADMIN");
+ * userService.updateUserRoles(userId, newRoles, currentUser);
+ * }</pre>
+ * 
+ * @author IQ Scaffold Team
+ * @version 1.0
+ * @since 1.0
+ * @see UserDto
+ * @see UserContext
+ * @see SecurityAuditService
+ * @see TenantContext
  */
 @Service
 @Transactional
@@ -48,7 +136,61 @@ public class UserManagementService {
   }
 
   /**
-   * Get all users with pagination and tenant filtering. Only accessible by ADMIN and SUPER_ADMIN authorities.
+   * Retrieve all users with pagination, role-based filtering, and comprehensive access control.
+   * 
+   * <p>This method provides secure access to user data with strict authorization checks and
+   * tenant-based filtering. Only administrators can access this functionality, and the results
+   * are filtered based on the requesting user's role and tenant context.
+   * 
+   * <h4>Access Control:</h4>
+   * <ul>
+   *   <li><strong>SUPER_ADMIN</strong> - Can view all users across all tenants</li>
+   *   <li><strong>ADMIN</strong> - Can view users within their tenant only</li>
+   *   <li><strong>USER</strong> - Access denied (throws AccessDeniedException)</li>
+   * </ul>
+   * 
+   * <h4>Filtering Logic:</h4>
+   * <ul>
+   *   <li>Tenant-based filtering for ADMIN users</li>
+   *   <li>No filtering for SUPER_ADMIN users</li>
+   *   <li>Automatic exclusion of system accounts</li>
+   *   <li>Optional status-based filtering (active/inactive)</li>
+   * </ul>
+   * 
+   * <h4>Pagination Support:</h4>
+   * <ul>
+   *   <li>Spring Data Pageable interface</li>
+   *   <li>Configurable page size and sorting</li>
+   *   <li>Total count and page metadata</li>
+   *   <li>Efficient database queries with LIMIT/OFFSET</li>
+   * </ul>
+   * 
+   * <h4>Data Security:</h4>
+   * <ul>
+   *   <li>Sensitive data (passwords, tokens) excluded from DTOs</li>
+   *   <li>Role and permission information included for authorized users</li>
+   *   <li>Audit logging of access attempts</li>
+   *   <li>IP address and user agent tracking</li>
+   * </ul>
+   * 
+   * <h4>Performance Optimizations:</h4>
+   * <ul>
+   *   <li>Database query optimization with proper indexing</li>
+   *   <li>Lazy loading of associated entities</li>
+   *   <li>Efficient DTO conversion</li>
+   *   <li>Caching of frequently accessed data</li>
+   * </ul>
+   * 
+   * @param pageable Pagination parameters (page, size, sort)
+   * @param currentUser The authenticated user making the request (for authorization)
+   * @return Page of UserDto objects with pagination metadata
+   * 
+   * @throws AccessDeniedException If the current user lacks administrative privileges
+   * @throws TenantContextException If tenant context is invalid or missing
+   * 
+   * @see UserDto
+   * @see UserContext
+   * @see Pageable
    */
   @Transactional(readOnly = true)
   public Page<UserDto> getAllUsers(Pageable pageable, UserContext currentUser) {
@@ -75,7 +217,47 @@ public class UserManagementService {
   }
 
   /**
-   * Get user by ID with tenant isolation. Cached with tenant-aware key generation.
+   * Retrieve a specific user by ID with tenant isolation and caching support.
+   * 
+   * <p>This method provides secure access to individual user records with automatic tenant
+   * filtering and intelligent caching. The result is cached using tenant-aware keys to
+   * improve performance while maintaining data isolation.
+   * 
+   * <h4>Security Features:</h4>
+   * <ul>
+   *   <li><strong>Tenant Isolation</strong> - Users can only access accounts within their tenant</li>
+   *   <li><strong>Role-Based Access</strong> - SUPER_ADMIN can access any user, ADMIN limited to tenant</li>
+   *   <li><strong>Data Sanitization</strong> - Sensitive information excluded from response</li>
+   *   <li><strong>Audit Logging</strong> - Access attempts logged for security monitoring</li>
+   * </ul>
+   * 
+   * <h4>Caching Strategy:</h4>
+   * <ul>
+   *   <li><strong>Cache Key</strong> - Includes user ID and tenant ID for isolation</li>
+   *   <li><strong>TTL</strong> - Configurable expiration time (default: 1 hour)</li>
+   *   <li><strong>Invalidation</strong> - Automatic cache eviction on user updates</li>
+   *   <li><strong>Cache Miss</strong> - Falls back to database query</li>
+   * </ul>
+   * 
+   * <h4>Data Transformation:</h4>
+   * <ul>
+   *   <li>Converts User entity to UserDto for safe external exposure</li>
+   *   <li>Includes role and permission information</li>
+   *   <li>Excludes password hash and sensitive tokens</li>
+   *   <li>Adds computed fields (full name, display name)</li>
+   * </ul>
+   * 
+   * @param userId The unique identifier of the user to retrieve
+   * @param currentUser The authenticated user making the request
+   * @return UserDto containing user information (excluding sensitive data)
+   * 
+   * @throws UserNotFoundException If user doesn't exist or is not accessible
+   * @throws AccessDeniedException If current user lacks permission to view the user
+   * @throws TenantContextException If tenant context validation fails
+   * 
+   * @see UserDto
+   * @see UserContext
+   * @see Cacheable
    */
   @Transactional(readOnly = true)
   @Cacheable(value = "users", key = "#userId + '_' + #currentUser.tenantId()",

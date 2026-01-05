@@ -19,7 +19,113 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for tenant management operations including CRUD operations and schema provisioning. Handles multi-tenant architecture support with tenant lifecycle management.
+ * Comprehensive tenant management service providing multi-tenant architecture support with enterprise features.
+ * 
+ * <p>This service manages the complete lifecycle of tenant environments in a multi-tenant SaaS architecture.
+ * It provides secure tenant operations, schema provisioning, quota management, and comprehensive monitoring
+ * capabilities while ensuring strict data isolation between tenants.
+ * 
+ * <h3>Core Capabilities</h3>
+ * <ul>
+ *   <li><strong>Tenant Lifecycle Management</strong> - Create, update, delete, and manage tenant environments</li>
+ *   <li><strong>Schema Provisioning</strong> - Automatic database schema creation and migration</li>
+ *   <li><strong>Quota Management</strong> - User limits, storage quotas, and API rate limiting</li>
+ *   <li><strong>Domain Management</strong> - Custom domain assignment and validation</li>
+ *   <li><strong>Tenant Statistics</strong> - Usage metrics and monitoring data</li>
+ * </ul>
+ * 
+ * <h3>Multi-Tenant Architecture</h3>
+ * <ul>
+ *   <li><strong>Schema-per-Tenant</strong> - Physical data isolation using separate database schemas</li>
+ *   <li><strong>Tenant Registry</strong> - Central registry stored in public schema</li>
+ *   <li><strong>Context Propagation</strong> - Automatic tenant context management</li>
+ *   <li><strong>Data Isolation</strong> - Complete separation of tenant data and operations</li>
+ * </ul>
+ * 
+ * <h3>Schema Management</h3>
+ * <ul>
+ *   <li><strong>Automatic Provisioning</strong> - Creates tenant schema during tenant creation</li>
+ *   <li><strong>Liquibase Integration</strong> - Database migrations per tenant schema</li>
+ *   <li><strong>Schema Naming</strong> - Consistent naming convention (tenant_[tenantId])</li>
+ *   <li><strong>Migration Tracking</strong> - Version control for schema changes</li>
+ * </ul>
+ * 
+ * <h3>Quota and Limits</h3>
+ * <ul>
+ *   <li><strong>User Quotas</strong> - Maximum number of users per tenant</li>
+ *   <li><strong>Storage Quotas</strong> - Disk space limits in GB</li>
+ *   <li><strong>API Rate Limits</strong> - Requests per minute throttling</li>
+ *   <li><strong>Feature Flags</strong> - Tenant-specific feature enablement</li>
+ * </ul>
+ * 
+ * <h3>Security Features</h3>
+ * <ul>
+ *   <li><strong>Tenant Validation</strong> - Comprehensive validation of tenant data</li>
+ *   <li><strong>Domain Uniqueness</strong> - Prevents domain conflicts across tenants</li>
+ *   <li><strong>Access Control</strong> - Role-based tenant management operations</li>
+ *   <li><strong>Audit Logging</strong> - Complete audit trail for tenant operations</li>
+ * </ul>
+ * 
+ * <h3>Caching Strategy</h3>
+ * <ul>
+ *   <li><strong>Tenant Lookups</strong> - Cached tenant metadata for performance</li>
+ *   <li><strong>Domain Resolution</strong> - Cached domain-to-tenant mappings</li>
+ *   <li><strong>Statistics</strong> - Cached usage statistics with TTL</li>
+ *   <li><strong>Cache Invalidation</strong> - Automatic eviction on tenant updates</li>
+ * </ul>
+ * 
+ * <h3>Monitoring and Statistics</h3>
+ * <ul>
+ *   <li><strong>User Counts</strong> - Active and total user statistics</li>
+ *   <li><strong>Storage Usage</strong> - Current storage consumption</li>
+ *   <li><strong>API Usage</strong> - Request volume and rate limit status</li>
+ *   <li><strong>Health Metrics</strong> - Tenant health and performance indicators</li>
+ * </ul>
+ * 
+ * <h3>Exception Handling</h3>
+ * <ul>
+ *   <li>{@code TenantAlreadyExistsException} - Duplicate tenant ID</li>
+ *   <li>{@code DomainAlreadyExistsException} - Duplicate domain assignment</li>
+ *   <li>{@code TenantNotFoundException} - Tenant not found</li>
+ *   <li>{@code SchemaProvisioningException} - Database schema creation failures</li>
+ *   <li>{@code QuotaExceededException} - Quota limit violations</li>
+ * </ul>
+ * 
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * @Autowired
+ * private TenantManagementService tenantService;
+ * 
+ * // Create new tenant with schema provisioning
+ * CreateTenantRequest request = CreateTenantRequest.builder()
+ *     .tenantId("acme-corp")
+ *     .name("ACME Corporation")
+ *     .domain("acme.example.com")
+ *     .maxUsers(100)
+ *     .storageQuotaGb(50)
+ *     .build();
+ * 
+ * TenantResponse tenant = tenantService.createTenant(request, "admin@system.com");
+ * 
+ * // Get tenant statistics
+ * TenantStatistics stats = tenantService.getTenantStatistics("acme-corp");
+ * 
+ * // Update tenant quotas
+ * UpdateTenantRequest updateRequest = UpdateTenantRequest.builder()
+ *     .maxUsers(200)
+ *     .storageQuotaGb(100)
+ *     .build();
+ * 
+ * tenantService.updateTenant("acme-corp", updateRequest, "admin@system.com");
+ * }</pre>
+ * 
+ * @author IQ Scaffold Team
+ * @version 1.0
+ * @since 1.0
+ * @see Tenant
+ * @see TenantDto
+ * @see SchemaNameResolver
+ * @see TenantLiquibaseRunner
  */
 @Service
 @Transactional
@@ -47,13 +153,92 @@ public class TenantManagementService {
   }
 
   /**
-   * Create a new tenant with validation and schema provisioning. Evicts tenant caches to ensure fresh data.
-   *
-   * @param request   the tenant creation request
-   * @param createdBy the user creating the tenant
-   * @return the created tenant response
-   * @throws TenantManagementException.TenantAlreadyExistsException if tenant already exists
-   * @throws TenantManagementException.DomainAlreadyExistsException if domain already exists
+   * Create a new tenant with comprehensive validation, schema provisioning, and quota setup.
+   * 
+   * <p>This method implements the complete tenant creation workflow including validation,
+   * database schema provisioning, and initial configuration. It ensures data integrity
+   * and proper isolation while setting up all necessary infrastructure for the new tenant.
+   * 
+   * <h4>Creation Workflow:</h4>
+   * <ol>
+   *   <li><strong>Validation Phase</strong>
+   *       <ul>
+   *         <li>Tenant ID uniqueness check</li>
+   *         <li>Domain uniqueness validation (if provided)</li>
+   *         <li>Input sanitization and format validation</li>
+   *         <li>Quota and limit validation</li>
+   *       </ul>
+   *   </li>
+   *   <li><strong>Entity Creation</strong>
+   *       <ul>
+   *         <li>Create Tenant entity with metadata</li>
+   *         <li>Set default quotas and limits</li>
+   *         <li>Configure tenant-specific settings</li>
+   *         <li>Persist to public schema registry</li>
+   *       </ul>
+   *   </li>
+   *   <li><strong>Schema Provisioning</strong>
+   *       <ul>
+   *         <li>Generate unique schema name</li>
+   *         <li>Create database schema</li>
+   *         <li>Run Liquibase migrations</li>
+   *         <li>Set up initial data and constraints</li>
+   *       </ul>
+   *   </li>
+   *   <li><strong>Cache Management</strong>
+   *       <ul>
+   *         <li>Invalidate tenant caches</li>
+   *         <li>Update domain resolution cache</li>
+   *         <li>Refresh tenant statistics</li>
+   *       </ul>
+   *   </li>
+   * </ol>
+   * 
+   * <h4>Validation Rules:</h4>
+   * <ul>
+   *   <li><strong>Tenant ID</strong> - Must be unique, alphanumeric, 3-50 characters</li>
+   *   <li><strong>Domain</strong> - Must be valid FQDN and globally unique</li>
+   *   <li><strong>Name</strong> - Required, 1-255 characters</li>
+   *   <li><strong>Quotas</strong> - Must be positive integers within system limits</li>
+   * </ul>
+   * 
+   * <h4>Default Configuration:</h4>
+   * <ul>
+   *   <li><strong>Status</strong> - Enabled by default</li>
+   *   <li><strong>Max Users</strong> - 10 (if not specified)</li>
+   *   <li><strong>Storage Quota</strong> - 1GB (if not specified)</li>
+   *   <li><strong>API Rate Limit</strong> - 1000 requests/minute (if not specified)</li>
+   * </ul>
+   * 
+   * <h4>Schema Provisioning:</h4>
+   * <ul>
+   *   <li>Creates schema with name pattern: {@code tenant_[tenantId]}</li>
+   *   <li>Runs all tenant-specific Liquibase changesets</li>
+   *   <li>Sets up initial tables, indexes, and constraints</li>
+   *   <li>Configures tenant-specific data and settings</li>
+   * </ul>
+   * 
+   * <h4>Error Handling:</h4>
+   * <ul>
+   *   <li>Rollback entity creation if schema provisioning fails</li>
+   *   <li>Cleanup partial schema creation on errors</li>
+   *   <li>Detailed error logging for troubleshooting</li>
+   *   <li>Graceful handling of concurrent creation attempts</li>
+   * </ul>
+   * 
+   * @param request The tenant creation request with all required information
+   * @param createdBy The identifier of the user/system creating the tenant
+   * @return TenantResponse containing the created tenant information
+   * 
+   * @throws TenantManagementException.TenantAlreadyExistsException If tenant ID already exists
+   * @throws TenantManagementException.DomainAlreadyExistsException If domain is already assigned
+   * @throws TenantManagementException.SchemaProvisioningException If database schema creation fails
+   * @throws ValidationException If request data is invalid
+   * 
+   * @see CreateTenantRequest
+   * @see TenantResponse
+   * @see SchemaNameResolver
+   * @see TenantLiquibaseRunner
    */
   @CacheEvict(value = "tenants", allEntries = true)
   public TenantResponse createTenant(CreateTenantRequest request, String createdBy) {

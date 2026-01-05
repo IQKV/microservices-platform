@@ -27,7 +27,129 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Global exception handler using Java 21 switch expressions and records. Provides consistent error responses across all endpoints with OpenAPI documentation.
+ * Global exception handler providing centralized error handling with RFC 9457 Problem Details compliance.
+ * 
+ * <p>This handler implements comprehensive error handling across the entire user service, providing
+ * consistent error responses, detailed problem information, and proper HTTP status codes. It follows
+ * the RFC 9457 Problem Details standard for machine-readable error responses.
+ * 
+ * <h3>Error Handling Features</h3>
+ * <ul>
+ *   <li><strong>RFC 9457 Compliance</strong> - Standard Problem Details format for all errors</li>
+ *   <li><strong>Centralized Handling</strong> - Single point for all exception processing</li>
+ *   <li><strong>Structured Responses</strong> - Consistent error format across all endpoints</li>
+ *   <li><strong>Context Enrichment</strong> - Automatic addition of request context and correlation IDs</li>
+ *   <li><strong>Security Aware</strong> - Prevents information leakage in error responses</li>
+ * </ul>
+ * 
+ * <h3>Problem Details Structure</h3>
+ * <ul>
+ *   <li><strong>type</strong> - URI identifying the problem type</li>
+ *   <li><strong>title</strong> - Human-readable summary of the problem</li>
+ *   <li><strong>status</strong> - HTTP status code</li>
+ *   <li><strong>detail</strong> - Detailed explanation of the problem</li>
+ *   <li><strong>instance</strong> - URI identifying the specific occurrence</li>
+ *   <li><strong>Additional Properties</strong> - Context-specific error information</li>
+ * </ul>
+ * 
+ * <h3>Handled Exception Types</h3>
+ * <ul>
+ *   <li><strong>Validation Errors</strong> - Bean validation and constraint violations</li>
+ *   <li><strong>Authentication Errors</strong> - Login failures and token issues</li>
+ *   <li><strong>Authorization Errors</strong> - Access denied and permission issues</li>
+ *   <li><strong>Business Logic Errors</strong> - Domain-specific exceptions</li>
+ *   <li><strong>System Errors</strong> - Database, network, and infrastructure issues</li>
+ * </ul>
+ * 
+ * <h3>Security Considerations</h3>
+ * <ul>
+ *   <li><strong>Information Hiding</strong> - Sensitive details excluded from error responses</li>
+ *   <li><strong>Stack Trace Protection</strong> - Stack traces never exposed to clients</li>
+ *   <li><strong>Error Code Mapping</strong> - Generic error codes prevent system enumeration</li>
+ *   <li><strong>Audit Integration</strong> - Security-relevant errors logged for monitoring</li>
+ * </ul>
+ * 
+ * <h3>Context Enrichment</h3>
+ * <p>All error responses automatically include:
+ * <ul>
+ *   <li><strong>Correlation ID</strong> - For request tracing and debugging</li>
+ *   <li><strong>Request ID</strong> - Unique identifier for the specific request</li>
+ *   <li><strong>Request Path</strong> - The endpoint that generated the error</li>
+ *   <li><strong>HTTP Method</strong> - The HTTP method used</li>
+ *   <li><strong>Timestamp</strong> - When the error occurred</li>
+ * </ul>
+ * 
+ * <h3>Validation Error Handling</h3>
+ * <ul>
+ *   <li><strong>Field-Level Errors</strong> - Detailed validation messages per field</li>
+ *   <li><strong>Constraint Violations</strong> - Bean validation constraint details</li>
+ *   <li><strong>Internationalization</strong> - Localized error messages</li>
+ *   <li><strong>Error Codes</strong> - Machine-readable error identification</li>
+ * </ul>
+ * 
+ * <h3>OpenAPI Integration</h3>
+ * <ul>
+ *   <li><strong>Documented Responses</strong> - All error responses documented in OpenAPI spec</li>
+ *   <li><strong>Schema Definitions</strong> - ProblemDetail schema included</li>
+ *   <li><strong>Status Code Mapping</strong> - Proper HTTP status codes for each error type</li>
+ * </ul>
+ * 
+ * <h3>Logging Strategy</h3>
+ * <ul>
+ *   <li><strong>Error Classification</strong> - Different log levels based on error severity</li>
+ *   <li><strong>Structured Logging</strong> - JSON formatted logs with context</li>
+ *   <li><strong>Correlation Tracking</strong> - Request correlation IDs in all log entries</li>
+ *   <li><strong>Security Events</strong> - Special handling for security-related errors</li>
+ * </ul>
+ * 
+ * <h3>Error Response Examples</h3>
+ * <pre>{@code
+ * // Validation Error Response
+ * {
+ *   "type": "https://problems.iqscaffold.com/validation-error",
+ *   "title": "Request validation failed",
+ *   "status": 400,
+ *   "detail": "One or more fields contain invalid values",
+ *   "instance": "/api/v1/users",
+ *   "correlationId": "abc123",
+ *   "requestId": "req-456",
+ *   "fields": [
+ *     {
+ *       "field": "email",
+ *       "message": "must be a valid email address",
+ *       "rejectedValue": "invalid-email"
+ *     }
+ *   ]
+ * }
+ * 
+ * // Authentication Error Response
+ * {
+ *   "type": "https://problems.iqscaffold.com/authentication-error",
+ *   "title": "Authentication failed",
+ *   "status": 401,
+ *   "detail": "Invalid credentials provided",
+ *   "instance": "/api/v1/auth/login",
+ *   "correlationId": "def789"
+ * }
+ * }</pre>
+ * 
+ * <h3>Exception Mapping</h3>
+ * <ul>
+ *   <li><strong>400 Bad Request</strong> - Validation errors, malformed requests</li>
+ *   <li><strong>401 Unauthorized</strong> - Authentication failures</li>
+ *   <li><strong>403 Forbidden</strong> - Authorization failures</li>
+ *   <li><strong>404 Not Found</strong> - Resource not found</li>
+ *   <li><strong>409 Conflict</strong> - Business rule violations</li>
+ *   <li><strong>429 Too Many Requests</strong> - Rate limiting</li>
+ *   <li><strong>500 Internal Server Error</strong> - System errors</li>
+ * </ul>
+ * 
+ * @author IQ Scaffold Team
+ * @version 1.0
+ * @since 1.0
+ * @see ProblemDetail
+ * @see RFC9457
+ * @see RestControllerAdvice
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,7 +157,48 @@ public class GlobalExceptionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   /**
-   * Helper to create a ProblemDetail with common properties.
+   * Create a standardized ProblemDetail response with comprehensive context information.
+   * 
+   * <p>This helper method constructs RFC 9457 compliant Problem Details responses with
+   * consistent structure and automatic context enrichment. It ensures all error responses
+   * follow the same format and include necessary debugging information.
+   * 
+   * <h4>Automatic Context Addition:</h4>
+   * <ul>
+   *   <li><strong>Request Path</strong> - The endpoint that generated the error</li>
+   *   <li><strong>HTTP Method</strong> - The HTTP method used in the request</li>
+   *   <li><strong>Correlation ID</strong> - For distributed tracing and debugging</li>
+   *   <li><strong>Request ID</strong> - Unique identifier for this specific request</li>
+   *   <li><strong>Timestamp</strong> - When the error occurred (implicit in response)</li>
+   * </ul>
+   * 
+   * <h4>Problem Detail Structure:</h4>
+   * <ul>
+   *   <li><strong>type</strong> - URI identifying the problem category</li>
+   *   <li><strong>title</strong> - Human-readable problem summary</li>
+   *   <li><strong>status</strong> - HTTP status code</li>
+   *   <li><strong>detail</strong> - Detailed problem description</li>
+   *   <li><strong>instance</strong> - URI of the specific problem occurrence</li>
+   * </ul>
+   * 
+   * <h4>Context Properties:</h4>
+   * <ul>
+   *   <li><strong>path</strong> - Request URI path for debugging</li>
+   *   <li><strong>method</strong> - HTTP method for context</li>
+   *   <li><strong>correlationId</strong> - Distributed tracing identifier</li>
+   *   <li><strong>requestId</strong> - Unique request identifier</li>
+   * </ul>
+   * 
+   * @param type URI identifying the problem type (e.g., "https://problems.iqscaffold.com/validation-error")
+   * @param title Human-readable summary of the problem type
+   * @param status HTTP status code for the response
+   * @param detail Detailed explanation of this specific problem occurrence
+   * @param request The HTTP request that caused the error (for context extraction)
+   * @return Fully constructed ProblemDetail with all context information
+   * 
+   * @see ProblemDetail
+   * @see HttpServletRequest
+   * @see MDC
    */
   private ProblemDetail problem(String type, String title, HttpStatus status, String detail, HttpServletRequest request) {
     var pd = ProblemDetail.forStatusAndDetail(status, detail);
