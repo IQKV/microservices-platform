@@ -2,6 +2,7 @@ package com.iqscaffold.gatewayservice.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,11 @@ import org.springframework.context.annotation.Configuration;
  * <p>
  * Automatically creates gateway routes for Swagger UI and OpenAPI JSON endpoints
  * for all enabled downstream services based on configuration.
+ * <p>
+ * This configuration is only active when Spring Cloud Gateway is enabled.
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class DynamicOpenApiRoutesConfiguration {
 
   private static final Logger log = LoggerFactory.getLogger(DynamicOpenApiRoutesConfiguration.class);
