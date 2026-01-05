@@ -48,7 +48,7 @@ public class UserManagementService {
   }
 
   /**
-   * Get all users with pagination and tenant filtering. Only accessible by ADMIN and SUPER_ADMIN roles.
+   * Get all users with pagination and tenant filtering. Only accessible by ADMIN and SUPER_ADMIN authorities.
    */
   @Transactional(readOnly = true)
   public Page<UserDto> getAllUsers(Pageable pageable, UserContext currentUser) {
@@ -125,7 +125,7 @@ public class UserManagementService {
     user.setEmailVerified(request.emailVerified());
 
     // Set authorities
-    var authorities = getAuthoritiesByNames(request.roles());
+    var authorities = getAuthoritiesByNames(request.authorities()); // Changed from roles() to authorities()
     validateRoleAssignment(authorities, currentUser);
     user.setAuthorities(authorities);
 
@@ -141,7 +141,7 @@ public class UserManagementService {
    */
   @Caching(evict = {
       @CacheEvict(value = "users", key = "#userId + '_' + #currentUser.tenantId()"),
-      @CacheEvict(value = "users", allEntries = true, condition = "#request.roles() != null")
+      @CacheEvict(value = "users", allEntries = true, condition = "#request.authorities() != null") // Changed from roles() to authorities()
   })
   public UserDto updateUser(Long userId, UpdateUserRequest request, UserContext currentUser) {
     validateAdminAccess(currentUser, "UPDATE_USER");
@@ -186,9 +186,9 @@ public class UserManagementService {
       user.setEmailVerified(request.emailVerified());
     }
 
-    // Update roles if provided
-    if (request.roles() != null) {
-      var authorities = getAuthoritiesByNames(request.roles());
+    // Update authorities if provided
+    if (request.authorities() != null) { // Changed from roles() to authorities()
+      var authorities = getAuthoritiesByNames(request.authorities()); // Changed from roles() to authorities()
       validateRoleAssignment(authorities, currentUser);
       user.setAuthorities(authorities);
     }
@@ -228,7 +228,7 @@ public class UserManagementService {
    * Validate admin access for user management operations.
    */
   private void validateAdminAccess(UserContext currentUser, String operation) {
-    if (!currentUser.hasRole("ADMIN") && !currentUser.hasRole("SUPER_ADMIN")) {
+    if (!currentUser.hasAuthority("ADMIN") && !currentUser.hasAuthority("SUPER_ADMIN")) {
       throw new AccessDeniedException("Insufficient permissions for operation: " + operation);
     }
   }
@@ -238,12 +238,12 @@ public class UserManagementService {
    */
   private List<User> applyRoleBasedFiltering(List<User> users, UserContext currentUser) {
     // SUPER_ADMIN can see all users
-    if (currentUser.hasRole("SUPER_ADMIN")) {
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
       return users;
     }
 
     // ADMIN can see non-admin users and other admins (but not super admins)
-    if (currentUser.hasRole("ADMIN")) {
+    if (currentUser.hasAuthority("ADMIN")) {
       return users.stream()
           .filter(user -> !user.hasAuthority("SUPER_ADMIN"))
           .toList();
@@ -258,12 +258,12 @@ public class UserManagementService {
    */
   private void validateUserAccess(User user, UserContext currentUser) {
     // SUPER_ADMIN can access all users
-    if (currentUser.hasRole("SUPER_ADMIN")) {
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
       return;
     }
 
     // ADMIN cannot access SUPER_ADMIN users
-    if (currentUser.hasRole("ADMIN") && user.hasAuthority("SUPER_ADMIN")) {
+    if (currentUser.hasAuthority("ADMIN") && user.hasAuthority("SUPER_ADMIN")) {
       throw new AccessDeniedException("Cannot access super admin user");
     }
   }
@@ -277,12 +277,12 @@ public class UserManagementService {
         .collect(Collectors.toSet());
 
     // Only SUPER_ADMIN can assign SUPER_ADMIN role
-    if (roleNames.contains("SUPER_ADMIN") && !currentUser.hasRole("SUPER_ADMIN")) {
+    if (roleNames.contains("SUPER_ADMIN") && !currentUser.hasAuthority("SUPER_ADMIN")) {
       throw new AccessDeniedException("Only super admin can assign super admin role");
     }
 
     // ADMIN cannot assign roles higher than their own level
-    if (currentUser.hasRole("ADMIN") && !currentUser.hasRole("SUPER_ADMIN")) {
+    if (currentUser.hasAuthority("ADMIN") && !currentUser.hasAuthority("SUPER_ADMIN")) {
       if (roleNames.contains("SUPER_ADMIN")) {
         throw new AccessDeniedException("Admin cannot assign super admin role");
       }
@@ -312,7 +312,7 @@ public class UserManagementService {
         .collect(Collectors.toSet());
 
     if (!missingNames.isEmpty()) {
-      throw new UserManagementException("Unknown roles: " + missingNames);
+      throw new UserManagementException("Unknown authorities: " + missingNames);
     }
 
     return authorities.stream().collect(Collectors.toSet());
@@ -322,7 +322,7 @@ public class UserManagementService {
    * Convert User entity to UserDto.
    */
   private UserDto convertToDto(User user) {
-    var roles = user.getAuthorities().stream()
+    var authorities = user.getAuthorities().stream()
         .map(Authority::getName)
         .collect(Collectors.toSet());
 
@@ -334,7 +334,7 @@ public class UserManagementService {
         user.getLastName(),
         user.getEnabled(),
         user.getEmailVerified(),
-        roles,
+        authorities, // Changed from roles to authorities
         user.getTenantId(),
         user.getCreatedAt(),
         user.getUpdatedAt()

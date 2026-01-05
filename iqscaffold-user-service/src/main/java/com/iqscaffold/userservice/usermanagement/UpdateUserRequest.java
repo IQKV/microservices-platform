@@ -25,7 +25,6 @@ public record UpdateUserRequest(
 
     Boolean enabled,
     Boolean emailVerified,
-    Set<String> roles
+    Set<String> authorities
 ) {
-
 }

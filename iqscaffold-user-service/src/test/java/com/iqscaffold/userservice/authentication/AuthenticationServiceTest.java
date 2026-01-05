@@ -770,7 +770,7 @@ class AuthenticationServiceTest {
       assertThat(result.user().username()).isEqualTo("testuser");
       assertThat(result.user().email()).isEqualTo("test@example.com");
       assertThat(result.user().tenantId()).isEqualTo("tenant-123");
-      assertThat(result.user().roles()).contains("ROLE_USER");
+      assertThat(result.user().authorities()).contains("ROLE_USER");
       assertThat(result.accessToken()).isEqualTo("access-token");
       assertThat(result.refreshToken()).isEqualTo("refresh-token");
       assertThat(result.correlationId()).isEqualTo("test-correlation-id");

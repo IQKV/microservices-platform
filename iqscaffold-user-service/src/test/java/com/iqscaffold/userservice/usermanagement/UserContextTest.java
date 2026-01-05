@@ -31,7 +31,7 @@ class UserContextTest {
     assertEquals(1L, context.userId());
     assertEquals("john.doe", context.username());
     assertEquals("john.doe@example.com", context.email());
-    assertEquals(Set.of("USER", "ADMIN"), context.roles());
+    assertEquals(Set.of("USER", "ADMIN"), context.authorities());
     assertEquals(Set.of("READ_PROFILE", "WRITE_PROFILE"), context.permissions());
     assertEquals("John", context.firstName());
     assertEquals("Doe", context.lastName());
@@ -126,7 +126,7 @@ class UserContextTest {
     );
 
     assertThrows(UnsupportedOperationException.class, () ->
-        context.roles().add("ADMIN")
+        context.authorities().add("ADMIN")
     );
 
     assertThrows(UnsupportedOperationException.class, () ->
@@ -176,10 +176,10 @@ class UserContextTest {
         null
     );
 
-    assertNotNull(context.roles());
+    assertNotNull(context.authorities());
     assertNotNull(context.permissions());
     assertNotNull(context.customClaims());
-    assertTrue(context.roles().isEmpty());
+    assertTrue(context.authorities().isEmpty());
     assertTrue(context.permissions().isEmpty());
     assertTrue(context.customClaims().isEmpty());
   }
@@ -198,9 +198,9 @@ class UserContextTest {
         Map.of()
     );
 
-    assertTrue(context.hasRole("USER"));
-    assertTrue(context.hasRole("ADMIN"));
-    assertFalse(context.hasRole("SUPER_ADMIN"));
+    assertTrue(context.hasAuthority("USER"));
+    assertTrue(context.hasAuthority("ADMIN"));
+    assertFalse(context.hasAuthority("SUPER_ADMIN"));
   }
 
   @Test

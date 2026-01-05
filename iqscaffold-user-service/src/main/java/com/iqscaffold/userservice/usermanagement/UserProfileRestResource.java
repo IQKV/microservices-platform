@@ -66,7 +66,7 @@ public class UserProfileRestResource {
                         "userId": 1,
                         "username": "john.doe",
                         "email": "john.doe@example.com",
-                        "roles": ["USER"],
+                        "authorities": ["USER"],
                         "permissions": [],
                         "firstName": "John",
                         "lastName": "Doe",

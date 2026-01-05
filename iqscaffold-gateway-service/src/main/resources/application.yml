@@ -191,7 +191,14 @@ iqscaffold:
         - /billing-service/swagger-ui/**
         - /billing-service/api-docs/**
         - /actuator/prometheus
+        
+        # Billing Service Webhooks (public - no authentication required)
         - /api/v1/billing/webhooks/**
+        
+        # Billing Service OpenAPI Documentation (public)
+        - /billing-service/v3/api-docs/**
+        - /billing-service/swagger-resources/**
+        - /billing-service/swagger-config/**
         
         # Protected endpoints requiring authentication:
         # - /api/v1/auth/logout (requires Bearer token)
@@ -261,6 +268,28 @@ iqscaffold:
             requests-per-minute: 50
             burst-capacity: 75
             enable-tenant-quotas: true
+          
+          # Billing Service Rate Limiting Policies
+          "/api/v1/billing/payments/intent":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/billing/payments/**":
+            requests-per-minute: 60
+            burst-capacity: 100
+            enable-tenant-quotas: true
+          "/api/v1/billing/payments/*/refund":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: true
+          "/api/v1/admin/billing/merchants/**":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: true
+          "/api/v1/billing/webhooks/**":
+            requests-per-minute: 200
+            burst-capacity: 500
+            enable-tenant-quotas: false  # Webhooks from external providers
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000

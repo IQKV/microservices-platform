@@ -14,7 +14,7 @@ public record UserDto(
     String lastName,
     Boolean enabled,
     Boolean emailVerified,
-    Set<String> roles,
+    Set<String> authorities,
     String tenantId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
@@ -47,6 +47,6 @@ public record UserDto(
    * Check if user has admin privileges.
    */
   public boolean isAdmin() {
-    return roles != null && (roles.contains("ADMIN") || roles.contains("SUPER_ADMIN"));
+    return authorities != null && (authorities.contains("ADMIN") || authorities.contains("SUPER_ADMIN"));
   }
 }

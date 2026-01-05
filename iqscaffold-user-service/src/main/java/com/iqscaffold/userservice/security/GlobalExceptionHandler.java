@@ -346,7 +346,7 @@ public class GlobalExceptionHandler {
       case String msg when msg.contains("username already exists") || msg.contains("email already exists") -> "USER_ALREADY_EXISTS";
       case String msg when msg.contains("user not found") -> "USER_NOT_FOUND";
       case String msg when msg.contains("cannot delete your own account") -> "USER_SELF_DELETE_FORBIDDEN";
-      case String msg when msg.contains("unknown roles") -> "USER_INVALID_ROLES";
+      case String msg when msg.contains("unknown authorities") -> "USER_INVALID_AUTHORITIES";
       default -> "USER_MANAGEMENT_FAILED";
     };
   }

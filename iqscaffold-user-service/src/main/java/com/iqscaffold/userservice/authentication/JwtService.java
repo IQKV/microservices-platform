@@ -100,7 +100,7 @@ public class JwtService {
     var userId = extractLong(claims.get(JwtClaimNames.SUBJECT));
     var username = extractString(claims.get(JwtClaimNames.USERNAME));
     var email = extractString(claims.get(JwtClaimNames.EMAIL));
-    var roles = extractStringSet(claims.get(JwtClaimNames.ROLES));
+    var authorities = extractStringSet(claims.get(JwtClaimNames.AUTHORITIES)); // Changed from roles to authorities
     var permissions = extractStringSet(claims.get(JwtClaimNames.PERMISSIONS));
     var firstName = extractString(claims.get(JwtClaimNames.FIRST_NAME));
     var lastName = extractString(claims.get(JwtClaimNames.LAST_NAME));
@@ -108,7 +108,7 @@ public class JwtService {
     var customClaims = extractCustomClaims(claims);
 
     return new UserContext(
-        userId, username, email, roles, permissions,
+        userId, username, email, authorities, permissions,
         firstName, lastName, tenantId, customClaims
     );
   }
@@ -184,7 +184,7 @@ public class JwtService {
    * Create user context from User entity.
    */
   private UserContext createUserContext(User user) {
-    Set<String> roles = user.getAuthorities().stream()
+    Set<String> authorities = user.getAuthorities().stream()
         .map(authority -> authority.getName())
         .collect(Collectors.toSet());
 
@@ -192,8 +192,8 @@ public class JwtService {
         user.getId(),
         user.getUsername(),
         user.getEmail(),
-        roles,
-        Set.of(), // Permissions can be derived from roles
+        authorities, // Changed from roles to authorities
+        Set.of(), // Permissions can be derived from authorities
         user.getFirstName(),
         user.getLastName(),
         user.getTenantId(),
@@ -214,7 +214,7 @@ public class JwtService {
         .claim(JwtClaimNames.TYPE, type)
         .claim(JwtClaimNames.USERNAME, userContext.username())
         .claim(JwtClaimNames.EMAIL, userContext.email())
-        .claim(JwtClaimNames.ROLES, userContext.roles())
+        .claim(JwtClaimNames.AUTHORITIES, userContext.authorities()) // Changed from roles to authorities
         .claim(JwtClaimNames.PERMISSIONS, userContext.permissions())
         .claim(JwtClaimNames.FIRST_NAME, userContext.firstName())
         .claim(JwtClaimNames.LAST_NAME, userContext.lastName())
@@ -285,7 +285,7 @@ public class JwtService {
         JwtClaimNames.TYPE,
         JwtClaimNames.USERNAME,
         JwtClaimNames.EMAIL,
-        JwtClaimNames.ROLES,
+        JwtClaimNames.AUTHORITIES, // Changed from ROLES to AUTHORITIES
         JwtClaimNames.PERMISSIONS,
         JwtClaimNames.FIRST_NAME,
         JwtClaimNames.LAST_NAME,

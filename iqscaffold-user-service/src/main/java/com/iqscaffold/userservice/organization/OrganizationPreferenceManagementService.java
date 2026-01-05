@@ -224,7 +224,7 @@ public class OrganizationPreferenceManagementService {
   }
 
   private void validateAdminAccess(UserContext currentUser, String operation) {
-    if (!currentUser.hasRole("ADMIN") && !currentUser.hasRole("SUPER_ADMIN")) {
+    if (!currentUser.hasAuthority("ADMIN") && !currentUser.hasAuthority("SUPER_ADMIN")) {
       throw new AccessDeniedException("Insufficient permissions for operation: " + operation);
     }
   }

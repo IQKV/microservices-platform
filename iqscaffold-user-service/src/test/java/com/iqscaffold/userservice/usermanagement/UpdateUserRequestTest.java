@@ -35,7 +35,7 @@ class UpdateUserRequestTest {
     assertEquals("NewDoe", request.lastName());
     assertFalse(request.enabled());
     assertTrue(request.emailVerified());
-    assertEquals(Set.of("ADMIN", "SUPER_ADMIN"), request.roles());
+    assertEquals(Set.of("ADMIN", "SUPER_ADMIN"), request.authorities());
   }
 
   @Test
@@ -58,7 +58,7 @@ class UpdateUserRequestTest {
     assertNull(request.lastName());
     assertNull(request.enabled());
     assertNull(request.emailVerified());
-    assertNull(request.roles());
+    assertNull(request.authorities());
   }
 
   @Test
@@ -81,7 +81,7 @@ class UpdateUserRequestTest {
     assertNull(request.lastName());
     assertFalse(request.enabled());
     assertNull(request.emailVerified());
-    assertEquals(Set.of("USER"), request.roles());
+    assertEquals(Set.of("USER"), request.authorities());
   }
 
   @Test
@@ -104,7 +104,7 @@ class UpdateUserRequestTest {
     assertEquals("", request.lastName());
     assertNull(request.enabled());
     assertNull(request.emailVerified());
-    assertNull(request.roles());
+    assertNull(request.authorities());
   }
 
   @Test
@@ -120,7 +120,7 @@ class UpdateUserRequestTest {
         Set.of("ADMIN")
     );
 
-    assertEquals(Set.of("ADMIN"), request.roles());
+    assertEquals(Set.of("ADMIN"), request.authorities());
   }
 
   @Test
@@ -136,7 +136,7 @@ class UpdateUserRequestTest {
         Set.of("USER", "ADMIN", "SUPER_ADMIN")
     );
 
-    assertEquals(Set.of("USER", "ADMIN", "SUPER_ADMIN"), request.roles());
+    assertEquals(Set.of("USER", "ADMIN", "SUPER_ADMIN"), request.authorities());
   }
 
   @Test
@@ -152,7 +152,7 @@ class UpdateUserRequestTest {
         Set.of()
     );
 
-    assertEquals(Set.of(), request.roles());
+    assertEquals(Set.of(), request.authorities());
   }
 
   @Test
@@ -205,7 +205,7 @@ class UpdateUserRequestTest {
     assertEquals("Doe", request.lastName());
     assertNull(request.enabled());
     assertTrue(request.emailVerified());
-    assertNull(request.roles());
+    assertNull(request.authorities());
   }
 
   @Test
@@ -228,6 +228,6 @@ class UpdateUserRequestTest {
     assertEquals(100, request.lastName().length());
     assertTrue(request.enabled());
     assertFalse(request.emailVerified());
-    assertEquals(5, request.roles().size());
+    assertEquals(5, request.authorities().size());
   }
 }

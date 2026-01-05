@@ -35,7 +35,7 @@ class CreateUserRequestTest {
     assertEquals("Doe", request.lastName());
     assertTrue(request.enabled());
     assertTrue(request.emailVerified());
-    assertEquals(Set.of("USER", "ADMIN"), request.roles());
+    assertEquals(Set.of("USER", "ADMIN"), request.authorities());
   }
 
   @Test
@@ -58,7 +58,7 @@ class CreateUserRequestTest {
     assertEquals("Doe", request.lastName());
     assertTrue(request.enabled()); // Default should be true
     assertFalse(request.emailVerified()); // Default should be false
-    assertEquals(Set.of("USER"), request.roles()); // Default should be USER
+    assertEquals(Set.of("USER"), request.authorities()); // Default should be USER
   }
 
   @Test
@@ -81,7 +81,7 @@ class CreateUserRequestTest {
     assertEquals("Doe", request.lastName());
     assertFalse(request.enabled()); // Explicitly set to false
     assertTrue(request.emailVerified()); // Explicitly set to true
-    assertEquals(Set.of("ADMIN"), request.roles()); // Explicitly set to ADMIN
+    assertEquals(Set.of("ADMIN"), request.authorities()); // Explicitly set to ADMIN
   }
 
   @Test
@@ -97,7 +97,7 @@ class CreateUserRequestTest {
         Set.of()
     );
 
-    assertEquals(Set.of(), request.roles());
+    assertEquals(Set.of(), request.authorities());
   }
 
   @Test
@@ -113,7 +113,7 @@ class CreateUserRequestTest {
         Set.of("ADMIN")
     );
 
-    assertEquals(Set.of("ADMIN"), request.roles());
+    assertEquals(Set.of("ADMIN"), request.authorities());
   }
 
   @Test
@@ -129,7 +129,7 @@ class CreateUserRequestTest {
         Set.of("USER", "ADMIN", "SUPER_ADMIN")
     );
 
-    assertEquals(Set.of("USER", "ADMIN", "SUPER_ADMIN"), request.roles());
+    assertEquals(Set.of("USER", "ADMIN", "SUPER_ADMIN"), request.authorities());
   }
 
   @Test
@@ -182,7 +182,7 @@ class CreateUserRequestTest {
     assertNull(request.lastName());
     assertTrue(request.enabled()); // Default should be applied
     assertFalse(request.emailVerified()); // Default should be applied
-    assertEquals(Set.of("USER"), request.roles()); // Default should be applied
+    assertEquals(Set.of("USER"), request.authorities()); // Default should be applied
   }
 
   @Test
@@ -205,6 +205,6 @@ class CreateUserRequestTest {
     assertEquals("", request.lastName());
     assertTrue(request.enabled()); // Default should be applied
     assertFalse(request.emailVerified()); // Default should be applied
-    assertEquals(Set.of("USER"), request.roles()); // Default should be applied
+    assertEquals(Set.of("USER"), request.authorities()); // Default should be applied
   }
 }

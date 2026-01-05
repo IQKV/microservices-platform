@@ -17,7 +17,7 @@ public final class JwtClaimNames {
   public static final String TYPE = "type";
   public static final String USERNAME = "username";
   public static final String EMAIL = "email";
-  public static final String ROLES = "roles";
+  public static final String AUTHORITIES = "authorities";  // Changed from ROLES to AUTHORITIES
   public static final String PERMISSIONS = "permissions";
   public static final String FIRST_NAME = "firstName";
   public static final String LAST_NAME = "lastName";

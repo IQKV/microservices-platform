@@ -98,6 +98,32 @@ public class DynamicOpenApiRoutesConfiguration {
 
       log.info("Created API Docs route for '{}': {} -> {}/api-docs",
           serviceName, apiDocsPath, serviceUri);
+
+      // Special handling for billing service with grouped API docs
+      if ("billing-service".equals(serviceName)) {
+        log.info("Creating specialized API docs routes for billing service groups");
+        
+        // Create routes for specialized billing API groups
+        var billingGroups = java.util.List.of("billing-payments", "billing-webhooks", "billing-admin");
+        
+        for (var groupName : billingGroups) {
+          var groupApiDocsRouteId = serviceName + "-" + groupName + "-api-docs";
+          var groupApiDocsPath = "/" + contextPath + "/api-docs/" + groupName;
+          
+          String finalContextPath2 = contextPath;
+          routeBuilder.route(groupApiDocsRouteId, r -> r
+              .path(groupApiDocsPath)
+              .filters(f -> f.rewritePath(
+                  "/" + finalContextPath2 + "/api-docs/" + groupName,
+                  "/api-docs/" + groupName
+              ))
+              .uri(serviceUri)
+          );
+          
+          log.info("Created specialized API Docs route for '{}' group '{}': {} -> {}/api-docs/{}",
+              serviceName, groupName, groupApiDocsPath, serviceUri, groupName);
+        }
+      }
     });
 
     return routeBuilder.build();
