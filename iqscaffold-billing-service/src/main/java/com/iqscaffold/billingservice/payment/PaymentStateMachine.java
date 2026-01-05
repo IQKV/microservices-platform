@@ -23,8 +23,7 @@ public class PaymentStateMachine {
         
         String msg = messageService.getMessage(
             BillingConstants.ErrorKeys.INVALID_STATUS_TRANSITION, 
-            currentStatus, 
-            targetStatus
+            new Object[]{currentStatus, targetStatus}
         );
         logger.warn("Invalid transition attempt: {} -> {}", currentStatus, targetStatus);
         throw new InvalidPaymentStateException(msg);
