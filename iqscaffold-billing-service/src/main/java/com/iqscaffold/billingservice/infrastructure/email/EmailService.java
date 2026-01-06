@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.infrastructure.email;
 import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class EmailService {
       helper.setFrom(iqScaffoldProperties.email().sender().fromEmail(), iqScaffoldProperties.email().sender().fromName());
 
       mailSender.send(message);
-    } catch (MessagingException e) {
+    } catch (MessagingException | UnsupportedEncodingException e) {
       // proper logging would go here
       throw new RuntimeException("Failed to send email to " + to, e);
     }
