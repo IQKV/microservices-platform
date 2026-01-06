@@ -4,7 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.UUID;
 
+import com.iqscaffold.userservice.authentication.AccountLockedException;
+import com.iqscaffold.userservice.authentication.AuthenticationException;
 import com.iqscaffold.userservice.authentication.AuthenticationService;
+import com.iqscaffold.userservice.authentication.EmailVerificationRequiredException;
 import com.iqscaffold.userservice.registration.UserRegistrationService;
 import com.iqscaffold.userservice.shared.UserServiceConstants;
 import com.iqscaffold.userservice.shared.exception.EmailVerificationException;
@@ -258,7 +261,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(pd);
   }
 
-  @ExceptionHandler(AuthenticationService.AuthenticationException.class)
+  @ExceptionHandler(AuthenticationException.class)
   @ApiResponse(
       responseCode = "401",
       description = "Authentication failed - invalid credentials or token",
@@ -268,7 +271,7 @@ public class GlobalExceptionHandler {
       )
   )
   public ResponseEntity<ProblemDetail> handleAuthenticationException(
-      AuthenticationService.AuthenticationException ex, HttpServletRequest request) {
+      AuthenticationException ex, HttpServletRequest request) {
     var errorCode = determineAuthErrorCode(ex.getMessage());
     var pd = problem("https://problems.iqscaffold.com/authentication-error",
         "Authentication failed",
@@ -280,9 +283,9 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(pd);
   }
 
-  @ExceptionHandler(AuthenticationService.AccountLockedException.class)
+  @ExceptionHandler(AccountLockedException.class)
   public ResponseEntity<ProblemDetail> handleAccountLockedException(
-      AuthenticationService.AccountLockedException ex, HttpServletRequest request) {
+      AccountLockedException ex, HttpServletRequest request) {
     var pd = problem("https://problems.iqscaffold.com/account-locked",
         "Account temporarily locked",
         HttpStatus.LOCKED,
@@ -292,7 +295,7 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.LOCKED).body(pd);
   }
 
-  @ExceptionHandler(AuthenticationService.EmailVerificationRequiredException.class)
+  @ExceptionHandler(EmailVerificationRequiredException.class)
   @ApiResponse(
       responseCode = "401",
       description = "Email verification required - user must verify email before login",
@@ -302,7 +305,7 @@ public class GlobalExceptionHandler {
       )
   )
   public ResponseEntity<ProblemDetail> handleEmailVerificationRequiredException(
-      AuthenticationService.EmailVerificationRequiredException ex, HttpServletRequest request) {
+      EmailVerificationRequiredException ex, HttpServletRequest request) {
     var pd = problem("https://problems.iqscaffold.com/email-verification-required",
         "Email verification required",
         HttpStatus.UNAUTHORIZED,

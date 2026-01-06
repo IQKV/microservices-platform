@@ -79,7 +79,7 @@ class AuthenticationServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new AuthenticationService(
+    service = new AuthenticationServiceImpl(
         userRepository,
         passwordEncoder,
         jwtService,
@@ -181,7 +181,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Invalid input detected");
 
       verify(securityAuditService).logSuspiciousActivity(
@@ -204,7 +204,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Invalid input detected");
 
       verify(securityAuditService).logSuspiciousActivity(anyString(), anyString(), anyString(), anyString());
@@ -223,7 +223,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AccountLockedException.class)
+          .isInstanceOf(AccountLockedException.class)
           .hasMessageContaining("Account is locked")
           .hasMessageContaining("15 minutes");
 
@@ -243,7 +243,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Invalid username or password");
 
       // Verify failed attempt is recorded even for non-existent users (prevents enumeration)
@@ -266,7 +266,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Invalid username or password");
 
       verify(accountLockoutService).recordFailedAttempt("testuser");
@@ -290,7 +290,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Invalid username or password");
 
       verify(accountLockoutService).recordFailedAttempt("testuser");
@@ -313,7 +313,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Account is disabled");
 
       verify(securityAuditService).logFailedAuthentication("testuser", "Account disabled", "127.0.0.1", "Mozilla/5.0");
@@ -335,7 +335,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.authenticateUser(loginRequest, "127.0.0.1", "Mozilla/5.0"))
-          .isInstanceOf(AuthenticationService.EmailVerificationRequiredException.class)
+          .isInstanceOf(EmailVerificationRequiredException.class)
           .hasMessageContaining("Email verification required");
 
       verify(securityAuditService).logFailedAuthentication("testuser", "Email not verified", "127.0.0.1", "Mozilla/5.0");
@@ -381,7 +381,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.changePassword(1L, "wrongPassword", "newPassword", "127.0.0.1"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("Current password is incorrect");
 
       verify(securityAuditService).logFailedAuthentication(
@@ -404,7 +404,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.changePassword(1L, "oldPassword", "short", "127.0.0.1"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("does not meet minimum requirements");
 
       verify(userRepository, never()).save(any());
@@ -420,7 +420,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.changePassword(1L, "oldPassword", "oldPassword", "127.0.0.1"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("must be different from current password");
 
       verify(userRepository, never()).save(any());
@@ -435,7 +435,7 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.changePassword(999L, "oldPassword", "newPassword", "127.0.0.1"))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessageContaining("User not found");
 
       verify(passwordEncoder, never()).matches(anyString(), anyString());
@@ -486,9 +486,9 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.refreshToken(refreshRequest))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessage("Token refresh failed")
-          .hasCauseInstanceOf(AuthenticationService.AuthenticationException.class);
+          .hasCauseInstanceOf(AuthenticationException.class);
 
       verify(jwtService, never()).generateAccessToken(any());
       verifyNoInteractions(userRepository);
@@ -506,9 +506,9 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.refreshToken(refreshRequest))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessage("Token refresh failed")
-          .hasCauseInstanceOf(AuthenticationService.AuthenticationException.class);
+          .hasCauseInstanceOf(AuthenticationException.class);
 
       verify(jwtService, never()).generateAccessToken(any());
       verifyNoInteractions(userRepository);
@@ -528,9 +528,9 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.refreshToken(refreshRequest))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessage("Token refresh failed")
-          .hasCauseInstanceOf(AuthenticationService.AuthenticationException.class);
+          .hasCauseInstanceOf(AuthenticationException.class);
 
       verify(jwtService, never()).generateAccessToken(any());
     }
@@ -548,9 +548,9 @@ class AuthenticationServiceTest {
 
       // Act & Assert
       assertThatThrownBy(() -> service.refreshToken(refreshRequest))
-          .isInstanceOf(AuthenticationService.AuthenticationException.class)
+          .isInstanceOf(AuthenticationException.class)
           .hasMessage("Token refresh failed")
-          .hasCauseInstanceOf(AuthenticationService.AuthenticationException.class);
+          .hasCauseInstanceOf(AuthenticationException.class);
 
       verify(jwtService, never()).generateAccessToken(any());
     }

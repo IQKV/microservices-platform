@@ -64,7 +64,7 @@ class JwtServiceTest {
     org.mockito.Mockito.lenient().when(jwtConfiguration.getRefreshTokenExpiry()).thenReturn(Duration.ofDays(7));
     org.mockito.Mockito.lenient().when(jwtConfiguration.getIssuer()).thenReturn("test-issuer");
 
-    service = new JwtService(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate);
+    service = new JwtServiceImpl(jwtEncoder, jwtDecoder, jwtConfiguration, redisTemplate);
 
     // Setup test user
     testUser = new User("testuser", "test@example.com", "hash", "Test", "User", "tenant-123");

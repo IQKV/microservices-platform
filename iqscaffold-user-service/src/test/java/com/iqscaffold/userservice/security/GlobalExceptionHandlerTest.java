@@ -10,7 +10,10 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Set;
 
+import com.iqscaffold.userservice.authentication.AccountLockedException;
+import com.iqscaffold.userservice.authentication.AuthenticationException;
 import com.iqscaffold.userservice.authentication.AuthenticationService;
+import com.iqscaffold.userservice.authentication.EmailVerificationRequiredException;
 import com.iqscaffold.userservice.registration.UserRegistrationService;
 import com.iqscaffold.userservice.shared.exception.EmailVerificationException;
 import com.iqscaffold.userservice.usermanagement.UserManagementService;
@@ -87,7 +90,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleAuthenticationException returns 401 for invalid credentials")
   void handleAuthenticationException() {
-    var exception = new AuthenticationService.AuthenticationException("Invalid username or password");
+    var exception = new AuthenticationException("Invalid username or password");
     var response = exceptionHandler.handleAuthenticationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -100,7 +103,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleAuthenticationException returns correct code for account disabled")
   void handleAuthenticationExceptionAccountDisabled() {
-    var exception = new AuthenticationService.AuthenticationException("Account is disabled");
+    var exception = new AuthenticationException("Account is disabled");
     var response = exceptionHandler.handleAuthenticationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -111,7 +114,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleAuthenticationException returns correct code for invalid token")
   void handleAuthenticationExceptionInvalidToken() {
-    var exception = new AuthenticationService.AuthenticationException("Invalid token");
+    var exception = new AuthenticationException("Invalid token");
     var response = exceptionHandler.handleAuthenticationException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -122,7 +125,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleAccountLockedException returns 423 LOCKED status")
   void handleAccountLockedException() {
-    var exception = new AuthenticationService.AccountLockedException("Account temporarily locked");
+    var exception = new AccountLockedException("Account temporarily locked");
     var response = exceptionHandler.handleAccountLockedException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.LOCKED);
@@ -135,7 +138,7 @@ class GlobalExceptionHandlerTest {
   @Test
   @DisplayName("handleEmailVerificationRequiredException returns 401 with actions")
   void handleEmailVerificationRequiredException() {
-    var exception = new AuthenticationService.EmailVerificationRequiredException("Email not verified");
+    var exception = new EmailVerificationRequiredException("Email not verified");
     var response = exceptionHandler.handleEmailVerificationRequiredException(exception, request);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
