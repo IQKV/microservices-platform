@@ -1,0 +1,260 @@
+server:
+  port: 8082
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  application:
+    name: iqscaffold-billing-service
+  profiles:
+    active: local
+  
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  # Internationalization Configuration
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
+  # Database Configuration
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5432/iqscaffold_billing}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_billing}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      auto-commit: false
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        multiTenancy: SCHEMA
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+    open-in-view: false
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:1}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Messaging Configuration - RabbitMQ
+  rabbitmq:
+    host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:localhost}
+    port: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PORT:5672}
+    username: ${IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME:iqscaffold}
+    password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD:iqscaffold_password}
+    virtual-host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_VHOST:/}
+    connection-timeout: 30000ms
+    requested-heartbeat: 60s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+
+  # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
+  liquibase:
+    enabled: false
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
+          issuer-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    groups-order: ASC
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+    display-operation-id: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: payments
+      display-name: Payment APIs
+      paths-to-match: /api/*/billing/payments/**
+    - group: webhooks
+      display-name: Webhook APIs
+      paths-to-match: /api/*/billing/webhooks/**
+    - group: invoices
+      display-name: Invoice APIs
+      paths-to-match: /api/*/billing/invoices/**
+    - group: subscriptions
+      display-name: Subscription APIs
+      paths-to-match: /api/*/billing/subscriptions/**
+    - group: admin
+      display-name: Admin APIs
+      paths-to-match: /api/*/admin/billing/**
+  show-actuator: true
+  use-management-port: false
+
+# Management and Observability Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase,openapi
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+    tags:
+      application: ${spring.application.name}
+      service: billing-service
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Logging Configuration - Structured JSON Logging
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+    liquibase: INFO
+    net.logstash.logback: INFO
+  config: classpath:logback-spring.xml
+
+# IQ Scaffold-specific configuration properties
+iqscaffold:
+  # Tenant identification header
+  tenant-id-header: X-Tenant-ID
+  
+  # Liquibase configuration for multi-tenant schema management
+  liquibase:
+    system-change-log: classpath:db/changelog/system/master.xml
+    tenant-change-log: classpath:db/changelog/tenant/master.xml
+  
+  # Email configuration
+  email:
+    smtp:
+      host: ${SMTP_HOST:localhost}
+      port: ${SMTP_PORT:587}
+      username: ${SMTP_USERNAME:}
+      password: ${SMTP_PASSWORD:}
+      auth: true
+      starttls: true
+      timeout: PT30S
+    sender:
+      from-email: ${EMAIL_FROM_EMAIL:billing@iqscaffold.com}
+      from-name: ${EMAIL_FROM_NAME:IQ Scaffold Billing}
+      base-url: ${APP_BASE_URL:https://app.iqscaffold.com}
+    templates:
+      merchant-onboarding-template: "email/merchant-onboarding.html"
+      payment-successful-template: "email/payment-successful.html"
+      payment-failed-template: "email/payment-failed.html"
+      payment-refunded-template: "email/payment-refunded.html"
+      invoice-generated-template: "email/invoice-generated.html"
+  
+  # Billing configuration
+  billing:
+    security:
+      jwt:
+        jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
+        issuer: ${JWT_ISSUER:iqscaffold-user-service}
+    payment:
+      provider: ${PAYMENT_PROVIDER:stripe}
+      saas-mode: ${BILLING_SAAS_MODE:true}
+      stripe:
+        api-key: ${STRIPE_API_KEY:}
+        webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+        client-id: ${STRIPE_CLIENT_ID:}
+    integration:
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
+        timeout-ms: 10000
+    stripe:
+      public-key: ${STRIPE_PUBLIC_KEY:}
+      secret-key: ${STRIPE_SECRET_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      connect-client-id: ${STRIPE_CONNECT_CLIENT_ID:}
+    notifications:
+      enable-email-notifications: ${BILLING_EMAIL_NOTIFICATIONS:true}
+      enable-webhook-notifications: ${BILLING_WEBHOOK_NOTIFICATIONS:true}
+      retry-delay: PT5S
+      max-retries: 3

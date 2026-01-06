@@ -74,6 +74,28 @@ public class SpringDocConfiguration {
 
         log.info("Registered OpenAPI documentation: {} -> {}", displayName, apiDocsUrl);
         registeredCount++;
+
+        // Special handling for billing service with specialized groups
+        if ("billing-service".equals(serviceName)) {
+          log.info("Registering specialized API groups for billing service");
+          
+          // Register Payment APIs
+          swaggerUiConfig.addGroup("💳 Payment APIs");
+          swaggerUiConfig.addUrl("/billing-service/api-docs/billing-payments");
+          registeredCount++;
+
+          // Register Webhook APIs
+          swaggerUiConfig.addGroup("🔗 Webhook APIs");
+          swaggerUiConfig.addUrl("/billing-service/api-docs/billing-webhooks");
+          registeredCount++;
+
+          // Register Admin APIs
+          swaggerUiConfig.addGroup("🛠️ Billing Admin APIs");
+          swaggerUiConfig.addUrl("/billing-service/api-docs/billing-admin");
+          registeredCount++;
+
+          log.info("Added {} specialized API groups for billing service", 3);
+        }
       }
 
       log.info("Successfully registered {} OpenAPI documentation URLs", registeredCount);

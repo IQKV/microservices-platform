@@ -166,7 +166,7 @@ class JwtServiceTest {
     assertThat(userContext.userId()).isEqualTo(1L);
     assertThat(userContext.username()).isEqualTo("testuser");
     assertThat(userContext.email()).isEqualTo("test@example.com");
-    assertThat(userContext.roles()).contains("ROLE_USER");
+    assertThat(userContext.authorities()).contains("ROLE_USER");
     assertThat(userContext.tenantId()).isEqualTo("tenant-123");
   }
 
@@ -302,7 +302,7 @@ class JwtServiceTest {
     claims.put("sub", "1");
     claims.put("username", "testuser");
     claims.put("email", "test@example.com");
-    claims.put("roles", java.util.List.of("ROLE_USER"));
+    claims.put("authorities", java.util.List.of("ROLE_USER"));
     claims.put("permissions", java.util.List.of());
     claims.put("firstName", "Test");
     claims.put("lastName", "User");

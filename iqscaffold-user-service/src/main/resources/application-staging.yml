@@ -52,6 +52,11 @@ spring:
           min-idle: 2
           max-wait: -1ms
 
+  # Messaging Configuration - Staging RabbitMQ
+  rabbitmq:
+    host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:rabbitmq-staging}
+    password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD}
+
   # Liquibase Configuration
   # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
   liquibase:
@@ -144,37 +149,15 @@ iqscaffold:
   # Observability Configuration - Staging
   observability:
     tracing:
-      enabled: true
-      service-name: ${spring.application.name}
       sampling-rate: 0.1  # Reduced sampling for staging
       endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://otel-collector:4317}
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 512
     metrics:
-      enabled: true
-      path: /actuator/prometheus
       prefix: iqscaffold_user_staging
-      include-host-tag: true
-      include-application-tag: true
-      include-environment-tag: true
       custom-tags:
         environment: staging
         service: user-service
     logging:
-      level: INFO
       format: json  # JSON format for staging
-      include-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
-      include-user-id: true
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
-      enable-sql-logging: false
-      enable-security-events: true
-      enable-performance-logging: false
   
   tenant-id-header: X-Tenant-ID
   
@@ -203,33 +186,11 @@ logging:
 
 # Management Configuration - Staging
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: when-authorized
-    prometheus:
-      access: read_only
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5,0.95,0.99
   tracing:
     sampling:
       probability: 0.1  # Reduced sampling for staging
-  prometheus:
-    metrics:
-      export:
-        enabled: true
 
 # SpringDoc Configuration - Staging
 springdoc:
-  api-docs:
-    enabled: true
   swagger-ui:
-    enabled: true
     try-it-out-enabled: false

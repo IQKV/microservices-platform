@@ -149,6 +149,7 @@ public class OpenApiConfig {
         contextPath = "/" + serviceName;
       }
 
+      // Create main service API group
       var pathPattern = contextPath + "/**";
 
       log.info("Configuring OpenAPI documentation for service '{}': displayName='{}', pathPattern='{}'",
@@ -161,9 +162,41 @@ public class OpenApiConfig {
           .build();
 
       serviceApis.add(groupedApi);
+
+      // Special handling for billing service with grouped APIs
+      if ("billing-service".equals(serviceName)) {
+        log.info("Configuring specialized API groups for billing service");
+        
+        // Payment APIs group
+        var paymentApi = GroupedOpenApi.builder()
+            .group("billing-payments")
+            .displayName("💳 Payment APIs")
+            .pathsToMatch("/api/v1/billing/payments/**")
+            .build();
+        serviceApis.add(paymentApi);
+
+        // Webhook APIs group
+        var webhookApi = GroupedOpenApi.builder()
+            .group("billing-webhooks")
+            .displayName("🔗 Webhook APIs")
+            .pathsToMatch("/api/v1/billing/webhooks/**")
+            .build();
+        serviceApis.add(webhookApi);
+
+        // Admin APIs group
+        var adminApi = GroupedOpenApi.builder()
+            .group("billing-admin")
+            .displayName("🛠️ Billing Admin APIs")
+            .pathsToMatch("/api/v1/admin/billing/**")
+            .build();
+        serviceApis.add(adminApi);
+
+        log.info("Added {} specialized API groups for billing service", 3);
+      }
     });
 
-    log.info("Configured OpenAPI documentation for {} downstream services", serviceApis.size());
+    log.info("Configured OpenAPI documentation for {} downstream services with {} total groups", 
+        services.size(), serviceApis.size());
     return serviceApis;
   }
 }

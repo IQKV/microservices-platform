@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      pool-name: BillingServiceHikariPool-Production
+
+logging:
+  level:
+    root: WARN
+    com.iqscaffold.billingservice: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    liquibase: WARN

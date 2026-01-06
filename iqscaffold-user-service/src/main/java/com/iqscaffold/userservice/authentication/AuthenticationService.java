@@ -24,7 +24,73 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Enhanced service for user authentication with security measures. Includes account lockout, audit logging, and input sanitization.
+ * Core authentication service providing secure user authentication with comprehensive security measures.
+ * 
+ * <p>This service implements enterprise-grade authentication patterns including:
+ * <ul>
+ *   <li><strong>Account Lockout Protection</strong> - Prevents brute force attacks by locking accounts after failed attempts</li>
+ *   <li><strong>Input Sanitization</strong> - Protects against injection attacks and malicious input</li>
+ *   <li><strong>Security Audit Logging</strong> - Comprehensive logging of all authentication events</li>
+ *   <li><strong>Session Management</strong> - Distributed session tracking with Redis</li>
+ *   <li><strong>Multi-Tenant Support</strong> - Tenant-aware authentication with context isolation</li>
+ *   <li><strong>JWT Token Management</strong> - Secure token generation with refresh capabilities</li>
+ * </ul>
+ * 
+ * <h3>Security Features</h3>
+ * <ul>
+ *   <li>Account lockout after 5 failed attempts (15-minute duration)</li>
+ *   <li>Protection against username enumeration attacks</li>
+ *   <li>SQL injection and XSS prevention through input sanitization</li>
+ *   <li>Correlation ID tracking for security event correlation</li>
+ *   <li>Metrics collection for monitoring authentication patterns</li>
+ * </ul>
+ * 
+ * <h3>Authentication Flow</h3>
+ * <ol>
+ *   <li>Input sanitization and validation</li>
+ *   <li>Account lockout status check</li>
+ *   <li>User lookup and password verification</li>
+ *   <li>JWT token generation (access + refresh)</li>
+ *   <li>Session creation and audit logging</li>
+ * </ol>
+ * 
+ * <h3>Token Management</h3>
+ * <ul>
+ *   <li><strong>Access Tokens</strong> - Short-lived (15 minutes) with user context claims</li>
+ *   <li><strong>Refresh Tokens</strong> - Long-lived (7 days) for token renewal</li>
+ *   <li><strong>Token Blacklisting</strong> - Immediate token revocation via Redis</li>
+ *   <li><strong>Multi-Device Support</strong> - Per-device and global logout capabilities</li>
+ * </ul>
+ * 
+ * <h3>Exception Handling</h3>
+ * <ul>
+ *   <li>{@link AuthenticationException} - General authentication failures</li>
+ *   <li>{@link AccountLockedException} - Account lockout scenarios</li>
+ *   <li>{@link EmailVerificationRequiredException} - Unverified email addresses</li>
+ *   <li>{@link UserDisabledException} - Disabled user accounts</li>
+ * </ul>
+ * 
+ * <h3>Usage Example</h3>
+ * <pre>{@code
+ * @Autowired
+ * private AuthenticationService authService;
+ * 
+ * public ResponseEntity<TokenResponse> login(LoginRequest request, HttpServletRequest httpRequest) {
+ *     String ipAddress = getClientIpAddress(httpRequest);
+ *     String userAgent = httpRequest.getHeader("User-Agent");
+ *     
+ *     TokenResponse tokens = authService.authenticateUser(request, ipAddress, userAgent);
+ *     return ResponseEntity.ok(tokens);
+ * }
+ * }</pre>
+ * 
+ * @author IQ Scaffold Team
+ * @version 1.0
+ * @since 1.0
+ * @see JwtService
+ * @see AccountLockoutService
+ * @see SecurityAuditService
+ * @see TenantContext
  */
 @Service
 @Transactional
@@ -60,7 +126,56 @@ public class AuthenticationService {
   }
 
   /**
-   * Authenticate user with enhanced security measures. Includes account lockout, audit logging, and input sanitization.
+   * Authenticate user with comprehensive security measures and audit logging.
+   * 
+   * <p>This method implements a secure authentication flow that protects against common attacks:
+   * <ul>
+   *   <li><strong>Brute Force Protection</strong> - Account lockout after failed attempts</li>
+   *   <li><strong>Injection Prevention</strong> - Input sanitization and validation</li>
+   *   <li><strong>Enumeration Protection</strong> - Consistent timing for valid/invalid users</li>
+   *   <li><strong>Audit Trail</strong> - Complete logging of authentication events</li>
+   * </ul>
+   * 
+   * <h4>Security Validations</h4>
+   * <ol>
+   *   <li>Input sanitization to prevent injection attacks</li>
+   *   <li>Account lockout status verification</li>
+   *   <li>User existence and password validation</li>
+   *   <li>Account status checks (enabled, email verified)</li>
+   *   <li>Tenant context validation</li>
+   * </ol>
+   * 
+   * <h4>Token Generation</h4>
+   * <p>Upon successful authentication, generates:
+   * <ul>
+   *   <li><strong>Access Token</strong> - Contains user context, roles, and permissions (15-min expiry)</li>
+   *   <li><strong>Refresh Token</strong> - Used for token renewal without re-authentication (7-day expiry)</li>
+   * </ul>
+   * 
+   * <h4>Session Management</h4>
+   * <p>Creates a distributed session entry in Redis with:
+   * <ul>
+   *   <li>Session ID and user context</li>
+   *   <li>Device information (IP, User-Agent)</li>
+   *   <li>Login timestamp and expiration</li>
+   *   <li>Tenant context for isolation</li>
+   * </ul>
+   * 
+   * @param request The login request containing username/email and password
+   * @param ipAddress The client's IP address for security logging and lockout tracking
+   * @param userAgent The client's User-Agent header for device identification
+   * @return TokenResponse containing access token, refresh token, and user context
+   * 
+   * @throws AuthenticationException If credentials are invalid or authentication fails
+   * @throws AccountLockedException If the account is locked due to failed attempts
+   * @throws EmailVerificationRequiredException If email verification is required
+   * @throws UserDisabledException If the user account is disabled
+   * @throws TenantContextException If tenant context is invalid or missing
+   * 
+   * @see LoginRequest
+   * @see TokenResponse
+   * @see AccountLockoutService#isAccountLocked(String)
+   * @see SecurityAuditService#logSuccessfulAuthentication(String, String, String)
    */
   public TokenResponse authenticateUser(LoginRequest request, String ipAddress, String userAgent) {
     var correlationId = generateCorrelationId();

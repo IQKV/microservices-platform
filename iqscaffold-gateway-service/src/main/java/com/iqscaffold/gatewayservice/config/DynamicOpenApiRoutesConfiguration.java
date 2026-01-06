@@ -2,6 +2,7 @@ package com.iqscaffold.gatewayservice.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,11 @@ import org.springframework.context.annotation.Configuration;
  * <p>
  * Automatically creates gateway routes for Swagger UI and OpenAPI JSON endpoints
  * for all enabled downstream services based on configuration.
+ * <p>
+ * This configuration is only active when Spring Cloud Gateway is enabled.
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class DynamicOpenApiRoutesConfiguration {
 
   private static final Logger log = LoggerFactory.getLogger(DynamicOpenApiRoutesConfiguration.class);
@@ -98,6 +102,32 @@ public class DynamicOpenApiRoutesConfiguration {
 
       log.info("Created API Docs route for '{}': {} -> {}/api-docs",
           serviceName, apiDocsPath, serviceUri);
+
+      // Special handling for billing service with grouped API docs
+      if ("billing-service".equals(serviceName)) {
+        log.info("Creating specialized API docs routes for billing service groups");
+        
+        // Create routes for specialized billing API groups
+        var billingGroups = java.util.List.of("billing-payments", "billing-webhooks", "billing-admin");
+        
+        for (var groupName : billingGroups) {
+          var groupApiDocsRouteId = serviceName + "-" + groupName + "-api-docs";
+          var groupApiDocsPath = "/" + contextPath + "/api-docs/" + groupName;
+          
+          String finalContextPath2 = contextPath;
+          routeBuilder.route(groupApiDocsRouteId, r -> r
+              .path(groupApiDocsPath)
+              .filters(f -> f.rewritePath(
+                  "/" + finalContextPath2 + "/api-docs/" + groupName,
+                  "/api-docs/" + groupName
+              ))
+              .uri(serviceUri)
+          );
+          
+          log.info("Created specialized API Docs route for '{}' group '{}': {} -> {}/api-docs/{}",
+              serviceName, groupName, groupApiDocsPath, serviceUri, groupName);
+        }
+      }
     });
 
     return routeBuilder.build();

@@ -515,6 +515,6 @@ class UserManagementServiceTest {
     // Act & Assert
     assertThatThrownBy(() -> service.createUser(request, adminUser))
         .isInstanceOf(UserManagementService.UserManagementException.class)
-        .hasMessageContaining("Unknown roles");
+        .hasMessageContaining("Unknown authorities");
   }
 }

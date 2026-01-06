@@ -4,171 +4,34 @@ server:
 spring:
   application:
     name: iqscaffold-gateway-service-test
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: ""
-      database: 15  # Use separate database for tests
-      timeout: 2000ms
+  main:
+    allow-bean-definition-overriding: true
+    web-application-type: none  # Disable web application for basic tests
   cloud:
     gateway:
-      routes:
-        - id: test-user-service
-          uri: http://localhost:8080
-          predicates:
-            - Path=/api/v1/auth/**
-
-# IQ Scaffold Gateway Test Configuration
-iqscaffold:
-  cache:
+      enabled: false  # Disable gateway for basic tests
+    loadbalancer:
+      enabled: false  # Disable load balancer
+  data:
     redis:
-      host: localhost
-      port: 6379
-      password: ""
-      database: 15
-      timeout: PT2S
-      pool:
-        max-active: 4
-        max-idle: 2
-        min-idle: 1
-        max-wait: PT1S
-      key-prefix: "iqscaffold:gateway:test"
-      default-ttl: PT5M
-      enable-statistics: false
+      repositories:
+        enabled: false  # Disable Redis repositories
 
-  gateway:
-    routing:
-      api-prefix:
-        enabled: true
-        prefix: /api
-        strip-count: 0
-      services:
-        user-service:
-          uri: http://localhost:8080
-          path: /v1/auth/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 10000
-      enable-service-discovery: false
-      load-balancing:
-        strategy: round-robin
-        enable-health-check: false
-        health-check-interval: PT30S
-
-    security:
-      jwt:
-        access-token-expiry: PT15M
-        refresh-token-expiry: P7D
-        issuer: iqscaffold-user-service
-        audience: iqscaffold-services
-        algorithm: RS256
-        jwk-set-uri: http://localhost:8080/.well-known/jwks.json
-      authentication:
-        enabled: true
-        user-service-url: http://localhost:8080
-        token-validation-timeout: PT5S
-        enable-user-context-propagation: true
-      public-paths:
-        - /api/v1/auth/login
-        - /api/v1/auth/signup
-        - /api/v1/auth/refresh
-        - /actuator/health
-
-    rate-limiting:
-      enabled: true
-      redis:
-        key-prefix: "iqscaffold:gateway:rate-limit:test"
-        key-expiry: PT1M
-      policies:
-        default-requests-per-minute: 100
-        default-burst-capacity: 200
-        endpoints:
-          "/api/v1/auth/login":
-            requests-per-minute: 20
-            burst-capacity: 40
-            enable-tenant-quotas: false
-      tenant-quotas:
-        enabled: false
-        default-tenant-requests-per-minute: 1000
-        tenant-specific-quotas: { }
-
-    circuit-breaker:
-      enabled: true
-      failure-rate-threshold: 50
-      slow-call-rate-threshold: 50
-      slow-call-duration-threshold: PT2S
-      minimum-number-of-calls: 5
-      wait-duration-in-open-state: PT10S
-      sliding-window-size: 50
-      sliding-window-type: COUNT_BASED
-
-    cors:
-      enabled: true
-      allowed-origins:
-        - http://localhost:3000
-        - http://localhost:5173
-      allowed-methods:
-        - GET
-        - POST
-        - PUT
-        - DELETE
-        - OPTIONS
-      allowed-headers:
-        - "*"
-      allow-credentials: true
-      max-age: 3600
-
-    transformation:
-      request:
-        enabled: true
-        enable-header-enrichment: true
-        enable-user-context-propagation: true
-        enable-tenant-context-propagation: true
-        headers-to-remove:
-          - Authorization-Internal
-        additional-headers:
-          X-Gateway-Version: "1.0.0-test"
-      response:
-        enabled: true
-        enable-security-headers: true
-        enable-correlation-headers: true
-        remove-internal-headers: true
-        additional-headers-to-remove:
-          - X-Internal-Service
-
+# Minimal IQ Scaffold Gateway Test Configuration
+iqscaffold:
   observability:
     tracing:
       enabled: false  # Disabled for unit tests
-      service-name: ${spring.application.name}
-      sampling-rate: 0.0
-      endpoint: http://localhost:4317
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 512
     metrics:
       enabled: false  # Disabled for unit tests
-      path: /actuator/prometheus
-      prefix: iqscaffold_gateway_test
-      include-host-tag: false
-      include-application-tag: false
-      include-environment-tag: false
-      custom-tags:
-        test: "true"
-      enabled-metrics: [ ]
     logging:
       level: DEBUG
       format: console
-      enable-request-logging: true
-      enable-response-logging: true
-      enable-correlation-id: true
+      enable-request-logging: false
+      enable-response-logging: false
+      enable-correlation-id: false
       include-trace-id: false
       include-span-id: false
-      include-user-id: true
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
 
 # Logging Configuration
 logging:
@@ -181,12 +44,10 @@ logging:
 # Management Configuration
 management:
   endpoints:
-    web:
-      exposure:
-        include: health,info
+    enabled-by-default: false
   endpoint:
     health:
-      show-details: always
+      enabled: false
   metrics:
     export:
       prometheus:

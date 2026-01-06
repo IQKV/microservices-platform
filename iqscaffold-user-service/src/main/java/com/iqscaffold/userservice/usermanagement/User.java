@@ -24,7 +24,111 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
- * User entity representing user accounts with authentication and profile information. Supports multi-tenant architecture with tenant isolation.
+ * Core user entity representing authenticated user accounts with comprehensive profile and security information.
+ * 
+ * <p>This entity serves as the central user representation in the multi-tenant authentication system,
+ * containing all necessary information for user identification, authentication, authorization, and
+ * profile management. It implements multi-tenant isolation through the TenantAware base class.
+ * 
+ * <h3>Entity Characteristics</h3>
+ * <ul>
+ *   <li><strong>Multi-Tenant Aware</strong> - Inherits tenant isolation from TenantAware base class</li>
+ *   <li><strong>Security Focused</strong> - Includes password hashing, account status, and verification</li>
+ *   <li><strong>Profile Complete</strong> - Comprehensive user profile information</li>
+ *   <li><strong>Audit Enabled</strong> - Automatic timestamp tracking for creation and updates</li>
+ * </ul>
+ * 
+ * <h3>Authentication Fields</h3>
+ * <ul>
+ *   <li><strong>username</strong> - Unique identifier for login (50 chars max)</li>
+ *   <li><strong>email</strong> - Email address, also unique and used for login (255 chars max)</li>
+ *   <li><strong>passwordHash</strong> - BCrypt hashed password (255 chars max)</li>
+ *   <li><strong>enabled</strong> - Account status flag (default: true)</li>
+ *   <li><strong>emailVerified</strong> - Email verification status (default: false)</li>
+ * </ul>
+ * 
+ * <h3>Profile Information</h3>
+ * <ul>
+ *   <li><strong>firstName</strong> - User's first name (100 chars max)</li>
+ *   <li><strong>lastName</strong> - User's last name (100 chars max)</li>
+ *   <li><strong>preferredLocale</strong> - Language preference (default: "en")</li>
+ *   <li><strong>timezone</strong> - User's timezone preference</li>
+ *   <li><strong>phoneNumber</strong> - Contact phone number</li>
+ * </ul>
+ * 
+ * <h3>Security Features</h3>
+ * <ul>
+ *   <li><strong>Account Lockout</strong> - Support for temporary account disabling</li>
+ *   <li><strong>Email Verification</strong> - Required email verification workflow</li>
+ *   <li><strong>Password Security</strong> - BCrypt hashing with configurable strength</li>
+ *   <li><strong>Audit Trail</strong> - Automatic creation and update timestamps</li>
+ * </ul>
+ * 
+ * <h3>Multi-Tenant Architecture</h3>
+ * <ul>
+ *   <li><strong>Tenant Isolation</strong> - Users belong to specific tenants</li>
+ *   <li><strong>Cross-Tenant Prevention</strong> - Automatic filtering by tenant context</li>
+ *   <li><strong>Tenant-Aware Queries</strong> - All queries automatically scoped to tenant</li>
+ * </ul>
+ * 
+ * <h3>Relationship Mappings</h3>
+ * <ul>
+ *   <li><strong>Authorities</strong> - Many-to-many relationship with roles and permissions</li>
+ *   <li><strong>Organization</strong> - One-to-one relationship with organization entity</li>
+ *   <li><strong>Preferences</strong> - One-to-one relationship with user preferences</li>
+ *   <li><strong>Audit Logs</strong> - One-to-many relationship with security audit entries</li>
+ * </ul>
+ * 
+ * <h3>Database Constraints</h3>
+ * <ul>
+ *   <li><strong>Unique Constraints</strong> - Username and email must be globally unique</li>
+ *   <li><strong>Not Null Constraints</strong> - Required fields enforced at database level</li>
+ *   <li><strong>Length Constraints</strong> - Maximum lengths enforced for all string fields</li>
+ *   <li><strong>Index Optimization</strong> - Indexes on frequently queried fields</li>
+ * </ul>
+ * 
+ * <h3>Security Considerations</h3>
+ * <ul>
+ *   <li><strong>Password Storage</strong> - Never store plain text passwords</li>
+ *   <li><strong>Sensitive Data</strong> - Password hash excluded from DTOs and serialization</li>
+ *   <li><strong>Account Status</strong> - Multiple layers of account disabling (enabled, emailVerified)</li>
+ *   <li><strong>Audit Integration</strong> - All changes logged for security monitoring</li>
+ * </ul>
+ * 
+ * <h3>Usage Patterns</h3>
+ * <pre>{@code
+ * // Create new user
+ * User user = new User();
+ * user.setUsername("john.doe");
+ * user.setEmail("john.doe@example.com");
+ * user.setPasswordHash(passwordEncoder.encode(plainPassword));
+ * user.setFirstName("John");
+ * user.setLastName("Doe");
+ * user.setEnabled(true);
+ * user.setEmailVerified(false);
+ * 
+ * // Add authorities
+ * Set<Authority> authorities = Set.of(userRole, adminRole);
+ * user.setAuthorities(authorities);
+ * 
+ * userRepository.save(user);
+ * }</pre>
+ * 
+ * <h3>Validation Rules</h3>
+ * <ul>
+ *   <li><strong>Username</strong> - 3-50 characters, alphanumeric and underscore only</li>
+ *   <li><strong>Email</strong> - Valid email format, maximum 255 characters</li>
+ *   <li><strong>Names</strong> - 1-100 characters, letters and spaces only</li>
+ *   <li><strong>Locale</strong> - Valid locale code (e.g., "en", "en_US")</li>
+ * </ul>
+ * 
+ * @author IQ Scaffold Team
+ * @version 1.0
+ * @since 1.0
+ * @see TenantAware
+ * @see Authority
+ * @see Organization
+ * @see UserPreference
  */
 @Entity
 @Table(name = "users")

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    
+    <!-- Console Appender with JSON format for structured logging -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"service":"iqscaffold-billing-service","version":"${project.version:-unknown}"}</customFields>
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <message>message</message>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+            </fieldNames>
+            <!-- Include MDC fields for correlation tracking -->
+            <mdcEntryWriter>
+                <mdcKeyFieldName>mdc</mdcKeyFieldName>
+            </mdcEntryWriter>
+            <!-- Include structured arguments -->
+            <argumentsFieldName>args</argumentsFieldName>
+            <!-- Include stack traces for exceptions -->
+            <includeStackTrace>true</includeStackTrace>
+            <stackTracePattern>
+                <pattern>
+                    <omitCommonFrames>true</omitCommonFrames>
+                    <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                </pattern>
+            </stackTracePattern>
+        </encoder>
+    </appender>
+
+    <!-- File Appender with JSON format for production logging -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/iqscaffold-billing-service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/iqscaffold-billing-service.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <customFields>{"service":"iqscaffold-billing-service","version":"${project.version:-unknown}"}</customFields>
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <message>message</message>
+                <level>level</level>
+                <thread>thread</thread>
+                <logger>logger</logger>
+            </fieldNames>
+            <mdcEntryWriter>
+                <mdcKeyFieldName>mdc</mdcKeyFieldName>
+            </mdcEntryWriter>
+            <argumentsFieldName>args</argumentsFieldName>
+            <includeStackTrace>true</includeStackTrace>
+        </encoder>
+    </appender>
+
+    <!-- Async Appender for better performance -->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- Profile-specific configurations -->
+    <springProfile name="local,dev">
+        <!-- Local development: Console only with pretty JSON -->
+        <appender name="CONSOLE_PRETTY" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeContext>true</includeContext>
+                <includeMdc>true</includeMdc>
+                <customFields>{"service":"iqscaffold-billing-service","environment":"local"}</customFields>
+                <!-- Pretty print JSON for local development -->
+                <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+            </encoder>
+        </appender>
+        
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PRETTY"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="staging,production">
+        <!-- Production: Both console and file with async processing -->
+        <root level="INFO">
+            <appender-ref ref="ASYNC_CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- Specific logger configurations -->
+    <logger name="com.iqscaffold.billingservice" level="DEBUG" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Security events logger -->
+    <logger name="SECURITY" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Payment events logger -->
+    <logger name="PAYMENT" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Billing events logger -->
+    <logger name="BILLING" level="INFO" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Reduce noise from third-party libraries -->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="WARN"/>
+    <logger name="org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping" level="WARN"/>
+    <logger name="org.springframework.boot.web.embedded.tomcat.TomcatWebServer" level="INFO"/>
+    <logger name="org.apache.catalina" level="WARN"/>
+    <logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="liquibase" level="INFO"/>
+    
+    <!-- Default root logger -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </root>
+
+</configuration>

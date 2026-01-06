@@ -1,0 +1,309 @@
+{
+    "groups": [
+        {
+            "name": "iqscaffold",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Configuration properties for IQ Scaffold Billing Service."
+        },
+        {
+            "name": "iqscaffold.email",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Email",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Email configuration properties."
+        },
+        {
+            "name": "iqscaffold.email.smtp",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Email$Smtp",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "SMTP server configuration for email sending."
+        },
+        {
+            "name": "iqscaffold.email.sender",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Email$Sender",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Email sender configuration (from address, name, etc.)."
+        },
+        {
+            "name": "iqscaffold.email.templates",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Email$Templates",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Email template configuration paths."
+        },
+        {
+            "name": "iqscaffold.billing",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Billing-specific configuration properties."
+        },
+        {
+            "name": "iqscaffold.billing.security",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Security",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Security configuration for billing service."
+        },
+        {
+            "name": "iqscaffold.billing.security.jwt",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Security$Jwt",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "JWT configuration for authentication."
+        },
+        {
+            "name": "iqscaffold.billing.payment",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Payment",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Payment processing configuration."
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Payment$Stripe",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Stripe payment provider configuration for payment processing."
+        },
+        {
+            "name": "iqscaffold.billing.integration",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Integration",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "External service integration configuration."
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Integration$EmailService",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Email service integration configuration."
+        },
+        {
+            "name": "iqscaffold.billing.stripe",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Stripe",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "General Stripe configuration for Connect and platform operations."
+        },
+        {
+            "name": "iqscaffold.billing.notifications",
+            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Notifications",
+            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
+            "description": "Notification system configuration."
+        }
+    ],
+    "properties": [
+        {
+            "name": "iqscaffold.tenant-id-header",
+            "type": "java.lang.String",
+            "description": "HTTP header name used to identify the tenant in multi-tenant requests.",
+            "defaultValue": "X-Tenant-ID"
+        },
+        {
+            "name": "iqscaffold.email.smtp.host",
+            "type": "java.lang.String",
+            "description": "SMTP server hostname for sending emails."
+        },
+        {
+            "name": "iqscaffold.email.smtp.port",
+            "type": "java.lang.Integer",
+            "description": "SMTP server port number.",
+            "defaultValue": 587
+        },
+        {
+            "name": "iqscaffold.email.smtp.username",
+            "type": "java.lang.String",
+            "description": "SMTP server username for authentication (optional)."
+        },
+        {
+            "name": "iqscaffold.email.smtp.password",
+            "type": "java.lang.String",
+            "description": "SMTP server password for authentication (optional)."
+        },
+        {
+            "name": "iqscaffold.email.smtp.auth",
+            "type": "java.lang.Boolean",
+            "description": "Enable SMTP authentication.",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.email.smtp.starttls",
+            "type": "java.lang.Boolean",
+            "description": "Enable STARTTLS encryption for SMTP.",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.email.smtp.timeout",
+            "type": "java.time.Duration",
+            "description": "SMTP connection timeout duration.",
+            "defaultValue": "PT30S"
+        },
+        {
+            "name": "iqscaffold.email.sender.from-email",
+            "type": "java.lang.String",
+            "description": "Default 'from' email address for outgoing emails.",
+            "defaultValue": "billing@iqscaffold.com"
+        },
+        {
+            "name": "iqscaffold.email.sender.from-name",
+            "type": "java.lang.String",
+            "description": "Default 'from' name for outgoing emails.",
+            "defaultValue": "IQ Scaffold Billing"
+        },
+        {
+            "name": "iqscaffold.email.sender.base-url",
+            "type": "java.lang.String",
+            "description": "Base URL for generating links in emails.",
+            "defaultValue": "https://app.iqscaffold.com"
+        },
+        {
+            "name": "iqscaffold.email.templates.merchant-onboarding-template",
+            "type": "java.lang.String",
+            "description": "Template path for merchant onboarding emails.",
+            "defaultValue": "email/merchant-onboarding.html"
+        },
+        {
+            "name": "iqscaffold.email.templates.payment-successful-template",
+            "type": "java.lang.String",
+            "description": "Template path for payment successful emails.",
+            "defaultValue": "email/payment-successful.html"
+        },
+        {
+            "name": "iqscaffold.email.templates.payment-failed-template",
+            "type": "java.lang.String",
+            "description": "Template path for payment failed emails.",
+            "defaultValue": "email/payment-failed.html"
+        },
+        {
+            "name": "iqscaffold.email.templates.payment-refunded-template",
+            "type": "java.lang.String",
+            "description": "Template path for payment refunded emails.",
+            "defaultValue": "email/payment-refunded.html"
+        },
+        {
+            "name": "iqscaffold.email.templates.invoice-generated-template",
+            "type": "java.lang.String",
+            "description": "Template path for invoice generated emails.",
+            "defaultValue": "email/invoice-generated.html"
+        },
+        {
+            "name": "iqscaffold.billing.security.jwt.jwk-set-uri",
+            "type": "java.lang.String",
+            "description": "URI to the JWK Set for JWT token validation."
+        },
+        {
+            "name": "iqscaffold.billing.security.jwt.issuer",
+            "type": "java.lang.String",
+            "description": "Expected issuer for JWT tokens.",
+            "defaultValue": "iqscaffold-user-service"
+        },
+        {
+            "name": "iqscaffold.billing.payment.provider",
+            "type": "java.lang.String",
+            "description": "Payment provider to use (stripe or manual).",
+            "defaultValue": "stripe"
+        },
+        {
+            "name": "iqscaffold.billing.payment.saas-mode",
+            "type": "java.lang.Boolean",
+            "description": "Enable SaaS mode with multi-tenant Stripe Connect support.",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.api-key",
+            "type": "java.lang.String",
+            "description": "Stripe Secret API Key for payment processing."
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.webhook-secret",
+            "type": "java.lang.String",
+            "description": "Stripe Webhook Signing Secret for payment events."
+        },
+        {
+            "name": "iqscaffold.billing.payment.stripe.client-id",
+            "type": "java.lang.String",
+            "description": "Stripe Client ID for Connect OAuth flow."
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service.url",
+            "type": "java.lang.String",
+            "description": "Base URL of the external Email Service.",
+            "defaultValue": "http://localhost:8084"
+        },
+        {
+            "name": "iqscaffold.billing.integration.email-service.timeout-ms",
+            "type": "java.lang.Long",
+            "description": "Timeout in milliseconds for Email Service calls.",
+            "defaultValue": 10000
+        },
+        {
+            "name": "iqscaffold.billing.stripe.public-key",
+            "type": "java.lang.String",
+            "description": "Stripe Publishable Key for client-side operations."
+        },
+        {
+            "name": "iqscaffold.billing.stripe.secret-key",
+            "type": "java.lang.String",
+            "description": "Stripe Secret Key for server-side operations."
+        },
+        {
+            "name": "iqscaffold.billing.stripe.webhook-secret",
+            "type": "java.lang.String",
+            "description": "Stripe Webhook Signing Secret for general webhooks."
+        },
+        {
+            "name": "iqscaffold.billing.stripe.connect-client-id",
+            "type": "java.lang.String",
+            "description": "Stripe Connect Client ID for merchant onboarding."
+        },
+        {
+            "name": "iqscaffold.billing.notifications.enable-email-notifications",
+            "type": "java.lang.Boolean",
+            "description": "Enable email notifications for billing events.",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.billing.notifications.enable-webhook-notifications",
+            "type": "java.lang.Boolean",
+            "description": "Enable webhook notifications for billing events.",
+            "defaultValue": true
+        },
+        {
+            "name": "iqscaffold.billing.notifications.retry-delay",
+            "type": "java.time.Duration",
+            "description": "Delay between notification retry attempts.",
+            "defaultValue": "PT5S"
+        },
+        {
+            "name": "iqscaffold.billing.notifications.max-retries",
+            "type": "java.lang.Integer",
+            "description": "Maximum number of retry attempts for failed notifications.",
+            "defaultValue": 3
+        }
+    ],
+    "hints": [
+        {
+            "name": "iqscaffold.billing.payment.provider",
+            "values": [
+                {
+                    "value": "stripe",
+                    "description": "Use Stripe as the payment provider."
+                },
+                {
+                    "value": "manual",
+                    "description": "Use manual payment processing (for testing)."
+                }
+            ]
+        },
+        {
+            "name": "iqscaffold.email.smtp.port",
+            "values": [
+                {
+                    "value": 587,
+                    "description": "Standard SMTP submission port with STARTTLS."
+                },
+                {
+                    "value": 465,
+                    "description": "SMTP over SSL/TLS port."
+                },
+                {
+                    "value": 25,
+                    "description": "Standard SMTP port (not recommended for client use)."
+                }
+            ]
+        }
+    ]
+}

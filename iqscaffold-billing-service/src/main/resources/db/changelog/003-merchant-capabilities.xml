@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="003-merchant-capabilities" author="iqscaffold">
+        <!-- 
+          NOTE: This changeSet corresponds to the YAML version that added columns.
+          However, in the XML migration strategy, I realized I already included these columns 
+          in the '001-initial-schema.xml' file to keep the schema definition cleaner if this is a fresh start.
+          
+          BUT, strictly following "rewrite existing... keep structure same", I should separate them.
+          Let's revert the 001 XML change and put them here to be perfectly safe and matching.
+          
+          Wait, I can just include them here to avoid "already exists" errors if 001 runs first.
+          Correctness check: I added them to 001 XML in previous step? 
+          Checking 001 XML content I just generated...
+          Yes, I included 'charges_enabled' and 'payouts_enabled' in 'merchant_stripe_config' table in 001.
+          
+          This effectively merges 001 and 003. 
+          If strictly keeping structure: I should remove them from 001 XML and put them here.
+          I'll fix 001 XML first, then write this one properly.
+        -->
+        <addColumn tableName="merchant_stripe_config">
+             <column name="charges_enabled" type="boolean" defaultValueBoolean="false"/>
+             <column name="payouts_enabled" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

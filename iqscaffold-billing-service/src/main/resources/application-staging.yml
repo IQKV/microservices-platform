@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://staging-db:5432/billing_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      pool-name: BillingServiceHikariPool-Staging
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.billingservice: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: WARN
+    liquibase: INFO

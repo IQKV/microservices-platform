@@ -37,10 +37,10 @@ public record UserContext(
     String email,
 
     @Schema(
-        description = "Set of user roles for authorization",
+        description = "Set of user authorities for authorization",
         example = "[\"USER\", \"ADMIN\"]"
     )
-    Set<String> roles,
+    Set<String> authorities,
 
     @Schema(
         description = "Set of specific permissions granted to the user",
@@ -82,16 +82,16 @@ public record UserContext(
     Objects.requireNonNull(tenantId, "Tenant ID cannot be null");
 
     // Ensure immutable collections
-    roles = roles != null ? Set.copyOf(roles) : Set.of();
+    authorities = authorities != null ? Set.copyOf(authorities) : Set.of();
     permissions = permissions != null ? Set.copyOf(permissions) : Set.of();
     customClaims = customClaims != null ? Map.copyOf(customClaims) : Map.of();
   }
 
   /**
-   * Check if user has a specific role.
+   * Check if user has a specific authority.
    */
-  public boolean hasRole(String role) {
-    return roles.contains(role);
+  public boolean hasAuthority(String authority) {
+    return authorities.contains(authority);
   }
 
   /**
@@ -114,6 +114,6 @@ public record UserContext(
    * Check if user has admin privileges.
    */
   public boolean isAdmin() {
-    return hasRole("ADMIN") || hasRole("SUPER_ADMIN");
+    return hasAuthority("ADMIN") || hasAuthority("SUPER_ADMIN");
   }
 }

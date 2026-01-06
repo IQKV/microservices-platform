@@ -59,8 +59,41 @@ public class ApiDocumentationResource {
                         "apiDocs": "http://localhost:8080/user-service/api-docs",
                         "directUri": "http://localhost:8080",
                         "enabled": true
+                      },
+                      {
+                        "name": "billing-service",
+                        "displayName": "Billing Service APIs",
+                        "description": "Payments, subscriptions and invoicing",
+                        "swaggerUi": "http://localhost:8080/billing-service/swagger-ui.html",
+                        "apiDocs": "http://localhost:8080/billing-service/api-docs",
+                        "directUri": "http://localhost:8082",
+                        "enabled": true,
+                        "specializedGroups": [
+                          {
+                            "name": "billing-payments",
+                            "displayName": "💳 Payment APIs",
+                            "description": "Payment processing, refunds, and payment intent management",
+                            "swaggerUi": "http://localhost:8080/billing-service/swagger-ui.html?urls.primaryName=💳 Payment APIs",
+                            "apiDocs": "http://localhost:8080/billing-service/api-docs/billing-payments"
+                          },
+                          {
+                            "name": "billing-webhooks",
+                            "displayName": "🔗 Webhook APIs", 
+                            "description": "Stripe webhook handlers for payment events",
+                            "swaggerUi": "http://localhost:8080/billing-service/swagger-ui.html?urls.primaryName=🔗 Webhook APIs",
+                            "apiDocs": "http://localhost:8080/billing-service/api-docs/billing-webhooks"
+                          },
+                          {
+                            "name": "billing-admin",
+                            "displayName": "🛠️ Billing Admin APIs",
+                            "description": "Merchant onboarding and administrative operations", 
+                            "swaggerUi": "http://localhost:8080/billing-service/swagger-ui.html?urls.primaryName=🛠️ Billing Admin APIs",
+                            "apiDocs": "http://localhost:8080/billing-service/api-docs/billing-admin"
+                          }
+                        ]
                       }
                     ],
+                    "totalServices": 2,
                     "message": "Access Swagger UI through the gateway for aggregated API documentation"
                   }
                   """
@@ -108,6 +141,33 @@ public class ApiDocumentationResource {
         serviceInfo.put("apiDocs", baseUrl + "/" + contextPath + "/api-docs");
         serviceInfo.put("directUri", serviceConfig.uri());
         serviceInfo.put("enabled", true);
+
+        // Add specialized groups for billing service
+        if ("billing-service".equals(serviceName)) {
+          serviceInfo.put("specializedGroups", java.util.List.of(
+              java.util.Map.of(
+                  "name", "billing-payments",
+                  "displayName", "💳 Payment APIs",
+                  "description", "Payment processing, refunds, and payment intent management",
+                  "swaggerUi", baseUrl + "/" + contextPath + "/swagger-ui.html?urls.primaryName=💳 Payment APIs",
+                  "apiDocs", baseUrl + "/" + contextPath + "/api-docs/billing-payments"
+              ),
+              java.util.Map.of(
+                  "name", "billing-webhooks", 
+                  "displayName", "🔗 Webhook APIs",
+                  "description", "Stripe webhook handlers for payment events",
+                  "swaggerUi", baseUrl + "/" + contextPath + "/swagger-ui.html?urls.primaryName=🔗 Webhook APIs",
+                  "apiDocs", baseUrl + "/" + contextPath + "/api-docs/billing-webhooks"
+              ),
+              java.util.Map.of(
+                  "name", "billing-admin",
+                  "displayName", "🛠️ Billing Admin APIs", 
+                  "description", "Merchant onboarding and administrative operations",
+                  "swaggerUi", baseUrl + "/" + contextPath + "/swagger-ui.html?urls.primaryName=🛠️ Billing Admin APIs",
+                  "apiDocs", baseUrl + "/" + contextPath + "/api-docs/billing-admin"
+              )
+          ));
+        }
 
         services.add(serviceInfo);
       });

@@ -41,7 +41,7 @@ class UserDtoTest {
     assertEquals("Doe", userDto.lastName());
     assertTrue(userDto.enabled());
     assertTrue(userDto.emailVerified());
-    assertEquals(Set.of("USER", "ADMIN"), userDto.roles());
+    assertEquals(Set.of("USER", "ADMIN"), userDto.authorities());
     assertEquals("tenant-123", userDto.tenantId());
     assertEquals(createdAt, userDto.createdAt());
     assertEquals(updatedAt, userDto.updatedAt());

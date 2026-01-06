@@ -31,7 +31,7 @@ public record CreateUserRequest(
 
     Boolean enabled,
     Boolean emailVerified,
-    Set<String> roles
+    Set<String> authorities
 ) {
 
   // Compact constructor for default values
@@ -43,8 +43,8 @@ public record CreateUserRequest(
     if (emailVerified == null) {
       emailVerified = false;
     }
-    if (roles == null) {
-      roles = Set.of("USER");
+    if (authorities == null) {
+      authorities = Set.of("USER");
     }
   }
 }
