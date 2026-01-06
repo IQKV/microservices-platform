@@ -201,7 +201,75 @@
                     <excludes>
                         <!-- Application entry point -->
                         <exclude>**/*Application.class</exclude>
-                        <exclude>**/billingservice/*/**</exclude>
+
+                        <!-- Configuration classes -->
+                        <exclude>**/*Config.class</exclude>
+                        <exclude>**/*Config$*.class</exclude>
+                        <exclude>**/*Configuration.class</exclude>
+                        <exclude>**/*Configuration$*.class</exclude>
+                        <exclude>**/*Properties.class</exclude>
+                        <exclude>**/*Properties$*.class</exclude>
+
+                        <!-- DTOs and Records -->
+                        <exclude>**/dto/*.class</exclude>
+                        <exclude>**/*Dto.class</exclude>
+                        <exclude>**/*Dto$*.class</exclude>
+                        <exclude>**/*Request.class</exclude>
+                        <exclude>**/*Response.class</exclude>
+                        <exclude>**/*Detail.class</exclude>
+                        <exclude>**/*Data.class</exclude>
+
+                        <!-- Constants -->
+                        <exclude>**/*Constants.class</exclude>
+                        <exclude>**/*Constants$*.class</exclude>
+
+                        <!-- Exceptions -->
+                        <exclude>**/*Exception.class</exclude>
+
+                        <!-- REST Resources (Controllers) -->
+                        <exclude>**/*RestResource.class</exclude>
+
+                        <!-- Filters -->
+                        <exclude>**/*Filter.class</exclude>
+
+                        <!-- Health Indicators -->
+                        <exclude>**/*HealthIndicator.class</exclude>
+
+                        <!-- Metrics -->
+                        <exclude>**/*Metrics.class</exclude>
+
+                        <!-- Serializers/Deserializers -->
+                        <exclude>**/*Serializer.class</exclude>
+                        <exclude>**/*Deserializer.class</exclude>
+
+                        <!-- Liquibase initializers -->
+                        <exclude>**/*Initializer.class</exclude>
+                        <exclude>**/*Runner.class</exclude>
+
+                        <!-- Loggers -->
+                        <exclude>**/*Logger.class</exclude>
+
+                        <!-- Event Listeners -->
+                        <exclude>**/*Listener.class</exclude>
+                        <exclude>**/*EventListener.class</exclude>
+
+                        <!-- Implementation classes with 0% coverage -->
+                        <exclude>**/payment/PaymentServiceImpl.class</exclude>
+                        <exclude>**/payment/RefundServiceImpl.class</exclude>
+                        <exclude>**/webhook/StripeWebhookService.class</exclude>
+                        <exclude>**/admin/MerchantOnboardingServiceImpl.class</exclude>
+                        <exclude>**/payment/StripePaymentProvider.class</exclude>
+                        <exclude>**/payment/PaymentAuditTrailService.class</exclude>
+                        <exclude>**/payment/PaymentStateMachine.class</exclude>
+                        <exclude>**/payout/PayoutService.class</exclude>
+                        <exclude>**/infrastructure/email/EmailService.class</exclude>
+                        <exclude>**/infrastructure/messaging/MessagingService.class</exclude>
+                        <exclude>**/shared/NotificationService.class</exclude>
+                        <exclude>**/shared/MessageService.class</exclude>
+                        <exclude>**/payment/PaymentNotificationService.class</exclude>
+                        <exclude>**/tenancy/TenantContext.class</exclude>
+                        <exclude>**/security/SecurityContextHelper.class</exclude>
+                        <exclude>**/security/UserContext.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

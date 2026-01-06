@@ -1,5 +1,6 @@
 package com.iqscaffold.billingservice.webhook;
 
+import com.iqscaffold.billingservice.webhook.WebhookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Webhooks", description = "Incoming webhooks from payment providers")
 public class StripeWebhookRestResource {
 
-  private final StripeWebhookService webhookService;
+  private final WebhookService webhookService;
 
-  public StripeWebhookRestResource(StripeWebhookService webhookService) {
+  public StripeWebhookRestResource(WebhookService webhookService) {
     this.webhookService = webhookService;
   }
 

@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Handles incoming webhooks from Stripe to synchronize local state with gateway
- * state.
+ * Implementation of WebhookService handling incoming webhooks from Stripe to synchronize 
+ * local state with gateway state.
  * <p>
  * Key Security Features:
  * <ul>
@@ -34,9 +34,13 @@ import org.springframework.stereotype.Service;
  * {@link com.iqscaffold.billingservice.admin.MerchantStripeConfig}
  * capabilities.</li>
  * </ul>
+ * 
+ * @author IQScaffold Team
+ * @version 1.0
+ * @since 1.0
  */
 @Service
-public class StripeWebhookService {
+public class StripeWebhookService implements WebhookService {
   private static final Logger logger = LoggerFactory.getLogger(StripeWebhookService.class);
 
   private final PaymentService paymentService;
@@ -72,6 +76,7 @@ public class StripeWebhookService {
    * @param sigHeader The {@code Stripe-Signature} header value.
    * @throws IllegalArgumentException If signature verification fails.
    */
+  @Override
   public void processWebhook(String payload, String sigHeader) {
     Event event;
     try {
