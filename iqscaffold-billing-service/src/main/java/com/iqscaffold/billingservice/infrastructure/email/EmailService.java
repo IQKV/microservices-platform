@@ -1,6 +1,6 @@
 package com.iqscaffold.billingservice.infrastructure.email;
 
-import com.iqscaffold.billingservice.config.BillingProperties;
+import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
@@ -19,18 +19,18 @@ public class EmailService {
 
   private final JavaMailSender mailSender;
   private final SpringTemplateEngine templateEngine;
-  private final BillingProperties billingProperties;
+  private final IqScaffoldProperties iqScaffoldProperties;
   private final MessageSource messageSource;
 
   public EmailService(
       JavaMailSender mailSender,
       SpringTemplateEngine templateEngine,
-      BillingProperties billingProperties,
+      IqScaffoldProperties iqScaffoldProperties,
       MessageSource messageSource
   ) {
     this.mailSender = mailSender;
     this.templateEngine = templateEngine;
-    this.billingProperties = billingProperties;
+    this.iqScaffoldProperties = iqScaffoldProperties;
     this.messageSource = messageSource;
   }
 
@@ -55,7 +55,7 @@ public class EmailService {
       assert subject != null;
       helper.setSubject(subject);
       helper.setText(html, true);
-      helper.setFrom("noreply@iqscaffold.com"); // Could be configurable
+      helper.setFrom(iqScaffoldProperties.email().sender().fromEmail(), iqScaffoldProperties.email().sender().fromName());
 
       mailSender.send(message);
     } catch (MessagingException e) {

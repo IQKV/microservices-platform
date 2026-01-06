@@ -103,6 +103,7 @@ kubectl get services -n iqscaffold-dev-env
 ```bash
 kubectl logs -f deployment/gateway-service -n iqscaffold-dev-env
 kubectl logs -f deployment/user-service -n iqscaffold-dev-env
+kubectl logs -f deployment/billing-service -n iqscaffold-dev-env
 ```
 
 ### Port Forwarding (Alternative to NodePort)
@@ -167,6 +168,14 @@ kubectl delete namespace iqscaffold-dev-env
 
 ## Testing the API
 
+### Health Checks
+
+```bash
+curl http://$(minikube ip):30080/actuator/health
+curl http://$(minikube ip):30081/actuator/health
+curl http://$(minikube ip):30082/actuator/health
+```
+
 ### Register a User
 
 ```bash
@@ -189,6 +198,20 @@ curl -X POST http://$(minikube ip):30080/api/v1/auth/login \
   -d '{
     "username": "testuser",
     "password": "TestPass123!"
+  }'
+```
+
+### Create a Payment (Billing Service)
+
+```bash
+# First get the JWT token from login response, then:
+curl -X POST http://$(minikube ip):30082/api/v1/billing/payments/intent \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "amount": 1000,
+    "currency": "usd",
+    "description": "Test payment"
   }'
 ```
 

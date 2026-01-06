@@ -65,9 +65,42 @@ public record IqScaffoldProperties(
    * Billing-specific configuration properties with iqscaffold.billing prefix.
    */
   public record Billing(
+      @Valid @NotNull Security security,
+      @Valid @NotNull Payment payment,
+      @Valid @NotNull Integration integration,
       @Valid @NotNull Stripe stripe,
       @Valid @NotNull Notifications notifications
   ) {
+
+    public record Security(
+        @Valid @NotNull Jwt jwt
+    ) {
+      public record Jwt(
+          @NotBlank String jwkSetUri,
+          @NotBlank String issuer
+      ) {}
+    }
+
+    public record Integration(
+        @Valid @NotNull EmailService emailService
+    ) {
+        public record EmailService(
+            @NotBlank String url,
+            @NotNull Long timeoutMs
+        ) {}
+    }
+
+    public record Payment(
+        @NotBlank @jakarta.validation.constraints.Pattern(regexp = "stripe|manual") String provider,
+        boolean saasMode,
+        @Valid @NotNull Stripe stripe
+    ) {
+      public record Stripe(
+          @NotBlank String apiKey,
+          @NotBlank String webhookSecret,
+          @NotBlank String clientId // For Connect
+      ) {}
+    }
 
     public record Stripe(
         @NotBlank String publicKey,

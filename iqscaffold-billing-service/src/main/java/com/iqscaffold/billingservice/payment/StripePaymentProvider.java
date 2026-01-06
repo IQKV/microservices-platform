@@ -1,6 +1,6 @@
 package com.iqscaffold.billingservice.payment;
 
-import com.iqscaffold.billingservice.config.BillingProperties;
+import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -36,14 +36,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class StripePaymentProvider implements PaymentProviderAdapter {
 
-  private final BillingProperties billingProperties;
+  private final IqScaffoldProperties iqScaffoldProperties;
   private final StripeCustomerRepository stripeCustomerRepository;
   private final com.iqscaffold.billingservice.security.SecurityContextHelper securityHelper; // To get tenant if needed,
                                                                                              // though we can pass it
                                                                                              // down.
 
-  public StripePaymentProvider(BillingProperties billingProperties, StripeCustomerRepository stripeCustomerRepository) {
-    this.billingProperties = billingProperties;
+  public StripePaymentProvider(IqScaffoldProperties iqScaffoldProperties, StripeCustomerRepository stripeCustomerRepository) {
+    this.iqScaffoldProperties = iqScaffoldProperties;
     this.stripeCustomerRepository = stripeCustomerRepository;
     this.securityHelper = null; // We'll just rely on passed args or context if we inject it properly.
     // Actually, let's keep it simple and just use the repo.
@@ -51,7 +51,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @PostConstruct
   public void init() {
-    Stripe.apiKey = billingProperties.payment().stripe().apiKey();
+    Stripe.apiKey = iqScaffoldProperties.billing().payment().stripe().apiKey();
   }
 
   /**

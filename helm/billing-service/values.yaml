@@ -43,13 +43,48 @@ readinessProbe:
 
 env:
   - name: SPRING_PROFILES_ACTIVE
-    value: "local"
-  - name: USER_SERVICE_URL
+    value: "production"
+  # Service Integration URLs
+  - name: IQSCAFFOLD_USER_SERVICE_URL
     value: "http://user-service:80"
+  - name: EMAIL_SERVICE_URL
+    value: "http://email-service:80"
+  # JWT Configuration
+  - name: JWT_ISSUER
+    value: "iqscaffold-user-service"
+  # Payment Configuration
+  - name: PAYMENT_PROVIDER
+    value: "stripe"
   - name: BILLING_SAAS_MODE
+    value: "true"
+  # Email Configuration
+  - name: EMAIL_FROM_EMAIL
+    value: "billing@iqscaffold.com"
+  - name: EMAIL_FROM_NAME
+    value: "IQ Scaffold Billing"
+  - name: APP_BASE_URL
+    value: "https://app.iqscaffold.com"
+  # Notification Configuration
+  - name: BILLING_EMAIL_NOTIFICATIONS
+    value: "true"
+  - name: BILLING_WEBHOOK_NOTIFICATIONS
     value: "true"
 
 secretEnv:
+  # Database Configuration
+  - name: IQSCAFFOLD_DATABASE_URL
+    secretKeyRef:
+      name: billing-service-secrets
+      key: DATABASE_URL
+  - name: IQSCAFFOLD_DATABASE_USERNAME
+    secretKeyRef:
+      name: billing-service-secrets
+      key: DATABASE_USERNAME
+  - name: IQSCAFFOLD_DATABASE_PASSWORD
+    secretKeyRef:
+      name: billing-service-secrets
+      key: DATABASE_PASSWORD
+  # Stripe Payment Configuration
   - name: STRIPE_API_KEY
     secretKeyRef:
       name: billing-service-secrets
@@ -62,23 +97,57 @@ secretEnv:
     secretKeyRef:
       name: billing-service-secrets
       key: STRIPE_CLIENT_ID
-  - name: SPRING_DATASOURCE_USERNAME
+  # Stripe General Configuration
+  - name: STRIPE_PUBLIC_KEY
     secretKeyRef:
       name: billing-service-secrets
-      key: DB_USERNAME
-  - name: SPRING_DATASOURCE_PASSWORD
+      key: STRIPE_PUBLIC_KEY
+  - name: STRIPE_SECRET_KEY
     secretKeyRef:
       name: billing-service-secrets
-      key: DB_PASSWORD
+      key: STRIPE_SECRET_KEY
+  - name: STRIPE_CONNECT_CLIENT_ID
+    secretKeyRef:
+      name: billing-service-secrets
+      key: STRIPE_CONNECT_CLIENT_ID
+  # Email SMTP Configuration
+  - name: SMTP_HOST
+    secretKeyRef:
+      name: billing-service-secrets
+      key: SMTP_HOST
+  - name: SMTP_PORT
+    secretKeyRef:
+      name: billing-service-secrets
+      key: SMTP_PORT
+  - name: SMTP_USERNAME
+    secretKeyRef:
+      name: billing-service-secrets
+      key: SMTP_USERNAME
+  - name: SMTP_PASSWORD
+    secretKeyRef:
+      name: billing-service-secrets
+      key: SMTP_PASSWORD
 
 secrets:
   enabled: true
   data:
-    STRIPE_API_KEY: ""
-    STRIPE_WEBHOOK_SECRET: ""
-    STRIPE_CLIENT_ID: ""
-    DB_USERNAME: Z3JpcGRheV91c2Vy
-    DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
+    # Database Configuration
+    DATABASE_URL: ""  # Base64 encoded: jdbc:postgresql://postgresql:5432/iqscaffold_billing
+    DATABASE_USERNAME: ""  # Base64 encoded database username
+    DATABASE_PASSWORD: ""  # Base64 encoded database password
+    # Stripe Payment Configuration
+    STRIPE_API_KEY: ""  # Base64 encoded Stripe secret API key
+    STRIPE_WEBHOOK_SECRET: ""  # Base64 encoded Stripe webhook secret
+    STRIPE_CLIENT_ID: ""  # Base64 encoded Stripe Connect client ID
+    # Stripe General Configuration
+    STRIPE_PUBLIC_KEY: ""  # Base64 encoded Stripe publishable key
+    STRIPE_SECRET_KEY: ""  # Base64 encoded Stripe secret key (same as API key)
+    STRIPE_CONNECT_CLIENT_ID: ""  # Base64 encoded Stripe Connect client ID
+    # Email SMTP Configuration
+    SMTP_HOST: ""  # Base64 encoded SMTP server hostname
+    SMTP_PORT: "NTg3"  # Base64 encoded: 587
+    SMTP_USERNAME: ""  # Base64 encoded SMTP username
+    SMTP_PASSWORD: ""  # Base64 encoded SMTP password
 
 postgresql:
   enabled: true

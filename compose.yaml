@@ -87,6 +87,17 @@ services:
       retries: 5
       start_period: 30s
 
+  # MailHog for Email Testing in Local Development
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: iqscaffold-mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI
+    networks:
+      - iqscaffold-network
+    restart: unless-stopped
+
   # User Service
   user-service:
     build:
@@ -134,21 +145,42 @@ services:
     container_name: iqscaffold-billing-service
     environment:
       SPRING_PROFILES_ACTIVE: local
+      # Database Configuration
       IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/iqscaffold_billing
       IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_billing
       IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+      # Cache Configuration
       IQSCAFFOLD_CACHE_REDIS_HOST: redis
       IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      # Messaging Configuration
       IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
       IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
       IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
       IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
-      USER_SERVICE_URL: http://user-service:8080
-      EMAIL_SERVICE_URL: http://email-service:8080
+      # Service Integration
+      IQSCAFFOLD_USER_SERVICE_URL: http://user-service:8080
+      EMAIL_SERVICE_URL: http://email-service:8084
+      # Email Configuration (MailHog for local development)
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      EMAIL_FROM_EMAIL: billing@iqscaffold.local
+      EMAIL_FROM_NAME: IQ Scaffold Billing (Local)
+      APP_BASE_URL: http://localhost:8080
+      # JWT Configuration
+      JWT_ISSUER: iqscaffold-user-service
+      # Payment Configuration
       PAYMENT_PROVIDER: stripe
       BILLING_SAAS_MODE: "true"
+      # Stripe Configuration
       STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_placeholder}
+      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-pk_test_placeholder}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_CLIENT_ID: ${STRIPE_CLIENT_ID:-ca_test_placeholder}
+      STRIPE_CONNECT_CLIENT_ID: ${STRIPE_CONNECT_CLIENT_ID:-ca_test_placeholder}
+      # Notification Configuration
+      BILLING_EMAIL_NOTIFICATIONS: "true"
+      BILLING_WEBHOOK_NOTIFICATIONS: "true"
     ports:
       - "8082:8082"
     depends_on:
@@ -160,6 +192,8 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - iqscaffold-network
     healthcheck:

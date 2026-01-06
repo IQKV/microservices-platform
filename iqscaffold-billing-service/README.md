@@ -1,10 +1,10 @@
 # 💰 IQ Scaffold Billing Service
 
-> Multi-tenant billing and payment orchestration service providing Stripe integration, merchant onboarding, and automated payment lifecycle management.
+> Multi-tenant billing and payment orchestration service providing Stripe integration, merchant onboarding, automated payment lifecycle management, and comprehensive financial operations.
 
 ## Business Purpose
 
-A core domain service for the IQ Scaffold platform that handles financial operations:
+A core domain service for the IQ Scaffold platform that handles comprehensive financial operations:
 
 - **Payment Orchestration** - End-to-end management of payment intents, from creation to final settlement with external providers.
 - **Merchant Onboarding** - Automated onboarding flow for platform merchants using Stripe Connect (Standard/Express).
@@ -12,6 +12,8 @@ A core domain service for the IQ Scaffold platform that handles financial operat
 - **Revenue Sharing** - Implementation of platform fees (application fees) on top of merchant transactions.
 - **Compliance & Auditing** - Detailed audit trails for every payment state transition and external webhook event.
 - **Multi-Tenant Finance** - Strict data isolation for financial records using schema-per-tenant architecture.
+- **Event-Driven Notifications** - Comprehensive email notification system with RabbitMQ messaging integration.
+- **Refund Management** - Full and partial refund processing with automated state synchronization.
 
 ## Overview
 
@@ -48,11 +50,14 @@ The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. I
 - **Webhook Signature Verification**: Cryptographic validation of incoming Stripe events.
 - **MDC Logging**: Correlation of logs with tenant, user, and payment identifiers.
 
-### 📧 Business Communication
+### 📧 Business Communication & Messaging
 
 - **Notification Engine**: Automated emails for onboarding and payment events via Thymeleaf templates.
 - **Multi-lingual Support**: Internationalized message resolution for error codes and notifications.
 - **Asynchronous Emailing**: Non-blocking email delivery using Spring's `@Async` support.
+- **RabbitMQ Integration**: Event-driven messaging for billing events, notifications, and cross-service communication.
+- **Event Publishing**: Publishes payment lifecycle events (created, succeeded, failed, refunded) to message queues.
+- **Email Templates**: Rich HTML email templates for merchant onboarding, payment confirmations, and refund notifications.
 
 ## Architecture Patterns
 
@@ -78,6 +83,11 @@ Request Flow:
 - **StripeWebhookService**: Secured entry point for external events with signature validation.
 - **MerchantOnboardingService**: Orchestrates the Stripe Connect onboarding journey.
 - **RefundService**: Manages the business logic and external calls for payment reversals.
+- **PaymentAuditTrailService**: Logs all payment state changes for compliance and debugging.
+- **MessagingService**: Publishes billing events and notification events to RabbitMQ.
+- **EmailService**: Handles transactional email sending with SMTP integration.
+- **NotificationService**: High-level notification orchestration combining email and event publishing.
+- **PaymentNotificationService**: Business logic integration for payment-related notifications.
 
 ## API Endpoints
 
@@ -101,14 +111,17 @@ Request Flow:
 
 The service enforces strict transitions to ensure financial consistency:
 
-| Initial State | Event        | Target State | Notes                      |
-| :------------ | :----------- | :----------- | :------------------------- |
-| `null`        | Create       | `PENDING`    | Initial record creation    |
-| `PENDING`     | API Call     | `PROCESSING` | Intent sent to Stripe      |
-| `PROCESSING`  | Webhook      | `SUCCEEDED`  | Success confirmation       |
-| `PROCESSING`  | Webhook      | `FAILED`     | Payment failed/declined    |
-| `SUCCEEDED`   | Admin Action | `REFUNDED`   | Money returned to customer |
-| `*`           | Webhook      | `CANCELED`   | Intent expired or canceled |
+| Initial State | Event        | Target State         | Notes                      |
+| :------------ | :----------- | :------------------- | :------------------------- |
+| `null`        | Create       | `PENDING`            | Initial record creation    |
+| `PENDING`     | API Call     | `PROCESSING`         | Intent sent to Stripe      |
+| `PROCESSING`  | Webhook      | `SUCCEEDED`          | Success confirmation       |
+| `PROCESSING`  | Webhook      | `FAILED`             | Payment failed/declined    |
+| `SUCCEEDED`   | Admin Action | `REFUNDED`           | Money returned to customer |
+| `SUCCEEDED`   | Webhook      | `PARTIALLY_REFUNDED` | Partial refund processed   |
+| `*`           | Webhook      | `CANCELED`           | Intent expired or canceled |
+
+**State Validation**: The `PaymentStateMachine` component validates all transitions to prevent invalid state changes (e.g., preventing a 'COMPLETED' payment from moving back to 'PENDING').
 
 ## Database & Multi-Tenancy
 
@@ -117,17 +130,76 @@ The service uses **Liquibase** for evolutionary database design with a schema-pe
 1. **Public Schema**: Stores shared platform registry (e.g., `merchant_stripe_config` mapping tenants to Stripe Account IDs).
 2. **Tenant Schemas**: Isolated storage for `payment`, `payment_audit_trail`, and `payout` records.
 
+### Schema Structure
+
+**Public Schema Tables:**
+
+- `merchant_stripe_config`: Maps tenants to Stripe Connect accounts, stores capabilities and fee percentages
+
+**Tenant Schema Tables:**
+
+- `payment`: Payment records with status, amounts, Stripe intent IDs, application fees
+- `payment_audit_trail`: Audit log of all payment state transitions
+- `payout`: Payout records from Stripe
+- `stripe_customer`: Customer records for Stripe integration
+
 ### Implementation Detail
 
-On every request, the `TenantIdentifierResolver` extracts the tenant ID from the `X-Tenant-ID` header (propagated by the Gateway) and routes Hibernate sessions to the appropriate schema.
+On every request, the `TenantIdentifierResolver` extracts the tenant ID from the `X-Tenant-ID` header (propagated by the Gateway) and routes Hibernate sessions to the appropriate schema. The `TenantContext` ThreadLocal maintains the current tenant context throughout the request lifecycle.
 
 ## Technical Highlights
 
 - **Spring Boot 3.x**: Latest framework features for microservices.
-- **Stripe Java SDK**: Deep integration with Stripe's advanced features.
-- **Hibernate Multi-Tenancy**: Enterprise-grade data isolation.
-- **Resilience**: Transactional integrity across local DB and external state updates.
-- **Observability**: Structured logging with OpenTelemetry-ready context.
+- **Stripe Java SDK**: Deep integration with Stripe's advanced features including Connect.
+- **Hibernate Multi-Tenancy**: Enterprise-grade data isolation with schema-per-tenant.
+- **Resilience4j**: Circuit breaker and time limiter patterns for external service calls.
+- **Transactional Integrity**: Ensures consistency across local DB and external state updates.
+- **OpenTelemetry Observability**: Structured logging with distributed tracing support.
+- **RabbitMQ Messaging**: Event-driven architecture with reliable message delivery.
+- **JWT Security**: OAuth2 Resource Server with comprehensive authentication and authorization.
+- **Email Integration**: SMTP-based transactional email system with Thymeleaf templates.
+
+## Messaging & Event Architecture
+
+### Event Types Published
+
+The service publishes events to RabbitMQ for cross-service communication:
+
+- **Payment Events**: `billing.payment.created`, `billing.payment.succeeded`, `billing.payment.failed`, `billing.payment.refunded`
+- **Merchant Events**: `billing.merchant.onboarded`
+- **Invoice Events**: `billing.invoice.generated`
+- **Notification Events**: `notification.email`
+
+### RabbitMQ Configuration
+
+- **Exchanges**: `iqscaffold.events`, `iqscaffold.billing`, `iqscaffold.dlx`
+- **Queues**: `iqscaffold.billing.events`, `iqscaffold.billing.payments`, `iqscaffold.notifications`
+- **Dead Letter Queues**: Failed message handling with retry logic
+
+### Email Notifications
+
+Automated email notifications for:
+
+- Merchant onboarding instructions
+- Payment successful/failed confirmations
+- Payment refund notifications
+- Invoice generation notifications
+
+## Webhook Processing
+
+### Supported Stripe Events
+
+- `payment_intent.succeeded` - Updates payment to SUCCEEDED status
+- `payment_intent.payment_failed` - Updates payment to FAILED status
+- `charge.refunded` - Syncs refund status (REFUNDED/PARTIALLY_REFUNDED)
+- `payout.paid` - Records payout entities
+- `account.updated` - Updates merchant capabilities (charges_enabled, payouts_enabled)
+
+### Security Features
+
+- **Signature Verification**: Cryptographic validation of incoming Stripe events using webhook secrets
+- **Tenant Resolution**: Automatic tenant context resolution from webhook metadata
+- **Idempotent Processing**: Safe to process the same webhook multiple times
 
 ## Configuration
 
@@ -146,4 +218,140 @@ iqscaffold:
     integration:
       email-service:
         url: ${EMAIL_SERVICE_URL}
+        timeout-ms: 10000
+    notifications:
+      enable-email-notifications: true
+      enable-webhook-notifications: true
+      retry-delay: PT5S
+      max-retries: 3
+  email:
+    smtp:
+      host: ${SMTP_HOST}
+      port: ${SMTP_PORT}
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+      auth: true
+      starttls: true
+    sender:
+      from-email: billing@iqscaffold.com
+      from-name: IQ Scaffold Billing
+    templates:
+      merchant-onboarding-template: email/merchant-onboarding.html
+      payment-successful-template: email/payment-successful.html
+      payment-failed-template: email/payment-failed.html
+      payment-refunded-template: email/payment-refunded.html
+  messaging:
+    rabbitmq:
+      exchanges:
+        events: iqscaffold.events
+        billing: iqscaffold.billing
+      routing-keys:
+        payment-created: billing.payment.created
+        payment-succeeded: billing.payment.succeeded
+        payment-failed: billing.payment.failed
+        payment-refunded: billing.payment.refunded
+        merchant-onboarded: billing.merchant.onboarded
+        notification-email: notification.email
 ```
+
+### Required Environment Variables
+
+```bash
+# Stripe Configuration
+STRIPE_API_KEY=sk_live_...
+STRIPE_PUBLIC_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_CLIENT_ID=ca_...
+
+# Database Configuration
+IQSCAFFOLD_DATABASE_URL=jdbc:postgresql://localhost:5432/iqscaffold_billing
+IQSCAFFOLD_DATABASE_USERNAME=iqscaffold_billing
+IQSCAFFOLD_DATABASE_PASSWORD=secure_password
+
+# Redis Configuration
+IQSCAFFOLD_CACHE_REDIS_HOST=localhost
+IQSCAFFOLD_CACHE_REDIS_PORT=6379
+IQSCAFFOLD_CACHE_REDIS_PASSWORD=redis_password
+
+# RabbitMQ Configuration
+IQSCAFFOLD_MESSAGING_RABBITMQ_HOST=localhost
+IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME=iqscaffold
+IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD=rabbitmq_password
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=billing@iqscaffold.com
+SMTP_PASSWORD=email_password
+
+# Service Integration
+IQSCAFFOLD_USER_SERVICE_URL=http://localhost:8080
+EMAIL_SERVICE_URL=http://localhost:8084
+```
+
+## Observability & Monitoring
+
+### Metrics
+
+- Prometheus metrics at `/actuator/prometheus`
+- HTTP request metrics (latency, success rates)
+- Custom billing metrics (payment processing times, success rates)
+- JVM metrics (memory, GC, threads)
+
+### Logging
+
+- Structured JSON logging via Logstash Logback Encoder
+- Correlation ID tracking across requests
+- Tenant and user context in all logs
+- Payment event logging for audit trails
+
+### Tracing
+
+- OpenTelemetry integration for distributed tracing
+- Trace ID and Span ID in logs
+- Service-to-service tracing
+- Performance metrics collection
+
+### Health Checks
+
+- Liveness probe: `/actuator/health/live`
+- Readiness probe: `/actuator/health/ready`
+- Database connectivity check
+- Redis connectivity check
+- RabbitMQ connectivity check
+
+## Security Features
+
+- **JWT Validation**: OAuth2 Resource Server with JWK Set validation from User Service
+- **Role-Based Access Control**: Method-level security with @PreAuthorize (ADMIN, USER roles)
+- **Webhook Signature Verification**: Cryptographic validation of Stripe events
+- **Tenant Isolation**: Schema-per-tenant prevents cross-tenant data access
+- **User Context Enrichment**: Audit logs include userId, email, tenant information
+- **MDC Logging**: Correlation IDs for request tracing and debugging
+- **CSRF Protection**: Configured appropriately for stateless API endpoints
+
+## Development & Testing
+
+### Key Dependencies
+
+- Spring Boot 3.x (Web, Data JPA, Security, OAuth2, AMQP, Mail, Thymeleaf)
+- PostgreSQL driver with Liquibase migrations
+- Stripe Java SDK for payment processing
+- JWT libraries (JJWT) for token validation
+- Resilience4j for circuit breaker patterns
+- Micrometer & OpenTelemetry for observability
+- Testcontainers for integration testing
+
+### Testing Strategy
+
+- Unit tests with Mockito for service layer testing
+- Integration tests with Testcontainers (PostgreSQL, RabbitMQ)
+- Architecture tests with ArchUnit for structural validation
+- Spring Modulith tests for modular architecture validation
+- Webhook testing with signature verification
+
+### API Documentation
+
+- OpenAPI/Swagger documentation available at `/swagger-ui.html`
+- Grouped APIs: Payments, Webhooks, Invoices, Subscriptions, Admin
+- Interactive API testing interface

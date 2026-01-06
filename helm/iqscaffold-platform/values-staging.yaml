@@ -54,12 +54,53 @@ gateway-service:
     persistence:
       size: 5Gi
 
+billing-service:
+  replicaCount: 3
+
+  image:
+    tag: "staging"
+
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  postgresql:
+    persistence:
+      size: 10Gi
+      storageClass: fast-ssd
+
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: "staging"
+    # Service Integration URLs
+    - name: IQSCAFFOLD_USER_SERVICE_URL
+      value: "http://user-service.iqscaffold-staging-env.svc.cluster.local:80"
+    - name: EMAIL_SERVICE_URL
+      value: "http://email-service.iqscaffold-staging-env.svc.cluster.local:80"
+    # Email Configuration
+    - name: EMAIL_FROM_EMAIL
+      value: "billing@staging.iqscaffold.com"
+    - name: EMAIL_FROM_NAME
+      value: "IQ Scaffold Billing (Staging)"
+    - name: APP_BASE_URL
+      value: "https://app-staging.iqscaffold.com"
+
 ingress:
   tls:
     enabled: true
   hosts:
     gateway: api-staging.iqscaffold.com
     user: user-staging.iqscaffold.com
+    billing: billing-staging.iqscaffold.com
 
 observability:
   enabled: true

@@ -87,8 +87,31 @@ billing-service:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: "production"
-    - name: USER_SERVICE_URL
-      value: "http://user-service:8080"
+    # Service Integration URLs
+    - name: IQSCAFFOLD_USER_SERVICE_URL
+      value: "http://user-service.{{ .Values.global.namespace }}.svc.cluster.local:80"
+    - name: EMAIL_SERVICE_URL
+      value: "http://email-service.{{ .Values.global.namespace }}.svc.cluster.local:80"
+    # JWT Configuration
+    - name: JWT_ISSUER
+      value: "iqscaffold-user-service"
+    # Payment Configuration
+    - name: PAYMENT_PROVIDER
+      value: "stripe"
+    - name: BILLING_SAAS_MODE
+      value: "true"
+    # Email Configuration
+    - name: EMAIL_FROM_EMAIL
+      value: "billing@iqscaffold.com"
+    - name: EMAIL_FROM_NAME
+      value: "IQ Scaffold Billing"
+    - name: APP_BASE_URL
+      value: "https://app.iqscaffold.com"
+    # Notification Configuration
+    - name: BILLING_EMAIL_NOTIFICATIONS
+      value: "true"
+    - name: BILLING_WEBHOOK_NOTIFICATIONS
+      value: "true"
 
 # Observability Stack (Optional)
 observability:

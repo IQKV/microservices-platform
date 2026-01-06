@@ -202,82 +202,15 @@ logging:
 
 # IQ Scaffold-specific configuration properties
 iqscaffold:
-  database:
-    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5432/iqscaffold_billing}
-    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_billing}
-    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
-    pool:
-      maximum-size: 20
-      minimum-idle: 5
-      connection-timeout: PT30S
-      idle-timeout: PT10M
-      max-lifetime: PT30M
-  cache:
-    redis:
-      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
-      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
-      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
-      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:1}
-      timeout: PT2S
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: PT-1S
-      key-prefix: "iqscaffold:billing"
-      default-ttl: PT1H
-      enable-statistics: false
-  messaging:
-    rabbitmq:
-      host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:localhost}
-      port: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PORT:5672}
-      username: ${IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME:iqscaffold}
-      password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD:iqscaffold_password}
-      virtual-host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_VHOST:/}
-      connection-timeout: PT30S
-      requested-heartbeat: PT60S
-      publisher-confirms: true
-      publisher-returns: true
-      template:
-        mandatory: true
-        retry:
-          enabled: true
-          initial-interval: PT1S
-          max-attempts: 3
-          max-interval: PT10S
-          multiplier: 2.0
-      listener:
-        simple:
-          acknowledge-mode: auto
-          prefetch: 10
-          default-requeue-rejected: false
-          retry:
-            enabled: true
-            initial-interval: PT1S
-            max-attempts: 3
-            max-interval: PT10S
-            multiplier: 2.0
-      exchanges:
-        events: "iqscaffold.events"
-        billing: "iqscaffold.billing"
-        dlx: "iqscaffold.dlx"
-      queues:
-        billing-events: "iqscaffold.billing.events"
-        payment-events: "iqscaffold.billing.payments"
-        invoice-events: "iqscaffold.billing.invoices"
-        notifications: "iqscaffold.notifications"
-        dlq: "iqscaffold.dlq"
-      routing-keys:
-        payment-created: "billing.payment.created"
-        payment-succeeded: "billing.payment.succeeded"
-        payment-failed: "billing.payment.failed"
-        payment-refunded: "billing.payment.refunded"
-        invoice-generated: "billing.invoice.generated"
-        subscription-created: "billing.subscription.created"
-        subscription-updated: "billing.subscription.updated"
-        subscription-cancelled: "billing.subscription.cancelled"
-        merchant-onboarded: "billing.merchant.onboarded"
-        notification-email: "notification.email"
+  # Tenant identification header
+  tenant-id-header: X-Tenant-ID
+  
+  # Liquibase configuration for multi-tenant schema management
+  liquibase:
+    system-change-log: classpath:db/changelog/system/master.xml
+    tenant-change-log: classpath:db/changelog/tenant/master.xml
+  
+  # Email configuration
   email:
     smtp:
       host: ${SMTP_HOST:localhost}
@@ -297,15 +230,13 @@ iqscaffold:
       payment-failed-template: "email/payment-failed.html"
       payment-refunded-template: "email/payment-refunded.html"
       invoice-generated-template: "email/invoice-generated.html"
+  
+  # Billing configuration
   billing:
     security:
       jwt:
         jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
         issuer: ${JWT_ISSUER:iqscaffold-user-service}
-    integration:
-      email-service:
-        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
-        timeout-ms: 10000
     payment:
       provider: ${PAYMENT_PROVIDER:stripe}
       saas-mode: ${BILLING_SAAS_MODE:true}
@@ -313,6 +244,10 @@ iqscaffold:
         api-key: ${STRIPE_API_KEY:}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
         client-id: ${STRIPE_CLIENT_ID:}
+    integration:
+      email-service:
+        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
+        timeout-ms: 10000
     stripe:
       public-key: ${STRIPE_PUBLIC_KEY:}
       secret-key: ${STRIPE_SECRET_KEY:}
@@ -323,47 +258,3 @@ iqscaffold:
       enable-webhook-notifications: ${BILLING_WEBHOOK_NOTIFICATIONS:true}
       retry-delay: PT5S
       max-retries: 3
-  observability:
-    tracing:
-      enabled: true
-      service-name: ${spring.application.name}
-      sampling-rate: 1.0
-      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
-      timeout: PT10S
-      export-timeout: PT30S
-      batch-size: 512
-    metrics:
-      enabled: true
-      path: /actuator/prometheus
-      prefix: iqscaffold_billing
-      include-host-tag: true
-      include-application-tag: true
-      include-environment-tag: true
-      custom-tags:
-        service: billing-service
-    logging:
-      level: INFO
-      format: json
-      include-correlation-id: true
-      include-trace-id: true
-      include-span-id: true
-      include-user-id: true
-      include-tenant-id: true
-      correlation-id-header: X-Correlation-ID
-      request-id-header: X-Request-ID
-      tenant-id-header: X-Tenant-ID
-      enable-sql-logging: false
-      enable-security-events: true
-      enable-performance-logging: true
-      enable-payment-events: true
-      enable-billing-events: true
-  tenant-id-header: X-Tenant-ID
-  tenancy:
-    schema:
-      prefix: tenant_
-      default: public
-  liquibase:
-    systemChangeLog: classpath:db/changelog/system/master.xml
-    tenantChangeLog: classpath:db/changelog/tenant/master.xml
-    # System changelog runs once on startup for public schema (billing system tables, etc.)
-    # Tenant changelog runs per-tenant schema during tenant provisioning

@@ -28,11 +28,27 @@ data:
   REDIS_PORT: "6379"
 
   # Service URLs
-  USER_SERVICE_URL: "http://user-service:8080"
-  BILLING_SERVICE_URL: "http://billing-service:8082"
+  IQSCAFFOLD_USER_SERVICE_URL: "http://user-service:8080"
+  EMAIL_SERVICE_URL: "http://email-service:8080"
 
   # Spring Profile
   SPRING_PROFILES_ACTIVE: "local"
+
+  # Email Configuration
+  EMAIL_FROM_EMAIL: "billing@iqscaffold.local"
+  EMAIL_FROM_NAME: "IQ Scaffold Billing (Local)"
+  APP_BASE_URL: "http://api.iqscaffold.site"
+
+  # JWT Configuration
+  JWT_ISSUER: "iqscaffold-user-service"
+
+  # Payment Configuration
+  PAYMENT_PROVIDER: "stripe"
+  BILLING_SAAS_MODE: "true"
+
+  # Notification Configuration
+  BILLING_EMAIL_NOTIFICATIONS: "true"
+  BILLING_WEBHOOK_NOTIFICATIONS: "true"
 
   # JVM Options
   JAVA_OPTS: "-Xms128m -Xmx256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
@@ -47,15 +63,27 @@ metadata:
 type: Opaque
 data:
   # Database credentials (iqscaffold_user:iqscaffold_password)
-  DB_USERNAME: Z3JpcGRheV91c2Vy
-  DB_PASSWORD: Z3JpcGRheV9wYXNzd29yZA==
+  DB_USERNAME: aXFzY2FmZm9sZF91c2Vy
+  DB_PASSWORD: aXFzY2FmZm9sZF9wYXNzd29yZA==
 
   # JWT Secret (local-dev-secret-key-change-in-production)
   JWT_SECRET: bG9jYWwtZGV2LXNlY3JldC1rZXktY2hhbmdlLWluLXByb2R1Y3Rpb24=
 
-  # Stripe Secrets (placeholder-values)
-  STRIPE_API_KEY: cGxhY2Vob2xkZXI=
-  STRIPE_WEBHOOK_SECRET: cGxhY2Vob2xkZXI=
+  # Stripe Payment Configuration (test keys)
+  STRIPE_API_KEY: c2tfdGVzdF9wbGFjZWhvbGRlcg== # sk_test_placeholder
+  STRIPE_WEBHOOK_SECRET: d2hzZWNfcGxhY2Vob2xkZXI= # whsec_placeholder
+  STRIPE_CLIENT_ID: Y2FfdGVzdF9wbGFjZWhvbGRlcg== # ca_test_placeholder
+
+  # Stripe General Configuration (test keys)
+  STRIPE_PUBLIC_KEY: cGtfdGVzdF9wbGFjZWhvbGRlcg== # pk_test_placeholder
+  STRIPE_SECRET_KEY: c2tfdGVzdF9wbGFjZWhvbGRlcg== # sk_test_placeholder (same as API key)
+  STRIPE_CONNECT_CLIENT_ID: Y2FfdGVzdF9wbGFjZWhvbGRlcg== # ca_test_placeholder
+
+  # Email SMTP Configuration (empty for local development)
+  SMTP_HOST: bG9jYWxob3N0 # localhost
+  SMTP_PORT: MTA5NQ== # 1095 (dummy port)
+  SMTP_USERNAME: ""
+  SMTP_PASSWORD: ""
 
   # Redis password (empty for local)
   REDIS_PASSWORD: ""
@@ -496,26 +524,78 @@ spec:
                 configMapKeyRef:
                   name: iqscaffold-config
                   key: SPRING_PROFILES_ACTIVE
-            - name: SPRING_DATASOURCE_URL
+            # Database Configuration
+            - name: IQSCAFFOLD_DATABASE_URL
               valueFrom:
                 configMapKeyRef:
                   name: iqscaffold-config
                   key: BILLING_DB_URL
-            - name: SPRING_DATASOURCE_USERNAME
+            - name: IQSCAFFOLD_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: iqscaffold-secrets
                   key: DB_USERNAME
-            - name: SPRING_DATASOURCE_PASSWORD
+            - name: IQSCAFFOLD_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: iqscaffold-secrets
                   key: DB_PASSWORD
-            - name: USER_SERVICE_URL
+            # Service Integration URLs
+            - name: IQSCAFFOLD_USER_SERVICE_URL
               valueFrom:
                 configMapKeyRef:
                   name: iqscaffold-config
-                  key: USER_SERVICE_URL
+                  key: IQSCAFFOLD_USER_SERVICE_URL
+            - name: EMAIL_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: EMAIL_SERVICE_URL
+            # JWT Configuration
+            - name: JWT_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: JWT_ISSUER
+            # Payment Configuration
+            - name: PAYMENT_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: PAYMENT_PROVIDER
+            - name: BILLING_SAAS_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: BILLING_SAAS_MODE
+            # Email Configuration
+            - name: EMAIL_FROM_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: EMAIL_FROM_EMAIL
+            - name: EMAIL_FROM_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: EMAIL_FROM_NAME
+            - name: APP_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: APP_BASE_URL
+            # Notification Configuration
+            - name: BILLING_EMAIL_NOTIFICATIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: BILLING_EMAIL_NOTIFICATIONS
+            - name: BILLING_WEBHOOK_NOTIFICATIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: iqscaffold-config
+                  key: BILLING_WEBHOOK_NOTIFICATIONS
+            # Stripe Payment Configuration
             - name: STRIPE_API_KEY
               valueFrom:
                 secretKeyRef:
@@ -526,6 +606,49 @@ spec:
                 secretKeyRef:
                   name: iqscaffold-secrets
                   key: STRIPE_WEBHOOK_SECRET
+            - name: STRIPE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_CLIENT_ID
+            # Stripe General Configuration
+            - name: STRIPE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_PUBLIC_KEY
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_SECRET_KEY
+            - name: STRIPE_CONNECT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: STRIPE_CONNECT_CLIENT_ID
+            # Email SMTP Configuration
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: SMTP_PORT
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: SMTP_USERNAME
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: iqscaffold-secrets
+                  key: SMTP_PASSWORD
+            # JVM Options
             - name: JAVA_OPTS
               valueFrom:
                 configMapKeyRef:

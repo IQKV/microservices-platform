@@ -34,9 +34,17 @@ spec:
                   name: {{ .secretKeyRef.name }}
                   key: {{ .secretKeyRef.key }}
             {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "billing-service.fullname" . }}-config

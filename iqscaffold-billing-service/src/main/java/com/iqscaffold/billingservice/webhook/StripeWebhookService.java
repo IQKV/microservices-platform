@@ -1,6 +1,6 @@
 package com.iqscaffold.billingservice.webhook;
 
-import com.iqscaffold.billingservice.config.BillingProperties;
+import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import com.iqscaffold.billingservice.payment.PaymentService;
 import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.stripe.exception.SignatureVerificationException;
@@ -42,17 +42,17 @@ public class StripeWebhookService {
   private final PaymentService paymentService;
   private final com.iqscaffold.billingservice.payout.PayoutService payoutService;
   private final com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository;
-  private final BillingProperties billingProperties;
+  private final IqScaffoldProperties iqScaffoldProperties;
 
   public StripeWebhookService(
       PaymentService paymentService,
       com.iqscaffold.billingservice.payout.PayoutService payoutService,
       com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository,
-      BillingProperties billingProperties) {
+      IqScaffoldProperties iqScaffoldProperties) {
     this.paymentService = paymentService;
     this.payoutService = payoutService;
     this.merchantConfigRepository = merchantConfigRepository;
-    this.billingProperties = billingProperties;
+    this.iqScaffoldProperties = iqScaffoldProperties;
   }
 
   /**
@@ -76,7 +76,7 @@ public class StripeWebhookService {
     Event event;
     try {
       event = Webhook.constructEvent(
-          payload, sigHeader, billingProperties.payment().stripe().webhookSecret());
+          payload, sigHeader, iqScaffoldProperties.billing().payment().stripe().webhookSecret());
     } catch (SignatureVerificationException e) {
       logger.error("Invalid signature for webhook", e);
       throw new IllegalArgumentException("Invalid signature");

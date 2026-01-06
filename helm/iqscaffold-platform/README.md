@@ -41,14 +41,14 @@ helm install iqscaffold . -f values-production.yaml --create-namespace
            │ Gateway Service │
            └───────┬─────────┘
                    │
-        ┏━━━━━━━━━━┻
-        ▼
-┌───────────────┐
-│ User Service  │
-├───────────────┤
-│ PostgreSQL    │
-│ Redis         │
-└───────────────┘
+        ┏━━━━━━━━━━┻━━━━━━━━━━━┓
+        ▼                    ▼
+┌───────────────┐    ┌───────────────┐
+│ User Service  │    │Billing Service│
+├───────────────┤    ├───────────────┤
+│ PostgreSQL    │    │ PostgreSQL    │
+│ Redis         │    │ Stripe        │
+└───────────────┘    └───────────────┘
 ```
 
 ## Configuration
@@ -114,7 +114,12 @@ helm install iqscaffold . -f custom-values.yaml
 ```bash
 # Install only user service
 helm install iqscaffold . \
-  --set gateway-service.enabled=false 
+  --set gateway-service.enabled=false \
+  --set billing-service.enabled=false
+
+# Install without billing service
+helm install iqscaffold . \
+  --set billing-service.enabled=false
 
 # Install without observability
 helm install iqscaffold . \
@@ -130,7 +135,8 @@ helm upgrade iqscaffold . -f values-production.yaml
 # Upgrade specific service version
 helm upgrade iqscaffold . \
   --set user-service.image.tag=1.1.0 \
-  --set gateway-service.image.tag=1.1.0
+  --set gateway-service.image.tag=1.1.0 \
+  --set billing-service.image.tag=1.1.0
 ```
 
 ## Uninstalling
@@ -155,6 +161,10 @@ curl http://localhost:8080/actuator/health
 # User Service
 kubectl port-forward -n iqscaffold-dev-env svc/user-service 8081:8080
 curl http://localhost:8081/actuator/health
+
+# Billing Service
+kubectl port-forward -n iqscaffold-dev-env svc/billing-service 8082:8082
+curl http://localhost:8082/actuator/health
 ```
 
 ### View Logs
@@ -162,6 +172,7 @@ curl http://localhost:8081/actuator/health
 ```bash
 kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=gateway-service
 kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=user-service
+kubectl logs -f -n iqscaffold-dev-env -l app.kubernetes.io/name=billing-service
 ```
 
 ### View Resources
@@ -213,6 +224,7 @@ See individual service charts for detailed configuration:
 
 - [User Service](../user-service/README.md)
 - [Gateway Service](../gateway-service/README.md)
+- [Billing Service](../billing-service/README.md)
 
 ## Support
 

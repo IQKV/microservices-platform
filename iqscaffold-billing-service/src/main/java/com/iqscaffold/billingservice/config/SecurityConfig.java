@@ -18,11 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-  private final BillingProperties billingProperties;
+  private final IqScaffoldProperties iqScaffoldProperties;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  public SecurityConfig(BillingProperties billingProperties, JwtAuthenticationFilter jwtAuthenticationFilter) {
-    this.billingProperties = billingProperties;
+  public SecurityConfig(IqScaffoldProperties iqScaffoldProperties, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    this.iqScaffoldProperties = iqScaffoldProperties;
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
@@ -45,7 +45,7 @@ public class SecurityConfig {
 
   @Bean
   public JwtDecoder jwtDecoder() {
-    return NimbusJwtDecoder.withJwkSetUri(billingProperties.security().jwt().jwkSetUri()).build();
+    return NimbusJwtDecoder.withJwkSetUri(iqScaffoldProperties.billing().security().jwt().jwkSetUri()).build();
   }
 
   @Bean
