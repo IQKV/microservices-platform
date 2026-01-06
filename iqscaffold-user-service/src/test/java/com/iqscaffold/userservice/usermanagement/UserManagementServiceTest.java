@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.iqscaffold.userservice.usermanagement.UserManagementServiceImpl;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +47,7 @@ class UserManagementServiceTest {
   private PasswordEncoder passwordEncoder;
 
   @InjectMocks
-  private UserManagementService service;
+  private UserManagementServiceImpl service;
 
   private UserContext adminUser;
   private UserContext superAdminUser;

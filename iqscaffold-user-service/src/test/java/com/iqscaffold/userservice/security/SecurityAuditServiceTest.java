@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.iqscaffold.userservice.security.SecurityAuditServiceImpl;
 import com.iqscaffold.userservice.tenancy.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ class SecurityAuditServiceTest {
   private UserAuditLogRepository auditLogRepository;
 
   @InjectMocks
-  private SecurityAuditService securityAuditService;
+  private SecurityAuditServiceImpl securityAuditService;
 
   private static final String TEST_TENANT = "test-tenant";
   private static final String TEST_IP = "192.168.1.1";
