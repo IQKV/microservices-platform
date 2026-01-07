@@ -11,9 +11,34 @@
       "description": "Database configuration properties with iqscaffold.database prefix"
     },
     {
+      "name": "iqscaffold.database.pool",
+      "type": "com.iqscaffold.userservice.infrastructure.config.DatabaseConfigurationProperties$PoolProperties",
+      "description": "Database connection pool configuration using HikariCP"
+    },
+    {
       "name": "iqscaffold.cache",
-      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$CacheProperties",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache",
       "description": "Cache configuration properties"
+    },
+    {
+      "name": "iqscaffold.cache.redis",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis",
+      "description": "Redis cache server configuration"
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis$Pool",
+      "description": "Redis connection pool configuration using Lettuce"
+    },
+    {
+      "name": "iqscaffold.messaging",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Messaging",
+      "description": "Messaging configuration for event-driven architecture"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Messaging$RabbitMq",
+      "description": "RabbitMQ message broker configuration"
     },
     {
       "name": "iqscaffold.auth",
@@ -22,18 +47,83 @@
     },
     {
       "name": "iqscaffold.auth.jwt",
-      "type": "com.iqscaffold.userservice.config.JwtConfiguration",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$JwtProperties",
       "description": "JWT configuration for token generation and validation"
     },
     {
+      "name": "iqscaffold.auth.security",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties",
+      "description": "Security configuration including password policies and rate limiting"
+    },
+    {
+      "name": "iqscaffold.auth.security.password",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$PasswordProperties",
+      "description": "Password security and validation policies"
+    },
+    {
+      "name": "iqscaffold.auth.security.rate-limiting",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$RateLimitingProperties",
+      "description": "Rate limiting configuration for authentication attempts"
+    },
+    {
+      "name": "iqscaffold.auth.security.session",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$SessionProperties",
+      "description": "Session management configuration"
+    },
+    {
+      "name": "iqscaffold.auth.oauth2",
+      "type": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$OAuth2Properties",
+      "description": "OAuth2 provider configuration for social login"
+    },
+    {
       "name": "iqscaffold.email",
-      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$EmailProperties",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Email",
       "description": "Email configuration properties"
+    },
+    {
+      "name": "iqscaffold.email.smtp",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Email$Smtp",
+      "description": "SMTP server configuration for sending emails"
+    },
+    {
+      "name": "iqscaffold.email.sender",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Email$Sender",
+      "description": "Email sender configuration (from address, name, base URL)"
+    },
+    {
+      "name": "iqscaffold.email.verification",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Email$Verification",
+      "description": "Email verification configuration"
+    },
+    {
+      "name": "iqscaffold.email.templates",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Email$Template",
+      "description": "Email template configuration for various notification types"
+    },
+    {
+      "name": "iqscaffold.i18n",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "description": "Internationalization configuration for multi-language support"
     },
     {
       "name": "iqscaffold.observability",
       "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Observability",
       "description": "Observability configuration for tracing, metrics, and logging"
+    },
+    {
+      "name": "iqscaffold.observability.tracing",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Observability$Tracing",
+      "description": "OpenTelemetry distributed tracing configuration"
+    },
+    {
+      "name": "iqscaffold.observability.metrics",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Observability$Metrics",
+      "description": "Prometheus metrics collection configuration"
+    },
+    {
+      "name": "iqscaffold.observability.logging",
+      "type": "com.iqscaffold.userservice.config.IqScaffoldProperties$Observability$Logging",
+      "description": "Structured logging configuration with correlation IDs"
     },
     {
       "name": "iqscaffold.tenancy",
@@ -554,6 +644,198 @@
       "description": "Classpath location of the Liquibase changelog for tenant-level migrations. Runs per-tenant schema during tenant provisioning for tables like users, organizations, etc.",
       "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Liquibase",
       "defaultValue": "classpath:db/changelog/tenant/master.xml"
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-active",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of active Redis connections in the pool (1-100)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis$Pool",
+      "defaultValue": 8
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-idle",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of idle Redis connections in the pool (0-50)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis$Pool",
+      "defaultValue": 8
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.min-idle",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of idle Redis connections in the pool (0-25)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis$Pool",
+      "defaultValue": 0
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-wait",
+      "type": "java.time.Duration",
+      "description": "Maximum time to wait for a connection from the pool (-1 for infinite)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Cache$Redis$Pool",
+      "defaultValue": "-1ms"
+    },
+    {
+      "name": "iqscaffold.auth.security.password.encoder-strength",
+      "type": "java.lang.Integer",
+      "description": "BCrypt password encoder strength (4-20). Higher values increase security but require more CPU time.",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$PasswordProperties",
+      "defaultValue": 10
+    },
+    {
+      "name": "iqscaffold.auth.security.password.require-special-chars",
+      "type": "java.lang.Boolean",
+      "description": "Require special characters in passwords",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$PasswordProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.auth.security.password.min-length",
+      "type": "java.lang.Integer",
+      "description": "Minimum password length (6-128 characters)",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$PasswordProperties",
+      "defaultValue": 8
+    },
+    {
+      "name": "iqscaffold.auth.security.rate-limiting.login-attempts",
+      "type": "java.lang.Integer",
+      "description": "Maximum failed login attempts before account lockout (1-100)",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$RateLimitingProperties",
+      "defaultValue": 5
+    },
+    {
+      "name": "iqscaffold.auth.security.rate-limiting.lockout-duration",
+      "type": "java.time.Duration",
+      "description": "Duration of account lockout after exceeding login attempts",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$RateLimitingProperties",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "iqscaffold.auth.security.session.timeout",
+      "type": "java.time.Duration",
+      "description": "Session timeout duration for inactive sessions",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$SessionProperties",
+      "defaultValue": "2h"
+    },
+    {
+      "name": "iqscaffold.auth.security.session.concurrent-sessions",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of concurrent sessions per user (1-10)",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$SecurityProperties$SessionProperties",
+      "defaultValue": 2
+    },
+    {
+      "name": "iqscaffold.auth.oauth2.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable OAuth2 social login providers",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$OAuth2Properties",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.auth.oauth2.providers",
+      "type": "java.util.Map<java.lang.String,com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$OAuth2Properties$OAuth2ProviderProperties>",
+      "description": "Map of OAuth2 provider configurations (e.g., google, github, facebook)",
+      "sourceType": "com.iqscaffold.userservice.infrastructure.config.AuthConfigurationProperties$OAuth2Properties"
+    },
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of supported locale codes (e.g., 'en', 'es', 'fr', 'en-US'). Must be in format 'xx' or 'xx-XX'.",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": ["en"]
+    },
+    {
+      "name": "iqscaffold.i18n.default-locale",
+      "type": "java.lang.String",
+      "description": "Default locale code (must be included in supported-locales). Format: 'xx' or 'xx-XX'.",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": "en"
+    },
+    {
+      "name": "iqscaffold.i18n.message-basename",
+      "type": "java.lang.String",
+      "description": "Base name for message resource bundles (e.g., 'i18n/messages' for i18n/messages_en.properties)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": "i18n/messages"
+    },
+    {
+      "name": "iqscaffold.i18n.message-cache-duration",
+      "type": "java.time.Duration",
+      "description": "Duration to cache message bundles. Set to -1 to cache forever, 0 to disable caching.",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": "1h"
+    },
+    {
+      "name": "iqscaffold.i18n.fallback-to-system-locale",
+      "type": "java.lang.Boolean",
+      "description": "Fall back to system locale if requested locale is not supported",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.i18n.use-code-as-default-message",
+      "type": "java.lang.Boolean",
+      "description": "Use message code as default message if translation is not found",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$I18n",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.metrics.custom-tags",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Custom tags to add to all metrics (e.g., service: user-service, region: us-east-1)",
+      "sourceType": "com.iqscaffold.userservice.config.IqScaffoldProperties$Observability$Metrics"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.host",
+      "type": "java.lang.String",
+      "description": "RabbitMQ server host",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.port",
+      "type": "java.lang.Integer",
+      "description": "RabbitMQ server port (1-65535)",
+      "defaultValue": 5672
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.username",
+      "type": "java.lang.String",
+      "description": "RabbitMQ authentication username",
+      "defaultValue": "guest"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.password",
+      "type": "java.lang.String",
+      "description": "RabbitMQ authentication password",
+      "defaultValue": "guest"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.virtual-host",
+      "type": "java.lang.String",
+      "description": "RabbitMQ virtual host",
+      "defaultValue": "/"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.connection-timeout",
+      "type": "java.time.Duration",
+      "description": "RabbitMQ connection timeout",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.requested-heartbeat",
+      "type": "java.time.Duration",
+      "description": "RabbitMQ heartbeat interval for connection health checks",
+      "defaultValue": "60s"
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.publisher-confirms",
+      "type": "java.lang.Boolean",
+      "description": "Enable publisher confirms for reliable message delivery",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.publisher-returns",
+      "type": "java.lang.Boolean",
+      "description": "Enable publisher returns for unroutable messages",
+      "defaultValue": true
     }
   ],
   "hints": [
@@ -775,6 +1057,91 @@
         {
           "value": "classpath:db/changelog/tenant/master.xml",
           "description": "Default tenant changelog location"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "values": [
+        {
+          "value": ["en"],
+          "description": "English only"
+        },
+        {
+          "value": ["en", "es"],
+          "description": "English and Spanish"
+        },
+        {
+          "value": ["en", "es", "fr"],
+          "description": "English, Spanish, and French"
+        },
+        {
+          "value": ["en", "es", "fr", "de"],
+          "description": "English, Spanish, French, and German"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.i18n.default-locale",
+      "values": [
+        {
+          "value": "en",
+          "description": "English (default)"
+        },
+        {
+          "value": "es",
+          "description": "Spanish"
+        },
+        {
+          "value": "fr",
+          "description": "French"
+        },
+        {
+          "value": "de",
+          "description": "German"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.auth.security.password.encoder-strength",
+      "values": [
+        {
+          "value": 10,
+          "description": "Standard strength (recommended for production)"
+        },
+        {
+          "value": 4,
+          "description": "Low strength (faster, for development/testing only)"
+        },
+        {
+          "value": 12,
+          "description": "High strength (more secure, slower)"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.host",
+      "values": [
+        {
+          "value": "localhost",
+          "description": "Local RabbitMQ server"
+        },
+        {
+          "value": "rabbitmq",
+          "description": "Docker Compose service name"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.messaging.rabbitmq.virtual-host",
+      "values": [
+        {
+          "value": "/",
+          "description": "Default virtual host"
+        },
+        {
+          "value": "/iqscaffold",
+          "description": "Custom IQ Scaffold virtual host"
         }
       ]
     }
