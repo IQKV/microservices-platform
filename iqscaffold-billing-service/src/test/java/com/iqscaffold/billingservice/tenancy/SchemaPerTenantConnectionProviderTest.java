@@ -48,12 +48,14 @@ class SchemaPerTenantConnectionProviderTest {
     // When
     Connection result = provider.getAnyConnection();
 
-    // Then
-    assertNotNull(result);
-    verify(dataSource).getConnection();
-    
-    // Clean up
-    result.close();
+    try {
+      // Then
+      assertNotNull(result);
+      verify(dataSource).getConnection();
+    } finally {
+      // Clean up
+      result.close();
+    }
   }
 
   @Test
@@ -99,14 +101,17 @@ class SchemaPerTenantConnectionProviderTest {
     when(metaData.getDatabaseProductName()).thenReturn("H2");
     when(connection.createStatement()).thenReturn(statement);
 
-    // When
-    Connection result = provider.getConnection(tenantId);
+    try {
+      // When
+      Connection result = provider.getConnection(tenantId);
 
-    // Then
-    verify(statement).execute("CREATE SCHEMA IF NOT EXISTS " + tenantId);
-    verify(statement).close();
-    verify(connection).setSchema(tenantId);
-    assertNotNull(result);
+      // Then
+      verify(statement).execute("CREATE SCHEMA IF NOT EXISTS " + tenantId);
+      verify(connection).setSchema(tenantId);
+      assertNotNull(result);
+    } finally {
+      verify(statement).close();
+    }
   }
 
   @Test

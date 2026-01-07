@@ -63,8 +63,9 @@ class GlobalExceptionHandlerTest {
 
     // Then
     assertNotNull(result);
-    assertNotNull(result.getProperties());
-    Object timestamp = result.getProperties().get("timestamp");
+    var properties = result.getProperties();
+    assertNotNull(properties);
+    Object timestamp = properties.get("timestamp");
     assertNotNull(timestamp);
   }
 
@@ -144,8 +145,9 @@ class GlobalExceptionHandlerTest {
 
     // Then
     assertNotNull(result);
-    assertNotNull(result.getProperties());
-    Object timestamp = result.getProperties().get("timestamp");
+    var properties = result.getProperties();
+    assertNotNull(properties);
+    Object timestamp = properties.get("timestamp");
     assertNotNull(timestamp);
   }
 }
