@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.config;
 import java.net.URI;
 import java.time.Instant;
 
+import com.iqscaffold.billingservice.payout.PayoutNotFoundException;
 import com.iqscaffold.billingservice.shared.MessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -17,6 +18,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   public GlobalExceptionHandler(final MessageService messageService) {
     this.messageService = messageService;
+  }
+
+  @ExceptionHandler(PayoutNotFoundException.class)
+  ProblemDetail handlePayoutNotFound(PayoutNotFoundException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.NOT_FOUND,
+        e.getMessage()
+    );
+    problemDetail.setTitle("Payout Not Found");
+    problemDetail.setType(URI.create("urn:problem-type:payout-not-found"));
+    problemDetail.setProperty("timestamp", Instant.now());
+    return problemDetail;
   }
 
   @ExceptionHandler(Exception.class)

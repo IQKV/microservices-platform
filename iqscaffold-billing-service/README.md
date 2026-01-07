@@ -83,6 +83,7 @@ Request Flow:
 - **StripeWebhookService**: Secured entry point for external events with signature validation.
 - **MerchantOnboardingService**: Orchestrates the Stripe Connect onboarding journey.
 - **RefundService**: Manages the business logic and external calls for payment reversals.
+- **PayoutService**: Processes and tracks payouts from Stripe to merchant bank accounts.
 - **PaymentAuditTrailService**: Logs all payment state changes for compliance and debugging.
 - **MessagingService**: Publishes billing events and notification events to RabbitMQ.
 - **EmailService**: Handles transactional email sending with SMTP integration.
@@ -97,6 +98,11 @@ Request Flow:
 - `GET /api/v1/billing/payments/{id}` - Retrieve detailed payment status and history
 - `GET /api/v1/billing/payments` - Paginated list of payments for the current tenant
 - `POST /api/v1/billing/payments/{id}/refund` - Process a full refund (Requires `ADMIN` role)
+
+### Payout Operations
+
+- `GET /api/v1/billing/payouts` - Paginated list of payouts for the current tenant (Requires `ADMIN` role)
+- `GET /api/v1/billing/payouts/{id}` - Retrieve detailed payout information by ID (Requires `ADMIN` role)
 
 ### Merchant Administration
 
@@ -122,6 +128,35 @@ The service enforces strict transitions to ensure financial consistency:
 | `*`           | Webhook      | `CANCELED`           | Intent expired or canceled |
 
 **State Validation**: The `PaymentStateMachine` component validates all transitions to prevent invalid state changes (e.g., preventing a 'COMPLETED' payment from moving back to 'PENDING').
+
+## Payout Management
+
+The service tracks payouts from Stripe to merchant bank accounts, providing visibility into when funds will arrive.
+
+### Payout Lifecycle
+
+1. **Webhook Reception**: Stripe sends payout events (`payout.paid`, `payout.failed`, `payout.canceled`)
+2. **Payout Processing**: `PayoutService` creates/updates payout records with status and arrival dates
+3. **Tenant Attribution**: Payouts are associated with the correct tenant via merchant account mapping
+4. **API Access**: Admins can query payout history and details via REST endpoints
+
+### Payout Status Values
+
+- `paid` - Payout successfully sent to bank account
+- `pending` - Payout is being processed by Stripe
+- `in_transit` - Payout is on its way to the bank
+- `canceled` - Payout was canceled before completion
+- `failed` - Payout failed (e.g., invalid bank details)
+
+### Payout Data Model
+
+Each payout record includes:
+- **id**: Stripe payout ID (e.g., `po_1234567890`)
+- **amount**: Payout amount in the specified currency
+- **currency**: Currency code (USD, EUR, etc.)
+- **status**: Current payout status
+- **arrivalDate**: Expected/actual arrival date at bank
+- **merchantAccountId**: Associated Stripe Connect account ID
 
 ## Database & Multi-Tenancy
 
@@ -166,6 +201,7 @@ On every request, the `TenantIdentifierResolver` extracts the tenant ID from the
 The service publishes events to RabbitMQ for cross-service communication:
 
 - **Payment Events**: `billing.payment.created`, `billing.payment.succeeded`, `billing.payment.failed`, `billing.payment.refunded`
+- **Payout Events**: `billing.payout.paid`, `billing.payout.failed`, `billing.payout.canceled`
 - **Merchant Events**: `billing.merchant.onboarded`
 - **Invoice Events**: `billing.invoice.generated`
 - **Notification Events**: `notification.email`
@@ -173,7 +209,7 @@ The service publishes events to RabbitMQ for cross-service communication:
 ### RabbitMQ Configuration
 
 - **Exchanges**: `iqscaffold.events`, `iqscaffold.billing`, `iqscaffold.dlx`
-- **Queues**: `iqscaffold.billing.events`, `iqscaffold.billing.payments`, `iqscaffold.notifications`
+- **Queues**: `iqscaffold.billing.events`, `iqscaffold.billing.payments`, `iqscaffold.billing.payouts`, `iqscaffold.notifications`
 - **Dead Letter Queues**: Failed message handling with retry logic
 
 ### Email Notifications
@@ -192,7 +228,9 @@ Automated email notifications for:
 - `payment_intent.succeeded` - Updates payment to SUCCEEDED status
 - `payment_intent.payment_failed` - Updates payment to FAILED status
 - `charge.refunded` - Syncs refund status (REFUNDED/PARTIALLY_REFUNDED)
-- `payout.paid` - Records payout entities
+- `payout.paid` - Records successful payout entities with arrival dates
+- `payout.failed` - Records failed payout attempts
+- `payout.canceled` - Records canceled payouts
 - `account.updated` - Updates merchant capabilities (charges_enabled, payouts_enabled)
 
 ### Security Features
@@ -353,5 +391,6 @@ EMAIL_SERVICE_URL=http://localhost:8084
 ### API Documentation
 
 - OpenAPI/Swagger documentation available at `/swagger-ui.html`
-- Grouped APIs: Payments, Webhooks, Invoices, Subscriptions, Admin
+- Grouped APIs: Payments, Payouts, Webhooks, Merchant Onboarding, Admin
 - Interactive API testing interface
+- Comprehensive request/response examples for all endpoints
