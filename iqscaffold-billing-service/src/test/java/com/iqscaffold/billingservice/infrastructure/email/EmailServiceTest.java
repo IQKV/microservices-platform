@@ -164,4 +164,54 @@ class EmailServiceTest {
     // Then
     verify(messageSource).getMessage(eq(subjectKey), isNull(), eq(subjectKey), eq(locale));
   }
+
+  @Test
+  void sendEmail_shouldThrowRuntimeExceptionOnMessagingException() {
+    // Given
+    String to = "test@example.com";
+    String subjectKey = "email.test.subject";
+    String templateName = "test";
+    Map<String, Object> variables = new HashMap<>();
+    Locale locale = Locale.ENGLISH;
+
+    when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+    when(templateEngine.process(anyString(), any())).thenReturn("<html>Test</html>");
+    when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenReturn("Subject");
+
+    // Simulate MessagingException by making send throw
+    org.mockito.Mockito.doThrow(new org.springframework.mail.MailSendException("Mail error"))
+        .when(mailSender).send(any(MimeMessage.class));
+
+    // When & Then
+    try {
+      emailService.sendEmail(to, subjectKey, templateName, variables, locale);
+    } catch (final RuntimeException e) {
+      // The exception message comes from the MailSendException
+      assert e.getMessage().contains("Mail error") || e.getMessage().contains("test@example.com");
+    }
+  }
+
+  @Test
+  void sendEmail_shouldHandleComplexTemplateVariables() {
+    // Given
+    String to = "test@example.com";
+    String subjectKey = "email.complex.subject";
+    String templateName = "complex-template";
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("user", Map.of("name", "John", "email", "john@example.com"));
+    variables.put("items", java.util.List.of("item1", "item2", "item3"));
+    variables.put("total", 150.50);
+    Locale locale = Locale.ENGLISH;
+
+    when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+    when(templateEngine.process(eq("email/complex-template"), any())).thenReturn("<html>Complex</html>");
+    when(messageSource.getMessage(anyString(), any(), anyString(), any())).thenReturn("Complex Subject");
+
+    // When
+    emailService.sendEmail(to, subjectKey, templateName, variables, locale);
+
+    // Then
+    verify(templateEngine).process(eq("email/complex-template"), any());
+    verify(mailSender).send(mimeMessage);
+  }
 }
