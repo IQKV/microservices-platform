@@ -253,23 +253,6 @@
                         <exclude>**/*Listener.class</exclude>
                         <exclude>**/*EventListener.class</exclude>
 
-                        <!-- Implementation classes with 0% coverage -->
-                        <exclude>**/payment/PaymentServiceImpl.class</exclude>
-                        <exclude>**/payment/RefundServiceImpl.class</exclude>
-                        <exclude>**/webhook/StripeWebhookService.class</exclude>
-                        <exclude>**/admin/MerchantOnboardingServiceImpl.class</exclude>
-                        <exclude>**/payment/StripePaymentProvider.class</exclude>
-                        <exclude>**/payment/PaymentAuditTrailService.class</exclude>
-                        <exclude>**/payment/PaymentStateMachine.class</exclude>
-                        <exclude>**/payout/PayoutService.class</exclude>
-                        <exclude>**/infrastructure/email/EmailService.class</exclude>
-                        <exclude>**/infrastructure/messaging/MessagingService.class</exclude>
-                        <exclude>**/shared/NotificationService.class</exclude>
-                        <exclude>**/shared/MessageService.class</exclude>
-                        <exclude>**/payment/PaymentNotificationService.class</exclude>
-                        <exclude>**/tenancy/TenantContext.class</exclude>
-                        <exclude>**/security/SecurityContextHelper.class</exclude>
-                        <exclude>**/security/UserContext.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
