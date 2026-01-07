@@ -176,8 +176,10 @@ class CacheManagementServiceTest {
 
   @Test
   void clearStatistics_shouldClearAllStats() {
-    // When
+    // Given
     when(sessionFactory.getStatistics()).thenReturn(statistics);
+
+    // When
     assertDoesNotThrow(() -> cacheManagementService.clearStatistics());
 
     // Then
