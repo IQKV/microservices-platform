@@ -1,6 +1,8 @@
 package com.iqscaffold.userservice.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.Locale;
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import com.iqscaffold.userservice.usermanagement.User;
 
 class MessageServiceTest {
 
@@ -76,5 +80,86 @@ class MessageServiceTest {
     LocaleContextHolder.setLocale(Locale.JAPAN);
     assertEquals("key@en-GB", ms.getMessage("key", Locale.UK));
     assertEquals("key[1]@en-GB", ms.getMessage("key", new Object[] {1}, Locale.UK));
+  }
+
+  @Test
+  void getMessageWithUserShouldUseUserPreferredLocale() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn("es-ES");
+
+    LocaleContextHolder.setLocale(Locale.JAPAN);
+    assertEquals("greeting@es-ES", ms.getMessage("greeting", user));
+  }
+
+  @Test
+  void getMessageWithUserAndArgsShouldUseUserPreferredLocale() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn("fr-FR");
+
+    LocaleContextHolder.setLocale(Locale.JAPAN);
+    assertEquals("hello[Alice,5]@fr-FR", ms.getMessage("hello", new Object[] {"Alice", 5}, user));
+  }
+
+  @Test
+  void getUserLocaleShouldReturnUserPreferredLocale() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn("de-DE");
+
+    assertEquals(Locale.forLanguageTag("de-DE"), ms.getUserLocale(user));
+  }
+
+  @Test
+  void getUserLocaleShouldFallbackToContextWhenUserIsNull() {
+    var ms = new MessageService(new StubMessageSource());
+    LocaleContextHolder.setLocale(Locale.ITALY);
+
+    assertEquals(Locale.ITALY, ms.getUserLocale(null));
+  }
+
+  @Test
+  void getUserLocaleShouldFallbackToContextWhenUserLocaleIsEmpty() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn("");
+    LocaleContextHolder.setLocale(Locale.CANADA);
+
+    assertEquals(Locale.CANADA, ms.getUserLocale(user));
+  }
+
+  @Test
+  void getUserLocaleShouldFallbackToContextWhenUserLocaleIsNull() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn(null);
+    LocaleContextHolder.setLocale(Locale.KOREA);
+
+    assertEquals(Locale.KOREA, ms.getUserLocale(user));
+  }
+
+  @Test
+  void getUserLocaleShouldFallbackToDefaultWhenContextLocaleIsNull() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    when(user.getPreferredLocale()).thenReturn(null);
+    LocaleContextHolder.resetLocaleContext();
+
+    var result = ms.getUserLocale(user);
+    // When context is null, it returns the default locale (typically en_US or en)
+    assertEquals(Locale.getDefault(), result);
+  }
+
+  @Test
+  void getUserLocaleShouldHandleInvalidUserLocale() {
+    var ms = new MessageService(new StubMessageSource());
+    var user = mock(User.class);
+    // Locale.forLanguageTag doesn't throw exception, it creates a locale with the tag
+    when(user.getPreferredLocale()).thenReturn("invalid-locale-tag");
+
+    var result = ms.getUserLocale(user);
+    // The result should be a locale created from the invalid tag
+    assertEquals(Locale.forLanguageTag("invalid-locale-tag"), result);
   }
 }
