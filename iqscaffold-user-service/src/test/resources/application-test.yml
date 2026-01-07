@@ -18,6 +18,9 @@ spring:
       hibernate:
         format_sql: true
         multiTenancy: SCHEMA
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
   
   liquibase:
     enabled: false  # Disabled by default, enable per-test using TestLiquibaseConfiguration

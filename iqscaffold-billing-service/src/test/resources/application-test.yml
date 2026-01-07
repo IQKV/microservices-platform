@@ -1,0 +1,97 @@
+# Test configuration for Billing Service
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
+        multiTenancy: SCHEMA
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+  
+  liquibase:
+    enabled: false
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+# IQ Scaffold test configuration
+iqscaffold:
+  tenant-id-header: X-Tenant-ID
+  
+  liquibase:
+    system-change-log: classpath:db/changelog/system/master.xml
+    tenant-change-log: classpath:db/changelog/tenant/master.xml
+  
+  email:
+    smtp:
+      host: localhost
+      port: 1025
+      username: test
+      password: test
+      auth: false
+      starttls: false
+      timeout: PT5S
+    sender:
+      from-email: test@iqscaffold.com
+      from-name: IQ Scaffold Test
+      base-url: http://localhost:8080
+    templates:
+      merchant-onboarding-template: "email/merchant-onboarding.html"
+      payment-successful-template: "email/payment-successful.html"
+      payment-failed-template: "email/payment-failed.html"
+      payment-refunded-template: "email/payment-refunded.html"
+      invoice-generated-template: "email/invoice-generated.html"
+  
+  billing:
+    security:
+      jwt:
+        jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+        issuer: test-issuer
+    payment:
+      provider: stripe
+      saas-mode: true
+      stripe:
+        api-key: test_key
+        webhook-secret: test_secret
+        client-id: test_client_id
+    integration:
+      email-service:
+        url: http://localhost:8084
+        timeout-ms: 5000
+    stripe:
+      public-key: pk_test_key
+      secret-key: sk_test_key
+      webhook-secret: whsec_test
+      connect-client-id: ca_test
+    notifications:
+      enable-email-notifications: false
+      enable-webhook-notifications: false
+      retry-delay: PT1S
+      max-retries: 1
+
+logging:
+  level:
+    root: WARN
+    com.iqscaffold.billingservice: DEBUG
