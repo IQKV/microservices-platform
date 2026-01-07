@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -380,6 +381,168 @@ class StripePaymentProviderTest {
       assertThrows(PaymentException.class, () ->
           stripePaymentProvider.createAccountLink("acct_123", "refresh", "return")
       );
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldHandleConnectedAccount() throws StripeException {
+    // Given
+    BigDecimal amount = new BigDecimal("100.00");
+    String currency = "usd";
+    String connectedAccountId = "acct_connected";
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_connected");
+    when(mockIntent.getClientSecret()).thenReturn("pi_connected_secret");
+
+    try (MockedStatic<PaymentIntent> mockedStatic = mockStatic(PaymentIntent.class)) {
+      mockedStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test", null, null, null, null, Optional.of(connectedAccountId), "key_connected"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_connected", result.id());
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldHandleApplicationFee() throws StripeException {
+    // Given
+    BigDecimal amount = new BigDecimal("100.00");
+    BigDecimal applicationFee = new BigDecimal("10.00");
+    String currency = "usd";
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_with_fee");
+    when(mockIntent.getClientSecret()).thenReturn("pi_with_fee_secret");
+
+    try (MockedStatic<PaymentIntent> mockedStatic = mockStatic(PaymentIntent.class)) {
+      mockedStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test", null, null, null, applicationFee, Optional.empty(), "key_fee"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_with_fee", result.id());
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldHandleZeroApplicationFee() throws StripeException {
+    // Given
+    BigDecimal amount = new BigDecimal("100.00");
+    BigDecimal applicationFee = BigDecimal.ZERO;
+    String currency = "usd";
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_zero_fee");
+    when(mockIntent.getClientSecret()).thenReturn("pi_zero_fee_secret");
+
+    try (MockedStatic<PaymentIntent> mockedStatic = mockStatic(PaymentIntent.class)) {
+      mockedStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test", null, null, null, applicationFee, Optional.empty(), "key_zero"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_zero_fee", result.id());
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldUpdateExistingCustomerName() throws StripeException {
+    // Given
+    String customerEmail = "existing@example.com";
+    String newName = "Updated Name";
+    StripeCustomer existingCustomer = new StripeCustomer();
+    existingCustomer.setStripeCustomerId("cus_existing");
+    existingCustomer.setEmail(customerEmail);
+    existingCustomer.setName("Old Name");
+
+    when(stripeCustomerRepository.findByEmailAndStripeAccountId(customerEmail, null))
+        .thenReturn(Optional.of(existingCustomer));
+
+    Customer mockCustomer = mock(Customer.class);
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_updated");
+    when(mockIntent.getClientSecret()).thenReturn("pi_updated_secret");
+
+    try (MockedStatic<Customer> customerStatic = mockStatic(Customer.class);
+         MockedStatic<PaymentIntent> intentStatic = mockStatic(PaymentIntent.class)) {
+
+      customerStatic.when(() -> Customer.retrieve(eq("cus_existing"), any()))
+          .thenReturn(mockCustomer);
+      intentStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          new BigDecimal("50.00"), "usd", "Test", customerEmail, newName,
+          null, null, Optional.empty(), "key_update"
+      );
+
+      // Then
+      assertNotNull(result);
+      verify(stripeCustomerRepository).save(existingCustomer);
+    }
+  }
+
+  @Test
+  void refundPayment_shouldHandleConnectedAccount() throws StripeException {
+    // Given
+    String paymentIntentId = "pi_123";
+    String currency = "usd";
+    String connectedAccountId = "acct_connected";
+
+    Refund mockRefund = mock(Refund.class);
+
+    try (MockedStatic<Refund> mockedStatic = mockStatic(Refund.class)) {
+      mockedStatic.when(() -> Refund.create(any(RefundCreateParams.class), any()))
+          .thenReturn(mockRefund);
+
+      // When
+      stripePaymentProvider.refundPayment(paymentIntentId, Optional.empty(), currency, Optional.of(connectedAccountId));
+
+      // Then
+      mockedStatic.verify(() -> Refund.create(any(RefundCreateParams.class), any()));
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldHandleJPYCurrency() throws StripeException {
+    // Given - JPY has 0 decimal places
+    BigDecimal amount = new BigDecimal("1000");
+    String currency = "jpy";
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_jpy");
+    when(mockIntent.getClientSecret()).thenReturn("pi_jpy_secret");
+
+    try (MockedStatic<PaymentIntent> mockedStatic = mockStatic(PaymentIntent.class)) {
+      mockedStatic.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test JPY", null, null, null, null, Optional.empty(), "key_jpy"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_jpy", result.id());
     }
   }
 }

@@ -208,6 +208,65 @@ class RefundServiceImplTest {
     verify(auditService).logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED);
   }
 
+  @Test
+  void processRefund_shouldHandleNullMerchantAccountId() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setMerchantAccountId(null);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+    doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
+
+    // When
+    refundService.processRefund(paymentId);
+
+    // Then
+    verify(paymentProvider).refundPayment(
+        eq("pi_123"),
+        eq(Optional.empty()),
+        eq("usd"),
+        eq(Optional.empty())
+    );
+  }
+
+  @Test
+  void processRefund_shouldHandleProviderExceptionDuringRefund() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    RuntimeException providerException = new RuntimeException("Stripe API error");
+    doThrow(providerException).when(paymentProvider).refundPayment(any(), any(), any(), any());
+
+    // When & Then
+    RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+    assertEquals("Stripe API error", thrown.getMessage());
+    verify(paymentRepository, never()).save(any());
+    verify(auditService, never()).logPaymentAttempt(any(), any());
+  }
+
+  @Test
+  void processRefund_shouldNotSendEmailWhenUserContextIsNull() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+    doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
+
+    // When
+    refundService.processRefund(paymentId);
+
+    // Then
+    verify(emailService, never()).sendEmail(any(), any(), any(), any(), any());
+  }
+
   private Payment createSuccessfulPayment(UUID paymentId) {
     Payment payment = new Payment();
     payment.setId(paymentId);

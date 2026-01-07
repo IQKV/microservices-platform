@@ -384,4 +384,91 @@ class StripeWebhookServiceTest {
       verify(paymentService, never()).updateStatus(anyString(), anyString());
     }
   }
+
+  @Test
+  void processWebhook_shouldRejectNonGlobalEventWithoutTenant() {
+    // Given
+    String payload = "{\"type\":\"payment_intent.succeeded\"}";
+    String sigHeader = "valid_signature";
+
+    Event mockEvent = mock(Event.class);
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    EventDataObjectDeserializer mockDeserializer = mock(EventDataObjectDeserializer.class);
+
+    Map<String, String> metadata = new HashMap<>();
+    // No tenant_id in metadata
+
+    when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(mockDeserializer);
+    when(mockDeserializer.getObject()).thenReturn(Optional.of(mockIntent));
+    when(mockIntent.getMetadata()).thenReturn(metadata);
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(eq(payload), eq(sigHeader), anyString()))
+          .thenReturn(mockEvent);
+
+      // When & Then
+      assertThrows(IllegalArgumentException.class, () ->
+          webhookService.processWebhook(payload, sigHeader)
+      );
+    }
+  }
+
+  @Test
+  void processWebhook_shouldHandleAccountUpdatedWithDisabledCapabilities() {
+    // Given
+    String payload = "{\"type\":\"account.updated\"}";
+    String sigHeader = "valid_signature";
+
+    Event mockEvent = mock(Event.class);
+    Account mockAccount = mock(Account.class);
+    EventDataObjectDeserializer mockDeserializer = mock(EventDataObjectDeserializer.class);
+    MerchantStripeConfig mockConfig = mock(MerchantStripeConfig.class);
+
+    when(mockEvent.getType()).thenReturn("account.updated");
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(mockDeserializer);
+    when(mockDeserializer.getObject()).thenReturn(Optional.of(mockAccount));
+    when(mockAccount.getId()).thenReturn("acct_456");
+    when(mockAccount.getChargesEnabled()).thenReturn(false);
+    when(mockAccount.getPayoutsEnabled()).thenReturn(false);
+    when(merchantConfigRepository.findByStripeAccountId("acct_456"))
+        .thenReturn(Optional.of(mockConfig));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(eq(payload), eq(sigHeader), anyString()))
+          .thenReturn(mockEvent);
+
+      // When
+      webhookService.processWebhook(payload, sigHeader);
+
+      // Then
+      verify(mockConfig).setChargesEnabled(false);
+      verify(mockConfig).setPayoutsEnabled(false);
+      verify(merchantConfigRepository).save(mockConfig);
+    }
+  }
+
+  @Test
+  void processWebhook_shouldHandleEmptyDataObject() {
+    // Given
+    String payload = "{\"type\":\"payment_intent.succeeded\"}";
+    String sigHeader = "valid_signature";
+
+    Event mockEvent = mock(Event.class);
+    EventDataObjectDeserializer mockDeserializer = mock(EventDataObjectDeserializer.class);
+
+    when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(mockDeserializer);
+    when(mockDeserializer.getObject()).thenReturn(Optional.empty());
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(eq(payload), eq(sigHeader), anyString()))
+          .thenReturn(mockEvent);
+
+      // When & Then - should throw due to missing tenant
+      assertThrows(IllegalArgumentException.class, () ->
+          webhookService.processWebhook(payload, sigHeader)
+      );
+    }
+  }
 }
