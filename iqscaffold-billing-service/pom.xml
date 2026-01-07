@@ -186,6 +186,18 @@
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
         </dependency>
+
+        <!-- Hibernate Second Level Cache with Ehcache 3 -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jcache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <classifier>jakarta</classifier>
+        </dependency>
     </dependencies>
 
     <build>
