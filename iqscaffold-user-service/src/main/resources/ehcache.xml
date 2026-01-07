@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.ehcache.org/v3"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.10.xsd">
+
+    <!-- Default cache template -->
+    <cache-template name="default">
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">1000</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache-template>
+
+    <!-- Entity cache template for frequently accessed entities -->
+    <cache-template name="entity-cache">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">2000</heap>
+            <offheap unit="MB">20</offheap>
+        </resources>
+    </cache-template>
+
+    <!-- Query cache template -->
+    <cache-template name="query-cache">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+            <offheap unit="MB">5</offheap>
+        </resources>
+    </cache-template>
+
+    <!-- User entity cache -->
+    <cache alias="com.iqscaffold.userservice.usermanagement.User" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">20</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10000</heap>
+            <offheap unit="MB">100</offheap>
+        </resources>
+    </cache>
+
+    <!-- Authority entity cache -->
+    <cache alias="com.iqscaffold.userservice.shared.Authority" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="hours">2</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+            <offheap unit="MB">5</offheap>
+        </resources>
+    </cache>
+
+    <!-- Organization entity cache -->
+    <cache alias="com.iqscaffold.userservice.organization.Organization" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="hours">1</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+            <offheap unit="MB">50</offheap>
+        </resources>
+    </cache>
+
+    <!-- Tenant entity cache -->
+    <cache alias="com.iqscaffold.userservice.tenancy.Tenant" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="hours">4</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">1000</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+
+    <!-- UserPreference entity cache -->
+    <cache alias="com.iqscaffold.userservice.usermanagement.UserPreference" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+            <offheap unit="MB">30</offheap>
+        </resources>
+    </cache>
+
+    <!-- OrganizationPreference entity cache -->
+    <cache alias="com.iqscaffold.userservice.organization.OrganizationPreference" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="hours">2</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">2000</heap>
+            <offheap unit="MB">20</offheap>
+        </resources>
+    </cache>
+
+    <!-- VerificationToken entity cache - shorter TTL for security -->
+    <cache alias="com.iqscaffold.userservice.emailverification.VerificationToken" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">5</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">2000</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+
+    <!-- UserAuditLog entity cache - minimal caching for audit logs -->
+    <cache alias="com.iqscaffold.userservice.security.UserAuditLog" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">2</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">1000</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+
+    <!-- User.authorities collection cache -->
+    <cache alias="com.iqscaffold.userservice.usermanagement.User.authorities" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+            <offheap unit="MB">20</offheap>
+        </resources>
+    </cache>
+
+    <!-- Authority.users collection cache -->
+    <cache alias="com.iqscaffold.userservice.shared.Authority.users" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+
+    <!-- Default query results cache -->
+    <cache alias="default-query-results-region" uses-template="query-cache"/>
+
+    <!-- Default update timestamps cache -->
+    <cache alias="default-update-timestamps-region">
+        <expiry>
+            <none/>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+        </resources>
+    </cache>
+
+</config>
