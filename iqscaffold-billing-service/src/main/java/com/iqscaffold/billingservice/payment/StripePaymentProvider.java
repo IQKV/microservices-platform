@@ -40,10 +40,10 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private final IqScaffoldProperties iqScaffoldProperties;
   private final StripeCustomerRepository stripeCustomerRepository;
   private final com.iqscaffold.billingservice.security.SecurityContextHelper securityHelper; // To get tenant if needed,
-                                                                                             // though we can pass it
-                                                                                             // down.
+  // though we can pass it
+  // down.
 
-  public StripePaymentProvider(IqScaffoldProperties iqScaffoldProperties, StripeCustomerRepository stripeCustomerRepository) {
+  public StripePaymentProvider(final IqScaffoldProperties iqScaffoldProperties, final StripeCustomerRepository stripeCustomerRepository) {
     this.iqScaffoldProperties = iqScaffoldProperties;
     this.stripeCustomerRepository = stripeCustomerRepository;
     this.securityHelper = null; // We'll just rely on passed args or context if we inject it properly.
@@ -138,7 +138,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
       PaymentIntent intent = PaymentIntent.create(paramsBuilder.build(), options);
       return new ProviderPaymentIntent(intent.getId(), intent.getClientSecret());
-    } catch (StripeException e) {
+    } catch (final StripeException e) {
       throw handleStripeException(e);
     }
   }
@@ -203,7 +203,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
-      Optional<String> connectedAccountId) {
+                            Optional<String> connectedAccountId) {
     try {
       RefundCreateParams.Builder paramsBuilder = RefundCreateParams.builder()
           .setPaymentIntent(paymentIntentId);
@@ -216,7 +216,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
       Refund.create(paramsBuilder.build(), options);
 
-    } catch (StripeException e) {
+    } catch (final StripeException e) {
       throw handleStripeException(e);
     }
   }
@@ -230,7 +230,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
       Account account = Account.create(params);
       return account.getId();
-    } catch (StripeException e) {
+    } catch (final StripeException e) {
       throw handleStripeException(e);
     }
   }
@@ -247,7 +247,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
       AccountLink link = AccountLink.create(params);
       return link.getUrl();
-    } catch (StripeException e) {
+    } catch (final StripeException e) {
       throw handleStripeException(e);
     }
   }
@@ -269,8 +269,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private RuntimeException handleStripeException(StripeException e) {
     return switch (e) {
       case com.stripe.exception.CardException ce -> new PaymentException("Card declined: " + ce.getMessage(), ce);
-      case com.stripe.exception.InvalidRequestException ire ->
-        new PaymentException("Invalid request: " + ire.getMessage(), ire);
+      case com.stripe.exception.InvalidRequestException ire -> new PaymentException("Invalid request: " + ire.getMessage(), ire);
       case com.stripe.exception.AuthenticationException ae -> new PaymentException("Authentication failed", ae);
       case com.stripe.exception.ApiConnectionException ace -> new PaymentException("Stripe connection failed", ace);
       case com.stripe.exception.StripeException se -> new PaymentException("Stripe error: " + se.getMessage(), se);

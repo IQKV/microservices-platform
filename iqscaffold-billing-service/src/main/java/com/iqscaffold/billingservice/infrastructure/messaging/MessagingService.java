@@ -33,7 +33,7 @@ public class MessagingService {
       );
       log.info("Successfully published billing event: {} for payment: {}",
           event.getEventType(), event.getPaymentId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish billing event: {} for payment: {}",
           event.getEventType(), event.getPaymentId(), e);
       throw new MessagingException("Failed to publish billing event", e);
@@ -53,7 +53,7 @@ public class MessagingService {
           event
       );
       log.info("Successfully published notification event to: {}", event.getRecipientEmail());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish notification event to: {}",
           event.getRecipientEmail(), e);
       throw new MessagingException("Failed to publish notification event", e);

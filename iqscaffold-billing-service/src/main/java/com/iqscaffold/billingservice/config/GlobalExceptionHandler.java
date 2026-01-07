@@ -15,7 +15,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   private final MessageService messageService;
 
-  public GlobalExceptionHandler(MessageService messageService) {
+  public GlobalExceptionHandler(final MessageService messageService) {
     this.messageService = messageService;
   }
 

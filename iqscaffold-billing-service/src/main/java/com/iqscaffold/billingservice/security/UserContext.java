@@ -11,11 +11,11 @@ public record UserContext(
     String firstName,
     String lastName
 ) {
-    public boolean hasAuthority(String authority) {
-        return authorities.contains(authority);
-    }
+  public boolean hasAuthority(String authority) {
+    return authorities.contains(authority);
+  }
 
-    public boolean isAdmin() {
-        return authorities.contains("ROLE_ADMIN") || authorities.contains("ADMIN");
-    }
+  public boolean isAdmin() {
+    return authorities.contains("ROLE_ADMIN") || authorities.contains("ADMIN");
+  }
 }

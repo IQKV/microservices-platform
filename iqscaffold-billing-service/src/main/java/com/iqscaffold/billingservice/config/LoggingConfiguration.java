@@ -60,11 +60,11 @@ public class LoggingConfiguration {
         // Add to MDC for structured logging
         MDC.put("correlationId", correlationId);
         MDC.put("requestId", requestId);
-        
+
         if (StringUtils.hasText(tenantId)) {
           MDC.put("tenantId", tenantId);
         }
-        
+
         if (StringUtils.hasText(userId)) {
           MDC.put("userId", userId);
         }
@@ -102,16 +102,16 @@ public class LoggingConfiguration {
     }
 
     private String getClientIpAddress(HttpServletRequest request) {
-      String xForwardedFor = request.getHeader("X-Forwarded-For");
-      if (StringUtils.hasText(xForwardedFor)) {
-        return xForwardedFor.split(",")[0].trim();
+      String xforwardedfor = request.getHeader("X-Forwarded-For");
+      if (StringUtils.hasText(xforwardedfor)) {
+        return xforwardedfor.split(",")[0].trim();
       }
-      
-      String xRealIp = request.getHeader("X-Real-IP");
-      if (StringUtils.hasText(xRealIp)) {
-        return xRealIp;
+
+      String xrealip = request.getHeader("X-Real-IP");
+      if (StringUtils.hasText(xrealip)) {
+        return xrealip;
       }
-      
+
       return request.getRemoteAddr();
     }
   }
@@ -120,18 +120,22 @@ public class LoggingConfiguration {
    * Utility class for structured logging in business logic.
    */
   public static class StructuredLogger {
-    
+
     /**
      * Log security events with structured context.
      */
     public static void logSecurityEvent(String event, String userId, String tenantId, Object details) {
       org.slf4j.Logger securityLogger = org.slf4j.LoggerFactory.getLogger("SECURITY");
-      
+
       MDC.put("eventType", "security");
       MDC.put("securityEvent", event);
-      if (userId != null) MDC.put("userId", userId);
-      if (tenantId != null) MDC.put("tenantId", tenantId);
-      
+      if (userId != null) {
+        MDC.put("userId", userId);
+      }
+      if (tenantId != null) {
+        MDC.put("tenantId", tenantId);
+      }
+
       securityLogger.info("Security event: {} - Details: {}", event, details);
     }
 
@@ -140,12 +144,14 @@ public class LoggingConfiguration {
      */
     public static void logPaymentEvent(String event, String paymentId, String tenantId, Object details) {
       org.slf4j.Logger paymentLogger = org.slf4j.LoggerFactory.getLogger("PAYMENT");
-      
+
       MDC.put("eventType", "payment");
       MDC.put("paymentEvent", event);
       MDC.put("paymentId", paymentId);
-      if (tenantId != null) MDC.put("tenantId", tenantId);
-      
+      if (tenantId != null) {
+        MDC.put("tenantId", tenantId);
+      }
+
       paymentLogger.info("Payment event: {} - Payment ID: {} - Details: {}", event, paymentId, details);
     }
 
@@ -154,12 +160,14 @@ public class LoggingConfiguration {
      */
     public static void logBillingEvent(String event, String entityId, String tenantId, Object details) {
       org.slf4j.Logger billingLogger = org.slf4j.LoggerFactory.getLogger("BILLING");
-      
+
       MDC.put("eventType", "billing");
       MDC.put("billingEvent", event);
       MDC.put("entityId", entityId);
-      if (tenantId != null) MDC.put("tenantId", tenantId);
-      
+      if (tenantId != null) {
+        MDC.put("tenantId", tenantId);
+      }
+
       billingLogger.info("Billing event: {} - Entity ID: {} - Details: {}", event, entityId, details);
     }
 
@@ -168,12 +176,12 @@ public class LoggingConfiguration {
      */
     public static void logPerformanceMetric(String operation, long durationMs, Object context) {
       org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger("PERFORMANCE");
-      
+
       MDC.put("eventType", "performance");
       MDC.put("operation", operation);
       MDC.put("durationMs", String.valueOf(durationMs));
-      
-      logger.info("Performance metric - Operation: {} - Duration: {}ms - Context: {}", 
+
+      logger.info("Performance metric - Operation: {} - Duration: {}ms - Context: {}",
           operation, durationMs, context);
     }
   }

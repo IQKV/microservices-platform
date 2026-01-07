@@ -28,9 +28,9 @@ public class NotificationEvent {
   }
 
   public NotificationEvent(final String eventId, final String notificationType, final String recipientEmail,
-                          final String recipientName, final String subject, final String templateName,
-                          final Map<String, Object> templateData, final Instant timestamp,
-                          final String tenantId, final String customerId) {
+                           final String recipientName, final String subject, final String templateName,
+                           final Map<String, Object> templateData, final Instant timestamp,
+                           final String tenantId, final String customerId) {
     this.eventId = eventId;
     this.notificationType = notificationType;
     this.recipientEmail = recipientEmail;

@@ -21,7 +21,7 @@ public class MerchantRestResource {
 
   private final MerchantOnboardingService onboardingService;
 
-  public MerchantRestResource(MerchantOnboardingService onboardingService) {
+  public MerchantRestResource(final MerchantOnboardingService onboardingService) {
     this.onboardingService = onboardingService;
   }
 

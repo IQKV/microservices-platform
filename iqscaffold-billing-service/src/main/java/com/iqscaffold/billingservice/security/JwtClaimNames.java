@@ -1,7 +1,8 @@
 package com.iqscaffold.billingservice.security;
 
 public final class JwtClaimNames {
-  private JwtClaimNames() {}
+  private JwtClaimNames() {
+  }
 
   public static final String SUBJECT = "sub";
   public static final String USERNAME = "username";

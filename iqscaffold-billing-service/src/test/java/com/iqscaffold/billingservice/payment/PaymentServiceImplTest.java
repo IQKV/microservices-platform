@@ -37,203 +37,203 @@ import org.springframework.data.domain.Pageable;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
 
-    @Mock
-    private PaymentRepository paymentRepository;
+  @Mock
+  private PaymentRepository paymentRepository;
 
-    @Mock
-    private PaymentProviderAdapter paymentProvider;
+  @Mock
+  private PaymentProviderAdapter paymentProvider;
 
-    @Mock
-    private MerchantStripeConfigRepository merchantConfigRepository;
+  @Mock
+  private MerchantStripeConfigRepository merchantConfigRepository;
 
-    @Mock
-    private PaymentStateMachine stateMachine;
+  @Mock
+  private PaymentStateMachine stateMachine;
 
-    @Mock
-    private PaymentAuditTrailService auditService;
+  @Mock
+  private PaymentAuditTrailService auditService;
 
-    private PaymentServiceImpl paymentService;
+  private PaymentServiceImpl paymentService;
 
-    @BeforeEach
-    void setUp() {
-        paymentService = new PaymentServiceImpl(
-            paymentRepository,
-            paymentProvider,
-            merchantConfigRepository,
-            stateMachine,
-            auditService
-        );
-    }
+  @BeforeEach
+  void setUp() {
+    paymentService = new PaymentServiceImpl(
+        paymentRepository,
+        paymentProvider,
+        merchantConfigRepository,
+        stateMachine,
+        auditService
+    );
+  }
 
-    @Test
-    void createPaymentIntent_shouldCreatePaymentSuccessfully() {
-        // Given
-        PaymentDtos.CreatePaymentRequest request = new PaymentDtos.CreatePaymentRequest(
-            new BigDecimal("100.00"),
-            "usd",
-            "Test payment",
-            "test@example.com",
-            "Test User",
-            Map.of("orderId", "123")
-        );
+  @Test
+  void createPaymentIntent_shouldCreatePaymentSuccessfully() {
+    // Given
+    PaymentDtos.CreatePaymentRequest request = new PaymentDtos.CreatePaymentRequest(
+        new BigDecimal("100.00"),
+        "usd",
+        "Test payment",
+        "test@example.com",
+        "Test User",
+        Map.of("orderId", "123")
+    );
 
-        Payment savedPayment = createTestPayment();
-        when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
+    Payment savedPayment = createTestPayment();
+    when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
 
-        PaymentProviderAdapter.ProviderPaymentIntent providerIntent = 
-            new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
-        when(paymentProvider.createPaymentIntent(
-            any(), any(), any(), any(), any(), any(), any(), any(), any()
-        )).thenReturn(providerIntent);
+    PaymentProviderAdapter.ProviderPaymentIntent providerIntent =
+        new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
+    when(paymentProvider.createPaymentIntent(
+        any(), any(), any(), any(), any(), any(), any(), any(), any()
+    )).thenReturn(providerIntent);
 
-        when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.empty());
+    when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.empty());
 
-        // When
-        PaymentDtos.PaymentResponse response = paymentService.createPaymentIntent(request);
+    // When
+    PaymentDtos.PaymentResponse response = paymentService.createPaymentIntent(request);
 
-        // Then
-        assertNotNull(response);
-        assertEquals("secret_123", response.clientSecret());
-        assertEquals(new BigDecimal("100.00"), response.amount());
-        assertEquals("usd", response.currency());
-        verify(stateMachine).validateTransition(null, BillingConstants.PaymentStatus.PENDING);
-        verify(paymentRepository, times(2)).save(any(Payment.class));
-        verify(auditService).logPaymentAttempt(any(UUID.class), eq(BillingConstants.PaymentStatus.PENDING));
-    }
+    // Then
+    assertNotNull(response);
+    assertEquals("secret_123", response.clientSecret());
+    assertEquals(new BigDecimal("100.00"), response.amount());
+    assertEquals("usd", response.currency());
+    verify(stateMachine).validateTransition(null, BillingConstants.PaymentStatus.PENDING);
+    verify(paymentRepository, times(2)).save(any(Payment.class));
+    verify(auditService).logPaymentAttempt(any(UUID.class), eq(BillingConstants.PaymentStatus.PENDING));
+  }
 
-    @Test
-    void createPaymentIntent_shouldCalculateApplicationFeeForConnectedAccount() {
-        // Given
-        PaymentDtos.CreatePaymentRequest request = new PaymentDtos.CreatePaymentRequest(
-            new BigDecimal("100.00"),
-            "usd",
-            "Test payment",
-            "test@example.com",
-            "Test User",
-            null
-        );
+  @Test
+  void createPaymentIntent_shouldCalculateApplicationFeeForConnectedAccount() {
+    // Given
+    PaymentDtos.CreatePaymentRequest request = new PaymentDtos.CreatePaymentRequest(
+        new BigDecimal("100.00"),
+        "usd",
+        "Test payment",
+        "test@example.com",
+        "Test User",
+        null
+    );
 
-        MerchantStripeConfig merchantConfig = new MerchantStripeConfig();
-        merchantConfig.setStripeAccountId("acct_123");
-        merchantConfig.setApplicationFeePercent(new BigDecimal("15.0"));
+    MerchantStripeConfig merchantConfig = new MerchantStripeConfig();
+    merchantConfig.setStripeAccountId("acct_123");
+    merchantConfig.setApplicationFeePercent(new BigDecimal("15.0"));
 
-        when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.of(merchantConfig));
+    when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.of(merchantConfig));
 
-        Payment savedPayment = createTestPayment();
-        when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
+    Payment savedPayment = createTestPayment();
+    when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
 
-        PaymentProviderAdapter.ProviderPaymentIntent providerIntent = 
-            new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
-        when(paymentProvider.createPaymentIntent(
-            any(), any(), any(), any(), any(), any(), any(), any(), any()
-        )).thenReturn(providerIntent);
+    PaymentProviderAdapter.ProviderPaymentIntent providerIntent =
+        new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
+    when(paymentProvider.createPaymentIntent(
+        any(), any(), any(), any(), any(), any(), any(), any(), any()
+    )).thenReturn(providerIntent);
 
-        // When
-        paymentService.createPaymentIntent(request);
+    // When
+    paymentService.createPaymentIntent(request);
 
-        // Then
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, atLeastOnce()).save(paymentCaptor.capture());
-        
-        Payment capturedPayment = paymentCaptor.getAllValues().get(0);
-        assertEquals(new BigDecimal("15.00"), capturedPayment.getApplicationFeeAmount());
-        assertEquals("acct_123", capturedPayment.getMerchantAccountId());
-    }
+    // Then
+    ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+    verify(paymentRepository, atLeastOnce()).save(paymentCaptor.capture());
 
-    @Test
-    void getPayment_shouldReturnPaymentWhenFound() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createTestPayment();
-        payment.setId(paymentId);
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    Payment capturedPayment = paymentCaptor.getAllValues().get(0);
+    assertEquals(new BigDecimal("15.00"), capturedPayment.getApplicationFeeAmount());
+    assertEquals("acct_123", capturedPayment.getMerchantAccountId());
+  }
 
-        // When
-        PaymentDtos.PaymentResponse response = paymentService.getPayment(paymentId);
+  @Test
+  void getPayment_shouldReturnPaymentWhenFound() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createTestPayment();
+    payment.setId(paymentId);
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
 
-        // Then
-        assertNotNull(response);
-        assertEquals(paymentId, response.id());
-        assertEquals(new BigDecimal("100.00"), response.amount());
-    }
+    // When
+    PaymentDtos.PaymentResponse response = paymentService.getPayment(paymentId);
 
-    @Test
-    void getPayment_shouldThrowExceptionWhenNotFound() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
+    // Then
+    assertNotNull(response);
+    assertEquals(paymentId, response.id());
+    assertEquals(new BigDecimal("100.00"), response.amount());
+  }
 
-        // When & Then
-        assertThrows(PaymentNotFoundException.class, () -> 
-            paymentService.getPayment(paymentId)
-        );
-    }
+  @Test
+  void getPayment_shouldThrowExceptionWhenNotFound() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
 
-    @Test
-    void getPayments_shouldReturnPagedResults() {
-        // Given
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Payment> payments = Arrays.asList(createTestPayment(), createTestPayment());
-        Page<Payment> paymentPage = new PageImpl<>(payments, pageable, payments.size());
-        when(paymentRepository.findAll(pageable)).thenReturn(paymentPage);
+    // When & Then
+    assertThrows(PaymentNotFoundException.class, () ->
+        paymentService.getPayment(paymentId)
+    );
+  }
 
-        // When
-        Page<PaymentDtos.PaymentResponse> result = paymentService.getPayments(pageable);
+  @Test
+  void getPayments_shouldReturnPagedResults() {
+    // Given
+    Pageable pageable = PageRequest.of(0, 10);
+    List<Payment> payments = Arrays.asList(createTestPayment(), createTestPayment());
+    Page<Payment> paymentPage = new PageImpl<>(payments, pageable, payments.size());
+    when(paymentRepository.findAll(pageable)).thenReturn(paymentPage);
 
-        // Then
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        verify(paymentRepository).findAll(pageable);
-    }
+    // When
+    Page<PaymentDtos.PaymentResponse> result = paymentService.getPayments(pageable);
 
-    @Test
-    void updateStatus_shouldUpdatePaymentStatus() {
-        // Given
-        String paymentIntentId = "pi_123";
-        Payment payment = createTestPayment();
-        payment.setPaymentIntentId(paymentIntentId);
-        payment.setStatus(BillingConstants.PaymentStatus.PENDING);
+    // Then
+    assertNotNull(result);
+    assertEquals(2, result.getContent().size());
+    verify(paymentRepository).findAll(pageable);
+  }
 
-        when(paymentRepository.findByPaymentIntentId(paymentIntentId))
-            .thenReturn(Optional.of(payment));
-        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+  @Test
+  void updateStatus_shouldUpdatePaymentStatus() {
+    // Given
+    String paymentIntentId = "pi_123";
+    Payment payment = createTestPayment();
+    payment.setPaymentIntentId(paymentIntentId);
+    payment.setStatus(BillingConstants.PaymentStatus.PENDING);
 
-        // When
-        paymentService.updateStatus(paymentIntentId, BillingConstants.PaymentStatus.SUCCEEDED);
+    when(paymentRepository.findByPaymentIntentId(paymentIntentId))
+        .thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
 
-        // Then
-        verify(stateMachine).validateTransition(
-            BillingConstants.PaymentStatus.PENDING,
-            BillingConstants.PaymentStatus.SUCCEEDED
-        );
-        verify(paymentRepository).save(payment);
-        verify(auditService).logPaymentAttempt(payment.getId(), BillingConstants.PaymentStatus.SUCCEEDED);
-        assertEquals(BillingConstants.PaymentStatus.SUCCEEDED, payment.getStatus());
-    }
+    // When
+    paymentService.updateStatus(paymentIntentId, BillingConstants.PaymentStatus.SUCCEEDED);
 
-    @Test
-    void updateStatus_shouldThrowExceptionWhenPaymentNotFound() {
-        // Given
-        String paymentIntentId = "pi_nonexistent";
-        when(paymentRepository.findByPaymentIntentId(paymentIntentId))
-            .thenReturn(Optional.empty());
+    // Then
+    verify(stateMachine).validateTransition(
+        BillingConstants.PaymentStatus.PENDING,
+        BillingConstants.PaymentStatus.SUCCEEDED
+    );
+    verify(paymentRepository).save(payment);
+    verify(auditService).logPaymentAttempt(payment.getId(), BillingConstants.PaymentStatus.SUCCEEDED);
+    assertEquals(BillingConstants.PaymentStatus.SUCCEEDED, payment.getStatus());
+  }
 
-        // When & Then
-        assertThrows(PaymentNotFoundException.class, () ->
-            paymentService.updateStatus(paymentIntentId, BillingConstants.PaymentStatus.SUCCEEDED)
-        );
-    }
+  @Test
+  void updateStatus_shouldThrowExceptionWhenPaymentNotFound() {
+    // Given
+    String paymentIntentId = "pi_nonexistent";
+    when(paymentRepository.findByPaymentIntentId(paymentIntentId))
+        .thenReturn(Optional.empty());
 
-    private Payment createTestPayment() {
-        Payment payment = new Payment();
-        payment.setId(UUID.randomUUID());
-        payment.setAmount(new BigDecimal("100.00"));
-        payment.setCurrency("usd");
-        payment.setStatus(BillingConstants.PaymentStatus.PENDING);
-        payment.setClientSecret("secret_123");
-        payment.setPaymentIntentId("pi_123");
-        payment.setCreatedAt(Instant.now());
-        payment.setUpdatedAt(Instant.now());
-        return payment;
-    }
+    // When & Then
+    assertThrows(PaymentNotFoundException.class, () ->
+        paymentService.updateStatus(paymentIntentId, BillingConstants.PaymentStatus.SUCCEEDED)
+    );
+  }
+
+  private Payment createTestPayment() {
+    Payment payment = new Payment();
+    payment.setId(UUID.randomUUID());
+    payment.setAmount(new BigDecimal("100.00"));
+    payment.setCurrency("usd");
+    payment.setStatus(BillingConstants.PaymentStatus.PENDING);
+    payment.setClientSecret("secret_123");
+    payment.setPaymentIntentId("pi_123");
+    payment.setCreatedAt(Instant.now());
+    payment.setUpdatedAt(Instant.now());
+    return payment;
+  }
 }

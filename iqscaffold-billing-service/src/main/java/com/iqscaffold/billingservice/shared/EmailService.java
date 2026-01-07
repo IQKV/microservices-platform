@@ -85,8 +85,8 @@ public class EmailService implements EmailOperations {
 
   @Override
   public void sendPaymentSuccessfulEmail(String customerEmail, String customerName, String paymentId,
-                                        BigDecimal amount, String currency, String description,
-                                        LocalDateTime paymentDate, String paymentMethod, String receiptUrl) {
+                                         BigDecimal amount, String currency, String description,
+                                         LocalDateTime paymentDate, String paymentMethod, String receiptUrl) {
     try {
       var mimeMessage = mailSender.createMimeMessage();
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -125,8 +125,8 @@ public class EmailService implements EmailOperations {
 
   @Override
   public void sendPaymentFailedEmail(String customerEmail, String customerName, String paymentId,
-                                    BigDecimal amount, String currency, String description,
-                                    LocalDateTime attemptDate, String errorMessage, String retryUrl) {
+                                     BigDecimal amount, String currency, String description,
+                                     LocalDateTime attemptDate, String errorMessage, String retryUrl) {
     try {
       var mimeMessage = mailSender.createMimeMessage();
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -165,7 +165,7 @@ public class EmailService implements EmailOperations {
 
   @Override
   public void sendPaymentRefundedEmail(String customerEmail, String customerName, String paymentId,
-                                      BigDecimal amount, String currency, String refundId, LocalDateTime refundDate) {
+                                       BigDecimal amount, String currency, String refundId, LocalDateTime refundDate) {
     try {
       var mimeMessage = mailSender.createMimeMessage();
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -202,8 +202,8 @@ public class EmailService implements EmailOperations {
 
   @Override
   public void sendInvoiceGeneratedEmail(String customerEmail, String customerName, String invoiceNumber,
-                                       BigDecimal amount, String currency, LocalDateTime issueDate,
-                                       LocalDateTime dueDate, String description, String invoiceUrl) {
+                                        BigDecimal amount, String currency, LocalDateTime issueDate,
+                                        LocalDateTime dueDate, String description, String invoiceUrl) {
     try {
       var mimeMessage = mailSender.createMimeMessage();
       var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");

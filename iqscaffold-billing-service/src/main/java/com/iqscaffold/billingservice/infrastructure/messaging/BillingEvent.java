@@ -27,8 +27,8 @@ public class BillingEvent {
   }
 
   public BillingEvent(final String eventId, final String eventType, final String paymentId,
-                     final String merchantId, final String invoiceId, final String customerEmail,
-                     final Map<String, Object> eventData, final Instant timestamp, final String tenantId) {
+                      final String merchantId, final String invoiceId, final String customerEmail,
+                      final Map<String, Object> eventData, final Instant timestamp, final String tenantId) {
     this.eventId = eventId;
     this.eventType = eventType;
     this.paymentId = paymentId;

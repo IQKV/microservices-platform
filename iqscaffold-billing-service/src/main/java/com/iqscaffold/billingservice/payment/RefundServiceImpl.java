@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  *     <li>Updates local payment state to 'REFUNDED'.</li>
  *     <li>Triggers customer notification emails.</li>
  * </ul>
- * 
+ *
  * @author IQScaffold Team
  * @version 1.0
  * @since 1.0
@@ -40,10 +40,10 @@ public class RefundServiceImpl implements RefundService {
   private final EmailService emailService;
 
   public RefundServiceImpl(
-      PaymentRepository paymentRepository,
-      PaymentProviderAdapter paymentProvider,
-      PaymentAuditTrailService auditService,
-      EmailService emailService
+      final PaymentRepository paymentRepository,
+      final PaymentProviderAdapter paymentProvider,
+      final PaymentAuditTrailService auditService,
+      final EmailService emailService
   ) {
     this.paymentRepository = paymentRepository;
     this.paymentProvider = paymentProvider;
@@ -59,12 +59,12 @@ public class RefundServiceImpl implements RefundService {
         .orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
 
     if (!BillingConstants.PaymentStatus.SUCCEEDED.equals(payment.getStatus())) {
-        throw new InvalidPaymentStateException("Cannot refund payment in state: " + payment.getStatus());
+      throw new InvalidPaymentStateException("Cannot refund payment in state: " + payment.getStatus());
     }
 
     try {
       paymentProvider.refundPayment(
-          payment.getPaymentIntentId(), 
+          payment.getPaymentIntentId(),
           Optional.empty(), // Full refund
           payment.getCurrency(),
           Optional.ofNullable(payment.getMerchantAccountId())
@@ -76,29 +76,29 @@ public class RefundServiceImpl implements RefundService {
 
       sendRefundEmail(payment);
 
-    } catch (Exception e) {
-        logger.error("Refund failed for payment: {}", paymentId, e);
-        // We might want to rethrow or handle specifically, but letting it bubble up is fine for now
-        throw e;
+    } catch (final Exception e) {
+      logger.error("Refund failed for payment: {}", paymentId, e);
+      // We might want to rethrow or handle specifically, but letting it bubble up is fine for now
+      throw e;
     }
   }
 
   private void sendRefundEmail(Payment payment) {
-      // In a real system, we'd look up the user email associated with the payment or order
-      // Here we grab the current user's email if available, or skip
-      UserContext user = SecurityContextHelper.getCurrentUserContext();
-      if (user != null && user.email() != null) {
-          emailService.sendEmail(
-              user.email(),
-              "email.payment.refunded.subject",
-              "payment-refunded", 
-              Map.of(
-                  "amount", payment.getAmount(),
-                  "currency", payment.getCurrency(),
-                  "paymentId", payment.getId()
-              ),
-              java.util.Locale.ROOT
-          );
-      }
+    // In a real system, we'd look up the user email associated with the payment or order
+    // Here we grab the current user's email if available, or skip
+    UserContext user = SecurityContextHelper.getCurrentUserContext();
+    if (user != null && user.email() != null) {
+      emailService.sendEmail(
+          user.email(),
+          "email.payment.refunded.subject",
+          "payment-refunded",
+          Map.of(
+              "amount", payment.getAmount(),
+              "currency", payment.getCurrency(),
+              "paymentId", payment.getId()
+          ),
+          java.util.Locale.ROOT
+      );
+    }
   }
 }

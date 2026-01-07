@@ -5,7 +5,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 public final class SecurityContextHelper {
 
-  private SecurityContextHelper() {}
+  private SecurityContextHelper() {
+  }
 
   public static UserContext getCurrentUserContext() {
     ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -30,9 +31,9 @@ public final class SecurityContextHelper {
     UserContext uc = getCurrentUserContext();
     return uc != null ? uc.userId() : null;
   }
-  
+
   public static String getCurrentTenantId() {
-      UserContext uc = getCurrentUserContext();
-      return uc != null ? uc.tenantId() : null;
+    UserContext uc = getCurrentUserContext();
+    return uc != null ? uc.tenantId() : null;
   }
 }

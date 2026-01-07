@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * interaction.</li>
  * <li>Resolution of multi-tenant merchant configurations.</li>
  * </ul>
- * 
+ *
  * @author IQScaffold Team
  * @version 1.0
  * @since 1.0
@@ -32,132 +32,132 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentRepository paymentRepository;
-    private final PaymentProviderAdapter paymentProvider;
-    private final MerchantStripeConfigRepository merchantConfigRepository;
-    private final PaymentStateMachine stateMachine;
-    private final PaymentAuditTrailService auditService;
+  private final PaymentRepository paymentRepository;
+  private final PaymentProviderAdapter paymentProvider;
+  private final MerchantStripeConfigRepository merchantConfigRepository;
+  private final PaymentStateMachine stateMachine;
+  private final PaymentAuditTrailService auditService;
 
-    public PaymentServiceImpl(
-            PaymentRepository paymentRepository,
-            PaymentProviderAdapter paymentProvider,
-            MerchantStripeConfigRepository merchantConfigRepository,
-            PaymentStateMachine stateMachine,
-            PaymentAuditTrailService auditService) {
-        this.paymentRepository = paymentRepository;
-        this.paymentProvider = paymentProvider;
-        this.merchantConfigRepository = merchantConfigRepository;
-        this.stateMachine = stateMachine;
-        this.auditService = auditService;
+  public PaymentServiceImpl(
+      final PaymentRepository paymentRepository,
+      final PaymentProviderAdapter paymentProvider,
+      final MerchantStripeConfigRepository merchantConfigRepository,
+      final PaymentStateMachine stateMachine,
+      final PaymentAuditTrailService auditService) {
+    this.paymentRepository = paymentRepository;
+    this.paymentProvider = paymentProvider;
+    this.merchantConfigRepository = merchantConfigRepository;
+    this.stateMachine = stateMachine;
+    this.auditService = auditService;
+  }
+
+  @Override
+  @Transactional
+  public PaymentDtos.PaymentResponse createPaymentIntent(PaymentDtos.CreatePaymentRequest request) {
+    // String tenantId = SecurityContextHelper.getCurrentTenantId(); // Not needed
+    // for entity field
+
+    // 1. Initial State Validation
+    stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
+
+    // 2. Resolve Merchant Account (if any)
+    // In schema-per-tenant, the merchant config is stored in the public schema
+    String tenantId = SecurityContextHelper.getCurrentTenantId();
+    var merchantConfig = merchantConfigRepository.findByTenantId(tenantId);
+
+    Optional<String> connectedAccountId = merchantConfig
+        .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getStripeAccountId);
+
+    // Platform fee logic (use config or default to 0)
+    BigDecimal applicationFee = BigDecimal.ZERO;
+    if (connectedAccountId.isPresent()) {
+      BigDecimal feePercent = merchantConfig
+          .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getApplicationFeePercent)
+          .orElse(BigDecimal.valueOf(10.0)); // Default 10%
+      applicationFee = request.amount().multiply(feePercent).divide(BigDecimal.valueOf(100), 2,
+          java.math.RoundingMode.HALF_UP);
     }
 
-    @Override
-    @Transactional
-    public PaymentDtos.PaymentResponse createPaymentIntent(PaymentDtos.CreatePaymentRequest request) {
-        // String tenantId = SecurityContextHelper.getCurrentTenantId(); // Not needed
-        // for entity field
+    Payment payment = new Payment();
+    payment.setAmount(request.amount());
+    payment.setCurrency(request.currency());
+    payment.setStatus(BillingConstants.PaymentStatus.PENDING);
+    payment.setApplicationFeeAmount(applicationFee);
+    connectedAccountId.ifPresent(payment::setMerchantAccountId);
 
-        // 1. Initial State Validation
-        stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
+    payment = paymentRepository.save(payment); // Save to get UUID
 
-        // 2. Resolve Merchant Account (if any)
-        // In schema-per-tenant, the merchant config is stored in the public schema
-        String tenantId = SecurityContextHelper.getCurrentTenantId();
-        var merchantConfig = merchantConfigRepository.findByTenantId(tenantId);
+    auditService.logPaymentAttempt(payment.getId(), BillingConstants.PaymentStatus.PENDING);
 
-        Optional<String> connectedAccountId = merchantConfig
-                .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getStripeAccountId);
+    // 4. Call Provider with idempotency key
+    PaymentProviderAdapter.ProviderPaymentIntent providerIntent = paymentProvider.createPaymentIntent(
+        request.amount(),
+        request.currency(),
+        request.description(),
+        request.customerEmail(),
+        request.customerName(),
+        request.metadata(),
+        applicationFee,
+        connectedAccountId,
+        payment.getId().toString());
 
-        // Platform fee logic (use config or default to 0)
-        BigDecimal applicationFee = BigDecimal.ZERO;
-        if (connectedAccountId.isPresent()) {
-            BigDecimal feePercent = merchantConfig
-                    .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getApplicationFeePercent)
-                    .orElse(BigDecimal.valueOf(10.0)); // Default 10%
-            applicationFee = request.amount().multiply(feePercent).divide(BigDecimal.valueOf(100), 2,
-                    java.math.RoundingMode.HALF_UP);
-        }
+    // 5. Update Record
+    payment.setPaymentIntentId(providerIntent.id());
+    payment.setClientSecret(providerIntent.clientSecret());
+    payment.setStatus(BillingConstants.PaymentStatus.PROCESSING);
+    payment = paymentRepository.save(payment);
 
-        Payment payment = new Payment();
-        payment.setAmount(request.amount());
-        payment.setCurrency(request.currency());
-        payment.setStatus(BillingConstants.PaymentStatus.PENDING);
-        payment.setApplicationFeeAmount(applicationFee);
-        connectedAccountId.ifPresent(payment::setMerchantAccountId);
+    return mapToResponse(payment);
+  }
 
-        payment = paymentRepository.save(payment); // Save to get UUID
+  @Override
+  @Transactional(readOnly = true)
+  public PaymentDtos.PaymentResponse getPayment(UUID id) {
+    // No need to filter by tenantId, schema is already isolated
+    Payment payment = paymentRepository.findById(id)
+        .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException(
+            "Payment not found"));
+    return mapToResponse(payment);
+  }
 
-        auditService.logPaymentAttempt(payment.getId(), BillingConstants.PaymentStatus.PENDING);
+  @Override
+  @Transactional(readOnly = true)
+  public Page<PaymentDtos.PaymentResponse> getPayments(Pageable pageable) {
+    // Simply findAll, scoped to current schema
+    return paymentRepository.findAll(pageable)
+        .map(this::mapToResponse);
+  }
 
-        // 4. Call Provider with idempotency key
-        PaymentProviderAdapter.ProviderPaymentIntent providerIntent = paymentProvider.createPaymentIntent(
-                request.amount(),
-                request.currency(),
-                request.description(),
-                request.customerEmail(),
-                request.customerName(),
-                request.metadata(),
-                applicationFee,
-                connectedAccountId,
-                payment.getId().toString());
+  @Override
+  @Transactional
+  public void updateStatus(String paymentIntentId, String newStatus) {
+    Payment payment = paymentRepository.findByPaymentIntentId(paymentIntentId)
+        .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException(
+            "Payment not found for intent: " + paymentIntentId));
 
-        // 5. Update Record
-        payment.setPaymentIntentId(providerIntent.id());
-        payment.setClientSecret(providerIntent.clientSecret());
-        payment.setStatus(BillingConstants.PaymentStatus.PROCESSING);
-        payment = paymentRepository.save(payment);
+    // Context setup logic might be complex for webhooks if we don't know the tenant
+    // from the payload
+    // But assuming the WebhookService or Filter sets up the context (via header or
+    // meta lookup)
+    // Actually, for schema-per-tenant, we MUST know the tenant to even FIND the
+    // payment
+    // So this method assumes the correct context is ALREADY active.
 
-        return mapToResponse(payment);
+    try (var ignored = org.slf4j.MDC.putCloseable("paymentId", payment.getId().toString())) {
+      stateMachine.validateTransition(payment.getStatus(), newStatus);
+      payment.setStatus(newStatus);
+      paymentRepository.save(payment);
+      auditService.logPaymentAttempt(payment.getId(), newStatus);
     }
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public PaymentDtos.PaymentResponse getPayment(UUID id) {
-        // No need to filter by tenantId, schema is already isolated
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException(
-                        "Payment not found"));
-        return mapToResponse(payment);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PaymentDtos.PaymentResponse> getPayments(Pageable pageable) {
-        // Simply findAll, scoped to current schema
-        return paymentRepository.findAll(pageable)
-                .map(this::mapToResponse);
-    }
-
-    @Override
-    @Transactional
-    public void updateStatus(String paymentIntentId, String newStatus) {
-        Payment payment = paymentRepository.findByPaymentIntentId(paymentIntentId)
-                .orElseThrow(() -> new com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException(
-                        "Payment not found for intent: " + paymentIntentId));
-
-        // Context setup logic might be complex for webhooks if we don't know the tenant
-        // from the payload
-        // But assuming the WebhookService or Filter sets up the context (via header or
-        // meta lookup)
-        // Actually, for schema-per-tenant, we MUST know the tenant to even FIND the
-        // payment
-        // So this method assumes the correct context is ALREADY active.
-
-        try (var ignored = org.slf4j.MDC.putCloseable("paymentId", payment.getId().toString())) {
-            stateMachine.validateTransition(payment.getStatus(), newStatus);
-            payment.setStatus(newStatus);
-            paymentRepository.save(payment);
-            auditService.logPaymentAttempt(payment.getId(), newStatus);
-        }
-    }
-
-    private PaymentDtos.PaymentResponse mapToResponse(Payment payment) {
-        return new PaymentDtos.PaymentResponse(
-                payment.getId(),
-                payment.getClientSecret(),
-                payment.getAmount(),
-                payment.getCurrency(),
-                payment.getStatus(),
-                payment.getCreatedAt());
-    }
+  private PaymentDtos.PaymentResponse mapToResponse(Payment payment) {
+    return new PaymentDtos.PaymentResponse(
+        payment.getId(),
+        payment.getClientSecret(),
+        payment.getAmount(),
+        payment.getCurrency(),
+        payment.getStatus(),
+        payment.getCreatedAt());
+  }
 }

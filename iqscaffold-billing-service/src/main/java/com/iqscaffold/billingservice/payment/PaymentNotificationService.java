@@ -26,7 +26,7 @@ public class PaymentNotificationService {
   private final MessagingService messagingService;
 
   public PaymentNotificationService(final NotificationService notificationService,
-                                  final MessagingService messagingService) {
+                                    final MessagingService messagingService) {
     this.notificationService = notificationService;
     this.messagingService = messagingService;
   }
@@ -40,8 +40,8 @@ public class PaymentNotificationService {
     try {
       // Log structured payment event
       StructuredLogger.logPaymentEvent(
-          "payment_successful", 
-          event.getPaymentId(), 
+          "payment_successful",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of(
               "amount", event.getAmount(),
@@ -73,16 +73,16 @@ public class PaymentNotificationService {
       );
 
       logger.info("Payment successful notifications sent for payment: {}", event.getPaymentId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log structured error event
       StructuredLogger.logPaymentEvent(
-          "payment_notification_failed", 
-          event.getPaymentId(), 
+          "payment_notification_failed",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of("error", e.getMessage(), "eventType", "payment_successful")
       );
-      
-      logger.error("Failed to handle payment successful notifications for payment: {}", 
+
+      logger.error("Failed to handle payment successful notifications for payment: {}",
           event.getPaymentId(), e);
       // Don't rethrow - notification failures shouldn't break payment processing
     }
@@ -97,8 +97,8 @@ public class PaymentNotificationService {
     try {
       // Log structured payment event
       StructuredLogger.logPaymentEvent(
-          "payment_failed", 
-          event.getPaymentId(), 
+          "payment_failed",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of(
               "amount", event.getAmount(),
@@ -130,16 +130,16 @@ public class PaymentNotificationService {
       );
 
       logger.info("Payment failed notifications sent for payment: {}", event.getPaymentId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log structured error event
       StructuredLogger.logPaymentEvent(
-          "payment_notification_failed", 
-          event.getPaymentId(), 
+          "payment_notification_failed",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of("error", e.getMessage(), "eventType", "payment_failed")
       );
-      
-      logger.error("Failed to handle payment failed notifications for payment: {}", 
+
+      logger.error("Failed to handle payment failed notifications for payment: {}",
           event.getPaymentId(), e);
       // Don't rethrow - notification failures shouldn't break payment processing
     }
@@ -154,8 +154,8 @@ public class PaymentNotificationService {
     try {
       // Log structured payment event
       StructuredLogger.logPaymentEvent(
-          "payment_refunded", 
-          event.getPaymentId(), 
+          "payment_refunded",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of(
               "amount", event.getAmount(),
@@ -185,16 +185,16 @@ public class PaymentNotificationService {
       );
 
       logger.info("Payment refunded notifications sent for payment: {}", event.getPaymentId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       // Log structured error event
       StructuredLogger.logPaymentEvent(
-          "payment_notification_failed", 
-          event.getPaymentId(), 
+          "payment_notification_failed",
+          event.getPaymentId(),
           event.getTenantId(),
           Map.of("error", e.getMessage(), "eventType", "payment_refunded")
       );
-      
-      logger.error("Failed to handle payment refunded notifications for payment: {}", 
+
+      logger.error("Failed to handle payment refunded notifications for payment: {}",
           event.getPaymentId(), e);
       // Don't rethrow - notification failures shouldn't break refund processing
     }
@@ -216,12 +216,13 @@ public class PaymentNotificationService {
     private String tenantId;
 
     // Constructors, getters, and setters
-    public PaymentSuccessfulEvent() {}
+    public PaymentSuccessfulEvent() {
+    }
 
-    public PaymentSuccessfulEvent(String paymentId, String customerEmail, String customerName,
-                                BigDecimal amount, String currency, String description,
-                                LocalDateTime paymentDate, String paymentMethod, String receiptUrl,
-                                String tenantId) {
+    public PaymentSuccessfulEvent(final String paymentId, final String customerEmail, final String customerName,
+                                  final BigDecimal amount, final String currency, final String description,
+                                  final LocalDateTime paymentDate, final String paymentMethod, final String receiptUrl,
+                                  final String tenantId) {
       this.paymentId = paymentId;
       this.customerEmail = customerEmail;
       this.customerName = customerName;
@@ -235,26 +236,85 @@ public class PaymentNotificationService {
     }
 
     // Getters and setters
-    public String getPaymentId() { return paymentId; }
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
-    public String getCustomerEmail() { return customerEmail; }
-    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public LocalDateTime getPaymentDate() { return paymentDate; }
-    public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-    public String getReceiptUrl() { return receiptUrl; }
-    public void setReceiptUrl(String receiptUrl) { this.receiptUrl = receiptUrl; }
-    public String getTenantId() { return tenantId; }
-    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+    public String getPaymentId() {
+      return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+      this.paymentId = paymentId;
+    }
+
+    public String getCustomerEmail() {
+      return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+      this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerName() {
+      return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+      this.customerName = customerName;
+    }
+
+    public BigDecimal getAmount() {
+      return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+      this.amount = amount;
+    }
+
+    public String getCurrency() {
+      return currency;
+    }
+
+    public void setCurrency(String currency) {
+      this.currency = currency;
+    }
+
+    public String getDescription() {
+      return description;
+    }
+
+    public void setDescription(String description) {
+      this.description = description;
+    }
+
+    public LocalDateTime getPaymentDate() {
+      return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+      this.paymentDate = paymentDate;
+    }
+
+    public String getPaymentMethod() {
+      return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+      this.paymentMethod = paymentMethod;
+    }
+
+    public String getReceiptUrl() {
+      return receiptUrl;
+    }
+
+    public void setReceiptUrl(String receiptUrl) {
+      this.receiptUrl = receiptUrl;
+    }
+
+    public String getTenantId() {
+      return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+      this.tenantId = tenantId;
+    }
   }
 
   /**
@@ -273,12 +333,13 @@ public class PaymentNotificationService {
     private String tenantId;
 
     // Constructors, getters, and setters
-    public PaymentFailedEvent() {}
+    public PaymentFailedEvent() {
+    }
 
-    public PaymentFailedEvent(String paymentId, String customerEmail, String customerName,
-                            BigDecimal amount, String currency, String description,
-                            LocalDateTime attemptDate, String errorMessage, String retryUrl,
-                            String tenantId) {
+    public PaymentFailedEvent(final String paymentId, final String customerEmail, final String customerName,
+                              final BigDecimal amount, final String currency, final String description,
+                              final LocalDateTime attemptDate, final String errorMessage, final String retryUrl,
+                              final String tenantId) {
       this.paymentId = paymentId;
       this.customerEmail = customerEmail;
       this.customerName = customerName;
@@ -292,26 +353,85 @@ public class PaymentNotificationService {
     }
 
     // Getters and setters
-    public String getPaymentId() { return paymentId; }
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
-    public String getCustomerEmail() { return customerEmail; }
-    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public LocalDateTime getAttemptDate() { return attemptDate; }
-    public void setAttemptDate(LocalDateTime attemptDate) { this.attemptDate = attemptDate; }
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
-    public String getRetryUrl() { return retryUrl; }
-    public void setRetryUrl(String retryUrl) { this.retryUrl = retryUrl; }
-    public String getTenantId() { return tenantId; }
-    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+    public String getPaymentId() {
+      return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+      this.paymentId = paymentId;
+    }
+
+    public String getCustomerEmail() {
+      return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+      this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerName() {
+      return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+      this.customerName = customerName;
+    }
+
+    public BigDecimal getAmount() {
+      return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+      this.amount = amount;
+    }
+
+    public String getCurrency() {
+      return currency;
+    }
+
+    public void setCurrency(String currency) {
+      this.currency = currency;
+    }
+
+    public String getDescription() {
+      return description;
+    }
+
+    public void setDescription(String description) {
+      this.description = description;
+    }
+
+    public LocalDateTime getAttemptDate() {
+      return attemptDate;
+    }
+
+    public void setAttemptDate(LocalDateTime attemptDate) {
+      this.attemptDate = attemptDate;
+    }
+
+    public String getErrorMessage() {
+      return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+      this.errorMessage = errorMessage;
+    }
+
+    public String getRetryUrl() {
+      return retryUrl;
+    }
+
+    public void setRetryUrl(String retryUrl) {
+      this.retryUrl = retryUrl;
+    }
+
+    public String getTenantId() {
+      return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+      this.tenantId = tenantId;
+    }
   }
 
   /**
@@ -328,11 +448,12 @@ public class PaymentNotificationService {
     private String tenantId;
 
     // Constructors, getters, and setters
-    public PaymentRefundedEvent() {}
+    public PaymentRefundedEvent() {
+    }
 
-    public PaymentRefundedEvent(String paymentId, String customerEmail, String customerName,
-                              BigDecimal amount, String currency, String refundId,
-                              LocalDateTime refundDate, String tenantId) {
+    public PaymentRefundedEvent(final String paymentId, final String customerEmail, final String customerName,
+                                final BigDecimal amount, final String currency, final String refundId,
+                                final LocalDateTime refundDate, final String tenantId) {
       this.paymentId = paymentId;
       this.customerEmail = customerEmail;
       this.customerName = customerName;
@@ -344,21 +465,68 @@ public class PaymentNotificationService {
     }
 
     // Getters and setters
-    public String getPaymentId() { return paymentId; }
-    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
-    public String getCustomerEmail() { return customerEmail; }
-    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
-    public String getRefundId() { return refundId; }
-    public void setRefundId(String refundId) { this.refundId = refundId; }
-    public LocalDateTime getRefundDate() { return refundDate; }
-    public void setRefundDate(LocalDateTime refundDate) { this.refundDate = refundDate; }
-    public String getTenantId() { return tenantId; }
-    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
+    public String getPaymentId() {
+      return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+      this.paymentId = paymentId;
+    }
+
+    public String getCustomerEmail() {
+      return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+      this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerName() {
+      return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+      this.customerName = customerName;
+    }
+
+    public BigDecimal getAmount() {
+      return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+      this.amount = amount;
+    }
+
+    public String getCurrency() {
+      return currency;
+    }
+
+    public void setCurrency(String currency) {
+      this.currency = currency;
+    }
+
+    public String getRefundId() {
+      return refundId;
+    }
+
+    public void setRefundId(String refundId) {
+      this.refundId = refundId;
+    }
+
+    public LocalDateTime getRefundDate() {
+      return refundDate;
+    }
+
+    public void setRefundDate(LocalDateTime refundDate) {
+      this.refundDate = refundDate;
+    }
+
+    public String getTenantId() {
+      return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+      this.tenantId = tenantId;
+    }
   }
 }

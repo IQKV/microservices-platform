@@ -24,8 +24,8 @@ public class NotificationService {
   private final MessageService messageService;
 
   public NotificationService(final EmailOperations emailService,
-                           final MessagingService messagingService,
-                           final MessageService messageService) {
+                             final MessagingService messagingService,
+                             final MessageService messageService) {
     this.emailService = emailService;
     this.messagingService = messagingService;
     this.messageService = messageService;
@@ -34,8 +34,8 @@ public class NotificationService {
   /**
    * Send merchant onboarding notification
    */
-  public void sendMerchantOnboardingNotification(String merchantEmail, String merchantName, 
-                                               String onboardingUrl, String tenantId) {
+  public void sendMerchantOnboardingNotification(String merchantEmail, String merchantName,
+                                                 String onboardingUrl, String tenantId) {
     try {
       // Send email directly
       emailService.sendMerchantOnboardingEmail(merchantEmail, merchantName, onboardingUrl);
@@ -54,8 +54,8 @@ public class NotificationService {
       messagingService.publishNotificationEvent(notificationEvent);
 
       logger.info("Merchant onboarding notification sent to: {} ({})", merchantName, merchantEmail);
-    } catch (Exception e) {
-      logger.error("Failed to send merchant onboarding notification to: {} ({})", 
+    } catch (final Exception e) {
+      logger.error("Failed to send merchant onboarding notification to: {} ({})",
           merchantName, merchantEmail, e);
       throw new NotificationException("Failed to send merchant onboarding notification", e);
     }
@@ -64,15 +64,15 @@ public class NotificationService {
   /**
    * Send payment successful notification
    */
-  public void sendPaymentSuccessfulNotification(String customerEmail, String customerName, 
-                                              String paymentId, BigDecimal amount, String currency,
-                                              String description, LocalDateTime paymentDate, 
-                                              String paymentMethod, String receiptUrl, String tenantId) {
+  public void sendPaymentSuccessfulNotification(String customerEmail, String customerName,
+                                                String paymentId, BigDecimal amount, String currency,
+                                                String description, LocalDateTime paymentDate,
+                                                String paymentMethod, String receiptUrl, String tenantId) {
     try {
-      emailService.sendPaymentSuccessfulEmail(customerEmail, customerName, paymentId, amount, 
+      emailService.sendPaymentSuccessfulEmail(customerEmail, customerName, paymentId, amount,
           currency, description, paymentDate, paymentMethod, receiptUrl);
 
-      var templateData = createPaymentSuccessfulTemplateData(paymentId, amount, currency, 
+      var templateData = createPaymentSuccessfulTemplateData(paymentId, amount, currency,
           description, paymentDate, paymentMethod, receiptUrl);
       var notificationEvent = NotificationEvent.emailNotification(
           customerEmail,
@@ -86,8 +86,8 @@ public class NotificationService {
       messagingService.publishNotificationEvent(notificationEvent);
 
       logger.info("Payment successful notification sent to: {} for payment: {}", customerEmail, paymentId);
-    } catch (Exception e) {
-      logger.error("Failed to send payment successful notification to: {} for payment: {}", 
+    } catch (final Exception e) {
+      logger.error("Failed to send payment successful notification to: {} for payment: {}",
           customerEmail, paymentId, e);
       throw new NotificationException("Failed to send payment successful notification", e);
     }
@@ -96,15 +96,15 @@ public class NotificationService {
   /**
    * Send payment failed notification
    */
-  public void sendPaymentFailedNotification(String customerEmail, String customerName, 
-                                          String paymentId, BigDecimal amount, String currency,
-                                          String description, LocalDateTime attemptDate, 
-                                          String errorMessage, String retryUrl, String tenantId) {
+  public void sendPaymentFailedNotification(String customerEmail, String customerName,
+                                            String paymentId, BigDecimal amount, String currency,
+                                            String description, LocalDateTime attemptDate,
+                                            String errorMessage, String retryUrl, String tenantId) {
     try {
-      emailService.sendPaymentFailedEmail(customerEmail, customerName, paymentId, amount, 
+      emailService.sendPaymentFailedEmail(customerEmail, customerName, paymentId, amount,
           currency, description, attemptDate, errorMessage, retryUrl);
 
-      var templateData = createPaymentFailedTemplateData(paymentId, amount, currency, 
+      var templateData = createPaymentFailedTemplateData(paymentId, amount, currency,
           description, attemptDate, errorMessage, retryUrl);
       var notificationEvent = NotificationEvent.emailNotification(
           customerEmail,
@@ -118,8 +118,8 @@ public class NotificationService {
       messagingService.publishNotificationEvent(notificationEvent);
 
       logger.info("Payment failed notification sent to: {} for payment: {}", customerEmail, paymentId);
-    } catch (Exception e) {
-      logger.error("Failed to send payment failed notification to: {} for payment: {}", 
+    } catch (final Exception e) {
+      logger.error("Failed to send payment failed notification to: {} for payment: {}",
           customerEmail, paymentId, e);
       throw new NotificationException("Failed to send payment failed notification", e);
     }
@@ -128,11 +128,11 @@ public class NotificationService {
   /**
    * Send payment refunded notification
    */
-  public void sendPaymentRefundedNotification(String customerEmail, String customerName, 
-                                            String paymentId, BigDecimal amount, String currency,
-                                            String refundId, LocalDateTime refundDate, String tenantId) {
+  public void sendPaymentRefundedNotification(String customerEmail, String customerName,
+                                              String paymentId, BigDecimal amount, String currency,
+                                              String refundId, LocalDateTime refundDate, String tenantId) {
     try {
-      emailService.sendPaymentRefundedEmail(customerEmail, customerName, paymentId, amount, 
+      emailService.sendPaymentRefundedEmail(customerEmail, customerName, paymentId, amount,
           currency, refundId, refundDate);
 
       var templateData = createPaymentRefundedTemplateData(paymentId, amount, currency, refundId, refundDate);
@@ -148,8 +148,8 @@ public class NotificationService {
       messagingService.publishNotificationEvent(notificationEvent);
 
       logger.info("Payment refunded notification sent to: {} for payment: {}", customerEmail, paymentId);
-    } catch (Exception e) {
-      logger.error("Failed to send payment refunded notification to: {} for payment: {}", 
+    } catch (final Exception e) {
+      logger.error("Failed to send payment refunded notification to: {} for payment: {}",
           customerEmail, paymentId, e);
       throw new NotificationException("Failed to send payment refunded notification", e);
     }
@@ -158,15 +158,15 @@ public class NotificationService {
   /**
    * Send invoice generated notification
    */
-  public void sendInvoiceGeneratedNotification(String customerEmail, String customerName, 
-                                             String invoiceNumber, BigDecimal amount, String currency,
-                                             LocalDateTime issueDate, LocalDateTime dueDate, 
-                                             String description, String invoiceUrl, String tenantId) {
+  public void sendInvoiceGeneratedNotification(String customerEmail, String customerName,
+                                               String invoiceNumber, BigDecimal amount, String currency,
+                                               LocalDateTime issueDate, LocalDateTime dueDate,
+                                               String description, String invoiceUrl, String tenantId) {
     try {
-      emailService.sendInvoiceGeneratedEmail(customerEmail, customerName, invoiceNumber, amount, 
+      emailService.sendInvoiceGeneratedEmail(customerEmail, customerName, invoiceNumber, amount,
           currency, issueDate, dueDate, description, invoiceUrl);
 
-      var templateData = createInvoiceGeneratedTemplateData(invoiceNumber, amount, currency, 
+      var templateData = createInvoiceGeneratedTemplateData(invoiceNumber, amount, currency,
           issueDate, dueDate, description, invoiceUrl);
       var notificationEvent = NotificationEvent.emailNotification(
           customerEmail,
@@ -180,8 +180,8 @@ public class NotificationService {
       messagingService.publishNotificationEvent(notificationEvent);
 
       logger.info("Invoice generated notification sent to: {} for invoice: {}", customerEmail, invoiceNumber);
-    } catch (Exception e) {
-      logger.error("Failed to send invoice generated notification to: {} for invoice: {}", 
+    } catch (final Exception e) {
+      logger.error("Failed to send invoice generated notification to: {} for invoice: {}",
           customerEmail, invoiceNumber, e);
       throw new NotificationException("Failed to send invoice generated notification", e);
     }
@@ -194,10 +194,10 @@ public class NotificationService {
     return data;
   }
 
-  private Map<String, Object> createPaymentSuccessfulTemplateData(String paymentId, BigDecimal amount, 
-                                                                String currency, String description, 
-                                                                LocalDateTime paymentDate, String paymentMethod, 
-                                                                String receiptUrl) {
+  private Map<String, Object> createPaymentSuccessfulTemplateData(String paymentId, BigDecimal amount,
+                                                                  String currency, String description,
+                                                                  LocalDateTime paymentDate, String paymentMethod,
+                                                                  String receiptUrl) {
     var data = new HashMap<String, Object>();
     data.put("paymentId", paymentId);
     data.put("amount", amount);
@@ -209,10 +209,10 @@ public class NotificationService {
     return data;
   }
 
-  private Map<String, Object> createPaymentFailedTemplateData(String paymentId, BigDecimal amount, 
-                                                            String currency, String description, 
-                                                            LocalDateTime attemptDate, String errorMessage, 
-                                                            String retryUrl) {
+  private Map<String, Object> createPaymentFailedTemplateData(String paymentId, BigDecimal amount,
+                                                              String currency, String description,
+                                                              LocalDateTime attemptDate, String errorMessage,
+                                                              String retryUrl) {
     var data = new HashMap<String, Object>();
     data.put("paymentId", paymentId);
     data.put("amount", amount);
@@ -224,9 +224,9 @@ public class NotificationService {
     return data;
   }
 
-  private Map<String, Object> createPaymentRefundedTemplateData(String paymentId, BigDecimal amount, 
-                                                              String currency, String refundId, 
-                                                              LocalDateTime refundDate) {
+  private Map<String, Object> createPaymentRefundedTemplateData(String paymentId, BigDecimal amount,
+                                                                String currency, String refundId,
+                                                                LocalDateTime refundDate) {
     var data = new HashMap<String, Object>();
     data.put("paymentId", paymentId);
     data.put("amount", amount);
@@ -236,10 +236,10 @@ public class NotificationService {
     return data;
   }
 
-  private Map<String, Object> createInvoiceGeneratedTemplateData(String invoiceNumber, BigDecimal amount, 
-                                                               String currency, LocalDateTime issueDate, 
-                                                               LocalDateTime dueDate, String description, 
-                                                               String invoiceUrl) {
+  private Map<String, Object> createInvoiceGeneratedTemplateData(String invoiceNumber, BigDecimal amount,
+                                                                 String currency, LocalDateTime issueDate,
+                                                                 LocalDateTime dueDate, String description,
+                                                                 String invoiceUrl) {
     var data = new HashMap<String, Object>();
     data.put("invoiceNumber", invoiceNumber);
     data.put("amount", amount);

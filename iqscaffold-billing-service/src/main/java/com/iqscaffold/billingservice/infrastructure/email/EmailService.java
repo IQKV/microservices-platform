@@ -25,10 +25,10 @@ public class EmailService {
   private final MessageSource messageSource;
 
   public EmailService(
-      JavaMailSender mailSender,
-      SpringTemplateEngine templateEngine,
-      IqScaffoldProperties iqScaffoldProperties,
-      MessageSource messageSource
+      final JavaMailSender mailSender,
+      final SpringTemplateEngine templateEngine,
+      final IqScaffoldProperties iqScaffoldProperties,
+      final MessageSource messageSource
   ) {
     this.mailSender = mailSender;
     this.templateEngine = templateEngine;
@@ -48,9 +48,9 @@ public class EmailService {
 
       Context context = new Context(locale);
       context.setVariables(variables);
-      
+
       String html = templateEngine.process("email/" + templateName, context);
-      
+
       String subject = messageSource.getMessage(subjectKey, null, subjectKey, locale);
 
       helper.setTo(to);
@@ -60,7 +60,7 @@ public class EmailService {
       helper.setFrom(iqScaffoldProperties.email().sender().fromEmail(), iqScaffoldProperties.email().sender().fromName());
 
       mailSender.send(message);
-    } catch (MessagingException | UnsupportedEncodingException e) {
+    } catch (final MessagingException | UnsupportedEncodingException e) {
       // proper logging would go here
       throw new RuntimeException("Failed to send email to " + to, e);
     }

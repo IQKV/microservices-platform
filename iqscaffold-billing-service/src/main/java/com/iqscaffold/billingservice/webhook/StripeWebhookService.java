@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of WebhookService handling incoming webhooks from Stripe to synchronize 
+ * Implementation of WebhookService handling incoming webhooks from Stripe to synchronize
  * local state with gateway state.
  * <p>
  * Key Security Features:
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
  * {@link com.iqscaffold.billingservice.admin.MerchantStripeConfig}
  * capabilities.</li>
  * </ul>
- * 
+ *
  * @author IQScaffold Team
  * @version 1.0
  * @since 1.0
@@ -49,10 +49,10 @@ public class StripeWebhookService implements WebhookService {
   private final IqScaffoldProperties iqScaffoldProperties;
 
   public StripeWebhookService(
-      PaymentService paymentService,
-      com.iqscaffold.billingservice.payout.PayoutService payoutService,
-      com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository,
-      IqScaffoldProperties iqScaffoldProperties) {
+      final PaymentService paymentService,
+      final com.iqscaffold.billingservice.payout.PayoutService payoutService,
+      final com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository,
+      final IqScaffoldProperties iqScaffoldProperties) {
     this.paymentService = paymentService;
     this.payoutService = payoutService;
     this.merchantConfigRepository = merchantConfigRepository;
@@ -82,10 +82,10 @@ public class StripeWebhookService implements WebhookService {
     try {
       event = Webhook.constructEvent(
           payload, sigHeader, iqScaffoldProperties.billing().payment().stripe().webhookSecret());
-    } catch (SignatureVerificationException e) {
+    } catch (final SignatureVerificationException e) {
       logger.error("Invalid signature for webhook", e);
       throw new IllegalArgumentException("Invalid signature");
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Webhook parsing failed", e);
       throw new IllegalArgumentException("Webhook parsing failed");
     }

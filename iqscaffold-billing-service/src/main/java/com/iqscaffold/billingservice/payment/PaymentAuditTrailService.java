@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PaymentAuditTrailService {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentAuditTrailService.class);
+  private static final Logger logger = LoggerFactory.getLogger(PaymentAuditTrailService.class);
 
-    public void logPaymentAttempt(UUID paymentId, String status) {
-        try (var ignored = MDC.putCloseable(BillingConstants.MDC.PAYMENT_ID, paymentId.toString())) {
-            String userId = SecurityContextHelper.getCurrentUserId() != null 
-                ? SecurityContextHelper.getCurrentUserId().toString() 
-                : "system";
-            String tenantId = SecurityContextHelper.getCurrentTenantId();
+  public void logPaymentAttempt(UUID paymentId, String status) {
+    try (var ignored = MDC.putCloseable(BillingConstants.MDC.PAYMENT_ID, paymentId.toString())) {
+      String userId = SecurityContextHelper.getCurrentUserId() != null
+          ? SecurityContextHelper.getCurrentUserId().toString()
+          : "system";
+      String tenantId = SecurityContextHelper.getCurrentTenantId();
 
-            logger.info("Payment Transition | PaymentID: {} | Status: {} | User: {} | Tenant: {}", 
-                paymentId, status, userId, tenantId);
-        }
+      logger.info("Payment Transition | PaymentID: {} | Status: {} | User: {} | Tenant: {}",
+          paymentId, status, userId, tenantId);
     }
+  }
 }

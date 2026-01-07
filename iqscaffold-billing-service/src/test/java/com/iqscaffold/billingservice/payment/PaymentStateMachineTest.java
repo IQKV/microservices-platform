@@ -17,116 +17,116 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PaymentStateMachineTest {
 
-    @Mock
-    private MessageService messageService;
+  @Mock
+  private MessageService messageService;
 
-    private PaymentStateMachine stateMachine;
+  private PaymentStateMachine stateMachine;
 
-    @BeforeEach
-    void setUp() {
-        stateMachine = new PaymentStateMachine(messageService);
-        lenient().when(messageService.getMessage(any(String.class), any(Object[].class)))
-            .thenReturn("Invalid transition");
-    }
+  @BeforeEach
+  void setUp() {
+    stateMachine = new PaymentStateMachine(messageService);
+    lenient().when(messageService.getMessage(any(String.class), any(Object[].class)))
+        .thenReturn("Invalid transition");
+  }
 
-    @Test
-    void shouldAllowInitialTransitionToPending() {
-        assertDoesNotThrow(() -> 
-            stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING)
-        );
-    }
+  @Test
+  void shouldAllowInitialTransitionToPending() {
+    assertDoesNotThrow(() ->
+        stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING)
+    );
+  }
 
-    @Test
-    void shouldRejectInitialTransitionToNonPending() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition(null, BillingConstants.PaymentStatus.SUCCEEDED)
-        );
-    }
+  @Test
+  void shouldRejectInitialTransitionToNonPending() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition(null, BillingConstants.PaymentStatus.SUCCEEDED)
+    );
+  }
 
-    @Test
-    void shouldAllowPendingToSucceeded() {
-        assertDoesNotThrow(() ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.PENDING,
-                BillingConstants.PaymentStatus.SUCCEEDED
-            )
-        );
-    }
+  @Test
+  void shouldAllowPendingToSucceeded() {
+    assertDoesNotThrow(() ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.PENDING,
+            BillingConstants.PaymentStatus.SUCCEEDED
+        )
+    );
+  }
 
-    @Test
-    void shouldAllowPendingToFailed() {
-        assertDoesNotThrow(() ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.PENDING,
-                BillingConstants.PaymentStatus.FAILED
-            )
-        );
-    }
+  @Test
+  void shouldAllowPendingToFailed() {
+    assertDoesNotThrow(() ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.PENDING,
+            BillingConstants.PaymentStatus.FAILED
+        )
+    );
+  }
 
-    @Test
-    void shouldRejectPendingToRefunded() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.PENDING,
-                BillingConstants.PaymentStatus.REFUNDED
-            )
-        );
-    }
+  @Test
+  void shouldRejectPendingToRefunded() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.PENDING,
+            BillingConstants.PaymentStatus.REFUNDED
+        )
+    );
+  }
 
-    @Test
-    void shouldAllowSucceededToRefunded() {
-        assertDoesNotThrow(() ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.SUCCEEDED,
-                BillingConstants.PaymentStatus.REFUNDED
-            )
-        );
-    }
+  @Test
+  void shouldAllowSucceededToRefunded() {
+    assertDoesNotThrow(() ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.SUCCEEDED,
+            BillingConstants.PaymentStatus.REFUNDED
+        )
+    );
+  }
 
-    @Test
-    void shouldAllowSucceededToPartiallyRefunded() {
-        assertDoesNotThrow(() ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.SUCCEEDED,
-                BillingConstants.PaymentStatus.PARTIALLY_REFUNDED
-            )
-        );
-    }
+  @Test
+  void shouldAllowSucceededToPartiallyRefunded() {
+    assertDoesNotThrow(() ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.SUCCEEDED,
+            BillingConstants.PaymentStatus.PARTIALLY_REFUNDED
+        )
+    );
+  }
 
-    @Test
-    void shouldRejectSucceededToFailed() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.SUCCEEDED,
-                BillingConstants.PaymentStatus.FAILED
-            )
-        );
-    }
+  @Test
+  void shouldRejectSucceededToFailed() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.SUCCEEDED,
+            BillingConstants.PaymentStatus.FAILED
+        )
+    );
+  }
 
-    @Test
-    void shouldRejectTransitionsFromFailed() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.FAILED,
-                BillingConstants.PaymentStatus.SUCCEEDED
-            )
-        );
-    }
+  @Test
+  void shouldRejectTransitionsFromFailed() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.FAILED,
+            BillingConstants.PaymentStatus.SUCCEEDED
+        )
+    );
+  }
 
-    @Test
-    void shouldRejectTransitionsFromRefunded() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition(
-                BillingConstants.PaymentStatus.REFUNDED,
-                BillingConstants.PaymentStatus.SUCCEEDED
-            )
-        );
-    }
+  @Test
+  void shouldRejectTransitionsFromRefunded() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition(
+            BillingConstants.PaymentStatus.REFUNDED,
+            BillingConstants.PaymentStatus.SUCCEEDED
+        )
+    );
+  }
 
-    @Test
-    void shouldRejectUnknownStatus() {
-        assertThrows(InvalidPaymentStateException.class, () ->
-            stateMachine.validateTransition("UNKNOWN", BillingConstants.PaymentStatus.SUCCEEDED)
-        );
-    }
+  @Test
+  void shouldRejectUnknownStatus() {
+    assertThrows(InvalidPaymentStateException.class, () ->
+        stateMachine.validateTransition("UNKNOWN", BillingConstants.PaymentStatus.SUCCEEDED)
+    );
+  }
 }

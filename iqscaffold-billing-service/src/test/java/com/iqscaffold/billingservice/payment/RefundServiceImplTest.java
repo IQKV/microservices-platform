@@ -27,161 +27,161 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class RefundServiceImplTest {
 
-    @Mock
-    private PaymentRepository paymentRepository;
+  @Mock
+  private PaymentRepository paymentRepository;
 
-    @Mock
-    private PaymentProviderAdapter paymentProvider;
+  @Mock
+  private PaymentProviderAdapter paymentProvider;
 
-    @Mock
-    private PaymentAuditTrailService auditService;
+  @Mock
+  private PaymentAuditTrailService auditService;
 
-    @Mock
-    private EmailService emailService;
+  @Mock
+  private EmailService emailService;
 
-    private RefundServiceImpl refundService;
+  private RefundServiceImpl refundService;
 
-    @BeforeEach
-    void setUp() {
-        refundService = new RefundServiceImpl(
-            paymentRepository,
-            paymentProvider,
-            auditService,
-            emailService
-        );
-    }
+  @BeforeEach
+  void setUp() {
+    refundService = new RefundServiceImpl(
+        paymentRepository,
+        paymentProvider,
+        auditService,
+        emailService
+    );
+  }
 
-    @Test
-    void processRefund_shouldRefundSuccessfulPayment() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
-        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-        doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
+  @Test
+  void processRefund_shouldRefundSuccessfulPayment() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
 
-        // When
-        refundService.processRefund(paymentId);
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+    doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
 
-        // Then
-        verify(paymentProvider).refundPayment(
-            eq("pi_123"),
-            eq(Optional.empty()),
-            eq("usd"),
-            eq(Optional.empty())
-        );
-        verify(paymentRepository).save(payment);
-        verify(auditService).logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED);
-        assertEquals(BillingConstants.PaymentStatus.REFUNDED, payment.getStatus());
-    }
+    // When
+    refundService.processRefund(paymentId);
 
-    @Test
-    void processRefund_shouldRefundPaymentWithMerchantAccount() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        payment.setMerchantAccountId("acct_123");
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
-        when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-        doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
+    // Then
+    verify(paymentProvider).refundPayment(
+        eq("pi_123"),
+        eq(Optional.empty()),
+        eq("usd"),
+        eq(Optional.empty())
+    );
+    verify(paymentRepository).save(payment);
+    verify(auditService).logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED);
+    assertEquals(BillingConstants.PaymentStatus.REFUNDED, payment.getStatus());
+  }
 
-        // When
-        refundService.processRefund(paymentId);
+  @Test
+  void processRefund_shouldRefundPaymentWithMerchantAccount() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setMerchantAccountId("acct_123");
 
-        // Then
-        verify(paymentProvider).refundPayment(
-            eq("pi_123"),
-            eq(Optional.empty()),
-            eq("usd"),
-            eq(Optional.of("acct_123"))
-        );
-    }
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+    doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
 
-    @Test
-    void processRefund_shouldThrowExceptionWhenPaymentNotFound() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
+    // When
+    refundService.processRefund(paymentId);
 
-        // When & Then
-        assertThrows(PaymentNotFoundException.class, () ->
-            refundService.processRefund(paymentId)
-        );
-        verify(paymentProvider, never()).refundPayment(any(), any(), any(), any());
-    }
+    // Then
+    verify(paymentProvider).refundPayment(
+        eq("pi_123"),
+        eq(Optional.empty()),
+        eq("usd"),
+        eq(Optional.of("acct_123"))
+    );
+  }
 
-    @Test
-    void processRefund_shouldThrowExceptionWhenPaymentNotSucceeded() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        payment.setStatus(BillingConstants.PaymentStatus.PENDING);
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+  @Test
+  void processRefund_shouldThrowExceptionWhenPaymentNotFound() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(InvalidPaymentStateException.class, () ->
-            refundService.processRefund(paymentId)
-        );
-        verify(paymentProvider, never()).refundPayment(any(), any(), any(), any());
-    }
+    // When & Then
+    assertThrows(PaymentNotFoundException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+    verify(paymentProvider, never()).refundPayment(any(), any(), any(), any());
+  }
 
-    @Test
-    void processRefund_shouldNotRefundFailedPayment() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        payment.setStatus(BillingConstants.PaymentStatus.FAILED);
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+  @Test
+  void processRefund_shouldThrowExceptionWhenPaymentNotSucceeded() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setStatus(BillingConstants.PaymentStatus.PENDING);
 
-        // When & Then
-        assertThrows(InvalidPaymentStateException.class, () ->
-            refundService.processRefund(paymentId)
-        );
-    }
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
 
-    @Test
-    void processRefund_shouldNotRefundAlreadyRefundedPayment() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        payment.setStatus(BillingConstants.PaymentStatus.REFUNDED);
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    // When & Then
+    assertThrows(InvalidPaymentStateException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+    verify(paymentProvider, never()).refundPayment(any(), any(), any(), any());
+  }
 
-        // When & Then
-        assertThrows(InvalidPaymentStateException.class, () ->
-            refundService.processRefund(paymentId)
-        );
-    }
+  @Test
+  void processRefund_shouldNotRefundFailedPayment() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setStatus(BillingConstants.PaymentStatus.FAILED);
 
-    @Test
-    void processRefund_shouldPropagateProviderException() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        Payment payment = createSuccessfulPayment(paymentId);
-        
-        when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
-        doThrow(new RuntimeException("Provider error"))
-            .when(paymentProvider).refundPayment(any(), any(), any(), any());
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
 
-        // When & Then
-        assertThrows(RuntimeException.class, () ->
-            refundService.processRefund(paymentId)
-        );
-        verify(paymentRepository, never()).save(any());
-    }
+    // When & Then
+    assertThrows(InvalidPaymentStateException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+  }
 
-    private Payment createSuccessfulPayment(UUID paymentId) {
-        Payment payment = new Payment();
-        payment.setId(paymentId);
-        payment.setAmount(new BigDecimal("100.00"));
-        payment.setCurrency("usd");
-        payment.setStatus(BillingConstants.PaymentStatus.SUCCEEDED);
-        payment.setPaymentIntentId("pi_123");
-        return payment;
-    }
+  @Test
+  void processRefund_shouldNotRefundAlreadyRefundedPayment() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setStatus(BillingConstants.PaymentStatus.REFUNDED);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+    // When & Then
+    assertThrows(InvalidPaymentStateException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+  }
+
+  @Test
+  void processRefund_shouldPropagateProviderException() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    doThrow(new RuntimeException("Provider error"))
+        .when(paymentProvider).refundPayment(any(), any(), any(), any());
+
+    // When & Then
+    assertThrows(RuntimeException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+    verify(paymentRepository, never()).save(any());
+  }
+
+  private Payment createSuccessfulPayment(UUID paymentId) {
+    Payment payment = new Payment();
+    payment.setId(paymentId);
+    payment.setAmount(new BigDecimal("100.00"));
+    payment.setCurrency("usd");
+    payment.setStatus(BillingConstants.PaymentStatus.SUCCEEDED);
+    payment.setPaymentIntentId("pi_123");
+    return payment;
+  }
 }

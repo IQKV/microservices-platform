@@ -65,7 +65,7 @@ public class MessageService {
 
     var locale = Locale.forLanguageTag(localeString);
     var i18nConfig = properties.i18n();
-    
+
     if (i18nConfig.isLocaleSupported(locale)) {
       return locale;
     }

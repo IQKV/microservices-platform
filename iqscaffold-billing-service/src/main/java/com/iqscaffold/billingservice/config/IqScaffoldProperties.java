@@ -69,10 +69,10 @@ public record IqScaffoldProperties(
    * Internationalization configuration properties with iqscaffold.i18n prefix.
    */
   public record I18n(
-      @NotNull List<@Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
-                            message = "Locale must be in format 'xx' or 'xx-XX'") String> supportedLocales,
-      @NotBlank @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
-                        message = "Default locale must be in format 'xx' or 'xx-XX'") String defaultLocale,
+      @NotNull List<@Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$",
+                             message = "Locale must be in format 'xx' or 'xx-XX'") String> supportedLocales,
+      @NotBlank @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$",
+                         message = "Default locale must be in format 'xx' or 'xx-XX'") String defaultLocale,
       @NotBlank String messageBasename,
       @NotNull Duration messageCacheDuration,
       boolean fallbackToSystemLocale,
@@ -113,8 +113,8 @@ public record IqScaffoldProperties(
      * Check if a Locale object is supported.
      */
     public boolean isLocaleSupported(Locale locale) {
-      return supportedLocales.contains(locale.toLanguageTag()) ||
-             supportedLocales.contains(locale.getLanguage());
+      return supportedLocales.contains(locale.toLanguageTag())
+             || supportedLocales.contains(locale.getLanguage());
     }
   }
 
@@ -135,16 +135,18 @@ public record IqScaffoldProperties(
       public record Jwt(
           @NotBlank String jwkSetUri,
           @NotBlank String issuer
-      ) {}
+      ) {
+      }
     }
 
     public record Integration(
         @Valid @NotNull EmailService emailService
     ) {
-        public record EmailService(
-            @NotBlank String url,
-            @NotNull Long timeoutMs
-        ) {}
+      public record EmailService(
+          @NotBlank String url,
+          @NotNull Long timeoutMs
+      ) {
+      }
     }
 
     public record Payment(
@@ -156,7 +158,8 @@ public record IqScaffoldProperties(
           @NotBlank String apiKey,
           @NotBlank String webhookSecret,
           @NotBlank String clientId // For Connect
-      ) {}
+      ) {
+      }
     }
 
     public record Stripe(

@@ -69,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       case String s -> {
         try {
           yield Long.parseLong(s);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
           yield null;
         }
       }

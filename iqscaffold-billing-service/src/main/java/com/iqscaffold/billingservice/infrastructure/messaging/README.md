@@ -28,21 +28,25 @@ The billing service mailer follows the same architectural patterns as the user s
 ## 🔧 Key Components
 
 ### 1. MessagingService
+
 - **Purpose**: Publishes billing events and notification events to RabbitMQ
 - **Events**: Payment successful/failed/refunded, merchant onboarding, invoice generated
 - **Integration**: Works with other microservices via message queues
 
 ### 2. EmailOperations & EmailService
+
 - **Purpose**: Direct email sending with Thymeleaf templates
 - **Features**: SMTP integration, template processing, error handling
 - **Templates**: Merchant onboarding, payment notifications, invoice notifications
 
 ### 3. NotificationService
+
 - **Purpose**: High-level notification orchestration
 - **Features**: Combines email sending with event publishing
 - **Benefits**: Single interface for all notification needs
 
 ### 4. PaymentNotificationService
+
 - **Purpose**: Business logic integration example
 - **Features**: Event-driven notifications, error resilience
 - **Pattern**: Shows how to integrate notifications with payment processing
@@ -181,6 +185,7 @@ The service publishes events to these exchanges and routing keys:
 ## 🔄 Event Flow
 
 ### Payment Success Flow
+
 1. Payment processed successfully
 2. `PaymentNotificationService.handlePaymentSuccessful()` called
 3. Email sent via `EmailService.sendPaymentSuccessfulEmail()`
@@ -188,6 +193,7 @@ The service publishes events to these exchanges and routing keys:
 5. Other services receive event for further processing
 
 ### Merchant Onboarding Flow
+
 1. Merchant account created
 2. `NotificationService.sendMerchantOnboardingNotification()` called
 3. Email sent with onboarding instructions
@@ -273,12 +279,14 @@ class NotificationServiceIntegrationTest {
 ## 🔒 Security Considerations
 
 ### Email Security
+
 - SMTP authentication required
 - TLS/STARTTLS encryption enforced
 - No sensitive data in email content
 - Rate limiting on email sending
 
 ### Event Security
+
 - Message encryption in transit
 - Tenant isolation in events
 - Audit logging for all notifications
@@ -287,18 +295,21 @@ class NotificationServiceIntegrationTest {
 ## 📊 Monitoring & Observability
 
 ### Metrics
+
 - Email send success/failure rates
 - Template processing times
 - Queue message processing rates
 - Error rates by notification type
 
 ### Logging
+
 - Structured JSON logging
 - Correlation ID tracking
 - Tenant context in logs
 - Performance metrics
 
 ### Health Checks
+
 - SMTP connectivity
 - RabbitMQ connectivity
 - Template engine health
@@ -307,12 +318,14 @@ class NotificationServiceIntegrationTest {
 ## 🔄 Error Handling
 
 ### Email Failures
+
 - Retry logic with exponential backoff
 - Dead letter queues for failed messages
 - Fallback notification methods
 - Graceful degradation
 
 ### Template Errors
+
 - Template validation on startup
 - Fallback to plain text emails
 - Error logging and alerting
@@ -321,6 +334,7 @@ class NotificationServiceIntegrationTest {
 ## 🚀 Deployment
 
 ### Docker Configuration
+
 ```dockerfile
 # Email service dependencies
 RUN apt-get update && apt-get install -y \
@@ -332,6 +346,7 @@ COPY src/main/resources/templates /app/templates
 ```
 
 ### Environment Variables
+
 ```bash
 # SMTP Configuration
 SMTP_USERNAME=billing@iqscaffold.com
@@ -350,12 +365,14 @@ RABBITMQ_PASSWORD=secure_password
 ## 📈 Performance Optimization
 
 ### Email Sending
+
 - Connection pooling for SMTP
 - Async email processing
 - Batch email operations
 - Template caching
 
 ### Message Processing
+
 - Parallel message processing
 - Message batching
 - Connection pooling
@@ -363,4 +380,5 @@ RABBITMQ_PASSWORD=secure_password
 
 ---
 
-This implementation provides complete code parity with the user service mailer while being specifically tailored for billing service requirements. It maintains the same architectural patterns, error handling, and integration approaches for consistency across the IQ Scaffold platform.
+This implementation provides complete code parity with the user service mailer while being specifically tailored for billing service requirements. It maintains the same architectural
+patterns, error handling, and integration approaches for consistency across the IQ Scaffold platform.

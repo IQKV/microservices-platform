@@ -27,7 +27,7 @@ public class Payout {
 
   @Column(name = "merchant_account_id")
   private String merchantAccountId;
-  
+
   // Note: Tenancy is tricky for payouts if they are platform-wide, 
   // but if they are for a connected account, we can trace back to tenant via MerchantStripeConfig
 

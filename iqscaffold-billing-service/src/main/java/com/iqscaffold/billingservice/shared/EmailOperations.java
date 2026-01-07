@@ -20,19 +20,19 @@ public interface EmailOperations {
   /**
    * Send payment successful confirmation email.
    *
-   * @param customerEmail   The customer's email address
-   * @param customerName    The customer's name
-   * @param paymentId       The payment identifier
-   * @param amount          The payment amount
-   * @param currency        The payment currency
-   * @param description     Payment description (optional)
-   * @param paymentDate     Payment processing date (optional)
-   * @param paymentMethod   Payment method used (optional)
-   * @param receiptUrl      Receipt download URL (optional)
+   * @param customerEmail The customer's email address
+   * @param customerName  The customer's name
+   * @param paymentId     The payment identifier
+   * @param amount        The payment amount
+   * @param currency      The payment currency
+   * @param description   Payment description (optional)
+   * @param paymentDate   Payment processing date (optional)
+   * @param paymentMethod Payment method used (optional)
+   * @param receiptUrl    Receipt download URL (optional)
    */
   void sendPaymentSuccessfulEmail(String customerEmail, String customerName, String paymentId,
-                                 BigDecimal amount, String currency, String description,
-                                 LocalDateTime paymentDate, String paymentMethod, String receiptUrl);
+                                  BigDecimal amount, String currency, String description,
+                                  LocalDateTime paymentDate, String paymentMethod, String receiptUrl);
 
   /**
    * Send payment failed notification email.
@@ -48,8 +48,8 @@ public interface EmailOperations {
    * @param retryUrl      URL to retry payment (optional)
    */
   void sendPaymentFailedEmail(String customerEmail, String customerName, String paymentId,
-                             BigDecimal amount, String currency, String description,
-                             LocalDateTime attemptDate, String errorMessage, String retryUrl);
+                              BigDecimal amount, String currency, String description,
+                              LocalDateTime attemptDate, String errorMessage, String retryUrl);
 
   /**
    * Send payment refunded notification email.
@@ -63,22 +63,22 @@ public interface EmailOperations {
    * @param refundDate    Date when refund was processed (optional)
    */
   void sendPaymentRefundedEmail(String customerEmail, String customerName, String paymentId,
-                               BigDecimal amount, String currency, String refundId, LocalDateTime refundDate);
+                                BigDecimal amount, String currency, String refundId, LocalDateTime refundDate);
 
   /**
    * Send invoice generated notification email.
    *
-   * @param customerEmail   The customer's email address
-   * @param customerName    The customer's name (optional)
-   * @param invoiceNumber   The invoice identifier
-   * @param amount          The invoice amount
-   * @param currency        The invoice currency
-   * @param issueDate       Invoice issue date (optional)
-   * @param dueDate         Payment due date (optional)
-   * @param description     Invoice description (optional)
-   * @param invoiceUrl      Download invoice URL (optional)
+   * @param customerEmail The customer's email address
+   * @param customerName  The customer's name (optional)
+   * @param invoiceNumber The invoice identifier
+   * @param amount        The invoice amount
+   * @param currency      The invoice currency
+   * @param issueDate     Invoice issue date (optional)
+   * @param dueDate       Payment due date (optional)
+   * @param description   Invoice description (optional)
+   * @param invoiceUrl    Download invoice URL (optional)
    */
   void sendInvoiceGeneratedEmail(String customerEmail, String customerName, String invoiceNumber,
-                                BigDecimal amount, String currency, LocalDateTime issueDate,
-                                LocalDateTime dueDate, String description, String invoiceUrl);
+                                 BigDecimal amount, String currency, LocalDateTime issueDate,
+                                 LocalDateTime dueDate, String description, String invoiceUrl);
 }

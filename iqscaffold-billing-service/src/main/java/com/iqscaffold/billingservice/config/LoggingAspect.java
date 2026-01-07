@@ -28,7 +28,9 @@ public class LoggingAspect {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface LogPerformance {
     String operation() default "";
+
     boolean logArgs() default false;
+
     boolean logResult() default false;
   }
 
@@ -39,6 +41,7 @@ public class LoggingAspect {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface LogBusinessEvent {
     String eventType() default "";
+
     String description() default "";
   }
 
@@ -47,38 +50,38 @@ public class LoggingAspect {
    */
   @Around("@annotation(logPerformance)")
   public Object logPerformance(ProceedingJoinPoint joinPoint, LogPerformance logPerformance) throws Throwable {
-    String operation = logPerformance.operation().isEmpty() 
-        ? joinPoint.getSignature().toShortString() 
+    String operation = logPerformance.operation().isEmpty()
+        ? joinPoint.getSignature().toShortString()
         : logPerformance.operation();
-    
+
     long startTime = System.currentTimeMillis();
-    
+
     try {
       // Add operation context to MDC
       MDC.put("operation", operation);
-      
+
       if (logPerformance.logArgs()) {
         log.debug("Starting operation: {} with args: {}", operation, joinPoint.getArgs());
       } else {
         log.debug("Starting operation: {}", operation);
       }
-      
+
       Object result = joinPoint.proceed();
-      
+
       long duration = System.currentTimeMillis() - startTime;
-      
+
       // Log performance metric
       LoggingConfiguration.StructuredLogger.logPerformanceMetric(operation, duration, null);
-      
+
       if (logPerformance.logResult()) {
         log.debug("Completed operation: {} in {}ms with result: {}", operation, duration, result);
       } else {
         log.debug("Completed operation: {} in {}ms", operation, duration);
       }
-      
+
       return result;
-      
-    } catch (Exception e) {
+
+    } catch (final Exception e) {
       long duration = System.currentTimeMillis() - startTime;
       log.error("Failed operation: {} after {}ms - Error: {}", operation, duration, e.getMessage(), e);
       throw e;
@@ -92,28 +95,28 @@ public class LoggingAspect {
    */
   @Around("@annotation(logBusinessEvent)")
   public Object logBusinessEvent(ProceedingJoinPoint joinPoint, LogBusinessEvent logBusinessEvent) throws Throwable {
-    String eventType = logBusinessEvent.eventType().isEmpty() 
-        ? joinPoint.getSignature().getName() 
+    String eventType = logBusinessEvent.eventType().isEmpty()
+        ? joinPoint.getSignature().getName()
         : logBusinessEvent.eventType();
-    
-    String description = logBusinessEvent.description().isEmpty() 
-        ? joinPoint.getSignature().toShortString() 
+
+    String description = logBusinessEvent.description().isEmpty()
+        ? joinPoint.getSignature().toShortString()
         : logBusinessEvent.description();
-    
+
     try {
       // Add business event context to MDC
       MDC.put("businessEventType", eventType);
       MDC.put("businessEventDescription", description);
-      
+
       log.info("Business event started: {} - {}", eventType, description);
-      
+
       Object result = joinPoint.proceed();
-      
+
       log.info("Business event completed: {} - {}", eventType, description);
-      
+
       return result;
-      
-    } catch (Exception e) {
+
+    } catch (final Exception e) {
       log.error("Business event failed: {} - {} - Error: {}", eventType, description, e.getMessage(), e);
       throw e;
     } finally {
@@ -130,28 +133,28 @@ public class LoggingAspect {
     String className = joinPoint.getTarget().getClass().getSimpleName();
     String methodName = joinPoint.getSignature().getName();
     String operation = className + "." + methodName;
-    
+
     long startTime = System.currentTimeMillis();
-    
+
     try {
       MDC.put("serviceClass", className);
       MDC.put("serviceMethod", methodName);
-      
+
       log.debug("Service call: {}", operation);
-      
+
       Object result = joinPoint.proceed();
-      
+
       long duration = System.currentTimeMillis() - startTime;
-      
+
       if (duration > 1000) { // Log slow operations
         log.warn("Slow service operation: {} took {}ms", operation, duration);
       } else {
         log.debug("Service call completed: {} in {}ms", operation, duration);
       }
-      
+
       return result;
-      
-    } catch (Exception e) {
+
+    } catch (final Exception e) {
       long duration = System.currentTimeMillis() - startTime;
       log.error("Service call failed: {} after {}ms - Error: {}", operation, duration, e.getMessage(), e);
       throw e;
@@ -169,26 +172,26 @@ public class LoggingAspect {
     String className = joinPoint.getTarget().getClass().getSimpleName();
     String methodName = joinPoint.getSignature().getName();
     String operation = className + "." + methodName;
-    
+
     long startTime = System.currentTimeMillis();
-    
+
     try {
       MDC.put("repositoryClass", className);
       MDC.put("repositoryMethod", methodName);
-      
+
       Object result = joinPoint.proceed();
-      
+
       long duration = System.currentTimeMillis() - startTime;
-      
+
       if (duration > 500) { // Log slow database operations
         log.warn("Slow database operation: {} took {}ms", operation, duration);
       } else {
         log.trace("Database operation: {} completed in {}ms", operation, duration);
       }
-      
+
       return result;
-      
-    } catch (Exception e) {
+
+    } catch (final Exception e) {
       long duration = System.currentTimeMillis() - startTime;
       log.error("Database operation failed: {} after {}ms - Error: {}", operation, duration, e.getMessage(), e);
       throw e;

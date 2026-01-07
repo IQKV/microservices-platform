@@ -18,7 +18,7 @@ public class StripeWebhookRestResource {
 
   private final WebhookService webhookService;
 
-  public StripeWebhookRestResource(WebhookService webhookService) {
+  public StripeWebhookRestResource(final WebhookService webhookService) {
     this.webhookService = webhookService;
   }
 

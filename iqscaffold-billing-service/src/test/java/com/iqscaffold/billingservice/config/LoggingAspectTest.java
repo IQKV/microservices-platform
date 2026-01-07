@@ -20,280 +20,280 @@ import org.slf4j.MDC;
 @ExtendWith(MockitoExtension.class)
 class LoggingAspectTest {
 
-    @Mock
-    private ProceedingJoinPoint joinPoint;
+  @Mock
+  private ProceedingJoinPoint joinPoint;
 
-    @Mock
-    private Signature signature;
+  @Mock
+  private Signature signature;
 
-    private LoggingAspect loggingAspect;
+  private LoggingAspect loggingAspect;
 
-    @BeforeEach
-    void setUp() {
-        loggingAspect = new LoggingAspect();
-        MDC.clear();
-    }
+  @BeforeEach
+  void setUp() {
+    loggingAspect = new LoggingAspect();
+    MDC.clear();
+  }
 
-    @AfterEach
-    void tearDown() {
-        MDC.clear();
-    }
+  @AfterEach
+  void tearDown() {
+    MDC.clear();
+  }
 
-    @Test
-    void logPerformance_shouldLogOperationWithDefaultName() throws Throwable {
-        // Given
-        LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        when(annotation.operation()).thenReturn("");
-        when(annotation.logArgs()).thenReturn(false);
-        when(annotation.logResult()).thenReturn(false);
-        
-        when(signature.toShortString()).thenReturn("TestClass.testMethod()");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        when(joinPoint.proceed()).thenReturn("result");
+  @Test
+  void logPerformance_shouldLogOperationWithDefaultName() throws Throwable {
+    // Given
+    LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
+    when(annotation.operation()).thenReturn("");
+    when(annotation.logArgs()).thenReturn(false);
+    when(annotation.logResult()).thenReturn(false);
 
-        // When
-        Object result = loggingAspect.logPerformance(joinPoint, annotation);
+    when(signature.toShortString()).thenReturn("TestClass.testMethod()");
+    when(joinPoint.getSignature()).thenReturn(signature);
+    when(joinPoint.proceed()).thenReturn("result");
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+    // When
+    Object result = loggingAspect.logPerformance(joinPoint, annotation);
 
-    @Test
-    void logPerformance_shouldLogOperationWithCustomName() throws Throwable {
-        // Given
-        LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        when(annotation.operation()).thenReturn("CustomOperation");
-        when(annotation.logArgs()).thenReturn(false);
-        when(annotation.logResult()).thenReturn(false);
-        
-        when(joinPoint.proceed()).thenReturn("result");
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
 
-        // When
-        Object result = loggingAspect.logPerformance(joinPoint, annotation);
+  @Test
+  void logPerformance_shouldLogOperationWithCustomName() throws Throwable {
+    // Given
+    LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
+    when(annotation.operation()).thenReturn("CustomOperation");
+    when(annotation.logArgs()).thenReturn(false);
+    when(annotation.logResult()).thenReturn(false);
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+    when(joinPoint.proceed()).thenReturn("result");
 
-    @Test
-    void logPerformance_shouldLogArgumentsWhenEnabled() throws Throwable {
-        // Given
-        LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        when(annotation.operation()).thenReturn("TestOp");
-        when(annotation.logArgs()).thenReturn(true);
-        when(annotation.logResult()).thenReturn(false);
-        
-        Object[] args = new Object[]{"arg1", "arg2"};
-        when(joinPoint.getArgs()).thenReturn(args);
-        when(joinPoint.proceed()).thenReturn("result");
+    // When
+    Object result = loggingAspect.logPerformance(joinPoint, annotation);
 
-        // When
-        Object result = loggingAspect.logPerformance(joinPoint, annotation);
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).getArgs();
-    }
+  @Test
+  void logPerformance_shouldLogArgumentsWhenEnabled() throws Throwable {
+    // Given
+    LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
+    when(annotation.operation()).thenReturn("TestOp");
+    when(annotation.logArgs()).thenReturn(true);
+    when(annotation.logResult()).thenReturn(false);
 
-    @Test
-    void logPerformance_shouldLogResultWhenEnabled() throws Throwable {
-        // Given
-        LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        when(annotation.operation()).thenReturn("TestOp");
-        when(annotation.logArgs()).thenReturn(false);
-        when(annotation.logResult()).thenReturn(true);
-        
-        when(joinPoint.proceed()).thenReturn("result");
+    Object[] args = new Object[] {"arg1", "arg2"};
+    when(joinPoint.getArgs()).thenReturn(args);
+    when(joinPoint.proceed()).thenReturn("result");
 
-        // When
-        Object result = loggingAspect.logPerformance(joinPoint, annotation);
+    // When
+    Object result = loggingAspect.logPerformance(joinPoint, annotation);
 
-        // Then
-        assertEquals("result", result);
-    }
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).getArgs();
+  }
 
-    @Test
-    void logPerformance_shouldHandleExceptionAndRethrow() throws Throwable {
-        // Given
-        LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        lenient().when(annotation.operation()).thenReturn("FailingOp");
-        lenient().when(annotation.logArgs()).thenReturn(false);
-        lenient().when(annotation.logResult()).thenReturn(false);
-        
-        lenient().when(signature.toShortString()).thenReturn("TestClass.failingMethod()");
-        lenient().when(joinPoint.getSignature()).thenReturn(signature);
-        
-        RuntimeException exception = new RuntimeException("Test error");
-        when(joinPoint.proceed()).thenThrow(exception);
+  @Test
+  void logPerformance_shouldLogResultWhenEnabled() throws Throwable {
+    // Given
+    LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
+    when(annotation.operation()).thenReturn("TestOp");
+    when(annotation.logArgs()).thenReturn(false);
+    when(annotation.logResult()).thenReturn(true);
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> 
-            loggingAspect.logPerformance(joinPoint, annotation)
-        );
-    }
+    when(joinPoint.proceed()).thenReturn("result");
 
-    @Test
-    void logBusinessEvent_shouldLogEventWithDefaultValues() throws Throwable {
-        // Given
-        LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
-        when(annotation.eventType()).thenReturn("");
-        when(annotation.description()).thenReturn("");
-        
-        when(signature.getName()).thenReturn("testMethod");
-        when(signature.toShortString()).thenReturn("TestClass.testMethod()");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        when(joinPoint.proceed()).thenReturn("result");
+    // When
+    Object result = loggingAspect.logPerformance(joinPoint, annotation);
 
-        // When
-        Object result = loggingAspect.logBusinessEvent(joinPoint, annotation);
+    // Then
+    assertEquals("result", result);
+  }
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+  @Test
+  void logPerformance_shouldHandleExceptionAndRethrow() throws Throwable {
+    // Given
+    LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
+    lenient().when(annotation.operation()).thenReturn("FailingOp");
+    lenient().when(annotation.logArgs()).thenReturn(false);
+    lenient().when(annotation.logResult()).thenReturn(false);
 
-    @Test
-    void logBusinessEvent_shouldLogEventWithCustomValues() throws Throwable {
-        // Given
-        LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
-        when(annotation.eventType()).thenReturn("PAYMENT_CREATED");
-        when(annotation.description()).thenReturn("Payment was created successfully");
-        
-        when(joinPoint.proceed()).thenReturn("result");
+    lenient().when(signature.toShortString()).thenReturn("TestClass.failingMethod()");
+    lenient().when(joinPoint.getSignature()).thenReturn(signature);
 
-        // When
-        Object result = loggingAspect.logBusinessEvent(joinPoint, annotation);
+    RuntimeException exception = new RuntimeException("Test error");
+    when(joinPoint.proceed()).thenThrow(exception);
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+    // When & Then
+    assertThrows(RuntimeException.class, () ->
+        loggingAspect.logPerformance(joinPoint, annotation)
+    );
+  }
 
-    @Test
-    void logBusinessEvent_shouldHandleExceptionAndRethrow() throws Throwable {
-        // Given
-        LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
-        when(annotation.eventType()).thenReturn("FAILING_EVENT");
-        when(annotation.description()).thenReturn("This will fail");
-        
-        RuntimeException exception = new RuntimeException("Business error");
-        when(joinPoint.proceed()).thenThrow(exception);
+  @Test
+  void logBusinessEvent_shouldLogEventWithDefaultValues() throws Throwable {
+    // Given
+    LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
+    when(annotation.eventType()).thenReturn("");
+    when(annotation.description()).thenReturn("");
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> 
-            loggingAspect.logBusinessEvent(joinPoint, annotation)
-        );
-    }
+    when(signature.getName()).thenReturn("testMethod");
+    when(signature.toShortString()).thenReturn("TestClass.testMethod()");
+    when(joinPoint.getSignature()).thenReturn(signature);
+    when(joinPoint.proceed()).thenReturn("result");
 
-    @Test
-    void logServiceMethods_shouldLogServiceCall() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("testMethod");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        when(joinPoint.proceed()).thenReturn("result");
+    // When
+    Object result = loggingAspect.logBusinessEvent(joinPoint, annotation);
 
-        // When
-        Object result = loggingAspect.logServiceMethods(joinPoint);
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+  @Test
+  void logBusinessEvent_shouldLogEventWithCustomValues() throws Throwable {
+    // Given
+    LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
+    when(annotation.eventType()).thenReturn("PAYMENT_CREATED");
+    when(annotation.description()).thenReturn("Payment was created successfully");
 
-    @Test
-    void logServiceMethods_shouldLogSlowOperations() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("slowMethod");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        
-        // Simulate slow operation
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            Thread.sleep(1100);
-            return "result";
-        });
+    when(joinPoint.proceed()).thenReturn("result");
 
-        // When
-        Object result = loggingAspect.logServiceMethods(joinPoint);
+    // When
+    Object result = loggingAspect.logBusinessEvent(joinPoint, annotation);
 
-        // Then
-        assertEquals("result", result);
-    }
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
 
-    @Test
-    void logServiceMethods_shouldHandleExceptionAndRethrow() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("failingMethod");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        
-        RuntimeException exception = new RuntimeException("Service error");
-        when(joinPoint.proceed()).thenThrow(exception);
+  @Test
+  void logBusinessEvent_shouldHandleExceptionAndRethrow() throws Throwable {
+    // Given
+    LoggingAspect.LogBusinessEvent annotation = mock(LoggingAspect.LogBusinessEvent.class);
+    when(annotation.eventType()).thenReturn("FAILING_EVENT");
+    when(annotation.description()).thenReturn("This will fail");
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> 
-            loggingAspect.logServiceMethods(joinPoint)
-        );
-    }
+    RuntimeException exception = new RuntimeException("Business error");
+    when(joinPoint.proceed()).thenThrow(exception);
 
-    @Test
-    void logRepositoryMethods_shouldLogDatabaseOperation() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("findById");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        when(joinPoint.proceed()).thenReturn("result");
+    // When & Then
+    assertThrows(RuntimeException.class, () ->
+        loggingAspect.logBusinessEvent(joinPoint, annotation)
+    );
+  }
 
-        // When
-        Object result = loggingAspect.logRepositoryMethods(joinPoint);
+  @Test
+  void logServiceMethods_shouldLogServiceCall() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("testMethod");
+    when(joinPoint.getSignature()).thenReturn(signature);
+    when(joinPoint.proceed()).thenReturn("result");
 
-        // Then
-        assertEquals("result", result);
-        verify(joinPoint).proceed();
-    }
+    // When
+    Object result = loggingAspect.logServiceMethods(joinPoint);
 
-    @Test
-    void logRepositoryMethods_shouldLogSlowDatabaseOperations() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("slowQuery");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        
-        // Simulate slow database operation
-        when(joinPoint.proceed()).thenAnswer(invocation -> {
-            Thread.sleep(600);
-            return "result";
-        });
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
 
-        // When
-        Object result = loggingAspect.logRepositoryMethods(joinPoint);
+  @Test
+  void logServiceMethods_shouldLogSlowOperations() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("slowMethod");
+    when(joinPoint.getSignature()).thenReturn(signature);
 
-        // Then
-        assertEquals("result", result);
-    }
+    // Simulate slow operation
+    when(joinPoint.proceed()).thenAnswer(invocation -> {
+      Thread.sleep(1100);
+      return "result";
+    });
 
-    @Test
-    void logRepositoryMethods_shouldHandleExceptionAndRethrow() throws Throwable {
-        // Given
-        Object target = new Object();
-        when(joinPoint.getTarget()).thenReturn(target);
-        when(signature.getName()).thenReturn("failingQuery");
-        when(joinPoint.getSignature()).thenReturn(signature);
-        
-        RuntimeException exception = new RuntimeException("Database error");
-        when(joinPoint.proceed()).thenThrow(exception);
+    // When
+    Object result = loggingAspect.logServiceMethods(joinPoint);
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> 
-            loggingAspect.logRepositoryMethods(joinPoint)
-        );
-    }
+    // Then
+    assertEquals("result", result);
+  }
+
+  @Test
+  void logServiceMethods_shouldHandleExceptionAndRethrow() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("failingMethod");
+    when(joinPoint.getSignature()).thenReturn(signature);
+
+    RuntimeException exception = new RuntimeException("Service error");
+    when(joinPoint.proceed()).thenThrow(exception);
+
+    // When & Then
+    assertThrows(RuntimeException.class, () ->
+        loggingAspect.logServiceMethods(joinPoint)
+    );
+  }
+
+  @Test
+  void logRepositoryMethods_shouldLogDatabaseOperation() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("findById");
+    when(joinPoint.getSignature()).thenReturn(signature);
+    when(joinPoint.proceed()).thenReturn("result");
+
+    // When
+    Object result = loggingAspect.logRepositoryMethods(joinPoint);
+
+    // Then
+    assertEquals("result", result);
+    verify(joinPoint).proceed();
+  }
+
+  @Test
+  void logRepositoryMethods_shouldLogSlowDatabaseOperations() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("slowQuery");
+    when(joinPoint.getSignature()).thenReturn(signature);
+
+    // Simulate slow database operation
+    when(joinPoint.proceed()).thenAnswer(invocation -> {
+      Thread.sleep(600);
+      return "result";
+    });
+
+    // When
+    Object result = loggingAspect.logRepositoryMethods(joinPoint);
+
+    // Then
+    assertEquals("result", result);
+  }
+
+  @Test
+  void logRepositoryMethods_shouldHandleExceptionAndRethrow() throws Throwable {
+    // Given
+    Object target = new Object();
+    when(joinPoint.getTarget()).thenReturn(target);
+    when(signature.getName()).thenReturn("failingQuery");
+    when(joinPoint.getSignature()).thenReturn(signature);
+
+    RuntimeException exception = new RuntimeException("Database error");
+    when(joinPoint.proceed()).thenThrow(exception);
+
+    // When & Then
+    assertThrows(RuntimeException.class, () ->
+        loggingAspect.logRepositoryMethods(joinPoint)
+    );
+  }
 }

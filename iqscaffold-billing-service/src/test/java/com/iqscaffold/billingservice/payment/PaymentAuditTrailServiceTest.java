@@ -13,68 +13,68 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PaymentAuditTrailServiceTest {
 
-    private PaymentAuditTrailService auditService;
+  private PaymentAuditTrailService auditService;
 
-    @BeforeEach
-    void setUp() {
-        auditService = new PaymentAuditTrailService();
-    }
+  @BeforeEach
+  void setUp() {
+    auditService = new PaymentAuditTrailService();
+  }
 
-    @Test
-    void logPaymentAttempt_shouldLogWithPaymentId() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
-        String status = BillingConstants.PaymentStatus.SUCCEEDED;
+  @Test
+  void logPaymentAttempt_shouldLogWithPaymentId() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    String status = BillingConstants.PaymentStatus.SUCCEEDED;
 
-        // When & Then - should not throw exception
-        assertDoesNotThrow(() -> 
-            auditService.logPaymentAttempt(paymentId, status)
-        );
-    }
+    // When & Then - should not throw exception
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, status)
+    );
+  }
 
-    @Test
-    void logPaymentAttempt_shouldLogPendingStatus() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
+  @Test
+  void logPaymentAttempt_shouldLogPendingStatus() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
 
-        // When & Then
-        assertDoesNotThrow(() -> 
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PENDING)
-        );
-    }
+    // When & Then
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PENDING)
+    );
+  }
 
-    @Test
-    void logPaymentAttempt_shouldLogFailedStatus() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
+  @Test
+  void logPaymentAttempt_shouldLogFailedStatus() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
 
-        // When & Then
-        assertDoesNotThrow(() -> 
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.FAILED)
-        );
-    }
+    // When & Then
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.FAILED)
+    );
+  }
 
-    @Test
-    void logPaymentAttempt_shouldLogRefundedStatus() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
+  @Test
+  void logPaymentAttempt_shouldLogRefundedStatus() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
 
-        // When & Then
-        assertDoesNotThrow(() -> 
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED)
-        );
-    }
+    // When & Then
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED)
+    );
+  }
 
-    @Test
-    void logPaymentAttempt_shouldHandleMultipleConsecutiveCalls() {
-        // Given
-        UUID paymentId = UUID.randomUUID();
+  @Test
+  void logPaymentAttempt_shouldHandleMultipleConsecutiveCalls() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
 
-        // When & Then
-        assertDoesNotThrow(() -> {
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PENDING);
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PROCESSING);
-            auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.SUCCEEDED);
-        });
-    }
+    // When & Then
+    assertDoesNotThrow(() -> {
+      auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PENDING);
+      auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PROCESSING);
+      auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.SUCCEEDED);
+    });
+  }
 }

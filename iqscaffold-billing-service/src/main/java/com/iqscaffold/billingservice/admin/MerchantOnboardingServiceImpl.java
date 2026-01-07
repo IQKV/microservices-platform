@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of MerchantOnboardingService managing merchant Stripe Connect onboarding flow.
- * 
+ *
  * @author IQScaffold Team
  * @version 1.0
  * @since 1.0
@@ -25,9 +25,9 @@ public class MerchantOnboardingServiceImpl implements MerchantOnboardingService 
   private final EmailService emailService;
 
   public MerchantOnboardingServiceImpl(
-      MerchantStripeConfigRepository repository,
-      PaymentProviderAdapter paymentProvider,
-      EmailService emailService) {
+      final MerchantStripeConfigRepository repository,
+      final PaymentProviderAdapter paymentProvider,
+      final EmailService emailService) {
     this.repository = repository;
     this.paymentProvider = paymentProvider;
     this.emailService = emailService;
