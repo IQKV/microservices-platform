@@ -47,7 +47,8 @@ public class BillingServiceLocaleResolver extends AcceptHeaderLocaleResolver {
     }
 
     // Priority 3: Fall back to default locale
-    return getDefaultLocale() != null ? getDefaultLocale() : Locale.getDefault();
+    Locale defaultLocale = getDefaultLocale();
+    return defaultLocale != null ? defaultLocale : Locale.getDefault();
   }
 
   private boolean isValidLocale(Locale locale, String originalTag) {

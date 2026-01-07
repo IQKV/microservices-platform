@@ -51,6 +51,9 @@ class SchemaPerTenantConnectionProviderTest {
     // Then
     assertNotNull(result);
     verify(dataSource).getConnection();
+    
+    // Clean up
+    result.close();
   }
 
   @Test
@@ -101,6 +104,7 @@ class SchemaPerTenantConnectionProviderTest {
 
     // Then
     verify(statement).execute("CREATE SCHEMA IF NOT EXISTS " + tenantId);
+    verify(statement).close();
     verify(connection).setSchema(tenantId);
     assertNotNull(result);
   }

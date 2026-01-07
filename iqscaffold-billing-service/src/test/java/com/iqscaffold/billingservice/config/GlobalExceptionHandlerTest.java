@@ -62,6 +62,7 @@ class GlobalExceptionHandlerTest {
     ProblemDetail result = exceptionHandler.handleUnhandled(exception);
 
     // Then
+    assertNotNull(result);
     assertNotNull(result.getProperties());
     Object timestamp = result.getProperties().get("timestamp");
     assertNotNull(timestamp);
@@ -142,6 +143,7 @@ class GlobalExceptionHandlerTest {
     ProblemDetail result = exceptionHandler.handlePayoutNotFound(exception);
 
     // Then
+    assertNotNull(result);
     assertNotNull(result.getProperties());
     Object timestamp = result.getProperties().get("timestamp");
     assertNotNull(timestamp);
