@@ -46,15 +46,10 @@ class SchemaPerTenantConnectionProviderTest {
   @Test
   void getAnyConnection_shouldReturnConnection() throws SQLException {
     // When
-    Connection result = provider.getAnyConnection();
-
-    try {
+    try (Connection result = provider.getAnyConnection()) {
       // Then
       assertNotNull(result);
       verify(dataSource).getConnection();
-    } finally {
-      // Clean up
-      result.close();
     }
   }
 
