@@ -175,6 +175,21 @@ class RefundServiceImplTest {
     verify(paymentRepository, never()).save(any());
   }
 
+  @Test
+  void processRefund_shouldHandlePartiallyRefundedPayment() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+    payment.setStatus(BillingConstants.PaymentStatus.PARTIALLY_REFUNDED);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+
+    // When & Then
+    assertThrows(InvalidPaymentStateException.class, () ->
+        refundService.processRefund(paymentId)
+    );
+  }
+
   private Payment createSuccessfulPayment(UUID paymentId) {
     Payment payment = new Payment();
     payment.setId(paymentId);

@@ -214,4 +214,24 @@ class EmailServiceTest {
     verify(templateEngine).process(eq("email/complex-template"), any());
     verify(mailSender).send(mimeMessage);
   }
+
+  @Test
+  void sendEmail_shouldHandleNullLocale() {
+    // Given
+    String to = "test@example.com";
+    String subjectKey = "email.test.subject";
+    String templateName = "test";
+    Map<String, Object> variables = new HashMap<>();
+
+    when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+    when(templateEngine.process(anyString(), any())).thenReturn("<html>Test</html>");
+    when(messageSource.getMessage(eq(subjectKey), isNull(), eq(subjectKey), any()))
+        .thenReturn("Subject");
+
+    // When
+    emailService.sendEmail(to, subjectKey, templateName, variables, null);
+
+    // Then
+    verify(mailSender).send(mimeMessage);
+  }
 }

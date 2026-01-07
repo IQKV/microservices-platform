@@ -258,4 +258,93 @@ class PaymentNotificationServiceTest {
     // When & Then - should not throw
     assertDoesNotThrow(() -> paymentNotificationService.handlePaymentSuccessful(event));
   }
+
+  @Test
+  void paymentSuccessfulEvent_shouldSetAllFields() {
+    // Given
+    PaymentNotificationService.PaymentSuccessfulEvent event =
+        new PaymentNotificationService.PaymentSuccessfulEvent();
+
+    // When
+    event.setPaymentId("pay_123");
+    event.setCustomerEmail("test@example.com");
+    event.setCustomerName("Test User");
+    event.setAmount(new BigDecimal("100.00"));
+    event.setCurrency("usd");
+    event.setDescription("Test");
+    event.setPaymentDate(LocalDateTime.now());
+    event.setPaymentMethod("card");
+    event.setReceiptUrl("https://receipt.url");
+    event.setTenantId("tenant_123");
+
+    // Then
+    assert event.getPaymentId().equals("pay_123");
+    assert event.getCustomerEmail().equals("test@example.com");
+    assert event.getCustomerName().equals("Test User");
+    assert event.getAmount().equals(new BigDecimal("100.00"));
+    assert event.getCurrency().equals("usd");
+    assert event.getDescription().equals("Test");
+    assert event.getPaymentDate() != null;
+    assert event.getPaymentMethod().equals("card");
+    assert event.getReceiptUrl().equals("https://receipt.url");
+    assert event.getTenantId().equals("tenant_123");
+  }
+
+  @Test
+  void paymentFailedEvent_shouldSetAllFields() {
+    // Given
+    PaymentNotificationService.PaymentFailedEvent event =
+        new PaymentNotificationService.PaymentFailedEvent();
+
+    // When
+    event.setPaymentId("pay_456");
+    event.setCustomerEmail("test@example.com");
+    event.setCustomerName("Test User");
+    event.setAmount(new BigDecimal("50.00"));
+    event.setCurrency("eur");
+    event.setDescription("Failed");
+    event.setAttemptDate(LocalDateTime.now());
+    event.setErrorMessage("Card declined");
+    event.setRetryUrl("https://retry.url");
+    event.setTenantId("tenant_456");
+
+    // Then
+    assert event.getPaymentId().equals("pay_456");
+    assert event.getCustomerEmail().equals("test@example.com");
+    assert event.getCustomerName().equals("Test User");
+    assert event.getAmount().equals(new BigDecimal("50.00"));
+    assert event.getCurrency().equals("eur");
+    assert event.getDescription().equals("Failed");
+    assert event.getAttemptDate() != null;
+    assert event.getErrorMessage().equals("Card declined");
+    assert event.getRetryUrl().equals("https://retry.url");
+    assert event.getTenantId().equals("tenant_456");
+  }
+
+  @Test
+  void paymentRefundedEvent_shouldSetAllFields() {
+    // Given
+    PaymentNotificationService.PaymentRefundedEvent event =
+        new PaymentNotificationService.PaymentRefundedEvent();
+
+    // When
+    event.setPaymentId("pay_789");
+    event.setCustomerEmail("test@example.com");
+    event.setCustomerName("Test User");
+    event.setAmount(new BigDecimal("75.00"));
+    event.setCurrency("gbp");
+    event.setRefundId("ref_123");
+    event.setRefundDate(LocalDateTime.now());
+    event.setTenantId("tenant_789");
+
+    // Then
+    assert event.getPaymentId().equals("pay_789");
+    assert event.getCustomerEmail().equals("test@example.com");
+    assert event.getCustomerName().equals("Test User");
+    assert event.getAmount().equals(new BigDecimal("75.00"));
+    assert event.getCurrency().equals("gbp");
+    assert event.getRefundId().equals("ref_123");
+    assert event.getRefundDate() != null;
+    assert event.getTenantId().equals("tenant_789");
+  }
 }
