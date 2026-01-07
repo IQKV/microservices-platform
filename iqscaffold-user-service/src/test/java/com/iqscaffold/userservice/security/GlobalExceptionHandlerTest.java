@@ -12,7 +12,6 @@ import java.util.Set;
 
 import com.iqscaffold.userservice.authentication.AccountLockedException;
 import com.iqscaffold.userservice.authentication.AuthenticationException;
-import com.iqscaffold.userservice.authentication.AuthenticationService;
 import com.iqscaffold.userservice.authentication.EmailVerificationRequiredException;
 import com.iqscaffold.userservice.registration.UserRegistrationService;
 import com.iqscaffold.userservice.shared.exception.EmailVerificationException;

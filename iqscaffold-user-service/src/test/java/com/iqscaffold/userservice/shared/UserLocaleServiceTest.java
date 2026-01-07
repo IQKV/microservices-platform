@@ -5,10 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.iqscaffold.userservice.usermanagement.User;
-import com.iqscaffold.userservice.usermanagement.UserRepository;
 import java.util.Locale;
 import java.util.Optional;
+
+import com.iqscaffold.userservice.usermanagement.User;
+import com.iqscaffold.userservice.usermanagement.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

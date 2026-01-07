@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.iqscaffold.userservice.security.AccountLockoutServiceImpl;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;

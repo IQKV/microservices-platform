@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.Duration;
 import java.util.List;
+
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

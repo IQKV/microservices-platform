@@ -1,13 +1,13 @@
 package com.iqscaffold.billingservice.config;
 
-import com.iqscaffold.billingservice.shared.MessageService;
 import java.net.URI;
 import java.time.Instant;
+
+import com.iqscaffold.billingservice.shared.MessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice

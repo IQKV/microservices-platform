@@ -7,13 +7,12 @@ import static org.mockito.Mockito.when;
 import jakarta.validation.constraints.NotNull;
 import java.util.Locale;
 
+import com.iqscaffold.userservice.usermanagement.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.i18n.LocaleContextHolder;
-
-import com.iqscaffold.userservice.usermanagement.User;
 
 class MessageServiceTest {
 

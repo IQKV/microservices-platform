@@ -1,12 +1,13 @@
 package com.iqscaffold.billingservice.infrastructure.email;
 
-import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
+
+import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

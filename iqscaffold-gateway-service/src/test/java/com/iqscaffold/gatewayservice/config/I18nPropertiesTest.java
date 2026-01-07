@@ -3,7 +3,6 @@ package com.iqscaffold.gatewayservice.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.iqscaffold.gatewayservice.config.IqScaffoldProperties.I18nProperties;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -11,6 +10,8 @@ import jakarta.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
+import com.iqscaffold.gatewayservice.config.IqScaffoldProperties.I18nProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

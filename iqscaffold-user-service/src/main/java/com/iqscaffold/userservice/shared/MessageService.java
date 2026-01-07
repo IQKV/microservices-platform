@@ -2,12 +2,11 @@ package com.iqscaffold.userservice.shared;
 
 import java.util.Locale;
 
+import com.iqscaffold.userservice.usermanagement.User;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import com.iqscaffold.userservice.usermanagement.User;
 
 /**
  * Service for retrieving internationalized messages with user preference support.

@@ -1,8 +1,9 @@
 package com.iqscaffold.userservice.usermanagement;
 
-import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
 
 /**
  * Validator for supported locales based on configuration.

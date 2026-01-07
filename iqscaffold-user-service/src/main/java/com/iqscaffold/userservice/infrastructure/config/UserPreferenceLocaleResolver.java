@@ -2,11 +2,11 @@ package com.iqscaffold.userservice.infrastructure.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-
 import java.util.List;
 import java.util.Locale;
+
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
  * Custom locale resolver that prioritizes user preferences over Accept-Language header.
