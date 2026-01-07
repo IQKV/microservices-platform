@@ -8,7 +8,6 @@ spring:
     allow-bean-definition-overriding: true
   profiles:
     active: local
-    include: i18n
   data:
     redis:
       host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
@@ -83,6 +82,14 @@ spring:
 
 # IQ Scaffold Gateway Configuration
 iqscaffold:
+  # Internationalization configuration
+  i18n:
+    supported-locales:
+      - en
+      - es
+      - fr
+    default-locale: en
+  
   cache:
     redis:
       host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}

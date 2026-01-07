@@ -1,8 +1,0 @@
-# I18n Configuration for Gateway Service
-iqscaffold:
-  i18n:
-    supported-locales:
-      - en
-      - es
-      - fr
-    default-locale: en

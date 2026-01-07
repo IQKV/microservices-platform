@@ -10,7 +10,6 @@ spring:
     name: iqscaffold-billing-service
   profiles:
     active: local
-    include: i18n
   
   lifecycle:
     timeout-per-shutdown-phase: 30s
@@ -218,6 +217,18 @@ logging:
 iqscaffold:
   # Tenant identification header
   tenant-id-header: X-Tenant-ID
+  
+  # Internationalization configuration
+  i18n:
+    supported-locales:
+      - en
+      - es
+      - fr
+    default-locale: en
+    message-basename: i18n/messages
+    message-cache-duration: PT1H  # 1 hour
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
   
   # Liquibase configuration for multi-tenant schema management
   liquibase:

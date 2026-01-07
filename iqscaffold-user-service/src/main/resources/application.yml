@@ -6,7 +6,6 @@ spring:
     name: iqscaffold-user-service
   profiles:
     active: local
-    include: i18n
   
   # Internationalization Configuration
   messages:
@@ -321,6 +320,19 @@ iqscaffold:
       enable-security-events: true
       enable-performance-logging: false
   tenant-id-header: X-Tenant-ID
+  
+  # Internationalization configuration
+  i18n:
+    supported-locales:
+      - en
+      - es
+      - fr
+    default-locale: en
+    message-basename: i18n/messages
+    message-cache-duration: PT1H  # 1 hour
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
   tenancy:
     schema:
       prefix: tenant_
