@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import com.iqscaffold.userservice.config.RedisConfig.TenantAwareSessionService;
 import com.iqscaffold.userservice.security.AccountLockoutService;
 import com.iqscaffold.userservice.security.InputSanitizer;
@@ -73,12 +75,26 @@ class AuthenticationServiceTest {
   @Mock
   private Counter counter;
 
+  @Mock
+  private IqScaffoldProperties iqScaffoldProperties;
+
   private AuthenticationService service;
   private User testUser;
   private LoginRequest loginRequest;
 
   @BeforeEach
   void setUp() {
+    // Setup i18n configuration mock with lenient stubbing (not all tests use it)
+    var i18nConfig = new IqScaffoldProperties.I18n(
+        java.util.List.of("en", "es", "fr"),
+        "en",
+        "i18n/messages",
+        java.time.Duration.ofHours(1),
+        false,
+        true
+    );
+    lenient().when(iqScaffoldProperties.i18n()).thenReturn(i18nConfig);
+
     service = new AuthenticationServiceImpl(
         userRepository,
         passwordEncoder,
@@ -87,7 +103,8 @@ class AuthenticationServiceTest {
         securityAuditService,
         inputSanitizer,
         sessionService,
-        meterRegistry
+        meterRegistry,
+        iqScaffoldProperties
     );
 
     // Setup test user with all required fields

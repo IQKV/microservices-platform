@@ -31,6 +31,7 @@ public final class GatewayConstants {
     public static final String X_USER_ID = "X-User-ID";
     public static final String X_USERNAME = "X-Username";
     public static final String X_USER_ROLES = "X-User-Roles";
+    public static final String X_USER_LOCALE = "X-User-Locale";
 
     // Gateway Identification Headers
     public static final String X_GATEWAY_SERVICE = "X-Gateway-Service";
@@ -82,6 +83,7 @@ public final class GatewayConstants {
     public static final String USER_ID = "userId";
     public static final String USERNAME = "username";
     public static final String REQUEST_PATH = "requestPath";
+    public static final String LOCALE = "locale";
   }
 
   /**
@@ -98,6 +100,7 @@ public final class GatewayConstants {
     public static final String TENANT_CONTEXT = "tenantContext";
     public static final String USER_CONTEXT = "userContext";
     public static final String REQUEST_START_TIME = "requestStartTime";
+    public static final String LOCALE = "locale";
   }
 
   /**
@@ -228,6 +231,7 @@ public final class GatewayConstants {
     }
 
     public static final int CORRELATION_ID_FILTER = -300;
+    public static final int LOCALE_EXTRACTION_FILTER = -250;
     public static final int TENANT_EXTRACTION_FILTER = -200;
     public static final int JWT_AUTHENTICATION_FILTER = -100;
   }

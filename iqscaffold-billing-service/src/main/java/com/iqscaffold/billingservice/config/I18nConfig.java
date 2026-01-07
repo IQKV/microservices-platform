@@ -1,19 +1,18 @@
-package com.iqscaffold.userservice.infrastructure.config;
+package com.iqscaffold.billingservice.config;
 
 import java.nio.charset.StandardCharsets;
 
-import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
- * Configuration for internationalization (i18n) support.
+ * Configuration for internationalization (i18n) support in billing service.
  * <p>
  * Configures message sources and locale resolution for multi-language support.
- * Uses a custom locale resolver that prioritizes user preferences over Accept-Language header.
  */
 @Configuration
 public class I18nConfig {
@@ -44,10 +43,7 @@ public class I18nConfig {
   }
 
   /**
-   * Configures locale resolution with priority order:
-   * 1. X-User-Locale header (from gateway/user preferences)
-   * 2. Accept-Language header
-   * 3. Default locale (configurable)
+   * Configures locale resolution based on Accept-Language header and X-User-Locale.
    * <p>
    * Supports configurable locales from properties.
    *
@@ -56,7 +52,7 @@ public class I18nConfig {
   @Bean
   public LocaleResolver localeResolver() {
     var i18nConfig = properties.i18n();
-    var localeResolver = new UserPreferenceLocaleResolver();
+    var localeResolver = new BillingServiceLocaleResolver();
     localeResolver.setDefaultLocale(i18nConfig.getDefaultLocaleObject());
     localeResolver.setSupportedLocales(i18nConfig.getSupportedLocaleObjects());
     return localeResolver;

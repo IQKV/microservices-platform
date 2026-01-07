@@ -23,6 +23,7 @@ public final class JwtClaimNames {
   public static final String DEPARTMENT = "department";
   public static final String ORGANIZATION_ID = "organizationId";
   public static final String TENANT_ID = "tenant_id";
+  public static final String PREFERRED_LOCALE = "preferred_locale";
 
   private JwtClaimNames() {
     throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");

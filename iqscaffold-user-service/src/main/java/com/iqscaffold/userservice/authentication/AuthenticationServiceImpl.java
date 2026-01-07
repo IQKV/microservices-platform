@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import com.iqscaffold.userservice.config.RedisConfig.TenantAwareSessionService;
 import com.iqscaffold.userservice.security.AccountLockoutService;
 import com.iqscaffold.userservice.security.InputSanitizer;
@@ -57,6 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final InputSanitizer inputSanitizer;
   private final TenantAwareSessionService sessionService;
   private final MeterRegistry meterRegistry;
+  private final IqScaffoldProperties iqScaffoldProperties;
 
   public AuthenticationServiceImpl(final UserRepository userRepository,
                                final PasswordEncoder passwordEncoder,
@@ -65,7 +67,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                final SecurityAuditService securityAuditService,
                                final InputSanitizer inputSanitizer,
                                final TenantAwareSessionService sessionService,
-                               final MeterRegistry meterRegistry) {
+                               final MeterRegistry meterRegistry,
+                               final IqScaffoldProperties iqScaffoldProperties) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -74,6 +77,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     this.inputSanitizer = inputSanitizer;
     this.sessionService = sessionService;
     this.meterRegistry = meterRegistry;
+    this.iqScaffoldProperties = iqScaffoldProperties;
   }
 
   @Override
@@ -498,5 +502,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       Instant lastAccessedAt
   ) {
 
+  }
+
+  @Override
+  @Transactional
+  @CacheEvict(value = "users", key = "#userId")
+  public void updateUserLocale(Long userId, String locale) {
+    logger.debug("Updating locale for user ID: {} to: {}", userId, locale);
+
+    var user = userRepository.findById(userId)
+        .orElseThrow(() -> new AuthenticationException("User not found"));
+
+    // Validate locale using configuration
+    var i18nConfig = iqScaffoldProperties.i18n();
+    if (!i18nConfig.isLocaleSupported(locale)) {
+      throw new AuthenticationException("Unsupported locale: " + locale + 
+          ". Supported locales: " + i18nConfig.supportedLocales());
+    }
+
+    // Update user's preferred locale
+    user.setPreferredLocale(locale);
+    userRepository.save(user);
+
+    // Log the change for audit purposes
+    securityAuditService.logUserLocaleChange(userId, user.getUsername(), locale);
+
+    logger.info("Successfully updated locale for user: {} to: {}", user.getUsername(), locale);
   }
 }

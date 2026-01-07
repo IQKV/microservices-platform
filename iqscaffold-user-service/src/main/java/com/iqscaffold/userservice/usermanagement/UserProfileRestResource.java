@@ -147,6 +147,65 @@ public class UserProfileRestResource {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
   }
 
+  @PatchMapping("/me/locale")
+  @Operation(
+      summary = "Update user's preferred locale",
+      description = """
+          Update the authenticated user's preferred locale setting.
+          
+          ## Supported Locales
+          - `en` - English (default)
+          - `es` - Spanish
+          - `fr` - French
+          
+          ## Behavior
+          - Updates user's preferred locale in database
+          - New locale will be used for future email notifications
+          - JWT tokens issued after this change will include the new locale
+          - Response messages will use the updated locale
+          
+          ## Security
+          - Requires valid authentication token
+          - Only affects the authenticated user's settings
+          """,
+      tags = {"User Profile"}
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Locale updated successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid locale", ref = "#/components/responses/BadRequest"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", ref = "#/components/responses/Unauthorized")
+  })
+  @Timed(value = "user.locale.update", extraTags = {"endpoint", "locale"})
+  public ResponseEntity<Void> updateLocale(
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "Update locale request containing the new preferred locale",
+          required = true,
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = UpdateLocaleRequest.class),
+              examples = {
+                  @ExampleObject(name = "English", value = "{\"locale\": \"en\"}"),
+                  @ExampleObject(name = "Spanish", value = "{\"locale\": \"es\"}"),
+                  @ExampleObject(name = "French", value = "{\"locale\": \"fr\"}")
+              }
+          )
+      )
+      @Valid @RequestBody UpdateLocaleRequest request,
+      Authentication authentication) {
+    
+    if (authentication instanceof JwtAuthenticationToken token) {
+      var subject = token.getToken().getSubject();
+      try {
+        var userId = Long.parseLong(subject);
+        authenticationService.updateUserLocale(userId, request.locale());
+        return ResponseEntity.noContent().build();
+      } catch (final NumberFormatException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  }
+
   /**
    * Get client IP address, considering proxy headers.
    */

@@ -118,4 +118,13 @@ public interface AuthenticationService {
      * @return Authentication failure result
      */
     AuthenticationResult.Failure createAuthenticationFailure(String reason, String errorCode);
+
+    /**
+     * Update user's preferred locale setting.
+     * 
+     * @param userId The user ID whose locale to update
+     * @param locale The new preferred locale (e.g., "en", "es", "fr")
+     * @throws AuthenticationException If user is not found or locale is invalid
+     */
+    void updateUserLocale(Long userId, String locale);
 }

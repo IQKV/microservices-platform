@@ -207,6 +207,7 @@ class TenantRateLimitingFilterTest {
             properties.gateway().cors(),
             properties.gateway().transformation()
         ),
+        properties.i18n(),
         properties.observability()
     );
 
@@ -246,6 +247,7 @@ class TenantRateLimitingFilterTest {
             properties.gateway().cors(),
             properties.gateway().transformation()
         ),
+        properties.i18n(),
         properties.observability()
     );
 
@@ -354,7 +356,11 @@ class TenantRateLimitingFilterTest {
 
     var observability = new IqScaffoldProperties.ObservabilityProperties(tracing, metrics, logging);
 
-    return new IqScaffoldProperties(cache, gateway, observability);
+    var i18nProperties = new IqScaffoldProperties.I18nProperties(
+        List.of("en", "es", "fr"), "en"
+    );
+
+    return new IqScaffoldProperties(cache, gateway, i18nProperties, observability);
   }
 
   private IqScaffoldProperties createDisabledProperties() {
@@ -449,6 +455,10 @@ class TenantRateLimitingFilterTest {
 
     var observability = new IqScaffoldProperties.ObservabilityProperties(tracing, metrics, logging);
 
-    return new IqScaffoldProperties(cache, gateway, observability);
+    var i18nProperties = new IqScaffoldProperties.I18nProperties(
+        List.of("en", "es", "fr"), "en"
+    );
+
+    return new IqScaffoldProperties(cache, gateway, i18nProperties, observability);
   }
 }

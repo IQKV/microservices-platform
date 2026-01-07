@@ -10,6 +10,7 @@ spring:
     name: iqscaffold-billing-service
   profiles:
     active: local
+    include: i18n
   
   lifecycle:
     timeout-per-shutdown-phase: 30s

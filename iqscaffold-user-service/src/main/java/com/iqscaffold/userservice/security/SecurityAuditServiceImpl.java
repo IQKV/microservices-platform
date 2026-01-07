@@ -150,6 +150,20 @@ public class SecurityAuditServiceImpl implements SecurityAuditService {
         action.toUpperCase(java.util.Locale.ROOT), username, ipAddress, userAgent);
   }
 
+  @Override
+  public void logUserLocaleChange(Long userId, String username, String newLocale) {
+    var details = String.format("User locale preference changed%n" +
+                                "User ID: %d%n" +
+                                "Username: %s%n" +
+                                "New Locale: %s%n" +
+                                "Timestamp: %s%n", userId, username, newLocale, Instant.now());
+
+    logSecurityEvent("USER_LOCALE_CHANGE", username, details, null, null);
+
+    securityLogger.info("USER_LOCALE_CHANGE: userId={}, user={}, newLocale={}",
+        userId, username, newLocale);
+  }
+
   /**
    * Generic method to log security events to database and structured logs.
    */

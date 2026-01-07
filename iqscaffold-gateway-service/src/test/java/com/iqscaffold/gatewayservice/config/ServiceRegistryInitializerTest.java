@@ -147,6 +147,12 @@ class ServiceRegistryInitializerTest {
 
     var observability = new IqScaffoldProperties.ObservabilityProperties(tracing, metrics, logging);
 
-    return new IqScaffoldProperties(cache, gateway, observability);
+    // Add i18n configuration
+    var i18n = new IqScaffoldProperties.I18nProperties(
+        List.of("en", "es", "fr"),
+        "en"
+    );
+
+    return new IqScaffoldProperties(cache, gateway, i18n, observability);
   }
 }

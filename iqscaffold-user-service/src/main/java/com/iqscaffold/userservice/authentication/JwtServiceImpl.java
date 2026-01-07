@@ -199,7 +199,7 @@ public class JwtServiceImpl implements JwtService {
         user.getFirstName(),
         user.getLastName(),
         user.getTenantId(),
-        Map.of()
+        Map.of("preferredLocale", user.getPreferredLocale())
     );
   }
 
@@ -221,6 +221,7 @@ public class JwtServiceImpl implements JwtService {
         .claim(JwtClaimNames.FIRST_NAME, userContext.firstName())
         .claim(JwtClaimNames.LAST_NAME, userContext.lastName())
         .claim(JwtClaimNames.TENANT_ID, userContext.tenantId())
+        .claim(JwtClaimNames.PREFERRED_LOCALE, userContext.customClaims().get("preferredLocale"))
         .build();
   }
 
@@ -291,7 +292,8 @@ public class JwtServiceImpl implements JwtService {
         JwtClaimNames.PERMISSIONS,
         JwtClaimNames.FIRST_NAME,
         JwtClaimNames.LAST_NAME,
-        JwtClaimNames.TENANT_ID
+        JwtClaimNames.TENANT_ID,
+        JwtClaimNames.PREFERRED_LOCALE
     );
 
     return allClaims.entrySet().stream()

@@ -62,7 +62,11 @@ class RequestTransformationFilterTest {
 
     var observabilityProperties = new IqScaffoldProperties.ObservabilityProperties(null, null, null);
 
-    return new IqScaffoldProperties(cacheProperties, gatewayProperties, observabilityProperties);
+    var i18nProperties = new IqScaffoldProperties.I18nProperties(
+        List.of("en", "es", "fr"), "en"
+    );
+
+    return new IqScaffoldProperties(cacheProperties, gatewayProperties, i18nProperties, observabilityProperties);
   }
 
   @Test

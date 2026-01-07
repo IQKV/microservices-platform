@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import java.time.Duration;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,6 +28,7 @@ public record IqScaffoldProperties(
     @Valid @NotNull Cache cache,
     @Valid @NotNull Auth auth,
     @Valid @NotNull Email email,
+    @Valid @NotNull I18n i18n,
     @Valid @NotNull Observability observability,
     @Valid @NotNull Tenancy tenancy,
     @Valid @NotNull Liquibase liquibase,
@@ -197,6 +200,59 @@ public record IqScaffoldProperties(
 
     }
 
+  }
+
+  /**
+   * Internationalization configuration properties with iqscaffold.i18n prefix.
+   */
+  public record I18n(
+      @NotNull List<@Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
+                            message = "Locale must be in format 'xx' or 'xx-XX'") String> supportedLocales,
+      @NotBlank @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
+                        message = "Default locale must be in format 'xx' or 'xx-XX'") String defaultLocale,
+      @NotBlank String messageBasename,
+      @NotNull Duration messageCacheDuration,
+      boolean fallbackToSystemLocale,
+      boolean useCodeAsDefaultMessage
+  ) {
+
+    public I18n {
+      // Validation: default locale must be in supported locales
+      if (supportedLocales != null && !supportedLocales.contains(defaultLocale)) {
+        throw new IllegalArgumentException("Default locale '" + defaultLocale + "' must be included in supported locales");
+      }
+    }
+
+    /**
+     * Get supported locales as Locale objects.
+     */
+    public List<Locale> getSupportedLocaleObjects() {
+      return supportedLocales.stream()
+          .map(Locale::forLanguageTag)
+          .toList();
+    }
+
+    /**
+     * Get default locale as Locale object.
+     */
+    public Locale getDefaultLocaleObject() {
+      return Locale.forLanguageTag(defaultLocale);
+    }
+
+    /**
+     * Check if a locale is supported.
+     */
+    public boolean isLocaleSupported(String locale) {
+      return supportedLocales.contains(locale);
+    }
+
+    /**
+     * Check if a Locale object is supported.
+     */
+    public boolean isLocaleSupported(Locale locale) {
+      return supportedLocales.contains(locale.toLanguageTag()) ||
+             supportedLocales.contains(locale.getLanguage());
+    }
   }
 
 

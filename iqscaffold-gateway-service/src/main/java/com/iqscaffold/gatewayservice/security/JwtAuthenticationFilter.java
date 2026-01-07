@@ -114,6 +114,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     var permissions = extractStringList(claims.get(JwtClaimNames.PERMISSIONS));
     var department = extractString(claims.get(JwtClaimNames.DEPARTMENT));
     var organizationId = extractString(claims.get(JwtClaimNames.ORGANIZATION_ID));
+    var preferredLocale = extractString(claims.get(JwtClaimNames.PREFERRED_LOCALE));
 
     return new UserContext(
         userId,
@@ -122,7 +123,8 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         roles,
         permissions,
         department,
-        organizationId
+        organizationId,
+        preferredLocale
     );
   }
 
@@ -194,8 +196,12 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
       if (!userContext.roles().isEmpty()) {
         builder.header(GatewayConstants.Headers.X_USER_ROLES, String.join(",", userContext.roles()));
       }
+      if (StringUtils.hasText(userContext.preferredLocale())) {
+        builder.header(GatewayConstants.Headers.X_USER_LOCALE, userContext.preferredLocale());
+      }
 
-      logger.debug("User context propagated for user: {}", userContext.username());
+      logger.debug("User context propagated for user: {} with locale: {}", 
+          userContext.username(), userContext.preferredLocale());
     } else {
       logger.debug("User context propagation is disabled");
     }
@@ -231,7 +237,8 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
       List<String> roles,
       List<String> permissions,
       String department,
-      String organizationId
+      String organizationId,
+      String preferredLocale
   ) {
 
   }

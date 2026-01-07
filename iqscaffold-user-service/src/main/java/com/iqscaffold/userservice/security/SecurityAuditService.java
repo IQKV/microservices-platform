@@ -102,4 +102,13 @@ public interface SecurityAuditService {
      * @param userAgent The client's User-Agent header
      */
     void logTokenEvent(String username, String action, String ipAddress, String userAgent);
+
+    /**
+     * Log user locale preference change for audit trail.
+     * 
+     * @param userId The user ID whose locale was changed
+     * @param username The username of the user
+     * @param newLocale The new locale preference
+     */
+    void logUserLocaleChange(Long userId, String username, String newLocale);
 }
