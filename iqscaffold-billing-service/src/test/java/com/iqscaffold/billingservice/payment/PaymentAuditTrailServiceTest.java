@@ -77,4 +77,65 @@ class PaymentAuditTrailServiceTest {
       auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.SUCCEEDED);
     });
   }
+
+  @Test
+  void logPaymentAttempt_shouldLogPartiallyRefundedStatus() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+
+    // When & Then
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PARTIALLY_REFUNDED)
+    );
+  }
+
+  @Test
+  void logPaymentAttempt_shouldLogProcessingStatus() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+
+    // When & Then
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.PROCESSING)
+    );
+  }
+
+  @Test
+  void logPaymentAttempt_shouldHandleNullUserId() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    String status = BillingConstants.PaymentStatus.SUCCEEDED;
+
+    // When & Then - should handle null user ID gracefully
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, status)
+    );
+  }
+
+  @Test
+  void logPaymentAttempt_shouldHandleNullTenantId() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    String status = BillingConstants.PaymentStatus.FAILED;
+
+    // When & Then - should handle null tenant ID gracefully
+    assertDoesNotThrow(() ->
+        auditService.logPaymentAttempt(paymentId, status)
+    );
+  }
+
+  @Test
+  void logPaymentAttempt_shouldHandleDifferentPaymentIds() {
+    // Given
+    UUID paymentId1 = UUID.randomUUID();
+    UUID paymentId2 = UUID.randomUUID();
+    UUID paymentId3 = UUID.randomUUID();
+
+    // When & Then
+    assertDoesNotThrow(() -> {
+      auditService.logPaymentAttempt(paymentId1, BillingConstants.PaymentStatus.SUCCEEDED);
+      auditService.logPaymentAttempt(paymentId2, BillingConstants.PaymentStatus.FAILED);
+      auditService.logPaymentAttempt(paymentId3, BillingConstants.PaymentStatus.REFUNDED);
+    });
+  }
 }

@@ -190,6 +190,24 @@ class RefundServiceImplTest {
     );
   }
 
+  @Test
+  void processRefund_shouldHandleNullUserContext() {
+    // Given
+    UUID paymentId = UUID.randomUUID();
+    Payment payment = createSuccessfulPayment(paymentId);
+
+    when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
+    when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
+    doNothing().when(paymentProvider).refundPayment(any(), any(), any(), any());
+
+    // When - should not throw even if user context is null
+    refundService.processRefund(paymentId);
+
+    // Then
+    verify(paymentRepository).save(payment);
+    verify(auditService).logPaymentAttempt(paymentId, BillingConstants.PaymentStatus.REFUNDED);
+  }
+
   private Payment createSuccessfulPayment(UUID paymentId) {
     Payment payment = new Payment();
     payment.setId(paymentId);

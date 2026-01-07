@@ -111,4 +111,39 @@ class GlobalExceptionHandlerTest {
     assertEquals(localizedMessage, result.getDetail());
     verify(messageService, times(1)).getMessage("error.unexpected");
   }
+
+  @Test
+  void handlePayoutNotFound_shouldReturnProblemDetailWithNotFound() {
+    // Given
+    com.iqscaffold.billingservice.payout.PayoutNotFoundException exception =
+        new com.iqscaffold.billingservice.payout.PayoutNotFoundException("Payout with ID 123 not found");
+
+    // When
+    ProblemDetail result = exceptionHandler.handlePayoutNotFound(exception);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatus());
+    assertEquals("Payout with ID 123 not found", result.getDetail());
+    assertEquals("Payout Not Found", result.getTitle());
+    assertNotNull(result.getType());
+    assertEquals("urn:problem-type:payout-not-found", result.getType().toString());
+    assertNotNull(result.getProperties());
+    assertTrue(result.getProperties().containsKey("timestamp"));
+  }
+
+  @Test
+  void handlePayoutNotFound_shouldIncludeTimestamp() {
+    // Given
+    com.iqscaffold.billingservice.payout.PayoutNotFoundException exception =
+        new com.iqscaffold.billingservice.payout.PayoutNotFoundException("Not found");
+
+    // When
+    ProblemDetail result = exceptionHandler.handlePayoutNotFound(exception);
+
+    // Then
+    assertNotNull(result.getProperties());
+    Object timestamp = result.getProperties().get("timestamp");
+    assertNotNull(timestamp);
+  }
 }
