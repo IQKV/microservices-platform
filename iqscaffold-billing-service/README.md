@@ -151,6 +151,7 @@ The service tracks payouts from Stripe to merchant bank accounts, providing visi
 ### Payout Data Model
 
 Each payout record includes:
+
 - **id**: Stripe payout ID (e.g., `po_1234567890`)
 - **amount**: Payout amount in the specified currency
 - **currency**: Currency code (USD, EUR, etc.)
