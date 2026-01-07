@@ -40,7 +40,7 @@ public class CacheConfig {
         return Health.up()
             .withDetail("secondLevelCacheEnabled", true)
             .withDetail("queryCacheEnabled", statistics.isStatisticsEnabled())
-            .withDetail("cacheRegions", cache.getCacheRegionNames())
+            .withDetail("statisticsEnabled", statistics.isStatisticsEnabled())
             .build();
       } catch (final Exception e) {
         log.error("Error checking cache health", e);

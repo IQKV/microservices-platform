@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.shared;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.iqscaffold.userservice.usermanagement.User;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
@@ -21,6 +24,8 @@ import org.hibernate.annotations.CreationTimestamp;
  */
 @Entity
 @Table(name = "authorities")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.shared.Authority")
 public class Authority {
 
   @Id
@@ -38,6 +43,7 @@ public class Authority {
   private LocalDateTime createdAt;
 
   @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.shared.Authority.users")
   private Set<User> users = new HashSet<>();
 
   // Default constructor for JPA

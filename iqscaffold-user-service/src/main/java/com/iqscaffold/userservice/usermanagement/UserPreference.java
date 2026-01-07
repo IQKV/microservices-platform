@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.usermanagement;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.iqscaffold.userservice.shared.TenantAware;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,6 +25,8 @@ import org.hibernate.annotations.UpdateTimestamp;
  */
 @Entity
 @Table(name = "user_preferences")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.usermanagement.UserPreference")
 public class UserPreference extends TenantAware {
 
   @Id

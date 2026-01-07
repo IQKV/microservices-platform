@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.organization;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +13,8 @@ import java.util.Objects;
 
 import com.iqscaffold.userservice.shared.TenantAware;
 import com.iqscaffold.userservice.usermanagement.User;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,6 +23,8 @@ import org.hibernate.annotations.UpdateTimestamp;
  */
 @Entity
 @Table(name = "organizations")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.organization.Organization")
 public class Organization extends TenantAware {
 
   @Id

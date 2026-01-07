@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.emailverification;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.iqscaffold.userservice.shared.TenantAware;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
@@ -17,6 +20,8 @@ import org.hibernate.annotations.CreationTimestamp;
  */
 @Entity
 @Table(name = "email_verification_tokens")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.emailverification.VerificationToken")
 public class VerificationToken extends TenantAware {
 
   @Id

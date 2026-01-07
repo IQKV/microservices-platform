@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.usermanagement;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,6 +21,8 @@ import java.util.Set;
 import com.iqscaffold.userservice.organization.Organization;
 import com.iqscaffold.userservice.shared.Authority;
 import com.iqscaffold.userservice.shared.TenantAware;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -132,6 +135,8 @@ import org.hibernate.annotations.UpdateTimestamp;
  */
 @Entity
 @Table(name = "users")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.usermanagement.User")
 public class User extends TenantAware {
 
   @Id
@@ -177,6 +182,7 @@ public class User extends TenantAware {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "authority_id")
   )
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.usermanagement.User.authorities")
   private Set<Authority> authorities = new HashSet<>();
 
   @OneToOne(fetch = FetchType.LAZY)

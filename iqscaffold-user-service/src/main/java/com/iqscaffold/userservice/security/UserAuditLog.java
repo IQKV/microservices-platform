@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.security;
 
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +16,8 @@ import java.util.Objects;
 import com.iqscaffold.userservice.shared.TenantAware;
 import com.iqscaffold.userservice.shared.UserServiceConstants;
 import com.iqscaffold.userservice.usermanagement.User;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
@@ -22,6 +25,8 @@ import org.hibernate.annotations.CreationTimestamp;
  */
 @Entity
 @Table(name = "user_audit_log")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.security.UserAuditLog")
 public class UserAuditLog extends TenantAware {
 
   @Id
