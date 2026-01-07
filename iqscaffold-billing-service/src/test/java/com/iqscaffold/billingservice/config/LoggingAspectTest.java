@@ -118,6 +118,9 @@ class LoggingAspectTest {
         when(annotation.logArgs()).thenReturn(false);
         when(annotation.logResult()).thenReturn(false);
         
+        when(signature.toShortString()).thenReturn("TestClass.failingMethod()");
+        when(joinPoint.getSignature()).thenReturn(signature);
+        
         RuntimeException exception = new RuntimeException("Test error");
         when(joinPoint.proceed()).thenThrow(exception);
 

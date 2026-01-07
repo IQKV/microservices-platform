@@ -32,7 +32,7 @@ class NotificationServiceTest {
     @BeforeEach
     void setUp() {
         notificationService = new NotificationService(emailService, messagingService, messageService);
-        when(messageService.getMessage(anyString())).thenReturn("Test Subject");
+        lenient().when(messageService.getMessage(anyString())).thenReturn("Test Subject");
     }
 
     @Test
@@ -155,7 +155,7 @@ class NotificationServiceTest {
         String tenantId = "tenant123";
         
         doThrow(new RuntimeException("Email failed"))
-            .when(emailService).sendMerchantOnboardingEmail(anyString(), anyString(), anyString());
+            .when(emailService).sendMerchantOnboardingEmail(merchantEmail, merchantName, onboardingUrl);
 
         // When & Then
         assertThrows(NotificationService.NotificationException.class, () ->
