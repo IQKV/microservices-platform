@@ -22,29 +22,57 @@ public class BillingServiceLocaleResolver extends AcceptHeaderLocaleResolver {
 
   @Override
   public Locale resolveLocale(HttpServletRequest request) {
-    // Priority 1: Check X-User-Locale header from gateway
-    String userLocaleHeader = request.getHeader(USER_LOCALE_HEADER);
-    if (StringUtils.hasText(userLocaleHeader)) {
-      try {
-        Locale userLocale = Locale.forLanguageTag(userLocaleHeader);
-        if (isSupportedLocale(userLocale)) {
-          return userLocale;
+    try {
+      // Priority 1: Check X-User-Locale header from gateway
+      String userLocaleHeader = request.getHeader(USER_LOCALE_HEADER);
+      if (StringUtils.hasText(userLocaleHeader)) {
+        try {
+          Locale userLocale = Locale.forLanguageTag(userLocaleHeader);
+          // Validate the locale is well-formed and supported
+          if (isValidLocale(userLocale, userLocaleHeader) && isSupportedLocale(userLocale)) {
+            return userLocale;
+          }
+        } catch (final Exception e) {
+          // Log and fall back to Accept-Language
         }
-      } catch (final Exception e) {
-        // Log and fall back to Accept-Language
       }
+
+      // Priority 2: Fall back to request locale (from Accept-Language header)
+      Locale requestLocale = request.getLocale();
+      if (requestLocale != null) {
+        return requestLocale;
+      }
+    } catch (final Exception e) {
+      // Handle any unexpected exceptions gracefully
     }
 
-    // Priority 2: Fall back to Accept-Language header resolution
-    return super.resolveLocale(request);
+    // Priority 3: Fall back to default locale
+    return getDefaultLocale() != null ? getDefaultLocale() : Locale.getDefault();
+  }
+
+  private boolean isValidLocale(Locale locale, String originalTag) {
+    // Check if locale has a valid language tag
+    // Locale.forLanguageTag() can create locales with invalid tags
+    if (locale == null || locale.getLanguage().isEmpty()) {
+      return false;
+    }
+    
+    // Check if the language code is a valid ISO 639 language
+    // Invalid language codes will have the same value as the display language
+    // For valid codes, getDisplayLanguage() returns a human-readable name
+    String language = locale.getLanguage();
+    String displayLanguage = locale.getDisplayLanguage(Locale.ENGLISH);
+    
+    // If display language equals the language code, it's likely invalid
+    // Valid languages have different display names (e.g., "en" -> "English")
+    if (language.equals(displayLanguage)) {
+      return false;
+    }
+    
+    return true;
   }
 
   private boolean isSupportedLocale(Locale locale) {
-    // Validate locale has a valid language tag
-    if (locale.getLanguage().isEmpty()) {
-      return false;
-    }
-
     List<Locale> supportedLocales = getSupportedLocales();
     if (supportedLocales == null || supportedLocales.isEmpty()) {
       return true; // If no supported locales configured, accept all
