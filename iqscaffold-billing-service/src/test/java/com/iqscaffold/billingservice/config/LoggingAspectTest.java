@@ -114,12 +114,12 @@ class LoggingAspectTest {
     void logPerformance_shouldHandleExceptionAndRethrow() throws Throwable {
         // Given
         LoggingAspect.LogPerformance annotation = mock(LoggingAspect.LogPerformance.class);
-        when(annotation.operation()).thenReturn("FailingOp");
-        when(annotation.logArgs()).thenReturn(false);
-        when(annotation.logResult()).thenReturn(false);
+        lenient().when(annotation.operation()).thenReturn("FailingOp");
+        lenient().when(annotation.logArgs()).thenReturn(false);
+        lenient().when(annotation.logResult()).thenReturn(false);
         
-        when(signature.toShortString()).thenReturn("TestClass.failingMethod()");
-        when(joinPoint.getSignature()).thenReturn(signature);
+        lenient().when(signature.toShortString()).thenReturn("TestClass.failingMethod()");
+        lenient().when(joinPoint.getSignature()).thenReturn(signature);
         
         RuntimeException exception = new RuntimeException("Test error");
         when(joinPoint.proceed()).thenThrow(exception);
