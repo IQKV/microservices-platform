@@ -20,7 +20,8 @@ spring:
         multiTenancy: SCHEMA
   
   liquibase:
-    enabled: false
+    enabled: false  # Disabled by default, enable per-test using TestLiquibaseConfiguration
+    change-log: classpath:db/changelog/tenant/master.xml
   
   data:
     redis:
