@@ -24,7 +24,7 @@ class UserServiceApplicationTests {
       var mainMethod = UserServiceApplication.class.getMethod("main", String[].class);
       assertThat(mainMethod).isNotNull();
       assertThat(mainMethod.getReturnType()).isEqualTo(void.class);
-    } catch (NoSuchMethodException e) {
+    } catch (final NoSuchMethodException e) {
       throw new AssertionError("Main method not found", e);
     }
   }

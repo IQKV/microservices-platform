@@ -65,11 +65,11 @@ public class MessageService {
     if (user != null && StringUtils.hasText(user.getPreferredLocale())) {
       try {
         return Locale.forLanguageTag(user.getPreferredLocale());
-      } catch (Exception e) {
+      } catch (final Exception e) {
         // Fall back to context locale if user locale is invalid
       }
     }
-    
+
     var contextLocale = LocaleContextHolder.getLocale();
     return contextLocale != null ? contextLocale : Locale.ENGLISH;
   }

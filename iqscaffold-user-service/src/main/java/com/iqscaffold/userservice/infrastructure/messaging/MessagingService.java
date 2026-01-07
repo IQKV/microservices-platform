@@ -33,7 +33,7 @@ public class MessagingService {
       );
       log.info("Successfully published user event: {} for user: {}",
           event.getEventType(), event.getUserId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish user event: {} for user: {}",
           event.getEventType(), event.getUserId(), e);
       throw new MessagingException("Failed to publish user event", e);
@@ -53,7 +53,7 @@ public class MessagingService {
           event
       );
       log.info("Successfully published notification event to: {}", event.getRecipientEmail());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to publish notification event to: {}",
           event.getRecipientEmail(), e);
       throw new MessagingException("Failed to publish notification event", e);

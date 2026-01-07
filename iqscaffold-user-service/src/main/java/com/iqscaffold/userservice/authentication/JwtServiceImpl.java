@@ -33,10 +33,10 @@ import org.springframework.stereotype.Service;
  *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see JwtService
  * @see UserContext
  * @see JwtConfiguration
+ * @since 1.0
  */
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -47,7 +47,7 @@ public class JwtServiceImpl implements JwtService {
   private final RedisTemplate<String, String> redisTemplate;
 
   public JwtServiceImpl(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
-                    final JwtConfiguration jwtConfiguration, final RedisTemplate<String, String> redisTemplate) {
+                        final JwtConfiguration jwtConfiguration, final RedisTemplate<String, String> redisTemplate) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
     this.jwtConfiguration = jwtConfiguration;

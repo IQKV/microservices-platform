@@ -20,11 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Comprehensive tenant management service providing multi-tenant architecture support with enterprise features.
- * 
+ *
  * <p>This service manages the complete lifecycle of tenant environments in a multi-tenant SaaS architecture.
  * It provides secure tenant operations, schema provisioning, quota management, and comprehensive monitoring
  * capabilities while ensuring strict data isolation between tenants.
- * 
+ *
  * <h3>Core Capabilities</h3>
  * <ul>
  *   <li><strong>Tenant Lifecycle Management</strong> - Create, update, delete, and manage tenant environments</li>
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Domain Management</strong> - Custom domain assignment and validation</li>
  *   <li><strong>Tenant Statistics</strong> - Usage metrics and monitoring data</li>
  * </ul>
- * 
+ *
  * <h3>Multi-Tenant Architecture</h3>
  * <ul>
  *   <li><strong>Schema-per-Tenant</strong> - Physical data isolation using separate database schemas</li>
@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Context Propagation</strong> - Automatic tenant context management</li>
  *   <li><strong>Data Isolation</strong> - Complete separation of tenant data and operations</li>
  * </ul>
- * 
+ *
  * <h3>Schema Management</h3>
  * <ul>
  *   <li><strong>Automatic Provisioning</strong> - Creates tenant schema during tenant creation</li>
@@ -49,7 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Schema Naming</strong> - Consistent naming convention (tenant_[tenantId])</li>
  *   <li><strong>Migration Tracking</strong> - Version control for schema changes</li>
  * </ul>
- * 
+ *
  * <h3>Quota and Limits</h3>
  * <ul>
  *   <li><strong>User Quotas</strong> - Maximum number of users per tenant</li>
@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>API Rate Limits</strong> - Requests per minute throttling</li>
  *   <li><strong>Feature Flags</strong> - Tenant-specific feature enablement</li>
  * </ul>
- * 
+ *
  * <h3>Security Features</h3>
  * <ul>
  *   <li><strong>Tenant Validation</strong> - Comprehensive validation of tenant data</li>
@@ -65,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Access Control</strong> - Role-based tenant management operations</li>
  *   <li><strong>Audit Logging</strong> - Complete audit trail for tenant operations</li>
  * </ul>
- * 
+ *
  * <h3>Caching Strategy</h3>
  * <ul>
  *   <li><strong>Tenant Lookups</strong> - Cached tenant metadata for performance</li>
@@ -73,7 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Statistics</strong> - Cached usage statistics with TTL</li>
  *   <li><strong>Cache Invalidation</strong> - Automatic eviction on tenant updates</li>
  * </ul>
- * 
+ *
  * <h3>Monitoring and Statistics</h3>
  * <ul>
  *   <li><strong>User Counts</strong> - Active and total user statistics</li>
@@ -81,7 +81,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>API Usage</strong> - Request volume and rate limit status</li>
  *   <li><strong>Health Metrics</strong> - Tenant health and performance indicators</li>
  * </ul>
- * 
+ *
  * <h3>Exception Handling</h3>
  * <ul>
  *   <li>{@code TenantAlreadyExistsException} - Duplicate tenant ID</li>
@@ -90,12 +90,12 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>{@code SchemaProvisioningException} - Database schema creation failures</li>
  *   <li>{@code QuotaExceededException} - Quota limit violations</li>
  * </ul>
- * 
+ *
  * <h3>Usage Example</h3>
  * <pre>{@code
  * @Autowired
  * private TenantManagementService tenantService;
- * 
+ *
  * // Create new tenant with schema provisioning
  * CreateTenantRequest request = CreateTenantRequest.builder()
  *     .tenantId("acme-corp")
@@ -104,28 +104,28 @@ import org.springframework.transaction.annotation.Transactional;
  *     .maxUsers(100)
  *     .storageQuotaGb(50)
  *     .build();
- * 
+ *
  * TenantResponse tenant = tenantService.createTenant(request, "admin@system.com");
- * 
+ *
  * // Get tenant statistics
  * TenantStatistics stats = tenantService.getTenantStatistics("acme-corp");
- * 
+ *
  * // Update tenant quotas
  * UpdateTenantRequest updateRequest = UpdateTenantRequest.builder()
  *     .maxUsers(200)
  *     .storageQuotaGb(100)
  *     .build();
- * 
+ *
  * tenantService.updateTenant("acme-corp", updateRequest, "admin@system.com");
  * }</pre>
- * 
+ *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see Tenant
  * @see TenantDto
  * @see SchemaNameResolver
  * @see TenantLiquibaseRunner
+ * @since 1.0
  */
 @Service
 @Transactional
@@ -154,11 +154,11 @@ public class TenantManagementService {
 
   /**
    * Create a new tenant with comprehensive validation, schema provisioning, and quota setup.
-   * 
+   *
    * <p>This method implements the complete tenant creation workflow including validation,
    * database schema provisioning, and initial configuration. It ensures data integrity
    * and proper isolation while setting up all necessary infrastructure for the new tenant.
-   * 
+   *
    * <h4>Creation Workflow:</h4>
    * <ol>
    *   <li><strong>Validation Phase</strong>
@@ -193,7 +193,7 @@ public class TenantManagementService {
    *       </ul>
    *   </li>
    * </ol>
-   * 
+   *
    * <h4>Validation Rules:</h4>
    * <ul>
    *   <li><strong>Tenant ID</strong> - Must be unique, alphanumeric, 3-50 characters</li>
@@ -201,7 +201,7 @@ public class TenantManagementService {
    *   <li><strong>Name</strong> - Required, 1-255 characters</li>
    *   <li><strong>Quotas</strong> - Must be positive integers within system limits</li>
    * </ul>
-   * 
+   *
    * <h4>Default Configuration:</h4>
    * <ul>
    *   <li><strong>Status</strong> - Enabled by default</li>
@@ -209,7 +209,7 @@ public class TenantManagementService {
    *   <li><strong>Storage Quota</strong> - 1GB (if not specified)</li>
    *   <li><strong>API Rate Limit</strong> - 1000 requests/minute (if not specified)</li>
    * </ul>
-   * 
+   *
    * <h4>Schema Provisioning:</h4>
    * <ul>
    *   <li>Creates schema with name pattern: {@code tenant_[tenantId]}</li>
@@ -217,7 +217,7 @@ public class TenantManagementService {
    *   <li>Sets up initial tables, indexes, and constraints</li>
    *   <li>Configures tenant-specific data and settings</li>
    * </ul>
-   * 
+   *
    * <h4>Error Handling:</h4>
    * <ul>
    *   <li>Rollback entity creation if schema provisioning fails</li>
@@ -225,16 +225,14 @@ public class TenantManagementService {
    *   <li>Detailed error logging for troubleshooting</li>
    *   <li>Graceful handling of concurrent creation attempts</li>
    * </ul>
-   * 
-   * @param request The tenant creation request with all required information
+   *
+   * @param request   The tenant creation request with all required information
    * @param createdBy The identifier of the user/system creating the tenant
    * @return TenantResponse containing the created tenant information
-   * 
    * @throws TenantManagementException.TenantAlreadyExistsException If tenant ID already exists
    * @throws TenantManagementException.DomainAlreadyExistsException If domain is already assigned
-   * @throws TenantManagementException.SchemaProvisioningException If database schema creation fails
-   * @throws ValidationException If request data is invalid
-   * 
+   * @throws TenantManagementException.SchemaProvisioningException  If database schema creation fails
+   * @throws ValidationException                                    If request data is invalid
    * @see CreateTenantRequest
    * @see TenantResponse
    * @see SchemaNameResolver

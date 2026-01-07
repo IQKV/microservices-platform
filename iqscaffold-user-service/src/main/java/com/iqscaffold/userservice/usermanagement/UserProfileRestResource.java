@@ -192,7 +192,7 @@ public class UserProfileRestResource {
       )
       @Valid @RequestBody UpdateLocaleRequest request,
       Authentication authentication) {
-    
+
     if (authentication instanceof JwtAuthenticationToken token) {
       var subject = token.getToken().getSubject();
       try {

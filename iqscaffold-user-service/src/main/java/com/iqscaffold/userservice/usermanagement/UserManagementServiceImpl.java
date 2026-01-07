@@ -31,10 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see UserManagementService
  * @see UserDto
  * @see UserContext
+ * @since 1.0
  */
 @Service
 @Transactional

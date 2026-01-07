@@ -30,241 +30,241 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @DisplayName("User Locale Service Tests")
 class UserLocaleServiceTest {
 
-    private UserLocaleService userLocaleService;
+  private UserLocaleService userLocaleService;
 
-    @Mock
-    private UserRepository userRepository;
+  @Mock
+  private UserRepository userRepository;
 
-    private User testUser;
+  private User testUser;
 
-    @BeforeEach
-    void setUp() {
-        userLocaleService = new UserLocaleService(userRepository);
-        
-        testUser = new User("testuser", "test@example.com", "password", "Test", "User", "tenant-123");
-        testUser.setPreferredLocale("es");
-    }
+  @BeforeEach
+  void setUp() {
+    userLocaleService = new UserLocaleService(userRepository);
 
-    @AfterEach
-    void cleanupSecurityContext() {
-        SecurityContextHolder.clearContext();
-    }
+    testUser = new User("testuser", "test@example.com", "password", "Test", "User", "tenant-123");
+    testUser.setPreferredLocale("es");
+  }
 
-    @Test
-    @DisplayName("Should get current user locale from authenticated user")
-    void shouldGetCurrentUserLocaleFromAuthenticatedUser() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("testuser", "password", java.util.Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+  @AfterEach
+  void cleanupSecurityContext() {
+    SecurityContextHolder.clearContext();
+  }
 
-        Locale result = userLocaleService.getCurrentUserLocale();
+  @Test
+  @DisplayName("Should get current user locale from authenticated user")
+  void shouldGetCurrentUserLocaleFromAuthenticatedUser() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("testuser", "password", java.util.Collections.emptyList());
+    SecurityContextHolder.getContext().setAuthentication(auth);
 
-        assertThat(result.getLanguage()).isEqualTo("es");
-    }
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
-    @Test
-    @DisplayName("Should return English when user is not authenticated")
-    void shouldReturnEnglishWhenUserIsNotAuthenticated() {
-        SecurityContextHolder.clearContext();
+    Locale result = userLocaleService.getCurrentUserLocale();
 
-        Locale result = userLocaleService.getCurrentUserLocale();
+    assertThat(result.getLanguage()).isEqualTo("es");
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English when user is not authenticated")
+  void shouldReturnEnglishWhenUserIsNotAuthenticated() {
+    SecurityContextHolder.clearContext();
 
-    @Test
-    @DisplayName("Should return English when authentication is null")
-    void shouldReturnEnglishWhenAuthenticationIsNull() {
-        SecurityContextHolder.getContext().setAuthentication(null);
+    Locale result = userLocaleService.getCurrentUserLocale();
 
-        Locale result = userLocaleService.getCurrentUserLocale();
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English when authentication is null")
+  void shouldReturnEnglishWhenAuthenticationIsNull() {
+    SecurityContextHolder.getContext().setAuthentication(null);
 
-    @Test
-    @DisplayName("Should return English for anonymous user")
-    void shouldReturnEnglishForAnonymousUser() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("anonymousUser", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    Locale result = userLocaleService.getCurrentUserLocale();
 
-        Locale result = userLocaleService.getCurrentUserLocale();
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English for anonymous user")
+  void shouldReturnEnglishForAnonymousUser() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("anonymousUser", null);
+    SecurityContextHolder.getContext().setAuthentication(auth);
 
-    @Test
-    @DisplayName("Should get user locale from user object")
-    void shouldGetUserLocaleFromUserObject() {
-        Locale result = userLocaleService.getUserLocale(testUser);
+    Locale result = userLocaleService.getCurrentUserLocale();
 
-        assertThat(result.getLanguage()).isEqualTo("es");
-    }
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-    @Test
-    @DisplayName("Should return English when user has no preferred locale")
-    void shouldReturnEnglishWhenUserHasNoPreferredLocale() {
-        testUser.setPreferredLocale(null);
+  @Test
+  @DisplayName("Should get user locale from user object")
+  void shouldGetUserLocaleFromUserObject() {
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    assertThat(result.getLanguage()).isEqualTo("es");
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English when user has no preferred locale")
+  void shouldReturnEnglishWhenUserHasNoPreferredLocale() {
+    testUser.setPreferredLocale(null);
 
-    @Test
-    @DisplayName("Should return English when user preferred locale is empty")
-    void shouldReturnEnglishWhenUserPreferredLocaleIsEmpty() {
-        testUser.setPreferredLocale("");
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English when user preferred locale is empty")
+  void shouldReturnEnglishWhenUserPreferredLocaleIsEmpty() {
+    testUser.setPreferredLocale("");
 
-    @Test
-    @DisplayName("Should return English when user preferred locale is blank")
-    void shouldReturnEnglishWhenUserPreferredLocaleIsBlank() {
-        testUser.setPreferredLocale("   ");
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+  @Test
+  @DisplayName("Should return English when user preferred locale is blank")
+  void shouldReturnEnglishWhenUserPreferredLocaleIsBlank() {
+    testUser.setPreferredLocale("   ");
 
-    @Test
-    @DisplayName("Should return English when user is null")
-    void shouldReturnEnglishWhenUserIsNull() {
-        Locale result = userLocaleService.getUserLocale(null);
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        assertThat(result).isEqualTo(Locale.ENGLISH);
-    }
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-    @Test
-    @DisplayName("Should return English when locale format is invalid")
-    void shouldReturnEnglishWhenLocaleFormatIsInvalid() {
-        testUser.setPreferredLocale("invalid-locale-format-xyz");
+  @Test
+  @DisplayName("Should return English when user is null")
+  void shouldReturnEnglishWhenUserIsNull() {
+    Locale result = userLocaleService.getUserLocale(null);
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    assertThat(result).isEqualTo(Locale.ENGLISH);
+  }
 
-        // Locale.forLanguageTag doesn't throw exception, it creates a locale with the tag
-        // So we just verify it returns a locale (not necessarily English)
-        assertThat(result).isNotNull();
-    }
+  @Test
+  @DisplayName("Should return English when locale format is invalid")
+  void shouldReturnEnglishWhenLocaleFormatIsInvalid() {
+    testUser.setPreferredLocale("invalid-locale-format-xyz");
 
-    @Test
-    @DisplayName("Should handle locale with region code")
-    void shouldHandleLocaleWithRegionCode() {
-        testUser.setPreferredLocale("en-US");
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    // Locale.forLanguageTag doesn't throw exception, it creates a locale with the tag
+    // So we just verify it returns a locale (not necessarily English)
+    assertThat(result).isNotNull();
+  }
 
-        assertThat(result.getLanguage()).isEqualTo("en");
-        assertThat(result.getCountry()).isEqualTo("US");
-    }
+  @Test
+  @DisplayName("Should handle locale with region code")
+  void shouldHandleLocaleWithRegionCode() {
+    testUser.setPreferredLocale("en-US");
 
-    @Test
-    @DisplayName("Should get current user from security context")
-    void shouldGetCurrentUserFromSecurityContext() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("testuser", "password", java.util.Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Optional<User> result = userLocaleService.getCurrentUser();
+    assertThat(result.getLanguage()).isEqualTo("en");
+    assertThat(result.getCountry()).isEqualTo("US");
+  }
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(testUser);
-    }
+  @Test
+  @DisplayName("Should get current user from security context")
+  void shouldGetCurrentUserFromSecurityContext() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("testuser", "password", java.util.Collections.emptyList());
+    SecurityContextHolder.getContext().setAuthentication(auth);
 
-    @Test
-    @DisplayName("Should return empty when user not found in repository")
-    void shouldReturnEmptyWhenUserNotFoundInRepository() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("nonexistent", "password", java.util.Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userLocaleService.getCurrentUser();
+    Optional<User> result = userLocaleService.getCurrentUser();
 
-        assertThat(result).isEmpty();
-    }
+    assertThat(result).isPresent();
+    assertThat(result.get()).isEqualTo(testUser);
+  }
 
-    @Test
-    @DisplayName("Should return empty when authentication principal is anonymous")
-    void shouldReturnEmptyWhenAuthenticationPrincipalIsAnonymous() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("anonymousUser", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+  @Test
+  @DisplayName("Should return empty when user not found in repository")
+  void shouldReturnEmptyWhenUserNotFoundInRepository() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("nonexistent", "password", java.util.Collections.emptyList());
+    SecurityContextHolder.getContext().setAuthentication(auth);
 
-        Optional<User> result = userLocaleService.getCurrentUser();
+    when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
-        assertThat(result).isEmpty();
-    }
+    Optional<User> result = userLocaleService.getCurrentUser();
 
-    @Test
-    @DisplayName("Should update user locale")
-    void shouldUpdateUserLocale() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+    assertThat(result).isEmpty();
+  }
 
-        userLocaleService.updateUserLocale("testuser", "fr");
+  @Test
+  @DisplayName("Should return empty when authentication principal is anonymous")
+  void shouldReturnEmptyWhenAuthenticationPrincipalIsAnonymous() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("anonymousUser", null);
+    SecurityContextHolder.getContext().setAuthentication(auth);
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-        
-        User savedUser = userCaptor.getValue();
-        assertThat(savedUser.getPreferredLocale()).isEqualTo("fr");
-    }
+    Optional<User> result = userLocaleService.getCurrentUser();
 
-    @Test
-    @DisplayName("Should not update when user not found")
-    void shouldNotUpdateWhenUserNotFound() {
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+    assertThat(result).isEmpty();
+  }
 
-        userLocaleService.updateUserLocale("nonexistent", "fr");
+  @Test
+  @DisplayName("Should update user locale")
+  void shouldUpdateUserLocale() {
+    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+    when(userRepository.save(any(User.class))).thenReturn(testUser);
 
-        verify(userRepository).findByUsername("nonexistent");
-    }
+    userLocaleService.updateUserLocale("testuser", "fr");
 
-    @Test
-    @DisplayName("Should handle French locale")
-    void shouldHandleFrenchLocale() {
-        testUser.setPreferredLocale("fr");
+    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+    verify(userRepository).save(userCaptor.capture());
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    User savedUser = userCaptor.getValue();
+    assertThat(savedUser.getPreferredLocale()).isEqualTo("fr");
+  }
 
-        assertThat(result).isEqualTo(Locale.FRENCH);
-    }
+  @Test
+  @DisplayName("Should not update when user not found")
+  void shouldNotUpdateWhenUserNotFound() {
+    when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("Should handle German locale")
-    void shouldHandleGermanLocale() {
-        testUser.setPreferredLocale("de");
+    userLocaleService.updateUserLocale("nonexistent", "fr");
 
-        Locale result = userLocaleService.getUserLocale(testUser);
+    verify(userRepository).findByUsername("nonexistent");
+  }
 
-        assertThat(result).isEqualTo(Locale.GERMAN);
-    }
+  @Test
+  @DisplayName("Should handle French locale")
+  void shouldHandleFrenchLocale() {
+    testUser.setPreferredLocale("fr");
 
-    @Test
-    @DisplayName("Should return empty when username is null in security context")
-    void shouldReturnEmptyWhenUsernameIsNullInSecurityContext() {
-        Authentication auth = new UsernamePasswordAuthenticationToken(null, "password");
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Optional<User> result = userLocaleService.getCurrentUser();
+    assertThat(result).isEqualTo(Locale.FRENCH);
+  }
 
-        assertThat(result).isEmpty();
-    }
+  @Test
+  @DisplayName("Should handle German locale")
+  void shouldHandleGermanLocale() {
+    testUser.setPreferredLocale("de");
 
-    @Test
-    @DisplayName("Should return empty when username is empty in security context")
-    void shouldReturnEmptyWhenUsernameIsEmptyInSecurityContext() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("", "password");
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    Locale result = userLocaleService.getUserLocale(testUser);
 
-        Optional<User> result = userLocaleService.getCurrentUser();
+    assertThat(result).isEqualTo(Locale.GERMAN);
+  }
 
-        assertThat(result).isEmpty();
-    }
+  @Test
+  @DisplayName("Should return empty when username is null in security context")
+  void shouldReturnEmptyWhenUsernameIsNullInSecurityContext() {
+    Authentication auth = new UsernamePasswordAuthenticationToken(null, "password");
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    Optional<User> result = userLocaleService.getCurrentUser();
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  @DisplayName("Should return empty when username is empty in security context")
+  void shouldReturnEmptyWhenUsernameIsEmptyInSecurityContext() {
+    Authentication auth = new UsernamePasswordAuthenticationToken("", "password");
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
+    Optional<User> result = userLocaleService.getCurrentUser();
+
+    assertThat(result).isEmpty();
+  }
 }

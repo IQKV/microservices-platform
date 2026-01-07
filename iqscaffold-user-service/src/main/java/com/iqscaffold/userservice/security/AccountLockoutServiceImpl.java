@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
  *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see AccountLockoutService
  * @see RedisTemplate
+ * @since 1.0
  */
 @Service
 public class AccountLockoutServiceImpl implements AccountLockoutService {

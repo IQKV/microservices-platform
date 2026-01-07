@@ -17,65 +17,65 @@ import org.springframework.util.StringUtils;
 @Service
 public class UserLocaleService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public UserLocaleService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+  public UserLocaleService(final UserRepository userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  /**
+   * Get the current authenticated user's preferred locale.
+   * Falls back to English if user is not authenticated or has no preference.
+   */
+  public Locale getCurrentUserLocale() {
+    return getCurrentUser()
+        .map(this::getUserLocale)
+        .orElse(Locale.ENGLISH);
+  }
+
+  /**
+   * Get locale for a specific user.
+   * Falls back to English if user has no preference set.
+   */
+  public Locale getUserLocale(User user) {
+    if (user != null && StringUtils.hasText(user.getPreferredLocale())) {
+      try {
+        return Locale.forLanguageTag(user.getPreferredLocale());
+      } catch (final Exception e) {
+        // Invalid locale format, fall back to English
+      }
+    }
+    return Locale.ENGLISH;
+  }
+
+  /**
+   * Get the current authenticated user from security context.
+   */
+  public Optional<User> getCurrentUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || !authentication.isAuthenticated()
+        || "anonymousUser".equals(authentication.getPrincipal())) {
+      return Optional.empty();
     }
 
-    /**
-     * Get the current authenticated user's preferred locale.
-     * Falls back to English if user is not authenticated or has no preference.
-     */
-    public Locale getCurrentUserLocale() {
-        return getCurrentUser()
-            .map(this::getUserLocale)
-            .orElse(Locale.ENGLISH);
+    // Extract username from authentication (assuming JWT contains username)
+    String username = authentication.getName();
+    if (StringUtils.hasText(username)) {
+      return userRepository.findByUsername(username);
     }
 
-    /**
-     * Get locale for a specific user.
-     * Falls back to English if user has no preference set.
-     */
-    public Locale getUserLocale(User user) {
-        if (user != null && StringUtils.hasText(user.getPreferredLocale())) {
-            try {
-                return Locale.forLanguageTag(user.getPreferredLocale());
-            } catch (Exception e) {
-                // Invalid locale format, fall back to English
-            }
-        }
-        return Locale.ENGLISH;
-    }
+    return Optional.empty();
+  }
 
-    /**
-     * Get the current authenticated user from security context.
-     */
-    public Optional<User> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication == null || !authentication.isAuthenticated() || 
-            "anonymousUser".equals(authentication.getPrincipal())) {
-            return Optional.empty();
-        }
-
-        // Extract username from authentication (assuming JWT contains username)
-        String username = authentication.getName();
-        if (StringUtils.hasText(username)) {
-            return userRepository.findByUsername(username);
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Update user's preferred locale.
-     */
-    public void updateUserLocale(String username, String locale) {
-        userRepository.findByUsername(username)
-            .ifPresent(user -> {
-                user.setPreferredLocale(locale);
-                userRepository.save(user);
-            });
-    }
+  /**
+   * Update user's preferred locale.
+   */
+  public void updateUserLocale(String username, String locale) {
+    userRepository.findByUsername(username)
+        .ifPresent(user -> {
+          user.setPreferredLocale(locale);
+          userRepository.save(user);
+        });
+  }
 }

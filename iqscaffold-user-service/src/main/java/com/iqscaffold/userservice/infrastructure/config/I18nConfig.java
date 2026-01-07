@@ -20,7 +20,7 @@ public class I18nConfig {
 
   private final IqScaffoldProperties properties;
 
-  public I18nConfig(IqScaffoldProperties properties) {
+  public I18nConfig(final IqScaffoldProperties properties) {
     this.properties = properties;
   }
 

@@ -30,11 +30,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * Global exception handler providing centralized error handling with RFC 9457 Problem Details compliance.
- * 
+ *
  * <p>This handler implements comprehensive error handling across the entire user service, providing
  * consistent error responses, detailed problem information, and proper HTTP status codes. It follows
  * the RFC 9457 Problem Details standard for machine-readable error responses.
- * 
+ *
  * <h3>Error Handling Features</h3>
  * <ul>
  *   <li><strong>RFC 9457 Compliance</strong> - Standard Problem Details format for all errors</li>
@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>Context Enrichment</strong> - Automatic addition of request context and correlation IDs</li>
  *   <li><strong>Security Aware</strong> - Prevents information leakage in error responses</li>
  * </ul>
- * 
+ *
  * <h3>Problem Details Structure</h3>
  * <ul>
  *   <li><strong>type</strong> - URI identifying the problem type</li>
@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>instance</strong> - URI identifying the specific occurrence</li>
  *   <li><strong>Additional Properties</strong> - Context-specific error information</li>
  * </ul>
- * 
+ *
  * <h3>Handled Exception Types</h3>
  * <ul>
  *   <li><strong>Validation Errors</strong> - Bean validation and constraint violations</li>
@@ -62,7 +62,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>Business Logic Errors</strong> - Domain-specific exceptions</li>
  *   <li><strong>System Errors</strong> - Database, network, and infrastructure issues</li>
  * </ul>
- * 
+ *
  * <h3>Security Considerations</h3>
  * <ul>
  *   <li><strong>Information Hiding</strong> - Sensitive details excluded from error responses</li>
@@ -70,7 +70,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>Error Code Mapping</strong> - Generic error codes prevent system enumeration</li>
  *   <li><strong>Audit Integration</strong> - Security-relevant errors logged for monitoring</li>
  * </ul>
- * 
+ *
  * <h3>Context Enrichment</h3>
  * <p>All error responses automatically include:
  * <ul>
@@ -80,7 +80,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>HTTP Method</strong> - The HTTP method used</li>
  *   <li><strong>Timestamp</strong> - When the error occurred</li>
  * </ul>
- * 
+ *
  * <h3>Validation Error Handling</h3>
  * <ul>
  *   <li><strong>Field-Level Errors</strong> - Detailed validation messages per field</li>
@@ -88,14 +88,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>Internationalization</strong> - Localized error messages</li>
  *   <li><strong>Error Codes</strong> - Machine-readable error identification</li>
  * </ul>
- * 
+ *
  * <h3>OpenAPI Integration</h3>
  * <ul>
  *   <li><strong>Documented Responses</strong> - All error responses documented in OpenAPI spec</li>
  *   <li><strong>Schema Definitions</strong> - ProblemDetail schema included</li>
  *   <li><strong>Status Code Mapping</strong> - Proper HTTP status codes for each error type</li>
  * </ul>
- * 
+ *
  * <h3>Logging Strategy</h3>
  * <ul>
  *   <li><strong>Error Classification</strong> - Different log levels based on error severity</li>
@@ -103,7 +103,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>Correlation Tracking</strong> - Request correlation IDs in all log entries</li>
  *   <li><strong>Security Events</strong> - Special handling for security-related errors</li>
  * </ul>
- * 
+ *
  * <h3>Error Response Examples</h3>
  * <pre>{@code
  * // Validation Error Response
@@ -123,7 +123,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *     }
  *   ]
  * }
- * 
+ *
  * // Authentication Error Response
  * {
  *   "type": "https://problems.iqscaffold.com/authentication-error",
@@ -134,7 +134,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   "correlationId": "def789"
  * }
  * }</pre>
- * 
+ *
  * <h3>Exception Mapping</h3>
  * <ul>
  *   <li><strong>400 Bad Request</strong> - Validation errors, malformed requests</li>
@@ -145,13 +145,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>429 Too Many Requests</strong> - Rate limiting</li>
  *   <li><strong>500 Internal Server Error</strong> - System errors</li>
  * </ul>
- * 
+ *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see ProblemDetail
  * @see RFC9457
  * @see RestControllerAdvice
+ * @since 1.0
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -160,11 +160,11 @@ public class GlobalExceptionHandler {
 
   /**
    * Create a standardized ProblemDetail response with comprehensive context information.
-   * 
+   *
    * <p>This helper method constructs RFC 9457 compliant Problem Details responses with
    * consistent structure and automatic context enrichment. It ensures all error responses
    * follow the same format and include necessary debugging information.
-   * 
+   *
    * <h4>Automatic Context Addition:</h4>
    * <ul>
    *   <li><strong>Request Path</strong> - The endpoint that generated the error</li>
@@ -173,7 +173,7 @@ public class GlobalExceptionHandler {
    *   <li><strong>Request ID</strong> - Unique identifier for this specific request</li>
    *   <li><strong>Timestamp</strong> - When the error occurred (implicit in response)</li>
    * </ul>
-   * 
+   *
    * <h4>Problem Detail Structure:</h4>
    * <ul>
    *   <li><strong>type</strong> - URI identifying the problem category</li>
@@ -182,7 +182,7 @@ public class GlobalExceptionHandler {
    *   <li><strong>detail</strong> - Detailed problem description</li>
    *   <li><strong>instance</strong> - URI of the specific problem occurrence</li>
    * </ul>
-   * 
+   *
    * <h4>Context Properties:</h4>
    * <ul>
    *   <li><strong>path</strong> - Request URI path for debugging</li>
@@ -190,14 +190,13 @@ public class GlobalExceptionHandler {
    *   <li><strong>correlationId</strong> - Distributed tracing identifier</li>
    *   <li><strong>requestId</strong> - Unique request identifier</li>
    * </ul>
-   * 
-   * @param type URI identifying the problem type (e.g., "https://problems.iqscaffold.com/validation-error")
-   * @param title Human-readable summary of the problem type
-   * @param status HTTP status code for the response
-   * @param detail Detailed explanation of this specific problem occurrence
+   *
+   * @param type    URI identifying the problem type (e.g., "https://problems.iqscaffold.com/validation-error")
+   * @param title   Human-readable summary of the problem type
+   * @param status  HTTP status code for the response
+   * @param detail  Detailed explanation of this specific problem occurrence
    * @param request The HTTP request that caused the error (for context extraction)
    * @return Fully constructed ProblemDetail with all context information
-   * 
    * @see ProblemDetail
    * @see HttpServletRequest
    * @see MDC

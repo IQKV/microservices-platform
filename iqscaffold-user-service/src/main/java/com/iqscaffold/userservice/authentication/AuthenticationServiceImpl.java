@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>This service implements enterprise-grade authentication patterns including:
  * <ul>
- *   <li><strong>Account Lockout Protection</strong> - Prevents brute force attacks by locking accounts after failed attempts</li>    
+ *   <li><strong>Account Lockout Protection</strong> - Prevents brute force attacks by locking accounts after failed attempts</li>
  *   <li><strong>Input Sanitization</strong> - Protects against injection attacks and malicious input</li>
  *   <li><strong>Security Audit Logging</strong> - Comprehensive logging of all authentication events</li>
  *   <li><strong>Session Management</strong> - Distributed session tracking with Redis</li>
@@ -39,10 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see JwtService
  * @see AccountLockoutService
  * @see SecurityAuditService
+ * @since 1.0
  */
 @Service
 @Transactional
@@ -61,14 +61,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final IqScaffoldProperties iqScaffoldProperties;
 
   public AuthenticationServiceImpl(final UserRepository userRepository,
-                               final PasswordEncoder passwordEncoder,
-                               final JwtService jwtService,
-                               final AccountLockoutService accountLockoutService,
-                               final SecurityAuditService securityAuditService,
-                               final InputSanitizer inputSanitizer,
-                               final TenantAwareSessionService sessionService,
-                               final MeterRegistry meterRegistry,
-                               final IqScaffoldProperties iqScaffoldProperties) {
+                                   final PasswordEncoder passwordEncoder,
+                                   final JwtService jwtService,
+                                   final AccountLockoutService accountLockoutService,
+                                   final SecurityAuditService securityAuditService,
+                                   final InputSanitizer inputSanitizer,
+                                   final TenantAwareSessionService sessionService,
+                                   final MeterRegistry meterRegistry,
+                                   final IqScaffoldProperties iqScaffoldProperties) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -516,8 +516,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     // Validate locale using configuration
     var i18nConfig = iqScaffoldProperties.i18n();
     if (!i18nConfig.isLocaleSupported(locale)) {
-      throw new AuthenticationException("Unsupported locale: " + locale + 
-          ". Supported locales: " + i18nConfig.supportedLocales());
+      throw new AuthenticationException("Unsupported locale: " + locale +
+                                        ". Supported locales: " + i18nConfig.supportedLocales());
     }
 
     // Update user's preferred locale

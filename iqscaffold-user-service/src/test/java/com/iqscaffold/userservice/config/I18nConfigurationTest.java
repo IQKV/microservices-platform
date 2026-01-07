@@ -14,7 +14,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({"test", "i18n"})
 @TestPropertySource(properties = {
     "iqscaffold.i18n.supported-locales[0]=en",
-    "iqscaffold.i18n.supported-locales[1]=es", 
+    "iqscaffold.i18n.supported-locales[1]=es",
     "iqscaffold.i18n.supported-locales[2]=fr",
     "iqscaffold.i18n.default-locale=en",
     "iqscaffold.i18n.message-basename=i18n/messages",
@@ -24,9 +24,9 @@ import org.springframework.test.context.TestPropertySource;
 })
 class I18nConfigurationTest {
 
-    @Test
-    void contextLoads() {
-        // Test that the application context loads successfully with i18n configuration
-        assertThat(true).isTrue();
-    }
+  @Test
+  void contextLoads() {
+    // Test that the application context loads successfully with i18n configuration
+    assertThat(true).isTrue();
+  }
 }

@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * Advanced RSA key management service for JWT signing with automatic key rotation and grace period support.
- * 
+ *
  * <p>This service provides enterprise-grade cryptographic key management for JWT token signing and validation.
  * It implements automatic key rotation with a grace period to ensure seamless token validation during
  * key transitions, preventing service disruption while maintaining security.
- * 
+ *
  * <h3>Key Management Features</h3>
  * <ul>
  *   <li><strong>Automatic Key Generation</strong> - Creates RSA-2048 key pairs on startup</li>
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  *   <li><strong>JWK Set Endpoint</strong> - Provides public keys for downstream services</li>
  *   <li><strong>Thread-Safe Operations</strong> - Concurrent access support with proper synchronization</li>
  * </ul>
- * 
+ *
  * <h3>Security Architecture</h3>
  * <ul>
  *   <li><strong>RSA-2048 Keys</strong> - Industry-standard key size for strong security</li>
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
  *   <li><strong>Secure Storage</strong> - In-memory key storage with proper lifecycle management</li>
  *   <li><strong>Automatic Cleanup</strong> - Expired keys are automatically removed</li>
  * </ul>
- * 
+ *
  * <h3>Key Rotation Strategy</h3>
  * <ol>
  *   <li><strong>Generation</strong> - New RSA key pair is generated</li>
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
  *   <li><strong>Grace Period</strong> - Old keys remain available for validation (7 days)</li>
  *   <li><strong>Cleanup</strong> - Expired keys are removed from memory</li>
  * </ol>
- * 
+ *
  * <h3>JWK Set Support</h3>
  * <p>Provides a JWK Set endpoint for downstream services to validate tokens:
  * <ul>
@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
  *   <li>Standard JWK format with key metadata</li>
  *   <li>Automatic updates when keys rotate</li>
  * </ul>
- * 
+ *
  * <h3>Thread Safety</h3>
  * <p>All operations are thread-safe using:
  * <ul>
@@ -61,30 +61,30 @@ import org.springframework.stereotype.Service;
  *   <li>{@code volatile} fields for atomic updates</li>
  *   <li>{@code synchronized} methods for critical sections</li>
  * </ul>
- * 
+ *
  * <h3>Configuration</h3>
  * <ul>
  *   <li><strong>Key Size</strong> - 2048 bits (configurable)</li>
  *   <li><strong>Grace Period</strong> - 7 days (configurable)</li>
  *   <li><strong>Rotation Schedule</strong> - Configurable via Spring scheduling</li>
  * </ul>
- * 
+ *
  * <h3>Usage Example</h3>
  * <pre>{@code
  * @Autowired
  * private JwtKeyManagementService keyService;
- * 
+ *
  * // Get current signing key
  * RSAPrivateKey signingKey = keyService.getCurrentPrivateKey();
  * String keyId = keyService.getCurrentKeyId();
- * 
+ *
  * // Get JWK Set for validation
  * JWKSet jwkSet = keyService.getJwkSet();
- * 
+ *
  * // Manually rotate keys (usually done automatically)
  * keyService.rotateKeys();
  * }</pre>
- * 
+ *
  * <h3>Monitoring and Observability</h3>
  * <ul>
  *   <li>Structured logging for key lifecycle events</li>
@@ -92,13 +92,13 @@ import org.springframework.stereotype.Service;
  *   <li>Error logging for key generation failures</li>
  *   <li>Key age and usage tracking</li>
  * </ul>
- * 
+ *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see JwtService
  * @see JWKSet
  * @see RSAKey
+ * @since 1.0
  */
 @Service
 public final class JwtKeyManagementService {
@@ -117,11 +117,11 @@ public final class JwtKeyManagementService {
 
   /**
    * Initialize cryptographic keys during service construction.
-   * 
+   *
    * <p>This method is called during service initialization to generate the initial RSA key pair
    * required for JWT token signing. It's designed to be safe for construction-time execution
    * and handles errors gracefully to prevent partial service initialization.
-   * 
+   *
    * <h4>Initialization Process:</h4>
    * <ol>
    *   <li>Generate unique key ID using UUID</li>
@@ -130,19 +130,19 @@ public final class JwtKeyManagementService {
    *   <li>Set as current active key</li>
    *   <li>Log successful initialization</li>
    * </ol>
-   * 
+   *
    * <h4>Error Handling:</h4>
    * <p>If key generation fails during initialization, this method throws an
    * {@code ExceptionInInitializerError} to prevent the service from starting in an
    * invalid state. This ensures fail-fast behavior and prevents runtime errors.
-   * 
+   *
    * <h4>Security Considerations:</h4>
    * <ul>
    *   <li>Keys are generated using secure random number generation</li>
    *   <li>Private keys never leave the service boundary</li>
    *   <li>Key generation uses industry-standard algorithms</li>
    * </ul>
-   * 
+   *
    * @throws ExceptionInInitializerError If key generation fails during initialization
    */
   private void initializeKeys() {
@@ -164,11 +164,11 @@ public final class JwtKeyManagementService {
 
   /**
    * Rotate cryptographic keys with zero-downtime transition and grace period support.
-   * 
+   *
    * <p>This method implements a sophisticated key rotation strategy that ensures continuous
    * service availability during key transitions. It generates new keys while maintaining
    * old keys for a grace period, allowing existing tokens to remain valid during the transition.
-   * 
+   *
    * <h4>Rotation Process:</h4>
    * <ol>
    *   <li><strong>New Key Generation</strong> - Create fresh RSA-2048 key pair</li>
@@ -177,7 +177,7 @@ public final class JwtKeyManagementService {
    *   <li><strong>JWK Set Update</strong> - Update public key set for downstream services</li>
    *   <li><strong>Cleanup Scheduling</strong> - Schedule removal of expired keys</li>
    * </ol>
-   * 
+   *
    * <h4>Zero-Downtime Guarantee:</h4>
    * <ul>
    *   <li>New tokens are signed with the new key immediately</li>
@@ -185,7 +185,7 @@ public final class JwtKeyManagementService {
    *   <li>No service interruption during rotation</li>
    *   <li>Gradual transition over the grace period</li>
    * </ul>
-   * 
+   *
    * <h4>Grace Period Management:</h4>
    * <ul>
    *   <li><strong>Duration</strong> - 7 days (configurable)</li>
@@ -193,7 +193,7 @@ public final class JwtKeyManagementService {
    *   <li><strong>Cleanup</strong> - Automatic removal after grace period</li>
    *   <li><strong>Validation</strong> - Old keys remain available for token validation</li>
    * </ul>
-   * 
+   *
    * <h4>Security Benefits:</h4>
    * <ul>
    *   <li>Limits key exposure time</li>
@@ -201,13 +201,12 @@ public final class JwtKeyManagementService {
    *   <li>Maintains cryptographic best practices</li>
    *   <li>Enables compliance with security policies</li>
    * </ul>
-   * 
+   *
    * <h4>Error Handling:</h4>
    * <p>If key generation fails, the rotation is aborted and the current key remains active.
    * This ensures service continuity even if rotation encounters issues.
-   * 
+   *
    * @throws RuntimeException If key generation fails (current keys remain active)
-   * 
    * @see #cleanupExpiredKeys()
    * @see #getCurrentKeyId()
    */

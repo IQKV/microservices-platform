@@ -25,11 +25,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Core user entity representing authenticated user accounts with comprehensive profile and security information.
- * 
+ *
  * <p>This entity serves as the central user representation in the multi-tenant authentication system,
  * containing all necessary information for user identification, authentication, authorization, and
  * profile management. It implements multi-tenant isolation through the TenantAware base class.
- * 
+ *
  * <h3>Entity Characteristics</h3>
  * <ul>
  *   <li><strong>Multi-Tenant Aware</strong> - Inherits tenant isolation from TenantAware base class</li>
@@ -37,7 +37,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Profile Complete</strong> - Comprehensive user profile information</li>
  *   <li><strong>Audit Enabled</strong> - Automatic timestamp tracking for creation and updates</li>
  * </ul>
- * 
+ *
  * <h3>Authentication Fields</h3>
  * <ul>
  *   <li><strong>username</strong> - Unique identifier for login (50 chars max)</li>
@@ -46,7 +46,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>enabled</strong> - Account status flag (default: true)</li>
  *   <li><strong>emailVerified</strong> - Email verification status (default: false)</li>
  * </ul>
- * 
+ *
  * <h3>Profile Information</h3>
  * <ul>
  *   <li><strong>firstName</strong> - User's first name (100 chars max)</li>
@@ -55,7 +55,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>timezone</strong> - User's timezone preference</li>
  *   <li><strong>phoneNumber</strong> - Contact phone number</li>
  * </ul>
- * 
+ *
  * <h3>Security Features</h3>
  * <ul>
  *   <li><strong>Account Lockout</strong> - Support for temporary account disabling</li>
@@ -63,14 +63,14 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Password Security</strong> - BCrypt hashing with configurable strength</li>
  *   <li><strong>Audit Trail</strong> - Automatic creation and update timestamps</li>
  * </ul>
- * 
+ *
  * <h3>Multi-Tenant Architecture</h3>
  * <ul>
  *   <li><strong>Tenant Isolation</strong> - Users belong to specific tenants</li>
  *   <li><strong>Cross-Tenant Prevention</strong> - Automatic filtering by tenant context</li>
  *   <li><strong>Tenant-Aware Queries</strong> - All queries automatically scoped to tenant</li>
  * </ul>
- * 
+ *
  * <h3>Relationship Mappings</h3>
  * <ul>
  *   <li><strong>Authorities</strong> - Many-to-many relationship with roles and permissions</li>
@@ -78,7 +78,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Preferences</strong> - One-to-one relationship with user preferences</li>
  *   <li><strong>Audit Logs</strong> - One-to-many relationship with security audit entries</li>
  * </ul>
- * 
+ *
  * <h3>Database Constraints</h3>
  * <ul>
  *   <li><strong>Unique Constraints</strong> - Username and email must be globally unique</li>
@@ -86,7 +86,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Length Constraints</strong> - Maximum lengths enforced for all string fields</li>
  *   <li><strong>Index Optimization</strong> - Indexes on frequently queried fields</li>
  * </ul>
- * 
+ *
  * <h3>Security Considerations</h3>
  * <ul>
  *   <li><strong>Password Storage</strong> - Never store plain text passwords</li>
@@ -94,7 +94,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Account Status</strong> - Multiple layers of account disabling (enabled, emailVerified)</li>
  *   <li><strong>Audit Integration</strong> - All changes logged for security monitoring</li>
  * </ul>
- * 
+ *
  * <h3>Usage Patterns</h3>
  * <pre>{@code
  * // Create new user
@@ -106,14 +106,14 @@ import org.hibernate.annotations.UpdateTimestamp;
  * user.setLastName("Doe");
  * user.setEnabled(true);
  * user.setEmailVerified(false);
- * 
+ *
  * // Add authorities
  * Set<Authority> authorities = Set.of(userRole, adminRole);
  * user.setAuthorities(authorities);
- * 
+ *
  * userRepository.save(user);
  * }</pre>
- * 
+ *
  * <h3>Validation Rules</h3>
  * <ul>
  *   <li><strong>Username</strong> - 3-50 characters, alphanumeric and underscore only</li>
@@ -121,14 +121,14 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Names</strong> - 1-100 characters, letters and spaces only</li>
  *   <li><strong>Locale</strong> - Valid locale code (e.g., "en", "en_US")</li>
  * </ul>
- * 
+ *
  * @author IQ Scaffold Team
  * @version 1.0
- * @since 1.0
  * @see TenantAware
  * @see Authority
  * @see Organization
  * @see UserPreference
+ * @since 1.0
  */
 @Entity
 @Table(name = "users")

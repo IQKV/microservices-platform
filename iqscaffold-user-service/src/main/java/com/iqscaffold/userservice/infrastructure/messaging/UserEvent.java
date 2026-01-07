@@ -24,8 +24,8 @@ public class UserEvent {
   public UserEvent() {
   }
 
-  public UserEvent(String eventId, String eventType, String userId, String tenantId, 
-                   String email, Instant timestamp, Map<String, Object> metadata) {
+  public UserEvent(final String eventId, final String eventType, final String userId, final String tenantId,
+                   final String email, final Instant timestamp, final Map<String, Object> metadata) {
     this.eventId = eventId;
     this.eventType = eventType;
     this.userId = userId;
