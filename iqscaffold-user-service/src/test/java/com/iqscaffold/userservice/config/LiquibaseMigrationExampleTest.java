@@ -19,6 +19,7 @@ class LiquibaseMigrationExampleTest {
    * This is the simplest approach - just extend the base class.
    */
   @SpringBootTest
+  @Disabled("Enable to run this test manually")
   @ActiveProfiles("test")
   static class UsingBaseClassTest extends AbstractLiquibaseIntegrationTest {
 

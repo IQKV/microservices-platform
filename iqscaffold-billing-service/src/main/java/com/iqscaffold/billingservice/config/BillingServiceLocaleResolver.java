@@ -40,6 +40,11 @@ public class BillingServiceLocaleResolver extends AcceptHeaderLocaleResolver {
   }
 
   private boolean isSupportedLocale(Locale locale) {
+    // Validate locale has a valid language tag
+    if (locale.getLanguage().isEmpty()) {
+      return false;
+    }
+
     List<Locale> supportedLocales = getSupportedLocales();
     if (supportedLocales == null || supportedLocales.isEmpty()) {
       return true; // If no supported locales configured, accept all

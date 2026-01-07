@@ -63,7 +63,7 @@ class BillingServiceLocaleResolverTest {
   void resolveLocale_shouldFallbackToAcceptLanguageWhenUserLocaleInvalid() {
     // Given
     when(request.getHeader("X-User-Locale")).thenReturn("invalid-locale");
-    when(request.getLocale()).thenReturn(Locale.US);
+    when(request.getLocales()).thenReturn(java.util.Collections.enumeration(Arrays.asList(Locale.US)));
 
     // When
     Locale result = resolver.resolveLocale(request);
@@ -77,7 +77,7 @@ class BillingServiceLocaleResolverTest {
   void resolveLocale_shouldFallbackToAcceptLanguageWhenUserLocaleNotSupported() {
     // Given
     when(request.getHeader("X-User-Locale")).thenReturn("de-DE");
-    when(request.getLocale()).thenReturn(Locale.US);
+    when(request.getLocales()).thenReturn(java.util.Collections.enumeration(Arrays.asList(Locale.US)));
     resolver.setSupportedLocales(Arrays.asList(Locale.ENGLISH, Locale.FRENCH));
 
     // When
@@ -133,7 +133,7 @@ class BillingServiceLocaleResolverTest {
   void resolveLocale_shouldHandleExceptionGracefully() {
     // Given
     when(request.getHeader("X-User-Locale")).thenThrow(new RuntimeException("Header error"));
-    when(request.getLocale()).thenReturn(Locale.US);
+    when(request.getLocales()).thenReturn(java.util.Collections.enumeration(Arrays.asList(Locale.US)));
 
     // When
     Locale result = resolver.resolveLocale(request);
