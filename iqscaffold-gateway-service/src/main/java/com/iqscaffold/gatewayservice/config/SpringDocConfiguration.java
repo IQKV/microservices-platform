@@ -78,7 +78,7 @@ public class SpringDocConfiguration {
         // Special handling for billing service with specialized groups
         if ("billing-service".equals(serviceName)) {
           log.info("Registering specialized API groups for billing service");
-          
+
           // Register Payment APIs
           swaggerUiConfig.addGroup("💳 Payment APIs");
           swaggerUiConfig.addUrl("/billing-service/api-docs/billing-payments");

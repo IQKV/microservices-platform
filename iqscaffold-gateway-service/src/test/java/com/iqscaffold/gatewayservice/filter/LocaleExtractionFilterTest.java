@@ -35,7 +35,7 @@ class LocaleExtractionFilterTest {
   private IqScaffoldProperties.I18nProperties i18nProperties;
 
   private LocaleExtractionFilter localeExtractionFilter;
-  
+
   // Capture the mutated exchange passed to the filter chain
   private ServerWebExchange capturedExchange;
 
@@ -45,15 +45,15 @@ class LocaleExtractionFilterTest {
       capturedExchange = invocation.getArgument(0);
       return Mono.empty();
     });
-    
+
     // Create a real I18nProperties object instead of mocking it
     i18nProperties = new IqScaffoldProperties.I18nProperties(
         List.of("en", "es", "fr"),
         "en"
     );
-    
+
     when(properties.i18n()).thenReturn(i18nProperties);
-    
+
     localeExtractionFilter = new LocaleExtractionFilter(properties);
   }
 
@@ -319,7 +319,7 @@ class LocaleExtractionFilterTest {
 
       // Should not throw exception and fall back to default
       localeExtractionFilter.filter(exchange, filterChain).block();
-      
+
       // Should use default locale
       assertThat(capturedExchange.getAttributes().get(GatewayConstants.Attributes.LOCALE)).isEqualTo("en");
     }
@@ -347,10 +347,10 @@ class LocaleExtractionFilterTest {
           "en-US"
       );
       when(properties.i18n()).thenReturn(regionalI18nProperties);
-      
+
       // Create a new filter instance with the updated properties
       var testFilter = new LocaleExtractionFilter(properties);
-      
+
       var request = MockServerHttpRequest.get("/api/test")
           .header("Accept-Language", "en-GB;q=0.9, en-US;q=0.8, fr-FR;q=0.7")
           .build();

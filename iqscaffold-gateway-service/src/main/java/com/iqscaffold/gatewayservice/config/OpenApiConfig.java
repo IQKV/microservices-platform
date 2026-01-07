@@ -166,7 +166,7 @@ public class OpenApiConfig {
       // Special handling for billing service with grouped APIs
       if ("billing-service".equals(serviceName)) {
         log.info("Configuring specialized API groups for billing service");
-        
+
         // Payment APIs group
         var paymentApi = GroupedOpenApi.builder()
             .group("billing-payments")
@@ -195,7 +195,7 @@ public class OpenApiConfig {
       }
     });
 
-    log.info("Configured OpenAPI documentation for {} downstream services with {} total groups", 
+    log.info("Configured OpenAPI documentation for {} downstream services with {} total groups",
         services.size(), serviceApis.size());
     return serviceApis;
   }

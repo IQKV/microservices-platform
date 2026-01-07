@@ -51,7 +51,7 @@ class I18nPropertiesTest {
           List.of("en", "es", "fr"),
           "de"
       )).isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Default locale 'de' must be included in supported locales");
+          .hasMessageContaining("Default locale 'de' must be included in supported locales");
     }
 
     @Test
@@ -112,7 +112,7 @@ class I18nPropertiesTest {
     void shouldFailValidationWhenSupportedLocalesIsNull() {
       // The constructor doesn't throw exception for null supportedLocales, it just skips validation
       var i18nProperties = new I18nProperties(null, "en");
-      
+
       // But bean validation should catch this
       Set<ConstraintViolation<I18nProperties>> violations = validator.validate(i18nProperties);
       assertThat(violations).isNotEmpty();
@@ -249,7 +249,7 @@ class I18nPropertiesTest {
       assertThat(i18nProperties.isLocaleSupported("fr")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("en-US")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("es-ES")).isTrue();
-      
+
       assertThat(i18nProperties.isLocaleSupported("de")).isFalse();
       assertThat(i18nProperties.isLocaleSupported("zh")).isFalse();
       assertThat(i18nProperties.isLocaleSupported("en-GB")).isFalse();
@@ -263,7 +263,7 @@ class I18nPropertiesTest {
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("fr"))).isTrue();
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("en-US"))).isTrue();
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("es-ES"))).isTrue();
-      
+
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("de"))).isFalse();
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("zh"))).isFalse();
     }
@@ -273,13 +273,13 @@ class I18nPropertiesTest {
     void shouldCheckIfLocaleObjectIsSupportedWithLanguageOnlyMatch() {
       // en-GB should match "en" in supported locales
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("en-GB"))).isTrue();
-      
+
       // es-MX should match "es" in supported locales
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("es-MX"))).isTrue();
-      
+
       // fr-CA should match "fr" in supported locales
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("fr-CA"))).isTrue();
-      
+
       // de-DE should not match any supported locale
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("de-DE"))).isFalse();
     }
@@ -290,7 +290,7 @@ class I18nPropertiesTest {
       // The actual implementation doesn't handle null gracefully, so we expect exceptions
       assertThatThrownBy(() -> i18nProperties.isLocaleSupported((String) null))
           .isInstanceOf(NullPointerException.class);
-      
+
       assertThat(i18nProperties.isLocaleSupported("")).isFalse();
       assertThat(i18nProperties.isLocaleSupported("   ")).isFalse();
     }
@@ -350,7 +350,7 @@ class I18nPropertiesTest {
       assertThat(i18nProperties.isLocaleSupported("es-ES")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("fr")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("de-DE")).isTrue();
-      
+
       // Language-only matching - the implementation checks if the language part matches
       // For es-MX, it will check "es" against supported locales, but "es" is not in the list, only "es-ES"
       // So this should be false unless we have "es" in the supported list
@@ -370,7 +370,7 @@ class I18nPropertiesTest {
       assertThat(i18nProperties.isLocaleSupported("zh-CN")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("zh-TW")).isTrue();
       assertThat(i18nProperties.isLocaleSupported("pt-BR")).isTrue();
-      
+
       // Language-only matching - "zh" and "pt" are not in the supported list, only "zh-CN", "zh-TW", "pt-BR"
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("zh-HK"))).isFalse(); // "zh" not in supported list
       assertThat(i18nProperties.isLocaleSupported(Locale.forLanguageTag("pt-PT"))).isFalse(); // "pt" not in supported list

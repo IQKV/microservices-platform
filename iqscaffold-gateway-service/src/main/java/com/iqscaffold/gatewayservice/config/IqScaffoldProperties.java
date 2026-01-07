@@ -308,10 +308,10 @@ public record IqScaffoldProperties(
    * Internationalization configuration properties with iqscaffold.i18n prefix.
    */
   public record I18nProperties(
-      @NotNull List<@Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
-                            message = "Locale must be in format 'xx' or 'xx-XX'") String> supportedLocales,
-      @NotBlank @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", 
-                        message = "Default locale must be in format 'xx' or 'xx-XX'") String defaultLocale
+      @NotNull List<@Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$",
+                             message = "Locale must be in format 'xx' or 'xx-XX'") String> supportedLocales,
+      @NotBlank @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$",
+                         message = "Default locale must be in format 'xx' or 'xx-XX'") String defaultLocale
   ) {
 
     public I18nProperties {
@@ -348,8 +348,8 @@ public record IqScaffoldProperties(
      * Check if a Locale object is supported.
      */
     public boolean isLocaleSupported(Locale locale) {
-      return supportedLocales.contains(locale.toLanguageTag()) ||
-             supportedLocales.contains(locale.getLanguage());
+      return supportedLocales.contains(locale.toLanguageTag())
+             || supportedLocales.contains(locale.getLanguage());
     }
   }
 }

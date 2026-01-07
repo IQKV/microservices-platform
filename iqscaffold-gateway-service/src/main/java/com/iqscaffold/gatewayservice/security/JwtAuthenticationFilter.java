@@ -200,7 +200,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         builder.header(GatewayConstants.Headers.X_USER_LOCALE, userContext.preferredLocale());
       }
 
-      logger.debug("User context propagated for user: {} with locale: {}", 
+      logger.debug("User context propagated for user: {} with locale: {}",
           userContext.username(), userContext.preferredLocale());
     } else {
       logger.debug("User context propagation is disabled");

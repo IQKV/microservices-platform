@@ -153,7 +153,7 @@ public class ApiDocumentationResource {
                   "apiDocs", baseUrl + "/" + contextPath + "/api-docs/billing-payments"
               ),
               java.util.Map.of(
-                  "name", "billing-webhooks", 
+                  "name", "billing-webhooks",
                   "displayName", "🔗 Webhook APIs",
                   "description", "Stripe webhook handlers for payment events",
                   "swaggerUi", baseUrl + "/" + contextPath + "/swagger-ui.html?urls.primaryName=🔗 Webhook APIs",
@@ -161,7 +161,7 @@ public class ApiDocumentationResource {
               ),
               java.util.Map.of(
                   "name", "billing-admin",
-                  "displayName", "🛠️ Billing Admin APIs", 
+                  "displayName", "🛠️ Billing Admin APIs",
                   "description", "Merchant onboarding and administrative operations",
                   "swaggerUi", baseUrl + "/" + contextPath + "/swagger-ui.html?urls.primaryName=🛠️ Billing Admin APIs",
                   "apiDocs", baseUrl + "/" + contextPath + "/api-docs/billing-admin"
