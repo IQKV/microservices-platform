@@ -3,12 +3,22 @@
     {
       "name": "iqscaffold",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties",
-      "description": "Configuration properties for IQ Scaffold Gateway Service"
+      "description": "Root configuration properties for IQ Scaffold Gateway Service"
     },
     {
       "name": "iqscaffold.cache",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$CacheProperties",
       "description": "Cache configuration with Redis support"
+    },
+    {
+      "name": "iqscaffold.cache.redis",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$CacheProperties$RedisProperties",
+      "description": "Redis connection and pool configuration"
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$CacheProperties$RedisProperties$PoolProperties",
+      "description": "Redis connection pool settings"
     },
     {
       "name": "iqscaffold.gateway",
@@ -18,17 +28,22 @@
     {
       "name": "iqscaffold.gateway.routing",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RoutingProperties",
-      "description": "Service routing with dynamic enable/disable support"
+      "description": "Service routing with dynamic enable/disable support and load balancing"
     },
     {
       "name": "iqscaffold.gateway.routing.api-prefix",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RoutingProperties$ApiPrefixProperties",
-      "description": "API prefix for environment-specific routing"
+      "description": "API prefix for environment-specific routing (e.g., /api in dev/staging, clean URLs in production)"
+    },
+    {
+      "name": "iqscaffold.gateway.routing.load-balancing",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RoutingProperties$LoadBalancingProperties",
+      "description": "Load balancing strategy and health check configuration"
     },
     {
       "name": "iqscaffold.gateway.routing.services",
-      "type": "java.util.Map",
-      "description": "Service configurations with dynamic enable/disable"
+      "type": "java.util.Map<java.lang.String, com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RoutingProperties$ServiceProperties>",
+      "description": "Service configurations with dynamic enable/disable, timeouts, and OpenAPI integration"
     },
     {
       "name": "iqscaffold.gateway.security",
@@ -36,22 +51,158 @@
       "description": "JWT authentication and security configuration"
     },
     {
+      "name": "iqscaffold.gateway.security.jwt",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$SecurityProperties$JwtProperties",
+      "description": "JWT token validation and configuration (RS256/HS256)"
+    },
+    {
       "name": "iqscaffold.gateway.security.authentication",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$SecurityProperties$AuthenticationProperties",
-      "description": "Authentication service integration"
+      "description": "Authentication service integration and user context propagation"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RateLimitingProperties",
+      "description": "Rate limiting with Redis backend and tenant-specific quotas"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.redis",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RateLimitingProperties$RedisProperties",
+      "description": "Redis configuration for rate limiting storage"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RateLimitingProperties$PoliciesProperties",
+      "description": "Rate limiting policies with default and endpoint-specific limits"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.tenant-quotas",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$RateLimitingProperties$TenantQuotasProperties",
+      "description": "Tenant-specific rate limiting quotas for multi-tenancy support"
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$CircuitBreakerProperties",
+      "description": "Circuit breaker configuration for fault tolerance"
+    },
+    {
+      "name": "iqscaffold.gateway.cors",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$CorsProperties",
+      "description": "CORS configuration for cross-origin requests"
     },
     {
       "name": "iqscaffold.gateway.transformation",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$TransformationProperties",
-      "description": "Request and response transformation"
+      "description": "Request and response transformation configuration"
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.request",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$TransformationProperties$RequestTransformationProperties",
+      "description": "Request transformation with header enrichment and context propagation"
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.response",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$GatewayProperties$TransformationProperties$ResponseTransformationProperties",
+      "description": "Response transformation with security headers and internal header removal"
+    },
+    {
+      "name": "iqscaffold.i18n",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Internationalization configuration with supported locales"
     },
     {
       "name": "iqscaffold.observability",
       "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$ObservabilityProperties",
       "description": "Observability for tracing, metrics, and logging"
+    },
+    {
+      "name": "iqscaffold.observability.tracing",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$ObservabilityProperties$TracingProperties",
+      "description": "Distributed tracing configuration with OpenTelemetry"
+    },
+    {
+      "name": "iqscaffold.observability.metrics",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$ObservabilityProperties$MetricsProperties",
+      "description": "Metrics collection and export configuration"
+    },
+    {
+      "name": "iqscaffold.observability.logging",
+      "type": "com.iqscaffold.gatewayservice.config.IqScaffoldProperties$ObservabilityProperties$LoggingProperties",
+      "description": "Structured logging with correlation IDs and context propagation"
     }
   ],
   "properties": [
+    {
+      "name": "iqscaffold.cache.redis.host",
+      "type": "java.lang.String",
+      "description": "Redis server host",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "iqscaffold.cache.redis.port",
+      "type": "java.lang.Integer",
+      "description": "Redis server port (1-65535)",
+      "defaultValue": 6379
+    },
+    {
+      "name": "iqscaffold.cache.redis.password",
+      "type": "java.lang.String",
+      "description": "Redis server password (optional)"
+    },
+    {
+      "name": "iqscaffold.cache.redis.database",
+      "type": "java.lang.Integer",
+      "description": "Redis database index (0-15)",
+      "defaultValue": 0
+    },
+    {
+      "name": "iqscaffold.cache.redis.timeout",
+      "type": "java.time.Duration",
+      "description": "Redis connection timeout",
+      "defaultValue": "PT5S"
+    },
+    {
+      "name": "iqscaffold.cache.redis.key-prefix",
+      "type": "java.lang.String",
+      "description": "Prefix for all Redis keys",
+      "defaultValue": "iqscaffold:gateway:"
+    },
+    {
+      "name": "iqscaffold.cache.redis.default-ttl",
+      "type": "java.time.Duration",
+      "description": "Default time-to-live for cached entries",
+      "defaultValue": "PT1H"
+    },
+    {
+      "name": "iqscaffold.cache.redis.enable-statistics",
+      "type": "java.lang.Boolean",
+      "description": "Enable cache statistics collection",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-active",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of active connections in pool (1-100)",
+      "defaultValue": 8
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-idle",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of idle connections in pool (0-50)",
+      "defaultValue": 8
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.min-idle",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of idle connections in pool (0-25)",
+      "defaultValue": 0
+    },
+    {
+      "name": "iqscaffold.cache.redis.pool.max-wait",
+      "type": "java.time.Duration",
+      "description": "Maximum time to wait for connection from pool",
+      "defaultValue": "PT10S"
+    },
     {
       "name": "iqscaffold.gateway.routing.api-prefix.enabled",
       "type": "java.lang.Boolean",
@@ -71,6 +222,30 @@
       "defaultValue": 0
     },
     {
+      "name": "iqscaffold.gateway.routing.enable-service-discovery",
+      "type": "java.lang.Boolean",
+      "description": "Enable service discovery for dynamic routing",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.gateway.routing.load-balancing.strategy",
+      "type": "java.lang.String",
+      "description": "Load balancing strategy (round-robin, weighted, least-connections)",
+      "defaultValue": "round-robin"
+    },
+    {
+      "name": "iqscaffold.gateway.routing.load-balancing.enable-health-check",
+      "type": "java.lang.Boolean",
+      "description": "Enable health checks for backend services",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.routing.load-balancing.health-check-interval",
+      "type": "java.time.Duration",
+      "description": "Interval between health checks",
+      "defaultValue": "PT30S"
+    },
+    {
       "name": "iqscaffold.gateway.routing.services.*.enabled",
       "type": "java.lang.Boolean",
       "description": "Enable/disable service route dynamically",
@@ -79,12 +254,12 @@
     {
       "name": "iqscaffold.gateway.routing.services.*.uri",
       "type": "java.lang.String",
-      "description": "Service base URI"
+      "description": "Service base URI (e.g., http://localhost:8080 or lb://user-service)"
     },
     {
       "name": "iqscaffold.gateway.routing.services.*.path",
       "type": "java.lang.String",
-      "description": "Service path pattern"
+      "description": "Service path pattern (e.g., /users/**)"
     },
     {
       "name": "iqscaffold.gateway.routing.services.*.connect-timeout",
@@ -97,6 +272,30 @@
       "type": "java.lang.Integer",
       "description": "Response timeout in milliseconds",
       "defaultValue": 30000
+    },
+    {
+      "name": "iqscaffold.gateway.routing.services.*.openapi.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable OpenAPI documentation for this service",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.gateway.routing.services.*.openapi.display-name",
+      "type": "java.lang.String",
+      "description": "Display name for OpenAPI documentation",
+      "defaultValue": "Service API"
+    },
+    {
+      "name": "iqscaffold.gateway.routing.services.*.openapi.description",
+      "type": "java.lang.String",
+      "description": "Description for OpenAPI documentation",
+      "defaultValue": "API documentation"
+    },
+    {
+      "name": "iqscaffold.gateway.routing.services.*.openapi.context-path",
+      "type": "java.lang.String",
+      "description": "Context path for OpenAPI documentation",
+      "defaultValue": ""
     },
     {
       "name": "iqscaffold.gateway.security.jwt.algorithm",
@@ -146,10 +345,165 @@
       "defaultValue": "http://localhost:8080"
     },
     {
+      "name": "iqscaffold.gateway.security.authentication.token-validation-timeout",
+      "type": "java.time.Duration",
+      "description": "Timeout for token validation requests",
+      "defaultValue": "PT5S"
+    },
+    {
       "name": "iqscaffold.gateway.security.authentication.enable-user-context-propagation",
       "type": "java.lang.Boolean",
       "description": "Propagate user context headers to downstream services",
       "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.security.public-paths",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of public paths that don't require authentication"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable rate limiting",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.redis.key-prefix",
+      "type": "java.lang.String",
+      "description": "Redis key prefix for rate limiting",
+      "defaultValue": "rate-limit:"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.redis.key-expiry",
+      "type": "java.time.Duration",
+      "description": "Redis key expiry for rate limiting counters",
+      "defaultValue": "PT1M"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute",
+      "type": "java.lang.Integer",
+      "description": "Default requests per minute limit (1-10000)",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies.default-burst-capacity",
+      "type": "java.lang.Integer",
+      "description": "Default burst capacity (1-20000)",
+      "defaultValue": 200
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies.endpoints.*.requests-per-minute",
+      "type": "java.lang.Integer",
+      "description": "Endpoint-specific requests per minute limit (1-1000)"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies.endpoints.*.burst-capacity",
+      "type": "java.lang.Integer",
+      "description": "Endpoint-specific burst capacity (1-2000)"
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.policies.endpoints.*.enable-tenant-quotas",
+      "type": "java.lang.Boolean",
+      "description": "Enable tenant-specific quotas for this endpoint",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.tenant-quotas.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable tenant-specific rate limiting quotas",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.tenant-quotas.default-tenant-requests-per-minute",
+      "type": "java.lang.Integer",
+      "description": "Default tenant requests per minute (1-100000)",
+      "defaultValue": 1000
+    },
+    {
+      "name": "iqscaffold.gateway.rate-limiting.tenant-quotas.tenant-specific-quotas",
+      "type": "java.util.Map<java.lang.String, java.lang.Integer>",
+      "description": "Tenant-specific quota overrides (tenant-id -> requests-per-minute)"
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable circuit breaker",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.failure-rate-threshold",
+      "type": "java.lang.Integer",
+      "description": "Failure rate threshold percentage (1-100)",
+      "defaultValue": 50
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.slow-call-rate-threshold",
+      "type": "java.lang.Integer",
+      "description": "Slow call rate threshold percentage (1-100)",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.slow-call-duration-threshold",
+      "type": "java.time.Duration",
+      "description": "Duration threshold for slow calls",
+      "defaultValue": "PT60S"
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.minimum-number-of-calls",
+      "type": "java.lang.Integer",
+      "description": "Minimum number of calls before calculating failure rate (1-100)",
+      "defaultValue": 10
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.wait-duration-in-open-state",
+      "type": "java.time.Duration",
+      "description": "Wait duration in open state before transitioning to half-open",
+      "defaultValue": "PT60S"
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.sliding-window-size",
+      "type": "java.lang.Integer",
+      "description": "Sliding window size (10-1000)",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.sliding-window-type",
+      "type": "java.lang.String",
+      "description": "Sliding window type (COUNT_BASED or TIME_BASED)",
+      "defaultValue": "COUNT_BASED"
+    },
+    {
+      "name": "iqscaffold.gateway.cors.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable CORS",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of allowed origins for CORS"
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allowed-methods",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of allowed HTTP methods for CORS"
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allowed-headers",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of allowed headers for CORS"
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allow-credentials",
+      "type": "java.lang.Boolean",
+      "description": "Allow credentials in CORS requests",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.gateway.cors.max-age",
+      "type": "java.lang.Integer",
+      "description": "CORS preflight cache duration in seconds (0-86400)",
+      "defaultValue": 3600
     },
     {
       "name": "iqscaffold.gateway.transformation.request.enabled",
@@ -176,22 +530,215 @@
       "defaultValue": true
     },
     {
-      "name": "iqscaffold.gateway.rate-limiting.enabled",
+      "name": "iqscaffold.gateway.transformation.request.headers-to-remove",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of headers to remove from requests"
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.request.additional-headers",
+      "type": "java.util.Map<java.lang.String, java.lang.String>",
+      "description": "Additional headers to add to requests"
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.response.enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable rate limiting",
+      "description": "Enable response transformation",
       "defaultValue": true
     },
     {
-      "name": "iqscaffold.gateway.circuit-breaker.enabled",
+      "name": "iqscaffold.gateway.transformation.response.enable-security-headers",
       "type": "java.lang.Boolean",
-      "description": "Enable circuit breaker",
+      "description": "Enable security headers in responses",
       "defaultValue": true
     },
     {
-      "name": "iqscaffold.gateway.cors.enabled",
+      "name": "iqscaffold.gateway.transformation.response.enable-correlation-headers",
       "type": "java.lang.Boolean",
-      "description": "Enable CORS",
+      "description": "Enable correlation headers in responses",
       "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.response.remove-internal-headers",
+      "type": "java.lang.Boolean",
+      "description": "Remove internal headers from responses",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.gateway.transformation.response.additional-headers-to-remove",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Additional headers to remove from responses"
+    },
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of supported locales (format: 'xx' or 'xx-XX')",
+      "defaultValue": ["en", "es", "fr"]
+    },
+    {
+      "name": "iqscaffold.i18n.default-locale",
+      "type": "java.lang.String",
+      "description": "Default locale (must be in supported locales)",
+      "defaultValue": "en"
+    },
+    {
+      "name": "iqscaffold.observability.tracing.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable distributed tracing",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.tracing.service-name",
+      "type": "java.lang.String",
+      "description": "Service name for tracing",
+      "defaultValue": "iqscaffold-gateway-service"
+    },
+    {
+      "name": "iqscaffold.observability.tracing.sampling-rate",
+      "type": "java.lang.Double",
+      "description": "Trace sampling rate (0.0-1.0)",
+      "defaultValue": 1.0
+    },
+    {
+      "name": "iqscaffold.observability.tracing.endpoint",
+      "type": "java.lang.String",
+      "description": "OpenTelemetry collector endpoint",
+      "defaultValue": "http://localhost:4318/v1/traces"
+    },
+    {
+      "name": "iqscaffold.observability.tracing.timeout",
+      "type": "java.time.Duration",
+      "description": "Tracing connection timeout",
+      "defaultValue": "PT10S"
+    },
+    {
+      "name": "iqscaffold.observability.tracing.export-timeout",
+      "type": "java.time.Duration",
+      "description": "Trace export timeout",
+      "defaultValue": "PT30S"
+    },
+    {
+      "name": "iqscaffold.observability.tracing.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Batch size for trace exports",
+      "defaultValue": 512
+    },
+    {
+      "name": "iqscaffold.observability.metrics.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable metrics collection",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.metrics.path",
+      "type": "java.lang.String",
+      "description": "Metrics endpoint path",
+      "defaultValue": "/actuator/metrics"
+    },
+    {
+      "name": "iqscaffold.observability.metrics.prefix",
+      "type": "java.lang.String",
+      "description": "Metrics name prefix",
+      "defaultValue": "iqscaffold.gateway"
+    },
+    {
+      "name": "iqscaffold.observability.metrics.include-host-tag",
+      "type": "java.lang.Boolean",
+      "description": "Include host tag in metrics",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.metrics.include-application-tag",
+      "type": "java.lang.Boolean",
+      "description": "Include application tag in metrics",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.metrics.include-environment-tag",
+      "type": "java.lang.Boolean",
+      "description": "Include environment tag in metrics",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.metrics.custom-tags",
+      "type": "java.util.Map<java.lang.String, java.lang.String>",
+      "description": "Custom tags to add to all metrics"
+    },
+    {
+      "name": "iqscaffold.observability.metrics.enabled-metrics",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of enabled metric names"
+    },
+    {
+      "name": "iqscaffold.observability.logging.level",
+      "type": "java.lang.String",
+      "description": "Logging level (DEBUG, INFO, WARN, ERROR)",
+      "defaultValue": "INFO"
+    },
+    {
+      "name": "iqscaffold.observability.logging.format",
+      "type": "java.lang.String",
+      "description": "Log format (console or json)",
+      "defaultValue": "json"
+    },
+    {
+      "name": "iqscaffold.observability.logging.enable-request-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable request logging",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.enable-response-logging",
+      "type": "java.lang.Boolean",
+      "description": "Enable response logging",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.enable-correlation-id",
+      "type": "java.lang.Boolean",
+      "description": "Enable correlation ID generation",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.include-trace-id",
+      "type": "java.lang.Boolean",
+      "description": "Include trace ID in logs",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.include-span-id",
+      "type": "java.lang.Boolean",
+      "description": "Include span ID in logs",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.include-user-id",
+      "type": "java.lang.Boolean",
+      "description": "Include user ID in logs",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.include-tenant-id",
+      "type": "java.lang.Boolean",
+      "description": "Include tenant ID in logs",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.observability.logging.correlation-id-header",
+      "type": "java.lang.String",
+      "description": "Header name for correlation ID",
+      "defaultValue": "X-Correlation-ID"
+    },
+    {
+      "name": "iqscaffold.observability.logging.request-id-header",
+      "type": "java.lang.String",
+      "description": "Header name for request ID",
+      "defaultValue": "X-Request-ID"
+    },
+    {
+      "name": "iqscaffold.observability.logging.tenant-id-header",
+      "type": "java.lang.String",
+      "description": "Header name for tenant ID",
+      "defaultValue": "X-Tenant-ID"
     }
   ],
   "hints": [
@@ -208,7 +755,7 @@
         },
         {
           "value": 2,
-          "description": "Strip two segments"
+          "description": "Strip two segments (e.g., /api/v1)"
         }
       ]
     },
@@ -217,11 +764,11 @@
       "values": [
         {
           "value": "/api",
-          "description": "Standard API prefix"
+          "description": "Standard API prefix for dev/staging"
         },
         {
           "value": "",
-          "description": "No prefix (production)"
+          "description": "No prefix (production with api.iqscaffold.com)"
         },
         {
           "value": "/v1",
@@ -230,15 +777,32 @@
       ]
     },
     {
+      "name": "iqscaffold.gateway.routing.load-balancing.strategy",
+      "values": [
+        {
+          "value": "round-robin",
+          "description": "Distribute requests evenly across instances"
+        },
+        {
+          "value": "weighted",
+          "description": "Distribute based on instance weights"
+        },
+        {
+          "value": "least-connections",
+          "description": "Route to instance with fewest active connections"
+        }
+      ]
+    },
+    {
       "name": "iqscaffold.gateway.security.jwt.algorithm",
       "values": [
         {
           "value": "RS256",
-          "description": "RSA SHA-256 (asymmetric) - Recommended"
+          "description": "RSA SHA-256 (asymmetric) - Recommended for production"
         },
         {
           "value": "HS256",
-          "description": "HMAC SHA-256 (symmetric) - Deprecated"
+          "description": "HMAC SHA-256 (symmetric) - Deprecated, use only for testing"
         }
       ]
     },
@@ -282,6 +846,145 @@
         {
           "value": false,
           "description": "Do not propagate user context headers"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.gateway.circuit-breaker.sliding-window-type",
+      "values": [
+        {
+          "value": "COUNT_BASED",
+          "description": "Use count of calls for sliding window"
+        },
+        {
+          "value": "TIME_BASED",
+          "description": "Use time duration for sliding window"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allowed-origins",
+      "values": [
+        {
+          "value": "*",
+          "description": "Allow all origins (not recommended for production)"
+        },
+        {
+          "value": "https://app.iqscaffold.com",
+          "description": "Production frontend"
+        },
+        {
+          "value": "http://localhost:3000",
+          "description": "Local development frontend"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.gateway.cors.allowed-methods",
+      "values": [
+        {
+          "value": "GET",
+          "description": "Allow GET requests"
+        },
+        {
+          "value": "POST",
+          "description": "Allow POST requests"
+        },
+        {
+          "value": "PUT",
+          "description": "Allow PUT requests"
+        },
+        {
+          "value": "DELETE",
+          "description": "Allow DELETE requests"
+        },
+        {
+          "value": "PATCH",
+          "description": "Allow PATCH requests"
+        },
+        {
+          "value": "OPTIONS",
+          "description": "Allow OPTIONS requests (required for CORS preflight)"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "values": [
+        {
+          "value": "en",
+          "description": "English"
+        },
+        {
+          "value": "en-US",
+          "description": "English (United States)"
+        },
+        {
+          "value": "es",
+          "description": "Spanish"
+        },
+        {
+          "value": "es-ES",
+          "description": "Spanish (Spain)"
+        },
+        {
+          "value": "fr",
+          "description": "French"
+        },
+        {
+          "value": "de",
+          "description": "German"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.observability.logging.level",
+      "values": [
+        {
+          "value": "DEBUG",
+          "description": "Detailed debugging information"
+        },
+        {
+          "value": "INFO",
+          "description": "General informational messages"
+        },
+        {
+          "value": "WARN",
+          "description": "Warning messages"
+        },
+        {
+          "value": "ERROR",
+          "description": "Error messages only"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.observability.logging.format",
+      "values": [
+        {
+          "value": "console",
+          "description": "Human-readable console format"
+        },
+        {
+          "value": "json",
+          "description": "Structured JSON format for log aggregation"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.cache.redis.host",
+      "values": [
+        {
+          "value": "localhost",
+          "description": "Local Redis instance"
+        },
+        {
+          "value": "redis",
+          "description": "Docker/Kubernetes Redis service"
+        },
+        {
+          "value": "redis.iqscaffold.com",
+          "description": "Production Redis endpoint"
         }
       ]
     }
