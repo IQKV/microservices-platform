@@ -99,7 +99,7 @@ class RabbitMQConfigTest {
     assertNotNull(binding);
     assertEquals(RabbitMQConfig.USER_EVENTS_QUEUE, binding.getDestination());
     assertEquals(RabbitMQConfig.EVENTS_EXCHANGE, binding.getExchange());
-    assertEquals("user.*", binding.getRoutingKey());
+    assertEquals("user.#", binding.getRoutingKey());
     assertEquals(Binding.DestinationType.QUEUE, binding.getDestinationType());
   }
 

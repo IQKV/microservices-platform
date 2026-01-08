@@ -43,6 +43,26 @@ public class UserEventPublisher {
   }
 
   /**
+   * Publish user created event with explicit parameters.
+   * Useful when User entity is not available.
+   */
+  public void publishUserCreated(Long userId, String tenantId, String email) {
+    try {
+      log.debug("Publishing user created event for user: {}", userId);
+      
+      messagingService.publishUserCreated(
+          userId.toString(),
+          tenantId,
+          email
+      );
+      
+      log.info("Published user created event for user: {} in tenant: {}", userId, tenantId);
+    } catch (final Exception e) {
+      log.error("Failed to publish user created event for user: {}", userId, e);
+    }
+  }
+
+  /**
    * Publish user updated event.
    * Called after successful user profile update.
    */
@@ -61,6 +81,26 @@ public class UserEventPublisher {
     } catch (final Exception e) {
       // Log error but don't fail the main operation
       log.error("Failed to publish user updated event for user: {}", user.getId(), e);
+    }
+  }
+
+  /**
+   * Publish user updated event with explicit parameters.
+   * Useful when User entity is not available.
+   */
+  public void publishUserUpdated(Long userId, String tenantId, String email) {
+    try {
+      log.debug("Publishing user updated event for user: {}", userId);
+      
+      messagingService.publishUserUpdated(
+          userId.toString(),
+          tenantId,
+          email
+      );
+      
+      log.info("Published user updated event for user: {} in tenant: {}", userId, tenantId);
+    } catch (final Exception e) {
+      log.error("Failed to publish user updated event for user: {}", userId, e);
     }
   }
 
@@ -87,6 +127,26 @@ public class UserEventPublisher {
   }
 
   /**
+   * Publish user deleted event with explicit parameters.
+   * Useful when User entity is not available.
+   */
+  public void publishUserDeleted(Long userId, String tenantId, String email) {
+    try {
+      log.debug("Publishing user deleted event for user: {}", userId);
+      
+      messagingService.publishUserDeleted(
+          userId.toString(),
+          tenantId,
+          email
+      );
+      
+      log.info("Published user deleted event for user: {} in tenant: {}", userId, tenantId);
+    } catch (final Exception e) {
+      log.error("Failed to publish user deleted event for user: {}", userId, e);
+    }
+  }
+
+  /**
    * Publish user verified event.
    * Called after successful email verification.
    */
@@ -109,6 +169,26 @@ public class UserEventPublisher {
   }
 
   /**
+   * Publish user verified event with explicit parameters.
+   * Useful when User entity is not available.
+   */
+  public void publishUserVerified(Long userId, String tenantId, String email) {
+    try {
+      log.debug("Publishing user verified event for user: {}", userId);
+      
+      messagingService.publishUserVerified(
+          userId.toString(),
+          tenantId,
+          email
+      );
+      
+      log.info("Published user verified event for user: {} in tenant: {}", userId, tenantId);
+    } catch (final Exception e) {
+      log.error("Failed to publish user verified event for user: {}", userId, e);
+    }
+  }
+
+  /**
    * Publish password reset event.
    * Called after successful password reset.
    */
@@ -127,86 +207,6 @@ public class UserEventPublisher {
     } catch (final Exception e) {
       // Log error but don't fail the main operation
       log.error("Failed to publish password reset event for user: {}", user.getId(), e);
-    }
-  }
-
-  /**
-   * Publish user created event with explicit parameters.
-   * Useful when User entity is not available.
-   */
-  public void publishUserCreated(Long userId, String tenantId, String email) {
-    try {
-      log.debug("Publishing user created event for user: {}", userId);
-      
-      messagingService.publishUserCreated(
-          userId.toString(),
-          tenantId,
-          email
-      );
-      
-      log.info("Published user created event for user: {} in tenant: {}", userId, tenantId);
-    } catch (final Exception e) {
-      log.error("Failed to publish user created event for user: {}", userId, e);
-    }
-  }
-
-  /**
-   * Publish user updated event with explicit parameters.
-   * Useful when User entity is not available.
-   */
-  public void publishUserUpdated(Long userId, String tenantId, String email) {
-    try {
-      log.debug("Publishing user updated event for user: {}", userId);
-      
-      messagingService.publishUserUpdated(
-          userId.toString(),
-          tenantId,
-          email
-      );
-      
-      log.info("Published user updated event for user: {} in tenant: {}", userId, tenantId);
-    } catch (final Exception e) {
-      log.error("Failed to publish user updated event for user: {}", userId, e);
-    }
-  }
-
-  /**
-   * Publish user deleted event with explicit parameters.
-   * Useful when User entity is not available.
-   */
-  public void publishUserDeleted(Long userId, String tenantId, String email) {
-    try {
-      log.debug("Publishing user deleted event for user: {}", userId);
-      
-      messagingService.publishUserDeleted(
-          userId.toString(),
-          tenantId,
-          email
-      );
-      
-      log.info("Published user deleted event for user: {} in tenant: {}", userId, tenantId);
-    } catch (final Exception e) {
-      log.error("Failed to publish user deleted event for user: {}", userId, e);
-    }
-  }
-
-  /**
-   * Publish user verified event with explicit parameters.
-   * Useful when User entity is not available.
-   */
-  public void publishUserVerified(Long userId, String tenantId, String email) {
-    try {
-      log.debug("Publishing user verified event for user: {}", userId);
-      
-      messagingService.publishUserVerified(
-          userId.toString(),
-          tenantId,
-          email
-      );
-      
-      log.info("Published user verified event for user: {} in tenant: {}", userId, tenantId);
-    } catch (final Exception e) {
-      log.error("Failed to publish user verified event for user: {}", userId, e);
     }
   }
 
