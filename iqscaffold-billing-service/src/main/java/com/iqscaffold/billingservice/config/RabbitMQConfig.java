@@ -40,6 +40,7 @@ public class RabbitMQConfig {
   public static final String DLX_EXCHANGE = "iqscaffold.dlx";
 
   // Queue names
+  public static final String USER_EVENTS_QUEUE = "iqscaffold.user.events";
   public static final String BILLING_EVENTS_QUEUE = "iqscaffold.billing.events";
   public static final String NOTIFICATIONS_QUEUE = "iqscaffold.notifications";
   public static final String DLQ = "iqscaffold.dlq";
@@ -75,6 +76,19 @@ public class RabbitMQConfig {
   }
 
   /**
+   * User events queue with dead letter routing
+   * Receives user lifecycle events from User Service
+   */
+  @Bean
+  public Queue userEventsQueue() {
+    return QueueBuilder
+        .durable(USER_EVENTS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
+  }
+
+  /**
    * Billing events queue with dead letter routing
    */
   @Bean
@@ -106,6 +120,18 @@ public class RabbitMQConfig {
     return QueueBuilder
         .durable(DLQ)
         .build();
+  }
+
+  /**
+   * Bind user events queue to events exchange with user.# routing key
+   * Uses user.# pattern to match all user events including user.password.reset
+   */
+  @Bean
+  public Binding userEventsBinding() {
+    return BindingBuilder
+        .bind(userEventsQueue())
+        .to(eventsExchange())
+        .with("user.#");
   }
 
   /**

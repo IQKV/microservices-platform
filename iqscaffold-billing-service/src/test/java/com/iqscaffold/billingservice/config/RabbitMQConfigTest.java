@@ -60,6 +60,17 @@ class RabbitMQConfigTest {
   }
 
   @Test
+  void shouldCreateUserEventsQueue() {
+    var queue = rabbitMQConfig.userEventsQueue();
+
+    assertNotNull(queue);
+    assertEquals(RabbitMQConfig.USER_EVENTS_QUEUE, queue.getName());
+    assertTrue(queue.isDurable());
+    assertEquals(RabbitMQConfig.DLX_EXCHANGE, queue.getArguments().get("x-dead-letter-exchange"));
+    assertEquals(86400000, queue.getArguments().get("x-message-ttl"));
+  }
+
+  @Test
   void shouldCreateBillingEventsQueue() {
     var queue = rabbitMQConfig.billingEventsQueue();
 
@@ -88,6 +99,17 @@ class RabbitMQConfigTest {
     assertNotNull(queue);
     assertEquals(RabbitMQConfig.DLQ, queue.getName());
     assertTrue(queue.isDurable());
+  }
+
+  @Test
+  void shouldCreateUserEventsBinding() {
+    var binding = rabbitMQConfig.userEventsBinding();
+
+    assertNotNull(binding);
+    assertEquals(RabbitMQConfig.USER_EVENTS_QUEUE, binding.getDestination());
+    assertEquals(RabbitMQConfig.EVENTS_EXCHANGE, binding.getExchange());
+    assertEquals("user.#", binding.getRoutingKey());
+    assertEquals(Binding.DestinationType.QUEUE, binding.getDestinationType());
   }
 
   @Test
@@ -169,6 +191,7 @@ class RabbitMQConfigTest {
 
   @Test
   void shouldVerifyQueueConstants() {
+    assertEquals("iqscaffold.user.events", RabbitMQConfig.USER_EVENTS_QUEUE);
     assertEquals("iqscaffold.billing.events", RabbitMQConfig.BILLING_EVENTS_QUEUE);
     assertEquals("iqscaffold.notifications", RabbitMQConfig.NOTIFICATIONS_QUEUE);
     assertEquals("iqscaffold.dlq", RabbitMQConfig.DLQ);

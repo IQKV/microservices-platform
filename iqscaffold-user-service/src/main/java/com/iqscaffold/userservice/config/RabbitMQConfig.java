@@ -109,14 +109,15 @@ public class RabbitMQConfig {
   }
 
   /**
-   * Bind user events queue to events exchange with user.* routing key
+   * Bind user events queue to events exchange with user.# routing key
+   * Uses user.# pattern to match all user events including user.password.reset
    */
   @Bean
   public Binding userEventsBinding() {
     return BindingBuilder
         .bind(userEventsQueue())
         .to(eventsExchange())
-        .with("user.*");
+        .with("user.#");
   }
 
   /**
