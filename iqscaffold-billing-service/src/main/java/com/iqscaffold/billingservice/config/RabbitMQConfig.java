@@ -1,23 +1,48 @@
 package com.iqscaffold.billingservice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * RabbitMQ configuration for billing service messaging
+ * RabbitMQ Configuration for IQScaffold Billing Service
+ * Configures exchanges, queues, bindings, and message converters
  */
 @Configuration
 public class RabbitMQConfig {
 
+  private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);
+
+  private final IqScaffoldProperties properties;
+  private final ObjectMapper objectMapper;
+
+  public RabbitMQConfig(final IqScaffoldProperties properties, final ObjectMapper objectMapper) {
+    this.properties = properties;
+    this.objectMapper = objectMapper;
+  }
+
   // Exchange names
   public static final String EVENTS_EXCHANGE = "iqscaffold.events";
+  public static final String DLX_EXCHANGE = "iqscaffold.dlx";
+
+  // Queue names
+  public static final String BILLING_EVENTS_QUEUE = "iqscaffold.billing.events";
+  public static final String NOTIFICATIONS_QUEUE = "iqscaffold.notifications";
+  public static final String DLQ = "iqscaffold.dlq";
 
   // Routing keys
   public static final String PAYMENT_SUCCESSFUL_KEY = "billing.payment.successful";
@@ -27,71 +52,144 @@ public class RabbitMQConfig {
   public static final String INVOICE_GENERATED_KEY = "billing.invoice.generated";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
 
-  // Queue names
-  public static final String BILLING_EVENTS_QUEUE = "billing.events";
-  public static final String NOTIFICATION_QUEUE = "notification.email";
-
+  /**
+   * Main events exchange for application events
+   */
   @Bean
   public TopicExchange eventsExchange() {
-    return new TopicExchange(EVENTS_EXCHANGE, true, false);
+    return ExchangeBuilder
+        .topicExchange(EVENTS_EXCHANGE)
+        .durable(true)
+        .build();
   }
 
+  /**
+   * Dead Letter Exchange for failed messages
+   */
+  @Bean
+  public TopicExchange deadLetterExchange() {
+    return ExchangeBuilder
+        .topicExchange(DLX_EXCHANGE)
+        .durable(true)
+        .build();
+  }
+
+  /**
+   * Billing events queue with dead letter routing
+   */
   @Bean
   public Queue billingEventsQueue() {
-    return new Queue(BILLING_EVENTS_QUEUE, true);
+    return QueueBuilder
+        .durable(BILLING_EVENTS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
   }
 
+  /**
+   * Notifications queue with dead letter routing
+   */
   @Bean
-  public Queue notificationQueue() {
-    return new Queue(NOTIFICATION_QUEUE, true);
+  public Queue notificationsQueue() {
+    return QueueBuilder
+        .durable(NOTIFICATIONS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
   }
 
+  /**
+   * Dead Letter Queue for failed messages
+   */
   @Bean
-  public Binding paymentSuccessfulBinding() {
-    return BindingBuilder.bind(billingEventsQueue())
+  public Queue deadLetterQueue() {
+    return QueueBuilder
+        .durable(DLQ)
+        .build();
+  }
+
+  /**
+   * Bind billing events queue to events exchange with billing.* routing key
+   */
+  @Bean
+  public Binding billingEventsBinding() {
+    return BindingBuilder
+        .bind(billingEventsQueue())
         .to(eventsExchange())
-        .with(PAYMENT_SUCCESSFUL_KEY);
+        .with("billing.*");
   }
 
+  /**
+   * Bind notifications queue to events exchange with notification.* routing key
+   */
   @Bean
-  public Binding paymentFailedBinding() {
-    return BindingBuilder.bind(billingEventsQueue())
+  public Binding notificationsBinding() {
+    return BindingBuilder
+        .bind(notificationsQueue())
         .to(eventsExchange())
-        .with(PAYMENT_FAILED_KEY);
+        .with("notification.*");
   }
 
+  /**
+   * Bind dead letter queue to DLX with all routing keys
+   */
   @Bean
-  public Binding paymentRefundedBinding() {
-    return BindingBuilder.bind(billingEventsQueue())
-        .to(eventsExchange())
-        .with(PAYMENT_REFUNDED_KEY);
+  public Binding deadLetterBinding() {
+    return BindingBuilder
+        .bind(deadLetterQueue())
+        .to(deadLetterExchange())
+        .with("#");
   }
 
+  /**
+   * JSON message converter using Jackson
+   */
   @Bean
-  public Binding merchantOnboardingBinding() {
-    return BindingBuilder.bind(billingEventsQueue())
-        .to(eventsExchange())
-        .with(MERCHANT_ONBOARDING_KEY);
+  public MessageConverter messageConverter() {
+    return new Jackson2JsonMessageConverter(objectMapper);
   }
 
-  @Bean
-  public Binding invoiceGeneratedBinding() {
-    return BindingBuilder.bind(billingEventsQueue())
-        .to(eventsExchange())
-        .with(INVOICE_GENERATED_KEY);
-  }
-
-  @Bean
-  public Binding notificationBinding() {
-    return BindingBuilder.bind(notificationQueue())
-        .to(eventsExchange())
-        .with(NOTIFICATION_EMAIL_KEY);
-  }
-
+  /**
+   * RabbitTemplate with JSON message converter and publisher confirms
+   */
   @Bean
   public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-    var template = new RabbitTemplate(connectionFactory);
-    template.setMessageConverter(new Jackson2JsonMessageConverter());
+    RabbitTemplate template = new RabbitTemplate(connectionFactory);
+    template.setMessageConverter(messageConverter());
+    template.setMandatory(true);
+
+    // Publisher confirms callback
+    template.setConfirmCallback((correlationData, ack, cause) -> {
+      if (ack) {
+        log.debug("Message confirmed: {}", correlationData);
+      } else {
+        log.error("Message not confirmed: {}, cause: {}", correlationData, cause);
+      }
+    });
+
+    // Publisher returns callback
+    template.setReturnsCallback(returned -> {
+      log.error("Message returned: {}, reply code: {}, reply text: {}, exchange: {}, routing key: {}",
+          returned.getMessage(),
+          returned.getReplyCode(),
+          returned.getReplyText(),
+          returned.getExchange(),
+          returned.getRoutingKey());
+    });
+
     return template;
+  }
+
+  /**
+   * Listener container factory with JSON message converter
+   */
+  @Bean
+  public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+      ConnectionFactory connectionFactory,
+      SimpleRabbitListenerContainerFactoryConfigurer configurer) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    configurer.configure(factory, connectionFactory);
+    factory.setMessageConverter(messageConverter());
+    return factory;
   }
 }
