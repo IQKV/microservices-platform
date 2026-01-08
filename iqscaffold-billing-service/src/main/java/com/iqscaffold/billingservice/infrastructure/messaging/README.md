@@ -1,384 +1,305 @@
-# Billing Service Mailer Implementation
+# Billing Service Messaging Infrastructure
 
-This directory contains the complete mailer implementation for the IQ Scaffold Billing Service, providing code parity with the user service mailer architecture.
+Complete RabbitMQ messaging implementation for event-driven communication in the IQScaffold Billing Service.
 
 ## 📧 Architecture Overview
 
-The billing service mailer follows the same architectural patterns as the user service:
-
 ```
-├── infrastructure/messaging/     # Event publishing and messaging
-│   ├── MessagingService.java    # RabbitMQ message publishing
-│   ├── BillingEvent.java        # Billing-specific events
-│   ├── NotificationEvent.java   # Email notification events
-│   └── MessagingException.java  # Messaging error handling
-├── shared/                      # Core email services
-│   ├── EmailOperations.java     # Email service interface
-│   ├── EmailService.java        # Email implementation
-│   ├── MessageService.java      # i18n message service
-│   └── NotificationService.java # Business logic integration
-├── config/                      # Configuration
-│   ├── IqScaffoldProperties.java # Configuration properties
-│   ├── MailConfig.java          # SMTP configuration
-│   └── RabbitMQConfig.java      # Messaging configuration
-└── payment/                     # Business integration example
-    └── PaymentNotificationService.java # Payment notification handling
+infrastructure/messaging/
+├── MessagingService.java           # Event publishing service
+├── BillingEvent.java              # Billing event model
+├── NotificationEvent.java         # Notification event model  
+├── UserEvent.java                 # User event model (from User Service)
+├── MessagingException.java        # Messaging exceptions
+├── UserEventListener.java         # ✨ NEW: Consumes user events
+├── BillingEventListener.java      # ✨ NEW: Consumes billing events
+├── NotificationEventListener.java # ✨ NEW: Consumes notification events
+└── README.md                      # This file
 ```
 
-## 🔧 Key Components
+## 🎯 Event Listeners (NEW)
 
-### 1. MessagingService
+### UserEventListener
+**Consumes**: `iqscaffold.user.events` queue  
+**Purpose**: Maintains billing data consistency with User Service
 
-- **Purpose**: Publishes billing events and notification events to RabbitMQ
-- **Events**: Payment successful/failed/refunded, merchant onboarding, invoice generated
-- **Integration**: Works with other microservices via message queues
+**Handles**:
+- `USER_CREATED` → Creates customer record in billing system
+- `USER_UPDATED` → Updates customer information
+- `USER_DELETED` → Cancels subscriptions and archives data
+- `USER_VERIFIED` → Enables trial subscriptions
+- `PASSWORD_RESET` → Logs security events
 
-### 2. EmailOperations & EmailService
+**Status**: ⚠️ Structure complete, implementation TODO
 
-- **Purpose**: Direct email sending with Thymeleaf templates
-- **Features**: SMTP integration, template processing, error handling
-- **Templates**: Merchant onboarding, payment notifications, invoice notifications
+### BillingEventListener
+**Consumes**: `iqscaffold.billing.events` queue  
+**Purpose**: Async processing of billing operations
 
-### 3. NotificationService
+**Handles**:
+- `PAYMENT_SUCCESSFUL` → Updates analytics, generates invoices
+- `PAYMENT_FAILED` → Schedules retries, suspends subscriptions
+- `PAYMENT_REFUNDED` → Adjusts metrics, handles refunds
+- `MERCHANT_ONBOARDING` → Sets up merchant accounts
+- `INVOICE_GENERATED` → Sends invoices, schedules reminders
 
-- **Purpose**: High-level notification orchestration
-- **Features**: Combines email sending with event publishing
-- **Benefits**: Single interface for all notification needs
+**Status**: ⚠️ Structure complete, implementation TODO
 
-### 4. PaymentNotificationService
+### NotificationEventListener
+**Consumes**: `iqscaffold.notifications` queue  
+**Purpose**: Tracks notification delivery and engagement
 
-- **Purpose**: Business logic integration example
-- **Features**: Event-driven notifications, error resilience
-- **Pattern**: Shows how to integrate notifications with payment processing
+**Handles**:
+- `EMAIL` → Tracks email delivery
+- `SMS` → Tracks SMS delivery and costs
+- `PUSH` → Tracks push notifications
+
+**Status**: ⚠️ Structure complete, implementation TODO
+
+## 🔄 Event Flow
+
+### Cross-Service Communication
+
+```
+User Service                    RabbitMQ                    Billing Service
+    |                              |                              |
+    |-- USER_CREATED ------------->|                              |
+    |                              |-- USER_CREATED ------------->|
+    |                              |                              |
+    |                              |                    UserEventListener
+    |                              |                    handleUserCreated()
+    |                              |                    TODO: Create customer
+    |                              |                              |
+    |                              |<-- PAYMENT_SUCCESSFUL -------|
+    |<-- PAYMENT_SUCCESSFUL -------|                              |
+```
+
+### Internal Event Processing
+
+```
+Payment Processing              RabbitMQ                    Async Processing
+    |                              |                              |
+    |-- publishPaymentSuccessful ->|                              |
+    |                              |-- PAYMENT_SUCCESSFUL ------->|
+    |                              |                              |
+    |                              |                    BillingEventListener
+    |                              |                    handlePaymentSuccessful()
+    |                              |                    TODO: Generate invoice
+    |                              |                    TODO: Update analytics
+```
 
 ## 🚀 Usage Examples
 
-### Basic Email Sending
+### Publishing Events (Already Working)
 
 ```java
 @Service
 public class PaymentService {
     
-    private final EmailOperations emailService;
+    private final MessagingService messagingService;
     
-    public void processPayment(PaymentRequest request) {
-        // Process payment logic...
+    public void processPayment(Payment payment) {
+        // Process payment...
         
-        // Send confirmation email
-        emailService.sendPaymentSuccessfulEmail(
-            request.getCustomerEmail(),
-            request.getCustomerName(),
+        // Publish event
+        messagingService.publishPaymentSuccessful(
             payment.getId(),
-            payment.getAmount(),
-            payment.getCurrency(),
-            "Subscription payment",
-            LocalDateTime.now(),
-            "Visa **** 1234",
-            generateReceiptUrl(payment.getId())
+            payment.getTenantId(),
+            payment.getCustomerEmail()
         );
     }
 }
 ```
 
-### Event-Driven Notifications
-
-```java
-@Service
-public class MerchantService {
-    
-    private final NotificationService notificationService;
-    
-    public void onboardMerchant(MerchantOnboardingRequest request) {
-        // Create merchant account...
-        
-        // Send onboarding email and publish event
-        notificationService.sendMerchantOnboardingNotification(
-            merchant.getEmail(),
-            merchant.getBusinessName(),
-            generateOnboardingUrl(merchant.getId()),
-            merchant.getTenantId()
-        );
-    }
-}
-```
-
-### Payment Processing Integration
+### Consuming Events (NEW - TODO Implementation)
 
 ```java
 @Component
-public class PaymentEventHandler {
+public class UserEventListener {
     
-    private final PaymentNotificationService notificationService;
-    
-    @EventListener
-    public void handlePaymentCompleted(PaymentCompletedEvent event) {
-        var notificationEvent = new PaymentNotificationService.PaymentSuccessfulEvent(
-            event.getPaymentId(),
-            event.getCustomerEmail(),
-            event.getCustomerName(),
-            event.getAmount(),
-            event.getCurrency(),
-            event.getDescription(),
-            event.getCompletedAt(),
-            event.getPaymentMethod(),
-            event.getReceiptUrl(),
-            event.getTenantId()
-        );
-        
-        notificationService.handlePaymentSuccessful(notificationEvent);
+    @RabbitListener(queues = "iqscaffold.user.events")
+    public void handleUserEvent(UserEvent event) {
+        switch (event.getEventType()) {
+            case "USER_CREATED":
+                // TODO: Implement customer creation
+                // Customer customer = new Customer();
+                // customer.setUserId(event.getUserId());
+                // customerRepository.save(customer);
+                break;
+        }
     }
 }
 ```
 
 ## ⚙️ Configuration
 
-### Application Properties
+### RabbitMQ Settings
 
 ```yaml
-iqscaffold:
-  email:
-    smtp:
-      host: smtp.gmail.com
-      port: 587
-      username: ${SMTP_USERNAME}
-      password: ${SMTP_PASSWORD}
-      auth: true
-      starttls: true
-      timeout: PT10S
-    sender:
-      fromEmail: billing@iqscaffold.com
-      fromName: IQ Scaffold Billing
-      baseUrl: https://billing.iqscaffold.com
-    templates:
-      merchantOnboardingTemplate: email/merchant-onboarding
-      paymentSuccessfulTemplate: email/payment-successful
-      paymentFailedTemplate: email/payment-failed
-      paymentRefundedTemplate: email/payment-refunded
-      invoiceGeneratedTemplate: email/invoice-generated
-  billing:
-    stripe:
-      publicKey: ${STRIPE_PUBLIC_KEY}
-      secretKey: ${STRIPE_SECRET_KEY}
-      webhookSecret: ${STRIPE_WEBHOOK_SECRET}
-      connectClientId: ${STRIPE_CONNECT_CLIENT_ID}
-    notifications:
-      enableEmailNotifications: true
-      enableWebhookNotifications: true
-      retryDelay: PT30S
-      maxRetries: 3
-  tenantIdHeader: X-Tenant-ID
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: iqscaffold
+    password: iqscaffold_password
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+        retry:
+          enabled: true
+          max-attempts: 3
 ```
 
-### RabbitMQ Configuration
+### Exchanges and Queues
 
-The service publishes events to these exchanges and routing keys:
+| Exchange | Queue | Routing Pattern | Listener |
+|----------|-------|-----------------|----------|
+| `iqscaffold.events` | `iqscaffold.user.events` | `user.*` | UserEventListener |
+| `iqscaffold.events` | `iqscaffold.billing.events` | `billing.*` | BillingEventListener |
+| `iqscaffold.events` | `iqscaffold.notifications` | `notification.*` | NotificationEventListener |
+| `iqscaffold.dlx` | `iqscaffold.dlq` | `#` | Manual processing |
 
-- **Exchange**: `iqscaffold.events`
-- **Routing Keys**:
-  - `billing.payment.successful`
-  - `billing.payment.failed`
-  - `billing.payment.refunded`
-  - `billing.merchant.onboarding`
-  - `billing.invoice.generated`
-  - `notification.email`
+## 📋 Implementation Checklist
 
-## 🔄 Event Flow
+### UserEventListener
+- [ ] Implement customer creation logic
+- [ ] Implement Stripe customer sync
+- [ ] Implement subscription cancellation
+- [ ] Implement fraud detection integration
+- [ ] Add idempotency handling
+- [ ] Add correlation ID tracking
+- [ ] Write integration tests
 
-### Payment Success Flow
+### BillingEventListener
+- [ ] Implement analytics integration
+- [ ] Implement retry scheduling logic
+- [ ] Implement subscription management
+- [ ] Implement accounting software sync
+- [ ] Add idempotency handling
+- [ ] Add correlation ID tracking
+- [ ] Write integration tests
 
-1. Payment processed successfully
-2. `PaymentNotificationService.handlePaymentSuccessful()` called
-3. Email sent via `EmailService.sendPaymentSuccessfulEmail()`
-4. Event published via `MessagingService.publishPaymentSuccessful()`
-5. Other services receive event for further processing
-
-### Merchant Onboarding Flow
-
-1. Merchant account created
-2. `NotificationService.sendMerchantOnboardingNotification()` called
-3. Email sent with onboarding instructions
-4. Event published for audit/analytics
-5. Merchant receives email with setup link
+### NotificationEventListener
+- [ ] Implement notification audit logging
+- [ ] Implement delivery tracking
+- [ ] Implement customer preference management
+- [ ] Implement analytics integration
+- [ ] Add idempotency handling
+- [ ] Write integration tests
 
 ## 🧪 Testing
 
-### Unit Tests
+### Unit Test Example
 
 ```java
 @ExtendWith(MockitoExtension.class)
-class EmailServiceTest {
+class UserEventListenerTest {
     
     @Mock
-    private JavaMailSender mailSender;
-    
-    @Mock
-    private TemplateEngine templateEngine;
-    
-    @Mock
-    private IqScaffoldProperties properties;
+    private CustomerRepository customerRepository;
     
     @InjectMocks
-    private EmailService emailService;
+    private UserEventListener listener;
     
     @Test
-    void shouldSendPaymentSuccessfulEmail() {
+    void shouldHandleUserCreatedEvent() {
         // Arrange
-        when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
-        when(templateEngine.process(anyString(), any(Context.class)))
-            .thenReturn("<html>Payment Successful</html>");
+        UserEvent event = new UserEvent();
+        event.setEventType("USER_CREATED");
+        event.setUserId("user-123");
+        event.setTenantId("tenant-1");
+        event.setEmail("user@example.com");
         
         // Act
-        emailService.sendPaymentSuccessfulEmail(
-            "customer@example.com",
-            "John Doe",
-            "pay_123",
-            new BigDecimal("99.99"),
-            "USD",
-            "Subscription",
-            LocalDateTime.now(),
-            "Visa **** 1234",
-            "https://receipts.example.com/pay_123"
-        );
+        listener.handleUserEvent(event);
         
         // Assert
-        verify(mailSender).send(any(MimeMessage.class));
-        verify(templateEngine).process(eq("email/payment-successful"), any(Context.class));
+        // TODO: Verify customer was created
+        // verify(customerRepository).save(any(Customer.class));
     }
 }
 ```
 
-### Integration Tests
+## 🔒 Error Handling
+
+All listeners follow this pattern:
 
 ```java
-@SpringBootTest
-@Testcontainers
-class NotificationServiceIntegrationTest {
-    
-    @Container
-    static RabbitMQContainer rabbitmq = new RabbitMQContainer("rabbitmq:3-management");
-    
-    @Autowired
-    private NotificationService notificationService;
-    
-    @Test
-    void shouldSendMerchantOnboardingNotification() {
-        // Test complete notification flow
-        notificationService.sendMerchantOnboardingNotification(
-            "merchant@example.com",
-            "Acme Corp",
-            "https://onboarding.example.com/token123",
-            "tenant_123"
-        );
-        
-        // Verify email sent and event published
-        // ... assertions
+@RabbitListener(queues = "queue.name")
+public void handleEvent(Event event) {
+    try {
+        log.info("Processing event: {}", event.getEventId());
+        // Business logic...
+        log.debug("Successfully processed event");
+    } catch (final Exception e) {
+        log.error("Error processing event: {}", event.getEventId(), e);
+        throw e; // Triggers retry or DLQ routing
     }
 }
 ```
 
-## 🔒 Security Considerations
+### Retry Mechanism
+- Initial interval: 1 second
+- Max attempts: 3
+- Multiplier: 2.0
+- Failed messages → Dead Letter Queue
 
-### Email Security
+## 📊 Monitoring
 
-- SMTP authentication required
-- TLS/STARTTLS encryption enforced
-- No sensitive data in email content
-- Rate limiting on email sending
-
-### Event Security
-
-- Message encryption in transit
-- Tenant isolation in events
-- Audit logging for all notifications
-- Input validation and sanitization
-
-## 📊 Monitoring & Observability
-
-### Metrics
-
-- Email send success/failure rates
-- Template processing times
-- Queue message processing rates
-- Error rates by notification type
+### Metrics to Track
+- Event processing rates
+- Event processing latency
+- Error rates by event type
+- Queue depths
+- DLQ message count
 
 ### Logging
-
 - Structured JSON logging
-- Correlation ID tracking
-- Tenant context in logs
+- Correlation IDs (TODO: implement)
+- Tenant context
 - Performance metrics
 
-### Health Checks
+## 🎯 Next Steps
 
-- SMTP connectivity
-- RabbitMQ connectivity
-- Template engine health
-- Configuration validation
+### Priority 1: Critical
+1. Implement `UserEventListener.handleUserCreated()`
+2. Implement `UserEventListener.handleUserDeleted()`
+3. Add idempotency keys to all events
+4. Add correlation IDs for distributed tracing
 
-## 🔄 Error Handling
+### Priority 2: High
+5. Implement `BillingEventListener.handlePaymentSuccessful()`
+6. Implement `BillingEventListener.handlePaymentFailed()`
+7. Implement notification tracking
+8. Add comprehensive integration tests
 
-### Email Failures
+### Priority 3: Medium
+9. Implement subscription event handling
+10. Implement accounting software sync
+11. Add event versioning
+12. Implement saga patterns for complex workflows
 
-- Retry logic with exponential backoff
-- Dead letter queues for failed messages
-- Fallback notification methods
-- Graceful degradation
+## 📚 Related Documentation
 
-### Template Errors
+- [RabbitMQ Configuration Summary](../../../RABBITMQ_CONFIGURATION_SUMMARY.md)
+- [Billing Service Messaging Completeness Analysis](../../../BILLING_SERVICE_MESSAGING_COMPLETENESS_ANALYSIS.md)
+- [User Service RabbitMQ Usage](../../../RABBITMQ_USAGE_IN_USER_SERVICE.md)
 
-- Template validation on startup
-- Fallback to plain text emails
-- Error logging and alerting
-- Template hot-reloading support
+## 🤝 Contributing
 
-## 🚀 Deployment
+When implementing TODO items:
 
-### Docker Configuration
-
-```dockerfile
-# Email service dependencies
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy email templates
-COPY src/main/resources/templates /app/templates
-```
-
-### Environment Variables
-
-```bash
-# SMTP Configuration
-SMTP_USERNAME=billing@iqscaffold.com
-SMTP_PASSWORD=secure_password
-
-# Stripe Configuration
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# RabbitMQ Configuration
-RABBITMQ_HOST=rabbitmq.iqscaffold.com
-RABBITMQ_USERNAME=billing_service
-RABBITMQ_PASSWORD=secure_password
-```
-
-## 📈 Performance Optimization
-
-### Email Sending
-
-- Connection pooling for SMTP
-- Async email processing
-- Batch email operations
-- Template caching
-
-### Message Processing
-
-- Parallel message processing
-- Message batching
-- Connection pooling
-- Circuit breaker patterns
+1. Remove the TODO comment
+2. Implement the business logic
+3. Add error handling
+4. Add logging
+5. Write unit tests
+6. Write integration tests
+7. Update this README
 
 ---
 
-This implementation provides complete code parity with the user service mailer while being specifically tailored for billing service requirements. It maintains the same architectural
-patterns, error handling, and integration approaches for consistency across the IQ Scaffold platform.
+**Status**: Event listeners created with TODO placeholders. Ready for implementation.
