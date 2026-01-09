@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository;
+import com.iqscaffold.billingservice.infrastructure.client.UserServiceClient;
 import com.iqscaffold.billingservice.payment.dto.PaymentDtos;
 import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.shared.BillingConstants;
@@ -35,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final PaymentRepository paymentRepository;
   private final PaymentProviderAdapter paymentProvider;
   private final MerchantStripeConfigRepository merchantConfigRepository;
+  private final UserServiceClient userServiceClient;
   private final PaymentStateMachine stateMachine;
   private final PaymentAuditTrailService auditService;
 
@@ -42,11 +44,13 @@ public class PaymentServiceImpl implements PaymentService {
       final PaymentRepository paymentRepository,
       final PaymentProviderAdapter paymentProvider,
       final MerchantStripeConfigRepository merchantConfigRepository,
+      final UserServiceClient userServiceClient,
       final PaymentStateMachine stateMachine,
       final PaymentAuditTrailService auditService) {
     this.paymentRepository = paymentRepository;
     this.paymentProvider = paymentProvider;
     this.merchantConfigRepository = merchantConfigRepository;
+    this.userServiceClient = userServiceClient;
     this.stateMachine = stateMachine;
     this.auditService = auditService;
   }
@@ -61,9 +65,11 @@ public class PaymentServiceImpl implements PaymentService {
     stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
 
     // 2. Resolve Merchant Account (if any)
-    // In schema-per-tenant, the merchant config is stored in the public schema
+    // Get organization by tenant, then get merchant config by organization
     String tenantId = SecurityContextHelper.getCurrentTenantId();
-    var merchantConfig = merchantConfigRepository.findByTenantId(tenantId);
+    var organization = userServiceClient.getOrganizationByTenantId(tenantId);
+    var merchantConfig = organization
+        .flatMap(org -> merchantConfigRepository.findByOrganizationId(org.id()));
 
     Optional<String> connectedAccountId = merchantConfig
         .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getStripeAccountId);

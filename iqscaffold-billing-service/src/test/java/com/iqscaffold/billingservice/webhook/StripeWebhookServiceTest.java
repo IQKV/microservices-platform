@@ -47,6 +47,9 @@ class StripeWebhookServiceTest {
   private MerchantStripeConfigRepository merchantConfigRepository;
 
   @Mock
+  private com.iqscaffold.billingservice.infrastructure.messaging.EventPublisher eventPublisher;
+
+  @Mock
   private IqScaffoldProperties iqScaffoldProperties;
 
   private StripeWebhookService webhookService;
@@ -66,7 +69,8 @@ class StripeWebhookServiceTest {
         paymentService,
         payoutService,
         merchantConfigRepository,
-        iqScaffoldProperties
+        iqScaffoldProperties,
+        eventPublisher
     );
   }
 

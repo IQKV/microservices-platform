@@ -1,11 +1,14 @@
 package com.iqscaffold.billingservice.admin;
 
+import java.util.Map;
+import java.util.Optional;
+
 import com.iqscaffold.billingservice.admin.dto.OnboardingLinkResponse;
 import com.iqscaffold.billingservice.admin.dto.OrganizationDto;
 import com.iqscaffold.billingservice.infrastructure.client.UserServiceClient;
 import com.iqscaffold.billingservice.infrastructure.email.EmailService;
-import com.iqscaffold.billingservice.infrastructure.messaging.MerchantOnboardedEvent;
 import com.iqscaffold.billingservice.infrastructure.messaging.EventPublisher;
+import com.iqscaffold.billingservice.infrastructure.messaging.MerchantOnboardedEvent;
 import com.iqscaffold.billingservice.payment.PaymentProviderAdapter;
 import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.security.UserContext;
@@ -14,9 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Merchant onboarding service with organization support.
@@ -149,7 +149,7 @@ public class MerchantOnboardingService {
       var event = new MerchantOnboardedEvent(organizationId, tenantId, stripeAccountId, chargesEnabled, payoutsEnabled);
       eventPublisher.publishMerchantOnboarded(event);
       logger.info("Published MerchantOnboardedEvent for organization {}", organizationId);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to publish MerchantOnboardedEvent for organization {}: {}", 
           organizationId, e.getMessage(), e);
       // Don't fail the onboarding if event publishing fails
@@ -176,7 +176,7 @@ public class MerchantOnboardingService {
         );
         logger.info("Sent onboarding email to {} for organization {}", recipientEmail, organization.id());
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to send onboarding email for organization {}: {}", 
           organization.id(), e.getMessage(), e);
       // Don't fail the onboarding if email fails

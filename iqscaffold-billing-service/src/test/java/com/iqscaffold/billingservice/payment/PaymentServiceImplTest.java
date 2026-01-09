@@ -47,6 +47,9 @@ class PaymentServiceImplTest {
   private MerchantStripeConfigRepository merchantConfigRepository;
 
   @Mock
+  private com.iqscaffold.billingservice.infrastructure.client.UserServiceClient userServiceClient;
+
+  @Mock
   private PaymentStateMachine stateMachine;
 
   @Mock
@@ -60,6 +63,7 @@ class PaymentServiceImplTest {
         paymentRepository,
         paymentProvider,
         merchantConfigRepository,
+        userServiceClient,
         stateMachine,
         auditService
     );
@@ -86,7 +90,7 @@ class PaymentServiceImplTest {
         any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(providerIntent);
 
-    when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.empty());
+    when(userServiceClient.getOrganizationByTenantId(any())).thenReturn(Optional.empty());
 
     // When
     PaymentDtos.PaymentResponse response = paymentService.createPaymentIntent(request);
@@ -113,11 +117,16 @@ class PaymentServiceImplTest {
         null
     );
 
+    var organizationDto = new com.iqscaffold.billingservice.admin.dto.OrganizationDto(
+        1L, "Test Org", "tenant-1", null, null, null, null, null, true
+    );
+
     MerchantStripeConfig merchantConfig = new MerchantStripeConfig();
     merchantConfig.setStripeAccountId("acct_123");
     merchantConfig.setApplicationFeePercent(new BigDecimal("15.0"));
 
-    when(merchantConfigRepository.findByTenantId(any())).thenReturn(Optional.of(merchantConfig));
+    when(userServiceClient.getOrganizationByTenantId(any())).thenReturn(Optional.of(organizationDto));
+    when(merchantConfigRepository.findByOrganizationId(1L)).thenReturn(Optional.of(merchantConfig));
 
     Payment savedPayment = createTestPayment();
     when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
