@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.organization;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -32,6 +33,21 @@ public record UpdateOrganizationRequest(
 
     Boolean enabled,
 
-    Long ownerId
+    Long ownerUserId,
+
+    @Email(message = "Billing email must be valid")
+    @Size(max = 255, message = "Billing email must not exceed 255 characters")
+    String billingEmail,
+
+    @Size(max = 255, message = "Stripe account ID must not exceed 255 characters")
+    String stripeAccountId,
+
+    @Size(max = 50, message = "Subscription status must not exceed 50 characters")
+    String subscriptionStatus,
+
+    @Size(max = 100, message = "Subscription plan must not exceed 100 characters")
+    String subscriptionPlan,
+
+    Integer maxUsers
 ) {
 }

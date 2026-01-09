@@ -27,6 +27,9 @@ public class MerchantStripeConfig {
   @Column(name = "tenant_id", nullable = false)
   private String tenantId;
 
+  @Column(name = "organization_id", nullable = false)
+  private Long organizationId;
+
   @Column(name = "charges_enabled")
   private boolean chargesEnabled;
 
@@ -67,6 +70,14 @@ public class MerchantStripeConfig {
 
   public void setTenantId(String tenantId) {
     this.tenantId = tenantId;
+  }
+
+  public Long getOrganizationId() {
+    return organizationId;
+  }
+
+  public void setOrganizationId(Long organizationId) {
+    this.organizationId = organizationId;
   }
 
   public boolean isChargesEnabled() {

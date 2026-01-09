@@ -11,8 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MerchantStripeConfigRepository extends JpaRepository<MerchantStripeConfig, UUID> {
   @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
-  Optional<MerchantStripeConfig> findByTenantId(String tenantId);
+  Optional<MerchantStripeConfig> findByStripeAccountId(String stripeAccountId);
 
   @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
-  Optional<MerchantStripeConfig> findByStripeAccountId(String stripeAccountId);
+  Optional<MerchantStripeConfig> findByOrganizationId(Long organizationId);
+
+  boolean existsByOrganizationId(Long organizationId);
 }

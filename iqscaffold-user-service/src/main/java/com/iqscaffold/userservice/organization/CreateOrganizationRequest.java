@@ -1,15 +1,20 @@
 package com.iqscaffold.userservice.organization;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * Request DTO for creating an organization.
+ * Request DTO for creating an organization (system-wide billing entity).
  */
 public record CreateOrganizationRequest(
     @NotBlank(message = "Organization name is required")
     @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
     String name,
+
+    @NotBlank(message = "Tenant ID is required")
+    @Size(min = 2, max = 100, message = "Tenant ID must be between 2 and 100 characters")
+    String tenantId,
 
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     String description,
@@ -34,6 +39,15 @@ public record CreateOrganizationRequest(
 
     Boolean enabled,
 
-    Long ownerId
+    Long ownerUserId,
+
+    @Email(message = "Billing email must be valid")
+    @Size(max = 255, message = "Billing email must not exceed 255 characters")
+    String billingEmail,
+
+    @Size(max = 100, message = "Subscription plan must not exceed 100 characters")
+    String subscriptionPlan,
+
+    Integer maxUsers
 ) {
 }

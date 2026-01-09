@@ -43,9 +43,6 @@
             <column name="tenant_id" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="organization_id" type="BIGINT">
-                <constraints nullable="true"/>
-            </column>
             <column name="preferred_locale" type="VARCHAR(10)" defaultValue="en">
                 <constraints nullable="true"/>
             </column>
@@ -185,69 +182,6 @@
                 referencedColumnNames="id"
                 constraintName="fk_email_verification_tokens_user_id"/>
 
-        <!-- Create organizations table -->
-        <createTable tableName="organizations">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="description" type="VARCHAR(1000)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="industry" type="VARCHAR(100)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="website" type="VARCHAR(255)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="phone" type="VARCHAR(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="address" type="VARCHAR(500)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="city" type="VARCHAR(100)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="country" type="VARCHAR(100)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
-                <constraints nullable="false"/>
-            </column>
-            <column name="tenant_id" type="VARCHAR(100)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addForeignKeyConstraint
-                baseTableName="users"
-                baseColumnNames="organization_id"
-                constraintName="fk_users_organization"
-                referencedTableName="organizations"
-                referencedColumnNames="id"
-                onDelete="SET NULL"
-                onUpdate="CASCADE"/>
-
-        <!-- Add unique constraints -->
-        <addUniqueConstraint
-                tableName="organizations"
-                columnNames="tenant_id, name"
-                constraintName="uq_organizations_tenant_name"/>
-
-        <addUniqueConstraint
-                tableName="users"
-                columnNames="organization_id"
-                constraintName="uq_users_organization_id"/>
-
         <!-- Create indexes for users table -->
         <createIndex indexName="idx_users_username" tableName="users">
             <column name="username"/>
@@ -264,9 +198,6 @@
         <createIndex indexName="idx_users_tenant_enabled" tableName="users">
             <column name="tenant_id"/>
             <column name="enabled"/>
-        </createIndex>
-        <createIndex indexName="idx_users_organization_id" tableName="users">
-            <column name="organization_id"/>
         </createIndex>
         <createIndex indexName="idx_users_tenant_email_verified" tableName="users">
             <column name="tenant_id"/>
@@ -334,32 +265,12 @@
             <column name="created_at"/>
         </createIndex>
 
-        <!-- Create indexes for organizations table -->
-        <createIndex indexName="idx_organizations_tenant_id" tableName="organizations">
-            <column name="tenant_id"/>
-        </createIndex>
-        <createIndex indexName="idx_organizations_name" tableName="organizations">
-            <column name="name"/>
-        </createIndex>
-        <createIndex indexName="idx_organizations_enabled" tableName="organizations">
-            <column name="enabled"/>
-        </createIndex>
-        <createIndex indexName="idx_organizations_created_at" tableName="organizations">
-            <column name="created_at"/>
-        </createIndex>
-        <createIndex indexName="idx_organizations_tenant_enabled" tableName="organizations">
-            <column name="tenant_id"/>
-            <column name="enabled"/>
-            <column name="created_at" descending="true"/>
-        </createIndex>
-
         <rollback>
             <dropTable tableName="user_authorities"/>
             <dropTable tableName="email_verification_tokens"/>
             <dropTable tableName="user_audit_log"/>
             <dropTable tableName="users"/>
             <dropTable tableName="authorities"/>
-            <dropTable tableName="organizations"/>
         </rollback>
     </changeSet>
 

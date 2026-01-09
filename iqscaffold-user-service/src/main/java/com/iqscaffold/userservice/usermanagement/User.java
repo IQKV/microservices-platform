@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.iqscaffold.userservice.organization.Organization;
 import com.iqscaffold.userservice.shared.Authority;
 import com.iqscaffold.userservice.shared.TenantAware;
 import org.hibernate.annotations.Cache;
@@ -77,9 +76,9 @@ import org.hibernate.annotations.UpdateTimestamp;
  * <h3>Relationship Mappings</h3>
  * <ul>
  *   <li><strong>Authorities</strong> - Many-to-many relationship with roles and permissions</li>
- *   <li><strong>Organization</strong> - One-to-one relationship with organization entity</li>
  *   <li><strong>Preferences</strong> - One-to-one relationship with user preferences</li>
  *   <li><strong>Audit Logs</strong> - One-to-many relationship with security audit entries</li>
+ *   <li><strong>Organization</strong> - Implicit via tenant context (tenant = organization)</li>
  * </ul>
  *
  * <h3>Database Constraints</h3>
@@ -129,7 +128,6 @@ import org.hibernate.annotations.UpdateTimestamp;
  * @version 1.0
  * @see TenantAware
  * @see Authority
- * @see Organization
  * @see UserPreference
  * @since 1.0
  */
@@ -184,10 +182,6 @@ public class User extends TenantAware {
   )
   @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.usermanagement.User.authorities")
   private Set<Authority> authorities = new HashSet<>();
-
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "organization_id")
-  private Organization organization;
 
   @OneToOne(mappedBy = "user")
   private UserPreference preference;
@@ -291,14 +285,6 @@ public class User extends TenantAware {
 
   public void setAuthorities(Set<Authority> authorities) {
     this.authorities = authorities;
-  }
-
-  public Organization getOrganization() {
-    return organization;
-  }
-
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
   }
 
   public UserPreference getPreference() {

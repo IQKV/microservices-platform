@@ -22,7 +22,8 @@ public record IqScaffoldProperties(
     @Valid @NotNull Email email,
     @Valid @NotNull I18n i18n,
     @Valid @NotNull Billing billing,
-    @NotBlank String tenantIdHeader
+    @NotBlank String tenantIdHeader,
+    @NotBlank String userServiceUrl
 ) {
 
   /**

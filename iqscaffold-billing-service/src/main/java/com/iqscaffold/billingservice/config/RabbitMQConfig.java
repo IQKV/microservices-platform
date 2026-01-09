@@ -50,6 +50,8 @@ public class RabbitMQConfig {
   public static final String PAYMENT_FAILED_KEY = "billing.payment.failed";
   public static final String PAYMENT_REFUNDED_KEY = "billing.payment.refunded";
   public static final String MERCHANT_ONBOARDING_KEY = "billing.merchant.onboarding";
+  public static final String MERCHANT_ONBOARDED_KEY = "billing.merchant.onboarded";
+  public static final String MERCHANT_CAPABILITIES_UPDATED_KEY = "billing.merchant.capabilities.updated";
   public static final String INVOICE_GENERATED_KEY = "billing.invoice.generated";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
 

@@ -2,6 +2,7 @@ package com.iqscaffold.userservice.organization;
 
 import com.iqscaffold.userservice.security.UserAuditLog;
 import com.iqscaffold.userservice.security.UserAuditLogRepository;
+import com.iqscaffold.userservice.tenancy.TenantContext;
 import com.iqscaffold.userservice.usermanagement.UserContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +11,17 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for organization preference management operations with admin-only access and tenant isolation.
+ * Service for organization preference management operations.
+ * 
+ * <p>Organization preferences are stored in PUBLIC schema alongside organizations.
+ * These preferences define organization-wide settings like password policies, security
+ * settings, and localization defaults.
  */
 @Service
 @Transactional
@@ -38,101 +42,120 @@ public class OrganizationPreferenceManagementService {
     this.auditLogRepository = auditLogRepository;
   }
 
+  /**
+   * Get all organization preferences with pagination.
+   * SUPER_ADMIN sees all, ADMIN sees only their organization's preferences.
+   */
   @Transactional(readOnly = true)
   public Page<OrganizationPreferenceDto> getAllPreferences(Pageable pageable, UserContext currentUser) {
     validateAdminAccess(currentUser, "LIST_ORGANIZATION_PREFERENCES");
 
-    var tenantId = currentUser.tenantId();
-    var preferences = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> preferenceRepository.findAll()
-    );
+    Page<OrganizationPreference> preferences;
+    
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      // Super admin sees all preferences
+      preferences = preferenceRepository.findAll(pageable);
+    } else {
+      // Regular admin sees only their organization's preferences
+      var org = organizationRepository.findByTenantId(currentUser.tenantId())
+          .orElseThrow(() -> new OrganizationPreferenceManagementException("Organization not found for tenant: " + currentUser.tenantId()));
+      
+      var pref = preferenceRepository.findByOrganizationId(org.getId()).orElse(null);
+      if (pref != null) {
+        var prefList = java.util.List.of(pref);
+        preferences = new org.springframework.data.domain.PageImpl<>(prefList, pageable, 1);
+      } else {
+        preferences = Page.empty(pageable);
+      }
+    }
 
-    var preferenceDtos = preferences.stream()
-        .map(this::convertToDto)
-        .toList();
+    logAuditEvent("LIST_ORGANIZATION_PREFERENCES", "Listed " + preferences.getNumberOfElements() + " preferences", currentUser);
 
-    var start = (int) pageable.getOffset();
-    var end = Math.min((start + pageable.getPageSize()), preferenceDtos.size());
-    var pageContent = preferenceDtos.subList(start, end);
-
-    logAuditEvent("LIST_ORGANIZATION_PREFERENCES", "Listed " + pageContent.size() + " preferences", currentUser);
-
-    return new PageImpl<>(pageContent, pageable, preferenceDtos.size());
+    return preferences.map(this::convertToDto);
   }
 
+  /**
+   * Get preference by ID with tenant validation.
+   */
   @Transactional(readOnly = true)
-  @Cacheable(value = "organizationPreferences", key = "#preferenceId + '_' + #currentUser.tenantId()",
-             condition = "#currentUser != null && #currentUser.tenantId() != null")
+  @Cacheable(value = "organizationPreferences", key = "#preferenceId")
   public OrganizationPreferenceDto getPreferenceById(Long preferenceId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_ORGANIZATION_PREFERENCE");
 
-    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser.tenantId());
+    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser);
 
     logAuditEvent("GET_ORGANIZATION_PREFERENCE", "Retrieved preference for organization: " + preference.getOrganization().getName(), currentUser);
 
     return convertToDto(preference);
   }
 
+  /**
+   * Get preference by organization ID with tenant validation.
+   */
   @Transactional(readOnly = true)
-  @Cacheable(value = "organizationPreferences", key = "'org_' + #organizationId + '_' + #currentUser.tenantId()",
-             condition = "#currentUser != null && #currentUser.tenantId() != null")
+  @Cacheable(value = "organizationPreferences", key = "'org_' + #organizationId")
   public OrganizationPreferenceDto getPreferenceByOrganizationId(Long organizationId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_ORGANIZATION_PREFERENCE");
 
-    var tenantId = currentUser.tenantId();
-    var organization = findOrganizationByIdWithTenantCheck(organizationId, tenantId);
+    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser);
 
-    var preference = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> preferenceRepository.findByOrganizationId(organizationId)
-            .orElseThrow(() -> new OrganizationPreferenceManagementException("Preference not found for organization: " + organizationId))
-    );
-
-    if (!preference.getTenantId().equals(tenantId)) {
-      throw new AccessDeniedException("Preference not found in current tenant");
-    }
+    var preference = preferenceRepository.findByOrganizationId(organizationId)
+        .orElseThrow(() -> new OrganizationPreferenceManagementException("Preference not found for organization: " + organizationId));
 
     logAuditEvent("GET_ORGANIZATION_PREFERENCE", "Retrieved preference for organization: " + organization.getName(), currentUser);
 
     return convertToDto(preference);
   }
 
-  @CacheEvict(value = "organizationPreferences", allEntries = true, condition = "#currentUser != null && #currentUser.tenantId() != null")
+  /**
+   * Get preference for current user's organization.
+   */
+  @Transactional(readOnly = true)
+  @Cacheable(value = "organizationPreferences", key = "'tenant_' + #currentUser.tenantId()")
+  public OrganizationPreferenceDto getPreferenceForCurrentTenant(UserContext currentUser) {
+    var organization = organizationRepository.findByTenantId(currentUser.tenantId())
+        .orElseThrow(() -> new OrganizationPreferenceManagementException("Organization not found for tenant: " + currentUser.tenantId()));
+
+    var preference = preferenceRepository.findByOrganizationId(organization.getId())
+        .orElseThrow(() -> new OrganizationPreferenceManagementException("Preference not found for organization: " + organization.getId()));
+
+    return convertToDto(preference);
+  }
+
+  /**
+   * Create organization preference.
+   */
+  @CacheEvict(value = "organizationPreferences", allEntries = true)
   public OrganizationPreferenceDto createPreference(CreateOrganizationPreferenceRequest request, UserContext currentUser) {
     validateAdminAccess(currentUser, "CREATE_ORGANIZATION_PREFERENCE");
 
-    var tenantId = currentUser.tenantId();
-    var organization = findOrganizationByIdWithTenantCheck(request.organizationId(), tenantId);
+    var organization = findOrganizationByIdWithTenantCheck(request.organizationId(), currentUser);
 
-    if (com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> preferenceRepository.existsByOrganizationId(request.organizationId())
-    )) {
+    if (preferenceRepository.existsByOrganizationId(request.organizationId())) {
       throw new OrganizationPreferenceManagementException("Preference already exists for organization: " + request.organizationId());
     }
 
-    var preference = new OrganizationPreference(organization, tenantId);
+    var preference = new OrganizationPreference(organization);
     applyRequestToPreference(preference, request);
 
-    var savedPreference = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> preferenceRepository.save(preference)
-    );
+    var savedPreference = preferenceRepository.save(preference);
 
     logAuditEvent("CREATE_ORGANIZATION_PREFERENCE", "Created preference for organization: " + organization.getName(), currentUser);
 
     return convertToDto(savedPreference);
   }
 
+  /**
+   * Update organization preference.
+   */
   @Caching(evict = {
-      @CacheEvict(value = "organizationPreferences", key = "#preferenceId + '_' + #currentUser.tenantId()"),
+      @CacheEvict(value = "organizationPreferences", key = "#preferenceId"),
       @CacheEvict(value = "organizationPreferences", allEntries = true)
   })
   public OrganizationPreferenceDto updatePreference(Long preferenceId, UpdateOrganizationPreferenceRequest request, UserContext currentUser) {
     validateAdminAccess(currentUser, "UPDATE_ORGANIZATION_PREFERENCE");
 
-    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser.tenantId());
+    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser);
 
     if (request.defaultLocale() != null) {
       preference.setDefaultLocale(request.defaultLocale());
@@ -142,12 +165,6 @@ public class OrganizationPreferenceManagementService {
     }
     if (request.defaultCurrency() != null) {
       preference.setDefaultCurrency(request.defaultCurrency());
-    }
-    if (request.defaultDateFormat() != null) {
-      preference.setDefaultDateFormat(request.defaultDateFormat());
-    }
-    if (request.defaultTimeFormat() != null) {
-      preference.setDefaultTimeFormat(request.defaultTimeFormat());
     }
     if (request.allowUserRegistration() != null) {
       preference.setAllowUserRegistration(request.allowUserRegistration());
@@ -179,46 +196,34 @@ public class OrganizationPreferenceManagementService {
     if (request.lockoutDurationMinutes() != null) {
       preference.setLockoutDurationMinutes(request.lockoutDurationMinutes());
     }
-    if (request.enableTwoFactorAuth() != null) {
-      preference.setEnableTwoFactorAuth(request.enableTwoFactorAuth());
-    }
-    if (request.requireTwoFactorAuth() != null) {
-      preference.setRequireTwoFactorAuth(request.requireTwoFactorAuth());
+    if (request.twoFactorAuthRequired() != null) {
+      preference.setTwoFactorAuthRequired(request.twoFactorAuthRequired());
     }
     if (request.notificationEmail() != null) {
       preference.setNotificationEmail(request.notificationEmail());
     }
-    if (request.supportEmail() != null) {
-      preference.setSupportEmail(request.supportEmail());
-    }
-    if (request.customSettings() != null) {
-      preference.setCustomSettings(request.customSettings());
-    }
 
-    var updatedPreference = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        currentUser.tenantId(),
-        () -> preferenceRepository.save(preference)
-    );
+    var updatedPreference = preferenceRepository.save(preference);
 
     logAuditEvent("UPDATE_ORGANIZATION_PREFERENCE", "Updated preference for organization: " + preference.getOrganization().getName(), currentUser);
 
     return convertToDto(updatedPreference);
   }
 
+  /**
+   * Delete organization preference.
+   */
   @Caching(evict = {
-      @CacheEvict(value = "organizationPreferences", key = "#preferenceId + '_' + #currentUser.tenantId()"),
+      @CacheEvict(value = "organizationPreferences", key = "#preferenceId"),
       @CacheEvict(value = "organizationPreferences", allEntries = true)
   })
   public void deletePreference(Long preferenceId, UserContext currentUser) {
     validateAdminAccess(currentUser, "DELETE_ORGANIZATION_PREFERENCE");
 
-    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser.tenantId());
+    var preference = findPreferenceByIdWithTenantCheck(preferenceId, currentUser);
     var organizationName = preference.getOrganization().getName();
 
-    com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        currentUser.tenantId(),
-        () -> preferenceRepository.delete(preference)
-    );
+    preferenceRepository.delete(preference);
 
     logAuditEvent("DELETE_ORGANIZATION_PREFERENCE", "Deleted preference for organization: " + organizationName, currentUser);
   }
@@ -229,29 +234,36 @@ public class OrganizationPreferenceManagementService {
     }
   }
 
-  private OrganizationPreference findPreferenceByIdWithTenantCheck(Long preferenceId, String tenantId) {
-    var preference = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> preferenceRepository.findById(preferenceId)
-            .orElseThrow(() -> new OrganizationPreferenceManagementException("Preference not found: " + preferenceId))
-    );
+  private OrganizationPreference findPreferenceByIdWithTenantCheck(Long preferenceId, UserContext currentUser) {
+    var preference = preferenceRepository.findById(preferenceId)
+        .orElseThrow(() -> new OrganizationPreferenceManagementException("Preference not found: " + preferenceId));
 
-    if (!preference.getTenantId().equals(tenantId)) {
-      throw new AccessDeniedException("Preference not found in current tenant");
+    // Super admin can access any preference
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      return preference;
+    }
+
+    // Regular admin can only access their organization's preference
+    var organization = preference.getOrganization();
+    if (!organization.getTenantId().equals(currentUser.tenantId())) {
+      throw new AccessDeniedException("Access denied to preference: " + preferenceId);
     }
 
     return preference;
   }
 
-  private Organization findOrganizationByIdWithTenantCheck(Long organizationId, String tenantId) {
-    var organization = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-        tenantId,
-        () -> organizationRepository.findById(organizationId)
-            .orElseThrow(() -> new OrganizationPreferenceManagementException("Organization not found: " + organizationId))
-    );
+  private Organization findOrganizationByIdWithTenantCheck(Long organizationId, UserContext currentUser) {
+    var organization = organizationRepository.findById(organizationId)
+        .orElseThrow(() -> new OrganizationPreferenceManagementException("Organization not found: " + organizationId));
 
-    if (!organization.getTenantId().equals(tenantId)) {
-      throw new AccessDeniedException("Organization not found in current tenant");
+    // Super admin can access any organization
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      return organization;
+    }
+
+    // Regular admin can only access their own organization
+    if (!organization.getTenantId().equals(currentUser.tenantId())) {
+      throw new AccessDeniedException("Access denied to organization: " + organizationId);
     }
 
     return organization;
@@ -267,12 +279,6 @@ public class OrganizationPreferenceManagementService {
     if (request.defaultCurrency() != null) {
       preference.setDefaultCurrency(request.defaultCurrency());
     }
-    if (request.defaultDateFormat() != null) {
-      preference.setDefaultDateFormat(request.defaultDateFormat());
-    }
-    if (request.defaultTimeFormat() != null) {
-      preference.setDefaultTimeFormat(request.defaultTimeFormat());
-    }
     if (request.allowUserRegistration() != null) {
       preference.setAllowUserRegistration(request.allowUserRegistration());
     }
@@ -303,20 +309,11 @@ public class OrganizationPreferenceManagementService {
     if (request.lockoutDurationMinutes() != null) {
       preference.setLockoutDurationMinutes(request.lockoutDurationMinutes());
     }
-    if (request.enableTwoFactorAuth() != null) {
-      preference.setEnableTwoFactorAuth(request.enableTwoFactorAuth());
-    }
-    if (request.requireTwoFactorAuth() != null) {
-      preference.setRequireTwoFactorAuth(request.requireTwoFactorAuth());
+    if (request.twoFactorAuthRequired() != null) {
+      preference.setTwoFactorAuthRequired(request.twoFactorAuthRequired());
     }
     if (request.notificationEmail() != null) {
       preference.setNotificationEmail(request.notificationEmail());
-    }
-    if (request.supportEmail() != null) {
-      preference.setSupportEmail(request.supportEmail());
-    }
-    if (request.customSettings() != null) {
-      preference.setCustomSettings(request.customSettings());
     }
   }
 
@@ -329,8 +326,6 @@ public class OrganizationPreferenceManagementService {
         preference.getDefaultLocale(),
         preference.getDefaultTimezone(),
         preference.getDefaultCurrency(),
-        preference.getDefaultDateFormat(),
-        preference.getDefaultTimeFormat(),
         preference.getAllowUserRegistration(),
         preference.getRequireEmailVerification(),
         preference.getPasswordMinLength(),
@@ -341,12 +336,8 @@ public class OrganizationPreferenceManagementService {
         preference.getSessionTimeoutMinutes(),
         preference.getMaxLoginAttempts(),
         preference.getLockoutDurationMinutes(),
-        preference.getEnableTwoFactorAuth(),
-        preference.getRequireTwoFactorAuth(),
+        preference.getTwoFactorAuthRequired(),
         preference.getNotificationEmail(),
-        preference.getSupportEmail(),
-        preference.getCustomSettings(),
-        preference.getTenantId(),
         preference.getCreatedAt(),
         preference.getUpdatedAt()
     );
@@ -363,10 +354,7 @@ public class OrganizationPreferenceManagementService {
           currentUser.tenantId()
       );
 
-      com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(
-          currentUser.tenantId(),
-          () -> auditLogRepository.save(auditLog)
-      );
+      TenantContext.executeInTenantContext(currentUser.tenantId(), () -> auditLogRepository.save(auditLog));
 
       logger.info("Organization preference management audit: {} - {} by user {} in tenant {}",
           action, details, currentUser.username(), currentUser.tenantId());

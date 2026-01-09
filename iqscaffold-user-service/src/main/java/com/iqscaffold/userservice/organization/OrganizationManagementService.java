@@ -2,6 +2,7 @@ package com.iqscaffold.userservice.organization;
 
 import com.iqscaffold.userservice.security.UserAuditLog;
 import com.iqscaffold.userservice.security.UserAuditLogRepository;
+import com.iqscaffold.userservice.tenancy.TenantContext;
 import com.iqscaffold.userservice.usermanagement.UserContext;
 import com.iqscaffold.userservice.usermanagement.UserRepository;
 import org.slf4j.Logger;
@@ -11,14 +12,23 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for organization management operations with admin-only access and tenant isolation.
+ * Service for organization management operations.
+ * 
+ * <p>Organizations are stored in PUBLIC schema (system-wide) and represent billing entities
+ * with a 1:1 relationship to tenants. This service provides CRUD operations with proper
+ * authorization checks.
+ * 
+ * <h3>Access Control</h3>
+ * <ul>
+ *   <li>SUPER_ADMIN - Can manage all organizations across all tenants</li>
+ *   <li>ADMIN - Can only manage their own organization (tenant-scoped)</li>
+ * </ul>
  */
 @Service
 @Transactional
@@ -39,50 +49,93 @@ public class OrganizationManagementService {
     this.auditLogRepository = auditLogRepository;
   }
 
+  /**
+   * Get all organizations with pagination.
+   * SUPER_ADMIN sees all, ADMIN sees only their organization.
+   */
   @Transactional(readOnly = true)
   public Page<OrganizationDto> getAllOrganizations(Pageable pageable, UserContext currentUser) {
     validateAdminAccess(currentUser, "LIST_ORGANIZATIONS");
 
-    var tenantId = currentUser.tenantId();
-    var organizations = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.findAll());
+    Page<Organization> organizations;
+    
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      // Super admin sees all organizations
+      organizations = organizationRepository.findAll(pageable);
+    } else {
+      // Regular admin sees only their organization
+      var org = organizationRepository.findByTenantId(currentUser.tenantId())
+          .orElseThrow(() -> new OrganizationManagementException("Organization not found for tenant: " + currentUser.tenantId()));
+      organizations = Page.empty(pageable);
+      // Return single organization as page
+      var orgList = java.util.List.of(org);
+      organizations = new org.springframework.data.domain.PageImpl<>(orgList, pageable, 1);
+    }
 
-    var organizationDtos = organizations.stream()
-        .map(this::convertToDto)
-        .toList();
+    logAuditEvent("LIST_ORGANIZATIONS", "Listed " + organizations.getNumberOfElements() + " organizations", currentUser);
 
-    var start = (int) pageable.getOffset();
-    var end = Math.min((start + pageable.getPageSize()), organizationDtos.size());
-    var pageContent = organizationDtos.subList(start, end);
-
-    logAuditEvent("LIST_ORGANIZATIONS", "Listed " + pageContent.size() + " organizations", currentUser);
-
-    return new PageImpl<>(pageContent, pageable, organizationDtos.size());
+    return organizations.map(this::convertToDto);
   }
 
+  /**
+   * Get organization by ID with tenant validation.
+   */
   @Transactional(readOnly = true)
-  @Cacheable(value = "organizations", key = "#organizationId + '_' + #currentUser.tenantId()",
-             condition = "#currentUser != null && #currentUser.tenantId() != null")
+  @Cacheable(value = "organizations", key = "#organizationId")
   public OrganizationDto getOrganizationById(Long organizationId, UserContext currentUser) {
     validateAdminAccess(currentUser, "GET_ORGANIZATION");
 
-    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser.tenantId());
+    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser);
 
     logAuditEvent("GET_ORGANIZATION", "Retrieved organization: " + organization.getName(), currentUser);
 
     return convertToDto(organization);
   }
 
-  @CacheEvict(value = "organizations", allEntries = true, condition = "#currentUser != null && #currentUser.tenantId() != null")
+  /**
+   * Get organization for current user's tenant.
+   */
+  @Transactional(readOnly = true)
+  @Cacheable(value = "organizations", key = "'tenant_' + #currentUser.tenantId()")
+  public OrganizationDto getOrganizationForCurrentTenant(UserContext currentUser) {
+    var organization = organizationRepository.findByTenantId(currentUser.tenantId())
+        .orElseThrow(() -> new OrganizationManagementException("Organization not found for tenant: " + currentUser.tenantId()));
+
+    return convertToDto(organization);
+  }
+
+  /**
+   * Get organization by tenant ID.
+   * Internal endpoint for service-to-service communication.
+   */
+  @Transactional(readOnly = true)
+  @Cacheable(value = "organizations", key = "'tenant_' + #tenantId")
+  public OrganizationDto getOrganizationByTenantId(String tenantId) {
+    var organization = organizationRepository.findByTenantId(tenantId)
+        .orElseThrow(() -> new OrganizationManagementException("Organization not found for tenant: " + tenantId));
+
+    return convertToDto(organization);
+  }
+
+  /**
+   * Create a new organization (SUPER_ADMIN only).
+   * This also establishes the 1:1 relationship with a tenant.
+   */
+  @CacheEvict(value = "organizations", allEntries = true)
   public OrganizationDto createOrganization(CreateOrganizationRequest request, UserContext currentUser) {
-    validateAdminAccess(currentUser, "CREATE_ORGANIZATION");
+    validateSuperAdminAccess(currentUser, "CREATE_ORGANIZATION");
 
-    var tenantId = currentUser.tenantId();
+    // Validate tenant doesn't already have an organization
+    if (organizationRepository.existsByTenantId(request.tenantId())) {
+      throw new OrganizationManagementException("Organization already exists for tenant: " + request.tenantId());
+    }
 
-    if (com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.existsByName(request.name()))) {
+    // Validate unique name
+    if (organizationRepository.existsByName(request.name())) {
       throw new OrganizationManagementException("Organization name already exists: " + request.name());
     }
 
-    var organization = new Organization(request.name(), tenantId);
+    var organization = new Organization(request.name(), request.tenantId());
     organization.setDescription(request.description());
     organization.setIndustry(request.industry());
     organization.setWebsite(request.website());
@@ -91,37 +144,40 @@ public class OrganizationManagementService {
     organization.setCity(request.city());
     organization.setCountry(request.country());
     organization.setEnabled(request.enabled() != null ? request.enabled() : true);
+    organization.setBillingEmail(request.billingEmail());
+    organization.setSubscriptionPlan(request.subscriptionPlan());
+    organization.setMaxUsers(request.maxUsers());
+    organization.setCreatedBy(currentUser.username());
 
-    if (request.ownerId() != null) {
-      var owner = userRepository.findById(request.ownerId())
-          .orElseThrow(() -> new OrganizationManagementException("Owner user not found: " + request.ownerId()));
-
-      if (!owner.getTenantId().equals(tenantId)) {
-        throw new AccessDeniedException("Owner user not found in current tenant");
-      }
-
-      owner.setOrganization(organization);
-      organization.setOwner(owner);
+    // Validate owner user exists in the tenant
+    if (request.ownerUserId() != null) {
+      validateOwnerUser(request.ownerUserId(), request.tenantId());
+      organization.setOwnerUserId(request.ownerUserId());
     }
 
-    var savedOrganization = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.save(organization));
+    var savedOrganization = organizationRepository.save(organization);
 
-    logAuditEvent("CREATE_ORGANIZATION", "Created organization: " + savedOrganization.getName(), currentUser);
+    logAuditEvent("CREATE_ORGANIZATION", "Created organization: " + savedOrganization.getName() + " for tenant: " + savedOrganization.getTenantId(), currentUser);
 
     return convertToDto(savedOrganization);
   }
 
+  /**
+   * Update organization details.
+   * SUPER_ADMIN can update any, ADMIN can update only their own.
+   */
   @Caching(evict = {
-      @CacheEvict(value = "organizations", key = "#organizationId + '_' + #currentUser.tenantId()"),
+      @CacheEvict(value = "organizations", key = "#organizationId"),
       @CacheEvict(value = "organizations", allEntries = true)
   })
   public OrganizationDto updateOrganization(Long organizationId, UpdateOrganizationRequest request, UserContext currentUser) {
     validateAdminAccess(currentUser, "UPDATE_ORGANIZATION");
 
-    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser.tenantId());
+    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser);
 
+    // Update basic fields
     if (request.name() != null && !request.name().equals(organization.getName())) {
-      if (com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.existsByName(request.name()))) {
+      if (organizationRepository.existsByName(request.name())) {
         throw new OrganizationManagementException("Organization name already exists: " + request.name());
       }
       organization.setName(request.name());
@@ -159,45 +215,57 @@ public class OrganizationManagementService {
       organization.setEnabled(request.enabled());
     }
 
-    if (request.ownerId() != null) {
-      var owner = userRepository.findById(request.ownerId())
-          .orElseThrow(() -> new OrganizationManagementException("Owner user not found: " + request.ownerId()));
-
-      if (!owner.getTenantId().equals(currentUser.tenantId())) {
-        throw new AccessDeniedException("Owner user not found in current tenant");
-      }
-
-      if (organization.getOwner() != null) {
-        organization.getOwner().setOrganization(null);
-      }
-
-      owner.setOrganization(organization);
-      organization.setOwner(owner);
+    // Update billing fields
+    if (request.billingEmail() != null) {
+      organization.setBillingEmail(request.billingEmail());
     }
 
-    var updatedOrganization = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.save(organization));
+    if (request.stripeAccountId() != null) {
+      organization.setStripeAccountId(request.stripeAccountId());
+    }
+
+    if (request.subscriptionStatus() != null) {
+      organization.setSubscriptionStatus(request.subscriptionStatus());
+    }
+
+    if (request.subscriptionPlan() != null) {
+      organization.setSubscriptionPlan(request.subscriptionPlan());
+    }
+
+    if (request.maxUsers() != null) {
+      organization.setMaxUsers(request.maxUsers());
+    }
+
+    // Update owner
+    if (request.ownerUserId() != null) {
+      validateOwnerUser(request.ownerUserId(), organization.getTenantId());
+      organization.setOwnerUserId(request.ownerUserId());
+    }
+
+    var updatedOrganization = organizationRepository.save(organization);
 
     logAuditEvent("UPDATE_ORGANIZATION", "Updated organization: " + updatedOrganization.getName(), currentUser);
 
     return convertToDto(updatedOrganization);
   }
 
+  /**
+   * Delete organization (SUPER_ADMIN only).
+   * This will cascade delete the tenant and all associated data.
+   */
   @Caching(evict = {
-      @CacheEvict(value = "organizations", key = "#organizationId + '_' + #currentUser.tenantId()"),
+      @CacheEvict(value = "organizations", key = "#organizationId"),
       @CacheEvict(value = "organizations", allEntries = true)
   })
   public void deleteOrganization(Long organizationId, UserContext currentUser) {
-    validateAdminAccess(currentUser, "DELETE_ORGANIZATION");
+    validateSuperAdminAccess(currentUser, "DELETE_ORGANIZATION");
 
-    var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser.tenantId());
+    var organization = organizationRepository.findById(organizationId)
+        .orElseThrow(() -> new OrganizationManagementException("Organization not found: " + organizationId));
 
-    if (organization.getOwner() != null) {
-      organization.getOwner().setOrganization(null);
-    }
+    organizationRepository.delete(organization);
 
-    com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> organizationRepository.delete(organization));
-
-    logAuditEvent("DELETE_ORGANIZATION", "Deleted organization: " + organization.getName(), currentUser);
+    logAuditEvent("DELETE_ORGANIZATION", "Deleted organization: " + organization.getName() + " (tenant: " + organization.getTenantId() + ")", currentUser);
   }
 
   private void validateAdminAccess(UserContext currentUser, String operation) {
@@ -206,20 +274,41 @@ public class OrganizationManagementService {
     }
   }
 
-  private Organization findOrganizationByIdWithTenantCheck(Long organizationId, String tenantId) {
-    var organization = com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(tenantId, () -> organizationRepository.findById(organizationId)
-        .orElseThrow(() -> new OrganizationManagementException("Organization not found: " + organizationId))
-    );
+  private void validateSuperAdminAccess(UserContext currentUser, String operation) {
+    if (!currentUser.hasAuthority("SUPER_ADMIN")) {
+      throw new AccessDeniedException("SUPER_ADMIN role required for operation: " + operation);
+    }
+  }
 
-    if (!organization.getTenantId().equals(tenantId)) {
-      throw new AccessDeniedException("Organization not found in current tenant");
+  private Organization findOrganizationByIdWithTenantCheck(Long organizationId, UserContext currentUser) {
+    var organization = organizationRepository.findById(organizationId)
+        .orElseThrow(() -> new OrganizationManagementException("Organization not found: " + organizationId));
+
+    // Super admin can access any organization
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      return organization;
+    }
+
+    // Regular admin can only access their own organization
+    if (!organization.getTenantId().equals(currentUser.tenantId())) {
+      throw new AccessDeniedException("Access denied to organization: " + organizationId);
     }
 
     return organization;
   }
 
+  private void validateOwnerUser(Long userId, String tenantId) {
+    // Execute in tenant context to check if user exists
+    var userExists = TenantContext.executeInTenantContext(tenantId, () -> 
+        userRepository.existsById(userId)
+    );
+
+    if (!userExists) {
+      throw new OrganizationManagementException("Owner user not found: " + userId + " in tenant: " + tenantId);
+    }
+  }
+
   private OrganizationDto convertToDto(Organization organization) {
-    var owner = organization.getOwner();
     return new OrganizationDto(
         organization.getId(),
         organization.getName(),
@@ -231,11 +320,18 @@ public class OrganizationManagementService {
         organization.getCity(),
         organization.getCountry(),
         organization.getEnabled(),
-        owner != null ? owner.getId() : null,
-        owner != null ? owner.getUsername() : null,
         organization.getTenantId(),
+        organization.getOwnerUserId(),
+        organization.getBillingEmail(),
+        organization.getStripeAccountId(),
+        organization.getChargesEnabled(),
+        organization.getPayoutsEnabled(),
+        organization.getSubscriptionStatus(),
+        organization.getSubscriptionPlan(),
+        organization.getMaxUsers(),
         organization.getCreatedAt(),
-        organization.getUpdatedAt()
+        organization.getUpdatedAt(),
+        organization.getCreatedBy()
     );
   }
 
@@ -250,7 +346,7 @@ public class OrganizationManagementService {
           currentUser.tenantId()
       );
 
-      com.iqscaffold.userservice.tenancy.TenantContext.executeInTenantContext(currentUser.tenantId(), () -> auditLogRepository.save(auditLog));
+      TenantContext.executeInTenantContext(currentUser.tenantId(), () -> auditLogRepository.save(auditLog));
 
       logger.info("Organization management audit: {} - {} by user {} in tenant {}",
           action, details, currentUser.username(), currentUser.tenantId());

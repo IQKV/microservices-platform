@@ -3,7 +3,7 @@ package com.iqscaffold.userservice.organization;
 import java.time.LocalDateTime;
 
 /**
- * OrganizationPreference DTO.
+ * OrganizationPreference DTO for system-wide organization preferences (public schema).
  */
 public record OrganizationPreferenceDto(
     Long id,
@@ -12,8 +12,6 @@ public record OrganizationPreferenceDto(
     String defaultLocale,
     String defaultTimezone,
     String defaultCurrency,
-    String defaultDateFormat,
-    String defaultTimeFormat,
     Boolean allowUserRegistration,
     Boolean requireEmailVerification,
     Integer passwordMinLength,
@@ -24,12 +22,8 @@ public record OrganizationPreferenceDto(
     Integer sessionTimeoutMinutes,
     Integer maxLoginAttempts,
     Integer lockoutDurationMinutes,
-    Boolean enableTwoFactorAuth,
-    Boolean requireTwoFactorAuth,
+    Boolean twoFactorAuthRequired,
     String notificationEmail,
-    String supportEmail,
-    String customSettings,
-    String tenantId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

@@ -6,5 +6,7 @@
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
 
     <include file="db/changelog/system/00000000000000-create-tenants-table.xml"/>
+    <include file="db/changelog/20251110154600-organizations-public-schema.xml"/>
+    <include file="db/changelog/20251110154700-add-organization-capabilities.xml"/>
 
 </databaseChangeLog>

@@ -41,6 +41,7 @@ public class RabbitMQConfig {
 
   // Queue names
   public static final String USER_EVENTS_QUEUE = "iqscaffold.user.events";
+  public static final String BILLING_EVENTS_QUEUE = "iqscaffold.user.billing.events";
   public static final String NOTIFICATIONS_QUEUE = "iqscaffold.notifications";
   public static final String DLQ = "iqscaffold.dlq";
 
@@ -99,6 +100,18 @@ public class RabbitMQConfig {
   }
 
   /**
+   * Billing events queue for receiving billing service events
+   */
+  @Bean
+  public Queue billingEventsQueue() {
+    return QueueBuilder
+        .durable(BILLING_EVENTS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
+  }
+
+  /**
    * Dead Letter Queue for failed messages
    */
   @Bean
@@ -129,6 +142,17 @@ public class RabbitMQConfig {
         .bind(notificationsQueue())
         .to(eventsExchange())
         .with("notification.*");
+  }
+
+  /**
+   * Bind billing events queue to events exchange with billing.merchant.# routing key
+   */
+  @Bean
+  public Binding billingEventsBinding() {
+    return BindingBuilder
+        .bind(billingEventsQueue())
+        .to(eventsExchange())
+        .with("billing.merchant.#");
   }
 
   /**

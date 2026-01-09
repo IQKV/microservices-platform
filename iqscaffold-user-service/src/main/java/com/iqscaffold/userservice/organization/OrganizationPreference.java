@@ -13,7 +13,6 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import com.iqscaffold.userservice.shared.TenantAware;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,13 +20,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * OrganizationPreference entity representing organization-specific settings and user defaults.
- * Maintains a one-to-one relationship with Organization.
+ * Stored in PUBLIC schema alongside Organization entity. Maintains a one-to-one relationship with Organization.
  */
 @Entity
-@Table(name = "organization_preferences")
+@Table(name = "organization_preferences", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.organization.OrganizationPreference")
-public class OrganizationPreference extends TenantAware {
+public class OrganizationPreference {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,31 +45,19 @@ public class OrganizationPreference extends TenantAware {
   @Column(name = "default_currency", length = 3)
   private String defaultCurrency = "USD";
 
-  @Column(name = "default_date_format", length = 50)
-  private String defaultDateFormat = "yyyy-MM-dd";
-
-  @Column(name = "default_time_format", length = 50)
-  private String defaultTimeFormat = "HH:mm:ss";
-
-  @Column(name = "allow_user_registration", nullable = false)
-  private Boolean allowUserRegistration = true;
-
-  @Column(name = "require_email_verification", nullable = false)
-  private Boolean requireEmailVerification = true;
-
   @Column(name = "password_min_length")
   private Integer passwordMinLength = 8;
 
-  @Column(name = "password_require_uppercase", nullable = false)
+  @Column(name = "password_require_uppercase")
   private Boolean passwordRequireUppercase = true;
 
-  @Column(name = "password_require_lowercase", nullable = false)
+  @Column(name = "password_require_lowercase")
   private Boolean passwordRequireLowercase = true;
 
-  @Column(name = "password_require_numbers", nullable = false)
+  @Column(name = "password_require_numbers")
   private Boolean passwordRequireNumbers = true;
 
-  @Column(name = "password_require_special_chars", nullable = false)
+  @Column(name = "password_require_special_chars")
   private Boolean passwordRequireSpecialChars = true;
 
   @Column(name = "session_timeout_minutes")
@@ -82,20 +69,17 @@ public class OrganizationPreference extends TenantAware {
   @Column(name = "lockout_duration_minutes")
   private Integer lockoutDurationMinutes = 15;
 
-  @Column(name = "enable_two_factor_auth", nullable = false)
-  private Boolean enableTwoFactorAuth = false;
+  @Column(name = "two_factor_auth_required")
+  private Boolean twoFactorAuthRequired = false;
 
-  @Column(name = "require_two_factor_auth", nullable = false)
-  private Boolean requireTwoFactorAuth = false;
+  @Column(name = "allow_user_registration")
+  private Boolean allowUserRegistration = true;
+
+  @Column(name = "require_email_verification")
+  private Boolean requireEmailVerification = true;
 
   @Column(name = "notification_email", length = 255)
   private String notificationEmail;
-
-  @Column(name = "support_email", length = 255)
-  private String supportEmail;
-
-  @Column(name = "custom_settings", columnDefinition = "TEXT")
-  private String customSettings;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -108,8 +92,7 @@ public class OrganizationPreference extends TenantAware {
   protected OrganizationPreference() {
   }
 
-  public OrganizationPreference(final Organization organization, final String tenantId) {
-    super(tenantId);
+  public OrganizationPreference(final Organization organization) {
     this.organization = organization;
   }
 
@@ -147,22 +130,6 @@ public class OrganizationPreference extends TenantAware {
 
   public void setDefaultCurrency(String defaultCurrency) {
     this.defaultCurrency = defaultCurrency;
-  }
-
-  public String getDefaultDateFormat() {
-    return defaultDateFormat;
-  }
-
-  public void setDefaultDateFormat(String defaultDateFormat) {
-    this.defaultDateFormat = defaultDateFormat;
-  }
-
-  public String getDefaultTimeFormat() {
-    return defaultTimeFormat;
-  }
-
-  public void setDefaultTimeFormat(String defaultTimeFormat) {
-    this.defaultTimeFormat = defaultTimeFormat;
   }
 
   public Boolean getAllowUserRegistration() {
@@ -245,20 +212,12 @@ public class OrganizationPreference extends TenantAware {
     this.lockoutDurationMinutes = lockoutDurationMinutes;
   }
 
-  public Boolean getEnableTwoFactorAuth() {
-    return enableTwoFactorAuth;
+  public Boolean getTwoFactorAuthRequired() {
+    return twoFactorAuthRequired;
   }
 
-  public void setEnableTwoFactorAuth(Boolean enableTwoFactorAuth) {
-    this.enableTwoFactorAuth = enableTwoFactorAuth;
-  }
-
-  public Boolean getRequireTwoFactorAuth() {
-    return requireTwoFactorAuth;
-  }
-
-  public void setRequireTwoFactorAuth(Boolean requireTwoFactorAuth) {
-    this.requireTwoFactorAuth = requireTwoFactorAuth;
+  public void setTwoFactorAuthRequired(Boolean twoFactorAuthRequired) {
+    this.twoFactorAuthRequired = twoFactorAuthRequired;
   }
 
   public String getNotificationEmail() {
@@ -267,22 +226,6 @@ public class OrganizationPreference extends TenantAware {
 
   public void setNotificationEmail(String notificationEmail) {
     this.notificationEmail = notificationEmail;
-  }
-
-  public String getSupportEmail() {
-    return supportEmail;
-  }
-
-  public void setSupportEmail(String supportEmail) {
-    this.supportEmail = supportEmail;
-  }
-
-  public String getCustomSettings() {
-    return customSettings;
-  }
-
-  public void setCustomSettings(String customSettings) {
-    this.customSettings = customSettings;
   }
 
   public LocalDateTime getCreatedAt() {
@@ -320,7 +263,6 @@ public class OrganizationPreference extends TenantAware {
         .append(", organizationId=").append(organization != null ? organization.getId() : null)
         .append(", defaultLocale='").append(defaultLocale).append('\'')
         .append(", defaultTimezone='").append(defaultTimezone).append('\'')
-        .append(", tenantId='").append(getTenantId()).append('\'')
         .append(", createdAt=").append(createdAt)
         .append('}');
     return sb.toString();

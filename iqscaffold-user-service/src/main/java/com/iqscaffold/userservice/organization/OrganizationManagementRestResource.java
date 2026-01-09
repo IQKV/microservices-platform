@@ -150,4 +150,21 @@ public class OrganizationManagementRestResource {
     organizationManagementService.deleteOrganization(id, currentUser);
     return ResponseEntity.noContent().build();
   }
+
+  @Operation(
+      summary = "Get organization by tenant ID",
+      description = "Retrieve organization by tenant ID. Internal endpoint for service-to-service communication."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Organization retrieved successfully"),
+      @ApiResponse(responseCode = "404", description = "Organization not found for tenant")
+  })
+  @GetMapping("/tenant/{tenantId}")
+  @Timed(value = "organization.endpoint", extraTags = {"endpoint", "getByTenant"})
+  public ResponseEntity<OrganizationDto> getOrganizationByTenantId(
+      @Parameter(description = "Tenant ID", required = true) @PathVariable String tenantId) {
+
+    var organization = organizationManagementService.getOrganizationByTenantId(tenantId);
+    return ResponseEntity.ok(organization);
+  }
 }

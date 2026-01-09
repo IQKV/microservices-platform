@@ -47,16 +47,19 @@ public class StripeWebhookService implements WebhookService {
   private final com.iqscaffold.billingservice.payout.PayoutService payoutService;
   private final com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository;
   private final IqScaffoldProperties iqScaffoldProperties;
+  private final com.iqscaffold.billingservice.infrastructure.messaging.EventPublisher eventPublisher;
 
   public StripeWebhookService(
       final PaymentService paymentService,
       final com.iqscaffold.billingservice.payout.PayoutService payoutService,
       final com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository merchantConfigRepository,
-      final IqScaffoldProperties iqScaffoldProperties) {
+      final IqScaffoldProperties iqScaffoldProperties,
+      final com.iqscaffold.billingservice.infrastructure.messaging.EventPublisher eventPublisher) {
     this.paymentService = paymentService;
     this.payoutService = payoutService;
     this.merchantConfigRepository = merchantConfigRepository;
     this.iqScaffoldProperties = iqScaffoldProperties;
+    this.eventPublisher = eventPublisher;
   }
 
   /**
@@ -183,10 +186,26 @@ public class StripeWebhookService implements WebhookService {
       var config = merchantConfigRepository.findByStripeAccountId(accountId);
       if (config.isPresent()) {
         var merchant = config.get();
-        merchant.setChargesEnabled(Boolean.TRUE.equals(account.getChargesEnabled()));
-        merchant.setPayoutsEnabled(Boolean.TRUE.equals(account.getPayoutsEnabled()));
+        boolean chargesEnabled = Boolean.TRUE.equals(account.getChargesEnabled());
+        boolean payoutsEnabled = Boolean.TRUE.equals(account.getPayoutsEnabled());
+        
+        merchant.setChargesEnabled(chargesEnabled);
+        merchant.setPayoutsEnabled(payoutsEnabled);
         merchantConfigRepository.save(merchant);
         logger.info("Updated merchant capabilities for account: {}", accountId);
+        
+        // Publish event to sync capabilities to user service
+        if (merchant.getOrganizationId() != null) {
+          var capabilitiesEvent = new com.iqscaffold.billingservice.infrastructure.messaging.MerchantCapabilitiesUpdatedEvent(
+              merchant.getOrganizationId(),
+              merchant.getTenantId(),
+              accountId,
+              chargesEnabled,
+              payoutsEnabled
+          );
+          eventPublisher.publishMerchantCapabilitiesUpdated(capabilitiesEvent);
+          logger.info("Published capabilities update event for organization: {}", merchant.getOrganizationId());
+        }
       } else {
         logger.warn("Received account update for unknown account: {}", accountId);
       }

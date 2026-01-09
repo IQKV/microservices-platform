@@ -218,6 +218,9 @@ iqscaffold:
   # Tenant identification header
   tenant-id-header: X-Tenant-ID
   
+  # User Service URL for inter-service communication
+  user-service-url: ${USER_SERVICE_URL:http://localhost:8080}
+  
   # Internationalization configuration
   i18n:
     supported-locales:
