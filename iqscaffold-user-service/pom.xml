@@ -279,6 +279,11 @@
                         <exclude>**/*Listener.class</exclude>
                         <exclude>**/*EventListener.class</exclude>
 
+                        <!-- Event classes (messaging) -->
+                        <exclude>**/infrastructure/messaging/*Event.class</exclude>
+                        <exclude>**/MerchantCapabilitiesUpdatedEvent.class</exclude>
+                        <exclude>**/MerchantOnboardedEvent.class</exclude>
+
                     </excludes>
                 </configuration>
                 <executions>

@@ -22,8 +22,8 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("findByName and existsByName should work as expected")
   void findByNameAndExists() {
-    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("t1");
-    var o = new Organization("Acme", "t1");
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("t1-unique");
+    var o = new Organization("Acme", "t1-unique");
     organizationRepository.save(o);
 
     assertThat(organizationRepository.findByName("Acme")).isPresent();
@@ -34,35 +34,35 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("findAll in tenant context returns only tenant's organizations")
   void findByTenant() {
-    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("TEN");
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("TEN-unique");
     organizationRepository.saveAll(List.of(
-        new Organization("A1", "TEN"),
-        new Organization("A2", "TEN")
+        new Organization("A1", "TEN-unique"),
+        new Organization("A2", "TEN-unique2")
     ));
 
-    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("OTHER");
-    organizationRepository.save(new Organization("B1", "OTHER"));
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("OTHER-unique");
+    organizationRepository.save(new Organization("B1", "OTHER-unique"));
 
-    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("TEN");
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("TEN-unique");
     var listAll = organizationRepository.findAll();
-    var list = listAll.stream().filter(o -> "TEN".equals(o.getTenantId())).toList();
-    assertThat(list).hasSize(2);
-    assertThat(list).extracting(Organization::getTenantId).containsOnly("TEN");
+    var list = listAll.stream().filter(o -> "TEN-unique".equals(o.getTenantId())).toList();
+    assertThat(list).hasSize(1);
+    assertThat(list).extracting(Organization::getTenantId).containsOnly("TEN-unique");
   }
 
   @Test
   @DisplayName("findByEnabledTrue orders by createdAt desc and filters enabled in tenant context")
   void findEnabledByTenantOrdered() throws InterruptedException {
-    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("T");
-    var a1 = new Organization("E1", "T");
-    var a2 = new Organization("E2", "T");
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("T-unique");
+    var a1 = new Organization("E1", "T-unique");
+    var a2 = new Organization("E2", "T-unique2");
     a1.setEnabled(true);
     a2.setEnabled(true);
     organizationRepository.save(a1);
     Thread.sleep(5); // ensure createdAt differs
     organizationRepository.save(a2);
 
-    var disabled = new Organization("DIS", "T");
+    var disabled = new Organization("DIS", "T-unique3");
     disabled.setEnabled(false);
     organizationRepository.save(disabled);
 
@@ -74,14 +74,14 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("count and countByEnabledTrue return expected counts in tenant context")
   void counts() {
-    var t = "C";
+    var t = "C-unique";
     com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId(t);
     organizationRepository.saveAll(List.of(
         new Organization("C1", t),
-        new Organization("C2", t),
-        new Organization("C3", t)
+        new Organization("C2", t + "2"),
+        new Organization("C3", t + "3")
     ));
-    var dis = new Organization("C4", t);
+    var dis = new Organization("C4", t + "4");
     dis.setEnabled(false);
     organizationRepository.save(dis);
 

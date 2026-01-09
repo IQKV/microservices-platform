@@ -56,7 +56,7 @@ class OrganizationManagementServiceTest {
         1L,
         "admin",
         "admin@test.com",
-        Set.of("ADMIN"),
+        Set.of("SUPER_ADMIN"),
         Set.of(),
         "Admin",
         "User",
@@ -166,7 +166,8 @@ class OrganizationManagementServiceTest {
     );
 
     when(organizationRepository.existsByName(anyString())).thenReturn(false);
-    when(userRepository.findById(anyLong())).thenReturn(Optional.of(testOwner));
+    when(organizationRepository.existsByTenantId(anyString())).thenReturn(false);
+    when(userRepository.existsById(anyLong())).thenReturn(true);
     when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
 
     // Act
@@ -174,7 +175,7 @@ class OrganizationManagementServiceTest {
 
     // Assert
     assertThat(result).isNotNull();
-    verify(userRepository).findById(1L);
+    verify(userRepository).existsById(1L);
     verify(organizationRepository).save(any(Organization.class));
   }
 
@@ -275,7 +276,9 @@ class OrganizationManagementServiceTest {
   void shouldGetAllOrganizations() {
     // Arrange
     var pageable = PageRequest.of(0, 20);
-    when(organizationRepository.findAll()).thenReturn(List.of(testOrganization));
+    when(organizationRepository.findAll(pageable)).thenReturn(
+        new org.springframework.data.domain.PageImpl<>(List.of(testOrganization), pageable, 1)
+    );
 
     // Act
     var result = service.getAllOrganizations(pageable, adminUser);
@@ -283,7 +286,7 @@ class OrganizationManagementServiceTest {
     // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    verify(organizationRepository).findAll();
+    verify(organizationRepository).findAll(pageable);
   }
 
   @Test
@@ -337,7 +340,7 @@ class OrganizationManagementServiceTest {
     // Act & Assert
     assertThatThrownBy(() -> service.createOrganization(request, regularUser))
         .isInstanceOf(AccessDeniedException.class)
-        .hasMessageContaining("Insufficient permissions");
+        .hasMessageContaining("SUPER_ADMIN role required");
   }
 
   @Test
@@ -383,7 +386,7 @@ class OrganizationManagementServiceTest {
     // Act & Assert
     assertThatThrownBy(() -> service.deleteOrganization(1L, regularUser))
         .isInstanceOf(AccessDeniedException.class)
-        .hasMessageContaining("Insufficient permissions");
+        .hasMessageContaining("SUPER_ADMIN role required");
   }
 
   @Test

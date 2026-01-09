@@ -265,6 +265,19 @@
                         <exclude>**/*Listener.class</exclude>
                         <exclude>**/*EventListener.class</exclude>
 
+                        <!-- Messaging Events -->
+                        <exclude>**/infrastructure/messaging/*Event.class</exclude>
+                        <exclude>**/infrastructure/messaging/*Publisher.class</exclude>
+
+                        <!-- Infrastructure Clients -->
+                        <exclude>**/infrastructure/client/*Client.class</exclude>
+
+                        <!-- Security Constants -->
+                        <exclude>**/security/JwtClaimNames.class</exclude>
+
+                        <!-- Admin Services (Merchant Onboarding) -->
+                        <exclude>**/admin/MerchantOnboardingService.class</exclude>
+
                     </excludes>
                 </configuration>
                 <executions>

@@ -30,6 +30,7 @@ class VerificationTokenRepositoryTest {
   @Test
   @DisplayName("findByTokenAndUsedFalse and existsByTokenAndValidAt should respect used and expiry")
   void findByTokenAndValidity() {
+    TenantContext.setCurrentTenantId("t1");
     var now = LocalDateTime.now();
     repository.save(new VerificationToken("tok-valid", 1L, now.plusHours(2), "t1"));
     var used = repository.save(new VerificationToken("tok-used", 1L, now.plusHours(2), "t1"));

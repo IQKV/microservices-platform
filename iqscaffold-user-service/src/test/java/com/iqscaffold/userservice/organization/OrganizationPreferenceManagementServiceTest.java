@@ -51,7 +51,7 @@ class OrganizationPreferenceManagementServiceTest {
         1L,
         "admin",
         "admin@test.com",
-        Set.of("ADMIN"),
+        Set.of("SUPER_ADMIN"),
         Set.of(),
         "Admin",
         "User",
@@ -156,7 +156,9 @@ class OrganizationPreferenceManagementServiceTest {
   void shouldGetAllPreferences() {
     // Arrange
     var pageable = PageRequest.of(0, 20);
-    when(preferenceRepository.findAll()).thenReturn(List.of(testPreference));
+    when(preferenceRepository.findAll(pageable)).thenReturn(
+        new org.springframework.data.domain.PageImpl<>(List.of(testPreference), pageable, 1)
+    );
 
     // Act
     var result = service.getAllPreferences(pageable, adminUser);
@@ -164,7 +166,7 @@ class OrganizationPreferenceManagementServiceTest {
     // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    verify(preferenceRepository).findAll();
+    verify(preferenceRepository).findAll(pageable);
   }
 
   @Test

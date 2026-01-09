@@ -155,18 +155,22 @@ class OrganizationTest {
   }
 
   @Test
-  void shouldCheckEqualityBasedOnIdAndName() {
+  void shouldCheckEqualityBasedOnTenantId() {
     var org1 = new Organization("Acme Corp", "tenant-1");
     var org2 = new Organization("Acme Corp", "tenant-1");
+    var org3 = new Organization("Different Corp", "tenant-1");
 
+    // Same tenant ID means equal (business key equality)
     assertEquals(org1, org2);
+    assertEquals(org1, org3);
     assertEquals(org1.hashCode(), org2.hashCode());
+    assertEquals(org1.hashCode(), org3.hashCode());
   }
 
   @Test
-  void shouldNotBeEqualWithDifferentNames() {
+  void shouldNotBeEqualWithDifferentTenantIds() {
     var org1 = new Organization("Acme Corp", "tenant-1");
-    var org2 = new Organization("Other Corp", "tenant-1");
+    var org2 = new Organization("Acme Corp", "tenant-2");
 
     assertNotEquals(org1, org2);
   }

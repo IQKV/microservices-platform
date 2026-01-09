@@ -236,6 +236,11 @@ public class OrganizationPreference {
     return updatedAt;
   }
 
+  /**
+   * Equals based on id only to avoid circular references with Organization.
+   * For transient entities (id == null), only reference equality is used.
+   * This is JPA-safe and avoids lazy loading issues.
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -246,13 +251,21 @@ public class OrganizationPreference {
     }
 
     var preference = (OrganizationPreference) obj;
-    return Objects.equals(id, preference.id)
-           && Objects.equals(organization, preference.organization);
+    // For transient entities, only reference equality
+    if (id == null || preference.id == null) {
+      return false;
+    }
+    return Objects.equals(id, preference.id);
   }
 
+  /**
+   * HashCode based on a constant to ensure consistency across persistence lifecycle.
+   * This prevents issues when entities are added to collections before persistence.
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(id, organization);
+    // Use a constant hash to ensure consistency before and after persistence
+    return getClass().hashCode();
   }
 
   @Override

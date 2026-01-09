@@ -76,19 +76,25 @@ class OrganizationPreferenceEntityTest {
   @DisplayName("Should handle equals and hashCode correctly")
   void shouldHandleEqualsAndHashCode() {
     var org1 = new Organization("Org 1", "tenant-123");
-    var org2 = new Organization("Org 2", "tenant-123");
+    var org2 = new Organization("Org 2", "tenant-456");
+    var org3 = new Organization("Org 3", "tenant-123");
 
     var pref1 = new OrganizationPreference(org1);
     var pref2 = new OrganizationPreference(org1);
     var pref3 = new OrganizationPreference(org2);
 
+    // Same reference
     assertThat(pref1).isEqualTo(pref1);
-    assertThat(pref1).isEqualTo(pref2);
+    
+    // Different instances with null ids are not equal (transient entities)
+    assertThat(pref1).isNotEqualTo(pref2);
     assertThat(pref1).isNotEqualTo(pref3);
     assertThat(pref1).isNotEqualTo(null);
     assertThat(pref1).isNotEqualTo(new Object());
 
+    // HashCode should be consistent (class-based)
     assertThat(pref1.hashCode()).isEqualTo(pref2.hashCode());
+    assertThat(pref1.hashCode()).isEqualTo(pref3.hashCode());
   }
 
   @Test

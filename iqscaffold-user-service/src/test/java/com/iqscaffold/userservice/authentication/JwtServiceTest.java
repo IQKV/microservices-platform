@@ -75,12 +75,25 @@ class JwtServiceTest {
 
     var authority = new Authority("ROLE_USER", "User role");
     testUser.setAuthorities(Set.of(authority));
+
+    // Mock organization lookup for token generation
+    var testOrg = new com.iqscaffold.userservice.organization.Organization("Test Org", "tenant-123");
+    try {
+      var idField = testOrg.getClass().getDeclaredField("id");
+      idField.setAccessible(true);
+      idField.set(testOrg, 1L);
+    } catch (final Exception e) {
+      // Ignore
+    }
+    org.mockito.Mockito.lenient().when(organizationRepository.findByTenantId("tenant-123"))
+        .thenReturn(java.util.Optional.of(testOrg));
   }
 
   @Test
   @DisplayName("Should generate access token successfully")
   void shouldGenerateAccessToken() {
     // Arrange
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("tenant-123");
     var mockJwt = createMockJwt("access-token-value");
     when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(mockJwt);
 
@@ -97,6 +110,7 @@ class JwtServiceTest {
   @DisplayName("Should generate refresh token successfully")
   void shouldGenerateRefreshToken() {
     // Arrange
+    com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("tenant-123");
     var mockJwt = createMockJwt("refresh-token-value");
     when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenReturn(mockJwt);
 
@@ -310,6 +324,7 @@ class JwtServiceTest {
     claims.put("firstName", "Test");
     claims.put("lastName", "User");
     claims.put("tenant_id", "tenant-123");  // Use underscore, not camelCase
+    claims.put("organization_id", 1L);  // Add organization_id
 
     return new Jwt(
         "token-value",

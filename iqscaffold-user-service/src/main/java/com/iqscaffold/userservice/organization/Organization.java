@@ -337,6 +337,10 @@ public class Organization {
     return hasStripeAccount() && Boolean.TRUE.equals(payoutsEnabled);
   }
 
+  /**
+   * Equals based on business key (tenantId) which is unique and immutable.
+   * This is JPA-safe as it doesn't rely on the id field which may be null before persistence.
+   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -347,13 +351,16 @@ public class Organization {
     }
 
     var organization = (Organization) obj;
-    return Objects.equals(id, organization.id)
-           && Objects.equals(tenantId, organization.tenantId);
+    return Objects.equals(tenantId, organization.tenantId);
   }
 
+  /**
+   * HashCode based on business key (tenantId) to ensure consistency with equals.
+   * Using a constant hash for null tenantId to handle edge cases during construction.
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId);
+    return tenantId != null ? tenantId.hashCode() : 0;
   }
 
   @Override
