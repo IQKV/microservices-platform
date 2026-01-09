@@ -18,21 +18,28 @@ class OrganizationDtoTest {
     var updatedAt = LocalDateTime.now();
 
     var dto = new OrganizationDto(
-        1L,
-        "Acme Corporation",
-        "A leading technology company",
-        "Technology",
-        "https://acme.com",
-        "+1-555-0100",
-        "123 Main Street",
-        "San Francisco",
-        "USA",
-        true,
-        10L,
-        "john.doe",
-        "tenant-1",
-        createdAt,
-        updatedAt
+        1L,                           // id
+        "Acme Corporation",           // name
+        "A leading technology company", // description
+        "Technology",                 // industry
+        "https://acme.com",          // website
+        "+1-555-0100",               // phone
+        "123 Main Street",           // address
+        "San Francisco",             // city
+        "USA",                       // country
+        true,                        // enabled
+        "tenant-1",                  // tenantId
+        10L,                         // ownerUserId
+        "billing@acme.com",          // billingEmail
+        "acct_123",                  // stripeAccountId
+        true,                        // chargesEnabled
+        true,                        // payoutsEnabled
+        "active",                    // subscriptionStatus
+        "pro",                       // subscriptionPlan
+        100,                         // maxUsers
+        createdAt,                   // createdAt
+        updatedAt,                   // updatedAt
+        "admin"                      // createdBy
     );
 
     assertEquals(1L, dto.id());
@@ -45,9 +52,9 @@ class OrganizationDtoTest {
     assertEquals("San Francisco", dto.city());
     assertEquals("USA", dto.country());
     assertTrue(dto.enabled());
-    assertEquals(10L, dto.ownerId());
-    assertEquals("john.doe", dto.ownerUsername());
     assertEquals("tenant-1", dto.tenantId());
+    assertEquals(10L, dto.ownerUserId());
+    assertEquals("billing@acme.com", dto.billingEmail());
     assertEquals(createdAt, dto.createdAt());
     assertEquals(updatedAt, dto.updatedAt());
   }
@@ -65,11 +72,18 @@ class OrganizationDtoTest {
         null,
         null,
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertTrue(dto.isActive());
@@ -88,11 +102,18 @@ class OrganizationDtoTest {
         null,
         null,
         false,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertFalse(dto.isActive());
@@ -111,11 +132,18 @@ class OrganizationDtoTest {
         null,
         null,
         null,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertFalse(dto.isActive());
@@ -134,11 +162,18 @@ class OrganizationDtoTest {
         "San Francisco",
         "USA",
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertEquals("San Francisco, USA", dto.getLocation());
@@ -157,11 +192,18 @@ class OrganizationDtoTest {
         "San Francisco",
         null,
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertEquals("San Francisco", dto.getLocation());
@@ -180,11 +222,18 @@ class OrganizationDtoTest {
         null,
         "USA",
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertEquals("USA", dto.getLocation());
@@ -203,11 +252,18 @@ class OrganizationDtoTest {
         null,
         null,
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertEquals("", dto.getLocation());
@@ -226,11 +282,18 @@ class OrganizationDtoTest {
         null,
         null,
         true,
-        null,
-        null,
         "tenant-1",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     assertEquals("Acme Corp", dto.name());
@@ -254,11 +317,18 @@ class OrganizationDtoTest {
         "San Francisco",
         "USA",
         true,
-        10L,
-        "john.doe",
         "tenant-1",
+        10L,
+        "billing@acme.com",
+        "acct_123",
+        true,
+        true,
+        "active",
+        "pro",
+        100,
         createdAt,
-        updatedAt
+        updatedAt,
+        "admin"
     );
 
     assertTrue(dto.isActive());
@@ -283,11 +353,18 @@ class OrganizationDtoTest {
         "SF",
         "USA",
         true,
-        10L,
-        "john.doe",
         "tenant-1",
+        10L,
+        "billing@acme.com",
+        "acct_123",
+        true,
+        true,
+        "active",
+        "pro",
+        100,
         createdAt,
-        updatedAt
+        updatedAt,
+        "admin"
     );
 
     var dto2 = new OrganizationDto(
@@ -301,11 +378,18 @@ class OrganizationDtoTest {
         "SF",
         "USA",
         true,
-        10L,
-        "john.doe",
         "tenant-1",
+        10L,
+        "billing@acme.com",
+        "acct_123",
+        true,
+        true,
+        "active",
+        "pro",
+        100,
         createdAt,
-        updatedAt
+        updatedAt,
+        "admin"
     );
 
     assertEquals(dto1, dto2);
@@ -325,11 +409,18 @@ class OrganizationDtoTest {
         null,
         null,
         true,
-        10L,
-        "john.doe",
         "tenant-1",
+        10L,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
     var dto2 = new OrganizationDto(
@@ -343,14 +434,20 @@ class OrganizationDtoTest {
         null,
         null,
         true,
-        20L,
-        "jane.doe",
         "tenant-1",
+        20L,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
         LocalDateTime.now(),
-        LocalDateTime.now()
+        LocalDateTime.now(),
+        null
     );
 
-    assertNotEquals(dto1.ownerId(), dto2.ownerId());
-    assertNotEquals(dto1.ownerUsername(), dto2.ownerUsername());
+    assertNotEquals(dto1.ownerUserId(), dto2.ownerUserId());
   }
 }

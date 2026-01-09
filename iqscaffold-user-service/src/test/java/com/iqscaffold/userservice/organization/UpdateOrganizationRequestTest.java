@@ -34,18 +34,28 @@ class UpdateOrganizationRequestTest {
         "New York",
         "USA",
         true,
-        2L
+        2L,
+        null,
+        null,
+        null,
+        null,
+        null
     );
 
     assertEquals("Updated Acme Corporation", request.name());
     assertEquals("Updated description", request.description());
     assertTrue(request.enabled());
-    assertEquals(2L, request.ownerId());
+    assertEquals(2L, request.ownerUserId());
   }
 
   @Test
   void shouldAllowAllNullFields() {
     var request = new UpdateOrganizationRequest(
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -67,6 +77,11 @@ class UpdateOrganizationRequestTest {
   void shouldValidateNameMinLength() {
     var request = new UpdateOrganizationRequest(
         "A",
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -97,6 +112,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -110,6 +130,11 @@ class UpdateOrganizationRequestTest {
     var request = new UpdateOrganizationRequest(
         null,
         longDescription,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -137,6 +162,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -152,6 +182,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         longWebsite,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -177,6 +212,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -194,6 +234,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         longAddress,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -217,6 +262,11 @@ class UpdateOrganizationRequestTest {
         longCity,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -237,6 +287,11 @@ class UpdateOrganizationRequestTest {
         null,
         longCountry,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -248,6 +303,11 @@ class UpdateOrganizationRequestTest {
   void shouldUpdateOnlyName() {
     var request = new UpdateOrganizationRequest(
         "New Name",
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -275,6 +335,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         false,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -294,10 +359,15 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         null,
-        99L
+        99L,
+        null,
+        null,
+        null,
+        null,
+        null
     );
 
-    assertEquals(99L, request.ownerId());
+    assertEquals(99L, request.ownerUserId());
     assertTrue(validator.validate(request).isEmpty());
   }
 
@@ -313,6 +383,11 @@ class UpdateOrganizationRequestTest {
         null,
         null,
         true,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 

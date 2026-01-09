@@ -59,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final TenantAwareSessionService sessionService;
   private final MeterRegistry meterRegistry;
   private final IqScaffoldProperties iqScaffoldProperties;
+  private final com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository;
 
   public AuthenticationServiceImpl(final UserRepository userRepository,
                                    final PasswordEncoder passwordEncoder,
@@ -68,7 +69,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                    final InputSanitizer inputSanitizer,
                                    final TenantAwareSessionService sessionService,
                                    final MeterRegistry meterRegistry,
-                                   final IqScaffoldProperties iqScaffoldProperties) {
+                                   final IqScaffoldProperties iqScaffoldProperties,
+                                   final com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -78,6 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     this.sessionService = sessionService;
     this.meterRegistry = meterRegistry;
     this.iqScaffoldProperties = iqScaffoldProperties;
+    this.organizationRepository = organizationRepository;
   }
 
   @Override
@@ -454,7 +457,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .map(authority -> authority.getName())
         .collect(java.util.stream.Collectors.toSet());
 
-    Long organizationId = user.getOrganization() != null ? user.getOrganization().getId() : null;
+    // Get organization ID from tenant (1:1 relationship)
+    String tenantId = user.getTenantId();
+    Long organizationId = null;
+    if (tenantId != null) {
+      organizationId = organizationRepository.findByTenantId(tenantId)
+          .map(com.iqscaffold.userservice.organization.Organization::getId)
+          .orElse(null);
+    }
 
     return new UserContext(
         user.getId(),

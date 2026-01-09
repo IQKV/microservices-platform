@@ -26,6 +26,7 @@ class CreateOrganizationRequestTest {
   void shouldCreateValidOrganizationRequest() {
     var request = new CreateOrganizationRequest(
         "Acme Corporation",
+        "tenant-1",
         "A leading technology company",
         "Technology",
         "https://acme.com",
@@ -34,20 +35,28 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        "billing@acme.com",
+        "pro",
+        100
     );
 
     assertEquals("Acme Corporation", request.name());
+    assertEquals("tenant-1", request.tenantId());
     assertEquals("A leading technology company", request.description());
     assertEquals("Technology", request.industry());
     assertTrue(request.enabled());
-    assertEquals(1L, request.ownerId());
+    assertEquals(1L, request.ownerUserId());
+    assertEquals("billing@acme.com", request.billingEmail());
+    assertEquals("pro", request.subscriptionPlan());
+    assertEquals(100, request.maxUsers());
   }
 
   @Test
   void shouldValidateNameNotBlank() {
     var request = new CreateOrganizationRequest(
         "",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -56,7 +65,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -69,6 +81,7 @@ class CreateOrganizationRequestTest {
   void shouldValidateNameMinLength() {
     var request = new CreateOrganizationRequest(
         "A",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -77,7 +90,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -91,6 +107,7 @@ class CreateOrganizationRequestTest {
     var longName = "A".repeat(256);
     var request = new CreateOrganizationRequest(
         longName,
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -99,7 +116,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -111,6 +131,7 @@ class CreateOrganizationRequestTest {
     var longDescription = "A".repeat(1001);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         longDescription,
         "Technology",
         "https://acme.com",
@@ -119,7 +140,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -133,6 +157,7 @@ class CreateOrganizationRequestTest {
     var longIndustry = "A".repeat(101);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         longIndustry,
         "https://acme.com",
@@ -141,7 +166,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -153,6 +181,7 @@ class CreateOrganizationRequestTest {
     var longWebsite = "https://" + "a".repeat(250) + ".com";
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         longWebsite,
@@ -161,7 +190,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -173,6 +205,7 @@ class CreateOrganizationRequestTest {
     var longPhone = "1".repeat(51);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -181,7 +214,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -193,6 +229,7 @@ class CreateOrganizationRequestTest {
     var longAddress = "A".repeat(501);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -201,7 +238,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -213,6 +253,7 @@ class CreateOrganizationRequestTest {
     var longCity = "A".repeat(101);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -221,7 +262,10 @@ class CreateOrganizationRequestTest {
         longCity,
         "USA",
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -233,6 +277,7 @@ class CreateOrganizationRequestTest {
     var longCountry = "A".repeat(101);
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -241,7 +286,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         longCountry,
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     Set<ConstraintViolation<CreateOrganizationRequest>> violations = validator.validate(request);
@@ -252,6 +300,10 @@ class CreateOrganizationRequestTest {
   void shouldAllowNullOptionalFields() {
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -270,6 +322,7 @@ class CreateOrganizationRequestTest {
   void shouldCreateMinimalRequest() {
     var request = new CreateOrganizationRequest(
         "Acme",
+        "tenant-1",
         null,
         null,
         null,
@@ -278,10 +331,14 @@ class CreateOrganizationRequestTest {
         null,
         null,
         true,
+        null,
+        null,
+        null,
         null
     );
 
     assertEquals("Acme", request.name());
+    assertEquals("tenant-1", request.tenantId());
     assertTrue(request.enabled());
     assertNull(request.description());
   }
@@ -290,6 +347,7 @@ class CreateOrganizationRequestTest {
   void shouldHandleDisabledOrganization() {
     var request = new CreateOrganizationRequest(
         "Acme Corp",
+        "tenant-1",
         "Description",
         "Technology",
         "https://acme.com",
@@ -298,7 +356,10 @@ class CreateOrganizationRequestTest {
         "San Francisco",
         "USA",
         false,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     assertFalse(request.enabled());
@@ -316,6 +377,7 @@ class CreateOrganizationRequestTest {
     for (final var phone : phoneFormats) {
       var request = new CreateOrganizationRequest(
           "Acme Corp",
+          "tenant-1",
           null,
           null,
           null,
@@ -324,6 +386,9 @@ class CreateOrganizationRequestTest {
           null,
           null,
           true,
+          null,
+          null,
+          null,
           null
       );
       assertTrue(validator.validate(request).isEmpty(), "Phone format should be valid: " + phone);
@@ -342,6 +407,7 @@ class CreateOrganizationRequestTest {
     for (final var website : websiteFormats) {
       var request = new CreateOrganizationRequest(
           "Acme Corp",
+          "tenant-1",
           null,
           null,
           website,
@@ -350,6 +416,9 @@ class CreateOrganizationRequestTest {
           null,
           null,
           true,
+          null,
+          null,
+          null,
           null
       );
       assertTrue(validator.validate(request).isEmpty(), "Website format should be valid: " + website);

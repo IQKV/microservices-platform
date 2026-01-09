@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20251110154600-000000-organizations-public-schema" author="iqscaffold" context="public">
+        <comment>Create organizations table in public schema - system-wide billing entities with 1:1 tenant relationship</comment>
+
+        <!-- Create organizations table in public schema -->
+        <createTable tableName="organizations" schemaName="public">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="industry" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="website" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="country" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="owner_user_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="billing_email" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="stripe_account_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="subscription_status" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="subscription_plan" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="max_users" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Add foreign key to tenants table -->
+        <addForeignKeyConstraint
+                baseTableName="organizations"
+                baseColumnNames="tenant_id"
+                constraintName="fk_organizations_tenant"
+                referencedTableName="tenants"
+                referencedColumnNames="tenant_id"
+                baseTableSchemaName="public"
+                referencedTableSchemaName="public"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <!-- Create indexes for organizations table -->
+        <createIndex indexName="idx_organizations_tenant_id" tableName="organizations" schemaName="public">
+            <column name="tenant_id"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_name" tableName="organizations" schemaName="public">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_enabled" tableName="organizations" schemaName="public">
+            <column name="enabled"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_created_at" tableName="organizations" schemaName="public">
+            <column name="created_at"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_stripe_account" tableName="organizations" schemaName="public">
+            <column name="stripe_account_id"/>
+        </createIndex>
+        <createIndex indexName="idx_organizations_subscription_status" tableName="organizations" schemaName="public">
+            <column name="subscription_status"/>
+            <column name="enabled"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="organizations" schemaName="public"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="20251110154600-000001-organization-preferences-public-schema" author="iqscaffold" context="public">
+        <comment>Create organization_preferences table in public schema for organization-wide settings</comment>
+
+        <!-- Create organization_preferences table in public schema -->
+        <createTable tableName="organization_preferences" schemaName="public">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="default_locale" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_timezone" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_currency" type="VARCHAR(3)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_min_length" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_require_uppercase" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_require_lowercase" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_require_numbers" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password_require_special_chars" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="session_timeout_minutes" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="max_login_attempts" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lockout_duration_minutes" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="two_factor_auth_required" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+            <column name="allow_user_registration" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="require_email_verification" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="notification_email" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Add foreign key to organizations table -->
+        <addForeignKeyConstraint
+                baseTableName="organization_preferences"
+                baseColumnNames="organization_id"
+                constraintName="fk_org_preferences_organization"
+                referencedTableName="organizations"
+                referencedColumnNames="id"
+                baseTableSchemaName="public"
+                referencedTableSchemaName="public"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <!-- Create indexes for organization_preferences table -->
+        <createIndex indexName="idx_org_preferences_organization_id" tableName="organization_preferences" schemaName="public">
+            <column name="organization_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="organization_preferences" schemaName="public"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

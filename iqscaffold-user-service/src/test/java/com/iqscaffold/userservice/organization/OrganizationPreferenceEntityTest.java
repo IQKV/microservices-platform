@@ -14,10 +14,9 @@ class OrganizationPreferenceEntityTest {
   @DisplayName("Should create organization preference with defaults")
   void shouldCreateOrganizationPreferenceWithDefaults() {
     var org = new Organization("Test Org", "tenant-123");
-    var preference = new OrganizationPreference(org, "tenant-123");
+    var preference = new OrganizationPreference(org);
 
     assertThat(preference.getOrganization()).isEqualTo(org);
-    assertThat(preference.getTenantId()).isEqualTo("tenant-123");
     assertThat(preference.getDefaultLocale()).isEqualTo("en");
     assertThat(preference.getDefaultTimezone()).isEqualTo("UTC");
     assertThat(preference.getDefaultCurrency()).isEqualTo("USD");
@@ -31,21 +30,18 @@ class OrganizationPreferenceEntityTest {
     assertThat(preference.getSessionTimeoutMinutes()).isEqualTo(30);
     assertThat(preference.getMaxLoginAttempts()).isEqualTo(5);
     assertThat(preference.getLockoutDurationMinutes()).isEqualTo(15);
-    assertThat(preference.getEnableTwoFactorAuth()).isFalse();
-    assertThat(preference.getRequireTwoFactorAuth()).isFalse();
+    assertThat(preference.getTwoFactorAuthRequired()).isFalse();
   }
 
   @Test
   @DisplayName("Should set and get all properties")
   void shouldSetAndGetAllProperties() {
     var org = new Organization("Test Org", "tenant-123");
-    var preference = new OrganizationPreference(org, "tenant-123");
+    var preference = new OrganizationPreference(org);
 
     preference.setDefaultLocale("fr");
     preference.setDefaultTimezone("Europe/Paris");
     preference.setDefaultCurrency("EUR");
-    preference.setDefaultDateFormat("dd/MM/yyyy");
-    preference.setDefaultTimeFormat("HH:mm");
     preference.setAllowUserRegistration(false);
     preference.setRequireEmailVerification(false);
     preference.setPasswordMinLength(12);
@@ -56,17 +52,12 @@ class OrganizationPreferenceEntityTest {
     preference.setSessionTimeoutMinutes(60);
     preference.setMaxLoginAttempts(3);
     preference.setLockoutDurationMinutes(30);
-    preference.setEnableTwoFactorAuth(true);
-    preference.setRequireTwoFactorAuth(true);
+    preference.setTwoFactorAuthRequired(true);
     preference.setNotificationEmail("notify@example.com");
-    preference.setSupportEmail("support@example.com");
-    preference.setCustomSettings("{\"key\":\"value\"}");
 
     assertThat(preference.getDefaultLocale()).isEqualTo("fr");
     assertThat(preference.getDefaultTimezone()).isEqualTo("Europe/Paris");
     assertThat(preference.getDefaultCurrency()).isEqualTo("EUR");
-    assertThat(preference.getDefaultDateFormat()).isEqualTo("dd/MM/yyyy");
-    assertThat(preference.getDefaultTimeFormat()).isEqualTo("HH:mm");
     assertThat(preference.getAllowUserRegistration()).isFalse();
     assertThat(preference.getRequireEmailVerification()).isFalse();
     assertThat(preference.getPasswordMinLength()).isEqualTo(12);
@@ -77,11 +68,8 @@ class OrganizationPreferenceEntityTest {
     assertThat(preference.getSessionTimeoutMinutes()).isEqualTo(60);
     assertThat(preference.getMaxLoginAttempts()).isEqualTo(3);
     assertThat(preference.getLockoutDurationMinutes()).isEqualTo(30);
-    assertThat(preference.getEnableTwoFactorAuth()).isTrue();
-    assertThat(preference.getRequireTwoFactorAuth()).isTrue();
+    assertThat(preference.getTwoFactorAuthRequired()).isTrue();
     assertThat(preference.getNotificationEmail()).isEqualTo("notify@example.com");
-    assertThat(preference.getSupportEmail()).isEqualTo("support@example.com");
-    assertThat(preference.getCustomSettings()).isEqualTo("{\"key\":\"value\"}");
   }
 
   @Test
@@ -90,9 +78,9 @@ class OrganizationPreferenceEntityTest {
     var org1 = new Organization("Org 1", "tenant-123");
     var org2 = new Organization("Org 2", "tenant-123");
 
-    var pref1 = new OrganizationPreference(org1, "tenant-123");
-    var pref2 = new OrganizationPreference(org1, "tenant-123");
-    var pref3 = new OrganizationPreference(org2, "tenant-123");
+    var pref1 = new OrganizationPreference(org1);
+    var pref2 = new OrganizationPreference(org1);
+    var pref3 = new OrganizationPreference(org2);
 
     assertThat(pref1).isEqualTo(pref1);
     assertThat(pref1).isEqualTo(pref2);
@@ -107,13 +95,12 @@ class OrganizationPreferenceEntityTest {
   @DisplayName("Should generate toString with all fields")
   void shouldGenerateToString() {
     var org = new Organization("Test Org", "tenant-123");
-    var preference = new OrganizationPreference(org, "tenant-123");
+    var preference = new OrganizationPreference(org);
 
     var toString = preference.toString();
 
     assertThat(toString).contains("OrganizationPreference");
     assertThat(toString).contains("defaultLocale='en'");
     assertThat(toString).contains("defaultTimezone='UTC'");
-    assertThat(toString).contains("tenantId='tenant-123'");
   }
 }

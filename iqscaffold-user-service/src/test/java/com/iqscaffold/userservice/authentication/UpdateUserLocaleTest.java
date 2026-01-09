@@ -61,6 +61,9 @@ class UpdateUserLocaleTest {
   @Mock
   private IqScaffoldProperties iqScaffoldProperties;
 
+  @Mock
+  private com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository;
+
   private AuthenticationService service;
   private User testUser;
 
@@ -86,7 +89,8 @@ class UpdateUserLocaleTest {
         inputSanitizer,
         sessionService,
         meterRegistry,
-        iqScaffoldProperties
+        iqScaffoldProperties,
+        organizationRepository
     );
 
     // Setup test user

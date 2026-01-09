@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.iqscaffold.userservice.config.JwtConfiguration;
 import com.iqscaffold.userservice.shared.JwtClaimNames;
+import com.iqscaffold.userservice.tenancy.TenantContext;
 import com.iqscaffold.userservice.usermanagement.User;
 import com.iqscaffold.userservice.usermanagement.UserContext;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,13 +46,16 @@ public class JwtServiceImpl implements JwtService {
   private final JwtDecoder jwtDecoder;
   private final JwtConfiguration jwtConfiguration;
   private final RedisTemplate<String, String> redisTemplate;
+  private final com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository;
 
   public JwtServiceImpl(final JwtEncoder jwtEncoder, final JwtDecoder jwtDecoder,
-                        final JwtConfiguration jwtConfiguration, final RedisTemplate<String, String> redisTemplate) {
+                        final JwtConfiguration jwtConfiguration, final RedisTemplate<String, String> redisTemplate,
+                        final com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository) {
     this.jwtEncoder = jwtEncoder;
     this.jwtDecoder = jwtDecoder;
     this.jwtConfiguration = jwtConfiguration;
     this.redisTemplate = redisTemplate;
+    this.organizationRepository = organizationRepository;
   }
 
   @Override
@@ -191,7 +195,14 @@ public class JwtServiceImpl implements JwtService {
         .map(authority -> authority.getName())
         .collect(Collectors.toSet());
 
-    Long organizationId = user.getOrganization() != null ? user.getOrganization().getId() : null;
+    // Get organization ID from tenant (1:1 relationship)
+    String tenantId = TenantContext.getCurrentTenantId();
+    Long organizationId = null;
+    if (tenantId != null) {
+      organizationId = organizationRepository.findByTenantId(tenantId)
+          .map(com.iqscaffold.userservice.organization.Organization::getId)
+          .orElse(null);
+    }
 
     return new UserContext(
         user.getId(),

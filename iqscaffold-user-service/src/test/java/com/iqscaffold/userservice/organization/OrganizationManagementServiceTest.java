@@ -88,6 +88,7 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new CreateOrganizationRequest(
         "New Org",
+        "tenant-123",
         "Description",
         "Technology",
         "https://example.com",
@@ -96,6 +97,9 @@ class OrganizationManagementServiceTest {
         "New York",
         "USA",
         true,
+        null,
+        null,
+        null,
         null
     );
 
@@ -117,6 +121,7 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new CreateOrganizationRequest(
         "Existing Org",
+        "tenant-123",
         null,
         null,
         null,
@@ -125,6 +130,9 @@ class OrganizationManagementServiceTest {
         null,
         null,
         true,
+        null,
+        null,
+        null,
         null
     );
 
@@ -142,6 +150,7 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new CreateOrganizationRequest(
         "New Org",
+        "tenant-123",
         "Description",
         null,
         null,
@@ -150,7 +159,10 @@ class OrganizationManagementServiceTest {
         null,
         null,
         true,
-        1L
+        1L,
+        null,
+        null,
+        null
     );
 
     when(organizationRepository.existsByName(anyString())).thenReturn(false);
@@ -207,6 +219,11 @@ class OrganizationManagementServiceTest {
         "Los Angeles",
         "USA",
         true,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
 
@@ -228,6 +245,11 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new UpdateOrganizationRequest(
         "Existing Org",
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -281,8 +303,7 @@ class OrganizationManagementServiceTest {
   @DisplayName("Should delete organization with owner")
   void shouldDeleteOrganizationWithOwner() {
     // Arrange
-    testOrganization.setOwner(testOwner);
-    testOwner.setOrganization(testOrganization);
+    testOrganization.setOwnerUserId(testOwner.getId());
     when(organizationRepository.findById(anyLong())).thenReturn(Optional.of(testOrganization));
 
     // Act
@@ -298,6 +319,7 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new CreateOrganizationRequest(
         "New Org",
+        "tenant-123",
         null,
         null,
         null,
@@ -306,6 +328,9 @@ class OrganizationManagementServiceTest {
         null,
         null,
         true,
+        null,
+        null,
+        null,
         null
     );
 
@@ -330,6 +355,11 @@ class OrganizationManagementServiceTest {
     // Arrange
     var request = new UpdateOrganizationRequest(
         "Updated Org",
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,

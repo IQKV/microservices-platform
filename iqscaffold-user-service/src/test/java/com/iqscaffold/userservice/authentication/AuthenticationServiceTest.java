@@ -78,6 +78,9 @@ class AuthenticationServiceTest {
   @Mock
   private IqScaffoldProperties iqScaffoldProperties;
 
+  @Mock
+  private com.iqscaffold.userservice.organization.OrganizationRepository organizationRepository;
+
   private AuthenticationService service;
   private User testUser;
   private LoginRequest loginRequest;
@@ -104,7 +107,8 @@ class AuthenticationServiceTest {
         inputSanitizer,
         sessionService,
         meterRegistry,
-        iqScaffoldProperties
+        iqScaffoldProperties,
+        organizationRepository
     );
 
     // Setup test user with all required fields

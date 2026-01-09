@@ -61,7 +61,7 @@ class OrganizationPreferenceManagementServiceTest {
     );
 
     testOrganization = new Organization("Test Org", "tenant-123");
-    testPreference = new OrganizationPreference(testOrganization, "tenant-123");
+    testPreference = new OrganizationPreference(testOrganization);
     testPreference.setDefaultLocale("en");
     testPreference.setDefaultTimezone("UTC");
   }
@@ -75,8 +75,6 @@ class OrganizationPreferenceManagementServiceTest {
         "en",
         "UTC",
         "USD",
-        null,
-        null,
         true,
         true,
         8,
@@ -88,10 +86,7 @@ class OrganizationPreferenceManagementServiceTest {
         5,
         15,
         false,
-        false,
-        "notify@test.com",
-        "support@test.com",
-        null
+        "notify@test.com"
     );
 
     when(organizationRepository.findById(anyLong())).thenReturn(Optional.of(testOrganization));
@@ -131,11 +126,6 @@ class OrganizationPreferenceManagementServiceTest {
         "fr",
         "Europe/Paris",
         "EUR",
-        null,
-        null,
-        null,
-        null,
-        null,
         null,
         null,
         null,
@@ -215,8 +205,6 @@ class OrganizationPreferenceManagementServiceTest {
         "en",
         "UTC",
         "USD",
-        null,
-        null,
         true,
         true,
         8,
@@ -228,9 +216,6 @@ class OrganizationPreferenceManagementServiceTest {
         5,
         15,
         false,
-        false,
-        null,
-        null,
         null
     );
 
@@ -264,8 +249,6 @@ class OrganizationPreferenceManagementServiceTest {
         "en",
         "UTC",
         "USD",
-        null,
-        null,
         true,
         true,
         8,
@@ -277,9 +260,6 @@ class OrganizationPreferenceManagementServiceTest {
         5,
         15,
         false,
-        false,
-        null,
-        null,
         null
     );
 
@@ -313,8 +293,6 @@ class OrganizationPreferenceManagementServiceTest {
         "en",
         "UTC",
         "USD",
-        null,
-        null,
         true,
         true,
         8,
@@ -326,9 +304,6 @@ class OrganizationPreferenceManagementServiceTest {
         5,
         15,
         false,
-        false,
-        null,
-        null,
         null
     );
 
@@ -380,11 +355,6 @@ class OrganizationPreferenceManagementServiceTest {
 
     var request = new UpdateOrganizationPreferenceRequest(
         "fr",
-        null,
-        null,
-        null,
-        null,
-        null,
         null,
         null,
         null,
@@ -463,8 +433,6 @@ class OrganizationPreferenceManagementServiceTest {
         "es",
         "America/New_York",
         "EUR",
-        "dd/MM/yyyy",
-        "HH:mm",
         false,
         false,
         12,
@@ -476,10 +444,7 @@ class OrganizationPreferenceManagementServiceTest {
         3,
         30,
         true,
-        true,
-        "new-notify@test.com",
-        "new-support@test.com",
-        "{\"key\":\"value\"}"
+        "new-notify@test.com"
     );
 
     when(preferenceRepository.findById(anyLong())).thenReturn(Optional.of(testPreference));

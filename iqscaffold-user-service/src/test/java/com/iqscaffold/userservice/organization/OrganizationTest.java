@@ -185,14 +185,6 @@ class OrganizationTest {
   }
 
   @Test
-  void shouldBelongToTenant() {
-    var organization = new Organization("Acme Corp", "tenant-1");
-
-    assertTrue(organization.belongsToTenant("tenant-1"));
-    assertFalse(organization.belongsToTenant("tenant-2"));
-  }
-
-  @Test
   void shouldSetCompleteOrganizationData() {
     var organization = new Organization("Acme Corporation", "tenant-1");
     organization.setDescription("Leading tech company");
