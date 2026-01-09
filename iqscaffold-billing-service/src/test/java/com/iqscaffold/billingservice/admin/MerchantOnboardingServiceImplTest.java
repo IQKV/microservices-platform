@@ -60,7 +60,7 @@ class MerchantOnboardingServiceImplTest {
     String accountId = "acct_123";
     String accountLink = "https://connect.stripe.com/setup/123";
     UserContext user = new UserContext(1L, "john", "john@example.com", 
-        java.util.Set.of("ROLE_ADMIN"), tenantId, "John", "Doe");
+        java.util.Set.of("ROLE_ADMIN"), tenantId, null, "John", "Doe");
 
     securityContextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
     securityContextMock.when(SecurityContextHelper::getCurrentUserContextOrThrow).thenReturn(user);
@@ -89,7 +89,7 @@ class MerchantOnboardingServiceImplTest {
     String accountId = "acct_existing";
     String accountLink = "https://connect.stripe.com/setup/456";
     UserContext user = new UserContext(2L, "jane", "jane@example.com", 
-        java.util.Set.of("ROLE_ADMIN"), tenantId, "Jane", "Smith");
+        java.util.Set.of("ROLE_ADMIN"), tenantId, null, "Jane", "Smith");
 
     MerchantStripeConfig existingConfig = new MerchantStripeConfig();
     existingConfig.setTenantId(tenantId);
@@ -119,7 +119,7 @@ class MerchantOnboardingServiceImplTest {
     // Given
     String tenantId = "tenant_123";
     UserContext user = new UserContext(3L, "admin", "admin@example.com", 
-        java.util.Set.of("ROLE_ADMIN"), tenantId, "Admin", "User");
+        java.util.Set.of("ROLE_ADMIN"), tenantId, null, "Admin", "User");
 
     MerchantStripeConfig existingConfig = new MerchantStripeConfig();
     existingConfig.setTenantId(tenantId);
@@ -147,7 +147,7 @@ class MerchantOnboardingServiceImplTest {
     String accountId = "acct_123";
     String accountLink = "https://connect.stripe.com/setup/123";
     UserContext user = new UserContext(4L, "user", null, 
-        java.util.Set.of("ROLE_ADMIN"), tenantId, "John", "Doe");
+        java.util.Set.of("ROLE_ADMIN"), tenantId, null, "John", "Doe");
 
     securityContextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
     securityContextMock.when(SecurityContextHelper::getCurrentUserContextOrThrow).thenReturn(user);
@@ -172,7 +172,7 @@ class MerchantOnboardingServiceImplTest {
     String accountId = "acct_123";
     String accountLink = "https://connect.stripe.com/setup/123";
     UserContext user = new UserContext(5L, "user", "user@example.com", 
-        java.util.Set.of("ROLE_ADMIN"), tenantId, null, "Doe");
+        java.util.Set.of("ROLE_ADMIN"), tenantId, null, null, "Doe");
 
     securityContextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
     securityContextMock.when(SecurityContextHelper::getCurrentUserContextOrThrow).thenReturn(user);

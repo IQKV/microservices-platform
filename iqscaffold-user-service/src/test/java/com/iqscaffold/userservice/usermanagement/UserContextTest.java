@@ -25,6 +25,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        123L,
         Map.of("department", "Engineering")
     );
 
@@ -36,6 +37,7 @@ class UserContextTest {
     assertEquals("John", context.firstName());
     assertEquals("Doe", context.lastName());
     assertEquals("tenant-1", context.tenantId());
+    assertEquals(123L, context.organizationId());
     assertEquals(Map.of("department", "Engineering"), context.customClaims());
   }
 
@@ -51,6 +53,7 @@ class UserContextTest {
             "John",
             "Doe",
             "tenant-1",
+            null,
             Map.of()
         )
     );
@@ -68,6 +71,7 @@ class UserContextTest {
             "John",
             "Doe",
             "tenant-1",
+            null,
             Map.of()
         )
     );
@@ -85,6 +89,7 @@ class UserContextTest {
             "John",
             "Doe",
             "tenant-1",
+            null,
             Map.of()
         )
     );
@@ -101,6 +106,7 @@ class UserContextTest {
             Set.of(),
             "John",
             "Doe",
+            null,
             null,
             Map.of()
         )
@@ -122,6 +128,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         claims
     );
 
@@ -147,6 +154,7 @@ class UserContextTest {
       @Nullable String firstName,
       @Nullable String lastName,
       String tenantId,
+      @Nullable Long organizationId,
       @Nullable Map<String, Object> customClaims
   ) {
     new UserContext(
@@ -158,6 +166,7 @@ class UserContextTest {
         firstName,
         lastName,
         tenantId,
+        organizationId,
         customClaims
     );
   }
@@ -173,6 +182,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         null
     );
 
@@ -195,6 +205,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -214,6 +225,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -233,6 +245,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -250,6 +263,7 @@ class UserContextTest {
         null,
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -267,6 +281,7 @@ class UserContextTest {
         "John",
         null,
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -284,6 +299,7 @@ class UserContextTest {
         null,
         null,
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -301,6 +317,7 @@ class UserContextTest {
         "Admin",
         "User",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -318,6 +335,7 @@ class UserContextTest {
         "Super",
         "Admin",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -335,6 +353,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -352,6 +371,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 
@@ -364,6 +384,7 @@ class UserContextTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
 

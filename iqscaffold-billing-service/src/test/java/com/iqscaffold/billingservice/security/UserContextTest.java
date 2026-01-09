@@ -20,6 +20,7 @@ class UserContextTest {
         "test@example.com",
         Set.of("READ", "WRITE"),
         "tenant1",
+        null,
         "John",
         "Doe"
     );
@@ -38,6 +39,7 @@ class UserContextTest {
         "test@example.com",
         Set.of("READ"),
         "tenant1",
+        null,
         "John",
         "Doe"
     );
@@ -56,6 +58,7 @@ class UserContextTest {
         "admin@example.com",
         Set.of("ROLE_ADMIN", "READ", "WRITE"),
         "tenant1",
+        null,
         "Admin",
         "User"
     );
@@ -73,6 +76,7 @@ class UserContextTest {
         "admin@example.com",
         Set.of("ADMIN", "READ"),
         "tenant1",
+        null,
         "Admin",
         "User"
     );
@@ -90,6 +94,7 @@ class UserContextTest {
         "user@example.com",
         Set.of("READ", "WRITE"),
         "tenant1",
+        null,
         "Regular",
         "User"
     );
@@ -106,12 +111,13 @@ class UserContextTest {
     String email = "test@example.com";
     Set<String> authorities = Set.of("READ", "WRITE");
     String tenantId = "tenant123";
+    Long organizationId = 456L;
     String firstName = "John";
     String lastName = "Doe";
 
     // When
     UserContext context = new UserContext(
-        userId, username, email, authorities, tenantId, firstName, lastName
+        userId, username, email, authorities, tenantId, organizationId, firstName, lastName
     );
 
     // Then
@@ -120,6 +126,7 @@ class UserContextTest {
     assertEquals(email, context.email());
     assertEquals(authorities, context.authorities());
     assertEquals(tenantId, context.tenantId());
+    assertEquals(organizationId, context.organizationId());
     assertEquals(firstName, context.firstName());
     assertEquals(lastName, context.lastName());
   }
@@ -133,6 +140,7 @@ class UserContextTest {
         "user@example.com",
         Set.of(),
         "tenant1",
+        null,
         "John",
         "Doe"
     );
@@ -152,6 +160,7 @@ class UserContextTest {
         Set.of("READ"),
         null,
         null,
+        null,
         null
     );
 
@@ -160,6 +169,7 @@ class UserContextTest {
     assertNull(context.username());
     assertNull(context.email());
     assertNull(context.tenantId());
+    assertNull(context.organizationId());
     assertNull(context.firstName());
     assertNull(context.lastName());
     assertTrue(context.hasAuthority("READ"));

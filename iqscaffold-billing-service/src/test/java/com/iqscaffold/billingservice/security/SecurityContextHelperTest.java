@@ -35,6 +35,7 @@ class SecurityContextHelperTest {
         "test@example.com",
         Set.of("READ", "WRITE"),
         "tenant1",
+        null,
         "John",
         "Doe"
     );
@@ -203,7 +204,7 @@ class SecurityContextHelperTest {
   void getCurrentUserId_shouldReturnNullWhenUserIdIsNull() {
     // Given
     UserContext contextWithNullUserId = new UserContext(
-        null, "user", "email@test.com", Set.of(), "tenant1", "John", "Doe"
+        null, "user", "email@test.com", Set.of(), "tenant1", null, "John", "Doe"
     );
     when(request.getAttribute("userContext")).thenReturn(contextWithNullUserId);
     ServletRequestAttributes attributes = new ServletRequestAttributes(request);
@@ -220,7 +221,7 @@ class SecurityContextHelperTest {
   void getCurrentTenantId_shouldReturnNullWhenTenantIdIsNull() {
     // Given
     UserContext contextWithNullTenantId = new UserContext(
-        1L, "user", "email@test.com", Set.of(), null, "John", "Doe"
+        1L, "user", "email@test.com", Set.of(), null, null, "John", "Doe"
     );
     when(request.getAttribute("userContext")).thenReturn(contextWithNullTenantId);
     ServletRequestAttributes attributes = new ServletRequestAttributes(request);

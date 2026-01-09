@@ -96,6 +96,7 @@ class TokenResponseTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
   }

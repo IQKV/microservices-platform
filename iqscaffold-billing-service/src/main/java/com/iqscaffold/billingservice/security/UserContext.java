@@ -8,6 +8,7 @@ public record UserContext(
     String email,
     Set<String> authorities,
     String tenantId,
+    Long organizationId,
     String firstName,
     String lastName
 ) {

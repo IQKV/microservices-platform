@@ -26,9 +26,8 @@ class JwtClaimNamesTest {
     assertThat(JwtClaimNames.USER_ID).isEqualTo("userId");
     assertThat(JwtClaimNames.USERNAME).isEqualTo("username");
     assertThat(JwtClaimNames.EMAIL).isEqualTo("email");
-    assertThat(JwtClaimNames.ROLES).isEqualTo("roles");
+    assertThat(JwtClaimNames.AUTHORITIES).isEqualTo("authorities");
     assertThat(JwtClaimNames.PERMISSIONS).isEqualTo("permissions");
-    assertThat(JwtClaimNames.DEPARTMENT).isEqualTo("department");
     assertThat(JwtClaimNames.ORGANIZATION_ID).isEqualTo("organizationId");
     assertThat(JwtClaimNames.TENANT_ID).isEqualTo("tenant_id");
   }

@@ -56,10 +56,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String email = jwt.getClaim(JwtClaimNames.EMAIL);
     Set<String> authorities = extractAuthorities(jwt.getClaim(JwtClaimNames.AUTHORITIES));
     String tenantId = jwt.getClaim(JwtClaimNames.TENANT_ID);
+    Long organizationId = extractLong(jwt.getClaim(JwtClaimNames.ORGANIZATION_ID));
     String firstName = jwt.getClaim(JwtClaimNames.FIRST_NAME);
     String lastName = jwt.getClaim(JwtClaimNames.LAST_NAME);
 
-    return new UserContext(userId, username, email, authorities, tenantId, firstName, lastName);
+    return new UserContext(userId, username, email, authorities, tenantId, organizationId, firstName, lastName);
   }
 
   private Long extractLong(Object value) {

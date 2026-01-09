@@ -110,9 +110,8 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     var userId = extractLong(claims.get(JwtClaimNames.USER_ID));
     var username = jwt.getSubject();
     var email = extractString(claims.get(JwtClaimNames.EMAIL));
-    var roles = extractStringList(claims.get(JwtClaimNames.ROLES));
+    var roles = extractStringList(claims.get(JwtClaimNames.AUTHORITIES));
     var permissions = extractStringList(claims.get(JwtClaimNames.PERMISSIONS));
-    var department = extractString(claims.get(JwtClaimNames.DEPARTMENT));
     var organizationId = extractString(claims.get(JwtClaimNames.ORGANIZATION_ID));
     var preferredLocale = extractString(claims.get(JwtClaimNames.PREFERRED_LOCALE));
 
@@ -122,7 +121,6 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         email,
         roles,
         permissions,
-        department,
         organizationId,
         preferredLocale
     );
@@ -236,7 +234,6 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
       String email,
       List<String> roles,
       List<String> permissions,
-      String department,
       String organizationId,
       String preferredLocale
   ) {

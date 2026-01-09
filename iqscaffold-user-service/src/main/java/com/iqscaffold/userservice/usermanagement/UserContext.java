@@ -68,6 +68,12 @@ public record UserContext(
     String tenantId,
 
     @Schema(
+        description = "Organization identifier for SaaS multi-organization support",
+        example = "123"
+    )
+    Long organizationId,
+
+    @Schema(
         description = "Additional custom claims and metadata",
         example = "{\"department\": \"Engineering\", \"location\": \"US\"}"
     )

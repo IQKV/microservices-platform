@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,7 +69,8 @@ class UserManagementServiceTest {
         "Admin",
         "User",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     superAdminUser = new UserContext(
@@ -80,7 +82,8 @@ class UserManagementServiceTest {
         "Super",
         "Admin",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     regularUser = new UserContext(
@@ -92,7 +95,8 @@ class UserManagementServiceTest {
         "Regular",
         "User",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     testUser = new User("testuser", "test@example.com", "hashedpass", "Test", "User", "tenant-123");

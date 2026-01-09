@@ -18,12 +18,15 @@ public final class JwtClaimNames {
   public static final String USER_ID = "userId";
   public static final String USERNAME = "username";
   public static final String EMAIL = "email";
-  public static final String ROLES = "roles";
+  public static final String AUTHORITIES = "authorities";
   public static final String PERMISSIONS = "permissions";
-  public static final String DEPARTMENT = "department";
   public static final String ORGANIZATION_ID = "organizationId";
   public static final String TENANT_ID = "tenant_id";
   public static final String PREFERRED_LOCALE = "preferred_locale";
+
+  // Token types
+  public static final String TOKEN_TYPE_ACCESS = "access";
+  public static final String TOKEN_TYPE_REFRESH = "refresh";
 
   private JwtClaimNames() {
     throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");

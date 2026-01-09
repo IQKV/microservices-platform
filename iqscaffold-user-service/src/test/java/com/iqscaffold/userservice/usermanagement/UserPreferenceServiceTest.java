@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,7 +52,8 @@ class UserPreferenceServiceTest {
         "Test",
         "User",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     user = new User("testuser", "test@example.com", "hash", "Test", "User", "tenant-123");

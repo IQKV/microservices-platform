@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,7 +61,8 @@ class OrganizationManagementServiceTest {
         "Admin",
         "User",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     regularUser = new UserContext(
@@ -72,7 +74,8 @@ class OrganizationManagementServiceTest {
         "Regular",
         "User",
         "tenant-123",
-        null
+        null,
+        Map.of()
     );
 
     testOrganization = new Organization("Test Org", "tenant-123");

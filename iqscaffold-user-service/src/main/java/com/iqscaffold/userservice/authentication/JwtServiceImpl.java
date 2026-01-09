@@ -113,11 +113,12 @@ public class JwtServiceImpl implements JwtService {
     var firstName = extractString(claims.get(JwtClaimNames.FIRST_NAME));
     var lastName = extractString(claims.get(JwtClaimNames.LAST_NAME));
     var tenantId = extractString(claims.get(JwtClaimNames.TENANT_ID));
+    var organizationId = extractLong(claims.get(JwtClaimNames.ORGANIZATION_ID));
     var customClaims = extractCustomClaims(claims);
 
     return new UserContext(
         userId, username, email, authorities, permissions,
-        firstName, lastName, tenantId, customClaims
+        firstName, lastName, tenantId, organizationId, customClaims
     );
   }
 
@@ -190,6 +191,8 @@ public class JwtServiceImpl implements JwtService {
         .map(authority -> authority.getName())
         .collect(Collectors.toSet());
 
+    Long organizationId = user.getOrganization() != null ? user.getOrganization().getId() : null;
+
     return new UserContext(
         user.getId(),
         user.getUsername(),
@@ -199,6 +202,7 @@ public class JwtServiceImpl implements JwtService {
         user.getFirstName(),
         user.getLastName(),
         user.getTenantId(),
+        organizationId,
         Map.of("preferredLocale", user.getPreferredLocale())
     );
   }
@@ -221,6 +225,7 @@ public class JwtServiceImpl implements JwtService {
         .claim(JwtClaimNames.FIRST_NAME, userContext.firstName())
         .claim(JwtClaimNames.LAST_NAME, userContext.lastName())
         .claim(JwtClaimNames.TENANT_ID, userContext.tenantId())
+        .claim(JwtClaimNames.ORGANIZATION_ID, userContext.organizationId())
         .claim(JwtClaimNames.PREFERRED_LOCALE, userContext.customClaims().get("preferredLocale"))
         .build();
   }
@@ -293,6 +298,7 @@ public class JwtServiceImpl implements JwtService {
         JwtClaimNames.FIRST_NAME,
         JwtClaimNames.LAST_NAME,
         JwtClaimNames.TENANT_ID,
+        JwtClaimNames.ORGANIZATION_ID,
         JwtClaimNames.PREFERRED_LOCALE
     );
 

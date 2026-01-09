@@ -454,6 +454,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         .map(authority -> authority.getName())
         .collect(java.util.stream.Collectors.toSet());
 
+    Long organizationId = user.getOrganization() != null ? user.getOrganization().getId() : null;
+
     return new UserContext(
         user.getId(),
         user.getUsername(),
@@ -463,6 +465,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.getFirstName(),
         user.getLastName(),
         user.getTenantId(),
+        organizationId,
         java.util.Map.of()
     );
   }

@@ -115,7 +115,6 @@ class JwtAuthenticationFilterTest {
         "test@example.com",
         List.of("ROLE_USER"),
         List.of("READ", "WRITE"),
-        "Engineering",
         "org-123",
         "en"
     );
@@ -125,8 +124,8 @@ class JwtAuthenticationFilterTest {
     assertThat(userContext.email()).isEqualTo("test@example.com");
     assertThat(userContext.roles()).containsExactly("ROLE_USER");
     assertThat(userContext.permissions()).containsExactly("READ", "WRITE");
-    assertThat(userContext.department()).isEqualTo("Engineering");
     assertThat(userContext.organizationId()).isEqualTo("org-123");
+    assertThat(userContext.preferredLocale()).isEqualTo("en");
   }
 
   @Test
@@ -143,7 +142,7 @@ class JwtAuthenticationFilterTest {
         JwtClaimNames.SUBJECT, "testuser",
         JwtClaimNames.USER_ID, 1L,
         JwtClaimNames.EMAIL, "test@example.com",
-        JwtClaimNames.ROLES, List.of("ROLE_USER"),
+        JwtClaimNames.AUTHORITIES, List.of("ROLE_USER"),
         JwtClaimNames.PERMISSIONS, List.of("READ", "WRITE"),
         JwtClaimNames.TENANT_ID, "tenant-123"
     );

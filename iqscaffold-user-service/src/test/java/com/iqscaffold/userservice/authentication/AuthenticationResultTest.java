@@ -149,6 +149,7 @@ class AuthenticationResultTest {
         "John",
         "Doe",
         "tenant-1",
+        null,
         Map.of()
     );
   }
