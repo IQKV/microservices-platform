@@ -77,7 +77,6 @@ class OrganizationPreferenceEntityTest {
   void shouldHandleEqualsAndHashCode() {
     var org1 = new Organization("Org 1", "tenant-123");
     var org2 = new Organization("Org 2", "tenant-456");
-    var org3 = new Organization("Org 3", "tenant-123");
 
     var pref1 = new OrganizationPreference(org1);
     var pref2 = new OrganizationPreference(org1);
