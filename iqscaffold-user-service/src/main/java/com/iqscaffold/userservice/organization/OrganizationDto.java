@@ -1,9 +1,10 @@
 package com.iqscaffold.userservice.organization;
 
-import java.time.LocalDateTime;
+import com.iqscaffold.userservice.shared.PaymentGatewayProvider;
 
 /**
- * Organization DTO for system-wide organization data (public schema).
+ * DTO for Organization entity with payment gateway abstraction.
+ * Clean greenfield implementation without backward compatibility.
  */
 public record OrganizationDto(
     Long id,
@@ -19,45 +20,64 @@ public record OrganizationDto(
     String tenantId,
     Long ownerUserId,
     String billingEmail,
-    String stripeAccountId,
+    String paymentGatewayAccountId,
+    PaymentGatewayProvider paymentGatewayProvider,
     Boolean chargesEnabled,
     Boolean payoutsEnabled,
     String subscriptionStatus,
     String subscriptionPlan,
-    Integer maxUsers,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    String createdBy
+    Integer maxUsers
 ) {
 
+  /**
+   * Check if organization has a payment gateway account configured.
+   */
+  public boolean hasPaymentGatewayAccount() {
+    return paymentGatewayAccountId != null && !paymentGatewayAccountId.isEmpty();
+  }
+
+  /**
+   * Check if organization can accept payments.
+   */
+  public boolean canAcceptPayments() {
+    return hasPaymentGatewayAccount() && Boolean.TRUE.equals(chargesEnabled);
+  }
+
+  /**
+   * Check if organization can receive payouts.
+   */
+  public boolean canReceivePayouts() {
+    return hasPaymentGatewayAccount() && Boolean.TRUE.equals(payoutsEnabled);
+  }
+
+  /**
+   * Check if organization is using a specific payment gateway provider.
+   */
+  public boolean isUsingProvider(PaymentGatewayProvider provider) {
+    return paymentGatewayProvider == provider;
+  }
+
+  /**
+   * Check if organization is active.
+   */
   public boolean isActive() {
     return Boolean.TRUE.equals(enabled);
   }
 
+  /**
+   * Check if organization has an active subscription.
+   */
+  public boolean isSubscriptionActive() {
+    return "active".equalsIgnoreCase(subscriptionStatus);
+  }
+
+  /**
+   * Get formatted location string.
+   */
   public String getLocation() {
     if (city != null && country != null) {
       return city + ", " + country;
     }
     return city != null ? city : (country != null ? country : "");
-  }
-
-  public boolean hasSubscription() {
-    return subscriptionStatus != null && !subscriptionStatus.isEmpty();
-  }
-
-  public boolean isSubscriptionActive() {
-    return "active".equalsIgnoreCase(subscriptionStatus);
-  }
-
-  public boolean hasStripeAccount() {
-    return stripeAccountId != null && !stripeAccountId.isEmpty();
-  }
-
-  public boolean canAcceptPayments() {
-    return hasStripeAccount() && Boolean.TRUE.equals(chargesEnabled);
-  }
-
-  public boolean canReceivePayouts() {
-    return hasStripeAccount() && Boolean.TRUE.equals(payoutsEnabled);
   }
 }

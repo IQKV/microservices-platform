@@ -200,6 +200,7 @@ public class StripeWebhookService implements WebhookService {
               merchant.getOrganizationId(),
               merchant.getTenantId(),
               accountId,
+              com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
               chargesEnabled,
               payoutsEnabled
           );

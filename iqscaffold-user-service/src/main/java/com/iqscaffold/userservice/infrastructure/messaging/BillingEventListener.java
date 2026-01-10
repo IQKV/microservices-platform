@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Listener for billing service events.
- * Handles merchant onboarding and capability updates to sync with organization data.
+ * Listener for billing service events with payment gateway abstraction.
+ * Clean greenfield implementation without backward compatibility.
  */
 @Component
 public class BillingEventListener {
@@ -25,14 +25,14 @@ public class BillingEventListener {
 
   /**
    * Handle merchant onboarded event from billing service.
-   * Syncs stripe_account_id and capabilities to organization.
+   * Syncs payment gateway account ID and capabilities to organization.
    */
   @RabbitListener(queues = RabbitMQConfig.BILLING_EVENTS_QUEUE)
   @Transactional
   public void handleMerchantOnboarded(MerchantOnboardedEvent event) {
     try {
-      log.info("Received merchant onboarded event for organization: {}, stripe account: {}",
-          event.organizationId(), event.stripeAccountId());
+      log.info("Received merchant onboarded event for organization: {}, gateway: {}, provider: {}",
+          event.organizationId(), event.gatewayAccountId(), event.gatewayProvider());
 
       var organization = organizationRepository.findById(event.organizationId())
           .orElseThrow(() -> new IllegalArgumentException("Organization not found: " + event.organizationId()));
@@ -44,15 +44,16 @@ public class BillingEventListener {
         throw new IllegalArgumentException("Tenant mismatch for organization: " + event.organizationId());
       }
 
-      // Update stripe account ID and capabilities
-      organization.setStripeAccountId(event.stripeAccountId());
+      // Update payment gateway account and capabilities
+      organization.setPaymentGatewayAccountId(event.gatewayAccountId());
+      organization.setPaymentGatewayProvider(event.gatewayProvider());
       organization.setChargesEnabled(event.chargesEnabled());
       organization.setPayoutsEnabled(event.payoutsEnabled());
 
       organizationRepository.save(organization);
 
-      log.info("Successfully synced merchant onboarding for organization: {}, stripe account: {}",
-          event.organizationId(), event.stripeAccountId());
+      log.info("Successfully synced merchant onboarding for organization: {}, gateway: {}, provider: {}",
+          event.organizationId(), event.gatewayAccountId(), event.gatewayProvider());
     } catch (final Exception e) {
       log.error("Error processing merchant onboarded event for organization: {}",
           event.organizationId(), e);
@@ -81,11 +82,18 @@ public class BillingEventListener {
         throw new IllegalArgumentException("Tenant mismatch for organization: " + event.organizationId());
       }
 
-      // Validate stripe account ID matches
-      if (!event.stripeAccountId().equals(organization.getStripeAccountId())) {
-        log.error("Stripe account mismatch for organization {}: expected {}, got {}",
-            event.organizationId(), organization.getStripeAccountId(), event.stripeAccountId());
-        throw new IllegalArgumentException("Stripe account mismatch for organization: " + event.organizationId());
+      // Validate payment gateway account matches
+      if (!event.gatewayAccountId().equals(organization.getPaymentGatewayAccountId())) {
+        log.error("Payment gateway account mismatch for organization {}: expected {}, got {}",
+            event.organizationId(), organization.getPaymentGatewayAccountId(), event.gatewayAccountId());
+        throw new IllegalArgumentException("Payment gateway account mismatch for organization: " + event.organizationId());
+      }
+
+      // Validate provider matches
+      if (event.gatewayProvider() != organization.getPaymentGatewayProvider()) {
+        log.error("Payment gateway provider mismatch for organization {}: expected {}, got {}",
+            event.organizationId(), organization.getPaymentGatewayProvider(), event.gatewayProvider());
+        throw new IllegalArgumentException("Payment gateway provider mismatch for organization: " + event.organizationId());
       }
 
       // Update capabilities

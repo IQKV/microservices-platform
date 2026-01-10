@@ -130,11 +130,6 @@ public class OrganizationManagementService {
       throw new OrganizationManagementException("Organization already exists for tenant: " + request.tenantId());
     }
 
-    // Validate unique name
-    if (organizationRepository.existsByName(request.name())) {
-      throw new OrganizationManagementException("Organization name already exists: " + request.name());
-    }
-
     var organization = new Organization(request.name(), request.tenantId());
     organization.setDescription(request.description());
     organization.setIndustry(request.industry());
@@ -143,8 +138,11 @@ public class OrganizationManagementService {
     organization.setAddress(request.address());
     organization.setCity(request.city());
     organization.setCountry(request.country());
-    organization.setEnabled(request.enabled() != null ? request.enabled() : true);
+    organization.setEnabled(true);
     organization.setBillingEmail(request.billingEmail());
+    organization.setPaymentGatewayAccountId(request.paymentGatewayAccountId());
+    organization.setPaymentGatewayProvider(request.paymentGatewayProvider());
+    organization.setSubscriptionStatus(request.subscriptionStatus());
     organization.setSubscriptionPlan(request.subscriptionPlan());
     organization.setMaxUsers(request.maxUsers());
     organization.setCreatedBy(currentUser.username());
@@ -176,10 +174,7 @@ public class OrganizationManagementService {
     var organization = findOrganizationByIdWithTenantCheck(organizationId, currentUser);
 
     // Update basic fields
-    if (request.name() != null && !request.name().equals(organization.getName())) {
-      if (organizationRepository.existsByName(request.name())) {
-        throw new OrganizationManagementException("Organization name already exists: " + request.name());
-      }
+    if (request.name() != null) {
       organization.setName(request.name());
     }
 
@@ -220,8 +215,20 @@ public class OrganizationManagementService {
       organization.setBillingEmail(request.billingEmail());
     }
 
-    if (request.stripeAccountId() != null) {
-      organization.setStripeAccountId(request.stripeAccountId());
+    if (request.paymentGatewayAccountId() != null) {
+      organization.setPaymentGatewayAccountId(request.paymentGatewayAccountId());
+    }
+
+    if (request.paymentGatewayProvider() != null) {
+      organization.setPaymentGatewayProvider(request.paymentGatewayProvider());
+    }
+
+    if (request.chargesEnabled() != null) {
+      organization.setChargesEnabled(request.chargesEnabled());
+    }
+
+    if (request.payoutsEnabled() != null) {
+      organization.setPayoutsEnabled(request.payoutsEnabled());
     }
 
     if (request.subscriptionStatus() != null) {
@@ -234,12 +241,6 @@ public class OrganizationManagementService {
 
     if (request.maxUsers() != null) {
       organization.setMaxUsers(request.maxUsers());
-    }
-
-    // Update owner
-    if (request.ownerUserId() != null) {
-      validateOwnerUser(request.ownerUserId(), organization.getTenantId());
-      organization.setOwnerUserId(request.ownerUserId());
     }
 
     var updatedOrganization = organizationRepository.save(organization);
@@ -323,15 +324,13 @@ public class OrganizationManagementService {
         organization.getTenantId(),
         organization.getOwnerUserId(),
         organization.getBillingEmail(),
-        organization.getStripeAccountId(),
+        organization.getPaymentGatewayAccountId(),
+        organization.getPaymentGatewayProvider(),
         organization.getChargesEnabled(),
         organization.getPayoutsEnabled(),
         organization.getSubscriptionStatus(),
         organization.getSubscriptionPlan(),
-        organization.getMaxUsers(),
-        organization.getCreatedAt(),
-        organization.getUpdatedAt(),
-        organization.getCreatedBy()
+        organization.getMaxUsers()
     );
   }
 

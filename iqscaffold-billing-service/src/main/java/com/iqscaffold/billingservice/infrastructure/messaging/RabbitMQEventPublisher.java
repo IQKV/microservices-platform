@@ -30,8 +30,8 @@ public class RabbitMQEventPublisher implements EventPublisher {
           RabbitMQConfig.MERCHANT_ONBOARDED_KEY,
           event
       );
-      log.info("Successfully published merchant onboarded event for organization: {}, stripe account: {}",
-          event.organizationId(), event.stripeAccountId());
+      log.info("Successfully published merchant onboarded event for organization: {}, gateway account: {}",
+          event.organizationId(), event.gatewayAccountId());
     } catch (final Exception e) {
       log.error("Failed to publish merchant onboarded event for organization: {}",
           event.organizationId(), e);

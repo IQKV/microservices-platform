@@ -1,22 +1,18 @@
 package com.iqscaffold.billingservice.infrastructure.messaging;
 
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
 
 /**
- * Event published when a merchant completes Stripe Connect onboarding.
- * This event is consumed by the user service to update the organization's stripe_account_id.
+ * Event published when a merchant completes payment gateway onboarding.
+ * Published by billing service to notify user service of new merchant account.
  */
 public record MerchantOnboardedEvent(
-    Long organizationId,
-    String tenantId,
-    String stripeAccountId,
-    boolean chargesEnabled,
-    boolean payoutsEnabled,
-    Instant timestamp
+    @JsonProperty("organization_id") Long organizationId,
+    @JsonProperty("tenant_id") String tenantId,
+    @JsonProperty("gateway_account_id") String gatewayAccountId,
+    @JsonProperty("gateway_provider") PaymentGatewayProvider gatewayProvider,
+    @JsonProperty("charges_enabled") boolean chargesEnabled,
+    @JsonProperty("payouts_enabled") boolean payoutsEnabled
 ) {
-  public MerchantOnboardedEvent(final Long organizationId, final String tenantId, 
-                                final String stripeAccountId, final boolean chargesEnabled, 
-                                final boolean payoutsEnabled) {
-    this(organizationId, tenantId, stripeAccountId, chargesEnabled, payoutsEnabled, Instant.now());
-  }
 }

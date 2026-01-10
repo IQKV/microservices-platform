@@ -3,6 +3,8 @@ package com.iqscaffold.userservice.organization;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +15,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import com.iqscaffold.userservice.shared.PaymentGatewayProvider;
 import com.iqscaffold.userservice.tenancy.Tenant;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -29,7 +32,7 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li>Centralized billing and subscription management</li>
  *   <li>Cross-tenant reporting and analytics</li>
  *   <li>Clear ownership: Organization owns Tenant owns Users</li>
- *   <li>Integration with billing service (Stripe Connect accounts)</li>
+ *   <li>Integration with billing service (payment gateway accounts)</li>
  * </ul>
  *
  * <h3>Key Relationships</h3>
@@ -39,9 +42,16 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Preferences</strong> - One-to-one relationship with organization preferences</li>
  * </ul>
  *
- * <h3>Billing Integration</h3>
+ * <h3>Payment Gateway Integration</h3>
  * <ul>
- *   <li><strong>stripeAccountId</strong> - Stripe Connect account for payment processing</li>
+ *   <li><strong>paymentGatewayAccountId</strong> - Account ID in payment gateway (e.g., Stripe Connect, PayPal merchant)</li>
+ *   <li><strong>paymentGatewayProvider</strong> - Gateway provider type (STRIPE, PAYPAL, SQUARE, BRAINTREE)</li>
+ *   <li><strong>chargesEnabled</strong> - Whether organization can accept payments</li>
+ *   <li><strong>payoutsEnabled</strong> - Whether organization can receive payouts</li>
+ * </ul>
+ *
+ * <h3>Subscription Management</h3>
+ * <ul>
  *   <li><strong>subscriptionStatus</strong> - Current subscription state (active, canceled, etc.)</li>
  *   <li><strong>subscriptionPlan</strong> - Plan identifier (basic, pro, enterprise)</li>
  *   <li><strong>billingEmail</strong> - Email for billing notifications</li>
@@ -98,12 +108,28 @@ public class Organization {
   @Column(name = "billing_email", length = 255)
   private String billingEmail;
 
-  @Column(name = "stripe_account_id", length = 255)
-  private String stripeAccountId;
+  /**
+   * Payment gateway account ID (e.g., Stripe Connect account, PayPal merchant ID).
+   */
+  @Column(name = "payment_gateway_account_id", length = 255)
+  private String paymentGatewayAccountId;
 
+  /**
+   * Payment gateway provider type.
+   */
+  @Column(name = "payment_gateway_provider", length = 50)
+  @Enumerated(EnumType.STRING)
+  private PaymentGatewayProvider paymentGatewayProvider;
+
+  /**
+   * Whether the organization can accept charges/payments through the gateway.
+   */
   @Column(name = "charges_enabled")
   private Boolean chargesEnabled = false;
 
+  /**
+   * Whether the organization can receive payouts through the gateway.
+   */
   @Column(name = "payouts_enabled")
   private Boolean payoutsEnabled = false;
 
@@ -137,6 +163,8 @@ public class Organization {
     this.name = name;
     this.tenantId = tenantId;
   }
+
+  // Getters and Setters
 
   public Long getId() {
     return id;
@@ -246,12 +274,20 @@ public class Organization {
     this.billingEmail = billingEmail;
   }
 
-  public String getStripeAccountId() {
-    return stripeAccountId;
+  public String getPaymentGatewayAccountId() {
+    return paymentGatewayAccountId;
   }
 
-  public void setStripeAccountId(String stripeAccountId) {
-    this.stripeAccountId = stripeAccountId;
+  public void setPaymentGatewayAccountId(String paymentGatewayAccountId) {
+    this.paymentGatewayAccountId = paymentGatewayAccountId;
+  }
+
+  public PaymentGatewayProvider getPaymentGatewayProvider() {
+    return paymentGatewayProvider;
+  }
+
+  public void setPaymentGatewayProvider(PaymentGatewayProvider paymentGatewayProvider) {
+    this.paymentGatewayProvider = paymentGatewayProvider;
   }
 
   public Boolean getChargesEnabled() {
@@ -318,14 +354,13 @@ public class Organization {
     this.createdBy = createdBy;
   }
 
+  // Business Logic Methods
+
   public boolean isActive() {
-    var enabled = this.enabled;
     return enabled != null && enabled;
   }
 
   public String getLocation() {
-    var city = this.city;
-    var country = this.country;
     if (city != null && country != null) {
       return city + ", " + country;
     }
@@ -340,16 +375,32 @@ public class Organization {
     return "active".equalsIgnoreCase(subscriptionStatus);
   }
 
-  public boolean hasStripeAccount() {
-    return stripeAccountId != null && !stripeAccountId.isEmpty();
+  /**
+   * Check if organization has a payment gateway account configured.
+   */
+  public boolean hasPaymentGatewayAccount() {
+    return paymentGatewayAccountId != null && !paymentGatewayAccountId.isEmpty();
   }
 
+  /**
+   * Check if organization can accept payments through the configured gateway.
+   */
   public boolean canAcceptPayments() {
-    return hasStripeAccount() && Boolean.TRUE.equals(chargesEnabled);
+    return hasPaymentGatewayAccount() && Boolean.TRUE.equals(chargesEnabled);
   }
 
+  /**
+   * Check if organization can receive payouts through the configured gateway.
+   */
   public boolean canReceivePayouts() {
-    return hasStripeAccount() && Boolean.TRUE.equals(payoutsEnabled);
+    return hasPaymentGatewayAccount() && Boolean.TRUE.equals(payoutsEnabled);
+  }
+
+  /**
+   * Check if organization is using a specific payment gateway provider.
+   */
+  public boolean isUsingProvider(PaymentGatewayProvider provider) {
+    return paymentGatewayProvider == provider;
   }
 
   /**
@@ -365,7 +416,7 @@ public class Organization {
       return false;
     }
 
-    var organization = (Organization) obj;
+    Organization organization = (Organization) obj;
     return Objects.equals(tenantId, organization.tenantId);
   }
 
@@ -380,16 +431,15 @@ public class Organization {
 
   @Override
   public String toString() {
-    var sb = new StringBuilder();
-    sb.append("Organization{")
-        .append("id=").append(id)
-        .append(", name='").append(name).append('\'')
-        .append(", tenantId='").append(tenantId).append('\'')
-        .append(", industry='").append(industry).append('\'')
-        .append(", enabled=").append(enabled)
-        .append(", subscriptionStatus='").append(subscriptionStatus).append('\'')
-        .append(", createdAt=").append(createdAt)
-        .append('}');
-    return sb.toString();
+    return "Organization{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", tenantId='" + tenantId + '\'' +
+        ", industry='" + industry + '\'' +
+        ", enabled=" + enabled +
+        ", paymentGatewayProvider=" + paymentGatewayProvider +
+        ", subscriptionStatus='" + subscriptionStatus + '\'' +
+        ", createdAt=" + createdAt +
+        '}';
   }
 }

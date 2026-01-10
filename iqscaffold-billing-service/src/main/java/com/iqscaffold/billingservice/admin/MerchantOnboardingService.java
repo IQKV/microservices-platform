@@ -146,7 +146,8 @@ public class MerchantOnboardingService {
   private void publishMerchantOnboardedEvent(Long organizationId, String tenantId, String stripeAccountId, 
                                              boolean chargesEnabled, boolean payoutsEnabled) {
     try {
-      var event = new MerchantOnboardedEvent(organizationId, tenantId, stripeAccountId, chargesEnabled, payoutsEnabled);
+      var event = new MerchantOnboardedEvent(organizationId, tenantId, stripeAccountId, 
+          com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE, chargesEnabled, payoutsEnabled);
       eventPublisher.publishMerchantOnboarded(event);
       logger.info("Published MerchantOnboardedEvent for organization {}", organizationId);
     } catch (final Exception e) {

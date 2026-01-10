@@ -1,25 +1,18 @@
 package com.iqscaffold.billingservice.infrastructure.messaging;
 
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
 
 /**
- * Event published when merchant capabilities are updated (charges_enabled, payouts_enabled).
- * This event is consumed by the user service for notification purposes.
+ * Event published when merchant payment gateway account capabilities are updated.
+ * Published by billing service to notify user service of capability changes.
  */
 public record MerchantCapabilitiesUpdatedEvent(
-    Long organizationId,
-    String tenantId,
-    String stripeAccountId,
-    boolean chargesEnabled,
-    boolean payoutsEnabled,
-    Instant timestamp
+    @JsonProperty("organization_id") Long organizationId,
+    @JsonProperty("tenant_id") String tenantId,
+    @JsonProperty("gateway_account_id") String gatewayAccountId,
+    @JsonProperty("gateway_provider") PaymentGatewayProvider gatewayProvider,
+    @JsonProperty("charges_enabled") boolean chargesEnabled,
+    @JsonProperty("payouts_enabled") boolean payoutsEnabled
 ) {
-  public MerchantCapabilitiesUpdatedEvent(
-      final Long organizationId,
-      final String tenantId,
-      final String stripeAccountId,
-      final boolean chargesEnabled,
-      final boolean payoutsEnabled) {
-    this(organizationId, tenantId, stripeAccountId, chargesEnabled, payoutsEnabled, Instant.now());
-  }
 }

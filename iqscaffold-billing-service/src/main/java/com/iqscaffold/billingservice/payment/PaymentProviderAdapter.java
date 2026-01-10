@@ -3,9 +3,21 @@ package com.iqscaffold.billingservice.payment;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
+
+/**
+ * Adapter interface for payment gateway providers.
+ * Implementations provide gateway-specific logic for payment processing,
+ * customer management, and merchant onboarding.
+ */
 public interface PaymentProviderAdapter {
   public record ProviderPaymentIntent(String id, String clientSecret) {
   }
+
+  /**
+   * Get the payment gateway provider type this adapter supports.
+   */
+  PaymentGatewayProvider getProviderType();
 
   /**
    * Create a Payment Intent.

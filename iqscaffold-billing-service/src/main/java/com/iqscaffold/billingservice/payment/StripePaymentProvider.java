@@ -55,6 +55,11 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     Stripe.apiKey = iqScaffoldProperties.billing().payment().stripe().apiKey();
   }
 
+  @Override
+  public com.iqscaffold.billingservice.shared.PaymentGatewayProvider getProviderType() {
+    return com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE;
+  }
+
   /**
    * Creates a Stripe PaymentIntent.
    * <p>

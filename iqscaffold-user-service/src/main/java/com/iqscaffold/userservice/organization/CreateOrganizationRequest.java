@@ -4,16 +4,19 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import com.iqscaffold.userservice.shared.PaymentGatewayProvider;
+
 /**
- * Request DTO for creating an organization (system-wide billing entity).
+ * Request DTO for creating organization with payment gateway abstraction.
+ * Clean greenfield implementation without backward compatibility.
  */
 public record CreateOrganizationRequest(
-    @NotBlank(message = "Organization name is required")
-    @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
+    @NotBlank(message = "Name is required")
+    @Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters")
     String name,
 
     @NotBlank(message = "Tenant ID is required")
-    @Size(min = 2, max = 100, message = "Tenant ID must be between 2 and 100 characters")
+    @Size(min = 1, max = 100, message = "Tenant ID must be between 1 and 100 characters")
     String tenantId,
 
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
@@ -37,13 +40,19 @@ public record CreateOrganizationRequest(
     @Size(max = 100, message = "Country must not exceed 100 characters")
     String country,
 
-    Boolean enabled,
-
     Long ownerUserId,
 
     @Email(message = "Billing email must be valid")
     @Size(max = 255, message = "Billing email must not exceed 255 characters")
     String billingEmail,
+
+    @Size(max = 255, message = "Payment gateway account ID must not exceed 255 characters")
+    String paymentGatewayAccountId,
+
+    PaymentGatewayProvider paymentGatewayProvider,
+
+    @Size(max = 50, message = "Subscription status must not exceed 50 characters")
+    String subscriptionStatus,
 
     @Size(max = 100, message = "Subscription plan must not exceed 100 characters")
     String subscriptionPlan,

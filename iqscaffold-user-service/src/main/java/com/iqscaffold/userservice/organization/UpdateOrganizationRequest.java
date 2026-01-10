@@ -3,11 +3,14 @@ package com.iqscaffold.userservice.organization;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
+import com.iqscaffold.userservice.shared.PaymentGatewayProvider;
+
 /**
- * Request DTO for updating organization.
+ * Request DTO for updating organization with payment gateway abstraction.
+ * Clean greenfield implementation without backward compatibility.
  */
 public record UpdateOrganizationRequest(
-    @Size(min = 2, max = 255, message = "Organization name must be between 2 and 255 characters")
+    @Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters")
     String name,
 
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
@@ -33,14 +36,18 @@ public record UpdateOrganizationRequest(
 
     Boolean enabled,
 
-    Long ownerUserId,
-
     @Email(message = "Billing email must be valid")
     @Size(max = 255, message = "Billing email must not exceed 255 characters")
     String billingEmail,
 
-    @Size(max = 255, message = "Stripe account ID must not exceed 255 characters")
-    String stripeAccountId,
+    @Size(max = 255, message = "Payment gateway account ID must not exceed 255 characters")
+    String paymentGatewayAccountId,
+
+    PaymentGatewayProvider paymentGatewayProvider,
+
+    Boolean chargesEnabled,
+
+    Boolean payoutsEnabled,
 
     @Size(max = 50, message = "Subscription status must not exceed 50 characters")
     String subscriptionStatus,
