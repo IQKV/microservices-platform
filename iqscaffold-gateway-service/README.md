@@ -31,8 +31,9 @@ handling cross-cutting concerns like authentication, rate limiting, and observab
 ### 🔐 Authentication & Authorization
 
 - JWT validation using RSA256 with JWK Set endpoint
-- User context extraction (userId, username, email, roles, permissions, department, organizationId)
-- Context propagation via headers (X-User-ID, X-Username, X-User-Roles)
+- User context extraction (userId, username, email, authorities, permissions, organizationId)
+- Authority propagation via headers (X-User-Authorities, X-User-Email, X-User-Permissions, X-Organization-ID)
+- Header sanitization to prevent spoofing attacks (removes all user/tenant context headers from incoming requests)
 - Public path pattern matching (exact and wildcard /\*\*)
 - Configurable user context propagation toggle
 - MDC logging with user and tenant context
@@ -163,8 +164,16 @@ Request Flow:
 ### Authentication Flow
 
 - Validate JWT tokens from Authorization header
-- Extract user context (userId, username, roles, permissions)
-- Propagate user context to downstream services via headers
+- Extract user context (userId, username, email, authorities, permissions, organizationId)
+- Sanitize incoming headers to prevent spoofing (removes X-User-\*, X-Tenant-ID, X-Organization-ID)
+- Propagate user context to downstream services via headers:
+  - `X-User-ID`: User identifier
+  - `X-Username`: Username
+  - `X-User-Email`: User email address
+  - `X-User-Authorities`: Comma-separated list of authorities (e.g., "ADMIN,USER")
+  - `X-User-Permissions`: Comma-separated list of permissions
+  - `X-Tenant-ID`: Tenant identifier
+  - `X-Organization-ID`: Organization identifier
 - Skip authentication for public paths
 - Support for both access and refresh tokens
 
@@ -195,7 +204,14 @@ Request Flow:
 ### Request Transformation
 
 - Add correlation ID to all requests
-- Propagate user context headers (X-User-ID, X-Username, X-User-Roles)
+- Sanitize incoming headers (remove X-User-\*, X-Tenant-ID, X-Organization-ID to prevent spoofing)
+- Propagate user context headers:
+  - `X-User-ID`: User identifier
+  - `X-Username`: Username
+  - `X-User-Email`: User email address
+  - `X-User-Authorities`: Comma-separated authorities
+  - `X-User-Permissions`: Comma-separated permissions
+  - `X-Organization-ID`: Organization identifier
 - Propagate tenant context (X-Tenant-ID)
 - Add gateway version header
 - Remove internal headers from requests
@@ -345,18 +361,26 @@ Downstream services receive enriched headers from the gateway:
 public ResponseEntity<?> protectedEndpoint(
   @RequestHeader("X-User-ID") Long userId,
   @RequestHeader("X-Username") String username,
-  @RequestHeader("X-User-Roles") String roles,
+  @RequestHeader("X-User-Email") String email,
+  @RequestHeader("X-User-Authorities") String authorities,
+  @RequestHeader("X-User-Permissions") String permissions,
   @RequestHeader("X-Tenant-ID") String tenantId,
+  @RequestHeader("X-Organization-ID") Long organizationId,
   @RequestHeader("X-Correlation-ID") String correlationId
 ) {
+  // Parse authorities
+  List<String> authorityList = Arrays.asList(authorities.split(","));
+
   // Use context for business logic
-  logger.info("Request from user {} (tenant: {}) with correlation: {}", username, tenantId, correlationId);
+  logger.info("Request from user {} (tenant: {}) with authorities: {} and correlation: {}", username, tenantId, authorityList, correlationId);
 
   return ResponseEntity.ok(
     /* response */
   );
 }
 ```
+
+**Security Note**: The gateway sanitizes all incoming user/tenant context headers before processing the request. This prevents clients from spoofing user identity by injecting malicious headers. Only the gateway can set these headers after JWT validation.
 
 ### JWT Validation Configuration
 

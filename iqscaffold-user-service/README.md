@@ -28,9 +28,11 @@ This is the authentication hub for the IQ Scaffold microservices platform. It ce
 - Access tokens (15min) and refresh tokens (7 days) with configurable expiry
 - Token rotation and Redis-backed blacklisting with TTL
 - JTI (JWT ID) for unique token identification
-- Role-based access control (RBAC) with method-level @PreAuthorize
+- Authority-based access control (ABAC) with method-level @PreAuthorize
+- System-wide authorities stored in PUBLIC schema for consistency
+- Granular billing authorities separate from general admin access
 - User context extraction with pattern matching (Java 21)
-- Comprehensive JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
+- Comprehensive JWT claims (userId, username, email, authorities, permissions, firstName, lastName, tenantId, organizationId)
 - Self-service user preference management
 - Admin-controlled organization settings
 
@@ -269,7 +271,7 @@ var stats = tenantRepository
 - `POST /api/v1/auth/logout` - Logout current session
 - `POST /api/v1/auth/logout-all` - Logout all sessions
 
-### Admin Endpoints (Requires ADMIN/SUPER_ADMIN Role)
+### Admin Endpoints (Requires ADMIN/TENANT_OWNER/SUPER_ADMIN Authority)
 
 #### User Management
 
@@ -296,7 +298,7 @@ var stats = tenantRepository
 - `PUT /api/v1/admin/organization-preferences/{id}` - Update organization preference
 - `DELETE /api/v1/admin/organization-preferences/{id}` - Delete organization preference
 
-#### Tenant Management
+#### Tenant Management (Requires SUPER_ADMIN)
 
 - `GET /api/v1/admin/tenants` - List tenants
 - `GET /api/v1/admin/tenants/{id}` - Get tenant by ID
@@ -391,7 +393,8 @@ public ResponseEntity<?> protectedEndpoint(Authentication auth) {
   if (auth instanceof JwtAuthenticationToken token) {
     var userId = token.getToken().getSubject();
     var tenantId = token.getToken().getClaimAsString("tenantId");
-    var roles = token.getToken().getClaimAsStringList("roles");
+    var authorities = token.getToken().getClaimAsStringList("authorities");
+    var organizationId = token.getToken().getClaimAsLong("organizationId");
     // Use context for business logic
   }
 }
@@ -404,19 +407,35 @@ Access tokens carry comprehensive user context:
 ```json
 {
   "sub": "1",
+  "userId": 1,
   "username": "john.doe",
   "email": "john.doe@example.com",
-  "roles": ["USER"],
-  "permissions": ["READ_PROFILE"],
+  "authorities": ["USER", "ADMIN"],
+  "permissions": ["READ_PROFILE", "WRITE_PROFILE"],
   "firstName": "John",
   "lastName": "Doe",
   "tenantId": "tenant-123",
+  "organizationId": 456,
   "type": "access",
+  "jti": "unique-token-id",
   "iss": "iqscaffold-user-service",
   "iat": 1634567890,
   "exp": 1634568790
 }
 ```
+
+### Authority Structure
+
+The service manages six system-wide authorities stored in the PUBLIC schema:
+
+- **SUPER_ADMIN** - Platform administrator with access to all operations across all tenants
+- **TENANT_OWNER** - Organization owner with full access within their tenant (includes billing)
+- **ADMIN** - General administrator for user management (NO billing access by design)
+- **BILLING_ADMIN** - Dedicated billing management authority with write access to billing operations
+- **FINANCE_VIEWER** - Read-only billing access for compliance and audit purposes
+- **USER** - Regular user with basic access
+
+**Key Design**: Authorities are stored in PUBLIC schema (system-wide) while user-authority mappings are in tenant schemas. This ensures consistent authority definitions across all tenants while maintaining tenant isolation for user data.
 
 ---
 

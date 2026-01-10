@@ -96,18 +96,18 @@ Request Flow:
 
 - `POST /api/v1/billing/payments/intent` - Create a payment intent (amount, currency, description)
 - `GET /api/v1/billing/payments/{id}` - Retrieve detailed payment status and history
-- `GET /api/v1/billing/payments` - Paginated list of payments for the current tenant
-- `POST /api/v1/billing/payments/{id}/refund` - Process a full refund (Requires `ADMIN` role)
+- `GET /api/v1/billing/payments` - Paginated list of payments for the current tenant (Requires billing access)
+- `POST /api/v1/billing/payments/{id}/refund` - Process a full refund (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
 
 ### Payout Operations
 
-- `GET /api/v1/billing/payouts` - Paginated list of payouts for the current tenant (Requires `ADMIN` role)
-- `GET /api/v1/billing/payouts/{id}` - Retrieve detailed payout information by ID (Requires `ADMIN` role)
+- `GET /api/v1/billing/payouts` - Paginated list of payouts for the current tenant (Requires billing access)
+- `GET /api/v1/billing/payouts/{id}` - Retrieve detailed payout information by ID (Requires billing access)
 
 ### Merchant Administration
 
-- `POST /api/v1/admin/billing/merchants/onboard` - Initiate Stripe Connect onboarding (Requires `ADMIN` role)
-- `GET /api/v1/admin/billing/merchants/status` - Check current merchant configuration and capability status
+- `POST /api/v1/admin/billing/merchants/onboard` - Initiate Stripe Connect onboarding (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `GET /api/v1/admin/billing/merchants/status` - Check current merchant configuration and capability status (Requires billing access)
 
 ### Internal/Webhook
 
@@ -362,10 +362,18 @@ EMAIL_SERVICE_URL=http://localhost:8084
 ## Security Features
 
 - **JWT Validation**: OAuth2 Resource Server with JWK Set validation from User Service
-- **Role-Based Access Control**: Method-level security with @PreAuthorize (ADMIN, USER roles)
+- **Authority-Based Access Control**: Method-level security with @PreAuthorize using granular authorities
+- **Billing Authorities**: Dedicated authorities for billing operations separate from general admin access
+  - `SUPER_ADMIN`: Platform-wide access to all operations
+  - `TENANT_OWNER`: Full organizational access including billing
+  - `BILLING_ADMIN`: Dedicated billing management authority (write access)
+  - `FINANCE_VIEWER`: Read-only billing access for compliance/audit
+  - `ADMIN`: General administration (NO billing access by design)
+  - `USER`: Regular user access
+- **Separation of Concerns**: ADMIN authority does NOT grant billing access - requires explicit BILLING_ADMIN or higher
 - **Webhook Signature Verification**: Cryptographic validation of Stripe events
 - **Tenant Isolation**: Schema-per-tenant prevents cross-tenant data access
-- **User Context Enrichment**: Audit logs include userId, email, tenant information
+- **User Context Enrichment**: Audit logs include userId, email, tenant information, and authorities
 - **MDC Logging**: Correlation IDs for request tracing and debugging
 - **CSRF Protection**: Configured appropriately for stateless API endpoints
 
