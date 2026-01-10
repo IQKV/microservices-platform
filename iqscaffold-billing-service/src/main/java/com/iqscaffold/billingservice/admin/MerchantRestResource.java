@@ -41,11 +41,11 @@ public class MerchantRestResource {
       @ApiResponse(responseCode = "200", description = "Onboarding link generated successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid request or organization already onboarded"),
       @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, TENANT_OWNER, or SUPER_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Organization not found")
   })
   @PostMapping("/onboard")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<OnboardingLinkResponse> initiateOnboarding(
       @Valid @RequestBody OnboardingRequest request) {
     var response = onboardingService.initiateOnboarding(
@@ -63,11 +63,11 @@ public class MerchantRestResource {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Status retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized - authentication required"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - insufficient permissions"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, FINANCE_VIEWER, TENANT_OWNER, or SUPER_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Merchant configuration not found")
   })
   @GetMapping("/status/{organizationId}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
   public ResponseEntity<MerchantStatusResponse> getMerchantStatus(
       @Parameter(description = "Organization ID", required = true)
       @PathVariable Long organizationId) {

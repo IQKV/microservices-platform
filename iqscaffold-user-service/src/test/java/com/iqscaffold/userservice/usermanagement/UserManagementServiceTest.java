@@ -295,15 +295,16 @@ class UserManagementServiceTest {
   void shouldGetAllUsers() {
     // Arrange
     var pageable = PageRequest.of(0, 20);
-    when(userRepository.findAll()).thenReturn(List.of(testUser));
+    var page = new org.springframework.data.domain.PageImpl<>(List.of(testUser), pageable, 1);
+    when(userRepository.findAll(any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
 
     // Act
-    var result = service.getAllUsers(pageable, adminUser);
+    var result = service.getAllUsers(pageable, superAdminUser);
 
     // Assert
     assertThat(result).isNotNull();
     assertThat(result.getContent()).hasSize(1);
-    verify(userRepository).findAll();
+    verify(userRepository).findAll(any(org.springframework.data.domain.Pageable.class));
   }
 
   @Test

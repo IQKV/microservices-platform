@@ -3,6 +3,8 @@ package com.iqscaffold.userservice.usermanagement;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -93,8 +95,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
   @Query("""
       SELECT DISTINCT u FROM User u 
       WHERE u.id NOT IN (
-        SELECT ua.user_id FROM user_authorities ua 
-        JOIN authorities a ON ua.authority_id = a.id 
+        SELECT u2.id FROM User u2 
+        JOIN u2.authorities a 
         WHERE a.name = :excludedAuthorityName
       )
       ORDER BY u.createdAt DESC

@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.iqscaffold.userservice.tenancy.Tenant;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;

@@ -174,4 +174,260 @@ class UserContextTest {
     assertNull(context.lastName());
     assertTrue(context.hasAuthority("READ"));
   }
+
+  @Test
+  void hasBillingAccess_shouldReturnTrueForSuperAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "superadmin", "super@example.com",
+        Set.of("SUPER_ADMIN"), "tenant1", null, "Super", "Admin"
+    );
+
+    // When & Then
+    assertTrue(context.hasBillingAccess());
+  }
+
+  @Test
+  void hasBillingAccess_shouldReturnTrueForTenantOwner() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "owner", "owner@example.com",
+        Set.of("TENANT_OWNER"), "tenant1", null, "Tenant", "Owner"
+    );
+
+    // When & Then
+    assertTrue(context.hasBillingAccess());
+  }
+
+  @Test
+  void hasBillingAccess_shouldReturnTrueForBillingAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "billingadmin", "billing@example.com",
+        Set.of("BILLING_ADMIN"), "tenant1", null, "Billing", "Admin"
+    );
+
+    // When & Then
+    assertTrue(context.hasBillingAccess());
+  }
+
+  @Test
+  void hasBillingAccess_shouldReturnTrueForFinanceViewer() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "viewer", "viewer@example.com",
+        Set.of("FINANCE_VIEWER"), "tenant1", null, "Finance", "Viewer"
+    );
+
+    // When & Then
+    assertTrue(context.hasBillingAccess());
+  }
+
+  @Test
+  void hasBillingAccess_shouldReturnFalseForRegularAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "admin", "admin@example.com",
+        Set.of("ADMIN"), "tenant1", null, "Regular", "Admin"
+    );
+
+    // When & Then
+    assertFalse(context.hasBillingAccess());
+  }
+
+  @Test
+  void hasBillingAccess_shouldReturnFalseForRegularUser() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "user", "user@example.com",
+        Set.of("USER"), "tenant1", null, "Regular", "User"
+    );
+
+    // When & Then
+    assertFalse(context.hasBillingAccess());
+  }
+
+  @Test
+  void canModifyBilling_shouldReturnTrueForSuperAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "superadmin", "super@example.com",
+        Set.of("SUPER_ADMIN"), "tenant1", null, "Super", "Admin"
+    );
+
+    // When & Then
+    assertTrue(context.canModifyBilling());
+  }
+
+  @Test
+  void canModifyBilling_shouldReturnTrueForTenantOwner() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "owner", "owner@example.com",
+        Set.of("TENANT_OWNER"), "tenant1", null, "Tenant", "Owner"
+    );
+
+    // When & Then
+    assertTrue(context.canModifyBilling());
+  }
+
+  @Test
+  void canModifyBilling_shouldReturnTrueForBillingAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "billingadmin", "billing@example.com",
+        Set.of("BILLING_ADMIN"), "tenant1", null, "Billing", "Admin"
+    );
+
+    // When & Then
+    assertTrue(context.canModifyBilling());
+  }
+
+  @Test
+  void canModifyBilling_shouldReturnFalseForFinanceViewer() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "viewer", "viewer@example.com",
+        Set.of("FINANCE_VIEWER"), "tenant1", null, "Finance", "Viewer"
+    );
+
+    // When & Then
+    assertFalse(context.canModifyBilling());
+  }
+
+  @Test
+  void canModifyBilling_shouldReturnFalseForRegularAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "admin", "admin@example.com",
+        Set.of("ADMIN"), "tenant1", null, "Regular", "Admin"
+    );
+
+    // When & Then
+    assertFalse(context.canModifyBilling());
+  }
+
+  @Test
+  void hasReadOnlyBillingAccess_shouldReturnTrueForFinanceViewer() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "viewer", "viewer@example.com",
+        Set.of("FINANCE_VIEWER"), "tenant1", null, "Finance", "Viewer"
+    );
+
+    // When & Then
+    assertTrue(context.hasReadOnlyBillingAccess());
+  }
+
+  @Test
+  void hasReadOnlyBillingAccess_shouldReturnFalseForBillingAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "billingadmin", "billing@example.com",
+        Set.of("BILLING_ADMIN"), "tenant1", null, "Billing", "Admin"
+    );
+
+    // When & Then
+    assertFalse(context.hasReadOnlyBillingAccess());
+  }
+
+  @Test
+  void hasReadOnlyBillingAccess_shouldReturnFalseForRegularUser() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "user", "user@example.com",
+        Set.of("USER"), "tenant1", null, "Regular", "User"
+    );
+
+    // When & Then
+    assertFalse(context.hasReadOnlyBillingAccess());
+  }
+
+  @Test
+  void isSuperAdmin_shouldReturnTrueForSuperAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "superadmin", "super@example.com",
+        Set.of("SUPER_ADMIN"), "tenant1", null, "Super", "Admin"
+    );
+
+    // When & Then
+    assertTrue(context.isSuperAdmin());
+  }
+
+  @Test
+  void isSuperAdmin_shouldReturnFalseForTenantOwner() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "owner", "owner@example.com",
+        Set.of("TENANT_OWNER"), "tenant1", null, "Tenant", "Owner"
+    );
+
+    // When & Then
+    assertFalse(context.isSuperAdmin());
+  }
+
+  @Test
+  void isSuperAdmin_shouldReturnFalseForRegularAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "admin", "admin@example.com",
+        Set.of("ADMIN"), "tenant1", null, "Regular", "Admin"
+    );
+
+    // When & Then
+    assertFalse(context.isSuperAdmin());
+  }
+
+  @Test
+  void isTenantOwner_shouldReturnTrueForTenantOwner() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "owner", "owner@example.com",
+        Set.of("TENANT_OWNER"), "tenant1", null, "Tenant", "Owner"
+    );
+
+    // When & Then
+    assertTrue(context.isTenantOwner());
+  }
+
+  @Test
+  void isTenantOwner_shouldReturnFalseForSuperAdmin() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "superadmin", "super@example.com",
+        Set.of("SUPER_ADMIN"), "tenant1", null, "Super", "Admin"
+    );
+
+    // When & Then
+    assertFalse(context.isTenantOwner());
+  }
+
+  @Test
+  void isTenantOwner_shouldReturnFalseForRegularUser() {
+    // Given
+    UserContext context = new UserContext(
+        1L, "user", "user@example.com",
+        Set.of("USER"), "tenant1", null, "Regular", "User"
+    );
+
+    // When & Then
+    assertFalse(context.isTenantOwner());
+  }
+
+  @Test
+  void billingAccessMethods_shouldWorkWithMultipleAuthorities() {
+    // Given - User with multiple authorities
+    UserContext context = new UserContext(
+        1L, "poweruser", "power@example.com",
+        Set.of("BILLING_ADMIN", "FINANCE_VIEWER", "USER"), "tenant1", null, "Power", "User"
+    );
+
+    // When & Then
+    assertTrue(context.hasBillingAccess());
+    assertTrue(context.canModifyBilling());
+    assertTrue(context.hasReadOnlyBillingAccess());
+    assertFalse(context.isSuperAdmin());
+    assertFalse(context.isTenantOwner());
+  }
 }

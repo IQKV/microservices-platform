@@ -40,17 +40,20 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-    var request = exchange.getRequest();
-    var path = request.getPath().value();
+    var originalRequest = exchange.getRequest();
+    var path = originalRequest.getPath().value();
+
+    // Sanitize incoming headers to prevent spoofing
+    var sanitizedRequest = sanitizeIncomingHeaders(originalRequest);
 
     // Generate correlation ID if not present
-    var correlationId = getOrGenerateCorrelationId(request);
+    var correlationId = getOrGenerateCorrelationId(sanitizedRequest);
     MDC.put(GatewayConstants.MdcKeys.CORRELATION_ID, correlationId);
 
     // Skip authentication for public paths
     if (isPublicPath(path)) {
       logger.debug("Skipping authentication for public path: {}", path);
-      return addCorrelationIdAndContinue(exchange, chain, correlationId);
+      return addCorrelationIdAndContinue(exchange.mutate().request(sanitizedRequest).build(), chain, correlationId);
     }
 
     // Extract user context from authenticated JWT
@@ -65,7 +68,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             var userContext = extractUserContext(jwt);
 
             // Extract tenant context
-            var tenantContext = extractTenantContext(request, jwt);
+            var tenantContext = extractTenantContext(sanitizedRequest, jwt);
 
             // Add tenant context to MDC for logging
             if (StringUtils.hasText(tenantContext.tenantId())) {
@@ -75,7 +78,7 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             logger.debug("Authenticated user: {} for tenant: {}", userContext.username(), tenantContext.tenantId());
 
             // Propagate user and tenant context to downstream services
-            var modifiedRequest = propagateContextHeaders(request, userContext, tenantContext, correlationId);
+            var modifiedRequest = propagateContextHeaders(sanitizedRequest, userContext, tenantContext, correlationId);
             var modifiedExchange = exchange.mutate().request(modifiedRequest).build();
 
             return chain.filter(modifiedExchange);
@@ -85,12 +88,43 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             MDC.remove(GatewayConstants.MdcKeys.TENANT_ID);
           }
         })
-        .switchIfEmpty(addCorrelationIdAndContinue(exchange, chain, correlationId));
+        .switchIfEmpty(addCorrelationIdAndContinue(exchange.mutate().request(sanitizedRequest).build(), chain, correlationId));
   }
 
   private String getOrGenerateCorrelationId(ServerHttpRequest request) {
     var existingCorrelationId = request.getHeaders().getFirst(GatewayConstants.Headers.X_CORRELATION_ID);
     return StringUtils.hasText(existingCorrelationId) ? existingCorrelationId : UUID.randomUUID().toString();
+  }
+
+  /**
+   * Sanitize incoming headers to prevent header spoofing attacks.
+   * Removes any user/tenant context headers that may have been set by external clients.
+   * Only the gateway should set these headers after JWT validation.
+   */
+  private ServerHttpRequest sanitizeIncomingHeaders(ServerHttpRequest request) {
+    return request.mutate()
+        .headers(headers -> {
+          // Remove user context headers (will be set by gateway after JWT validation)
+          headers.remove(GatewayConstants.Headers.X_USER_ID);
+          headers.remove(GatewayConstants.Headers.X_USERNAME);
+          headers.remove(GatewayConstants.Headers.X_USER_EMAIL);
+          headers.remove(GatewayConstants.Headers.X_USER_AUTHORITIES);
+          headers.remove(GatewayConstants.Headers.X_USER_PERMISSIONS);
+          headers.remove(GatewayConstants.Headers.X_USER_ROLES);
+          headers.remove(GatewayConstants.Headers.X_ORGANIZATION_ID);
+
+          // Remove tenant context headers (will be set by gateway after validation)
+          headers.remove(GatewayConstants.Headers.X_TENANT_ID);
+
+          // Remove internal headers that should never come from external requests
+          headers.remove(GatewayConstants.Headers.X_INTERNAL_SERVICE);
+          headers.remove(GatewayConstants.Headers.X_INTERNAL_VERSION);
+          headers.remove(GatewayConstants.Headers.X_INTERNAL_TOKEN);
+          headers.remove(GatewayConstants.Headers.AUTHORIZATION_INTERNAL);
+
+          logger.trace("Sanitized incoming request headers");
+        })
+        .build();
   }
 
   private boolean isPublicPath(String path) {
@@ -185,21 +219,46 @@ public final class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Add user context headers only if propagation is enabled
     if (properties.gateway().security().authentication().enableUserContextPropagation()) {
+      // User ID
       if (userContext.userId() != null) {
         builder.header(GatewayConstants.Headers.X_USER_ID, userContext.userId().toString());
       }
+
+      // Username
       if (StringUtils.hasText(userContext.username())) {
         builder.header(GatewayConstants.Headers.X_USERNAME, userContext.username());
       }
-      if (!userContext.roles().isEmpty()) {
-        builder.header(GatewayConstants.Headers.X_USER_ROLES, String.join(",", userContext.roles()));
+
+      // Email
+      if (StringUtils.hasText(userContext.email())) {
+        builder.header(GatewayConstants.Headers.X_USER_EMAIL, userContext.email());
       }
+
+      // Authorities (for authorization checks - CRITICAL for @PreAuthorize)
+      if (!userContext.roles().isEmpty()) {
+        var authoritiesStr = String.join(",", userContext.roles());
+        builder.header(GatewayConstants.Headers.X_USER_AUTHORITIES, authoritiesStr);
+        // Also set X-User-Roles for backward compatibility
+        builder.header(GatewayConstants.Headers.X_USER_ROLES, authoritiesStr);
+      }
+
+      // Permissions (for fine-grained access control)
+      if (!userContext.permissions().isEmpty()) {
+        builder.header(GatewayConstants.Headers.X_USER_PERMISSIONS, String.join(",", userContext.permissions()));
+      }
+
+      // Organization ID
+      if (StringUtils.hasText(userContext.organizationId())) {
+        builder.header(GatewayConstants.Headers.X_ORGANIZATION_ID, userContext.organizationId());
+      }
+
+      // Locale
       if (StringUtils.hasText(userContext.preferredLocale())) {
         builder.header(GatewayConstants.Headers.X_USER_LOCALE, userContext.preferredLocale());
       }
 
-      logger.debug("User context propagated for user: {} with locale: {}",
-          userContext.username(), userContext.preferredLocale());
+      logger.debug("User context propagated for user: {} with authorities: {} and locale: {}",
+          userContext.username(), userContext.roles(), userContext.preferredLocale());
     } else {
       logger.debug("User context propagation is disabled");
     }

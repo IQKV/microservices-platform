@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.iqscaffold.userservice.organization.Organization;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;

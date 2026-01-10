@@ -30,8 +30,12 @@ public final class GatewayConstants {
     // User Context Headers
     public static final String X_USER_ID = "X-User-ID";
     public static final String X_USERNAME = "X-Username";
-    public static final String X_USER_ROLES = "X-User-Roles";
+    public static final String X_USER_EMAIL = "X-User-Email";
+    public static final String X_USER_AUTHORITIES = "X-User-Authorities";
+    public static final String X_USER_PERMISSIONS = "X-User-Permissions";
+    public static final String X_USER_ROLES = "X-User-Roles"; // Deprecated: use X_USER_AUTHORITIES
     public static final String X_USER_LOCALE = "X-User-Locale";
+    public static final String X_ORGANIZATION_ID = "X-Organization-ID";
 
     // Gateway Identification Headers
     public static final String X_GATEWAY_SERVICE = "X-Gateway-Service";

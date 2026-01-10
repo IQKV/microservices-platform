@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import com.iqscaffold.userservice.tenancy.Tenant;
+import com.iqscaffold.userservice.tenancy.TenantRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +21,16 @@ class OrganizationRepositoryTest {
   @Autowired
   private OrganizationRepository organizationRepository;
 
+  @Autowired
+  private TenantRepository tenantRepository;
+
   @Test
   @DisplayName("findByName and existsByName should work as expected")
   void findByNameAndExists() {
+    // Create tenant first
+    var tenant = new Tenant("t1-unique", "Test Tenant 1");
+    tenantRepository.save(tenant);
+
     com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("t1-unique");
     var o = new Organization("Acme", "t1-unique");
     organizationRepository.save(o);
@@ -34,6 +43,11 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("findAll in tenant context returns only tenant's organizations")
   void findByTenant() {
+    // Create tenants first
+    tenantRepository.save(new Tenant("TEN-unique", "Test Tenant"));
+    tenantRepository.save(new Tenant("TEN-unique2", "Test Tenant 2"));
+    tenantRepository.save(new Tenant("OTHER-unique", "Other Tenant"));
+
     com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("TEN-unique");
     organizationRepository.saveAll(List.of(
         new Organization("A1", "TEN-unique"),
@@ -53,6 +67,11 @@ class OrganizationRepositoryTest {
   @Test
   @DisplayName("findByEnabledTrue orders by createdAt desc and filters enabled in tenant context")
   void findEnabledByTenantOrdered() throws InterruptedException {
+    // Create tenants first
+    tenantRepository.save(new Tenant("T-unique", "Test Tenant"));
+    tenantRepository.save(new Tenant("T-unique2", "Test Tenant 2"));
+    tenantRepository.save(new Tenant("T-unique3", "Test Tenant 3"));
+
     com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId("T-unique");
     var a1 = new Organization("E1", "T-unique");
     var a2 = new Organization("E2", "T-unique2");
@@ -75,6 +94,12 @@ class OrganizationRepositoryTest {
   @DisplayName("count and countByEnabledTrue return expected counts in tenant context")
   void counts() {
     var t = "C-unique";
+    // Create tenants first
+    tenantRepository.save(new Tenant(t, "Test Tenant"));
+    tenantRepository.save(new Tenant(t + "2", "Test Tenant 2"));
+    tenantRepository.save(new Tenant(t + "3", "Test Tenant 3"));
+    tenantRepository.save(new Tenant(t + "4", "Test Tenant 4"));
+
     com.iqscaffold.userservice.tenancy.TenantContext.setCurrentTenantId(t);
     organizationRepository.saveAll(List.of(
         new Organization("C1", t),

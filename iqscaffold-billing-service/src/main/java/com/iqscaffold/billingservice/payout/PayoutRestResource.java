@@ -31,10 +31,10 @@ public class PayoutRestResource {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Payouts retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden (Admin only)")
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, FINANCE_VIEWER, TENANT_OWNER, or SUPER_ADMIN role")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
   public ResponseEntity<Page<PayoutDtos.PayoutResponse>> listPayouts(Pageable pageable) {
     return ResponseEntity.ok(payoutService.getPayouts(pageable));
   }
@@ -42,12 +42,12 @@ public class PayoutRestResource {
   @Operation(summary = "Get payout details", description = "Retrieves details of a specific payout by its ID")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Payout details found"),
-      @ApiResponse(responseCode = "404", description = "Payout not found"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden (Admin only)")
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, FINANCE_VIEWER, TENANT_OWNER, or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "404", description = "Payout not found")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
   public ResponseEntity<PayoutDtos.PayoutResponse> getPayout(@PathVariable String id) {
     return ResponseEntity.ok(payoutService.getPayout(id));
   }

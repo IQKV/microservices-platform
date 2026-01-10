@@ -56,8 +56,13 @@ public class PaymentRestResource {
   }
 
   @Operation(summary = "List payments", description = "Retrieves a paginated list of payments for the current tenant")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Payments retrieved successfully"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, FINANCE_VIEWER, TENANT_OWNER, or SUPER_ADMIN role")
+  })
   @GetMapping
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
   public ResponseEntity<org.springframework.data.domain.Page<PaymentDtos.PaymentResponse>> listPayments(org.springframework.data.domain.Pageable pageable) {
     return ResponseEntity.ok(paymentService.getPayments(pageable));
   }
@@ -66,10 +71,12 @@ public class PaymentRestResource {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "204", description = "Refund initiated successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid state for refund"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, TENANT_OWNER, or SUPER_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Payment not found")
   })
   @PostMapping("/{id}/refund")
-  @PreAuthorize("hasAuthority('ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<Void> refundPayment(@PathVariable UUID id) {
     refundService.processRefund(id);
     return ResponseEntity.noContent().build();
