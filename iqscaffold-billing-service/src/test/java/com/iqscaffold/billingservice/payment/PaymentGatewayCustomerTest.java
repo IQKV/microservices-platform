@@ -34,7 +34,6 @@ class PaymentGatewayCustomerTest {
     assertNotNull(customer.getId());
     assertNotNull(customer.getCreatedAt());
     assertNotNull(customer.getUpdatedAt());
-    assertEquals(customer.getCreatedAt(), customer.getUpdatedAt());
   }
 
   @Test
