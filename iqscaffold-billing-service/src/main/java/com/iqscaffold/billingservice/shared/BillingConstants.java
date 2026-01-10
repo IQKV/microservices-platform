@@ -34,4 +34,14 @@ public final class BillingConstants {
     public static final String MERCHANT_CONFIG_NOT_FOUND = "merchant.config.not.found";
     public static final String STRIPE_ERROR = "payment.stripe.error";
   }
+
+  /**
+   * Default values for various operations.
+   */
+  public static final class Defaults {
+    private Defaults() {
+    }
+
+    public static final String DEFAULT_TENANT_ID = "default";
+  }
 }
