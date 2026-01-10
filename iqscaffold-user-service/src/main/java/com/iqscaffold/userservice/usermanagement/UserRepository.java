@@ -88,21 +88,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
   List<User> findByAuthorityName(@Param("authorityName") String authorityName);
 
   /**
+   * Find users excluding those with a specific authority (for ADMIN filtering out SUPER_ADMIN).
+   */
+  @Query("""
+      SELECT DISTINCT u FROM User u 
+      WHERE u.id NOT IN (
+        SELECT ua.user_id FROM user_authorities ua 
+        JOIN authorities a ON ua.authority_id = a.id 
+        WHERE a.name = :excludedAuthorityName
+      )
+      ORDER BY u.createdAt DESC
+      """)
+  Page<User> findByAuthoritiesNameNot(@Param("excludedAuthorityName") String excludedAuthorityName, Pageable pageable);
+
+  /**
    * Count users in current tenant schema.
    */
   long count();
 
   /**
    * Count enabled users in current tenant schema.
-   */
-  @Query("""
-      SELECT COUNT(u) FROM User u 
-      WHERE u.enabled = true
-      """)
-  long countEnabledUsers();
-
-  /**
-   * Count enabled users.
    */
   long countByEnabledTrue();
 

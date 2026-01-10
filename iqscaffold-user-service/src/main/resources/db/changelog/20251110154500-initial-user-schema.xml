@@ -83,7 +83,7 @@
             <column name="description" value="Standard user with basic access"/>
         </insert>
 
-        <!-- Create user_authorities junction table -->
+        <!-- Create user_authorities junction table (references public.authorities) -->
         <createTable tableName="user_authorities">
             <column name="user_id" type="BIGINT">
                 <constraints nullable="false"/>
@@ -111,6 +111,7 @@
                 baseColumnNames="authority_id"
                 constraintName="fk_user_authorities_authority_id"
                 referencedTableName="authorities"
+                referencedTableSchemaName="public"
                 referencedColumnNames="id"
                 onDelete="CASCADE"/>
 
@@ -205,11 +206,6 @@
             <column name="enabled"/>
         </createIndex>
 
-        <!-- Create indexes for authorities table -->
-        <createIndex indexName="idx_authorities_name" tableName="authorities">
-            <column name="name"/>
-        </createIndex>
-
         <!-- Create indexes for user_audit_log table -->
         <createIndex indexName="idx_user_audit_log_user_id" tableName="user_audit_log">
             <column name="user_id"/>
@@ -270,7 +266,6 @@
             <dropTable tableName="email_verification_tokens"/>
             <dropTable tableName="user_audit_log"/>
             <dropTable tableName="users"/>
-            <dropTable tableName="authorities"/>
         </rollback>
     </changeSet>
 

@@ -63,24 +63,22 @@ public class UserManagementServiceImpl implements UserManagementService {
   public Page<UserDto> getAllUsers(Pageable pageable, UserContext currentUser) {
     validateAdminAccess(currentUser, "LIST_USERS");
 
-    var users = userRepository.findAll();
+    Page<User> users;
 
-    // Apply role-based filtering
-    var filteredUsers = applyRoleBasedFiltering(users, currentUser);
+    // SUPER_ADMIN can see all users
+    if (currentUser.hasAuthority("SUPER_ADMIN")) {
+      users = userRepository.findAll(pageable);
+    } else {
+      // ADMIN can see non-super-admin users
+      users = userRepository.findByAuthoritiesNameNot("SUPER_ADMIN", pageable);
+    }
 
     // Convert to DTOs
-    var userDtos = filteredUsers.stream()
-        .map(this::convertToDto)
-        .toList();
+    var userDtos = users.map(this::convertToDto);
 
-    // Create pageable result
-    var start = (int) pageable.getOffset();
-    var end = Math.min((start + pageable.getPageSize()), userDtos.size());
-    var pageContent = userDtos.subList(start, end);
+    logAuditEvent("LIST_USERS", "Listed " + userDtos.getNumberOfElements() + " users", currentUser);
 
-    logAuditEvent("LIST_USERS", "Listed " + pageContent.size() + " users", currentUser);
-
-    return new PageImpl<>(pageContent, pageable, userDtos.size());
+    return userDtos;
   }
 
   @Override
@@ -235,29 +233,14 @@ public class UserManagementServiceImpl implements UserManagementService {
   }
 
   /**
-   * Apply role-based filtering for hierarchical access control.
-   */
-  private List<User> applyRoleBasedFiltering(List<User> users, UserContext currentUser) {
-    // SUPER_ADMIN can see all users
-    if (currentUser.hasAuthority("SUPER_ADMIN")) {
-      return users;
-    }
-
-    // ADMIN can see non-admin users and other admins (but not super admins)
-    if (currentUser.hasAuthority("ADMIN")) {
-      return users.stream()
-          .filter(user -> !user.hasAuthority("SUPER_ADMIN"))
-          .toList();
-    }
-
-    // Should not reach here due to validateAdminAccess, but return empty list as fallback
-    return List.of();
-  }
-
-  /**
-   * Validate user access based on role hierarchy.
+   * Validate user access based on role hierarchy and tenant ownership.
    */
   private void validateUserAccess(User user, UserContext currentUser) {
+    // Validate tenant ownership
+    if (!user.getTenantId().equals(currentUser.tenantId())) {
+      throw new AccessDeniedException("User does not belong to current tenant");
+    }
+
     // SUPER_ADMIN can access all users
     if (currentUser.hasAuthority("SUPER_ADMIN")) {
       return;
@@ -292,6 +275,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
   /**
    * Get authorities by names.
+   * 
+   * <p>Authorities are stored in PUBLIC schema (system-wide), so all tenants
+   * share the same set of roles. This ensures consistency and simplifies
+   * role management across the platform.
    */
   private Set<Authority> getAuthoritiesByNames(Set<String> roleNames) {
     var authorities = authorityRepository.findByNameIn(roleNames);

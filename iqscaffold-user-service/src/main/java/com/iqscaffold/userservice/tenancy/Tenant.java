@@ -3,12 +3,16 @@ package com.iqscaffold.userservice.tenancy;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import com.iqscaffold.userservice.organization.Organization;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -63,6 +67,9 @@ public class Tenant {
 
   @Column(name = "created_by", length = 100)
   private String createdBy;
+
+  @OneToOne(mappedBy = "tenant", fetch = FetchType.LAZY)
+  private Organization organization;
 
   // Default constructor for JPA
   protected Tenant() {
@@ -165,6 +172,14 @@ public class Tenant {
 
   public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
+  }
+
+  public Organization getOrganization() {
+    return organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
   }
 
   // Utility methods

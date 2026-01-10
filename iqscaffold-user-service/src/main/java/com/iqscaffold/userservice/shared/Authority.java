@@ -20,10 +20,19 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 
 /**
- * Authority entity representing roles and permissions in the RBAC system. Used for role-based access control across the platform.
+ * Authority entity representing roles and permissions in the RBAC system.
+ * 
+ * <p>Authorities are stored in the PUBLIC schema (system-wide) to ensure consistency
+ * across all tenants. This design provides:
+ * <ul>
+ *   <li>Centralized role management</li>
+ *   <li>Consistent permissions across tenants</li>
+ *   <li>Simplified role updates and maintenance</li>
+ *   <li>No role duplication per tenant</li>
+ * </ul>
  */
 @Entity
-@Table(name = "authorities")
+@Table(name = "authorities", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.shared.Authority")
 public class Authority {

@@ -153,13 +153,15 @@ public class OrganizationManagementRestResource {
 
   @Operation(
       summary = "Get organization by tenant ID",
-      description = "Retrieve organization by tenant ID. Internal endpoint for service-to-service communication."
+      description = "Retrieve organization by tenant ID. Internal endpoint for service-to-service communication. Requires SUPER_ADMIN role."
   )
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Organization retrieved successfully"),
+      @ApiResponse(responseCode = "403", description = "Insufficient permissions - requires SUPER_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Organization not found for tenant")
   })
   @GetMapping("/tenant/{tenantId}")
+  @PreAuthorize("hasAuthority('SUPER_ADMIN')")
   @Timed(value = "organization.endpoint", extraTags = {"endpoint", "getByTenant"})
   public ResponseEntity<OrganizationDto> getOrganizationByTenantId(
       @Parameter(description = "Tenant ID", required = true) @PathVariable String tenantId) {
