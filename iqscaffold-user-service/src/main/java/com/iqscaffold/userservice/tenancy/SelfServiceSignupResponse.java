@@ -1,7 +1,8 @@
 package com.iqscaffold.userservice.tenancy;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Response DTO for self-service tenant signup operations.

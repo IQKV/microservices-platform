@@ -1,10 +1,11 @@
 package com.iqscaffold.userservice.infrastructure.messaging;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Event for tenant lifecycle activities.

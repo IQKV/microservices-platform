@@ -274,6 +274,7 @@ var stats = tenantRepository
 - `POST /api/v1/public/signup` - Self-service tenant signup (no authentication required)
 
 **Request:**
+
 ```json
 {
   "organizationName": "ACME Corporation",
@@ -288,6 +289,7 @@ var stats = tenantRepository
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "tenantId": "acme-corp-a1b2",
@@ -306,6 +308,7 @@ var stats = tenantRepository
 ```
 
 **Features:**
+
 - Tenant ID auto-generated if not provided
 - Complete environment provisioning (tenant + organization + admin user)
 - Admin user assigned TENANT_ADMIN authority

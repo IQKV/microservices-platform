@@ -3,7 +3,6 @@ package com.iqscaffold.userservice.tenancy;
 import com.iqscaffold.userservice.emailverification.EmailVerificationService;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
 import com.iqscaffold.userservice.organization.OrganizationManagementService;
-import com.iqscaffold.userservice.registration.UserRegistrationService;
 import com.iqscaffold.userservice.security.InputSanitizer;
 import com.iqscaffold.userservice.security.SecurityAuditService;
 import com.iqscaffold.userservice.shared.Authority;

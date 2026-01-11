@@ -1,10 +1,11 @@
 package com.iqscaffold.userservice.tenancy;
 
-import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Utility class for generating unique tenant IDs from organization names.
