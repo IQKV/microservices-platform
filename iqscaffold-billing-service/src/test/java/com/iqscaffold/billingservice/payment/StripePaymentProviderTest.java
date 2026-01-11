@@ -16,9 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos;
 import com.iqscaffold.billingservice.config.IqScaffoldProperties;
 import com.iqscaffold.billingservice.payment.PaymentProviderAdapter.ProviderPaymentIntent;
+import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.shared.exception.PaymentException;
+import com.iqscaffold.billingservice.webhook.WebhookEvent;
 import com.stripe.Stripe;
 import com.stripe.exception.ApiConnectionException;
 import com.stripe.exception.AuthenticationException;
@@ -31,6 +34,7 @@ import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.Refund;
 import com.stripe.net.RequestOptions;
+import com.stripe.net.Webhook;
 import com.stripe.param.AccountCreateParams;
 import com.stripe.param.AccountLinkCreateParams;
 import com.stripe.param.CustomerCreateParams;
@@ -552,6 +556,396 @@ class StripePaymentProviderTest {
       // Then
       assertNotNull(result);
       assertEquals("pi_jpy", result.id());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParsePaymentIntentSucceeded() {
+    // Given
+    String payload = "{\"id\":\"evt_123\",\"type\":\"payment_intent.succeeded\"}";
+    String sigHeader = "t=123,v1=sig";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_123");
+    when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
+    
+    com.stripe.model.StripeObject mockObject = mock(com.stripe.model.PaymentIntent.class);
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    when(deserializer.getObject()).thenReturn(Optional.of(mockObject));
+    
+    com.stripe.model.PaymentIntent pi = mock(com.stripe.model.PaymentIntent.class);
+    when(pi.getId()).thenReturn("pi_123");
+    when(pi.getMetadata()).thenReturn(Map.of("tenant_id", "tenant-123"));
+    when(deserializer.getObject()).thenReturn(Optional.of(pi));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals("evt_123", result.eventId());
+      assertEquals(WebhookEvent.EventType.PAYMENT_SUCCEEDED, result.eventType());
+      assertEquals(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE, result.provider());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldHandleInvalidSignature() {
+    // Given
+    String payload = "invalid";
+    String sigHeader = "invalid";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenThrow(new com.stripe.exception.SignatureVerificationException("Invalid", "sig"));
+
+      // When & Then
+      assertThrows(IllegalArgumentException.class, () ->
+          stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader)
+      );
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParseChargeRefunded() {
+    // Given
+    String payload = "{\"id\":\"evt_456\",\"type\":\"charge.refunded\"}";
+    String sigHeader = "t=456,v1=sig456";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_456");
+    when(mockEvent.getType()).thenReturn("charge.refunded");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.Charge charge = mock(com.stripe.model.Charge.class);
+    when(charge.getPaymentIntent()).thenReturn("pi_456");
+    when(charge.getRefunded()).thenReturn(true);
+    when(charge.getMetadata()).thenReturn(Map.of());
+    when(deserializer.getObject()).thenReturn(Optional.of(charge));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals(WebhookEvent.EventType.PAYMENT_REFUNDED, result.eventType());
+      assertEquals("pi_456", result.resourceId());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParsePayoutPaid() {
+    // Given
+    String payload = "{\"id\":\"evt_789\",\"type\":\"payout.paid\"}";
+    String sigHeader = "t=789,v1=sig789";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_789");
+    when(mockEvent.getType()).thenReturn("payout.paid");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.Payout payout = mock(com.stripe.model.Payout.class);
+    when(payout.getId()).thenReturn("po_123");
+    when(payout.getAmount()).thenReturn(10000L);
+    when(payout.getCurrency()).thenReturn("usd");
+    when(payout.getArrivalDate()).thenReturn(1234567890L);
+    when(deserializer.getObject()).thenReturn(Optional.of(payout));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals(WebhookEvent.EventType.PAYOUT_PAID, result.eventType());
+      assertEquals("po_123", result.resourceId());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParseAccountUpdated() {
+    // Given
+    String payload = "{\"id\":\"evt_account\",\"type\":\"account.updated\"}";
+    String sigHeader = "t=999,v1=sig999";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_account");
+    when(mockEvent.getType()).thenReturn("account.updated");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.Account account = mock(com.stripe.model.Account.class);
+    when(account.getId()).thenReturn("acct_123");
+    when(account.getChargesEnabled()).thenReturn(true);
+    when(account.getPayoutsEnabled()).thenReturn(true);
+    when(deserializer.getObject()).thenReturn(Optional.of(account));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals(WebhookEvent.EventType.ACCOUNT_UPDATED, result.eventType());
+      assertEquals("acct_123", result.resourceId());
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldUseTenantSpecificApiKey() throws Exception {
+    // Given
+    String tenantId = "tenant-123";
+    BigDecimal amount = new BigDecimal("100.00");
+    String currency = "usd";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.apiKey()).thenReturn("sk_test_global");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(true);
+    
+    GatewayConfigDtos.StripeGatewayConfigData tenantConfig = 
+        new GatewayConfigDtos.StripeGatewayConfigData("sk_test_tenant", "whsec_tenant", null, null);
+    
+    when(gatewayConfigService.getDecryptedGatewayConfig(
+        eq(tenantId),
+        eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
+        eq(GatewayConfigDtos.StripeGatewayConfigData.class)
+    )).thenReturn(tenantConfig);
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_tenant");
+    when(mockIntent.getClientSecret()).thenReturn("pi_tenant_secret");
+
+    try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
+         MockedStatic<PaymentIntent> intentMock = mockStatic(PaymentIntent.class)) {
+      
+      contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
+      intentMock.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test", null, null, null, null, Optional.empty(), "key_tenant"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_tenant", result.id());
+      verify(gatewayConfigService).getDecryptedGatewayConfig(
+          eq(tenantId),
+          eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
+          eq(GatewayConfigDtos.StripeGatewayConfigData.class)
+      );
+    }
+  }
+
+  @Test
+  void createPaymentIntent_shouldFallbackToGlobalKeyOnTenantConfigError() throws Exception {
+    // Given
+    String tenantId = "tenant-123";
+    BigDecimal amount = new BigDecimal("100.00");
+    String currency = "usd";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    when(iqScaffoldProperties.billing()).thenReturn(billing);
+    when(billing.payment()).thenReturn(payment);
+    when(payment.stripe()).thenReturn(stripe);
+    when(stripe.apiKey()).thenReturn("sk_test_global");
+    when(billing.security()).thenReturn(security);
+    when(security.encryption()).thenReturn(encryption);
+    when(encryption.useTenantSpecificConfig()).thenReturn(true);
+    
+    when(gatewayConfigService.getDecryptedGatewayConfig(
+        eq(tenantId),
+        eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
+        eq(GatewayConfigDtos.StripeGatewayConfigData.class)
+    )).thenThrow(new RuntimeException("Config error"));
+
+    PaymentIntent mockIntent = mock(PaymentIntent.class);
+    when(mockIntent.getId()).thenReturn("pi_fallback");
+    when(mockIntent.getClientSecret()).thenReturn("pi_fallback_secret");
+
+    try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
+         MockedStatic<PaymentIntent> intentMock = mockStatic(PaymentIntent.class)) {
+      
+      contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
+      intentMock.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockIntent);
+
+      // When
+      ProviderPaymentIntent result = stripePaymentProvider.createPaymentIntent(
+          amount, currency, "Test", null, null, null, null, Optional.empty(), "key_fallback"
+      );
+
+      // Then
+      assertNotNull(result);
+      assertEquals("pi_fallback", result.id());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldUseTenantSpecificWebhookSecret() {
+    // Given
+    String tenantId = "tenant-123";
+    String payload = "{\"id\":\"evt_tenant\",\"type\":\"payment_intent.succeeded\"}";
+    String sigHeader = "t=123,v1=sig";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_global");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(true);
+    
+    GatewayConfigDtos.StripeGatewayConfigData tenantConfig = 
+        new GatewayConfigDtos.StripeGatewayConfigData("sk_test_tenant", "whsec_tenant", null, null);
+    
+    try {
+      when(gatewayConfigService.getDecryptedGatewayConfig(
+          eq(tenantId),
+          eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
+          eq(GatewayConfigDtos.StripeGatewayConfigData.class)
+      )).thenReturn(tenantConfig);
+    } catch (final Exception e) {
+      // Not thrown in this scenario
+    }
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_tenant");
+    when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.PaymentIntent pi = mock(com.stripe.model.PaymentIntent.class);
+    when(pi.getId()).thenReturn("pi_tenant");
+    when(pi.getMetadata()).thenReturn(Map.of());
+    when(deserializer.getObject()).thenReturn(Optional.of(pi));
+
+    try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
+         MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      
+      contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_tenant"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals("evt_tenant", result.eventId());
     }
   }
 }
