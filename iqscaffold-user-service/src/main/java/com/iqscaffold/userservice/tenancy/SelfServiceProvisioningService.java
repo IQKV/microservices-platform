@@ -186,9 +186,6 @@ public class SelfServiceProvisioningService {
     // Sanitize inputs
     var sanitizedUsername = inputSanitizer.sanitizeUsername(request.adminUsername());
     var sanitizedEmail = inputSanitizer.sanitizeEmail(request.adminEmail());
-    var sanitizedFirstName = inputSanitizer.sanitizeName(request.adminFirstName());
-    var sanitizedLastName = inputSanitizer.sanitizeName(request.adminLastName());
-    var sanitizedOrgName = inputSanitizer.sanitizeName(request.organizationName());
 
     // Check for unsafe inputs
     if (!inputSanitizer.isInputSafe(request.adminUsername())
