@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
+import com.iqscaffold.billingservice.webhook.WebhookEvent;
 
 /**
  * Adapter interface for payment gateway providers.
  * Implementations provide gateway-specific logic for payment processing,
- * customer management, and merchant onboarding.
+ * customer management, merchant onboarding, and webhook handling.
  */
 public interface PaymentProviderAdapter {
   public record ProviderPaymentIntent(String id, String clientSecret) {
@@ -71,4 +72,18 @@ public interface PaymentProviderAdapter {
    * @return the URL for the user to visit
    */
   String createAccountLink(String accountId, String refreshUrl, String returnUrl);
+
+  /**
+   * Verify webhook signature and parse the webhook payload into a normalized event.
+   * <p>
+   * This method performs cryptographic signature verification to ensure the webhook
+   * is authentic and originated from the payment provider. It then parses the
+   * provider-specific event format into a unified {@link WebhookEvent} structure.
+   *
+   * @param payload   The raw JSON payload from the request body
+   * @param sigHeader The signature header value (e.g., Stripe-Signature, PayPal-Transmission-Sig)
+   * @return Normalized webhook event
+   * @throws IllegalArgumentException If signature verification fails or payload is invalid
+   */
+  WebhookEvent verifyAndParseWebhook(String payload, String sigHeader);
 }

@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.iqscaffold.billingservice.admin.MerchantStripeConfig;
-import com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository;
 import com.iqscaffold.billingservice.payment.dto.PaymentDtos;
 import com.iqscaffold.billingservice.shared.BillingConstants;
 import com.iqscaffold.billingservice.shared.exception.PaymentNotFoundException;
@@ -41,13 +39,7 @@ class PaymentServiceImplTest {
   private PaymentRepository paymentRepository;
 
   @Mock
-  private PaymentProviderAdapter paymentProvider;
-
-  @Mock
-  private MerchantStripeConfigRepository merchantConfigRepository;
-
-  @Mock
-  private com.iqscaffold.billingservice.infrastructure.client.UserServiceClient userServiceClient;
+  private GatewayConfigurationService gatewayConfigService;
 
   @Mock
   private PaymentStateMachine stateMachine;
@@ -61,9 +53,7 @@ class PaymentServiceImplTest {
   void setUp() {
     paymentService = new PaymentServiceImpl(
         paymentRepository,
-        paymentProvider,
-        merchantConfigRepository,
-        userServiceClient,
+        gatewayConfigService,
         stateMachine,
         auditService
     );
@@ -81,16 +71,29 @@ class PaymentServiceImplTest {
         Map.of("orderId", "123")
     );
 
+    // Mock gateway configuration
+    GatewayConfigurationService.GatewayConfiguration gatewayConfig =
+        new GatewayConfigurationService.GatewayConfiguration(
+            com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
+            Optional.empty(),
+            Optional.empty(),
+            false,
+            false,
+            false
+        );
+    when(gatewayConfigService.resolveGatewayForCurrentTenant()).thenReturn(gatewayConfig);
+
+    PaymentProviderAdapter mockProvider = org.mockito.Mockito.mock(PaymentProviderAdapter.class);
+    when(gatewayConfigService.getProviderForCurrentTenant()).thenReturn(mockProvider);
+
     Payment savedPayment = createTestPayment();
     when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
 
     PaymentProviderAdapter.ProviderPaymentIntent providerIntent =
         new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
-    when(paymentProvider.createPaymentIntent(
+    when(mockProvider.createPaymentIntent(
         any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(providerIntent);
-
-    when(userServiceClient.getOrganizationByTenantId(any())).thenReturn(Optional.empty());
 
     // When
     PaymentDtos.PaymentResponse response = paymentService.createPaymentIntent(request);
@@ -117,23 +120,27 @@ class PaymentServiceImplTest {
         null
     );
 
-    var organizationDto = new com.iqscaffold.billingservice.admin.dto.OrganizationDto(
-        1L, "Test Org", "tenant-1", null, null, null, null, null, true
-    );
+    // Mock gateway configuration with connected account
+    GatewayConfigurationService.GatewayConfiguration gatewayConfig =
+        new GatewayConfigurationService.GatewayConfiguration(
+            com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
+            Optional.of("acct_123"),
+            Optional.of(new BigDecimal("15.0")),
+            true,
+            true,
+            true
+        );
+    when(gatewayConfigService.resolveGatewayForCurrentTenant()).thenReturn(gatewayConfig);
 
-    MerchantStripeConfig merchantConfig = new MerchantStripeConfig();
-    merchantConfig.setStripeAccountId("acct_123");
-    merchantConfig.setApplicationFeePercent(new BigDecimal("15.0"));
-
-    when(userServiceClient.getOrganizationByTenantId(any())).thenReturn(Optional.of(organizationDto));
-    when(merchantConfigRepository.findByOrganizationId(1L)).thenReturn(Optional.of(merchantConfig));
+    PaymentProviderAdapter mockProvider = org.mockito.Mockito.mock(PaymentProviderAdapter.class);
+    when(gatewayConfigService.getProviderForCurrentTenant()).thenReturn(mockProvider);
 
     Payment savedPayment = createTestPayment();
     when(paymentRepository.save(any(Payment.class))).thenReturn(savedPayment);
 
     PaymentProviderAdapter.ProviderPaymentIntent providerIntent =
         new PaymentProviderAdapter.ProviderPaymentIntent("pi_123", "secret_123");
-    when(paymentProvider.createPaymentIntent(
+    when(mockProvider.createPaymentIntent(
         any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(providerIntent);
 

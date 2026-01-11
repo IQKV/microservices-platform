@@ -90,16 +90,25 @@ Request Flow:
 
 ### Key Components
 
+#### Core Payment Components
 - **PaymentStateMachine**: Encapsulates legal state transitions for financial integrity.
 - **PaymentGatewayConfigService**: Manages tenant-specific gateway configurations with encryption/decryption.
 - **GatewayConfigEncryptionService**: Provides AES-256-GCM encryption for sensitive gateway credentials.
 - **PaymentProviderFactory**: Runtime gateway provider selection based on tenant configuration.
-- **StripePaymentProvider**: Adapter for Stripe API with tenant-specific credential support.
-- **StripeWebhookService**: Secured entry point for external events with signature validation.
+- **StripePaymentProvider**: Adapter for Stripe API with tenant-specific credential support and webhook verification.
 - **MerchantOnboardingService**: Orchestrates the Stripe Connect onboarding journey.
 - **RefundService**: Manages the business logic and external calls for payment reversals.
-- **PayoutService**: Processes and tracks payouts from Stripe to merchant bank accounts.
+- **PayoutService**: Processes and tracks payouts from payment gateways to merchant bank accounts.
 - **PaymentAuditTrailService**: Logs all payment state changes for compliance and debugging.
+
+#### Unified Webhook Components
+- **UnifiedWebhookService**: Central orchestrator for processing normalized webhook events from all providers.
+- **WebhookEventHandler**: Interface for provider-agnostic event handlers.
+- **PaymentWebhookEventHandler**: Handles payment lifecycle events (succeeded, failed, refunded).
+- **PayoutWebhookEventHandler**: Handles payout events (paid, failed).
+- **AccountWebhookEventHandler**: Handles merchant account updates and capability changes.
+
+#### Messaging & Notifications
 - **MessagingService**: Publishes billing events and notification events to RabbitMQ.
 - **EmailService**: Handles transactional email sending with SMTP integration.
 - **NotificationService**: High-level notification orchestration combining email and event publishing.
@@ -139,7 +148,11 @@ Request Flow:
 
 ### Internal/Webhook
 
-- `POST /api/v1/billing/webhooks/stripe` - Public endpoint for Stripe event consumption (Crypto-secured)
+- `POST /api/v1/billing/webhooks/{provider}` - Unified endpoint for webhook events from any payment provider (Crypto-secured)
+  - `/api/v1/billing/webhooks/stripe` - Stripe webhook endpoint (Stripe-Signature header)
+  - `/api/v1/billing/webhooks/paypal` - PayPal webhook endpoint (PayPal-Transmission-Sig header)
+  - `/api/v1/billing/webhooks/square` - Square webhook endpoint (X-Square-Signature header)
+  - `/api/v1/billing/webhooks/braintree` - Braintree webhook endpoint (X-Braintree-Signature header)
 
 ## Payment State Machine
 
@@ -253,21 +266,121 @@ Automated email notifications for:
 
 ## Webhook Processing
 
-### Supported Stripe Events
+### Unified Webhook Architecture
 
-- `payment_intent.succeeded` - Updates payment to SUCCEEDED status
-- `payment_intent.payment_failed` - Updates payment to FAILED status
-- `charge.refunded` - Syncs refund status (REFUNDED/PARTIALLY_REFUNDED)
-- `payout.paid` - Records successful payout entities with arrival dates
-- `payout.failed` - Records failed payout attempts
-- `payout.canceled` - Records canceled payouts
-- `account.updated` - Updates merchant capabilities (charges_enabled, payouts_enabled)
+The service implements a unified webhook handling system that works across all payment providers:
+
+#### Architecture Components
+
+- **WebhookEvent**: Provider-agnostic event abstraction with normalized event types
+- **PaymentProviderAdapter**: Each provider implements `verifyAndParseWebhook()` for signature verification
+- **UnifiedWebhookService**: Central orchestrator that routes events to appropriate handlers
+- **Event Handlers**: Specialized handlers for payment, payout, and account events
+  - `PaymentWebhookEventHandler` - Handles payment lifecycle events
+  - `PayoutWebhookEventHandler` - Handles payout events
+  - `AccountWebhookEventHandler` - Handles merchant account updates
+
+#### Normalized Event Types
+
+- `payment.succeeded` - Payment completed successfully
+- `payment.failed` - Payment failed or was declined
+- `payment.refunded` - Full refund processed
+- `payment.partially_refunded` - Partial refund processed
+- `payout.paid` - Payout successfully sent to bank account
+- `payout.failed` - Payout failed
+- `account.updated` - Merchant account capabilities changed
+
+### Provider-Specific Event Mappings
+
+#### Stripe Events
+
+- `payment_intent.succeeded` → `payment.succeeded`
+- `payment_intent.payment_failed` → `payment.failed`
+- `charge.refunded` → `payment.refunded` or `payment.partially_refunded`
+- `payout.paid` → `payout.paid`
+- `payout.failed` → `payout.failed`
+- `account.updated` → `account.updated`
+
+#### PayPal Events (Future Implementation)
+
+- `PAYMENT.SALE.COMPLETED` → `payment.succeeded`
+- `PAYMENT.SALE.DENIED` → `payment.failed`
+- `PAYMENT.SALE.REFUNDED` → `payment.refunded`
+
+#### Square Events (Future Implementation)
+
+- `payment.created` → `payment.succeeded`
+- `payment.failed` → `payment.failed`
+- `refund.created` → `payment.refunded`
+
+#### Braintree Events (Future Implementation)
+
+- `subscription_charged_successfully` → `payment.succeeded`
+- `subscription_charged_unsuccessfully` → `payment.failed`
 
 ### Security Features
 
-- **Signature Verification**: Cryptographic validation of incoming Stripe events using webhook secrets
+- **Signature Verification**: Cryptographic validation of incoming webhook events using provider-specific secrets
 - **Tenant Resolution**: Automatic tenant context resolution from webhook metadata
 - **Idempotent Processing**: Safe to process the same webhook multiple times
+- **Provider Isolation**: Each provider's webhook logic is encapsulated in its adapter
+
+### Webhook Setup Instructions
+
+#### Stripe Webhook Configuration
+
+1. **Create Webhook Endpoint in Stripe Dashboard**:
+   - Go to Developers → Webhooks
+   - Click "Add endpoint"
+   - URL: `https://your-domain.com/api/v1/billing/webhooks/stripe`
+   - Select events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `payout.paid`, `payout.failed`, `account.updated`
+
+2. **Configure Webhook Secret**:
+   - Copy the webhook signing secret from Stripe dashboard
+   - Add to environment variables: `STRIPE_WEBHOOK_SECRET=whsec_...`
+   - Or configure per-tenant in gateway configuration
+
+3. **Test Webhook**:
+   ```bash
+   curl -X POST https://your-domain.com/api/v1/billing/webhooks/stripe \
+     -H "Stripe-Signature: t=timestamp,v1=signature" \
+     -H "Content-Type: application/json" \
+     -d @stripe-event.json
+   ```
+
+#### PayPal Webhook Configuration (Future)
+
+1. **Create Webhook in PayPal Developer Portal**:
+   - Go to REST API apps → Your App → Webhooks
+   - Click "Add Webhook"
+   - URL: `https://your-domain.com/api/v1/billing/webhooks/paypal`
+   - Select events: `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.DENIED`, `PAYMENT.SALE.REFUNDED`
+
+2. **Configure Webhook Credentials**:
+   - Store webhook ID in gateway configuration
+   - PayPal uses certificate-based signature verification
+
+#### Square Webhook Configuration (Future)
+
+1. **Create Webhook in Square Developer Portal**:
+   - Go to Applications → Your App → Webhooks
+   - Add webhook URL: `https://your-domain.com/api/v1/billing/webhooks/square`
+   - Subscribe to: `payment.created`, `payment.failed`, `refund.created`
+
+2. **Configure Signature Key**:
+   - Copy signature key from Square dashboard
+   - Add to tenant-specific gateway configuration
+
+#### Braintree Webhook Configuration (Future)
+
+1. **Configure Webhook in Braintree Control Panel**:
+   - Go to Settings → Webhooks
+   - URL: `https://your-domain.com/api/v1/billing/webhooks/braintree`
+   - Enable notifications for subscription and transaction events
+
+2. **Webhook Verification**:
+   - Braintree uses public key cryptography for webhook verification
+   - Store public key in gateway configuration
 
 ## Payment Gateway Configuration
 

@@ -303,6 +303,122 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     return amount.movePointRight(fractionDigits).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
   }
 
+  @Override
+  public com.iqscaffold.billingservice.webhook.WebhookEvent verifyAndParseWebhook(String payload, String sigHeader) {
+    com.stripe.model.Event event;
+    try {
+      // Get tenant-specific webhook secret if available
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String webhookSecret = getWebhookSecret(tenantId);
+      
+      event = com.stripe.net.Webhook.constructEvent(payload, sigHeader, webhookSecret);
+    } catch (final com.stripe.exception.SignatureVerificationException e) {
+      org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
+          .error("Invalid Stripe webhook signature", e);
+      throw new IllegalArgumentException("Invalid signature");
+    } catch (final Exception e) {
+      org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
+          .error("Stripe webhook parsing failed", e);
+      throw new IllegalArgumentException("Webhook parsing failed");
+    }
+
+    return parseStripeEventToWebhookEvent(event);
+  }
+
+  /**
+   * Gets the Stripe webhook secret for the current tenant.
+   * Falls back to global configuration if tenant-specific config is not available.
+   */
+  private String getWebhookSecret(String tenantId) {
+    if (iqScaffoldProperties.billing().security().encryption().useTenantSpecificConfig() && tenantId != null) {
+      try {
+        var config = gatewayConfigService.getDecryptedGatewayConfig(
+            tenantId,
+            com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
+            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class
+        );
+        return config.webhookSecret();
+      } catch (final Exception e) {
+        org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
+            .warn("Failed to load tenant-specific webhook secret for tenant {}, using global config: {}",
+                tenantId, e.getMessage());
+      }
+    }
+    return iqScaffoldProperties.billing().payment().stripe().webhookSecret();
+  }
+
+  /**
+   * Converts a Stripe Event to a normalized WebhookEvent.
+   */
+  private com.iqscaffold.billingservice.webhook.WebhookEvent parseStripeEventToWebhookEvent(com.stripe.model.Event event) {
+    String normalizedEventType = normalizeStripeEventType(event.getType());
+    var dataObject = event.getDataObjectDeserializer().getObject().orElse(null);
+    
+    String resourceId = null;
+    String resourceType = null;
+    java.util.Optional<String> tenantId = java.util.Optional.empty();
+    java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+
+    // Extract data based on object type
+    if (dataObject instanceof com.stripe.model.PaymentIntent pi) {
+      resourceId = pi.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.PAYMENT_INTENT;
+      tenantId = java.util.Optional.ofNullable(pi.getMetadata().get("tenant_id"));
+      metadata.putAll(pi.getMetadata());
+    } else if (dataObject instanceof com.stripe.model.Charge charge) {
+      resourceId = charge.getPaymentIntent() != null ? charge.getPaymentIntent() : charge.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.CHARGE;
+      tenantId = java.util.Optional.ofNullable(charge.getMetadata().get("tenant_id"));
+      metadata.putAll(charge.getMetadata());
+      metadata.put("refunded", charge.getRefunded());
+    } else if (dataObject instanceof com.stripe.model.Payout payout) {
+      resourceId = payout.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.PAYOUT;
+      metadata.put("amount", payout.getAmount());
+      metadata.put("currency", payout.getCurrency());
+      metadata.put("arrival_date", payout.getArrivalDate());
+    } else if (dataObject instanceof com.stripe.model.Account account) {
+      resourceId = account.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.ACCOUNT;
+      metadata.put("charges_enabled", account.getChargesEnabled());
+      metadata.put("payouts_enabled", account.getPayoutsEnabled());
+      
+      // Resolve tenant from account ID
+      var config = com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository.class;
+      // Note: Repository lookup is handled in event handlers
+    }
+
+    return new com.iqscaffold.billingservice.webhook.WebhookEvent(
+        event.getId(),
+        normalizedEventType,
+        com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
+        tenantId,
+        resourceId != null ? resourceId : event.getId(),
+        resourceType != null ? resourceType : "unknown",
+        metadata,
+        dataObject
+    );
+  }
+
+  /**
+   * Maps Stripe event types to normalized event type constants.
+   */
+  private String normalizeStripeEventType(String stripeEventType) {
+    return switch (stripeEventType) {
+      case "payment_intent.succeeded" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_SUCCEEDED;
+      case "payment_intent.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_FAILED;
+      case "charge.refunded" -> {
+        // Determine if full or partial refund based on charge object
+        // This will be checked in the event handler
+        yield com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_REFUNDED;
+      }
+      case "payout.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_PAID;
+      case "payout.failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_FAILED;
+      case "account.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.ACCOUNT_UPDATED;
+      default -> stripeEventType; // Keep original for unsupported events
+    };
+  }
+
   private RuntimeException handleStripeException(StripeException e) {
     return switch (e) {
       case com.stripe.exception.CardException ce -> new PaymentException("Card declined: " + ce.getMessage(), ce);
