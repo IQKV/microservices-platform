@@ -911,15 +911,11 @@ class StripePaymentProviderTest {
     GatewayConfigDtos.StripeGatewayConfigData tenantConfig = 
         new GatewayConfigDtos.StripeGatewayConfigData("sk_test_tenant", "whsec_tenant", null, null);
     
-    try {
-      when(gatewayConfigService.getDecryptedGatewayConfig(
-          eq(tenantId),
-          eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
-          eq(GatewayConfigDtos.StripeGatewayConfigData.class)
-      )).thenReturn(tenantConfig);
-    } catch (final Exception e) {
-      // Not thrown in this scenario
-    }
+    when(gatewayConfigService.getDecryptedGatewayConfig(
+        eq(tenantId),
+        eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
+        eq(GatewayConfigDtos.StripeGatewayConfigData.class)
+    )).thenReturn(tenantConfig);
 
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_tenant");

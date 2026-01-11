@@ -383,9 +383,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       metadata.put("charges_enabled", account.getChargesEnabled());
       metadata.put("payouts_enabled", account.getPayoutsEnabled());
       
-      // Resolve tenant from account ID
-      var config = com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository.class;
-      // Note: Repository lookup is handled in event handlers
+      // Note: Tenant resolution from account ID is handled in event handlers
     }
 
     return new com.iqscaffold.billingservice.webhook.WebhookEvent(
