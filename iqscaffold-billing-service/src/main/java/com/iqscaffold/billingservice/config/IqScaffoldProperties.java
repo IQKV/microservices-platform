@@ -131,11 +131,18 @@ public record IqScaffoldProperties(
   ) {
 
     public record Security(
-        @Valid @NotNull Jwt jwt
+        @Valid @NotNull Jwt jwt,
+        @Valid @NotNull Encryption encryption
     ) {
       public record Jwt(
           @NotBlank String jwkSetUri,
           @NotBlank String issuer
+      ) {
+      }
+      
+      public record Encryption(
+          @NotBlank String masterKey,
+          boolean useTenantSpecificConfig
       ) {
       }
     }

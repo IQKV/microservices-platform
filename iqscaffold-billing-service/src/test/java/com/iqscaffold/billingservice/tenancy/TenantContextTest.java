@@ -1,8 +1,11 @@
 package com.iqscaffold.billingservice.tenancy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.iqscaffold.billingservice.shared.exception.TenantContextException;
 import org.junit.jupiter.api.AfterEach;
@@ -150,5 +153,178 @@ class TenantContextTest {
     // Then
     assertEquals(specialTenantId, TenantContext.getCurrentTenantId());
     assertEquals(specialTenantId, MDC.get("tenant_id"));
+  }
+
+  @Test
+  void getCurrentTenantIdOrDefault_shouldReturnTenantIdWhenSet() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    String result = TenantContext.getCurrentTenantIdOrDefault();
+
+    // Then
+    assertEquals("tenant-123", result);
+  }
+
+  @Test
+  void getCurrentTenantIdOrDefault_shouldReturnDefaultWhenNotSet() {
+    // When
+    String result = TenantContext.getCurrentTenantIdOrDefault();
+
+    // Then
+    assertEquals(TenantContext.getDefaultTenantId(), result);
+  }
+
+  @Test
+  void hasTenantContext_shouldReturnTrueWhenSet() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    boolean result = TenantContext.hasTenantContext();
+
+    // Then
+    assertTrue(result);
+  }
+
+  @Test
+  void hasTenantContext_shouldReturnFalseWhenNotSet() {
+    // When
+    boolean result = TenantContext.hasTenantContext();
+
+    // Then
+    assertFalse(result);
+  }
+
+  @Test
+  void isCurrentTenant_shouldReturnTrueForMatchingTenant() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    boolean result = TenantContext.isCurrentTenant("tenant-123");
+
+    // Then
+    assertTrue(result);
+  }
+
+  @Test
+  void isCurrentTenant_shouldReturnFalseForDifferentTenant() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    boolean result = TenantContext.isCurrentTenant("tenant-456");
+
+    // Then
+    assertFalse(result);
+  }
+
+  @Test
+  void isCurrentTenant_shouldReturnFalseWhenNoContext() {
+    // When
+    boolean result = TenantContext.isCurrentTenant("tenant-123");
+
+    // Then
+    assertFalse(result);
+  }
+
+  @Test
+  void executeInTenantContext_shouldExecuteWithSpecifiedTenant() {
+    // Given
+    TenantContext.setCurrentTenantId("original-tenant");
+    final String[] capturedTenant = new String[1];
+
+    // When
+    TenantContext.executeInTenantContext("temp-tenant", () -> {
+      capturedTenant[0] = TenantContext.getCurrentTenantId();
+    });
+
+    // Then
+    assertEquals("temp-tenant", capturedTenant[0]);
+    assertEquals("original-tenant", TenantContext.getCurrentTenantId());
+  }
+
+  @Test
+  void executeInTenantContext_shouldRestoreOriginalContext() {
+    // Given
+    TenantContext.setCurrentTenantId("original-tenant");
+
+    // When
+    TenantContext.executeInTenantContext("temp-tenant", () -> {
+      // Execute some operation
+    });
+
+    // Then
+    assertEquals("original-tenant", TenantContext.getCurrentTenantId());
+  }
+
+  @Test
+  void executeInTenantContext_shouldClearContextWhenNoPrevious() {
+    // When
+    TenantContext.executeInTenantContext("temp-tenant", () -> {
+      // Execute some operation
+    });
+
+    // Then
+    assertNull(TenantContext.getCurrentTenantId());
+  }
+
+  @Test
+  void executeInTenantContextWithSupplier_shouldReturnResult() {
+    // Given
+    TenantContext.setCurrentTenantId("original-tenant");
+
+    // When
+    String result = TenantContext.executeInTenantContext("temp-tenant", () -> {
+      return "result-from-" + TenantContext.getCurrentTenantId();
+    });
+
+    // Then
+    assertEquals("result-from-temp-tenant", result);
+    assertEquals("original-tenant", TenantContext.getCurrentTenantId());
+  }
+
+  @Test
+  void createTenantAwareCacheKey_shouldPrefixWithTenantId() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    String cacheKey = TenantContext.createTenantAwareCacheKey("payment:12345");
+
+    // Then
+    assertEquals("tenant-123:payment:12345", cacheKey);
+  }
+
+  @Test
+  void createTenantAwareCacheKey_shouldUseDefaultTenantWhenNotSet() {
+    // When
+    String cacheKey = TenantContext.createTenantAwareCacheKey("payment:12345");
+
+    // Then
+    assertEquals(TenantContext.getDefaultTenantId() + ":payment:12345", cacheKey);
+  }
+
+  @Test
+  void createTenantAwareCacheKeyWithSeparator_shouldUseCustomSeparator() {
+    // Given
+    TenantContext.setCurrentTenantId("tenant-123");
+
+    // When
+    String cacheKey = TenantContext.createTenantAwareCacheKey("payment:12345", "_");
+
+    // Then
+    assertEquals("tenant-123_payment:12345", cacheKey);
+  }
+
+  @Test
+  void getDefaultTenantId_shouldReturnDefaultValue() {
+    // When
+    String defaultId = TenantContext.getDefaultTenantId();
+
+    // Then
+    assertNotNull(defaultId);
   }
 }

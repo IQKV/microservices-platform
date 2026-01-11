@@ -80,6 +80,27 @@
         </resources>
     </cache>
 
+    <!-- PaymentGatewayConfig entity cache -->
+    <cache alias="com.iqscaffold.billingservice.admin.PaymentGatewayConfig" uses-template="entity-cache">
+        <expiry>
+            <ttl unit="hours">1</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+            <offheap unit="MB">5</offheap>
+        </resources>
+    </cache>
+
+    <!-- Gateway configuration service cache -->
+    <cache alias="gatewayConfigs">
+        <expiry>
+            <ttl unit="hours">1</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
     <!-- Default query results cache -->
     <cache alias="default-query-results-region" uses-template="query-cache"/>
 

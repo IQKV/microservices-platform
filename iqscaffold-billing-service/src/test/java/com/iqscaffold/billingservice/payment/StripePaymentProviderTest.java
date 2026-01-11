@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -51,6 +52,9 @@ class StripePaymentProviderTest {
   @Mock
   private StripeCustomerRepository stripeCustomerRepository;
 
+  @Mock
+  private com.iqscaffold.billingservice.admin.PaymentGatewayConfigService gatewayConfigService;
+
   private StripePaymentProvider stripePaymentProvider;
 
   @BeforeEach
@@ -58,13 +62,18 @@ class StripePaymentProviderTest {
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
 
     when(iqScaffoldProperties.billing()).thenReturn(billing);
     when(billing.payment()).thenReturn(payment);
     when(payment.stripe()).thenReturn(stripe);
     when(stripe.apiKey()).thenReturn("sk_test_123");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
 
-    stripePaymentProvider = new StripePaymentProvider(iqScaffoldProperties, stripeCustomerRepository);
+    stripePaymentProvider = new StripePaymentProvider(iqScaffoldProperties, stripeCustomerRepository, gatewayConfigService);
     stripePaymentProvider.init();
   }
 

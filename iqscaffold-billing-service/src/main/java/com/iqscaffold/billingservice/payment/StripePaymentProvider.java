@@ -39,20 +39,45 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   private final IqScaffoldProperties iqScaffoldProperties;
   private final StripeCustomerRepository stripeCustomerRepository;
-  private final com.iqscaffold.billingservice.security.SecurityContextHelper securityHelper; // To get tenant if needed,
-  // though we can pass it
-  // down.
+  private final com.iqscaffold.billingservice.admin.PaymentGatewayConfigService gatewayConfigService;
 
-  public StripePaymentProvider(final IqScaffoldProperties iqScaffoldProperties, final StripeCustomerRepository stripeCustomerRepository) {
+  public StripePaymentProvider(
+      final IqScaffoldProperties iqScaffoldProperties,
+      final StripeCustomerRepository stripeCustomerRepository,
+      final com.iqscaffold.billingservice.admin.PaymentGatewayConfigService gatewayConfigService) {
     this.iqScaffoldProperties = iqScaffoldProperties;
     this.stripeCustomerRepository = stripeCustomerRepository;
-    this.securityHelper = null; // We'll just rely on passed args or context if we inject it properly.
-    // Actually, let's keep it simple and just use the repo.
+    this.gatewayConfigService = gatewayConfigService;
   }
 
   @PostConstruct
   public void init() {
+    // Initialize global Stripe API key as fallback
+    // Individual requests will use tenant-specific keys if configured
     Stripe.apiKey = iqScaffoldProperties.billing().payment().stripe().apiKey();
+  }
+
+  /**
+   * Gets the Stripe API key for the current tenant.
+   * Falls back to global configuration if tenant-specific config is not available.
+   */
+  private String getStripeApiKey(String tenantId) {
+    if (iqScaffoldProperties.billing().security().encryption().useTenantSpecificConfig()) {
+      try {
+        var config = gatewayConfigService.getDecryptedGatewayConfig(
+            tenantId,
+            com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
+            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class
+        );
+        return config.apiKey();
+      } catch (final Exception e) {
+        // Log and fall back to global config
+        org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
+            .warn("Failed to load tenant-specific Stripe config for tenant {}, using global config: {}",
+                tenantId, e.getMessage());
+      }
+    }
+    return iqScaffoldProperties.billing().payment().stripe().apiKey();
   }
 
   @Override
@@ -95,10 +120,14 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       Optional<String> connectedAccountId,
       String idempotencyKey) {
     try {
+      // Get tenant ID and tenant-specific API key
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
       // 1. Upsert Customer if email provided
       String customerId = null;
       if (customerEmail != null) {
-        customerId = upsertCustomer(customerEmail, customerName, connectedAccountId);
+        customerId = upsertCustomer(customerEmail, customerName, connectedAccountId, apiKey);
       }
 
       PaymentIntentCreateParams.Builder paramsBuilder = PaymentIntentCreateParams.builder()
@@ -117,7 +146,6 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       }
 
       // Add Tenant ID to metadata for webhook resolution
-      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
       if (tenantId != null) {
         paramsBuilder.putMetadata("tenant_id", tenantId);
       }
@@ -126,21 +154,19 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
         paramsBuilder.setApplicationFeeAmount(toMinorUnits(applicationFeeAmount, currency));
       }
 
-      RequestOptions options = RequestOptions.builder()
-          .setIdempotencyKey(idempotencyKey)
-          .build();
+      RequestOptions.RequestOptionsBuilder optionsBuilder = RequestOptions.builder()
+          .setApiKey(apiKey)
+          .setIdempotencyKey(idempotencyKey);
 
       if (connectedAccountId.isPresent()) {
         paramsBuilder.setTransferData(
             PaymentIntentCreateParams.TransferData.builder()
                 .setDestination(connectedAccountId.get())
                 .build());
+        optionsBuilder.setStripeAccount(connectedAccountId.get());
       }
 
-      if (connectedAccountId.isPresent()) {
-        options = options.toBuilder().setStripeAccount(connectedAccountId.get()).build();
-      }
-
+      RequestOptions options = optionsBuilder.build();
       PaymentIntent intent = PaymentIntent.create(paramsBuilder.build(), options);
       return new ProviderPaymentIntent(intent.getId(), intent.getClientSecret());
     } catch (final StripeException e) {
@@ -160,7 +186,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
    * This logic mimics the `Hi.Events` reference implementation for customer
    * consistency.
    */
-  private String upsertCustomer(String email, String name, Optional<String> connectedAccountId) throws StripeException {
+  private String upsertCustomer(String email, String name, Optional<String> connectedAccountId, String apiKey) throws StripeException {
     String accountId = connectedAccountId.orElse(null); // Null for platform
     // Note: Tenant ID is needed for local persistence.
     // In a real app we'd pass it or fetch from context.
@@ -169,9 +195,11 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
     var existing = stripeCustomerRepository.findByEmailAndStripeAccountId(email, accountId);
 
-    RequestOptions options = accountId != null
-        ? RequestOptions.builder().setStripeAccount(accountId).build()
-        : null;
+    RequestOptions.RequestOptionsBuilder optionsBuilder = RequestOptions.builder().setApiKey(apiKey);
+    if (accountId != null) {
+      optionsBuilder.setStripeAccount(accountId);
+    }
+    RequestOptions options = optionsBuilder.build();
 
     if (existing.isPresent()) {
       StripeCustomer localParams = existing.get();
@@ -210,14 +238,18 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
                             Optional<String> connectedAccountId) {
     try {
+      // Get tenant-specific API key
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
       RefundCreateParams.Builder paramsBuilder = RefundCreateParams.builder()
           .setPaymentIntent(paymentIntentId);
 
       amount.ifPresent(a -> paramsBuilder.setAmount(toMinorUnits(a, currency)));
 
-      RequestOptions options = connectedAccountId
-          .map(id -> RequestOptions.builder().setStripeAccount(id).build())
-          .orElse(null);
+      RequestOptions.RequestOptionsBuilder optionsBuilder = RequestOptions.builder().setApiKey(apiKey);
+      connectedAccountId.ifPresent(optionsBuilder::setStripeAccount);
+      RequestOptions options = optionsBuilder.build();
 
       Refund.create(paramsBuilder.build(), options);
 

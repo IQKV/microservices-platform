@@ -7,6 +7,7 @@
 A core domain service for the IQ Scaffold platform that handles comprehensive financial operations:
 
 - **Payment Orchestration** - End-to-end management of payment intents, from creation to final settlement with external providers.
+- **Multi-Gateway Support** - Flexible payment gateway configuration per tenant (Stripe, PayPal, Square, Braintree) with encrypted credential storage.
 - **Merchant Onboarding** - Automated onboarding flow for platform merchants using Stripe Connect (Standard/Express).
 - **Automated Payouts** - Tracking and reconciliation of payouts from the platform/gateway to merchant bank accounts.
 - **Revenue Sharing** - Implementation of platform fees (application fees) on top of merchant transactions.
@@ -29,7 +30,16 @@ The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. I
 - Support for platform fees (SaaS commission logic) automatically calculated per transaction.
 - Detailed audit logging for every step of the payment journey using a dedicated audit entity.
 
-### 🏦 Stripe Connect Integration
+### 🏦 Payment Gateway Management
+
+- **Multi-Gateway Architecture**: Support for Stripe, PayPal, Square, and Braintree payment gateways.
+- **Tenant-Specific Credentials**: Each tenant can configure their own gateway API keys and credentials.
+- **AES-256-GCM Encryption**: Military-grade encryption for sensitive gateway configuration data at rest.
+- **Primary Gateway Selection**: Tenants can designate a default gateway while maintaining multiple active gateways.
+- **Dynamic Gateway Switching**: Seamless switching between test and live modes per tenant.
+- **Credential Rotation**: Update gateway credentials without service disruption.
+
+### 🔌 Stripe Connect Integration
 
 - **Standard/Express Onboarding**: Automated generation of onboarding links for merchants.
 - **Direct & Destination Charges**: Support for complex payment flows with platform fees.
@@ -49,6 +59,8 @@ The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. I
 - **User Context Propagation**: Enrichment of transactions with user identity (userId, email).
 - **Webhook Signature Verification**: Cryptographic validation of incoming Stripe events.
 - **MDC Logging**: Correlation of logs with tenant, user, and payment identifiers.
+- **Gateway Credential Encryption**: AES-256-GCM encryption with tenant-specific key derivation for gateway credentials.
+- **Masked Sensitive Data**: API responses mask sensitive credentials (API keys, secrets) showing only last 4 characters.
 
 ### 📧 Business Communication & Messaging
 
@@ -79,7 +91,10 @@ Request Flow:
 ### Key Components
 
 - **PaymentStateMachine**: Encapsulates legal state transitions for financial integrity.
-- **StripePaymentProvider**: Adapter for Stripe API, handling Connect accounts and application fees.
+- **PaymentGatewayConfigService**: Manages tenant-specific gateway configurations with encryption/decryption.
+- **GatewayConfigEncryptionService**: Provides AES-256-GCM encryption for sensitive gateway credentials.
+- **PaymentProviderFactory**: Runtime gateway provider selection based on tenant configuration.
+- **StripePaymentProvider**: Adapter for Stripe API with tenant-specific credential support.
 - **StripeWebhookService**: Secured entry point for external events with signature validation.
 - **MerchantOnboardingService**: Orchestrates the Stripe Connect onboarding journey.
 - **RefundService**: Manages the business logic and external calls for payment reversals.
@@ -108,6 +123,19 @@ Request Flow:
 
 - `POST /api/v1/admin/billing/merchants/onboard` - Initiate Stripe Connect onboarding (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
 - `GET /api/v1/admin/billing/merchants/status` - Check current merchant configuration and capability status (Requires billing access)
+
+### Payment Gateway Configuration
+
+- `POST /api/v1/admin/billing/gateway-config` - Create new gateway configuration (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `PUT /api/v1/admin/billing/gateway-config/{provider}` - Update gateway configuration (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `GET /api/v1/admin/billing/gateway-config/{provider}` - Get gateway configuration with masked credentials (Requires billing access)
+- `GET /api/v1/admin/billing/gateway-config` - List all gateway configurations for tenant (Requires billing access)
+- `GET /api/v1/admin/billing/gateway-config/active` - List active gateway configurations (Requires billing access)
+- `GET /api/v1/admin/billing/gateway-config/primary` - Get primary gateway configuration (Requires billing access)
+- `POST /api/v1/admin/billing/gateway-config/{provider}/activate` - Activate a gateway (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/admin/billing/gateway-config/{provider}/deactivate` - Deactivate a gateway (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/admin/billing/gateway-config/{provider}/set-primary` - Set gateway as primary (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `DELETE /api/v1/admin/billing/gateway-config/{provider}` - Delete gateway configuration (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
 
 ### Internal/Webhook
 
@@ -170,7 +198,8 @@ The service uses **Liquibase** for evolutionary database design with a schema-pe
 
 **Public Schema Tables:**
 
-- `merchant_stripe_config`: Maps tenants to Stripe Connect accounts, stores capabilities and fee percentages
+- `merchant_payment_config`: Maps tenants to payment gateway accounts, stores capabilities and fee percentages
+- `payment_gateway_config`: Stores encrypted tenant-specific gateway configurations (API keys, secrets, credentials)
 
 **Tenant Schema Tables:**
 
@@ -240,6 +269,55 @@ Automated email notifications for:
 - **Tenant Resolution**: Automatic tenant context resolution from webhook metadata
 - **Idempotent Processing**: Safe to process the same webhook multiple times
 
+## Payment Gateway Configuration
+
+### Tenant-Specific Gateway Management
+
+The service supports per-tenant payment gateway configuration, allowing each tenant to use their own credentials:
+
+#### Supported Gateways
+
+- **Stripe**: Full support with Connect, webhooks, and payment intents
+- **PayPal**: Sandbox and live mode support (future implementation)
+- **Square**: Location-based payments (future implementation)  
+- **Braintree**: Merchant account integration (future implementation)
+
+#### Configuration Structure
+
+Each gateway configuration includes:
+
+- **Gateway Provider**: STRIPE, PAYPAL, SQUARE, or BRAINTREE
+- **Mode**: `test` or `live` for sandbox vs production
+- **Status**: Active/inactive state per gateway
+- **Primary Flag**: Designate default gateway for tenant
+- **Encrypted Credentials**: API keys, secrets, tokens encrypted with AES-256-GCM
+
+#### Example: Stripe Gateway Configuration
+
+```json
+{
+  "gatewayProvider": "STRIPE",
+  "configData": {
+    "apiKey": "sk_test_...",
+    "webhookSecret": "whsec_...",
+    "clientId": "ca_...",
+    "publicKey": "pk_test_..."
+  },
+  "mode": "test",
+  "isActive": true,
+  "isPrimary": true,
+  "displayName": "Production Stripe Account",
+  "description": "Main payment gateway for production transactions"
+}
+```
+
+#### Security Features
+
+- **Encryption at Rest**: All sensitive credentials encrypted using AES-256-GCM
+- **Tenant-Specific Keys**: Key derivation uses tenant ID for additional isolation
+- **Masked Responses**: API responses show only last 4 characters of sensitive data
+- **Automatic Fallback**: Falls back to global configuration if tenant config unavailable
+
 ## Configuration
 
 The service uses type-safe properties via `BillingProperties` (record-based):
@@ -247,6 +325,10 @@ The service uses type-safe properties via `BillingProperties` (record-based):
 ```yaml
 iqscaffold:
   billing:
+    security:
+      encryption:
+        master-key: ${GATEWAY_CONFIG_ENCRYPTION_KEY}
+        use-tenant-specific-config: true
     payment:
       provider: stripe
       saas-mode: true
@@ -296,7 +378,11 @@ iqscaffold:
 ### Required Environment Variables
 
 ```bash
-# Stripe Configuration
+# Gateway Encryption (Required for tenant-specific configs)
+GATEWAY_CONFIG_ENCRYPTION_KEY=your-secure-random-256-bit-key-here
+USE_TENANT_SPECIFIC_GATEWAY_CONFIG=true
+
+# Stripe Configuration (Global Fallback)
 STRIPE_API_KEY=sk_live_...
 STRIPE_PUBLIC_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -373,6 +459,7 @@ EMAIL_SERVICE_URL=http://localhost:8084
 - **Separation of Concerns**: ADMIN authority does NOT grant billing access - requires explicit BILLING_ADMIN or higher
 - **Webhook Signature Verification**: Cryptographic validation of Stripe events
 - **Tenant Isolation**: Schema-per-tenant prevents cross-tenant data access
+- **Gateway Credential Security**: AES-256-GCM encryption with unique IV per encryption operation
 - **User Context Enrichment**: Audit logs include userId, email, tenant information, and authorities
 - **MDC Logging**: Correlation IDs for request tracing and debugging
 - **CSRF Protection**: Configured appropriately for stateless API endpoints
@@ -400,6 +487,67 @@ EMAIL_SERVICE_URL=http://localhost:8084
 ### API Documentation
 
 - OpenAPI/Swagger documentation available at `/swagger-ui.html`
-- Grouped APIs: Payments, Payouts, Webhooks, Merchant Onboarding, Admin
+- Grouped APIs: Payments, Payouts, Webhooks, Merchant Onboarding, Gateway Configuration, Admin
 - Interactive API testing interface
 - Comprehensive request/response examples for all endpoints
+
+## Gateway Configuration Examples
+
+### Creating a Stripe Gateway Configuration
+
+```bash
+curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "gatewayProvider": "STRIPE",
+    "configData": {
+      "apiKey": "sk_test_...",
+      "webhookSecret": "whsec_...",
+      "clientId": "ca_...",
+      "publicKey": "pk_test_..."
+    },
+    "mode": "test",
+    "isActive": true,
+    "isPrimary": true,
+    "displayName": "Test Stripe Account"
+  }'
+```
+
+### Listing Gateway Configurations
+
+```bash
+curl -X GET http://localhost:8082/api/v1/admin/billing/gateway-config \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123"
+```
+
+### Setting a Gateway as Primary
+
+```bash
+curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config/STRIPE/set-primary \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123"
+```
+
+### Response Example (Sensitive Data Masked)
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "tenantId": "tenant-123",
+  "gatewayProvider": "STRIPE",
+  "isActive": true,
+  "isPrimary": true,
+  "mode": "test",
+  "displayName": "Test Stripe Account",
+  "maskedConfigData": {
+    "provider": "STRIPE",
+    "isConfigured": true,
+    "lastFourChars": "****"
+  },
+  "createdAt": "2026-01-11T08:00:00Z",
+  "updatedAt": "2026-01-11T08:00:00Z"
+}
+```
