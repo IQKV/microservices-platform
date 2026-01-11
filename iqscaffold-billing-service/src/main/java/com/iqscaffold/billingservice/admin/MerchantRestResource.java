@@ -50,6 +50,7 @@ public class MerchantRestResource {
       @Valid @RequestBody OnboardingRequest request) {
     var response = onboardingService.initiateOnboarding(
         request.organizationId(),
+        request.gatewayProvider(),
         request.refreshUrl(),
         request.returnUrl()
     );
@@ -80,7 +81,7 @@ public class MerchantRestResource {
     }
 
     var response = new MerchantStatusResponse(
-        config.getStripeAccountId(),
+        config.getGatewayAccountId(),
         config.getOrganizationId(),
         config.getTenantId(),
         config.isChargesEnabled(),

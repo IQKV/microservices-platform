@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.iqscaffold.billingservice.admin.MerchantStripeConfigRepository;
-import com.iqscaffold.billingservice.infrastructure.client.UserServiceClient;
 import com.iqscaffold.billingservice.payment.dto.PaymentDtos;
-import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.shared.BillingConstants;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,23 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentServiceImpl implements PaymentService {
 
   private final PaymentRepository paymentRepository;
-  private final PaymentProviderAdapter paymentProvider;
-  private final MerchantStripeConfigRepository merchantConfigRepository;
-  private final UserServiceClient userServiceClient;
+  private final GatewayConfigurationService gatewayConfigService;
   private final PaymentStateMachine stateMachine;
   private final PaymentAuditTrailService auditService;
 
   public PaymentServiceImpl(
       final PaymentRepository paymentRepository,
-      final PaymentProviderAdapter paymentProvider,
-      final MerchantStripeConfigRepository merchantConfigRepository,
-      final UserServiceClient userServiceClient,
+      final GatewayConfigurationService gatewayConfigService,
       final PaymentStateMachine stateMachine,
       final PaymentAuditTrailService auditService) {
     this.paymentRepository = paymentRepository;
-    this.paymentProvider = paymentProvider;
-    this.merchantConfigRepository = merchantConfigRepository;
-    this.userServiceClient = userServiceClient;
+    this.gatewayConfigService = gatewayConfigService;
     this.stateMachine = stateMachine;
     this.auditService = auditService;
   }
@@ -58,32 +49,30 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   @Transactional
   public PaymentDtos.PaymentResponse createPaymentIntent(PaymentDtos.CreatePaymentRequest request) {
-    // String tenantId = SecurityContextHelper.getCurrentTenantId(); // Not needed
-    // for entity field
-
     // 1. Initial State Validation
     stateMachine.validateTransition(null, BillingConstants.PaymentStatus.PENDING);
 
-    // 2. Resolve Merchant Account (if any)
-    // Get organization by tenant, then get merchant config by organization
-    String tenantId = SecurityContextHelper.getCurrentTenantId();
-    var organization = userServiceClient.getOrganizationByTenantId(tenantId);
-    var merchantConfig = organization
-        .flatMap(org -> merchantConfigRepository.findByOrganizationId(org.id()));
-
-    Optional<String> connectedAccountId = merchantConfig
-        .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getStripeAccountId);
-
+    // 2. Resolve Gateway Configuration for Current Tenant
+    // This determines which payment gateway to use (Stripe, PayPal, etc.)
+    GatewayConfigurationService.GatewayConfiguration gatewayConfig = 
+        gatewayConfigService.resolveGatewayForCurrentTenant();
+    
+    // 3. Get the appropriate payment provider adapter
+    PaymentProviderAdapter paymentProvider = gatewayConfigService.getProviderForCurrentTenant();
+    
+    // 4. Extract gateway configuration details
+    Optional<String> connectedAccountId = gatewayConfig.gatewayAccountId();
+    
     // Platform fee logic (use config or default to 0)
     BigDecimal applicationFee = BigDecimal.ZERO;
-    if (connectedAccountId.isPresent()) {
-      BigDecimal feePercent = merchantConfig
-          .map(com.iqscaffold.billingservice.admin.MerchantStripeConfig::getApplicationFeePercent)
+    if (gatewayConfig.hasConfiguration() && connectedAccountId.isPresent()) {
+      BigDecimal feePercent = gatewayConfig.applicationFeePercent()
           .orElse(BigDecimal.valueOf(10.0)); // Default 10%
-      applicationFee = request.amount().multiply(feePercent).divide(BigDecimal.valueOf(100), 2,
-          java.math.RoundingMode.HALF_UP);
+      applicationFee = request.amount().multiply(feePercent)
+          .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
     }
 
+    // 5. Create payment entity
     Payment payment = new Payment();
     payment.setAmount(request.amount());
     payment.setCurrency(request.currency());
@@ -95,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     auditService.logPaymentAttempt(payment.getId(), BillingConstants.PaymentStatus.PENDING);
 
-    // 4. Call Provider with idempotency key
+    // 6. Call selected payment provider with idempotency key
     PaymentProviderAdapter.ProviderPaymentIntent providerIntent = paymentProvider.createPaymentIntent(
         request.amount(),
         request.currency(),
@@ -107,7 +96,7 @@ public class PaymentServiceImpl implements PaymentService {
         connectedAccountId,
         payment.getId().toString());
 
-    // 5. Update Record
+    // 7. Update payment record with provider response
     payment.setPaymentIntentId(providerIntent.id());
     payment.setClientSecret(providerIntent.clientSecret());
     payment.setStatus(BillingConstants.PaymentStatus.PROCESSING);

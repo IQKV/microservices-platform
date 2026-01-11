@@ -10,8 +10,10 @@ import com.iqscaffold.billingservice.infrastructure.email.EmailService;
 import com.iqscaffold.billingservice.infrastructure.messaging.EventPublisher;
 import com.iqscaffold.billingservice.infrastructure.messaging.MerchantOnboardedEvent;
 import com.iqscaffold.billingservice.payment.PaymentProviderAdapter;
+import com.iqscaffold.billingservice.payment.PaymentProviderFactory;
 import com.iqscaffold.billingservice.security.SecurityContextHelper;
 import com.iqscaffold.billingservice.security.UserContext;
+import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,41 +29,55 @@ public class MerchantOnboardingService {
 
   private static final Logger logger = LoggerFactory.getLogger(MerchantOnboardingService.class);
 
-  private final MerchantStripeConfigRepository repository;
-  private final PaymentProviderAdapter paymentProvider;
+  private final MerchantPaymentConfigRepository repository;
+  private final PaymentProviderFactory paymentProviderFactory;
   private final EmailService emailService;
   private final UserServiceClient userServiceClient;
   private final EventPublisher eventPublisher;
 
   public MerchantOnboardingService(
-      final MerchantStripeConfigRepository repository,
-      final PaymentProviderAdapter paymentProvider,
+      final MerchantPaymentConfigRepository repository,
+      final PaymentProviderFactory paymentProviderFactory,
       final EmailService emailService,
       final UserServiceClient userServiceClient,
       final EventPublisher eventPublisher) {
     this.repository = repository;
-    this.paymentProvider = paymentProvider;
+    this.paymentProviderFactory = paymentProviderFactory;
     this.emailService = emailService;
     this.userServiceClient = userServiceClient;
     this.eventPublisher = eventPublisher;
   }
 
   /**
-   * Initiates merchant onboarding for an organization.
+   * Initiates merchant onboarding for an organization with specified payment gateway.
    *
    * @param organizationId Organization ID from user service
+   * @param gatewayProvider Payment gateway provider (Stripe, PayPal, etc.)
    * @param refreshUrl URL to redirect if onboarding link expires
    * @param returnUrl URL to redirect after onboarding completion
    * @return Onboarding link response with URL and account details
    */
   @Transactional
-  public OnboardingLinkResponse initiateOnboarding(Long organizationId, String refreshUrl, String returnUrl) {
+  public OnboardingLinkResponse initiateOnboarding(
+      Long organizationId, 
+      PaymentGatewayProvider gatewayProvider,
+      String refreshUrl, 
+      String returnUrl) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
     UserContext user = SecurityContextHelper.getCurrentUserContextOrThrow();
 
-    logger.info("Initiating merchant onboarding for organization {} by user {}", organizationId, user.userId());
+    logger.info("Initiating {} merchant onboarding for organization {} by user {}", 
+        gatewayProvider, organizationId, user.userId());
 
-    // 1. Validate organization exists and belongs to tenant
+    // 1. Validate gateway provider is supported
+    if (!paymentProviderFactory.isProviderSupported(gatewayProvider)) {
+      throw new IllegalArgumentException("Unsupported payment gateway provider: " + gatewayProvider);
+    }
+    
+    // Get payment provider adapter
+    PaymentProviderAdapter paymentProvider = paymentProviderFactory.getProvider(gatewayProvider);
+
+    // 2. Validate organization exists and belongs to tenant
     OrganizationDto organization = userServiceClient.getOrganization(organizationId)
         .orElseThrow(() -> new IllegalArgumentException("Organization not found: " + organizationId));
 
@@ -74,61 +90,69 @@ public class MerchantOnboardingService {
       throw new IllegalStateException("Organization is not active: " + organizationId);
     }
 
-    // 2. Check if already onboarded
-    if (repository.existsByOrganizationId(organizationId)) {
-      var existingConfig = repository.findByOrganizationId(organizationId).get();
-      if (existingConfig.isChargesEnabled() && existingConfig.isPayoutsEnabled()) {
-        throw new IllegalStateException("Organization already fully onboarded");
+    // 3. Check if already onboarded for this gateway provider
+    var existingConfig = repository.findByOrganizationIdAndGatewayProvider(
+        organizationId, gatewayProvider);
+        
+    if (existingConfig.isPresent()) {
+      var config = existingConfig.get();
+      if (config.isChargesEnabled() && config.isPayoutsEnabled()) {
+        throw new IllegalStateException(
+            "Organization already fully onboarded with " + gatewayProvider);
       }
       
       // Re-generate onboarding link for incomplete onboarding
-      logger.info("Re-generating onboarding link for organization {}", organizationId);
+      logger.info("Re-generating {} onboarding link for organization {}", 
+          gatewayProvider, organizationId);
       String accountLink = paymentProvider.createAccountLink(
-          existingConfig.getStripeAccountId(), 
+          config.getGatewayAccountId(), 
           refreshUrl, 
           returnUrl
       );
       
       return new OnboardingLinkResponse(
           accountLink,
-          existingConfig.getStripeAccountId(),
+          config.getGatewayAccountId(),
+          gatewayProvider,
           organizationId
       );
     }
 
-    // 3. Create Stripe Connect Account
-    logger.info("Creating Stripe Connect account for organization {}", organizationId);
+    // 4. Create gateway-specific merchant account
+    logger.info("Creating {} merchant account for organization {}", gatewayProvider, organizationId);
     String accountId = paymentProvider.createConnectAccount();
 
-    // 4. Save merchant config with organization link
-    MerchantStripeConfig config = new MerchantStripeConfig();
+    // 5. Save merchant config with organization and gateway provider
+    MerchantPaymentConfig config = new MerchantPaymentConfig();
     config.setTenantId(tenantId);
     config.setOrganizationId(organizationId);
-    config.setStripeAccountId(accountId);
+    config.setGatewayProvider(gatewayProvider);
+    config.setGatewayAccountId(accountId);
     config.setChargesEnabled(false);
     config.setPayoutsEnabled(false);
     repository.save(config);
 
-    logger.info("Saved merchant config for organization {} with Stripe account {}", organizationId, accountId);
+    logger.info("Saved merchant config for organization {} with {} account {}", 
+        organizationId, gatewayProvider, accountId);
 
-    // 5. Publish event for user service to update organization
-    publishMerchantOnboardedEvent(organizationId, tenantId, accountId, false, false);
+    // 6. Publish event for user service to update organization
+    publishMerchantOnboardedEvent(organizationId, tenantId, accountId, gatewayProvider, false, false);
 
-    // 6. Create onboarding link
+    // 7. Create onboarding link
     String accountLink = paymentProvider.createAccountLink(accountId, refreshUrl, returnUrl);
 
-    // 7. Send email notification
-    sendOnboardingEmail(organization, user, accountLink);
+    // 8. Send email notification
+    sendOnboardingEmail(organization, user, accountLink, gatewayProvider);
 
-    logger.info("Successfully initiated onboarding for organization {}", organizationId);
+    logger.info("Successfully initiated {} onboarding for organization {}", gatewayProvider, organizationId);
 
-    return new OnboardingLinkResponse(accountLink, accountId, organizationId);
+    return new OnboardingLinkResponse(accountLink, accountId, gatewayProvider, organizationId);
   }
 
   /**
    * Get merchant status by organization ID.
    */
-  public Optional<MerchantStripeConfig> getMerchantStatusByOrganization(Long organizationId) {
+  public Optional<MerchantPaymentConfig> getMerchantStatusByOrganization(Long organizationId) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
     
     var config = repository.findByOrganizationId(organizationId);
@@ -143,13 +167,15 @@ public class MerchantOnboardingService {
     return config;
   }
 
-  private void publishMerchantOnboardedEvent(Long organizationId, String tenantId, String stripeAccountId, 
+  private void publishMerchantOnboardedEvent(Long organizationId, String tenantId, String gatewayAccountId, 
+                                             PaymentGatewayProvider gatewayProvider,
                                              boolean chargesEnabled, boolean payoutsEnabled) {
     try {
-      var event = new MerchantOnboardedEvent(organizationId, tenantId, stripeAccountId, 
-          com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE, chargesEnabled, payoutsEnabled);
+      var event = new MerchantOnboardedEvent(organizationId, tenantId, gatewayAccountId, 
+          gatewayProvider, chargesEnabled, payoutsEnabled);
       eventPublisher.publishMerchantOnboarded(event);
-      logger.info("Published MerchantOnboardedEvent for organization {}", organizationId);
+      logger.info("Published MerchantOnboardedEvent for organization {} with {}", 
+          organizationId, gatewayProvider);
     } catch (final Exception e) {
       logger.error("Failed to publish MerchantOnboardedEvent for organization {}: {}", 
           organizationId, e.getMessage(), e);
@@ -157,7 +183,8 @@ public class MerchantOnboardingService {
     }
   }
 
-  private void sendOnboardingEmail(OrganizationDto organization, UserContext user, String onboardingUrl) {
+  private void sendOnboardingEmail(OrganizationDto organization, UserContext user, 
+                                   String onboardingUrl, PaymentGatewayProvider gatewayProvider) {
     try {
       String recipientEmail = organization.billingEmail() != null 
           ? organization.billingEmail() 
