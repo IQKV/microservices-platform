@@ -99,4 +99,48 @@ public class MessagingService {
     UserEvent event = UserEvent.passwordReset(userId, tenantId, email);
     publishUserEvent(event, RabbitMQConfig.PASSWORD_RESET_KEY);
   }
+
+  /**
+   * Publish tenant event
+   */
+  public void publishTenantEvent(TenantEvent event, String routingKey) {
+    try {
+      log.debug("Publishing tenant event: {} with routing key: {}", event.getEventType(), routingKey);
+      rabbitTemplate.convertAndSend(
+          RabbitMQConfig.EVENTS_EXCHANGE,
+          routingKey,
+          event
+      );
+      log.info("Successfully published tenant event: {} for tenant: {}",
+          event.getEventType(), event.getTenantId());
+    } catch (final Exception e) {
+      log.error("Failed to publish tenant event: {} for tenant: {}",
+          event.getEventType(), event.getTenantId(), e);
+      throw new MessagingException("Failed to publish tenant event", e);
+    }
+  }
+
+  /**
+   * Publish tenant created event
+   */
+  public void publishTenantCreated(String tenantId, String organizationName, java.util.Map<String, Object> metadata) {
+    TenantEvent event = TenantEvent.tenantCreated(tenantId, organizationName, metadata);
+    publishTenantEvent(event, RabbitMQConfig.TENANT_CREATED_KEY);
+  }
+
+  /**
+   * Publish tenant updated event
+   */
+  public void publishTenantUpdated(String tenantId, String organizationName) {
+    TenantEvent event = TenantEvent.tenantUpdated(tenantId, organizationName);
+    publishTenantEvent(event, RabbitMQConfig.TENANT_UPDATED_KEY);
+  }
+
+  /**
+   * Publish tenant deleted event
+   */
+  public void publishTenantDeleted(String tenantId, String organizationName) {
+    TenantEvent event = TenantEvent.tenantDeleted(tenantId, organizationName);
+    publishTenantEvent(event, RabbitMQConfig.TENANT_DELETED_KEY);
+  }
 }

@@ -30,6 +30,10 @@
             <column name="description" value="Platform administrator with full system access across all tenants"/>
         </insert>
         <insert tableName="authorities" schemaName="public">
+            <column name="name" value="TENANT_ADMIN"/>
+            <column name="description" value="Tenant administrator with full control within tenant scope"/>
+        </insert>
+        <insert tableName="authorities" schemaName="public">
             <column name="name" value="TENANT_OWNER"/>
             <column name="description" value="Organization owner with full billing and administrative access (cannot be removed, only transferred)"/>
         </insert>

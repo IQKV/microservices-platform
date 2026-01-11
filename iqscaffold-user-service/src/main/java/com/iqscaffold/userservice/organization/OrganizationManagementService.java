@@ -118,6 +118,39 @@ public class OrganizationManagementService {
   }
 
   /**
+   * Create a default organization for self-service tenant provisioning.
+   * This method is used internally during tenant signup and does not require user context.
+   *
+   * @param name organization name
+   * @param tenantId tenant ID to associate with
+   * @param createdBy creator identifier (admin username or email)
+   * @return created organization entity
+   */
+  @CacheEvict(value = "organizations", allEntries = true)
+  public Organization createDefaultOrganization(String name, String tenantId, String createdBy) {
+    logger.info("Creating default organization '{}' for tenant: {}", name, tenantId);
+
+    // Validate tenant doesn't already have an organization
+    if (organizationRepository.existsByTenantId(tenantId)) {
+      throw new OrganizationManagementException("Organization already exists for tenant: " + tenantId);
+    }
+
+    var organization = new Organization(name, tenantId);
+    organization.setEnabled(true);
+    organization.setSubscriptionStatus("trial");
+    organization.setSubscriptionPlan("basic");
+    organization.setMaxUsers(10);
+    organization.setCreatedBy(createdBy);
+
+    var savedOrganization = organizationRepository.save(organization);
+
+    logger.info("Created default organization: {} (ID: {}) for tenant: {}",
+        savedOrganization.getName(), savedOrganization.getId(), savedOrganization.getTenantId());
+
+    return savedOrganization;
+  }
+
+  /**
    * Create a new organization (SUPER_ADMIN only).
    * This also establishes the 1:1 relationship with a tenant.
    */

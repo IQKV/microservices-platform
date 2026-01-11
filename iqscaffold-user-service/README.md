@@ -177,6 +177,20 @@ var stats = tenantRepository
 
 ## Use Cases Implemented
 
+### Self-Service Tenant Provisioning
+
+- Public tenant signup without authentication
+- Automated tenant ID generation from organization name
+- Complete environment provisioning:
+  - Tenant creation with database schema
+  - Organization setup with default configuration
+  - Admin user creation with TENANT_ADMIN authority
+  - Email verification workflow initiation
+- Input validation and sanitization (XSS/SQL injection prevention)
+- IP-based rate limiting (3 signups per hour)
+- Security audit logging for all signup attempts
+- Transactional provisioning with automatic rollback on failures
+
 ### User Authentication
 
 - User signup with email verification
@@ -255,7 +269,53 @@ var stats = tenantRepository
 
 ### Public Endpoints
 
-- `POST /api/v1/auth/signup` - Register new user
+#### Self-Service Provisioning
+
+- `POST /api/v1/public/signup` - Self-service tenant signup (no authentication required)
+
+**Request:**
+```json
+{
+  "organizationName": "ACME Corporation",
+  "adminUsername": "john.doe",
+  "adminEmail": "john.doe@acme.com",
+  "adminPassword": "SecurePassword123!",
+  "adminFirstName": "John",
+  "adminLastName": "Doe",
+  "tenantId": "acme-corp",
+  "domain": "acme.example.com"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "tenantId": "acme-corp-a1b2",
+  "organizationName": "ACME Corporation",
+  "organizationId": 1,
+  "adminUserId": 1,
+  "adminUsername": "john.doe",
+  "adminEmail": "john.doe@acme.com",
+  "adminFirstName": "John",
+  "adminLastName": "Doe",
+  "emailVerificationRequired": true,
+  "createdAt": "2026-01-11T11:00:00Z",
+  "message": "Tenant provisioned successfully! Your organization 'ACME Corporation' is ready to use.",
+  "nextSteps": "1. Check your email (john.doe@acme.com) for a verification link\n2. Click the verification link to activate your account\n3. Log in with your username (john.doe) and password\n4. Start inviting team members to your organization"
+}
+```
+
+**Features:**
+- Tenant ID auto-generated if not provided
+- Complete environment provisioning (tenant + organization + admin user)
+- Admin user assigned TENANT_ADMIN authority
+- Email verification automatically initiated
+- Rate limited to 3 signups per hour per IP
+- Default quotas: 10 users, 1GB storage, 1000 req/min
+
+#### Authentication
+
+- `POST /api/v1/auth/signup` - Register new user (requires existing tenant)
 - `POST /api/v1/auth/login` - Authenticate user
 - `POST /api/v1/auth/refresh` - Refresh access token
 - `POST /api/v1/auth/validate` - Validate JWT token

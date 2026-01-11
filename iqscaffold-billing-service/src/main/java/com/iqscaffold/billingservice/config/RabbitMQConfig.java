@@ -41,6 +41,7 @@ public class RabbitMQConfig {
 
   // Queue names
   public static final String USER_EVENTS_QUEUE = "iqscaffold.user.events";
+  public static final String TENANT_EVENTS_QUEUE = "iqscaffold.billing.tenant.events";
   public static final String BILLING_EVENTS_QUEUE = "iqscaffold.billing.events";
   public static final String NOTIFICATIONS_QUEUE = "iqscaffold.notifications";
   public static final String DLQ = "iqscaffold.dlq";
@@ -91,6 +92,19 @@ public class RabbitMQConfig {
   }
 
   /**
+   * Tenant events queue with dead letter routing
+   * Receives tenant lifecycle events from User Service
+   */
+  @Bean
+  public Queue tenantEventsQueue() {
+    return QueueBuilder
+        .durable(TENANT_EVENTS_QUEUE)
+        .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+        .withArgument("x-message-ttl", 86400000) // 24 hours
+        .build();
+  }
+
+  /**
    * Billing events queue with dead letter routing
    */
   @Bean
@@ -134,6 +148,18 @@ public class RabbitMQConfig {
         .bind(userEventsQueue())
         .to(eventsExchange())
         .with("user.#");
+  }
+
+  /**
+   * Bind tenant events queue to events exchange with tenant.# routing key
+   * Receives all tenant lifecycle events (created, updated, deleted)
+   */
+  @Bean
+  public Binding tenantEventsBinding() {
+    return BindingBuilder
+        .bind(tenantEventsQueue())
+        .to(eventsExchange())
+        .with("tenant.#");
   }
 
   /**

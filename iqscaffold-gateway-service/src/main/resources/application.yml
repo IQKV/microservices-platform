@@ -27,6 +27,16 @@ spring:
         locator:
           enabled: false
       routes:
+        - id: user-service-public-signup
+          uri: ${iqscaffold.gateway.routing.services.user-service.uri}
+          predicates:
+            - Path=/api/v1/public/signup
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: 3  # Strict rate limit for signup: 3 requests per minute
+                redis-rate-limiter.burst-capacity: 5
         - id: user-service-auth
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates:
@@ -169,6 +179,9 @@ iqscaffold:
       public-paths:
         # JWK endpoint for public key distribution
         - /.well-known/jwks.json
+        
+        # Self-service provisioning endpoints (public)
+        - /api/v1/public/**
         
         # Authentication endpoints (public)
         - /api/v1/auth/login

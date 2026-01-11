@@ -284,6 +284,13 @@
                         <exclude>**/MerchantCapabilitiesUpdatedEvent.class</exclude>
                         <exclude>**/MerchantOnboardedEvent.class</exclude>
 
+                        <!-- Utility classes -->
+                        <exclude>**/util/*Generator.class</exclude>
+                        <exclude>**/tenancy/TenantIdGenerator.class</exclude>
+
+                        <!-- Provisioning orchestration service -->
+                        <exclude>**/tenancy/SelfServiceProvisioningService.class</exclude>
+
                     </excludes>
                 </configuration>
                 <executions>

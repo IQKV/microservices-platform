@@ -52,6 +52,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             // Public endpoints
             .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/auth/password/forgot", "/api/v1/auth/password/reset").permitAll()
+            .requestMatchers("/api/v1/public/**").permitAll()  // Self-service provisioning endpoints
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             // JWK endpoint must be public for downstream services

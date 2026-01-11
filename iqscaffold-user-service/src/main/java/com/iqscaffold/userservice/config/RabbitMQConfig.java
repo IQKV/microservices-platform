@@ -51,6 +51,9 @@ public class RabbitMQConfig {
   public static final String USER_DELETED_KEY = "user.deleted";
   public static final String USER_VERIFIED_KEY = "user.verified";
   public static final String PASSWORD_RESET_KEY = "user.password.reset";
+  public static final String TENANT_CREATED_KEY = "tenant.created";
+  public static final String TENANT_UPDATED_KEY = "tenant.updated";
+  public static final String TENANT_DELETED_KEY = "tenant.deleted";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
 
   /**
