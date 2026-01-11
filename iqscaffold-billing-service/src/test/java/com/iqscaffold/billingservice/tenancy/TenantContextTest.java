@@ -2,7 +2,9 @@ package com.iqscaffold.billingservice.tenancy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.iqscaffold.billingservice.shared.exception.TenantContextException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,12 +47,13 @@ class TenantContextTest {
     // Given
     TenantContext.setCurrentTenantId("tenant123");
 
-    // When
-    TenantContext.setCurrentTenantId(null);
-
-    // Then
-    assertNull(TenantContext.getCurrentTenantId());
-    assertNull(MDC.get("tenant_id"));
+    // When / Then
+    assertThrows(TenantContextException.InvalidTenantIdException.class, () -> {
+      TenantContext.setCurrentTenantId(null);
+    });
+    
+    // Verify original context remains unchanged
+    assertEquals("tenant123", TenantContext.getCurrentTenantId());
   }
 
   @Test
@@ -132,12 +135,10 @@ class TenantContextTest {
 
   @Test
   void setCurrentTenantId_shouldHandleEmptyString() {
-    // When
-    TenantContext.setCurrentTenantId("");
-
-    // Then
-    assertEquals("", TenantContext.getCurrentTenantId());
-    assertEquals("", MDC.get("tenant_id"));
+    // When / Then
+    assertThrows(TenantContextException.InvalidTenantIdException.class, () -> {
+      TenantContext.setCurrentTenantId("");
+    });
   }
 
   @Test

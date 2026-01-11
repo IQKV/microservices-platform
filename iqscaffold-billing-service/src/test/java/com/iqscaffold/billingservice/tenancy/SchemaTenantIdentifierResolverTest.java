@@ -2,7 +2,9 @@ package com.iqscaffold.billingservice.tenancy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.iqscaffold.billingservice.shared.exception.TenantContextException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,14 +44,10 @@ class SchemaTenantIdentifierResolverTest {
 
   @Test
   void resolveCurrentTenantIdentifier_shouldReturnPublicWhenTenantIsNull() {
-    // Given
-    TenantContext.setCurrentTenantId(null);
-
-    // When
-    String result = resolver.resolveCurrentTenantIdentifier();
-
-    // Then
-    assertEquals("public", result);
+    // Given / When / Then
+    assertThrows(TenantContextException.InvalidTenantIdException.class, () -> {
+      TenantContext.setCurrentTenantId(null);
+    });
   }
 
   @Test
@@ -77,13 +75,9 @@ class SchemaTenantIdentifierResolverTest {
 
   @Test
   void resolveCurrentTenantIdentifier_shouldHandleEmptyString() {
-    // Given
-    TenantContext.setCurrentTenantId("");
-
-    // When
-    String result = resolver.resolveCurrentTenantIdentifier();
-
-    // Then - empty string is treated as a valid tenant ID, not null
-    assertEquals("", result);
+    // Given / When / Then
+    assertThrows(TenantContextException.InvalidTenantIdException.class, () -> {
+      TenantContext.setCurrentTenantId("");
+    });
   }
 }
