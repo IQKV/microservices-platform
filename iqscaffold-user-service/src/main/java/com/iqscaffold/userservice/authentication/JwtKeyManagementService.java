@@ -93,12 +93,9 @@ import org.springframework.stereotype.Service;
  *   <li>Key age and usage tracking</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see JwtService
  * @see JWKSet
  * @see RSAKey
- * @since 1.0
  */
 @Service
 public final class JwtKeyManagementService {
@@ -111,7 +108,7 @@ public final class JwtKeyManagementService {
   private volatile String currentKeyId;
 
   public JwtKeyManagementService() {
-    // Generate initial key pair using private method to avoid overridable method call
+    // Generate an initial key pair using a private method to avoid overridable method call
     initializeKeys();
   }
 

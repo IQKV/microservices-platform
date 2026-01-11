@@ -119,13 +119,10 @@ import org.springframework.transaction.annotation.Transactional;
  * tenantService.updateTenant("acme-corp", updateRequest, "admin@system.com");
  * }</pre>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see Tenant
  * @see TenantDto
  * @see SchemaNameResolver
  * @see TenantLiquibaseRunner
- * @since 1.0
  */
 @Service
 @Transactional

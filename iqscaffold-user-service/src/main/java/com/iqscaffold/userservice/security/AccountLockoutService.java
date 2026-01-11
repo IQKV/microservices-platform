@@ -21,10 +21,6 @@ import java.time.Duration;
  *   <li><strong>Progressive Lockout</strong> - Configurable thresholds and durations</li>
  *   <li><strong>Automatic Cleanup</strong> - TTL-based cleanup prevents memory leaks</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface AccountLockoutService {
 

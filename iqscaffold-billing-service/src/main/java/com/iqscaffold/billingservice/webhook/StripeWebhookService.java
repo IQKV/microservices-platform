@@ -34,10 +34,6 @@ import org.springframework.stereotype.Service;
  * {@link com.iqscaffold.billingservice.admin.MerchantStripeConfig}
  * capabilities.</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Service
 public class StripeWebhookService implements WebhookService {

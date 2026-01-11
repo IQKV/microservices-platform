@@ -10,10 +10,6 @@ package com.iqscaffold.userservice.authentication;
  *   <li>Token validation failures</li>
  *   <li>System errors during authentication</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public class AuthenticationException extends RuntimeException {
 

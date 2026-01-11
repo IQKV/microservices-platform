@@ -29,10 +29,6 @@ import org.springframework.data.domain.Pageable;
  *   <li><strong>Audit Logging</strong> - All operations logged for compliance</li>
  *   <li><strong>Data Sanitization</strong> - Input validation and sanitization</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface UserManagementService {
 

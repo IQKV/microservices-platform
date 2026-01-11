@@ -25,10 +25,6 @@ import org.springframework.stereotype.Component;
  *   <li>Updates the local merchant configuration</li>
  *   <li>Publishes a domain event for cross-service synchronization</li>
  * </ol>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Component
 public class AccountWebhookEventHandler implements WebhookEventHandler {

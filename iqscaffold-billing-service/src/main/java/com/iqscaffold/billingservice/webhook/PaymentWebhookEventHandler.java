@@ -20,10 +20,6 @@ import org.springframework.stereotype.Component;
  *   <li>{@link WebhookEvent.EventType#PAYMENT_REFUNDED} - Full refund processed</li>
  *   <li>{@link WebhookEvent.EventType#PAYMENT_PARTIALLY_REFUNDED} - Partial refund processed</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Component
 public class PaymentWebhookEventHandler implements WebhookEventHandler {

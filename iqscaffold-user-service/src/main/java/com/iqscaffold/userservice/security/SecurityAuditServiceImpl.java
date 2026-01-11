@@ -16,12 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>This service implements enterprise-grade security audit logging with structured event tracking,
  * comprehensive context capture, and integration with both application logging and persistent audit storage.
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see SecurityAuditService
  * @see UserAuditLog
  * @see UserAuditLogRepository
- * @since 1.0
  */
 @Service
 @Transactional

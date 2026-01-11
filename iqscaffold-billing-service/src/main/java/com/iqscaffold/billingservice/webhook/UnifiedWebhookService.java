@@ -24,17 +24,13 @@ import org.springframework.stereotype.Service;
  * <ol>
  *   <li>Receive normalized {@link WebhookEvent} from provider adapter</li>
  *   <li>Resolve and set tenant context</li>
- *   <li>Find appropriate event handler(s) that support the event</li>
+ *   <li>Find an appropriate event handler(s) that support the event</li>
  *   <li>Delegate event processing to handler(s)</li>
  *   <li>Clean up tenant context</li>
  * </ol>
  * <p>
  * This replaces the provider-specific {@code StripeWebhookService} with a unified
  * approach that works across all payment gateways.
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Service
 public class UnifiedWebhookService {

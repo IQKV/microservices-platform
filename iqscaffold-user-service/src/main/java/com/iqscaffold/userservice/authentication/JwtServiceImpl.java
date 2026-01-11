@@ -32,12 +32,9 @@ import org.springframework.stereotype.Service;
  *   <li><strong>Key Rotation Support</strong> - Works with rotating RSA key pairs</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see JwtService
  * @see UserContext
  * @see JwtConfiguration
- * @since 1.0
  */
 @Service
 public class JwtServiceImpl implements JwtService {

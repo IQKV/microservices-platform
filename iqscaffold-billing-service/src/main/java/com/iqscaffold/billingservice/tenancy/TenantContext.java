@@ -71,12 +71,9 @@ import org.slf4j.MDC;
  *   <li><strong>Log Context</strong> - Include tenant ID in all significant log entries</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see ThreadLocal
  * @see MDC
  * @see BillingConstants
- * @since 1.0
  */
 public final class TenantContext {
 

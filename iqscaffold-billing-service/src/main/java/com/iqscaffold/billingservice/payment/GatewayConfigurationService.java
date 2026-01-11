@@ -32,10 +32,6 @@ import org.springframework.stereotype.Service;
  *   <li>Merchant onboarding - Configure new gateway for organization</li>
  *   <li>Multi-gateway support - Allow different organizations to use different gateways</li>
  * </ul>
- *
- * @author IQ Scaffold Team
- * @version 1.0
- * @since 2.0
  */
 @Service
 public class GatewayConfigurationService {

@@ -21,10 +21,6 @@ import org.springframework.stereotype.Component;
  * Note: The actual payout processing logic delegates to the provider-specific
  * implementation since different providers may have different payout data structures.
  * The handler extracts the raw provider payload and passes it to the appropriate service.
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Component
 public class PayoutWebhookEventHandler implements WebhookEventHandler {

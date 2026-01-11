@@ -14,11 +14,8 @@ import org.springframework.stereotype.Service;
  * credential stuffing, and other automated authentication threats. It uses Redis for distributed state
  * management, enabling consistent lockout behavior across multiple application instances.
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see AccountLockoutService
  * @see RedisTemplate
- * @since 1.0
  */
 @Service
 public class AccountLockoutServiceImpl implements AccountLockoutService {

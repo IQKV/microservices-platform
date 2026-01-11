@@ -27,10 +27,6 @@ package com.iqscaffold.billingservice.webhook;
  *   <li>payout.paid - Records Payout entities</li>
  *   <li>account.updated - Updates merchant configuration capabilities</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface WebhookService {
 

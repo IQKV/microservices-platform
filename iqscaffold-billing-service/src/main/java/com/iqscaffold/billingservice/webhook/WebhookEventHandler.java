@@ -13,10 +13,6 @@ package com.iqscaffold.billingservice.webhook;
  *   <li>Easy Testing - Handlers can be tested with mock WebhookEvent objects</li>
  *   <li>Extensibility - New event types can be added without modifying existing handlers</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface WebhookEventHandler {
 

@@ -9,10 +9,6 @@ package com.iqscaffold.userservice.authentication;
  *   <li>Security policy violations</li>
  *   <li>Administrative account suspension</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public class AccountLockedException extends RuntimeException {
 

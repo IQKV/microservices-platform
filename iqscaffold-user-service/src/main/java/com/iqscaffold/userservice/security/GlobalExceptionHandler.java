@@ -146,12 +146,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *   <li><strong>500 Internal Server Error</strong> - System errors</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see ProblemDetail
  * @see RFC9457
  * @see RestControllerAdvice
- * @since 1.0
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {

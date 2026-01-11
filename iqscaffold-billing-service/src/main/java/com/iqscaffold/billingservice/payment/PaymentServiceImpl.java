@@ -22,10 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
  * interaction.</li>
  * <li>Resolution of multi-tenant merchant configurations.</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Service
 public class PaymentServiceImpl implements PaymentService {

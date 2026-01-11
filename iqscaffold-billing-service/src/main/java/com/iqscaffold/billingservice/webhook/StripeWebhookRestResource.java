@@ -39,10 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>
  * Security: Each provider adapter performs cryptographic signature verification
  * before parsing the webhook, ensuring the webhook originated from the payment provider.
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @RestController
 @RequestMapping("/api/v1/billing/webhooks")

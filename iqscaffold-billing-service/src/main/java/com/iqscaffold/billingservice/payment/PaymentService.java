@@ -24,10 +24,6 @@ import org.springframework.data.domain.Pageable;
  *   <li><strong>Audit Trail</strong> - Comprehensive logging of payment operations</li>
  *   <li><strong>Provider Integration</strong> - Abstracted payment gateway interactions</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface PaymentService {
 

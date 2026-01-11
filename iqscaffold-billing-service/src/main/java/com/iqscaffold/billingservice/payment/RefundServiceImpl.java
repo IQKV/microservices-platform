@@ -25,10 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
  *     <li>Updates local payment state to 'REFUNDED'.</li>
  *     <li>Triggers customer notification emails.</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 @Service
 public class RefundServiceImpl implements RefundService {

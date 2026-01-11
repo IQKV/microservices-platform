@@ -37,12 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>JWT Token Management</strong> - Secure token generation with refresh capabilities</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see JwtService
  * @see AccountLockoutService
  * @see SecurityAuditService
- * @since 1.0
  */
 @Service
 @Transactional

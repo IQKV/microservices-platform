@@ -22,10 +22,6 @@ import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
  * @param resourceType      Type of resource (e.g., "payment_intent", "payout", "account")
  * @param metadata          Additional event-specific metadata
  * @param rawPayload        Original event object for provider-specific handling
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public record WebhookEvent(
     String eventId,

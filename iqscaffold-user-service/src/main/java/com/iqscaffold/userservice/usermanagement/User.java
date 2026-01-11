@@ -124,12 +124,9 @@ import org.hibernate.annotations.UpdateTimestamp;
  *   <li><strong>Locale</strong> - Valid locale code (e.g., "en", "en_US")</li>
  * </ul>
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see TenantAware
  * @see Authority
  * @see UserPreference
- * @since 1.0
  */
 @Entity
 @Table(name = "users")
@@ -317,7 +314,7 @@ public class User extends TenantAware {
   public String getFullName() {
     var first = this.firstName;
     var last = this.lastName;
-    return first + " " + last;
+    return "%s %s".formatted(first, last);
   }
 
   public boolean isActive() {

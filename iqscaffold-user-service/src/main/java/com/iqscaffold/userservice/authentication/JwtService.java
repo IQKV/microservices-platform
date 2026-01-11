@@ -23,10 +23,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
  *   <li><strong>Access Tokens</strong> - Short-lived tokens containing user context</li>
  *   <li><strong>Refresh Tokens</strong> - Long-lived tokens for token renewal</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface JwtService {
 

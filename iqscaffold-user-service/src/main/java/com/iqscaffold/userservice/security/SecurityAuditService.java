@@ -19,15 +19,11 @@ package com.iqscaffold.userservice.security;
  *   <li><strong>Threat Detection</strong> - Pattern analysis for anomaly detection</li>
  *   <li><strong>Monitoring</strong> - Real-time security event tracking</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface SecurityAuditService {
 
   /**
-   * Log successful authentication event with comprehensive context capture.
+   * Log a successful authentication event with comprehensive context capture.
    *
    * @param username  The username of the successfully authenticated user
    * @param ipAddress The client's IP address for network context
@@ -36,7 +32,7 @@ public interface SecurityAuditService {
   void logSuccessfulAuthentication(String username, String ipAddress, String userAgent);
 
   /**
-   * Log failed authentication attempt with detailed context and reason.
+   * Log a failed authentication attempt with detailed context and reason.
    *
    * @param username  The attempted username (may not exist)
    * @param reason    The specific reason for authentication failure
@@ -56,7 +52,7 @@ public interface SecurityAuditService {
   void logAccountLockout(String username, int failedAttempts, String ipAddress, String userAgent);
 
   /**
-   * Log password change event for security tracking.
+   * Log the password change event for security tracking.
    *
    * @param username  The username of the user changing password
    * @param ipAddress The client's IP address
@@ -79,7 +75,7 @@ public interface SecurityAuditService {
    *
    * @param ipAddress The client's IP address that exceeded limits
    * @param userAgent The client's User-Agent header
-   * @param endpoint  The endpoint that was rate limited
+   * @param endpoint  The endpoint that was rate-limited
    */
   void logRateLimitExceeded(String ipAddress, String userAgent, String endpoint);
 

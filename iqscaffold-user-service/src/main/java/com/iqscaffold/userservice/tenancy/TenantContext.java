@@ -91,14 +91,11 @@ import org.slf4j.MDC;
  * <h3>Thread Safety</h3>
  * <p>This class is thread-safe through the use of ThreadLocal storage. Each thread
  * maintains its own tenant context, preventing race conditions and ensuring isolation
- * in multi-threaded environments.
+ * in multithreaded environments.
  *
- * @author IQ Scaffold Team
- * @version 1.0
  * @see ThreadLocal
  * @see MDC
  * @see UserServiceConstants
- * @since 1.0
  */
 public final class TenantContext {
 

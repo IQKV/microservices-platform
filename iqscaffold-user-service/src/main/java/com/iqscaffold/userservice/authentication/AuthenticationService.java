@@ -19,18 +19,14 @@ import com.iqscaffold.userservice.usermanagement.User;
  * <ul>
  *   <li><strong>Account Lockout</strong> - Protection against brute force attacks</li>
  *   <li><strong>Input Sanitization</strong> - Prevention of injection attacks</li>
- *   <li><strong>Audit Logging</strong> - Comprehensive security event tracking</li>
+ *   <li><strong>Audit Logging</strong> - Security event tracking</li>
  *   <li><strong>Token Management</strong> - Secure JWT lifecycle management</li>
  * </ul>
- *
- * @author IQScaffold Team
- * @version 1.0
- * @since 1.0
  */
 public interface AuthenticationService {
 
   /**
-   * Authenticate user with comprehensive security measures and audit logging.
+   * Authenticate a user with security measures and audit logging.
    *
    * @param request   The login request containing username/email and password
    * @param ipAddress The client's IP address for security logging
@@ -43,7 +39,7 @@ public interface AuthenticationService {
   TokenResponse authenticateUser(LoginRequest request, String ipAddress, String userAgent);
 
   /**
-   * Change password for an authenticated user with security validation.
+   * Change the password for an authenticated user with security validation.
    *
    * @param userId          The ID of the user changing password
    * @param currentPassword The current password for verification
@@ -54,11 +50,11 @@ public interface AuthenticationService {
   void changePassword(Long userId, String currentPassword, String newPassword, String clientIp);
 
   /**
-   * Refresh access token using valid refresh token.
+   * Refresh access token using a valid refresh token.
    *
    * @param request The refresh token request
    * @return New access token and user context
-   * @throws AuthenticationException If refresh token is invalid or expired
+   * @throws AuthenticationException If the refresh token is invalid or expired
    */
   TokenResponse refreshToken(RefreshTokenRequest request);
 
@@ -71,16 +67,16 @@ public interface AuthenticationService {
   void logoutUser(String accessToken, String sessionId);
 
   /**
-   * Logout user from all sessions by invalidating all tokens.
+   * Log out user from all sessions by invalidating all tokens.
    *
-   * @param userId The user ID to logout from all sessions
+   * @param userId The user ID to log out from all sessions
    */
   void logoutAllUserSessions(Long userId);
 
   /**
-   * Logout user from all devices by revoking all refresh tokens and sessions.
+   * Log out user from all devices by revoking all refresh tokens and sessions.
    *
-   * @param userId The user ID to logout from all devices
+   * @param userId The user ID to log out from all devices
    */
   void logoutFromAllDevices(Long userId);
 
@@ -88,7 +84,7 @@ public interface AuthenticationService {
    * Validate session and extend if needed.
    *
    * @param sessionId The session ID to validate
-   * @return true if session is valid and extended, false otherwise
+   * @return true if the session is valid and extended, false otherwise
    */
   boolean validateAndExtendSession(String sessionId);
 
@@ -120,7 +116,7 @@ public interface AuthenticationService {
   AuthenticationResult.Failure createAuthenticationFailure(String reason, String errorCode);
 
   /**
-   * Update user's preferred locale setting.
+   * Update a user's preferred locale setting.
    *
    * @param userId The user ID whose locale to update
    * @param locale The new preferred locale (e.g., "en", "es", "fr")
