@@ -91,6 +91,7 @@ Request Flow:
 ### Key Components
 
 #### Core Payment Components
+
 - **PaymentStateMachine**: Encapsulates legal state transitions for financial integrity.
 - **PaymentGatewayConfigService**: Manages tenant-specific gateway configurations with encryption/decryption.
 - **GatewayConfigEncryptionService**: Provides AES-256-GCM encryption for sensitive gateway credentials.
@@ -102,6 +103,7 @@ Request Flow:
 - **PaymentAuditTrailService**: Logs all payment state changes for compliance and debugging.
 
 #### Unified Webhook Components
+
 - **UnifiedWebhookService**: Central orchestrator for processing normalized webhook events from all providers.
 - **WebhookEventHandler**: Interface for provider-agnostic event handlers.
 - **PaymentWebhookEventHandler**: Handles payment lifecycle events (succeeded, failed, refunded).
@@ -109,6 +111,7 @@ Request Flow:
 - **AccountWebhookEventHandler**: Handles merchant account updates and capability changes.
 
 #### Messaging & Notifications
+
 - **MessagingService**: Publishes billing events and notification events to RabbitMQ.
 - **EmailService**: Handles transactional email sending with SMTP integration.
 - **NotificationService**: High-level notification orchestration combining email and event publishing.
@@ -392,7 +395,7 @@ The service supports per-tenant payment gateway configuration, allowing each ten
 
 - **Stripe**: Full support with Connect, webhooks, and payment intents
 - **PayPal**: Sandbox and live mode support (future implementation)
-- **Square**: Location-based payments (future implementation)  
+- **Square**: Location-based payments (future implementation)
 - **Braintree**: Merchant account integration (future implementation)
 
 #### Configuration Structure
