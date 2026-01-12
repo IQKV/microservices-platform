@@ -45,13 +45,6 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
   boolean existsByDomain(String domain);
 
   /**
-   * Find all enabled tenants.
-   *
-   * @return list of enabled tenants
-   */
-  List<Tenant> findByEnabledTrue();
-
-  /**
    * Find tenants by status.
    *
    * @param status the tenant status
@@ -77,18 +70,11 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
   List<Tenant> findByNameContainingIgnoreCase(String name);
 
   /**
-   * Count total number of enabled tenants.
+   * Count total number of active tenants.
    *
-   * @return count of enabled tenants
+   * @return count of active tenants
    */
-  long countByEnabledTrue();
-
-  /**
-   * Count total number of disabled tenants.
-   *
-   * @return count of disabled tenants
-   */
-  long countByEnabledFalse();
+  long countByStatus(TenantStatus status);
 
 
 }

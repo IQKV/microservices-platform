@@ -366,7 +366,7 @@ public class TenantManagementService {
   @Transactional(readOnly = true)
   @Cacheable(value = "tenants", key = "#enabledOnly ? 'enabled_tenants' : 'all_tenants'")
   public List<TenantSummary> getAllTenants(boolean enabledOnly) {
-    var tenants = enabledOnly ? tenantRepository.findByEnabledTrue() : tenantRepository.findAll();
+    var tenants = enabledOnly ? tenantRepository.findByStatus(TenantStatus.ACTIVE) : tenantRepository.findAll();
 
     return tenants.stream()
         .map(this::mapToTenantSummary)
@@ -573,7 +573,7 @@ public class TenantManagementService {
   public List<Tenant> findTenantsWithUserCountBetween(long minUsers, long maxUsers) {
     var previous = TenantContext.getCurrentTenantId();
     TenantContext.clear();
-    var tenants = tenantRepository.findByEnabledTrue();
+    var tenants = tenantRepository.findByStatus(TenantStatus.ACTIVE);
     if (previous != null) {
       TenantContext.setCurrentTenantId(previous);
     }
@@ -590,7 +590,7 @@ public class TenantManagementService {
   public List<Tenant> findTenantsExceedingUserQuota() {
     var previous = TenantContext.getCurrentTenantId();
     TenantContext.clear();
-    var tenants = tenantRepository.findByEnabledTrue();
+    var tenants = tenantRepository.findByStatus(TenantStatus.ACTIVE);
     if (previous != null) {
       TenantContext.setCurrentTenantId(previous);
     }
