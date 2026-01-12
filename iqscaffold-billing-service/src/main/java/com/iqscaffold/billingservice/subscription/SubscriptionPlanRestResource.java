@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.subscription;
 import jakarta.validation.Valid;
 import java.util.UUID;
 
+import com.iqscaffold.billingservice.security.BillingAuthorizationService;
 import com.iqscaffold.billingservice.subscription.dto.SubscriptionDtos;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,6 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Updating existing plans</li>
  *   <li>Synchronizing plans with Stripe</li>
  * </ul>
+ * 
+ * <h4>Authorization:</h4>
+ * Plan management requires: SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role
  */
 @RestController
 @RequestMapping("/api/v1/billing/subscription-plans")
@@ -39,9 +43,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriptionPlanRestResource {
 
   private final SubscriptionPlanService subscriptionPlanService;
+  private final BillingAuthorizationService authorizationService;
 
-  public SubscriptionPlanRestResource(final SubscriptionPlanService subscriptionPlanService) {
+  public SubscriptionPlanRestResource(
+      final SubscriptionPlanService subscriptionPlanService,
+      final BillingAuthorizationService authorizationService) {
     this.subscriptionPlanService = subscriptionPlanService;
+    this.authorizationService = authorizationService;
   }
 
   @Operation(
@@ -51,12 +59,14 @@ public class SubscriptionPlanRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription plan created successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN role")
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role")
   })
   @PostMapping
-  @PreAuthorize("hasAuthority('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.PlanResponse> createPlan(
       @Valid @RequestBody SubscriptionDtos.UpsertPlanRequest request) {
+    // Verify authorization
+    authorizationService.requirePlanManagePermission();
     return ResponseEntity.ok(subscriptionPlanService.createPlan(request));
   }
 
@@ -101,14 +111,16 @@ public class SubscriptionPlanRestResource {
       @ApiResponse(responseCode = "200", description = "Plan updated successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Plan not found")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAuthority('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.PlanResponse> updatePlan(
       @PathVariable UUID id,
       @Valid @RequestBody SubscriptionDtos.UpsertPlanRequest request) {
+    // Verify authorization
+    authorizationService.requirePlanManagePermission();
     return ResponseEntity.ok(subscriptionPlanService.updatePlan(id, request));
   }
 
@@ -118,12 +130,14 @@ public class SubscriptionPlanRestResource {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "204", description = "Plan synchronized successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Plan not found")
   })
   @PostMapping("/{id}/sync")
-  @PreAuthorize("hasAuthority('SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<Void> syncPlanWithStripe(@PathVariable UUID id) {
+    // Verify authorization
+    authorizationService.requirePlanManagePermission();
     subscriptionPlanService.syncPlanWithStripe(id);
     return ResponseEntity.noContent().build();
   }

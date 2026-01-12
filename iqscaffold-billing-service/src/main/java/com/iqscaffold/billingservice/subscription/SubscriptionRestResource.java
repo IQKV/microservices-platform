@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.subscription;
 import jakarta.validation.Valid;
 import java.util.UUID;
 
+import com.iqscaffold.billingservice.security.BillingAuthorizationService;
 import com.iqscaffold.billingservice.subscription.dto.SubscriptionDtos;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Canceling subscriptions</li>
  *   <li>Pausing and resuming subscriptions</li>
  * </ul>
+ * 
+ * <h4>Authorization:</h4>
+ * <ul>
+ *   <li>Subscription creation: Requires authenticated user with SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN</li>
+ *   <li>Subscription management: Owner (same tenant) or BILLING_ADMIN</li>
+ *   <li>Subscription viewing: Owner, BILLING_ADMIN, or FINANCE_VIEWER</li>
+ * </ul>
  */
 @RestController
 @RequestMapping("/api/v1/billing/subscriptions")
@@ -40,9 +48,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriptionRestResource {
 
   private final SubscriptionService subscriptionService;
+  private final BillingAuthorizationService authorizationService;
 
-  public SubscriptionRestResource(final SubscriptionService subscriptionService) {
+  public SubscriptionRestResource(
+      final SubscriptionService subscriptionService,
+      final BillingAuthorizationService authorizationService) {
     this.subscriptionService = subscriptionService;
+    this.authorizationService = authorizationService;
   }
 
   @Operation(
@@ -52,13 +64,15 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription created successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input or tenant already has active subscription"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription plan not found")
   })
   @PostMapping
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> createSubscription(
       @Valid @RequestBody SubscriptionDtos.CreateSubscriptionRequest request) {
+    // Verify authorization
+    authorizationService.requireSubscriptionCreatePermission();
     return ResponseEntity.ok(subscriptionService.createSubscription(request));
   }
 
@@ -84,12 +98,15 @@ public class SubscriptionRestResource {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Subscription found"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner, BILLING_ADMIN, or FINANCE_VIEWER"),
       @ApiResponse(responseCode = "404", description = "Subscription not found or access denied")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER', 'USER')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> getSubscription(
       @PathVariable UUID id) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionViewPermission(id);
     return ResponseEntity.ok(subscriptionService.getSubscription(id));
   }
 
@@ -114,7 +131,7 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription updated successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid input or update not allowed in current state"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription or new plan not found")
   })
   @PutMapping("/{id}")
@@ -122,6 +139,8 @@ public class SubscriptionRestResource {
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> updateSubscription(
       @PathVariable UUID id,
       @Valid @RequestBody SubscriptionDtos.UpdateSubscriptionRequest request) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionManagePermission(id);
     return ResponseEntity.ok(subscriptionService.updateSubscription(id, request));
   }
 
@@ -132,13 +151,15 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription canceled successfully"),
       @ApiResponse(responseCode = "400", description = "Cancellation not allowed in current state"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription not found")
   })
   @PostMapping("/{id}/cancel")
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> cancelSubscription(
       @PathVariable UUID id) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionManagePermission(id);
     return ResponseEntity.ok(subscriptionService.cancelSubscription(id));
   }
 
@@ -149,13 +170,15 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription canceled immediately"),
       @ApiResponse(responseCode = "400", description = "Cancellation not allowed in current state"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription not found")
   })
   @PostMapping("/{id}/cancel-immediately")
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> cancelSubscriptionImmediately(
       @PathVariable UUID id) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionManagePermission(id);
     return ResponseEntity.ok(subscriptionService.cancelSubscriptionImmediately(id));
   }
 
@@ -166,13 +189,15 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription paused successfully"),
       @ApiResponse(responseCode = "400", description = "Pause not allowed in current state"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription not found")
   })
   @PostMapping("/{id}/pause")
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> pauseSubscription(
       @PathVariable UUID id) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionManagePermission(id);
     return ResponseEntity.ok(subscriptionService.pauseSubscription(id));
   }
 
@@ -183,13 +208,15 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "200", description = "Subscription resumed successfully"),
       @ApiResponse(responseCode = "400", description = "Resume not allowed in current state"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - requires TENANT_OWNER or SUPER_ADMIN role"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires owner or BILLING_ADMIN role"),
       @ApiResponse(responseCode = "404", description = "Subscription not found")
   })
   @PostMapping("/{id}/resume")
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> resumeSubscription(
       @PathVariable UUID id) {
+    // Verify authorization with ownership check
+    authorizationService.requireSubscriptionManagePermission(id);
     return ResponseEntity.ok(subscriptionService.resumeSubscription(id));
   }
 }

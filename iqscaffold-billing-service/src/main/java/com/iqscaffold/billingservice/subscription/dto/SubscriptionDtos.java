@@ -137,6 +137,7 @@ public class SubscriptionDtos {
    *
    * @param id Invoice UUID
    * @param subscriptionId Subscription UUID
+   * @param tenantId Tenant ID
    * @param stripeInvoiceId Stripe invoice ID
    * @param invoiceNumber Invoice number
    * @param status Invoice status
@@ -148,10 +149,12 @@ public class SubscriptionDtos {
    * @param hostedInvoiceUrl Hosted invoice URL
    * @param invoicePdfUrl Invoice PDF URL
    * @param createdAt Created timestamp
+   * @param updatedAt Updated timestamp
    */
   public record InvoiceResponse(
       UUID id,
       UUID subscriptionId,
+      String tenantId,
       String stripeInvoiceId,
       String invoiceNumber,
       String status,
@@ -162,6 +165,7 @@ public class SubscriptionDtos {
       Instant paidAt,
       String hostedInvoiceUrl,
       String invoicePdfUrl,
-      Instant createdAt) {
+      Instant createdAt,
+      Instant updatedAt) {
   }
 }
