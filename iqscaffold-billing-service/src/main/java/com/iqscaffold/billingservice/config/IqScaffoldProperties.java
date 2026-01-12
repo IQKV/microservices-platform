@@ -127,7 +127,8 @@ public record IqScaffoldProperties(
       @Valid @NotNull Payment payment,
       @Valid @NotNull Integration integration,
       @Valid @NotNull Stripe stripe,
-      @Valid @NotNull Notifications notifications
+      @Valid @NotNull Notifications notifications,
+      @Valid @NotNull Subscription subscription
   ) {
 
     public record Security(
@@ -186,6 +187,37 @@ public record IqScaffoldProperties(
         @Min(1) @Max(10) int maxRetries
     ) {
 
+    }
+
+    public record Subscription(
+        boolean enableSubscriptions,
+        @Min(0) @Max(365) int trialPeriodDays,
+        @Min(0) @Max(30) int gracePeriodDays,
+        @Min(1) @Max(10) int maxRetryAttempts,
+        @Min(1) @Max(90) int autoCancelAfterDays,
+        @NotBlank @jakarta.validation.constraints.Pattern(
+            regexp = "CREATE_PRORATIONS|NONE|ALWAYS_INVOICE",
+            message = "Proration behavior must be CREATE_PRORATIONS, NONE, or ALWAYS_INVOICE"
+        ) String prorationBehavior,
+        @Valid @NotNull SubscriptionNotifications notifications
+    ) {
+      public record SubscriptionNotifications(
+          @Min(1) @Max(30) int trialEndingDaysNotice,
+          @NotNull List<@Min(1) @Max(30) Integer> paymentRetrySchedule
+      ) {
+        public SubscriptionNotifications {
+          // Validation: payment retry schedule must not be empty
+          if (paymentRetrySchedule == null || paymentRetrySchedule.isEmpty()) {
+            throw new IllegalArgumentException("Payment retry schedule must contain at least one value");
+          }
+          // Validation: payment retry schedule must be in ascending order
+          for (int i = 1; i < paymentRetrySchedule.size(); i++) {
+            if (paymentRetrySchedule.get(i) <= paymentRetrySchedule.get(i - 1)) {
+              throw new IllegalArgumentException("Payment retry schedule must be in ascending order");
+            }
+          }
+        }
+      }
     }
   }
 }

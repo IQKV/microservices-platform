@@ -289,3 +289,13 @@ iqscaffold:
       enable-webhook-notifications: ${BILLING_WEBHOOK_NOTIFICATIONS:true}
       retry-delay: PT5S
       max-retries: 3
+    subscription:
+      enable-subscriptions: true
+      trial-period-days: 14
+      grace-period-days: 3
+      max-retry-attempts: 3
+      auto-cancel-after-days: 30
+      proration-behavior: CREATE_PRORATIONS
+      notifications:
+        trial-ending-days-notice: 3
+        payment-retry-schedule: [1, 3, 5, 7]
