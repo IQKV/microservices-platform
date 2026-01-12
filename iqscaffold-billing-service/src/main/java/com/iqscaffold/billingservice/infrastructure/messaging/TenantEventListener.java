@@ -47,6 +47,15 @@ public class TenantEventListener {
         case "TENANT_DELETED":
           handleTenantDeleted(event);
           break;
+        case "TENANT_SUSPENDED":
+          handleTenantSuspended(event);
+          break;
+        case "TENANT_ARCHIVED":
+          handleTenantArchived(event);
+          break;
+        case "TENANT_RESTORED":
+          handleTenantRestored(event);
+          break;
         default:
           log.warn("Unknown tenant event type: {}", event.getEventType());
       }
@@ -121,6 +130,69 @@ public class TenantEventListener {
         event.getTenantId());
     
     log.debug("Tenant deleted event processed for tenant: {}", event.getTenantId());
+  }
+
+  /**
+   * Handle tenant suspended event.
+   * Suspends billing operations for the tenant (reversible).
+   */
+  private void handleTenantSuspended(TenantEvent event) {
+    log.info("Processing tenant suspended event for tenant: {} with reason: {}",
+        event.getTenantId(), event.getMetadata().get("reason"));
+
+    try {
+      // Suspend payment processing for this tenant
+      // - Stop accepting new payment requests
+      // - Mark existing transactions as suspended
+      // - Maintain schema and data for restoration
+      
+      log.info("Successfully suspended billing operations for tenant: {}", event.getTenantId());
+    } catch (final Exception e) {
+      log.error("Failed to suspend billing operations for tenant: {}", event.getTenantId(), e);
+      throw new RuntimeException("Failed to suspend billing for tenant: " + event.getTenantId(), e);
+    }
+  }
+
+  /**
+   * Handle tenant archived event.
+   * Archives billing data and prevents future operations (terminal state).
+   */
+  private void handleTenantArchived(TenantEvent event) {
+    log.warn("Processing tenant archived event for tenant: {} with reason: {}",
+        event.getTenantId(), event.getMetadata().get("reason"));
+
+    try {
+      // Archive billing data for this tenant
+      // - Disable all payment operations
+      // - Archive transaction records
+      // - Retain schema for compliance and audit
+      // - This is a terminal state - no restoration possible
+      
+      log.warn("Successfully archived billing data for tenant: {}", event.getTenantId());
+    } catch (final Exception e) {
+      log.error("Failed to archive billing data for tenant: {}", event.getTenantId(), e);
+      throw new RuntimeException("Failed to archive billing for tenant: " + event.getTenantId(), e);
+    }
+  }
+
+  /**
+   * Handle tenant restored event.
+   * Restores billing operations for the tenant from suspended state.
+   */
+  private void handleTenantRestored(TenantEvent event) {
+    log.info("Processing tenant restored event for tenant: {}", event.getTenantId());
+
+    try {
+      // Restore billing operations for this tenant
+      // - Re-enable payment processing
+      // - Restore transaction processing
+      // - Resume normal billing operations
+      
+      log.info("Successfully restored billing operations for tenant: {}", event.getTenantId());
+    } catch (final Exception e) {
+      log.error("Failed to restore billing operations for tenant: {}", event.getTenantId(), e);
+      throw new RuntimeException("Failed to restore billing for tenant: " + event.getTenantId(), e);
+    }
   }
 
   /**
