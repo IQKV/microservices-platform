@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="#{email.subscription.trial.ending.subject}">Your Trial is Ending Soon - IQ Scaffold</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .trial-icon {
+      font-size: 48px;
+      color: #f59e0b;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 20px;
+    }
+
+    .content {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 30px;
+    }
+
+    .trial-notice {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .trial-notice h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .trial-notice p {
+      color: #92400e;
+      margin: 0;
+    }
+
+    .subscription-details {
+      background-color: #f0f9ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .subscription-details h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .detail-value {
+      color: #4b5563;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .cta-button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .cancel-info {
+      background-color: #f9fafb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .cancel-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .cancel-info p {
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="logo">IQ Scaffold</div>
+    <div class="trial-icon">⏰</div>
+    <h1 class="title" th:text="#{email.subscription.trial.ending.title}">Your Trial is Ending Soon</h1>
+  </div>
+
+  <div class="content">
+    <p th:text="#{email.subscription.trial.ending.greeting(${customerName})}">Hello,</p>
+
+    <p th:text="#{email.subscription.trial.ending.body}">This is a friendly reminder that your free trial is coming to an end soon.</p>
+
+    <div class="trial-notice">
+      <h3>⏰ Trial Ending</h3>
+      <p th:text="#{email.subscription.trial.ending.notice(${#temporals.format(trialEnd, 'MMM dd, yyyy')})}">Your trial will end on Feb 15, 2024. After this date, your subscription will automatically continue with the paid plan.</p>
+    </div>
+
+    <div class="subscription-details">
+      <h3 th:text="#{email.subscription.trial.ending.details.title}">Subscription Details</h3>
+      <div class="detail-row">
+        <span class="detail-label">Plan:</span>
+        <span class="detail-value" th:text="${planName}">Premium Plan</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Amount:</span>
+        <span class="detail-value" th:text="${amount} + ' ' + ${currency} + ' / ' + ${interval}">29.99 USD / month</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Trial Ends:</span>
+        <span class="detail-value" th:text="${#temporals.format(trialEnd, 'MMM dd, yyyy')}">Feb 15, 2024</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">First Billing Date:</span>
+        <span class="detail-value" th:text="${#temporals.format(nextBillingDate, 'MMM dd, yyyy')}">Feb 16, 2024</span>
+      </div>
+    </div>
+
+    <div class="button-container" th:if="${manageUrl}">
+      <a th:href="${manageUrl}" class="cta-button" th:text="#{email.subscription.trial.ending.cta.button}">Manage Subscription</a>
+    </div>
+
+    <div class="cancel-info">
+      <h3 th:text="#{email.subscription.trial.ending.cancel.title}">Don't Want to Continue?</h3>
+      <p th:text="#{email.subscription.trial.ending.cancel.body}">You can cancel your subscription anytime before the trial ends to avoid being charged. No questions asked.</p>
+    </div>
+
+    <p>Best regards,</p>
+    <p><strong>The IQ Scaffold Team</strong></p>
+  </div>
+
+  <div class="footer">
+    <p th:text="#{email.subscription.trial.ending.footer}">You can manage your subscription anytime from your account settings.</p>
+    <p>© 2024 IQ Scaffold. All rights reserved.</p>
+  </div>
+</div>
+</body>
+</html>

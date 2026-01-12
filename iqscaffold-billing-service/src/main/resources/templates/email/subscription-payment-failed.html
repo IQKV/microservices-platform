@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="#{email.subscription.payment.failed.subject}">Subscription Payment Failed - IQ Scaffold</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .warning-icon {
+      font-size: 48px;
+      color: #ef4444;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 20px;
+    }
+
+    .content {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 30px;
+    }
+
+    .error-notice {
+      background-color: #fee2e2;
+      border-left: 4px solid #ef4444;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .error-notice h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #991b1b;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .error-notice p {
+      color: #991b1b;
+      margin: 0;
+    }
+
+    .subscription-details {
+      background-color: #f0f9ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .subscription-details h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .detail-value {
+      color: #4b5563;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+
+    .retry-info {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .retry-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .retry-info p {
+      color: #92400e;
+      margin: 0 0 10px 0;
+    }
+
+    .troubleshooting {
+      background-color: #f9fafb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .troubleshooting h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .troubleshooting ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .troubleshooting li {
+      margin-bottom: 10px;
+      color: #4b5563;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: #ef4444;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .cta-button:hover {
+      background-color: #dc2626;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="logo">IQ Scaffold</div>
+    <div class="warning-icon">⚠️</div>
+    <h1 class="title" th:text="#{email.subscription.payment.failed.title}">Subscription Payment Failed</h1>
+  </div>
+
+  <div class="content">
+    <p th:text="#{email.subscription.payment.failed.greeting(${customerName})}">Hello,</p>
+
+    <p th:text="#{email.subscription.payment.failed.body}">We were unable to process your subscription payment. Please update your payment method to continue your service.</p>
+
+    <div class="error-notice">
+      <h3>❌ Payment Failed</h3>
+      <p th:text="#{email.subscription.payment.failed.error(${errorMessage})}">Error: Your card was declined. Please contact your bank or try a different payment method.</p>
+    </div>
+
+    <div class="subscription-details">
+      <h3 th:text="#{email.subscription.payment.failed.details.title}">Subscription Details</h3>
+      <div class="detail-row">
+        <span class="detail-label">Plan:</span>
+        <span class="detail-value" th:text="${planName}">Premium Plan</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Amount Due:</span>
+        <span class="detail-value" th:text="${amount} + ' ' + ${currency}">29.99 USD</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Attempt Date:</span>
+        <span class="detail-value" th:text="${#temporals.format(attemptDate, 'MMM dd, yyyy')}">Feb 15, 2024</span>
+      </div>
+      <div class="detail-row" th:if="${retryDate}">
+        <span class="detail-label">Next Retry:</span>
+        <span class="detail-value" th:text="${#temporals.format(retryDate, 'MMM dd, yyyy')}">Feb 18, 2024</span>
+      </div>
+    </div>
+
+    <div class="retry-info" th:if="${retryDate}">
+      <h3>🔄 Automatic Retry</h3>
+      <p th:text="#{email.subscription.payment.failed.retry.info(${#temporals.format(retryDate, 'MMM dd, yyyy')})}">We will automatically retry your payment on Feb 18, 2024. You can also update your payment method now to avoid any service interruption.</p>
+    </div>
+
+    <div class="button-container" th:if="${updatePaymentUrl}">
+      <a th:href="${updatePaymentUrl}" class="cta-button" th:text="#{email.subscription.payment.failed.cta.button}">Update Payment Method</a>
+    </div>
+
+    <div class="troubleshooting">
+      <h3 th:text="#{email.subscription.payment.failed.troubleshooting.title}">Common Solutions</h3>
+      <ul>
+        <li th:text="#{email.subscription.payment.failed.troubleshooting.step1}">Check that your card has sufficient funds</li>
+        <li th:text="#{email.subscription.payment.failed.troubleshooting.step2}">Verify your card details are correct</li>
+        <li th:text="#{email.subscription.payment.failed.troubleshooting.step3}">Ensure your card hasn't expired</li>
+        <li th:text="#{email.subscription.payment.failed.troubleshooting.step4}">Contact your bank if the issue persists</li>
+        <li th:text="#{email.subscription.payment.failed.troubleshooting.step5}">Try using a different payment method</li>
+      </ul>
+    </div>
+
+    <p>Best regards,</p>
+    <p><strong>The IQ Scaffold Billing Team</strong></p>
+  </div>
+
+  <div class="footer">
+    <p th:text="#{email.subscription.payment.failed.footer}">If you need assistance, please contact our support team.</p>
+    <p>© 2024 IQ Scaffold. All rights reserved.</p>
+  </div>
+</div>
+</body>
+</html>

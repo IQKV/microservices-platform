@@ -240,6 +240,240 @@ public class EmailService implements EmailOperations {
     }
   }
 
+  @Override
+  public void sendInvoicePaidEmail(String customerEmail, String customerName, String invoiceNumber,
+                                   BigDecimal amount, String currency, LocalDateTime paymentDate,
+                                   String paymentMethod, String transactionId, String receiptUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.invoice.paid.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("invoiceNumber", invoiceNumber);
+      context.setVariable("amount", amount);
+      context.setVariable("currency", currency);
+      context.setVariable("paymentDate", paymentDate);
+      context.setVariable("paymentMethod", paymentMethod);
+      context.setVariable("transactionId", transactionId);
+      context.setVariable("receiptUrl", receiptUrl);
+
+      var htmlContent = templateEngine.process("email/invoice-paid", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Invoice paid email sent to: {} for invoice: {}", customerEmail, invoiceNumber);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send invoice paid email to: {} for invoice: {}",
+          customerEmail, invoiceNumber, e);
+      throw new EmailServiceException("Failed to send invoice paid email", e);
+    }
+  }
+
+  @Override
+  public void sendSubscriptionCreatedEmail(String customerEmail, String customerName, String planName,
+                                           BigDecimal amount, String currency, String interval, String status,
+                                           LocalDateTime trialEnd, LocalDateTime nextBillingDate, String dashboardUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.subscription.created.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("planName", planName);
+      context.setVariable("amount", amount);
+      context.setVariable("currency", currency);
+      context.setVariable("interval", interval);
+      context.setVariable("status", status);
+      context.setVariable("trialEnd", trialEnd);
+      context.setVariable("nextBillingDate", nextBillingDate);
+      context.setVariable("dashboardUrl", dashboardUrl);
+
+      var htmlContent = templateEngine.process("email/subscription-created", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Subscription created email sent to: {} for plan: {}", customerEmail, planName);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send subscription created email to: {} for plan: {}",
+          customerEmail, planName, e);
+      throw new EmailServiceException("Failed to send subscription created email", e);
+    }
+  }
+
+  @Override
+  public void sendSubscriptionTrialEndingEmail(String customerEmail, String customerName, String planName,
+                                               BigDecimal amount, String currency, String interval,
+                                               LocalDateTime trialEnd, LocalDateTime nextBillingDate, String manageUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.subscription.trial.ending.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("planName", planName);
+      context.setVariable("amount", amount);
+      context.setVariable("currency", currency);
+      context.setVariable("interval", interval);
+      context.setVariable("trialEnd", trialEnd);
+      context.setVariable("nextBillingDate", nextBillingDate);
+      context.setVariable("manageUrl", manageUrl);
+
+      var htmlContent = templateEngine.process("email/subscription-trial-ending", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Subscription trial ending email sent to: {} for plan: {}", customerEmail, planName);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send subscription trial ending email to: {} for plan: {}",
+          customerEmail, planName, e);
+      throw new EmailServiceException("Failed to send subscription trial ending email", e);
+    }
+  }
+
+  @Override
+  public void sendSubscriptionRenewedEmail(String customerEmail, String customerName, String planName,
+                                           BigDecimal amount, String currency, LocalDateTime renewalDate,
+                                           LocalDateTime nextBillingDate, String invoiceUrl, String dashboardUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.subscription.renewed.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("planName", planName);
+      context.setVariable("amount", amount);
+      context.setVariable("currency", currency);
+      context.setVariable("renewalDate", renewalDate);
+      context.setVariable("nextBillingDate", nextBillingDate);
+      context.setVariable("invoiceUrl", invoiceUrl);
+      context.setVariable("dashboardUrl", dashboardUrl);
+
+      var htmlContent = templateEngine.process("email/subscription-renewed", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Subscription renewed email sent to: {} for plan: {}", customerEmail, planName);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send subscription renewed email to: {} for plan: {}",
+          customerEmail, planName, e);
+      throw new EmailServiceException("Failed to send subscription renewed email", e);
+    }
+  }
+
+  @Override
+  public void sendSubscriptionPaymentFailedEmail(String customerEmail, String customerName, String planName,
+                                                 BigDecimal amount, String currency, LocalDateTime attemptDate,
+                                                 String errorMessage, LocalDateTime retryDate, String updatePaymentUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.subscription.payment.failed.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("planName", planName);
+      context.setVariable("amount", amount);
+      context.setVariable("currency", currency);
+      context.setVariable("attemptDate", attemptDate);
+      context.setVariable("errorMessage", errorMessage);
+      context.setVariable("retryDate", retryDate);
+      context.setVariable("updatePaymentUrl", updatePaymentUrl);
+
+      var htmlContent = templateEngine.process("email/subscription-payment-failed", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Subscription payment failed email sent to: {} for plan: {}", customerEmail, planName);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send subscription payment failed email to: {} for plan: {}",
+          customerEmail, planName, e);
+      throw new EmailServiceException("Failed to send subscription payment failed email", e);
+    }
+  }
+
+  @Override
+  public void sendSubscriptionCanceledEmail(String customerEmail, String customerName, String planName,
+                                            LocalDateTime cancellationDate, LocalDateTime accessEndDate,
+                                            String reason, String feedbackUrl, String reactivateUrl) {
+    try {
+      var mimeMessage = mailSender.createMimeMessage();
+      var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+      var emailConfig = properties.email();
+      var senderConfig = emailConfig.sender();
+
+      helper.setFrom(senderConfig.fromEmail(), senderConfig.fromName());
+      helper.setTo(customerEmail);
+      helper.setSubject(messageService.getMessage("email.subscription.canceled.subject", Locale.ENGLISH));
+
+      var context = new Context(Locale.ENGLISH);
+      context.setVariable("customerName", customerName);
+      context.setVariable("planName", planName);
+      context.setVariable("cancellationDate", cancellationDate);
+      context.setVariable("accessEndDate", accessEndDate);
+      context.setVariable("reason", reason);
+      context.setVariable("feedbackUrl", feedbackUrl);
+      context.setVariable("reactivateUrl", reactivateUrl);
+
+      var htmlContent = templateEngine.process("email/subscription-canceled", context);
+      helper.setText(htmlContent, true);
+
+      mailSender.send(mimeMessage);
+
+      logger.info("Subscription canceled email sent to: {} for plan: {}", customerEmail, planName);
+
+    } catch (final Exception e) {
+      logger.error("Failed to send subscription canceled email to: {} for plan: {}",
+          customerEmail, planName, e);
+      throw new EmailServiceException("Failed to send subscription canceled email", e);
+    }
+  }
+
   /**
    * Custom exception for email service errors.
    */

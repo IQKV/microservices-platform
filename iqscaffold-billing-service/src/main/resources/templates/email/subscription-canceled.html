@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="#{email.subscription.canceled.subject}">Subscription Canceled - IQ Scaffold</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .cancel-icon {
+      font-size: 48px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 20px;
+    }
+
+    .content {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 30px;
+    }
+
+    .cancellation-notice {
+      background-color: #f3f4f6;
+      border-left: 4px solid #6b7280;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .cancellation-notice h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .cancellation-notice p {
+      color: #4b5563;
+      margin: 0;
+    }
+
+    .subscription-details {
+      background-color: #f0f9ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .subscription-details h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .detail-value {
+      color: #4b5563;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+
+    .access-info {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .access-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .access-info p {
+      color: #92400e;
+      margin: 0;
+    }
+
+    .feedback-section {
+      background-color: #f9fafb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .feedback-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .feedback-section p {
+      color: #4b5563;
+      margin: 0 0 15px 0;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .cta-button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="logo">IQ Scaffold</div>
+    <div class="cancel-icon">👋</div>
+    <h1 class="title" th:text="#{email.subscription.canceled.title}">Subscription Canceled</h1>
+  </div>
+
+  <div class="content">
+    <p th:text="#{email.subscription.canceled.greeting(${customerName})}">Hello,</p>
+
+    <p th:text="#{email.subscription.canceled.body}">We're sorry to see you go. Your subscription has been successfully canceled.</p>
+
+    <div class="cancellation-notice">
+      <h3>✓ Cancellation Confirmed</h3>
+      <p th:text="#{email.subscription.canceled.confirmation}">Your subscription has been canceled and you will not be charged again.</p>
+    </div>
+
+    <div class="subscription-details">
+      <h3 th:text="#{email.subscription.canceled.details.title}">Cancellation Details</h3>
+      <div class="detail-row">
+        <span class="detail-label">Plan:</span>
+        <span class="detail-value" th:text="${planName}">Premium Plan</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Cancellation Date:</span>
+        <span class="detail-value" th:text="${#temporals.format(cancellationDate, 'MMM dd, yyyy')}">Feb 15, 2024</span>
+      </div>
+      <div class="detail-row" th:if="${accessEndDate}">
+        <span class="detail-label">Access Until:</span>
+        <span class="detail-value" th:text="${#temporals.format(accessEndDate, 'MMM dd, yyyy')}">Mar 15, 2024</span>
+      </div>
+      <div class="detail-row" th:if="${reason}">
+        <span class="detail-label">Reason:</span>
+        <span class="detail-value" th:text="${reason}">No longer needed</span>
+      </div>
+    </div>
+
+    <div class="access-info" th:if="${accessEndDate}">
+      <h3>⏰ Access Remaining</h3>
+      <p th:text="#{email.subscription.canceled.access.info(${#temporals.format(accessEndDate, 'MMM dd, yyyy')})}">You will continue to have access to your subscription features until Mar 15, 2024, the end of your current billing period.</p>
+    </div>
+
+    <div class="feedback-section">
+      <h3 th:text="#{email.subscription.canceled.feedback.title}">We'd Love Your Feedback</h3>
+      <p th:text="#{email.subscription.canceled.feedback.body}">Your feedback helps us improve. Would you mind sharing why you canceled?</p>
+      <div class="button-container" th:if="${feedbackUrl}">
+        <a th:href="${feedbackUrl}" class="cta-button" th:text="#{email.subscription.canceled.feedback.button}">Share Feedback</a>
+      </div>
+    </div>
+
+    <div class="feedback-section">
+      <h3 th:text="#{email.subscription.canceled.reactivate.title}">Changed Your Mind?</h3>
+      <p th:text="#{email.subscription.canceled.reactivate.body}">You can reactivate your subscription anytime. We'd love to have you back!</p>
+      <div class="button-container" th:if="${reactivateUrl}">
+        <a th:href="${reactivateUrl}" class="cta-button" th:text="#{email.subscription.canceled.reactivate.button}">Reactivate Subscription</a>
+      </div>
+    </div>
+
+    <p>Best regards,</p>
+    <p><strong>The IQ Scaffold Team</strong></p>
+  </div>
+
+  <div class="footer">
+    <p th:text="#{email.subscription.canceled.footer}">Thank you for being a part of IQ Scaffold. We hope to see you again soon!</p>
+    <p>© 2024 IQ Scaffold. All rights reserved.</p>
+  </div>
+</div>
+</body>
+</html>

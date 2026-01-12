@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="#{email.invoice.paid.subject}">Invoice Paid - IQ Scaffold</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .email-container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .success-icon {
+      font-size: 48px;
+      color: #10b981;
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 20px;
+    }
+
+    .content {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 30px;
+    }
+
+    .payment-success {
+      background-color: #ecfdf5;
+      border-left: 4px solid #10b981;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .payment-success h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #065f46;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .payment-success p {
+      color: #065f46;
+      margin: 0;
+    }
+
+    .amount-highlight {
+      background-color: #f0f9ff;
+      border: 1px solid #10b981;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .amount-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #10b981;
+    }
+
+    .invoice-details {
+      background-color: #f0f9ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .invoice-details h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .detail-value {
+      color: #4b5563;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+
+    .receipt-button {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .receipt-button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .button-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    .support-info {
+      background-color: #f9fafb;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .support-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .support-info p {
+      color: #6b7280;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="logo">IQ Scaffold</div>
+    <div class="success-icon">✅</div>
+    <h1 class="title" th:text="#{email.invoice.paid.title}">Payment Received</h1>
+  </div>
+
+  <div class="content">
+    <p th:text="#{email.invoice.paid.greeting(${customerName})}">Hello,</p>
+
+    <p th:text="#{email.invoice.paid.body}">Thank you for your payment! We have successfully received your payment for the invoice.</p>
+
+    <div class="payment-success">
+      <h3>✓ Payment Confirmed</h3>
+      <p th:text="#{email.invoice.paid.confirmation}">Your payment has been processed successfully.</p>
+    </div>
+
+    <div class="amount-highlight">
+      <div class="amount-value" th:text="#{email.invoice.paid.amount(${amount}, ${currency})}">Amount Paid: 29.99 USD</div>
+    </div>
+
+    <div class="invoice-details">
+      <h3 th:text="#{email.invoice.paid.details.title}">Payment Details</h3>
+      <div class="detail-row">
+        <span class="detail-label">Invoice Number:</span>
+        <span class="detail-value" th:text="${invoiceNumber}">INV-2024-001</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Amount Paid:</span>
+        <span class="detail-value" th:text="${amount} + ' ' + ${currency}">29.99 USD</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Payment Date:</span>
+        <span class="detail-value" th:text="${#temporals.format(paymentDate, 'MMM dd, yyyy')}">Feb 15, 2024</span>
+      </div>
+      <div class="detail-row" th:if="${paymentMethod}">
+        <span class="detail-label">Payment Method:</span>
+        <span class="detail-value" th:text="${paymentMethod}">Visa ending in 4242</span>
+      </div>
+      <div class="detail-row" th:if="${transactionId}">
+        <span class="detail-label">Transaction ID:</span>
+        <span class="detail-value" th:text="${transactionId}">TXN-123456789</span>
+      </div>
+    </div>
+
+    <div class="button-container" th:if="${receiptUrl}">
+      <a th:href="${receiptUrl}" class="receipt-button" th:text="#{email.invoice.paid.receipt.button}">Download Receipt</a>
+    </div>
+
+    <div class="support-info">
+      <h3 th:text="#{email.invoice.paid.support.title}">Questions?</h3>
+      <p th:text="#{email.invoice.paid.support.body}">If you have any questions about this payment, please contact our billing team with Invoice Number: <strong th:text="${invoiceNumber}">INV-2024-001</strong></p>
+    </div>
+
+    <p>Best regards,</p>
+    <p><strong>The IQ Scaffold Billing Team</strong></p>
+  </div>
+
+  <div class="footer">
+    <p>This email was sent regarding Invoice: <span th:text="${invoiceNumber}">INV-2024-001</span></p>
+    <p>© 2024 IQ Scaffold. All rights reserved.</p>
+  </div>
+</div>
+</body>
+</html>
