@@ -3,11 +3,15 @@ package com.iqscaffold.userservice.tenancy;
 import jakarta.validation.Valid;
 import java.util.List;
 
+import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.ArchiveTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
+import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.RestoreTenantRequest;
+import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.SuspendTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantResponse;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantStatistics;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantSummary;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.UpdateTenantRequest;
+import com.iqscaffold.userservice.shared.exception.TenantManagementException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -180,38 +184,112 @@ public class TenantManagementRestResource {
   }
 
   /**
-   * Enable or disable a tenant. Requires SUPER_ADMIN role for access.
+   * Suspend a tenant. Temporarily disables the tenant while preserving data. Can be restored. Requires SUPER_ADMIN role.
    */
-  @PatchMapping("/{tenantId}/enabled")
+  @PatchMapping("/{tenantId}/suspend")
   @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
   @Operation(
-      summary = "Enable or disable tenant",
-      description = "Enable or disable a tenant. Requires SUPER_ADMIN role."
+      summary = "Suspend tenant",
+      description = "Suspend a tenant with a reason. Tenant can be restored later. Requires SUPER_ADMIN role."
   )
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Tenant status updated successfully"),
+      @ApiResponse(responseCode = "200", description = "Tenant suspended successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid request or tenant already suspended"),
       @ApiResponse(responseCode = "403", description = "Access denied - SUPER_ADMIN role required"),
       @ApiResponse(responseCode = "404", description = "Tenant not found")
   })
-  public ResponseEntity<TenantResponse> setTenantEnabled(
+  public ResponseEntity<TenantResponse> suspendTenant(
       @Parameter(description = "Tenant ID", required = true)
       @PathVariable String tenantId,
-      @Parameter(description = "Enabled status", required = true)
-      @RequestParam boolean enabled,
+      @Valid @RequestBody SuspendTenantRequest request,
       Authentication authentication) {
 
-    logger.info("Setting tenant {} enabled status to {} by user: {}",
-        tenantId, enabled, authentication.getName());
+    logger.info("Suspending tenant {} by user: {}", tenantId, authentication.getName());
 
     try {
-      var tenantResponse = tenantManagementService.setTenantEnabled(tenantId, enabled);
-
-      logger.info("Successfully updated tenant {} enabled status to: {}", tenantId, enabled);
+      var tenantResponse = tenantManagementService.suspendTenant(tenantId, request.reason(), authentication.getName());
+      logger.info("Successfully suspended tenant: {}", tenantId);
       return ResponseEntity.ok(tenantResponse);
 
-    } catch (final IllegalArgumentException e) {
+    } catch (final TenantManagementException.TenantNotFoundException e) {
       logger.warn("Tenant not found: {}", tenantId);
       return ResponseEntity.notFound().build();
+    } catch (final IllegalStateException e) {
+      logger.warn("Cannot suspend tenant {}: {}", tenantId, e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Archive a tenant. Permanently archives the tenant. Tenant cannot be restored. Requires SUPER_ADMIN role.
+   */
+  @PatchMapping("/{tenantId}/archive")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
+  @Operation(
+      summary = "Archive tenant",
+      description = "Archive a tenant with a reason. Archived tenants cannot be restored. Requires SUPER_ADMIN role."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Tenant archived successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid request or tenant already archived"),
+      @ApiResponse(responseCode = "403", description = "Access denied - SUPER_ADMIN role required"),
+      @ApiResponse(responseCode = "404", description = "Tenant not found")
+  })
+  public ResponseEntity<TenantResponse> archiveTenant(
+      @Parameter(description = "Tenant ID", required = true)
+      @PathVariable String tenantId,
+      @Valid @RequestBody ArchiveTenantRequest request,
+      Authentication authentication) {
+
+    logger.warn("Archiving tenant {} by user: {}", tenantId, authentication.getName());
+
+    try {
+      var tenantResponse = tenantManagementService.archiveTenant(tenantId, request.reason(), authentication.getName());
+      logger.warn("Successfully archived tenant: {}", tenantId);
+      return ResponseEntity.ok(tenantResponse);
+
+    } catch (final TenantManagementException.TenantNotFoundException e) {
+      logger.warn("Tenant not found: {}", tenantId);
+      return ResponseEntity.notFound().build();
+    } catch (final IllegalStateException e) {
+      logger.warn("Cannot archive tenant {}: {}", tenantId, e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Restore a suspended tenant back to active state. Only works for suspended tenants. Requires SUPER_ADMIN role.
+   */
+  @PatchMapping("/{tenantId}/restore")
+  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN')")
+  @Operation(
+      summary = "Restore tenant",
+      description = "Restore a suspended tenant back to active state. Only works for suspended tenants. Requires SUPER_ADMIN role."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Tenant restored successfully"),
+      @ApiResponse(responseCode = "400", description = "Tenant is not suspended"),
+      @ApiResponse(responseCode = "403", description = "Access denied - SUPER_ADMIN role required"),
+      @ApiResponse(responseCode = "404", description = "Tenant not found")
+  })
+  public ResponseEntity<TenantResponse> restoreTenant(
+      @Parameter(description = "Tenant ID", required = true)
+      @PathVariable String tenantId,
+      Authentication authentication) {
+
+    logger.info("Restoring tenant {} by user: {}", tenantId, authentication.getName());
+
+    try {
+      var tenantResponse = tenantManagementService.restoreTenant(tenantId, authentication.getName());
+      logger.info("Successfully restored tenant: {}", tenantId);
+      return ResponseEntity.ok(tenantResponse);
+
+    } catch (final TenantManagementException.TenantNotFoundException e) {
+      logger.warn("Tenant not found: {}", tenantId);
+      return ResponseEntity.notFound().build();
+    } catch (final IllegalStateException e) {
+      logger.warn("Cannot restore tenant {}: {}", tenantId, e.getMessage());
+      return ResponseEntity.badRequest().build();
     }
   }
 

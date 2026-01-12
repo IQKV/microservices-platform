@@ -52,11 +52,12 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
   List<Tenant> findByEnabledTrue();
 
   /**
-   * Find all disabled tenants.
+   * Find tenants by status.
    *
-   * @return list of disabled tenants
+   * @param status the tenant status
+   * @return list of tenants with the given status
    */
-  List<Tenant> findByEnabledFalse();
+  List<Tenant> findByStatus(TenantStatus status);
 
   /**
    * Find tenants created by a specific user.

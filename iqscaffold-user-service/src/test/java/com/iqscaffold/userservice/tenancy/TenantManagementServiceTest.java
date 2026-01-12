@@ -145,8 +145,7 @@ class TenantManagementServiceTest {
         "updated.com",
         200,
         100,
-        2000,
-        true
+        2000
     );
 
     when(tenantRepository.findByTenantId(anyString())).thenReturn(Optional.of(testTenant));
@@ -167,7 +166,6 @@ class TenantManagementServiceTest {
     // Arrange
     var request = new UpdateTenantRequest(
         "Updated Tenant",
-        null,
         null,
         null,
         null,
@@ -227,10 +225,10 @@ class TenantManagementServiceTest {
   }
 
   @Test
-  @DisplayName("Should get only enabled tenants")
-  void shouldGetOnlyEnabledTenants() {
+  @DisplayName("Should get only active tenants")
+  void shouldGetOnlyActiveTenants() {
     // Arrange
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(testTenant));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(testTenant));
     when(userRepository.countByEnabledTrue()).thenReturn(5L);
 
     // Act
@@ -238,7 +236,7 @@ class TenantManagementServiceTest {
 
     // Assert
     assertThat(result).isNotEmpty();
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
   }
 
   @Test
@@ -269,14 +267,14 @@ class TenantManagementServiceTest {
   }
 
   @Test
-  @DisplayName("Should set tenant enabled status")
-  void shouldSetTenantEnabledStatus() {
+  @DisplayName("Should suspend tenant")
+  void shouldSuspendTenant() {
     // Arrange
     when(tenantRepository.findByTenantId(anyString())).thenReturn(Optional.of(testTenant));
     when(tenantRepository.save(any(Tenant.class))).thenReturn(testTenant);
 
     // Act
-    var result = service.setTenantEnabled("tenant-123", false);
+    var result = service.suspendTenant("tenant-123", "Payment overdue", "admin");
 
     // Assert
     assertThat(result).isNotNull();
@@ -284,10 +282,10 @@ class TenantManagementServiceTest {
   }
 
   @Test
-  @DisplayName("Should validate tenant exists and is enabled")
-  void shouldValidateTenantExistsAndIsEnabled() {
+  @DisplayName("Should validate tenant exists and is active")
+  void shouldValidateTenantExistsAndIsActive() {
     // Arrange
-    testTenant.setEnabled(true);
+    testTenant.setStatus(TenantStatus.ACTIVE);
     when(tenantRepository.findByTenantId(anyString())).thenReturn(Optional.of(testTenant));
 
     // Act
@@ -311,10 +309,10 @@ class TenantManagementServiceTest {
   }
 
   @Test
-  @DisplayName("Should return false for disabled tenant")
-  void shouldReturnFalseForDisabledTenant() {
+  @DisplayName("Should return false for suspended tenant")
+  void shouldReturnFalseForSuspendedTenant() {
     // Arrange
-    testTenant.setEnabled(false);
+    testTenant.setStatus(TenantStatus.SUSPENDED);
     when(tenantRepository.findByTenantId(anyString())).thenReturn(Optional.of(testTenant));
 
     // Act

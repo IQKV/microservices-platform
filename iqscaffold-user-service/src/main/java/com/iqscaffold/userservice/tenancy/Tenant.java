@@ -3,6 +3,8 @@ package com.iqscaffold.userservice.tenancy;
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,8 +43,9 @@ public class Tenant {
   @Column(name = "description", length = 500)
   private String description;
 
-  @Column(name = "enabled", nullable = false)
-  private Boolean enabled = true;
+  @Column(name = "status", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private TenantStatus status = TenantStatus.ACTIVE;
 
   @Column(name = "domain", length = 255)
   private String domain;
@@ -66,6 +69,18 @@ public class Tenant {
 
   @Column(name = "created_by", length = 100)
   private String createdBy;
+
+  @Column(name = "suspended_at")
+  private LocalDateTime suspendedAt;
+
+  @Column(name = "archived_at")
+  private LocalDateTime archivedAt;
+
+  @Column(name = "suspension_reason", length = 500)
+  private String suspensionReason;
+
+  @Column(name = "archived_reason", length = 500)
+  private String archivedReason;
 
   @OneToOne(mappedBy = "tenant", fetch = FetchType.LAZY)
   private Organization organization;
@@ -117,12 +132,44 @@ public class Tenant {
     this.description = description;
   }
 
-  public Boolean getEnabled() {
-    return enabled;
+  public TenantStatus getStatus() {
+    return status;
   }
 
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
+  public void setStatus(TenantStatus status) {
+    this.status = status;
+  }
+
+  public LocalDateTime getSuspendedAt() {
+    return suspendedAt;
+  }
+
+  public void setSuspendedAt(LocalDateTime suspendedAt) {
+    this.suspendedAt = suspendedAt;
+  }
+
+  public LocalDateTime getArchivedAt() {
+    return archivedAt;
+  }
+
+  public void setArchivedAt(LocalDateTime archivedAt) {
+    this.archivedAt = archivedAt;
+  }
+
+  public String getSuspensionReason() {
+    return suspensionReason;
+  }
+
+  public void setSuspensionReason(String suspensionReason) {
+    this.suspensionReason = suspensionReason;
+  }
+
+  public String getArchivedReason() {
+    return archivedReason;
+  }
+
+  public void setArchivedReason(String archivedReason) {
+    this.archivedReason = archivedReason;
   }
 
   public String getDomain() {
@@ -183,8 +230,15 @@ public class Tenant {
 
   // Utility methods
   public boolean isActive() {
-    var enabled = this.enabled;
-    return enabled != null && enabled;
+    return status == TenantStatus.ACTIVE;
+  }
+
+  public boolean isSuspended() {
+    return status == TenantStatus.SUSPENDED;
+  }
+
+  public boolean isArchived() {
+    return status == TenantStatus.ARCHIVED;
   }
 
   public boolean hasUserQuota() {
@@ -233,10 +287,10 @@ public class Tenant {
     var sb = new StringBuilder();
     sb.append("Tenant{")
         .append("id=").append(id)
-        .append(", tenantId='").append(tenantId).append('\'')
-        .append(", name='").append(name).append('\'')
-        .append(", enabled=").append(enabled)
-        .append(", domain='").append(domain).append('\'')
+        .append(", tenantId='").append(tenantId).append("'")
+        .append(", name='").append(name).append("'")
+        .append(", status=").append(status)
+        .append(", domain='").append(domain).append("'")
         .append(", createdAt=").append(createdAt)
         .append('}');
     return sb.toString();

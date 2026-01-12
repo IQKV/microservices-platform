@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.iqscaffold.userservice.tenancy.Tenant;
 import com.iqscaffold.userservice.tenancy.TenantRepository;
+import com.iqscaffold.userservice.tenancy.TenantStatus;
 import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,11 +61,11 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldCleanupExpiredTokensSuccessfully() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
     var tenant2 = new Tenant("tenant-2", "Tenant 2");
-    tenant2.setEnabled(true);
+    tenant2.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1, tenant2));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L, 3L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5, 3);
 
@@ -72,7 +73,7 @@ class EmailVerificationTokenCleanupServiceTest {
     service.cleanupExpiredTokens();
 
     // Assert
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
     verify(metricsService).startCleanupTimer();
     verify(timerSample).stop(timer);
   }
@@ -81,7 +82,7 @@ class EmailVerificationTokenCleanupServiceTest {
   @DisplayName("Should handle cleanup errors gracefully")
   void shouldHandleCleanupErrorsGracefully() {
     // Arrange
-    when(tenantRepository.findByEnabledTrue()).thenThrow(new RuntimeException("Database error"));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenThrow(new RuntimeException("Database error"));
 
     // Act - should not throw exception
     service.cleanupExpiredTokens();
@@ -95,9 +96,9 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldPerformManualCleanupSuccessfully() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5);
 
@@ -106,7 +107,7 @@ class EmailVerificationTokenCleanupServiceTest {
 
     // Assert
     assertThat(deletedCount).isEqualTo(5L);
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
     verify(metricsService).startCleanupTimer();
     verify(timerSample).stop(timer);
   }
@@ -115,7 +116,7 @@ class EmailVerificationTokenCleanupServiceTest {
   @DisplayName("Should throw exception when manual cleanup fails")
   void shouldThrowExceptionWhenManualCleanupFails() {
     // Arrange
-    when(tenantRepository.findByEnabledTrue()).thenThrow(new RuntimeException("Database error"));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenThrow(new RuntimeException("Database error"));
 
     // Act & Assert
     assertThatThrownBy(() -> service.performManualCleanup())
@@ -130,11 +131,11 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldGetExpiredTokenCount() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
     var tenant2 = new Tenant("tenant-2", "Tenant 2");
-    tenant2.setEnabled(true);
+    tenant2.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1, tenant2));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L, 3L);
 
     // Act
@@ -142,14 +143,14 @@ class EmailVerificationTokenCleanupServiceTest {
 
     // Assert
     assertThat(count).isEqualTo(8L);
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
   }
 
   @Test
   @DisplayName("Should return zero when counting fails")
   void shouldReturnZeroWhenCountingFails() {
     // Arrange
-    when(tenantRepository.findByEnabledTrue()).thenThrow(new RuntimeException("Database error"));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenThrow(new RuntimeException("Database error"));
 
     // Act
     var count = service.getExpiredTokenCount();
@@ -162,13 +163,13 @@ class EmailVerificationTokenCleanupServiceTest {
   @DisplayName("Should handle empty tenant list")
   void shouldHandleEmptyTenantList() {
     // Arrange
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of());
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of());
 
     // Act
     service.cleanupExpiredTokens();
 
     // Assert
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
     verify(timerSample).stop(timer);
   }
 
@@ -177,9 +178,9 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldRecordMetricsDuringCleanup() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(5);
 
@@ -196,13 +197,13 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldProcessMultipleTenantsDuringCleanup() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
     var tenant2 = new Tenant("tenant-2", "Tenant 2");
-    tenant2.setEnabled(true);
+    tenant2.setStatus(TenantStatus.ACTIVE);
     var tenant3 = new Tenant("tenant-3", "Tenant 3");
-    tenant3.setEnabled(true);
+    tenant3.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1, tenant2, tenant3));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1, tenant2, tenant3));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(2L, 3L, 1L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(2, 3, 1);
 
@@ -210,7 +211,7 @@ class EmailVerificationTokenCleanupServiceTest {
     service.cleanupExpiredTokens();
 
     // Assert
-    verify(tenantRepository).findByEnabledTrue();
+    verify(tenantRepository).findByStatus(TenantStatus.ACTIVE);
   }
 
   @Test
@@ -218,9 +219,9 @@ class EmailVerificationTokenCleanupServiceTest {
   void shouldHandleZeroExpiredTokens() {
     // Arrange
     var tenant1 = new Tenant("tenant-1", "Tenant 1");
-    tenant1.setEnabled(true);
+    tenant1.setStatus(TenantStatus.ACTIVE);
 
-    when(tenantRepository.findByEnabledTrue()).thenReturn(List.of(tenant1));
+    when(tenantRepository.findByStatus(TenantStatus.ACTIVE)).thenReturn(List.of(tenant1));
     when(tokenRepository.countByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(0L);
     when(tokenRepository.deleteByExpiresAtBefore(any(LocalDateTime.class))).thenReturn(0);
 

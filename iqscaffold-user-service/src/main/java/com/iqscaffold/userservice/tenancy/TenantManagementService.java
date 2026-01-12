@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.tenancy;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -330,10 +331,6 @@ public class TenantManagementService {
       tenant.setApiRateLimitPerMinute(request.apiRateLimitPerMinute());
     }
 
-    if (request.enabled() != null) {
-      tenant.setEnabled(request.enabled());
-    }
-
     var updatedTenant = tenantRepository.save(tenant);
 
     logger.info("Successfully updated tenant: {}", tenantId);
@@ -413,15 +410,22 @@ public class TenantManagementService {
   }
 
   /**
-   * Enable or disable a tenant.
+   * Suspend a tenant. Prevents access but preserves all data. Can be restored.
    *
    * @param tenantId the tenant ID
-   * @param enabled  the enabled status
+   * @param reason   the suspension reason
+   * @param suspendedBy the user suspending the tenant
    * @return the updated tenant response
    * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws IllegalStateException if tenant is already suspended or archived
    */
-  public TenantResponse setTenantEnabled(String tenantId, boolean enabled) {
-    logger.info("Setting tenant {} enabled status to: {}", tenantId, enabled);
+  @Caching(evict = {
+      @CacheEvict(value = "tenants", key = "#tenantId"),
+      @CacheEvict(value = "tenants", key = "'all_tenants'"),
+      @CacheEvict(value = "tenants", key = "'enabled_tenants'")
+  })
+  public TenantResponse suspendTenant(String tenantId, String reason, String suspendedBy) {
+    logger.info("Suspending tenant: {} with reason: {}", tenantId, reason);
 
     var tenant = tenantRepository.findByTenantId(tenantId)
         .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
@@ -429,10 +433,109 @@ public class TenantManagementService {
             tenantId
         ));
 
-    tenant.setEnabled(enabled);
+    if (tenant.isSuspended()) {
+      throw new IllegalStateException("Tenant " + tenantId + " is already suspended");
+    }
+
+    if (tenant.isArchived()) {
+      throw new IllegalStateException("Tenant " + tenantId + " is archived and cannot be suspended");
+    }
+
+    tenant.setStatus(TenantStatus.SUSPENDED);
+    tenant.setSuspendedAt(LocalDateTime.now());
+    tenant.setSuspensionReason(reason);
+
     var updatedTenant = tenantRepository.save(tenant);
+    logger.info("Successfully suspended tenant: {}", tenantId);
 
     return mapToTenantResponse(updatedTenant);
+  }
+
+  /**
+   * Archive a tenant. Data is preserved but inaccessible. Terminal state - cannot be restored.
+   *
+   * @param tenantId the tenant ID
+   * @param reason   the archive reason
+   * @param archivedBy the user archiving the tenant
+   * @return the updated tenant response
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws IllegalStateException if tenant is already archived
+   */
+  @Caching(evict = {
+      @CacheEvict(value = "tenants", key = "#tenantId"),
+      @CacheEvict(value = "tenants", key = "'all_tenants'"),
+      @CacheEvict(value = "tenants", key = "'enabled_tenants'")
+  })
+  public TenantResponse archiveTenant(String tenantId, String reason, String archivedBy) {
+    logger.warn("Archiving tenant: {} with reason: {}", tenantId, reason);
+
+    var tenant = tenantRepository.findByTenantId(tenantId)
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
+
+    if (tenant.isArchived()) {
+      throw new IllegalStateException("Tenant " + tenantId + " is already archived");
+    }
+
+    tenant.setStatus(TenantStatus.ARCHIVED);
+    tenant.setArchivedAt(LocalDateTime.now());
+    tenant.setArchivedReason(reason);
+
+    var updatedTenant = tenantRepository.save(tenant);
+    logger.warn("Successfully archived tenant: {}", tenantId);
+
+    return mapToTenantResponse(updatedTenant);
+  }
+
+  /**
+   * Restore a suspended tenant back to active state. Only works for suspended tenants.
+   *
+   * @param tenantId the tenant ID
+   * @param restoredBy the user restoring the tenant
+   * @return the updated tenant response
+   * @throws TenantManagementException.TenantNotFoundException if tenant not found
+   * @throws IllegalStateException if tenant is not suspended
+   */
+  @Caching(evict = {
+      @CacheEvict(value = "tenants", key = "#tenantId"),
+      @CacheEvict(value = "tenants", key = "'all_tenants'"),
+      @CacheEvict(value = "tenants", key = "'enabled_tenants'")
+  })
+  public TenantResponse restoreTenant(String tenantId, String restoredBy) {
+    logger.info("Restoring tenant: {}", tenantId);
+
+    var tenant = tenantRepository.findByTenantId(tenantId)
+        .orElseThrow(() -> new TenantManagementException.TenantNotFoundException(
+            "Tenant not found: " + tenantId,
+            tenantId
+        ));
+
+    if (!tenant.isSuspended()) {
+      throw new IllegalStateException("Tenant " + tenantId + " is not suspended and cannot be restored");
+    }
+
+    tenant.setStatus(TenantStatus.ACTIVE);
+    tenant.setSuspendedAt(null);
+    tenant.setSuspensionReason(null);
+
+    var updatedTenant = tenantRepository.save(tenant);
+    logger.info("Successfully restored tenant: {}", tenantId);
+
+    return mapToTenantResponse(updatedTenant);
+  }
+
+  /**
+   * Check if a tenant is accessible (active and not suspended/archived).
+   *
+   * @param tenantId the tenant ID
+   * @return true if tenant is active, false otherwise
+   */
+  public boolean isTenantAccessible(String tenantId) {
+    return tenantRepository.findByTenantId(tenantId)
+        .map(Tenant::isActive)
+        .orElse(false);
   }
 
   /**
@@ -456,7 +559,7 @@ public class TenantManagementService {
           return new TenantStatistics(
               t.getTenantId(),
               t.getName(),
-              t.getEnabled(),
+              t.getStatus(),
               count,
               t.getMaxUsers(),
               utilization,
@@ -573,14 +676,18 @@ public class TenantManagementService {
         tenant.getTenantId(),
         tenant.getName(),
         tenant.getDescription(),
-        tenant.getEnabled(),
+        tenant.getStatus(),
         tenant.getDomain(),
         tenant.getMaxUsers(),
         tenant.getStorageQuotaGb(),
         tenant.getApiRateLimitPerMinute(),
         tenant.getCreatedAt(),
         tenant.getUpdatedAt(),
-        tenant.getCreatedBy()
+        tenant.getCreatedBy(),
+        tenant.getSuspendedAt(),
+        tenant.getArchivedAt(),
+        tenant.getSuspensionReason(),
+        tenant.getArchivedReason()
     );
   }
 
@@ -590,7 +697,7 @@ public class TenantManagementService {
     return new TenantSummary(
         tenant.getTenantId(),
         tenant.getName(),
-        tenant.getEnabled(),
+        tenant.getStatus(),
         userCount,
         tenant.getMaxUsers(),
         tenant.getCreatedAt()

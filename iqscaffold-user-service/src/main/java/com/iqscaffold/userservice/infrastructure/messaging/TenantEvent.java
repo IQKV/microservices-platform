@@ -88,6 +88,59 @@ public class TenantEvent {
     );
   }
 
+  /**
+   * Create a tenant suspended event.
+   */
+  public static TenantEvent tenantSuspended(String tenantId, String organizationName, String reason, String suspendedBy) {
+    var metadata = new HashMap<String, Object>();
+    metadata.put("reason", reason);
+    metadata.put("suspendedBy", suspendedBy);
+    
+    return new TenantEvent(
+        UUID.randomUUID().toString(),
+        "TENANT_SUSPENDED",
+        tenantId,
+        organizationName,
+        Instant.now(),
+        metadata
+    );
+  }
+
+  /**
+   * Create a tenant archived event.
+   */
+  public static TenantEvent tenantArchived(String tenantId, String organizationName, String reason, String archivedBy) {
+    var metadata = new HashMap<String, Object>();
+    metadata.put("reason", reason);
+    metadata.put("archivedBy", archivedBy);
+    
+    return new TenantEvent(
+        UUID.randomUUID().toString(),
+        "TENANT_ARCHIVED",
+        tenantId,
+        organizationName,
+        Instant.now(),
+        metadata
+    );
+  }
+
+  /**
+   * Create a tenant restored event.
+   */
+  public static TenantEvent tenantRestored(String tenantId, String organizationName, String restoredBy) {
+    var metadata = new HashMap<String, Object>();
+    metadata.put("restoredBy", restoredBy);
+    
+    return new TenantEvent(
+        UUID.randomUUID().toString(),
+        "TENANT_RESTORED",
+        tenantId,
+        organizationName,
+        Instant.now(),
+        metadata
+    );
+  }
+
   // Getters and setters
 
   public String getEventId() {

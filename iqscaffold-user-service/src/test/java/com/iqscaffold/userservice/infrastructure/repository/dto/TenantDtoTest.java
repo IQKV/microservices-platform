@@ -11,6 +11,7 @@ import jakarta.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import com.iqscaffold.userservice.tenancy.TenantStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -105,19 +106,18 @@ class TenantDtoTest {
   }
 
   @Test
-  void shouldCreateValidUpdateTenantRequest() {
+  void shouldUpdateTenantRequest() {
     var request = new TenantDto.UpdateTenantRequest(
         "Updated Name",
         "Updated description",
         "newdomain.com",
         200,
         100,
-        2000,
-        true
+        2000
     );
 
     assertEquals("Updated Name", request.name());
-    assertTrue(request.enabled());
+    assertEquals("Updated description", request.description());
   }
 
   @Test
@@ -128,12 +128,11 @@ class TenantDtoTest {
         null,
         null,
         null,
-        null,
         null
     );
 
     assertNull(request.name());
-    assertNull(request.enabled());
+    assertNull(request.description());
   }
 
   @Test
@@ -146,20 +145,24 @@ class TenantDtoTest {
         "tenant-123",
         "Acme Corp",
         "A great company",
-        true,
+        TenantStatus.ACTIVE,
         "acme.com",
         100,
         50,
         1000,
         createdAt,
         updatedAt,
-        "admin"
+        "admin",
+        null,
+        null,
+        null,
+        null
     );
 
     assertEquals(1L, response.id());
     assertEquals("tenant-123", response.tenantId());
     assertEquals("Acme Corp", response.name());
-    assertTrue(response.enabled());
+    assertEquals(TenantStatus.ACTIVE, response.status());
   }
 
   @Test
@@ -169,7 +172,7 @@ class TenantDtoTest {
     var summary = new TenantDto.TenantSummary(
         "tenant-123",
         "Acme Corp",
-        true,
+        TenantStatus.ACTIVE,
         75L,
         100,
         createdAt
@@ -178,6 +181,7 @@ class TenantDtoTest {
     assertEquals("tenant-123", summary.tenantId());
     assertEquals(75L, summary.userCount());
     assertEquals(100, summary.maxUsers());
+    assertEquals(TenantStatus.ACTIVE, summary.status());
   }
 
   @Test
@@ -229,7 +233,7 @@ class TenantDtoTest {
     var statistics = new TenantDto.TenantStatistics(
         "tenant-123",
         "Acme Corp",
-        true,
+        TenantStatus.ACTIVE,
         75L,
         100,
         75.0,
@@ -238,6 +242,7 @@ class TenantDtoTest {
 
     assertEquals("tenant-123", statistics.tenantId());
     assertEquals(75.0, statistics.userQuotaUtilization());
+    assertEquals(TenantStatus.ACTIVE, statistics.status());
   }
 
   @Test
@@ -247,14 +252,14 @@ class TenantDtoTest {
         100,
         50,
         1000,
-        true
+        TenantStatus.ACTIVE
     );
 
     assertEquals("tenant-123", config.tenantId());
     assertEquals(100, config.maxUsers());
     assertEquals(50, config.storageQuotaGb());
     assertEquals(1000, config.apiRateLimitPerMinute());
-    assertTrue(config.enabled());
+    assertEquals(TenantStatus.ACTIVE, config.status());
   }
 
   @Test

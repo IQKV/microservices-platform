@@ -9,15 +9,17 @@ import org.junit.jupiter.api.Test;
 class TenantTest {
 
   @Test
-  void isActiveShouldReflectEnabledFlag() {
+  void isActiveShouldReflectStatus() {
     var t = new Tenant("t-1", "Tenant One");
     assertTrue(t.isActive());
 
-    t.setEnabled(false);
+    t.setStatus(TenantStatus.SUSPENDED);
     assertFalse(t.isActive());
+    assertTrue(t.isSuspended());
 
-    t.setEnabled(null);
+    t.setStatus(TenantStatus.ARCHIVED);
     assertFalse(t.isActive());
+    assertTrue(t.isArchived());
   }
 
   @Test

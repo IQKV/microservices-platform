@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.iqscaffold.userservice.shared.exception.EmailVerificationException;
 import com.iqscaffold.userservice.tenancy.TenantContext;
 import com.iqscaffold.userservice.tenancy.TenantRepository;
+import com.iqscaffold.userservice.tenancy.TenantStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -45,7 +46,7 @@ public class EmailVerificationTokenCleanupService {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
 
-      var tenants = tenantRepository.findByEnabledTrue();
+      var tenants = tenantRepository.findByStatus(TenantStatus.ACTIVE);
       long totalDeleted = 0L;
       long totalExpired = 0L;
 
@@ -86,7 +87,7 @@ public class EmailVerificationTokenCleanupService {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
 
-      var tenants = tenantRepository.findByEnabledTrue();
+      var tenants = tenantRepository.findByStatus(TenantStatus.ACTIVE);
       long totalDeleted = 0L;
 
       for (final var tenant : tenants) {
@@ -122,7 +123,7 @@ public class EmailVerificationTokenCleanupService {
   public long getExpiredTokenCount() {
     try {
       var cutoffTime = LocalDateTime.now().minusHours(48);
-      var tenants = tenantRepository.findByEnabledTrue();
+      var tenants = tenantRepository.findByStatus(TenantStatus.ACTIVE);
       long total = 0L;
       for (final var tenant : tenants) {
         var count = TenantContext.executeInTenantContext(tenant.getTenantId(), () ->

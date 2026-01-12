@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="00000000000007" author="iqscaffold">
+        <comment>Add lifecycle status columns to tenants table</comment>
+
+        <addColumn tableName="tenants">
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="suspended_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="archived_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="suspension_reason" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="archived_reason" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="00000000000008" author="iqscaffold">
+        <comment>Create index on tenant status for performance</comment>
+
+        <createIndex indexName="idx_tenants_status" tableName="tenants">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_suspended_at" tableName="tenants">
+            <column name="suspended_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_tenants_archived_at" tableName="tenants">
+            <column name="archived_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="00000000000009" author="iqscaffold">
+        <comment>Drop enabled column from tenants table - replaced by status enum</comment>
+
+        <dropColumn tableName="tenants" columnName="enabled"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import com.iqscaffold.userservice.tenancy.TenantStatus;
 
 /**
  * Data Transfer Objects for Tenant operations using Java 21 records. Provides immutable data structures for tenant management.
@@ -60,9 +61,7 @@ public final class TenantDto {
       Integer storageQuotaGb,
 
       @Min(value = 1, message = "API rate limit must be at least 1 request per minute")
-      Integer apiRateLimitPerMinute,
-
-      Boolean enabled
+      Integer apiRateLimitPerMinute
   ) {
 
   }
@@ -75,14 +74,18 @@ public final class TenantDto {
       String tenantId,
       String name,
       String description,
-      Boolean enabled,
+      TenantStatus status,
       String domain,
       Integer maxUsers,
       Integer storageQuotaGb,
       Integer apiRateLimitPerMinute,
       LocalDateTime createdAt,
       LocalDateTime updatedAt,
-      String createdBy
+      String createdBy,
+      LocalDateTime suspendedAt,
+      LocalDateTime archivedAt,
+      String suspensionReason,
+      String archivedReason
   ) {
 
   }
@@ -93,7 +96,7 @@ public final class TenantDto {
   public record TenantSummary(
       String tenantId,
       String name,
-      Boolean enabled,
+      TenantStatus status,
       Long userCount,
       Integer maxUsers,
       LocalDateTime createdAt
@@ -107,7 +110,7 @@ public final class TenantDto {
   public record TenantStatistics(
       String tenantId,
       String name,
-      Boolean enabled,
+      TenantStatus status,
       Long userCount,
       Integer maxUsers,
       Double userQuotaUtilization,
@@ -137,7 +140,51 @@ public final class TenantDto {
       Integer maxUsers,
       Integer storageQuotaGb,
       Integer apiRateLimitPerMinute,
-      Boolean enabled
+      TenantStatus status
+  ) {
+
+  }
+
+  /**
+   * Request DTO for suspending a tenant.
+   */
+  public record SuspendTenantRequest(
+      @NotBlank(message = "Suspension reason is required")
+      @Size(min = 10, max = 500, message = "Suspension reason must be between 10 and 500 characters")
+      String reason
+  ) {
+
+  }
+
+  /**
+   * Request DTO for archiving a tenant.
+   */
+  public record ArchiveTenantRequest(
+      @NotBlank(message = "Archive reason is required")
+      @Size(min = 10, max = 500, message = "Archive reason must be between 10 and 500 characters")
+      String reason
+  ) {
+
+  }
+
+  /**
+   * Request DTO for restoring a suspended tenant.
+   */
+  public record RestoreTenantRequest(
+  ) {
+
+  }
+
+  /**
+   * Response DTO for tenant status information.
+   */
+  public record TenantStatusResponse(
+      String tenantId,
+      TenantStatus status,
+      LocalDateTime suspendedAt,
+      LocalDateTime archivedAt,
+      String suspensionReason,
+      String archivedReason
   ) {
 
   }

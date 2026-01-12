@@ -46,22 +46,19 @@ class TenantRepositoryTest {
   }
 
   @Test
-  @DisplayName("enabled filters, createdBy, and name contains queries work")
-  void enabledAndCreatedByAndNameSearch() {
+  @DisplayName("status filters, createdBy, and name contains queries work")
+  void statusAndCreatedByAndNameSearch() {
     var a = new Tenant("A", "Acme");
     a.setCreatedBy("sys");
     var b = new Tenant("B", "Beta");
     b.setCreatedBy("sys");
     var c = new Tenant("C", "Gamma");
     c.setCreatedBy("ops");
-    c.setEnabled(false);
+    c.setStatus(TenantStatus.SUSPENDED);
     tenantRepository.saveAll(List.of(a, b, c));
 
-    assertThat(tenantRepository.findByEnabledTrue()).extracting(Tenant::getTenantId).contains("A", "B");
-    assertThat(tenantRepository.findByEnabledFalse()).extracting(Tenant::getTenantId).contains("C");
-
-    assertThat(tenantRepository.countByEnabledTrue()).isEqualTo(2);
-    assertThat(tenantRepository.countByEnabledFalse()).isEqualTo(1);
+    assertThat(tenantRepository.findByStatus(TenantStatus.ACTIVE)).extracting(Tenant::getTenantId).contains("A", "B");
+    assertThat(tenantRepository.findByStatus(TenantStatus.SUSPENDED)).extracting(Tenant::getTenantId).contains("C");
 
     assertThat(tenantRepository.findByCreatedBy("sys")).extracting(Tenant::getTenantId).containsExactlyInAnyOrder("A", "B");
 
