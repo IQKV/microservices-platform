@@ -2,6 +2,19 @@
 
 > Reactive API gateway providing intelligent routing, JWT authentication, Redis-backed rate limiting, circuit breaker patterns, and user context propagation across microservices.
 
+## Table of Contents
+
+- [Business Purpose](#business-purpose)
+- [Overview](#overview)
+- [What It Demonstrates](#what-it-demonstrates)
+- [Architecture Patterns](#architecture-patterns)
+- [Technical Highlights](#technical-highlights)
+- [Use Cases Implemented](#use-cases-implemented)
+- [API Examples](#api-examples)
+- [Learning Points](#learning-points)
+- [Adapting for Your Domain](#adapting-for-your-domain)
+- [Integration with Downstream Services](#integration-with-downstream-services)
+
 ## Business Purpose
 
 A centralized entry point for the IQ Scaffold microservices platform that handles:

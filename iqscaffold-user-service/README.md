@@ -2,6 +2,19 @@
 
 > Centralized authentication and user management microservice providing JWT-based authentication, user lifecycle management, role-based access control, and email verification.
 
+## Table of Contents
+
+- [Business Purpose](#business-purpose)
+- [Overview](#overview)
+- [What It Demonstrates](#what-it-demonstrates)
+- [Architecture Patterns](#architecture-patterns)
+- [Technical Highlights](#technical-highlights)
+- [Use Cases Implemented](#use-cases-implemented)
+- [API Examples](#api-examples)
+- [Learning Points](#learning-points)
+- [Adapting for Your Domain](#adapting-for-your-domain)
+- [Integration with Other Services](#integration-with-other-services)
+
 ## Business Purpose
 
 An identity and access management service that handles:

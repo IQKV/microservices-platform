@@ -2,6 +2,26 @@
 
 > Multi-tenant billing and payment orchestration service providing Stripe integration, merchant onboarding, automated payment lifecycle management, and comprehensive financial operations.
 
+## Table of Contents
+
+- [Business Purpose](#business-purpose)
+- [Overview](#overview)
+- [What It Demonstrates](#what-it-demonstrates)
+- [Architecture Patterns](#architecture-patterns)
+- [API Endpoints](#api-endpoints)
+- [Payment State Machine](#payment-state-machine)
+- [Payout Management](#payout-management)
+- [Database & Multi-Tenancy](#database--multi-tenancy)
+- [Technical Highlights](#technical-highlights)
+- [Messaging & Event Architecture](#messaging--event-architecture)
+- [Webhook Processing](#webhook-processing)
+- [Payment Gateway Configuration](#payment-gateway-configuration)
+- [Configuration](#configuration)
+- [Observability & Monitoring](#observability--monitoring)
+- [Security Features](#security-features)
+- [Development & Testing](#development--testing)
+- [Gateway Configuration Examples](#gateway-configuration-examples)
+
 ## Business Purpose
 
 A core domain service for the IQ Scaffold platform that handles comprehensive financial operations:
