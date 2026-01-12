@@ -3,8 +3,11 @@ package com.iqscaffold.billingservice.subscription;
 import java.util.List;
 import java.util.UUID;
 
+import com.iqscaffold.billingservice.subscription.dto.SubscriptionDtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,59 +23,71 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
   private static final Logger log = LoggerFactory.getLogger(SubscriptionPlanServiceImpl.class);
 
   private final SubscriptionPlanRepository planRepository;
-  // Note: Stripe integration will be added when PaymentProviderAdapter is extended
+  private final com.iqscaffold.billingservice.payment.PaymentProviderFactory paymentProviderFactory;
 
-  public SubscriptionPlanServiceImpl(final SubscriptionPlanRepository planRepository) {
+  public SubscriptionPlanServiceImpl(
+      final SubscriptionPlanRepository planRepository,
+      final com.iqscaffold.billingservice.payment.PaymentProviderFactory paymentProviderFactory) {
     this.planRepository = planRepository;
+    this.paymentProviderFactory = paymentProviderFactory;
   }
 
   @Override
-  public SubscriptionPlan createPlan(final SubscriptionPlan plan) {
-    log.debug("Creating subscription plan: {}", plan.getName());
+  public SubscriptionDtos.PlanResponse createPlan(final SubscriptionDtos.UpsertPlanRequest request) {
+    log.debug("Creating subscription plan: {}", request.name());
 
     // Validate unique name
-    if (planRepository.existsByName(plan.getName())) {
-      throw new IllegalArgumentException("Plan with name '" + plan.getName() + "' already exists");
+    if (planRepository.existsByName(request.name())) {
+      throw new IllegalArgumentException("Plan with name '" + request.name() + "' already exists");
     }
 
-    // Validate pricing
-    if (plan.getAmount() == null || plan.getAmount().signum() < 0) {
-      throw new IllegalArgumentException("Plan amount must be a positive value");
+    // Create entity from request
+    SubscriptionPlan plan = new SubscriptionPlan();
+    plan.setName(request.name());
+    plan.setDescription(request.description());
+    plan.setAmount(request.priceAmount());
+    plan.setCurrency(request.currency());
+    plan.setInterval(SubscriptionInterval.valueOf(request.interval().toUpperCase()));
+    plan.setIntervalCount(request.intervalCount() != null ? request.intervalCount() : 1);
+    plan.setTrialPeriodDays(request.trialDays() != null ? request.trialDays() : 0);
+    plan.setIsActive(request.isActive() != null ? request.isActive() : true);
+
+    if (request.features() != null) {
+      plan.setFeatures(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.features()).toString());
+    }
+    
+    if (request.metadata() != null) {
+      plan.setMetadata(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.metadata()).toString());
     }
 
     SubscriptionPlan savedPlan = planRepository.save(plan);
     log.info("Created subscription plan: {} with ID: {}", savedPlan.getName(), savedPlan.getId());
 
-    return savedPlan;
+    return mapToResponse(savedPlan);
   }
 
   @Override
-  public SubscriptionPlan updatePlan(final UUID id, final SubscriptionPlan plan) {
+  public SubscriptionDtos.PlanResponse updatePlan(final UUID id, final SubscriptionDtos.UpsertPlanRequest request) {
     log.debug("Updating subscription plan: {}", id);
 
-    SubscriptionPlan existingPlan = getPlan(id);
+    SubscriptionPlan existingPlan = planRepository.findById(id)
+        .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with id: " + id));
 
     // Update mutable fields
-    if (plan.getName() != null) {
-      existingPlan.setName(plan.getName());
+    if (request.name() != null) {
+      existingPlan.setName(request.name());
     }
-    if (plan.getDescription() != null) {
-      existingPlan.setDescription(plan.getDescription());
+    if (request.description() != null) {
+      existingPlan.setDescription(request.description());
     }
-    if (plan.getFeatures() != null) {
-      existingPlan.setFeatures(plan.getFeatures());
+    if (request.isActive() != null) {
+      existingPlan.setIsActive(request.isActive());
     }
-    if (plan.getMaxUsers() != null) {
-      existingPlan.setMaxUsers(plan.getMaxUsers());
+    if (request.features() != null) {
+      existingPlan.setFeatures(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.features()).toString());
     }
-    if (plan.getMaxStorageGb() != null) {
-      existingPlan.setMaxStorageGb(plan.getMaxStorageGb());
-    }
-    if (plan.getMaxApiCalls() != null) {
-      existingPlan.setMaxApiCalls(plan.getMaxApiCalls());
-    }
-    if (plan.getMetadata() != null) {
-      existingPlan.setMetadata(plan.getMetadata());
+    if (request.metadata() != null) {
+      existingPlan.setMetadata(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.metadata()).toString());
     }
 
     // Note: Price and interval are immutable once set (Stripe limitation)
@@ -81,33 +96,38 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     SubscriptionPlan updatedPlan = planRepository.save(existingPlan);
     log.info("Updated subscription plan: {}", updatedPlan.getId());
 
-    return updatedPlan;
+    return mapToResponse(updatedPlan);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public SubscriptionPlan getPlan(final UUID id) {
-    return planRepository.findById(id)
+  public SubscriptionDtos.PlanResponse getPlan(final UUID id) {
+    SubscriptionPlan plan = planRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with id: " + id));
+    return mapToResponse(plan);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<SubscriptionPlan> getActivePlans() {
-    return planRepository.findByIsActiveTrue();
+  public List<SubscriptionDtos.PlanResponse> getActivePlans() {
+    return planRepository.findByIsActiveTrue().stream()
+        .map(this::mapToResponse)
+        .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<SubscriptionPlan> getAllPlans() {
-    return planRepository.findAll();
+  public Page<SubscriptionDtos.PlanResponse> getAllPlans(Pageable pageable) {
+    return planRepository.findAll(pageable)
+        .map(this::mapToResponse);
   }
 
   @Override
   public void deactivatePlan(final UUID id) {
     log.debug("Deactivating subscription plan: {}", id);
 
-    SubscriptionPlan plan = getPlan(id);
+    SubscriptionPlan plan = planRepository.findById(id)
+        .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with id: " + id));
     plan.setIsActive(false);
     planRepository.save(plan);
 
@@ -118,7 +138,8 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
   public void activatePlan(final UUID id) {
     log.debug("Activating subscription plan: {}", id);
 
-    SubscriptionPlan plan = getPlan(id);
+    SubscriptionPlan plan = planRepository.findById(id)
+        .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with id: " + id));
     plan.setIsActive(true);
     planRepository.save(plan);
 
@@ -126,37 +147,60 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
   }
 
   @Override
-  public SubscriptionPlan syncPlanWithStripe(final UUID id) {
+  public void syncPlanWithStripe(final UUID id) {
     log.debug("Syncing subscription plan with Stripe: {}", id);
 
-    SubscriptionPlan plan = getPlan(id);
+    SubscriptionPlan plan = planRepository.findById(id)
+        .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with id: " + id));
 
-    // TODO: Implement Stripe Product and Price creation
-    // This will be implemented once PaymentProviderAdapter is extended with subscription methods
-    // 
-    // Steps:
-    // 1. Check if stripeProductId exists, if not create Stripe Product
-    // 2. Check if stripePriceId exists, if not create Stripe Price
-    // 3. Update plan with Stripe IDs
-    //
-    // Example:
-    // if (plan.getStripeProductId() == null) {
-    //   String productId = stripeProvider.createProduct(plan.getName(), plan.getDescription());
-    //   plan.setStripeProductId(productId);
-    // }
-    // if (plan.getStripePriceId() == null) {
-    //   String priceId = stripeProvider.createPrice(
-    //     plan.getStripeProductId(), 
-    //     plan.getAmount(), 
-    //     plan.getCurrency(), 
-    //     plan.getInterval()
-    //   );
-    //   plan.setStripePriceId(priceId);
-    // }
+    // Get the Stripe payment provider
+    var provider = paymentProviderFactory.getProvider(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE);
 
-    log.warn("Stripe sync not yet implemented for plan: {}", id);
-    
-    return planRepository.save(plan);
+    try {
+      // Create Stripe Product if not exists
+      if (plan.getStripeProductId() == null) {
+        log.info("Creating Stripe Product for plan: {}", plan.getName());
+        
+        java.util.Map<String, String> metadata = new java.util.HashMap<>();
+        metadata.put("plan_id", plan.getId().toString());
+        
+        String productId = provider.createProduct(
+            plan.getName(),
+            plan.getDescription(),
+            metadata
+        );
+        
+        plan.setStripeProductId(productId);
+        log.info("Created Stripe Product: {}", productId);
+      }
+
+      // Create Stripe Price if not exists
+      if (plan.getStripePriceId() == null) {
+        log.info("Creating Stripe Price for plan: {}", plan.getName());
+        
+        java.util.Map<String, String> metadata = new java.util.HashMap<>();
+        metadata.put("plan_id", plan.getId().toString());
+        
+        String priceId = provider.createPrice(
+            plan.getStripeProductId(),
+            plan.getAmount(),
+            plan.getCurrency(),
+            plan.getInterval().name(),
+            plan.getIntervalCount(),
+            metadata
+        );
+        
+        plan.setStripePriceId(priceId);
+        log.info("Created Stripe Price: {}", priceId);
+      }
+
+      planRepository.save(plan);
+      log.info("Successfully synced plan {} with Stripe", id);
+      
+    } catch (Exception e) {
+      log.error("Failed to sync plan {} with Stripe: {}", id, e.getMessage(), e);
+      throw new RuntimeException("Failed to sync plan with Stripe: " + e.getMessage(), e);
+    }
   }
 
   @Override
@@ -164,5 +208,20 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
   public SubscriptionPlan findByStripePriceId(final String stripePriceId) {
     return planRepository.findByStripePriceId(stripePriceId)
         .orElseThrow(() -> new SubscriptionNotFoundException("Plan not found with Stripe price ID: " + stripePriceId));
+  }
+
+  private SubscriptionDtos.PlanResponse mapToResponse(SubscriptionPlan plan) {
+    return new SubscriptionDtos.PlanResponse(
+        plan.getId(),
+        plan.getName(),
+        plan.getDescription(),
+        plan.getAmount(),
+        plan.getCurrency(),
+        plan.getInterval().name(),
+        plan.getIntervalCount(),
+        plan.getTrialPeriodDays(),
+        plan.getIsActive(),
+        plan.getStripePriceId(),
+        plan.getStripeProductId());
   }
 }

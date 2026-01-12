@@ -45,6 +45,19 @@ public record WebhookEvent(
     public static final String PAYOUT_PAID = "payout.paid";
     public static final String PAYOUT_FAILED = "payout.failed";
     public static final String ACCOUNT_UPDATED = "account.updated";
+    
+    // Subscription events
+    public static final String SUBSCRIPTION_CREATED = "subscription.created";
+    public static final String SUBSCRIPTION_UPDATED = "subscription.updated";
+    public static final String SUBSCRIPTION_CANCELED = "subscription.canceled";
+    public static final String SUBSCRIPTION_TRIAL_ENDING = "subscription.trial_ending";
+    
+    // Invoice events
+    public static final String INVOICE_CREATED = "invoice.created";
+    public static final String INVOICE_FINALIZED = "invoice.finalized";
+    public static final String INVOICE_PAID = "invoice.paid";
+    public static final String INVOICE_PAYMENT_FAILED = "invoice.payment_failed";
+    public static final String INVOICE_VOIDED = "invoice.voided";
 
     private EventType() {
       // Utility class
@@ -60,6 +73,8 @@ public record WebhookEvent(
     public static final String REFUND = "refund";
     public static final String PAYOUT = "payout";
     public static final String ACCOUNT = "account";
+    public static final String SUBSCRIPTION = "subscription";
+    public static final String INVOICE = "invoice";
 
     private ResourceType() {
       // Utility class
@@ -85,6 +100,20 @@ public record WebhookEvent(
    */
   public boolean isAccountEvent() {
     return eventType.startsWith("account.");
+  }
+
+  /**
+   * Check if this event is related to a subscription.
+   */
+  public boolean isSubscriptionEvent() {
+    return eventType.startsWith("subscription.");
+  }
+
+  /**
+   * Check if this event is related to an invoice.
+   */
+  public boolean isInvoiceEvent() {
+    return eventType.startsWith("invoice.");
   }
 
   /**

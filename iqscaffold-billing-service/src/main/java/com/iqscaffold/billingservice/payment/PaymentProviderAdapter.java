@@ -86,4 +86,83 @@ public interface PaymentProviderAdapter {
    * @throws IllegalArgumentException If signature verification fails or payload is invalid
    */
   WebhookEvent verifyAndParseWebhook(String payload, String sigHeader);
+
+  // ==================== Subscription Management Methods ====================
+
+  /**
+   * Create a Product in the payment provider.
+   *
+   * @param name        Product name
+   * @param description Product description
+   * @param metadata    Additional metadata
+   * @return Product ID
+   */
+  String createProduct(String name, String description, java.util.Map<String, String> metadata);
+
+  /**
+   * Create a Price for a Product.
+   *
+   * @param productId     Product ID
+   * @param amount        Price amount in major units
+   * @param currency      Currency code
+   * @param interval      Billing interval (month, year, etc.)
+   * @param intervalCount Number of intervals between billings
+   * @param metadata      Additional metadata
+   * @return Price ID
+   */
+  String createPrice(String productId, BigDecimal amount, String currency, 
+                     String interval, Integer intervalCount, java.util.Map<String, String> metadata);
+
+  /**
+   * Create a Subscription for a customer.
+   *
+   * @param customerId        Customer ID
+   * @param priceId           Price ID to subscribe to
+   * @param trialPeriodDays   Number of trial days (optional)
+   * @param metadata          Additional metadata
+   * @param idempotencyKey    Key to ensure operation is not repeated
+   * @return Subscription ID
+   */
+  String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
+                            java.util.Map<String, String> metadata, String idempotencyKey);
+
+  /**
+   * Update a subscription (e.g., change plan, update quantity).
+   *
+   * @param subscriptionId Subscription ID
+   * @param newPriceId     New price ID (if changing plan)
+   * @param metadata       Updated metadata
+   * @return Updated subscription ID
+   */
+  String updateSubscription(String subscriptionId, String newPriceId, java.util.Map<String, String> metadata);
+
+  /**
+   * Cancel a subscription.
+   *
+   * @param subscriptionId  Subscription ID
+   * @param cancelAtPeriodEnd If true, cancel at end of current period; if false, cancel immediately
+   */
+  void cancelSubscription(String subscriptionId, boolean cancelAtPeriodEnd);
+
+  /**
+   * Pause a subscription (pause collection).
+   *
+   * @param subscriptionId Subscription ID
+   */
+  void pauseSubscription(String subscriptionId);
+
+  /**
+   * Resume a paused subscription.
+   *
+   * @param subscriptionId Subscription ID
+   */
+  void resumeSubscription(String subscriptionId);
+
+  /**
+   * Retrieve subscription details from the provider.
+   *
+   * @param subscriptionId Subscription ID
+   * @return Subscription details (provider-specific object)
+   */
+  Object getSubscription(String subscriptionId);
 }

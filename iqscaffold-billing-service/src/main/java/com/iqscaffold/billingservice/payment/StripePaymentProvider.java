@@ -384,6 +384,24 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       metadata.put("payouts_enabled", account.getPayoutsEnabled());
       
       // Note: Tenant resolution from account ID is handled in event handlers
+    } else if (dataObject instanceof com.stripe.model.Subscription subscription) {
+      resourceId = subscription.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.SUBSCRIPTION;
+      tenantId = java.util.Optional.ofNullable(subscription.getMetadata().get("tenant_id"));
+      metadata.putAll(subscription.getMetadata());
+      metadata.put("status", subscription.getStatus());
+      metadata.put("customer", subscription.getCustomer());
+      // Store subscription object for processing in handlers
+      metadata.put("subscription", subscription);
+    } else if (dataObject instanceof com.stripe.model.Invoice invoice) {
+      resourceId = invoice.getId();
+      resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.INVOICE;
+      
+      metadata.put("customer", invoice.getCustomer());
+      metadata.put("status", invoice.getStatus());
+      metadata.put("currency", invoice.getCurrency());
+      // Store invoice object for processing in handlers
+      metadata.put("invoice", invoice);
     }
 
     return new com.iqscaffold.billingservice.webhook.WebhookEvent(
@@ -413,6 +431,20 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       case "payout.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_PAID;
       case "payout.failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_FAILED;
       case "account.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.ACCOUNT_UPDATED;
+      
+      // Subscription events
+      case "customer.subscription.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
+      case "customer.subscription.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
+      case "customer.subscription.deleted" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
+      case "customer.subscription.trial_will_end" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
+      
+      // Invoice events
+      case "invoice.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_CREATED;
+      case "invoice.finalized" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_FINALIZED;
+      case "invoice.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAID;
+      case "invoice.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
+      case "invoice.voided" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_VOIDED;
+      
       default -> stripeEventType; // Keep original for unsupported events
     };
   }
@@ -425,5 +457,231 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       case com.stripe.exception.ApiConnectionException ace -> new PaymentException("Stripe connection failed", ace);
       case com.stripe.exception.StripeException se -> new PaymentException("Stripe error: " + se.getMessage(), se);
     };
+  }
+
+  // ==================== Subscription Management Implementation ====================
+
+  @Override
+  public String createProduct(String name, String description, java.util.Map<String, String> metadata) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      var paramsBuilder = com.stripe.param.ProductCreateParams.builder()
+          .setName(name)
+          .setDescription(description);
+
+      if (metadata != null) {
+        paramsBuilder.putAllMetadata(metadata);
+      }
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      var product = com.stripe.model.Product.create(paramsBuilder.build(), options);
+
+      return product.getId();
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public String createPrice(String productId, BigDecimal amount, String currency,
+                            String interval, Integer intervalCount, java.util.Map<String, String> metadata) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      // Map interval string to Stripe enum
+      com.stripe.param.PriceCreateParams.Recurring.Interval stripeInterval = switch (interval.toLowerCase()) {
+        case "day" -> com.stripe.param.PriceCreateParams.Recurring.Interval.DAY;
+        case "week" -> com.stripe.param.PriceCreateParams.Recurring.Interval.WEEK;
+        case "month" -> com.stripe.param.PriceCreateParams.Recurring.Interval.MONTH;
+        case "year" -> com.stripe.param.PriceCreateParams.Recurring.Interval.YEAR;
+        default -> throw new IllegalArgumentException("Invalid interval: " + interval);
+      };
+
+      var recurringBuilder = com.stripe.param.PriceCreateParams.Recurring.builder()
+          .setInterval(stripeInterval);
+
+      if (intervalCount != null && intervalCount > 1) {
+        recurringBuilder.setIntervalCount(intervalCount.longValue());
+      }
+
+      var paramsBuilder = com.stripe.param.PriceCreateParams.builder()
+          .setProduct(productId)
+          .setUnitAmount(toMinorUnits(amount, currency))
+          .setCurrency(currency)
+          .setRecurring(recurringBuilder.build());
+
+      if (metadata != null) {
+        paramsBuilder.putAllMetadata(metadata);
+      }
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      var price = com.stripe.model.Price.create(paramsBuilder.build(), options);
+
+      return price.getId();
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
+                                   java.util.Map<String, String> metadata, String idempotencyKey) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      var itemBuilder = com.stripe.param.SubscriptionCreateParams.Item.builder()
+          .setPrice(priceId);
+
+      var paramsBuilder = com.stripe.param.SubscriptionCreateParams.builder()
+          .setCustomer(customerId)
+          .addItem(itemBuilder.build());
+
+      if (trialPeriodDays != null && trialPeriodDays > 0) {
+        paramsBuilder.setTrialPeriodDays(trialPeriodDays.longValue());
+      }
+
+      if (metadata != null) {
+        paramsBuilder.putAllMetadata(metadata);
+      }
+
+      // Add tenant ID to metadata for webhook resolution
+      if (tenantId != null) {
+        paramsBuilder.putMetadata("tenant_id", tenantId);
+      }
+
+      RequestOptions.RequestOptionsBuilder optionsBuilder = RequestOptions.builder().setApiKey(apiKey);
+      if (idempotencyKey != null) {
+        optionsBuilder.setIdempotencyKey(idempotencyKey);
+      }
+
+      var subscription = com.stripe.model.Subscription.create(paramsBuilder.build(), optionsBuilder.build());
+
+      return subscription.getId();
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public String updateSubscription(String subscriptionId, String newPriceId, java.util.Map<String, String> metadata) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+
+      // Retrieve current subscription to get item ID
+      var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
+      var items = subscription.getItems().getData();
+
+      if (items.isEmpty()) {
+        throw new PaymentException("Subscription has no items");
+      }
+
+      var paramsBuilder = com.stripe.param.SubscriptionUpdateParams.builder();
+
+      // Update price if provided
+      if (newPriceId != null) {
+        var itemUpdateBuilder = com.stripe.param.SubscriptionUpdateParams.Item.builder()
+            .setId(items.get(0).getId())
+            .setPrice(newPriceId);
+        paramsBuilder.addItem(itemUpdateBuilder.build());
+      }
+
+      // Update metadata if provided
+      if (metadata != null) {
+        paramsBuilder.putAllMetadata(metadata);
+      }
+
+      var updatedSubscription = subscription.update(paramsBuilder.build(), options);
+
+      return updatedSubscription.getId();
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public void cancelSubscription(String subscriptionId, boolean cancelAtPeriodEnd) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
+
+      if (cancelAtPeriodEnd) {
+        // Schedule cancellation at period end
+        var params = com.stripe.param.SubscriptionUpdateParams.builder()
+            .setCancelAtPeriodEnd(true)
+            .build();
+        subscription.update(params, options);
+      } else {
+        // Cancel immediately
+        var cancelParams = com.stripe.param.SubscriptionCancelParams.builder().build();
+        subscription.cancel(cancelParams, options);
+      }
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public void pauseSubscription(String subscriptionId) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
+
+      var pauseCollection = com.stripe.param.SubscriptionUpdateParams.PauseCollection.builder()
+          .setBehavior(com.stripe.param.SubscriptionUpdateParams.PauseCollection.Behavior.VOID)
+          .build();
+
+      var params = com.stripe.param.SubscriptionUpdateParams.builder()
+          .setPauseCollection(pauseCollection)
+          .build();
+
+      subscription.update(params, options);
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public void resumeSubscription(String subscriptionId) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
+
+      var params = com.stripe.param.SubscriptionUpdateParams.builder()
+          .setPauseCollection(com.stripe.param.SubscriptionUpdateParams.PauseCollection.builder().build())
+          .build();
+
+      subscription.update(params, options);
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  @Override
+  public Object getSubscription(String subscriptionId) {
+    try {
+      String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+
+      RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
+      return com.stripe.model.Subscription.retrieve(subscriptionId, options);
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
   }
 }
