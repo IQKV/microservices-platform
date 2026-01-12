@@ -19,6 +19,7 @@
 - [Configuration](#configuration)
 - [Observability & Monitoring](#observability--monitoring)
 - [Security Features](#security-features)
+- [Authorization & Access Control](#authorization--access-control)
 - [Development & Testing](#development--testing)
 - [Gateway Configuration Examples](#gateway-configuration-examples)
 
@@ -600,6 +601,52 @@ EMAIL_SERVICE_URL=http://localhost:8084
 - **MDC Logging**: Correlation IDs for request tracing and debugging
 - **CSRF Protection**: Configured appropriately for stateless API endpoints
 
+## Authorization & Access Control
+
+The billing service implements comprehensive authorization controls with multi-layer security:
+
+### Authorization Architecture
+
+- **Multi-Layer Defense**: Authorization enforced at controller, service, and repository layers
+- **Centralized Authorization**: `BillingAuthorizationService` provides consistent permission checks
+- **Ownership Validation**: Resources validated against user's tenant ID
+- **Role-Based Access Control**: Fine-grained permissions based on user roles
+
+### Authorization Rules
+
+| Operation           | Required Roles                                                           | Ownership Check |
+| ------------------- | ------------------------------------------------------------------------ | --------------- |
+| **Subscriptions**   |
+| Create subscription | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View subscription   | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`, `USER` | ✅              |
+| Manage subscription | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
+| **Plans**           |
+| Manage plans        | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View plans          | Any authenticated user                                                   | ❌              |
+| **Invoices**        |
+| View invoices       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+
+### Key Features
+
+- **Tenant Isolation**: Strict separation between tenant data
+- **Ownership Validation**: Users can only access resources in their tenant
+- **Super Admin Bypass**: `SUPER_ADMIN` has platform-wide access
+- **Audit Trail**: All subscription state changes logged
+- **Fail Secure**: Access denied by default; explicit permission required
+
+### Example Usage
+
+```java
+// Controller with authorization
+@PostMapping("/{id}/cancel")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+public ResponseEntity<Response> cancelSubscription(@PathVariable UUID id) {
+  // Verify authorization with ownership check
+  authorizationService.requireSubscriptionManagePermission(id);
+  return ResponseEntity.ok(subscriptionService.cancelSubscription(id));
+}
+```
+
 ## Development & Testing
 
 ### Key Dependencies
@@ -617,6 +664,7 @@ EMAIL_SERVICE_URL=http://localhost:8084
 - Unit tests with Mockito for service layer testing
 - Integration tests with Testcontainers (PostgreSQL, RabbitMQ)
 - Architecture tests with ArchUnit for structural validation
+- Authorization tests for role-based access control and ownership validation
 - Spring Modulith tests for modular architecture validation
 - Webhook testing with signature verification
 
