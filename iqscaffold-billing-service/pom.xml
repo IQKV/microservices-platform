@@ -235,6 +235,9 @@
                         <exclude>**/*Constants.class</exclude>
                         <exclude>**/*Constants$*.class</exclude>
 
+                        <!-- Enums -->
+                        <exclude>**/*Status.class</exclude>
+
                         <!-- Exceptions -->
                         <exclude>**/*Exception.class</exclude>
 
