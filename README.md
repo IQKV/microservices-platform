@@ -2,6 +2,19 @@
 
 > Production-ready Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
+## Table of Contents
+
+- [Business Purpose](#business-purpose)
+- [Platform Services](#platform-services)
+- [Architecture Overview](#architecture-overview)
+- [Key Features](#key-features)
+- [Architecture Patterns](#architecture-patterns)
+- [Getting Started](#getting-started)
+- [API Endpoints](#api-endpoints)
+- [Monitoring](#monitoring)
+- [Learning Objectives](#learning-objectives)
+- [Adapting for Your Domain](#adapting-for-your-domain)
+
 ## Business Purpose
 
 A microservices ecosystem that provides:
