@@ -372,7 +372,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       eventPublisher.publishSubscriptionResumed(
           SubscriptionEvent.resumed(subscription.getId(), TenantContext.getCurrentTenantId())
       );
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to resume subscription: {}", id, e);
       throw new RuntimeException("Failed to resume subscription with payment provider", e);
     }
@@ -395,14 +395,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     try {
       Object stripeSubscriptionObj = paymentProvider.getSubscription(stripeSubscriptionId);
       
-      // In a real implementation, extract details from Stripe subscription object
+      // In a real implementation, extract details from the Stripe subscription object
       // For now, just log the sync
       log.info("Retrieved subscription from Stripe: {}", stripeSubscriptionId);
 
-      // Keep existing status for now
+      // Keep the existing status for now
       subscriptionRepository.save(subscription);
       log.info("Synced subscription: {}", subscription.getId());
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to sync subscription from Stripe: {}", stripeSubscriptionId, e);
       throw new RuntimeException("Failed to sync subscription from Stripe", e);
     }
