@@ -7,11 +7,11 @@ import java.util.UUID;
  */
 public class SubscriptionNotFoundException extends RuntimeException {
 
-  public SubscriptionNotFoundException(UUID id) {
+  public SubscriptionNotFoundException(final UUID id) {
     super("Subscription not found with id: " + id);
   }
 
-  public SubscriptionNotFoundException(String message) {
+  public SubscriptionNotFoundException(final String message) {
     super(message);
   }
 }

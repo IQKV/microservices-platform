@@ -23,20 +23,18 @@ import org.hibernate.type.SqlTypes;
 /**
  * Represents a tenant's subscription to a platform plan.
  * <p>
- * Stored in public schema as it tracks cross-tenant subscription data.
+ * Stored in tenant-specific schema for maximum isolation.
  * Each tenant can have one active subscription at a time.
+ * Tenant context is determined by the schema, not a column.
  */
 @Entity
-@Table(name = "tenant_subscription", schema = "public")
+@Table(name = "tenant_subscription")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.billingservice.subscription.TenantSubscription")
 public class TenantSubscription {
 
   @Id
   private UUID id;
-
-  @Column(name = "tenant_id", nullable = false)
-  private String tenantId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "plan_id", nullable = false)
@@ -97,14 +95,6 @@ public class TenantSubscription {
 
   public void setId(UUID id) {
     this.id = id;
-  }
-
-  public String getTenantId() {
-    return tenantId;
-  }
-
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
   }
 
   public SubscriptionPlan getPlan() {

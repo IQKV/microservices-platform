@@ -22,10 +22,10 @@ import org.hibernate.type.SqlTypes;
  * Subscription invoice entity.
  * <p>
  * Tracks billing invoices generated for tenant subscriptions.
- * Stored in public schema.
+ * Stored in tenant-specific schema for isolation.
  */
 @Entity
-@Table(name = "subscription_invoice", schema = "public")
+@Table(name = "subscription_invoice")
 public class SubscriptionInvoice {
 
   @Id
@@ -34,9 +34,6 @@ public class SubscriptionInvoice {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "tenant_subscription_id", nullable = false)
   private TenantSubscription tenantSubscription;
-
-  @Column(name = "tenant_id", nullable = false)
-  private String tenantId;
 
   @Column(name = "invoice_number", length = 100)
   private String invoiceNumber;
@@ -98,14 +95,6 @@ public class SubscriptionInvoice {
 
   public void setTenantSubscription(TenantSubscription tenantSubscription) {
     this.tenantSubscription = tenantSubscription;
-  }
-
-  public String getTenantId() {
-    return tenantId;
-  }
-
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
   }
 
   public String getInvoiceNumber() {

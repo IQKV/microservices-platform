@@ -17,10 +17,10 @@ import java.util.UUID;
  * Line item within a subscription.
  * <p>
  * Supports multiple plans/add-ons within a single subscription.
- * Stored in public schema.
+ * Stored in tenant-specific schema for isolation.
  */
 @Entity
-@Table(name = "subscription_item", schema = "public")
+@Table(name = "subscription_item")
 public class SubscriptionItem {
 
   @Id

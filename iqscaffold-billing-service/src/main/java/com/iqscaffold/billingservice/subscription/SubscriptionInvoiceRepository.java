@@ -13,6 +13,9 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for {@link SubscriptionInvoice} entities.
+ * <p>
+ * All queries are automatically scoped to the current tenant's schema.
+ * No tenant_id filtering needed - schema isolation provides tenant context.
  */
 @Repository
 public interface SubscriptionInvoiceRepository extends JpaRepository<SubscriptionInvoice, UUID> {
@@ -26,15 +29,6 @@ public interface SubscriptionInvoiceRepository extends JpaRepository<Subscriptio
    */
   @Query("SELECT i FROM SubscriptionInvoice i WHERE i.tenantSubscription.id = :tenantSubscriptionId")
   Page<SubscriptionInvoice> findByTenantSubscriptionId(@Param("tenantSubscriptionId") UUID tenantSubscriptionId, Pageable pageable);
-
-  /**
-   * Find invoices by tenant ID.
-   *
-   * @param tenantId Tenant ID
-   * @param pageable Pagination parameters
-   * @return Page of invoices
-   */
-  Page<SubscriptionInvoice> findByTenantId(String tenantId, Pageable pageable);
 
   /**
    * Find an invoice by Stripe invoice ID.
@@ -54,16 +48,15 @@ public interface SubscriptionInvoiceRepository extends JpaRepository<Subscriptio
   Page<SubscriptionInvoice> findByStatus(InvoiceStatus status, Pageable pageable);
 
   /**
-   * Find open invoices for a tenant.
+   * Find open invoices for current tenant.
    *
-   * @param tenantId Tenant ID
    * @return List of open invoices
    */
-  @Query("SELECT i FROM SubscriptionInvoice i WHERE i.tenantId = :tenantId AND i.status = 'OPEN'")
-  List<SubscriptionInvoice> findOpenInvoicesByTenantId(@Param("tenantId") String tenantId);
+  @Query("SELECT i FROM SubscriptionInvoice i WHERE i.status = 'OPEN'")
+  List<SubscriptionInvoice> findOpenInvoices();
 
   /**
-   * Find overdue invoices.
+   * Find overdue invoices for current tenant.
    *
    * @return List of overdue invoices
    */

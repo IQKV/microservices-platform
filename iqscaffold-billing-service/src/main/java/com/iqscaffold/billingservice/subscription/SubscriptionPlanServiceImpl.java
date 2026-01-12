@@ -197,7 +197,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
       planRepository.save(plan);
       log.info("Successfully synced plan {} with Stripe", id);
       
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to sync plan {} with Stripe: {}", id, e.getMessage(), e);
       throw new RuntimeException("Failed to sync plan with Stripe: " + e.getMessage(), e);
     }

@@ -72,9 +72,8 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     String status = event.getMetadataString("status").orElse("active");
     String customerId = event.getMetadataString("customer").orElse(null);
 
-    // Create local subscription record
+    // Create local subscription record (no tenant_id needed - schema provides context)
     TenantSubscription subscription = new TenantSubscription();
-    subscription.setTenantId(tenantId);
     subscription.setStripeSubscriptionId(stripeSubscriptionId);
     subscription.setStripeCustomerId(customerId);
     subscription.setStatus(mapStripeStatusToLocal(status));

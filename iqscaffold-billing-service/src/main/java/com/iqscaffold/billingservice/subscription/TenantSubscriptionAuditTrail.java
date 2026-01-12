@@ -20,10 +20,10 @@ import org.hibernate.type.SqlTypes;
  * Audit trail for tenant subscription state changes.
  * <p>
  * Tracks all status transitions for compliance and debugging.
- * Stored in public schema.
+ * Stored in tenant-specific schema for isolation.
  */
 @Entity
-@Table(name = "tenant_subscription_audit_trail", schema = "public")
+@Table(name = "tenant_subscription_audit_trail")
 public class TenantSubscriptionAuditTrail {
 
   @Id
@@ -32,9 +32,6 @@ public class TenantSubscriptionAuditTrail {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "tenant_subscription_id", nullable = false)
   private TenantSubscription tenantSubscription;
-
-  @Column(name = "tenant_id", nullable = false)
-  private String tenantId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "old_status", length = 50)
@@ -76,14 +73,6 @@ public class TenantSubscriptionAuditTrail {
 
   public void setTenantSubscription(TenantSubscription tenantSubscription) {
     this.tenantSubscription = tenantSubscription;
-  }
-
-  public String getTenantId() {
-    return tenantId;
-  }
-
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
   }
 
   public SubscriptionStatus getOldStatus() {

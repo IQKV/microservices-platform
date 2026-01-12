@@ -11,26 +11,21 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for {@link TenantSubscription} entities.
+ * <p>
+ * All queries are automatically scoped to the current tenant's schema.
+ * No tenant_id filtering needed - schema isolation provides tenant context.
  */
 @Repository
 public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscription, UUID> {
 
   /**
-   * Find a subscription by tenant ID.
+   * Find active subscription for current tenant.
+   * Schema routing ensures this only searches current tenant's data.
    *
-   * @param tenantId Tenant ID
-   * @return Optional subscription
-   */
-  Optional<TenantSubscription> findByTenantId(String tenantId);
-
-  /**
-   * Find active subscription by tenant ID.
-   *
-   * @param tenantId Tenant ID
    * @return Optional active subscription
    */
-  @Query("SELECT s FROM TenantSubscription s WHERE s.tenantId = :tenantId AND s.status = 'ACTIVE'")
-  Optional<TenantSubscription> findActiveByTenantId(@Param("tenantId") String tenantId);
+  @Query("SELECT s FROM TenantSubscription s WHERE s.status = 'ACTIVE'")
+  Optional<TenantSubscription> findActive();
 
   /**
    * Find a subscription by Stripe subscription ID.
@@ -66,16 +61,16 @@ public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscr
   List<TenantSubscription> findByPlanId(@Param("planId") UUID planId);
 
   /**
-   * Check if tenant has an active subscription.
+   * Check if current tenant has an active subscription.
    *
-   * @param tenantId Tenant ID
    * @return true if has active subscription
    */
-  @Query("SELECT COUNT(s) > 0 FROM TenantSubscription s WHERE s.tenantId = :tenantId AND s.status = 'ACTIVE'")
-  boolean hasActiveSubscription(@Param("tenantId") String tenantId);
+  @Query("SELECT COUNT(s) > 0 FROM TenantSubscription s WHERE s.status = 'ACTIVE'")
+  boolean hasActiveSubscription();
 
   /**
    * Find all subscriptions that are in trial and trial end is approaching.
+   * Note: This query runs in current tenant's schema only.
    *
    * @return List of subscriptions with trial ending soon
    */
@@ -83,7 +78,7 @@ public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscr
   List<TenantSubscription> findTrialsEndingSoon();
 
   /**
-   * Find all past due subscriptions.
+   * Find all past due subscriptions in current tenant's schema.
    *
    * @return List of past due subscriptions
    */

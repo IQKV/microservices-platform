@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <!-- 
+        Tenant-specific subscription schema
+        This migration runs in each tenant's schema (not public)
+        No tenant_id columns needed - schema provides isolation
+    -->
+
+    <!-- Tenant Subscription Table -->
+    <changeSet id="001-tenant-subscription-table" author="iqscaffold">
+        <createTable tableName="tenant_subscription">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="plan_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="bigint"/>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stripe_subscription_id" type="varchar(255)"/>
+            <column name="stripe_customer_id" type="varchar(255)"/>
+            <column name="current_period_start" type="timestamp"/>
+            <column name="current_period_end" type="timestamp"/>
+            <column name="trial_end" type="timestamp"/>
+            <column name="cancel_at" type="timestamp"/>
+            <column name="canceled_at" type="timestamp"/>
+            <column name="cancellation_reason" type="text"/>
+            <column name="metadata" type="jsonb"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="tenant_subscription" indexName="idx_tenant_subscription_organization_id">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex tableName="tenant_subscription" indexName="idx_tenant_subscription_stripe_subscription_id" unique="true">
+            <column name="stripe_subscription_id"/>
+        </createIndex>
+        <createIndex tableName="tenant_subscription" indexName="idx_tenant_subscription_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="tenant_subscription" indexName="idx_tenant_subscription_plan_id">
+            <column name="plan_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Subscription Invoice Table -->
+    <changeSet id="001-subscription-invoice-table" author="iqscaffold">
+        <createTable tableName="subscription_invoice">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_subscription_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_subscription_invoice_tenant_subscription"
+                            references="tenant_subscription(id)"/>
+            </column>
+            <column name="invoice_number" type="varchar(100)"/>
+            <column name="amount_due" type="decimal(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount_paid" type="decimal(19, 2)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="varchar(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="due_date" type="timestamp"/>
+            <column name="paid_at" type="timestamp"/>
+            <column name="stripe_invoice_id" type="varchar(255)"/>
+            <column name="hosted_invoice_url" type="varchar(500)"/>
+            <column name="invoice_pdf_url" type="varchar(500)"/>
+            <column name="metadata" type="jsonb"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="subscription_invoice" indexName="idx_subscription_invoice_tenant_subscription_id">
+            <column name="tenant_subscription_id"/>
+        </createIndex>
+        <createIndex tableName="subscription_invoice" indexName="idx_subscription_invoice_stripe_invoice_id" unique="true">
+            <column name="stripe_invoice_id"/>
+        </createIndex>
+        <createIndex tableName="subscription_invoice" indexName="idx_subscription_invoice_status">
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="subscription_invoice" indexName="idx_subscription_invoice_due_date">
+            <column name="due_date"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Subscription Item Table (Line items for subscriptions) -->
+    <changeSet id="001-subscription-item-table" author="iqscaffold">
+        <createTable tableName="subscription_item">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_subscription_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_subscription_item_tenant_subscription"
+                            references="tenant_subscription(id)"/>
+            </column>
+            <column name="plan_id" type="uuid"/>
+            <column name="quantity" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unit_amount" type="decimal(19, 2)"/>
+            <column name="stripe_subscription_item_id" type="varchar(255)"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="subscription_item" indexName="idx_subscription_item_tenant_subscription_id">
+            <column name="tenant_subscription_id"/>
+        </createIndex>
+        <createIndex tableName="subscription_item" indexName="idx_subscription_item_stripe_subscription_item_id">
+            <column name="stripe_subscription_item_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Tenant Subscription Audit Trail Table -->
+    <changeSet id="001-tenant-subscription-audit-trail-table" author="iqscaffold">
+        <createTable tableName="tenant_subscription_audit_trail">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="tenant_subscription_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_tenant_subscription_audit_trail_tenant_subscription"
+                            references="tenant_subscription(id)"/>
+            </column>
+            <column name="old_status" type="varchar(50)"/>
+            <column name="new_status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="varchar(255)"/>
+            <column name="reason" type="text"/>
+            <column name="metadata" type="jsonb"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="tenant_subscription_audit_trail" indexName="idx_tenant_subscription_audit_trail_tenant_subscription_id">
+            <column name="tenant_subscription_id"/>
+        </createIndex>
+        <createIndex tableName="tenant_subscription_audit_trail" indexName="idx_tenant_subscription_audit_trail_created_at">
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

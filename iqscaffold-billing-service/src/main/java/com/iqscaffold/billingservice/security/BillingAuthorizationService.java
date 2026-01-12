@@ -1,16 +1,16 @@
 package com.iqscaffold.billingservice.security;
 
+import java.util.UUID;
+
+import com.iqscaffold.billingservice.subscription.SubscriptionInvoice;
+import com.iqscaffold.billingservice.subscription.SubscriptionInvoiceRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionNotFoundException;
 import com.iqscaffold.billingservice.subscription.TenantSubscription;
 import com.iqscaffold.billingservice.subscription.TenantSubscriptionRepository;
-import com.iqscaffold.billingservice.subscription.SubscriptionInvoice;
-import com.iqscaffold.billingservice.subscription.SubscriptionInvoiceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 /**
  * Centralized authorization service for billing operations.
@@ -32,8 +32,8 @@ public class BillingAuthorizationService {
   private final SubscriptionInvoiceRepository invoiceRepository;
 
   public BillingAuthorizationService(
-      TenantSubscriptionRepository subscriptionRepository,
-      SubscriptionInvoiceRepository invoiceRepository) {
+      final TenantSubscriptionRepository subscriptionRepository,
+      final SubscriptionInvoiceRepository invoiceRepository) {
     this.subscriptionRepository = subscriptionRepository;
     this.invoiceRepository = invoiceRepository;
   }
@@ -55,7 +55,7 @@ public class BillingAuthorizationService {
 
   /**
    * Verify user can manage a specific subscription.
-   * Requires: Owner (same tenant) or BILLING_ADMIN role
+   * Requires: Owner (same tenant via schema) or BILLING_ADMIN role
    *
    * @param subscriptionId The subscription ID
    * @throws AccessDeniedException if user lacks permission
@@ -72,12 +72,9 @@ public class BillingAuthorizationService {
       return;
     }
 
-    // Check if user belongs to the same tenant (owner check)
-    String currentTenantId = SecurityContextHelper.getCurrentTenantId();
-    boolean isOwner = currentTenantId != null && currentTenantId.equals(subscription.getTenantId());
-
-    // User must be owner OR have billing admin role
-    if (!isOwner && !userContext.hasAuthority("BILLING_ADMIN")) {
+    // Schema isolation ensures we can only see our own subscriptions
+    // If we found it, we own it. Just check role permissions.
+    if (!userContext.hasAuthority("BILLING_ADMIN") && !userContext.isTenantOwner()) {
       log.warn("User {} attempted to manage subscription {} without permission", 
           userContext.userId(), subscriptionId);
       throw new AccessDeniedException("Insufficient permissions to manage this subscription");
@@ -86,7 +83,7 @@ public class BillingAuthorizationService {
 
   /**
    * Verify user can view a specific subscription.
-   * Requires: Owner (same tenant), BILLING_ADMIN, or FINANCE_VIEWER role
+   * Requires: Owner (same tenant via schema), BILLING_ADMIN, or FINANCE_VIEWER role
    *
    * @param subscriptionId The subscription ID
    * @throws AccessDeniedException if user lacks permission
@@ -103,12 +100,9 @@ public class BillingAuthorizationService {
       return;
     }
 
-    // Check if user belongs to the same tenant (owner check)
-    String currentTenantId = SecurityContextHelper.getCurrentTenantId();
-    boolean isOwner = currentTenantId != null && currentTenantId.equals(subscription.getTenantId());
-
-    // User must be owner OR have billing access (includes FINANCE_VIEWER)
-    if (!isOwner && !userContext.hasBillingAccess()) {
+    // Schema isolation ensures we can only see our own subscriptions
+    // If we found it, we own it. Just check role permissions.
+    if (!userContext.hasBillingAccess()) {
       log.warn("User {} attempted to view subscription {} without permission", 
           userContext.userId(), subscriptionId);
       throw new AccessDeniedException("Insufficient permissions to view this subscription");
@@ -124,9 +118,9 @@ public class BillingAuthorizationService {
   public void requirePlanManagePermission() {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
     
-    if (!userContext.isSuperAdmin() && 
-        !userContext.isTenantOwner() && 
-        !userContext.hasAuthority("BILLING_ADMIN")) {
+    if (!userContext.isSuperAdmin() 
+        && !userContext.isTenantOwner() 
+        && !userContext.hasAuthority("BILLING_ADMIN")) {
       log.warn("User {} attempted to manage subscription plans without permission", userContext.userId());
       throw new AccessDeniedException("Insufficient permissions to manage subscription plans");
     }
@@ -134,7 +128,7 @@ public class BillingAuthorizationService {
 
   /**
    * Verify user can view an invoice.
-   * Requires: Owner (same tenant), BILLING_ADMIN, or FINANCE_VIEWER role
+   * Requires: Owner (same tenant via schema), BILLING_ADMIN, or FINANCE_VIEWER role
    *
    * @param invoiceId The invoice ID
    * @throws AccessDeniedException if user lacks permission
@@ -150,12 +144,9 @@ public class BillingAuthorizationService {
       return;
     }
 
-    // Check if user belongs to the same tenant (owner check)
-    String currentTenantId = SecurityContextHelper.getCurrentTenantId();
-    boolean isOwner = currentTenantId != null && currentTenantId.equals(invoice.getTenantId());
-
-    // User must be owner OR have billing access (includes FINANCE_VIEWER)
-    if (!isOwner && !userContext.hasBillingAccess()) {
+    // Schema isolation ensures we can only see our own invoices
+    // If we found it, we own it. Just check role permissions.
+    if (!userContext.hasBillingAccess()) {
       log.warn("User {} attempted to view invoice {} without permission", 
           userContext.userId(), invoiceId);
       throw new AccessDeniedException("Insufficient permissions to view this invoice");
@@ -178,24 +169,26 @@ public class BillingAuthorizationService {
   }
 
   /**
-   * Check if current user is the owner of a subscription (same tenant).
+   * Check if current user is the owner of a subscription (same tenant via schema).
+   * With schema-per-tenant, if we can access it, we own it.
    *
    * @param subscription The subscription to check
    * @return true if user is owner
    */
   public boolean isSubscriptionOwner(TenantSubscription subscription) {
-    String currentTenantId = SecurityContextHelper.getCurrentTenantId();
-    return currentTenantId != null && currentTenantId.equals(subscription.getTenantId());
+    // With schema isolation, if we can access it, we own it
+    return true;
   }
 
   /**
-   * Check if current user is the owner of an invoice (same tenant).
+   * Check if current user is the owner of an invoice (same tenant via schema).
+   * With schema-per-tenant, if we can access it, we own it.
    *
    * @param invoice The invoice to check
    * @return true if user is owner
    */
   public boolean isInvoiceOwner(SubscriptionInvoice invoice) {
-    String currentTenantId = SecurityContextHelper.getCurrentTenantId();
-    return currentTenantId != null && currentTenantId.equals(invoice.getTenantId());
+    // With schema isolation, if we can access it, we own it
+    return true;
   }
 }

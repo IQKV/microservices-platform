@@ -1,9 +1,10 @@
 package com.iqscaffold.billingservice.subscription.event;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Domain event for subscription lifecycle changes.

@@ -5,11 +5,11 @@ package com.iqscaffold.billingservice.subscription;
  */
 public class InvalidSubscriptionStateException extends RuntimeException {
 
-  public InvalidSubscriptionStateException(String message) {
+  public InvalidSubscriptionStateException(final String message) {
     super(message);
   }
 
-  public InvalidSubscriptionStateException(String message, Throwable cause) {
+  public InvalidSubscriptionStateException(final String message, final Throwable cause) {
     super(message, cause);
   }
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.ArchiveTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
-import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.RestoreTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.SuspendTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantResponse;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.TenantStatistics;

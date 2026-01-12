@@ -60,12 +60,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Transactional
   public SubscriptionDtos.SubscriptionResponse createSubscription(
       SubscriptionDtos.CreateSubscriptionRequest request) {
-    String tenantId = TenantContext.getCurrentTenantId();
-    if (tenantId == null) {
+    // Validate tenant context exists
+    if (!TenantContext.hasTenantContext()) {
       throw new IllegalStateException("Tenant context is required");
     }
 
-    log.info("Creating subscription for tenant: {}, planId: {}", tenantId, request.planId());
+    log.info("Creating subscription for current tenant, planId: {}", request.planId());
 
     // 1. Validate plan exists and is active
     SubscriptionPlan plan = planRepository.findById(request.planId())
@@ -75,8 +75,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       throw new IllegalArgumentException("Subscription plan is not active: " + request.planId());
     }
 
-    // 2. Check for existing active subscription
-    var existingActive = subscriptionRepository.findActiveByTenantId(tenantId);
+    // 2. Check for existing active subscription (schema-scoped)
+    var existingActive = subscriptionRepository.findActive();
     if (existingActive.isPresent()) {
       throw new IllegalStateException("Tenant already has an active subscription");
     }
@@ -89,14 +89,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     // 5. Create or get Stripe customer
     // In a real implementation, we'd store and retrieve customer ID from tenant metadata
-    String stripeCustomerId = createOrGetStripeCustomer(paymentProvider, tenantId);
+    String stripeCustomerId = createOrGetStripeCustomer(paymentProvider, TenantContext.getCurrentTenantId());
 
     // 6. Determine trial period
     Integer trialDays = request.trialDays() != null ? request.trialDays() : plan.getTrialPeriodDays();
 
     // 7. Build metadata
     Map<String, String> metadata = new HashMap<>();
-    metadata.put("tenant_id", tenantId);
+    metadata.put("tenant_id", TenantContext.getCurrentTenantId());
     metadata.put("plan_id", plan.getId().toString());
     if (request.metadata() != null) {
       metadata.putAll(request.metadata());
@@ -111,14 +111,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
           trialDays,
           metadata,
           UUID.randomUUID().toString());
-    } catch (Exception e) {
-      log.error("Failed to create Stripe subscription for tenant: {}", tenantId, e);
+    } catch (final Exception e) {
+      log.error("Failed to create Stripe subscription", e);
       throw new RuntimeException("Failed to create subscription with payment provider", e);
     }
 
-    // 9. Create local subscription record
+    // 9. Create local subscription record (no tenant_id needed - schema provides context)
     TenantSubscription subscription = new TenantSubscription();
-    subscription.setTenantId(tenantId);
     subscription.setPlan(plan);
     subscription.setStripeSubscriptionId(stripeSubscriptionId);
     subscription.setStripeCustomerId(stripeCustomerId);
@@ -139,14 +138,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     eventPublisher.publishSubscriptionCreated(
         SubscriptionEvent.created(
             subscription.getId(),
-            tenantId,
+            TenantContext.getCurrentTenantId(),
             plan.getId(),
             plan.getName(),
             stripeSubscriptionId
         )
     );
 
-    log.info("Created subscription: {} for tenant: {}", subscription.getId(), tenantId);
+    log.info("Created subscription: {}", subscription.getId());
 
     return mapToResponse(subscription);
   }
@@ -154,55 +153,58 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional(readOnly = true)
   public SubscriptionDtos.SubscriptionResponse getSubscription(UUID id) {
-    String tenantId = TenantContext.getCurrentTenantId();
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // Ensure tenant isolation
-    if (!subscription.getTenantId().equals(tenantId)) {
-      throw new SubscriptionNotFoundException("Subscription not found: " + id);
-    }
-
+    // No tenant_id check needed - schema isolation ensures we can only see our own data
     return mapToResponse(subscription);
   }
 
   @Override
   @Transactional(readOnly = true)
   public java.util.Optional<SubscriptionDtos.SubscriptionResponse> getActiveSubscription() {
-    String tenantId = TenantContext.getCurrentTenantId();
-    return subscriptionRepository.findActiveByTenantId(tenantId)
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
+    return subscriptionRepository.findActive()
         .map(this::mapToResponse);
   }
 
   @Override
   @Transactional(readOnly = true)
   public Page<SubscriptionDtos.SubscriptionResponse> getSubscriptions(Pageable pageable) {
-    String tenantId = TenantContext.getCurrentTenantId();
-    // Note: Repository doesn't have pageable variant, so use unpaged and convert
-    // In production, add pageable method to repository
-    java.util.List<TenantSubscription> subscriptions = subscriptionRepository.findAll();
-    java.util.List<SubscriptionDtos.SubscriptionResponse> filteredResponses = 
-        subscriptions.stream()
-            .filter(s -> s.getTenantId().equals(tenantId))
-            .map(this::mapToResponse)
-            .toList();
-    return new org.springframework.data.domain.PageImpl<>(
-        filteredResponses, pageable, filteredResponses.size());
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
+    // Simply findAll - schema routing ensures we only see current tenant's data
+    return subscriptionRepository.findAll(pageable)
+        .map(this::mapToResponse);
   }
 
   @Override
   @Transactional
   public SubscriptionDtos.SubscriptionResponse updateSubscription(UUID id,
       SubscriptionDtos.UpdateSubscriptionRequest request) {
-    String tenantId = TenantContext.getCurrentTenantId();
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    if (!subscription.getTenantId().equals(tenantId)) {
-      throw new SubscriptionNotFoundException("Subscription not found: " + id);
-    }
+    // No tenant check needed - schema isolation ensures we can only access our own data
 
-    log.info("Updating subscription: {} for tenant: {}", id, tenantId);
+    log.info("Updating subscription: {}", id);
 
     PaymentProviderAdapter paymentProvider = gatewayConfigService.getProviderForCurrentTenant();
     SubscriptionStatus oldStatus = subscription.getStatus();
@@ -222,7 +224,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             newPlan.getStripePriceId(),
             request.metadata());
         subscription.setPlan(newPlan);
-      } catch (Exception e) {
+      } catch (final Exception e) {
         log.error("Failed to update subscription plan: {}", id, e);
         throw new RuntimeException("Failed to update subscription with payment provider", e);
       }
@@ -235,7 +237,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     eventPublisher.publishSubscriptionUpdated(
         SubscriptionEvent.updated(
             subscription.getId(),
-            tenantId,
+            TenantContext.getCurrentTenantId(),
             subscription.getPlan().getId(),
             subscription.getPlan().getName(),
             subscription.getStatus().name()
@@ -259,15 +261,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   }
 
   private SubscriptionDtos.SubscriptionResponse cancelSubscriptionInternal(UUID id, boolean immediately) {
-    String tenantId = TenantContext.getCurrentTenantId();
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    if (!subscription.getTenantId().equals(tenantId)) {
-      throw new SubscriptionNotFoundException("Subscription not found: " + id);
-    }
+    // No tenant check needed - schema isolation ensures we can only access our own data
 
-    log.info("Canceling subscription: {} for tenant: {}, immediately: {}", id, tenantId, immediately);
+    log.info("Canceling subscription: {}, immediately: {}", id, immediately);
 
     SubscriptionStatus oldStatus = subscription.getStatus();
     stateMachine.validateTransition(oldStatus, SubscriptionStatus.CANCELED);
@@ -286,11 +290,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       eventPublisher.publishSubscriptionCanceled(
           SubscriptionEvent.canceled(
               subscription.getId(),
-              tenantId,
+              TenantContext.getCurrentTenantId(),
               SubscriptionStatus.CANCELED.name()
           )
       );
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to cancel subscription: {}", id, e);
       throw new RuntimeException("Failed to cancel subscription with payment provider", e);
     }
@@ -302,15 +306,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional
   public SubscriptionDtos.SubscriptionResponse pauseSubscription(UUID id) {
-    String tenantId = TenantContext.getCurrentTenantId();
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    if (!subscription.getTenantId().equals(tenantId)) {
-      throw new SubscriptionNotFoundException("Subscription not found: " + id);
-    }
+    // No tenant check needed - schema isolation ensures we can only access our own data
 
-    log.info("Pausing subscription: {} for tenant: {}", id, tenantId);
+    log.info("Pausing subscription: {}", id);
 
     SubscriptionStatus oldStatus = subscription.getStatus();
     stateMachine.validateTransition(oldStatus, SubscriptionStatus.PAUSED);
@@ -325,9 +331,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
       // Publish event
       eventPublisher.publishSubscriptionPaused(
-          SubscriptionEvent.paused(subscription.getId(), tenantId)
+          SubscriptionEvent.paused(subscription.getId(), TenantContext.getCurrentTenantId())
       );
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Failed to pause subscription: {}", id, e);
       throw new RuntimeException("Failed to pause subscription with payment provider", e);
     }
@@ -339,15 +345,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional
   public SubscriptionDtos.SubscriptionResponse resumeSubscription(UUID id) {
-    String tenantId = TenantContext.getCurrentTenantId();
+    // Validate tenant context
+    if (!TenantContext.hasTenantContext()) {
+      throw new IllegalStateException("Tenant context is required");
+    }
+
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    if (!subscription.getTenantId().equals(tenantId)) {
-      throw new SubscriptionNotFoundException("Subscription not found: " + id);
-    }
+    // No tenant check needed - schema isolation ensures we can only access our own data
 
-    log.info("Resuming subscription: {} for tenant: {}", id, tenantId);
+    log.info("Resuming subscription: {}", id);
 
     SubscriptionStatus oldStatus = subscription.getStatus();
     stateMachine.validateTransition(oldStatus, SubscriptionStatus.ACTIVE);
@@ -362,7 +370,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
       // Publish event
       eventPublisher.publishSubscriptionResumed(
-          SubscriptionEvent.resumed(subscription.getId(), tenantId)
+          SubscriptionEvent.resumed(subscription.getId(), TenantContext.getCurrentTenantId())
       );
     } catch (Exception e) {
       log.error("Failed to resume subscription: {}", id, e);
@@ -416,7 +424,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       SubscriptionStatus newStatus, String notes) {
     TenantSubscriptionAuditTrail audit = new TenantSubscriptionAuditTrail();
     audit.setTenantSubscription(subscription);
-    audit.setTenantId(subscription.getTenantId());
     audit.setOldStatus(oldStatus);
     audit.setNewStatus(newStatus);
     audit.setReason(notes);
@@ -442,7 +449,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private SubscriptionDtos.SubscriptionResponse mapToResponse(TenantSubscription subscription) {
     return new SubscriptionDtos.SubscriptionResponse(
         subscription.getId(),
-        subscription.getTenantId(),
+        TenantContext.getCurrentTenantId(), // Get from context, not entity
         subscription.getPlan().getId(),
         subscription.getPlan().getName(),
         subscription.getStatus().name(),

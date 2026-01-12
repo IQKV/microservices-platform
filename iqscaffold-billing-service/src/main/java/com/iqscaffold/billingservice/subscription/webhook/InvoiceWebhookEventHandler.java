@@ -148,7 +148,7 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
 
     invoice.setStripeInvoiceId(stripeInvoiceId);
     invoice.setTenantSubscription(tenantSubscription);
-    invoice.setTenantId(tenantSubscription.getTenantId());
+    // No need to set tenant_id - schema provides context
     invoice.setInvoiceNumber(stripeInvoice.getNumber());
     
     // Set amounts
