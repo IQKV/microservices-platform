@@ -54,6 +54,13 @@ public class RabbitMQConfig {
   public static final String MERCHANT_ONBOARDED_KEY = "billing.merchant.onboarded";
   public static final String MERCHANT_CAPABILITIES_UPDATED_KEY = "billing.merchant.capabilities.updated";
   public static final String INVOICE_GENERATED_KEY = "billing.invoice.generated";
+  public static final String SUBSCRIPTION_CREATED_KEY = "billing.subscription.created";
+  public static final String SUBSCRIPTION_UPDATED_KEY = "billing.subscription.updated";
+  public static final String SUBSCRIPTION_CANCELED_KEY = "billing.subscription.canceled";
+  public static final String SUBSCRIPTION_PAUSED_KEY = "billing.subscription.paused";
+  public static final String SUBSCRIPTION_RESUMED_KEY = "billing.subscription.resumed";
+  public static final String SUBSCRIPTION_TRIAL_ENDING_KEY = "billing.subscription.trial_ending";
+  public static final String SUBSCRIPTION_PLAN_CHANGED_KEY = "billing.subscription.plan_changed";
   public static final String NOTIFICATION_EMAIL_KEY = "notification.email";
 
   /**

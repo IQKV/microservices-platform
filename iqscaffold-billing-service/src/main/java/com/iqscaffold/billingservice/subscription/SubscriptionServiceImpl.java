@@ -8,6 +8,8 @@ import java.util.UUID;
 import com.iqscaffold.billingservice.payment.GatewayConfigurationService;
 import com.iqscaffold.billingservice.payment.PaymentProviderAdapter;
 import com.iqscaffold.billingservice.subscription.dto.SubscriptionDtos;
+import com.iqscaffold.billingservice.subscription.event.SubscriptionEvent;
+import com.iqscaffold.billingservice.subscription.event.SubscriptionEventPublisher;
 import com.iqscaffold.billingservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +39,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final TenantSubscriptionAuditTrailRepository auditTrailRepository;
   private final GatewayConfigurationService gatewayConfigService;
   private final SubscriptionStateMachine stateMachine;
+  private final SubscriptionEventPublisher eventPublisher;
 
   public SubscriptionServiceImpl(
       final TenantSubscriptionRepository subscriptionRepository,
       final SubscriptionPlanRepository planRepository,
       final TenantSubscriptionAuditTrailRepository auditTrailRepository,
       final GatewayConfigurationService gatewayConfigService,
-      final SubscriptionStateMachine stateMachine) {
+      final SubscriptionStateMachine stateMachine,
+      final SubscriptionEventPublisher eventPublisher) {
     this.subscriptionRepository = subscriptionRepository;
     this.planRepository = planRepository;
     this.auditTrailRepository = auditTrailRepository;
     this.gatewayConfigService = gatewayConfigService;
     this.stateMachine = stateMachine;
+    this.eventPublisher = eventPublisher;
   }
 
   @Override
@@ -129,6 +134,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     // 10. Create audit trail
     createAuditTrail(subscription, null, subscription.getStatus(), "Subscription created");
+
+    // 11. Publish event
+    eventPublisher.publishSubscriptionCreated(
+        SubscriptionEvent.created(
+            subscription.getId(),
+            tenantId,
+            plan.getId(),
+            plan.getName(),
+            stripeSubscriptionId
+        )
+    );
 
     log.info("Created subscription: {} for tenant: {}", subscription.getId(), tenantId);
 
@@ -215,6 +231,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscription = subscriptionRepository.save(subscription);
     createAuditTrail(subscription, oldStatus, subscription.getStatus(), "Subscription updated");
 
+    // Publish event
+    eventPublisher.publishSubscriptionUpdated(
+        SubscriptionEvent.updated(
+            subscription.getId(),
+            tenantId,
+            subscription.getPlan().getId(),
+            subscription.getPlan().getName(),
+            subscription.getStatus().name()
+        )
+    );
+
     log.info("Updated subscription: {}", id);
     return mapToResponse(subscription);
   }
@@ -254,6 +281,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       subscription = subscriptionRepository.save(subscription);
       createAuditTrail(subscription, oldStatus, SubscriptionStatus.CANCELED,
           "Subscription canceled" + (immediately ? " immediately" : " at period end"));
+
+      // Publish event
+      eventPublisher.publishSubscriptionCanceled(
+          SubscriptionEvent.canceled(
+              subscription.getId(),
+              tenantId,
+              SubscriptionStatus.CANCELED.name()
+          )
+      );
     } catch (Exception e) {
       log.error("Failed to cancel subscription: {}", id, e);
       throw new RuntimeException("Failed to cancel subscription with payment provider", e);
@@ -286,6 +322,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       subscription.setStatus(SubscriptionStatus.PAUSED);
       subscription = subscriptionRepository.save(subscription);
       createAuditTrail(subscription, oldStatus, SubscriptionStatus.PAUSED, "Subscription paused");
+
+      // Publish event
+      eventPublisher.publishSubscriptionPaused(
+          SubscriptionEvent.paused(subscription.getId(), tenantId)
+      );
     } catch (Exception e) {
       log.error("Failed to pause subscription: {}", id, e);
       throw new RuntimeException("Failed to pause subscription with payment provider", e);
@@ -318,6 +359,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       subscription.setStatus(SubscriptionStatus.ACTIVE);
       subscription = subscriptionRepository.save(subscription);
       createAuditTrail(subscription, oldStatus, SubscriptionStatus.ACTIVE, "Subscription resumed");
+
+      // Publish event
+      eventPublisher.publishSubscriptionResumed(
+          SubscriptionEvent.resumed(subscription.getId(), tenantId)
+      );
     } catch (Exception e) {
       log.error("Failed to resume subscription: {}", id, e);
       throw new RuntimeException("Failed to resume subscription with payment provider", e);
