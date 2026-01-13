@@ -64,8 +64,10 @@ public class BillingAuthorizationService {
   public void requireSubscriptionManagePermission(UUID subscriptionId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
     
-    TenantSubscription subscription = subscriptionRepository.findById(subscriptionId)
-        .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + subscriptionId));
+    // Verify subscription exists and is accessible (schema isolation ensures ownership)
+    if (!subscriptionRepository.existsById(subscriptionId)) {
+      throw new SubscriptionNotFoundException("Subscription not found: " + subscriptionId);
+    }
 
     // Super admin can manage any subscription
     if (userContext.isSuperAdmin()) {
@@ -92,8 +94,10 @@ public class BillingAuthorizationService {
   public void requireSubscriptionViewPermission(UUID subscriptionId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
     
-    TenantSubscription subscription = subscriptionRepository.findById(subscriptionId)
-        .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + subscriptionId));
+    // Verify subscription exists and is accessible (schema isolation ensures ownership)
+    if (!subscriptionRepository.existsById(subscriptionId)) {
+      throw new SubscriptionNotFoundException("Subscription not found: " + subscriptionId);
+    }
 
     // Super admin can view any subscription
     if (userContext.isSuperAdmin()) {
@@ -136,8 +140,10 @@ public class BillingAuthorizationService {
   public void requireInvoiceViewPermission(UUID invoiceId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
     
-    SubscriptionInvoice invoice = invoiceRepository.findById(invoiceId)
-        .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
+    // Verify invoice exists and is accessible (schema isolation ensures ownership)
+    if (!invoiceRepository.existsById(invoiceId)) {
+      throw new IllegalArgumentException("Invoice not found: " + invoiceId);
+    }
 
     // Super admin can view any invoice
     if (userContext.isSuperAdmin()) {
@@ -168,27 +174,4 @@ public class BillingAuthorizationService {
     }
   }
 
-  /**
-   * Check if current user is the owner of a subscription (same tenant via schema).
-   * With schema-per-tenant, if we can access it, we own it.
-   *
-   * @param subscription The subscription to check
-   * @return true if user is owner
-   */
-  public boolean isSubscriptionOwner(TenantSubscription subscription) {
-    // With schema isolation, if we can access it, we own it
-    return true;
-  }
-
-  /**
-   * Check if current user is the owner of an invoice (same tenant via schema).
-   * With schema-per-tenant, if we can access it, we own it.
-   *
-   * @param invoice The invoice to check
-   * @return true if user is owner
-   */
-  public boolean isInvoiceOwner(SubscriptionInvoice invoice) {
-    // With schema isolation, if we can access it, we own it
-    return true;
-  }
 }
