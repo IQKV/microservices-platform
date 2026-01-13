@@ -10,6 +10,7 @@
 - [Architecture Patterns](#architecture-patterns)
 - [API Endpoints](#api-endpoints)
 - [Payment State Machine](#payment-state-machine)
+- [Subscription Management](#subscription-management)
 - [Payout Management](#payout-management)
 - [Database & Multi-Tenancy](#database--multi-tenancy)
 - [Technical Highlights](#technical-highlights)
@@ -28,6 +29,7 @@
 A core domain service for the IQ Scaffold platform that handles comprehensive financial operations:
 
 - **Payment Orchestration** - End-to-end management of payment intents, from creation to final settlement with external providers.
+- **Subscription Management** - Complete subscription lifecycle including recurring billing, trial periods, plan changes, and automated invoice generation.
 - **Multi-Gateway Support** - Flexible payment gateway configuration per tenant (Stripe, PayPal, Square, Braintree) with encrypted credential storage.
 - **Merchant Onboarding** - Automated onboarding flow for platform merchants using Stripe Connect (Standard/Express).
 - **Automated Payouts** - Tracking and reconciliation of payouts from the platform/gateway to merchant bank accounts.
@@ -39,7 +41,7 @@ A core domain service for the IQ Scaffold platform that handles comprehensive fi
 
 ## Overview
 
-The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. It abstracts the complexities of payment gateways (primarily Stripe) while providing a multi-tenant-aware API for creating payments, managing refunds, and onboarding new merchants. It ensures that every transaction is tracked, audited, and correctly attributed to the appropriate tenant.
+The Billing Service acts as the financial engine of the IQ Scaffold ecosystem. It abstracts the complexities of payment gateways (primarily Stripe) while providing a multi-tenant-aware API for creating payments, managing subscriptions, processing refunds, and onboarding new merchants. It ensures that every transaction is tracked, audited, and correctly attributed to the appropriate tenant.
 
 ## What It Demonstrates
 
@@ -147,6 +149,34 @@ Request Flow:
 - `GET /api/v1/billing/payments` - Paginated list of payments for the current tenant (Requires billing access)
 - `POST /api/v1/billing/payments/{id}/refund` - Process a full refund (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
 
+### Subscription Operations
+
+- `POST /api/v1/billing/subscriptions` - Create a new subscription for the current tenant (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `GET /api/v1/billing/subscriptions/active` - Get the active subscription for the current tenant
+- `GET /api/v1/billing/subscriptions/{id}` - Get subscription by ID (Requires billing access or ownership)
+- `GET /api/v1/billing/subscriptions` - List all subscriptions for the current tenant (Requires billing access)
+- `PUT /api/v1/billing/subscriptions/{id}` - Update subscription (change plan, payment method) (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/billing/subscriptions/{id}/cancel` - Cancel subscription at end of billing period (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/billing/subscriptions/{id}/cancel-immediately` - Cancel subscription immediately (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/billing/subscriptions/{id}/pause` - Pause subscription billing (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/billing/subscriptions/{id}/resume` - Resume paused subscription (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+
+### Subscription Plan Management
+
+- `POST /api/v1/billing/subscription-plans` - Create a new subscription plan (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `GET /api/v1/billing/subscription-plans/{id}` - Get subscription plan by ID
+- `GET /api/v1/billing/subscription-plans` - List all subscription plans (paginated)
+- `GET /api/v1/billing/subscription-plans/active` - List active subscription plans available for tenants
+- `PUT /api/v1/billing/subscription-plans/{id}` - Update subscription plan (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+- `POST /api/v1/billing/subscription-plans/{id}/sync` - Synchronize plan with Stripe (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
+
+### Invoice Operations
+
+- `GET /api/v1/billing/invoices/{id}` - Get invoice by ID (Requires billing access or ownership)
+- `GET /api/v1/billing/invoices` - List all invoices for the current tenant (Requires billing access)
+- `GET /api/v1/billing/invoices/subscription/{subscriptionId}` - List invoices for a specific subscription (Requires billing access)
+- `GET /api/v1/billing/invoices/open` - List open (unpaid) invoices for the current tenant (Requires billing access)
+
 ### Payout Operations
 
 - `GET /api/v1/billing/payouts` - Paginated list of payouts for the current tenant (Requires billing access)
@@ -155,7 +185,7 @@ Request Flow:
 ### Merchant Administration
 
 - `POST /api/v1/admin/billing/merchants/onboard` - Initiate Stripe Connect onboarding (Requires `SUPER_ADMIN`, `TENANT_OWNER`, or `BILLING_ADMIN`)
-- `GET /api/v1/admin/billing/merchants/status` - Check current merchant configuration and capability status (Requires billing access)
+- `GET /api/v1/admin/billing/merchants/status/{organizationId}` - Check merchant status by organization ID (Requires billing access)
 
 ### Payment Gateway Configuration
 
@@ -193,6 +223,48 @@ The service enforces strict transitions to ensure financial consistency:
 | `*`           | Webhook      | `CANCELED`           | Intent expired or canceled |
 
 **State Validation**: The `PaymentStateMachine` component validates all transitions to prevent invalid state changes (e.g., preventing a 'COMPLETED' payment from moving back to 'PENDING').
+
+## Subscription Management
+
+The service provides comprehensive subscription lifecycle management with support for recurring billing, trial periods, and plan changes.
+
+### Subscription Lifecycle
+
+1. **Subscription Creation**: Tenants create subscriptions by selecting a plan and providing payment method
+2. **Trial Period**: Optional trial period before first billing (configurable per plan)
+3. **Active Billing**: Recurring charges based on plan interval (monthly, yearly)
+4. **Plan Changes**: Upgrade/downgrade with prorated billing adjustments
+5. **Pause/Resume**: Temporary suspension of billing while preserving subscription
+6. **Cancellation**: End-of-period or immediate cancellation options
+
+### Subscription Status Values
+
+- `active` - Subscription is active and billing normally
+- `trialing` - In trial period, no charges yet
+- `past_due` - Payment failed, in grace period
+- `canceled` - Canceled, will end at period end
+- `unpaid` - Payment failed beyond grace period
+- `paused` - Temporarily paused by tenant
+
+### Subscription Plan Management
+
+Platform administrators can create and manage subscription plans:
+
+- **Pricing Configuration**: Amount, currency, billing interval
+- **Trial Periods**: Configurable trial days per plan
+- **Feature Sets**: JSON-based feature definitions
+- **Stripe Synchronization**: Automatic sync with Stripe products and prices
+- **Active/Inactive Status**: Control plan availability
+
+### Invoice Management
+
+Automated invoice generation and tracking:
+
+- **Automatic Generation**: Invoices created for each billing cycle
+- **Payment Tracking**: Status updates from payment gateway webhooks
+- **Hosted URLs**: Stripe-hosted invoice pages for customer access
+- **PDF Generation**: Downloadable invoice PDFs
+- **Payment Retry Logic**: Automatic retry for failed payments
 
 ## Payout Management
 
@@ -244,6 +316,9 @@ The service uses **Liquibase** for evolutionary database design with a schema-pe
 - `payment_audit_trail`: Audit log of all payment state transitions
 - `payout`: Payout records from Stripe
 - `stripe_customer`: Customer records for Stripe integration
+- `tenant_subscription`: Subscription records with plan associations, billing periods, and status
+- `subscription_plan`: Available subscription plans with pricing and features
+- `subscription_invoice`: Invoice records for subscription billing cycles
 
 ### Implementation Detail
 
@@ -268,9 +343,10 @@ On every request, the `TenantIdentifierResolver` extracts the tenant ID from the
 The service publishes events to RabbitMQ for cross-service communication:
 
 - **Payment Events**: `billing.payment.created`, `billing.payment.succeeded`, `billing.payment.failed`, `billing.payment.refunded`
+- **Subscription Events**: `billing.subscription.created`, `billing.subscription.updated`, `billing.subscription.canceled`, `billing.subscription.paused`, `billing.subscription.resumed`
 - **Payout Events**: `billing.payout.paid`, `billing.payout.failed`, `billing.payout.canceled`
 - **Merchant Events**: `billing.merchant.onboarded`
-- **Invoice Events**: `billing.invoice.generated`
+- **Invoice Events**: `billing.invoice.generated`, `billing.invoice.paid`, `billing.invoice.payment_failed`
 - **Notification Events**: `notification.email`
 
 ### RabbitMQ Configuration
@@ -286,7 +362,9 @@ Automated email notifications for:
 - Merchant onboarding instructions
 - Payment successful/failed confirmations
 - Payment refund notifications
-- Invoice generation notifications
+- Invoice generation and payment notifications
+- Subscription lifecycle events (created, canceled, trial ending)
+- Subscription payment failures and retries
 
 ## Webhook Processing
 
@@ -482,6 +560,16 @@ iqscaffold:
       enable-webhook-notifications: true
       retry-delay: PT5S
       max-retries: 3
+    subscription:
+      enable-subscriptions: true
+      trial-period-days: 14
+      grace-period-days: 3
+      max-retry-attempts: 3
+      auto-cancel-after-days: 30
+      proration-behavior: CREATE_PRORATIONS
+      notifications:
+        trial-ending-days-notice: 3
+        payment-retry-schedule: [1, 3, 5, 7]
   email:
     smtp:
       host: ${SMTP_HOST}
@@ -614,17 +702,30 @@ The billing service implements comprehensive authorization controls with multi-l
 
 ### Authorization Rules
 
-| Operation           | Required Roles                                                           | Ownership Check |
-| ------------------- | ------------------------------------------------------------------------ | --------------- |
-| **Subscriptions**   |
-| Create subscription | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
-| View subscription   | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`, `USER` | ✅              |
-| Manage subscription | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
-| **Plans**           |
-| Manage plans        | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
-| View plans          | Any authenticated user                                                   | ❌              |
-| **Invoices**        |
-| View invoices       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+| Operation                 | Required Roles                                                           | Ownership Check |
+| ------------------------- | ------------------------------------------------------------------------ | --------------- |
+| **Payments**              |
+| Create payment            | `USER`                                                                   | ❌              |
+| View payment              | `USER`                                                                   | ✅              |
+| List payments             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+| Refund payment            | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
+| **Subscriptions**         |
+| Create subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View subscription         | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`, `USER` | ✅              |
+| Manage subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
+| **Subscription Plans**    |
+| Manage plans              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View plans                | Any authenticated user                                                   | ❌              |
+| **Invoices**              |
+| View invoices             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+| **Payouts**               |
+| View payouts              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+| **Merchant Onboarding**   |
+| Initiate onboarding       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View merchant status      | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌              |
+| **Gateway Configuration** |
+| Manage gateway config     | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View gateway config       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌              |
 
 ### Key Features
 
@@ -699,10 +800,68 @@ curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config \
   }'
 ```
 
+### Creating a Subscription
+
+```bash
+curl -X POST http://localhost:8082/api/v1/billing/subscriptions \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "planId": "550e8400-e29b-41d4-a716-446655440000",
+    "paymentMethodId": "pm_1234567890",
+    "trialDays": 14,
+    "metadata": {
+      "source": "web_signup",
+      "campaign": "spring_promo"
+    }
+  }'
+```
+
+### Creating a Subscription Plan
+
+```bash
+curl -X POST http://localhost:8082/api/v1/billing/subscription-plans \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Professional Plan",
+    "description": "Full-featured plan for growing businesses",
+    "priceAmount": 29.99,
+    "currency": "USD",
+    "interval": "month",
+    "intervalCount": 1,
+    "trialDays": 14,
+    "isActive": true,
+    "features": {
+      "maxUsers": 10,
+      "storageGB": 100,
+      "apiCalls": 10000
+    }
+  }'
+```
+
 ### Listing Gateway Configurations
 
 ```bash
 curl -X GET http://localhost:8082/api/v1/admin/billing/gateway-config \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123"
+```
+
+### Getting Active Subscription
+
+```bash
+curl -X GET http://localhost:8082/api/v1/billing/subscriptions/active \
+  -H "Authorization: Bearer ${JWT_TOKEN}" \
+  -H "X-Tenant-ID: tenant-123"
+```
+
+### Listing Invoices
+
+```bash
+curl -X GET http://localhost:8082/api/v1/billing/invoices \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123"
 ```
@@ -731,6 +890,26 @@ curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config/STRIPE/se
     "isConfigured": true,
     "lastFourChars": "****"
   },
+  "createdAt": "2026-01-11T08:00:00Z",
+  "updatedAt": "2026-01-11T08:00:00Z"
+}
+```
+
+### Subscription Response Example
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "tenantId": "tenant-123",
+  "planId": "550e8400-e29b-41d4-a716-446655440000",
+  "planName": "Professional Plan",
+  "status": "active",
+  "stripeSubscriptionId": "sub_1234567890",
+  "stripeCustomerId": "cus_1234567890",
+  "currentPeriodStart": "2026-01-11T08:00:00Z",
+  "currentPeriodEnd": "2026-02-11T08:00:00Z",
+  "trialStart": "2026-01-11T08:00:00Z",
+  "trialEnd": "2026-01-25T08:00:00Z",
   "createdAt": "2026-01-11T08:00:00Z",
   "updatedAt": "2026-01-11T08:00:00Z"
 }
