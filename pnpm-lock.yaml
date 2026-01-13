@@ -36,8 +36,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1(prettier@3.7.4)
       prettier-plugin-packagejson:
-        specifier: 2.5.20
-        version: 2.5.20(prettier@3.7.4)
+        specifier: 2.5.21
+        version: 2.5.21(prettier@3.7.4)
       release-it:
         specifier: ^19.2.3
         version: 19.2.3(@types/node@24.10.1)
@@ -429,10 +429,6 @@ packages:
   '@phun-ky/typeof@2.0.3':
     resolution: {integrity: sha512-oeQJs1aa8Ghke8JIK9yuq/+KjMiaYeDZ38jx7MhkXncXlUKjqQ3wEm2X3qCKyjo+ZZofZj+WsEEiqkTtRuE2xQ==}
     engines: {node: ^20.9.0 || >=22.0.0, npm: '>=10.8.2'}
-
-  '@pkgr/core@0.2.9':
-    resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
-    engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
   '@release-it/conventional-changelog@10.0.4':
     resolution: {integrity: sha512-pU1JkAZBHVk9u0O9CZcaLsqSZHWu0s9WNIFVUq0M9r/WlLpJvrCiSH2OCLo5XyOnWacdMvBjijm+kl6m36SdrA==}
@@ -1866,8 +1862,8 @@ packages:
     peerDependencies:
       prettier: ^3.0.0
 
-  prettier-plugin-packagejson@2.5.20:
-    resolution: {integrity: sha512-G8cowPh+QmJJECTZlrPDKWkVVcwrFjF2rGcw546w3N8blLoc4szSs8UUPfFVxHUNLUjiru71Ah83g1lZkeK9Bw==}
+  prettier-plugin-packagejson@2.5.21:
+    resolution: {integrity: sha512-d9ivsysb1SeRaKDhjf6Hi7jBGnP4TVsh7DeVi8N5HtHJ5vwD7YHcQIuy6jRkr2qGW/VKbrEVDWVMODuqcZuz8Q==}
     peerDependencies:
       prettier: '>= 1.16.0'
     peerDependenciesMeta:
@@ -2038,6 +2034,9 @@ packages:
   sort-object-keys@2.0.1:
     resolution: {integrity: sha512-R89fO+z3x7hiKPXX5P0qim+ge6Y60AjtlW+QQpRozrrNcR1lw9Pkpm5MLB56HoNvdcLHL4wbpq16OcvGpEDJIg==}
 
+  sort-object-keys@2.1.0:
+    resolution: {integrity: sha512-SOiEnthkJKPv2L6ec6HMwhUcN0/lppkeYuN1x63PbyPRrgSPIuBJCiYxYyvWRTtjMlOi14vQUCGUJqS6PLVm8g==}
+
   sort-package-json@3.5.0:
     resolution: {integrity: sha512-moY4UtptUuP5sPuu9H9dp8xHNel7eP5/Kz/7+90jTvC0IOiPH2LigtRM/aSFSxreaWoToHUVUpEV4a2tAs2oKQ==}
     engines: {node: '>=20'}
@@ -2179,10 +2178,6 @@ packages:
 
   svg-tags@1.0.0:
     resolution: {integrity: sha512-ovssysQTa+luh7A5Weu3Rta6FJlFBBbInjOh722LIt6klpU2/HtdUbszju/G4devcvk8PGt7FCLv5wftu3THUA==}
-
-  synckit@0.11.11:
-    resolution: {integrity: sha512-MeQTA1r0litLUf0Rp/iisCaL8761lKAZHaimlbGK4j0HysC4PLfqygQj9srcs0m2RdtDYnF8UuYyKpbjHYp7Jw==}
-    engines: {node: ^14.18.0 || >=16.0.0}
 
   table@6.9.0:
     resolution: {integrity: sha512-9kY+CygyYM6j02t5YFHbNz2FN5QmYGv9zAjVp4lCDjlCw7amdckXlEt/bjMhUIfj4ThGRE4gCUH5+yGnNuPo5A==}
@@ -2793,8 +2788,6 @@ snapshots:
       '@octokit/openapi-types': 27.0.0
 
   '@phun-ky/typeof@2.0.3': {}
-
-  '@pkgr/core@0.2.9': {}
 
   '@release-it/conventional-changelog@10.0.4(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.2.1)(release-it@19.2.3(@types/node@24.10.1))':
     dependencies:
@@ -4246,10 +4239,9 @@ snapshots:
       java-parser: 3.0.1
       prettier: 3.7.4
 
-  prettier-plugin-packagejson@2.5.20(prettier@3.7.4):
+  prettier-plugin-packagejson@2.5.21(prettier@3.7.4):
     dependencies:
       sort-package-json: 3.5.0
-      synckit: 0.11.11
     optionalDependencies:
       prettier: 3.7.4
 
@@ -4432,6 +4424,8 @@ snapshots:
 
   sort-object-keys@2.0.1: {}
 
+  sort-object-keys@2.1.0: {}
+
   sort-package-json@3.5.0:
     dependencies:
       detect-indent: 7.0.2
@@ -4439,7 +4433,7 @@ snapshots:
       git-hooks-list: 4.1.1
       is-plain-obj: 4.1.0
       semver: 7.7.3
-      sort-object-keys: 2.0.1
+      sort-object-keys: 2.1.0
       tinyglobby: 0.2.15
 
   sort-package-json@3.6.0:
@@ -4612,10 +4606,6 @@ snapshots:
       supports-color: 7.2.0
 
   svg-tags@1.0.0: {}
-
-  synckit@0.11.11:
-    dependencies:
-      '@pkgr/core': 0.2.9
 
   table@6.9.0:
     dependencies:
