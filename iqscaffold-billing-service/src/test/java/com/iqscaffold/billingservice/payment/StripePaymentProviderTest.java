@@ -944,4 +944,493 @@ class StripePaymentProviderTest {
       assertEquals("evt_tenant", result.eventId());
     }
   }
+
+  // ==================== Subscription Management Tests ====================
+
+  @Test
+  void createProduct_shouldCreateStripeProduct() throws StripeException {
+    // Given
+    String name = "Test Product";
+    String description = "Test Description";
+    Map<String, String> metadata = Map.of("key", "value");
+
+    com.stripe.model.Product mockProduct = mock(com.stripe.model.Product.class);
+    when(mockProduct.getId()).thenReturn("prod_123");
+
+    try (MockedStatic<com.stripe.model.Product> productStatic = mockStatic(com.stripe.model.Product.class)) {
+      productStatic.when(() -> com.stripe.model.Product.create(any(com.stripe.param.ProductCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockProduct);
+
+      // When
+      String productId = stripePaymentProvider.createProduct(name, description, metadata);
+
+      // Then
+      assertEquals("prod_123", productId);
+    }
+  }
+
+  @Test
+  void createProduct_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Product> productStatic = mockStatic(com.stripe.model.Product.class)) {
+      productStatic.when(() -> com.stripe.model.Product.create(any(com.stripe.param.ProductCreateParams.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.createProduct("Test", "Description", null)
+      );
+    }
+  }
+
+  @Test
+  void createPrice_shouldCreateStripePrice() throws StripeException {
+    // Given
+    String productId = "prod_123";
+    BigDecimal amount = new BigDecimal("29.99");
+    String currency = "usd";
+    String interval = "month";
+    Integer intervalCount = 1;
+    Map<String, String> metadata = Map.of("plan", "basic");
+
+    com.stripe.model.Price mockPrice = mock(com.stripe.model.Price.class);
+    when(mockPrice.getId()).thenReturn("price_123");
+
+    try (MockedStatic<com.stripe.model.Price> priceStatic = mockStatic(com.stripe.model.Price.class)) {
+      priceStatic.when(() -> com.stripe.model.Price.create(any(com.stripe.param.PriceCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockPrice);
+
+      // When
+      String priceId = stripePaymentProvider.createPrice(productId, amount, currency, interval, intervalCount, metadata);
+
+      // Then
+      assertEquals("price_123", priceId);
+    }
+  }
+
+  @Test
+  void createPrice_shouldHandleInvalidInterval() {
+    // When & Then
+    assertThrows(IllegalArgumentException.class, () ->
+        stripePaymentProvider.createPrice("prod_123", new BigDecimal("10"), "usd", "invalid", 1, null)
+    );
+  }
+
+  @Test
+  void createPrice_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Price> priceStatic = mockStatic(com.stripe.model.Price.class)) {
+      priceStatic.when(() -> com.stripe.model.Price.create(any(com.stripe.param.PriceCreateParams.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.createPrice("prod_123", new BigDecimal("10"), "usd", "month", 1, null)
+      );
+    }
+  }
+
+  @Test
+  void createSubscription_shouldCreateStripeSubscription() throws StripeException {
+    // Given
+    String customerId = "cus_123";
+    String priceId = "price_123";
+    Integer trialPeriodDays = 7;
+    Map<String, String> metadata = Map.of("plan", "premium");
+    String idempotencyKey = "sub_key_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+    when(mockSubscription.getId()).thenReturn("sub_123");
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.create(any(com.stripe.param.SubscriptionCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      String subscriptionId = stripePaymentProvider.createSubscription(customerId, priceId, trialPeriodDays, metadata, idempotencyKey);
+
+      // Then
+      assertEquals("sub_123", subscriptionId);
+    }
+  }
+
+  @Test
+  void createSubscription_shouldHandleNullTrialPeriod() throws StripeException {
+    // Given
+    String customerId = "cus_123";
+    String priceId = "price_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+    when(mockSubscription.getId()).thenReturn("sub_no_trial");
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.create(any(com.stripe.param.SubscriptionCreateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      String subscriptionId = stripePaymentProvider.createSubscription(customerId, priceId, null, null, null);
+
+      // Then
+      assertEquals("sub_no_trial", subscriptionId);
+    }
+  }
+
+  @Test
+  void createSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.create(any(com.stripe.param.SubscriptionCreateParams.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.createSubscription("cus_123", "price_123", null, null, null)
+      );
+    }
+  }
+
+  @Test
+  void updateSubscription_shouldUpdateStripeSubscription() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+    String newPriceId = "price_new";
+    Map<String, String> metadata = Map.of("updated", "true");
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+    when(mockSubscription.getId()).thenReturn(subscriptionId);
+
+    com.stripe.model.SubscriptionItemCollection itemCollection = mock(com.stripe.model.SubscriptionItemCollection.class);
+    com.stripe.model.SubscriptionItem item = mock(com.stripe.model.SubscriptionItem.class);
+    when(item.getId()).thenReturn("si_123");
+    when(itemCollection.getData()).thenReturn(java.util.List.of(item));
+    when(mockSubscription.getItems()).thenReturn(itemCollection);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+      when(mockSubscription.update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      String result = stripePaymentProvider.updateSubscription(subscriptionId, newPriceId, metadata);
+
+      // Then
+      assertEquals(subscriptionId, result);
+    }
+  }
+
+  @Test
+  void updateSubscription_shouldHandleNoItems() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+    com.stripe.model.SubscriptionItemCollection itemCollection = mock(com.stripe.model.SubscriptionItemCollection.class);
+    when(itemCollection.getData()).thenReturn(java.util.List.of());
+    when(mockSubscription.getItems()).thenReturn(itemCollection);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.updateSubscription(subscriptionId, "price_new", null)
+      );
+    }
+  }
+
+  @Test
+  void updateSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(any(String.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.updateSubscription("sub_123", "price_new", null)
+      );
+    }
+  }
+
+  @Test
+  void cancelSubscription_shouldCancelAtPeriodEnd() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+      when(mockSubscription.update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      stripePaymentProvider.cancelSubscription(subscriptionId, true);
+
+      // Then
+      verify(mockSubscription).update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class));
+    }
+  }
+
+  @Test
+  void cancelSubscription_shouldCancelImmediately() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+      when(mockSubscription.cancel(any(com.stripe.param.SubscriptionCancelParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      stripePaymentProvider.cancelSubscription(subscriptionId, false);
+
+      // Then
+      verify(mockSubscription).cancel(any(com.stripe.param.SubscriptionCancelParams.class), any(RequestOptions.class));
+    }
+  }
+
+  @Test
+  void cancelSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(any(String.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.cancelSubscription("sub_123", false)
+      );
+    }
+  }
+
+  @Test
+  void pauseSubscription_shouldPauseStripeSubscription() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+      when(mockSubscription.update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      stripePaymentProvider.pauseSubscription(subscriptionId);
+
+      // Then
+      verify(mockSubscription).update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class));
+    }
+  }
+
+  @Test
+  void pauseSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(any(String.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.pauseSubscription("sub_123")
+      );
+    }
+  }
+
+  @Test
+  void resumeSubscription_shouldResumeStripeSubscription() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+      when(mockSubscription.update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      stripePaymentProvider.resumeSubscription(subscriptionId);
+
+      // Then
+      verify(mockSubscription).update(any(com.stripe.param.SubscriptionUpdateParams.class), any(RequestOptions.class));
+    }
+  }
+
+  @Test
+  void resumeSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(any(String.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.resumeSubscription("sub_123")
+      );
+    }
+  }
+
+  @Test
+  void getSubscription_shouldRetrieveStripeSubscription() throws StripeException {
+    // Given
+    String subscriptionId = "sub_123";
+
+    com.stripe.model.Subscription mockSubscription = mock(com.stripe.model.Subscription.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(eq(subscriptionId), any(RequestOptions.class)))
+          .thenReturn(mockSubscription);
+
+      // When
+      Object result = stripePaymentProvider.getSubscription(subscriptionId);
+
+      // Then
+      assertEquals(mockSubscription, result);
+    }
+  }
+
+  @Test
+  void getSubscription_shouldHandleStripeException() throws StripeException {
+    // Given
+    StripeException stripeException = mock(StripeException.class);
+
+    try (MockedStatic<com.stripe.model.Subscription> subscriptionStatic = mockStatic(com.stripe.model.Subscription.class)) {
+      subscriptionStatic.when(() -> com.stripe.model.Subscription.retrieve(any(String.class), any(RequestOptions.class)))
+          .thenThrow(stripeException);
+
+      // When & Then
+      assertThrows(PaymentException.class, () ->
+          stripePaymentProvider.getSubscription("sub_123")
+      );
+    }
+  }
+
+  @Test
+  void getProviderType_shouldReturnStripe() {
+    // When
+    com.iqscaffold.billingservice.shared.PaymentGatewayProvider result = stripePaymentProvider.getProviderType();
+
+    // Then
+    assertEquals(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE, result);
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParseSubscriptionCreated() {
+    // Given
+    String payload = "{\"id\":\"evt_sub_created\",\"type\":\"customer.subscription.created\"}";
+    String sigHeader = "t=123,v1=sig";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_sub_created");
+    when(mockEvent.getType()).thenReturn("customer.subscription.created");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.Subscription subscription = mock(com.stripe.model.Subscription.class);
+    when(subscription.getId()).thenReturn("sub_123");
+    when(subscription.getStatus()).thenReturn("active");
+    when(subscription.getCustomer()).thenReturn("cus_123");
+    when(subscription.getMetadata()).thenReturn(Map.of("tenant_id", "tenant-123"));
+    when(deserializer.getObject()).thenReturn(Optional.of(subscription));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals(WebhookEvent.EventType.SUBSCRIPTION_CREATED, result.eventType());
+      assertEquals("sub_123", result.resourceId());
+    }
+  }
+
+  @Test
+  void verifyAndParseWebhook_shouldParseInvoicePaid() {
+    // Given
+    String payload = "{\"id\":\"evt_invoice_paid\",\"type\":\"invoice.paid\"}";
+    String sigHeader = "t=123,v1=sig";
+    
+    IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
+    IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
+    IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
+    IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
+    IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
+    
+    lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
+    lenient().when(billing.payment()).thenReturn(payment);
+    lenient().when(payment.stripe()).thenReturn(stripe);
+    lenient().when(stripe.webhookSecret()).thenReturn("whsec_test");
+    lenient().when(billing.security()).thenReturn(security);
+    lenient().when(security.encryption()).thenReturn(encryption);
+    lenient().when(encryption.useTenantSpecificConfig()).thenReturn(false);
+
+    com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
+    when(mockEvent.getId()).thenReturn("evt_invoice_paid");
+    when(mockEvent.getType()).thenReturn("invoice.paid");
+    
+    com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
+    when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
+    
+    com.stripe.model.Invoice invoice = mock(com.stripe.model.Invoice.class);
+    when(invoice.getId()).thenReturn("in_123");
+    when(invoice.getStatus()).thenReturn("paid");
+    when(invoice.getCustomer()).thenReturn("cus_123");
+    when(invoice.getCurrency()).thenReturn("usd");
+    when(deserializer.getObject()).thenReturn(Optional.of(invoice));
+
+    try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
+      webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_test"))
+          .thenReturn(mockEvent);
+
+      // When
+      WebhookEvent result = stripePaymentProvider.verifyAndParseWebhook(payload, sigHeader);
+
+      // Then
+      assertNotNull(result);
+      assertEquals(WebhookEvent.EventType.INVOICE_PAID, result.eventType());
+      assertEquals("in_123", result.resourceId());
+    }
+  }
 }
