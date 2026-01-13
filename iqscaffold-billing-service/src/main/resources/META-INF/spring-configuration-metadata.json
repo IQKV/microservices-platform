@@ -67,18 +67,6 @@
             "description": "Stripe payment provider configuration for processing payments, webhooks, and Connect integration."
         },
         {
-            "name": "iqscaffold.billing.integration",
-            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Integration",
-            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
-            "description": "External service integration configuration for connecting with other microservices."
-        },
-        {
-            "name": "iqscaffold.billing.integration.email-service",
-            "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Integration$EmailService",
-            "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
-            "description": "Email service integration configuration for connecting to the external email microservice."
-        },
-        {
             "name": "iqscaffold.billing.stripe",
             "type": "com.iqscaffold.billingservice.config.IqScaffoldProperties$Billing$Stripe",
             "sourceType": "com.iqscaffold.billingservice.config.IqScaffoldProperties",
@@ -288,18 +276,6 @@
             "name": "iqscaffold.billing.payment.stripe.client-id",
             "type": "java.lang.String",
             "description": "Stripe Connect Client ID (ca_...) for OAuth flow during merchant onboarding. Required when saas-mode is enabled."
-        },
-        {
-            "name": "iqscaffold.billing.integration.email-service.url",
-            "type": "java.lang.String",
-            "description": "Base URL of the external Email Service microservice for sending notification emails.",
-            "defaultValue": "http://localhost:8084"
-        },
-        {
-            "name": "iqscaffold.billing.integration.email-service.timeout-ms",
-            "type": "java.lang.Long",
-            "description": "Timeout in milliseconds for HTTP calls to the Email Service. Requests exceeding this duration will fail.",
-            "defaultValue": 10000
         },
         {
             "name": "iqscaffold.billing.stripe.public-key",
