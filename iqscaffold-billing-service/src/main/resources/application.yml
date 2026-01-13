@@ -275,10 +275,6 @@ iqscaffold:
         api-key: ${STRIPE_API_KEY:}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
         client-id: ${STRIPE_CLIENT_ID:}
-    integration:
-      email-service:
-        url: ${EMAIL_SERVICE_URL:http://localhost:8084}
-        timeout-ms: 10000
     stripe:
       public-key: ${STRIPE_PUBLIC_KEY:}
       secret-key: ${STRIPE_SECRET_KEY:}

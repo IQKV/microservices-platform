@@ -551,10 +551,6 @@ iqscaffold:
         api-key: ${STRIPE_API_KEY}
         webhook-secret: ${STRIPE_WEBHOOK_SECRET}
         client-id: ${STRIPE_CLIENT_ID}
-    integration:
-      email-service:
-        url: ${EMAIL_SERVICE_URL}
-        timeout-ms: 10000
     notifications:
       enable-email-notifications: true
       enable-webhook-notifications: true
@@ -636,7 +632,6 @@ SMTP_PASSWORD=email_password
 
 # Service Integration
 IQSCAFFOLD_USER_SERVICE_URL=http://localhost:8080
-EMAIL_SERVICE_URL=http://localhost:8084
 ```
 
 ## Observability & Monitoring

@@ -125,7 +125,6 @@ public record IqScaffoldProperties(
   public record Billing(
       @Valid @NotNull Security security,
       @Valid @NotNull Payment payment,
-      @Valid @NotNull Integration integration,
       @Valid @NotNull Stripe stripe,
       @Valid @NotNull Notifications notifications,
       @Valid @NotNull Subscription subscription
@@ -144,16 +143,6 @@ public record IqScaffoldProperties(
       public record Encryption(
           @NotBlank String masterKey,
           boolean useTenantSpecificConfig
-      ) {
-      }
-    }
-
-    public record Integration(
-        @Valid @NotNull EmailService emailService
-    ) {
-      public record EmailService(
-          @NotBlank String url,
-          @NotNull Long timeoutMs
       ) {
       }
     }
