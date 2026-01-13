@@ -2,10 +2,8 @@ package com.iqscaffold.billingservice.security;
 
 import java.util.UUID;
 
-import com.iqscaffold.billingservice.subscription.SubscriptionInvoice;
 import com.iqscaffold.billingservice.subscription.SubscriptionInvoiceRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionNotFoundException;
-import com.iqscaffold.billingservice.subscription.TenantSubscription;
 import com.iqscaffold.billingservice.subscription.TenantSubscriptionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
