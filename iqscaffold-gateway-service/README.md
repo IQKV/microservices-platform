@@ -170,9 +170,50 @@ Request Flow:
 ### Request Routing
 
 - Route requests to user-service (/api/v1/auth/**, /api/v1/users/me, /api/v1/admin/**)
+- Route requests to billing-service (/api/v1/billing/**, /api/v1/admin/billing/**)
 - Dynamic service registration support
 - Load balancing across service instances
 - Health check-based routing
+
+### Billing Service Integration
+
+The gateway provides comprehensive routing and rate limiting for the billing service:
+
+#### Payment Operations
+
+- `POST /api/v1/billing/payments/intent` - Create payment intents (30 req/min)
+- `GET /api/v1/billing/payments/**` - Payment queries (60 req/min)
+- `POST /api/v1/billing/payments/*/refund` - Process refunds (10 req/min)
+
+#### Subscription Management
+
+- `POST /api/v1/billing/subscriptions` - Create subscriptions (40 req/min)
+- `GET /api/v1/billing/subscriptions/**` - Subscription queries (50 req/min)
+- `POST /api/v1/billing/subscriptions/*/cancel` - Cancel subscriptions (10 req/min)
+- `POST /api/v1/billing/subscriptions/*/pause` - Pause subscriptions (10 req/min)
+- `POST /api/v1/billing/subscriptions/*/resume` - Resume subscriptions (10 req/min)
+
+#### Subscription Plans (Public Access)
+
+- `GET /api/v1/billing/subscription-plans` - List all plans (public)
+- `GET /api/v1/billing/subscription-plans/active` - List active plans (public)
+
+#### Invoice Operations
+
+- `GET /api/v1/billing/invoices/**` - Invoice queries (50 req/min)
+
+#### Payout Operations
+
+- `GET /api/v1/billing/payouts/**` - Payout queries (40 req/min)
+
+#### Admin Operations
+
+- `POST /api/v1/admin/billing/merchants/**` - Merchant onboarding (20 req/min)
+- `GET/POST/PUT/DELETE /api/v1/admin/billing/gateway-config/**` - Gateway configuration (20 req/min)
+
+#### Webhook Processing (Public Access)
+
+- `POST /api/v1/billing/webhooks/**` - Payment provider webhooks (200 req/min, no auth required)
 
 ### Authentication Flow
 
@@ -261,6 +302,8 @@ spring:
 
 ### Public Endpoints (No Authentication)
 
+#### User Service
+
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/signup` - User registration
 - `POST /api/v1/auth/refresh` - Refresh access token
@@ -268,11 +311,33 @@ spring:
 - `POST /api/v1/auth/password/forgot` - Password reset request
 - `GET /.well-known/jwks.json` - JWK Set for token validation
 
+#### Billing Service
+
+- `GET /api/v1/billing/subscription-plans` - List all subscription plans
+- `GET /api/v1/billing/subscription-plans/active` - List active subscription plans
+- `POST /api/v1/billing/webhooks/**` - Payment provider webhooks (Stripe, PayPal, etc.)
+
 ### Protected Endpoints (Requires JWT)
+
+#### User Service
 
 - `GET /api/v1/users/me` - Get current user
 - `POST /api/v1/auth/logout` - Logout current session
 - `GET /api/v1/admin/users` - List users (admin only)
+
+#### Billing Service
+
+- `POST /api/v1/billing/payments/intent` - Create payment intent (USER role)
+- `GET /api/v1/billing/payments/{id}` - Get payment details (USER role)
+- `GET /api/v1/billing/payments` - List payments (BILLING_ADMIN+ role)
+- `POST /api/v1/billing/payments/{id}/refund` - Process refund (BILLING_ADMIN+ role)
+- `POST /api/v1/billing/subscriptions` - Create subscription (BILLING_ADMIN+ role)
+- `GET /api/v1/billing/subscriptions/**` - Subscription operations (USER+ role)
+- `GET /api/v1/billing/invoices/**` - Invoice operations (BILLING_ADMIN+ role)
+- `GET /api/v1/billing/payouts/**` - Payout operations (BILLING_ADMIN+ role)
+- `POST /api/v1/admin/billing/merchants/onboard` - Merchant onboarding (BILLING_ADMIN+ role)
+- `GET /api/v1/admin/billing/merchants/status/{orgId}` - Merchant status (BILLING_ADMIN+ role)
+- `GET/POST/PUT/DELETE /api/v1/admin/billing/gateway-config/**` - Gateway configuration (BILLING_ADMIN+ role)
 
 ### Monitoring Endpoints
 
