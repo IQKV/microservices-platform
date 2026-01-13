@@ -2,17 +2,13 @@ package com.iqscaffold.billingservice.security;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import com.iqscaffold.billingservice.subscription.SubscriptionInvoice;
 import com.iqscaffold.billingservice.subscription.SubscriptionInvoiceRepository;
 import com.iqscaffold.billingservice.subscription.SubscriptionNotFoundException;
-import com.iqscaffold.billingservice.subscription.TenantSubscription;
 import com.iqscaffold.billingservice.subscription.TenantSubscriptionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,11 +96,10 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithSuperAdmin_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    TenantSubscription subscription = new TenantSubscription();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("SUPER_ADMIN"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -116,11 +111,10 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithBillingAdmin_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    TenantSubscription subscription = new TenantSubscription();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -132,11 +126,10 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithTenantOwner_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    TenantSubscription subscription = new TenantSubscription();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("TENANT_OWNER"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -148,11 +141,10 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithoutPermission_ShouldThrow() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    TenantSubscription subscription = new TenantSubscription();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("USER"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -168,7 +160,7 @@ class BillingAuthorizationServiceTest {
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(false);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -181,11 +173,10 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionViewPermission_WithFinanceViewer_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    TenantSubscription subscription = new TenantSubscription();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("FINANCE_VIEWER"), "tenant1", 1L, "John", "Doe");
     
-    when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -222,11 +213,10 @@ class BillingAuthorizationServiceTest {
   void requireInvoiceViewPermission_WithBillingAccess_ShouldPass() {
     // Given
     UUID invoiceId = UUID.randomUUID();
-    SubscriptionInvoice invoice = new SubscriptionInvoice();
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
     
-    when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
+    when(invoiceRepository.existsById(invoiceId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -241,7 +231,7 @@ class BillingAuthorizationServiceTest {
     UserContext userContext = new UserContext(1L, "user", "user@test.com", 
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
     
-    when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.empty());
+    when(invoiceRepository.existsById(invoiceId)).thenReturn(false);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
@@ -273,29 +263,5 @@ class BillingAuthorizationServiceTest {
     // When & Then
     assertThrows(AccessDeniedException.class, 
         () -> authorizationService.requireInvoiceListPermission());
-  }
-
-  @Test
-  void isSubscriptionOwner_ShouldReturnTrue() {
-    // Given
-    TenantSubscription subscription = new TenantSubscription();
-
-    // When
-    boolean result = authorizationService.isSubscriptionOwner(subscription);
-
-    // Then
-    assertTrue(result);
-  }
-
-  @Test
-  void isInvoiceOwner_ShouldReturnTrue() {
-    // Given
-    SubscriptionInvoice invoice = new SubscriptionInvoice();
-
-    // When
-    boolean result = authorizationService.isInvoiceOwner(invoice);
-
-    // Then
-    assertTrue(result);
   }
 }
