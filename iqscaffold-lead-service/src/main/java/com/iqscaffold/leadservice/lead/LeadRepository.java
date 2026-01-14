@@ -73,4 +73,21 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
       @Param("assignedTo") String assignedTo,
       Pageable pageable
   );
+
+  @Query("SELECT l.source as source, COUNT(l) as count FROM Lead l WHERE "
+      + "(:startDate IS NULL OR l.createdAt >= :startDate) "
+      + "AND (:endDate IS NULL OR l.createdAt <= :endDate) "
+      + "GROUP BY l.source")
+  List<LeadSourceCount> countLeadsBySource(
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate
+  );
+
+  /**
+   * Projection interface for lead source counts.
+   */
+  interface LeadSourceCount {
+    String getSource();
+    Long getCount();
+  }
 }

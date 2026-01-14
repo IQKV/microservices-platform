@@ -27,6 +27,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 /**
  * REST API for lead management operations.
  * <p>
@@ -182,6 +186,41 @@ public class LeadRestResource {
   public ResponseEntity<Void> deleteLead(@PathVariable Long id) {
     leadService.deleteLead(id);
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Gets lead counts grouped by source.
+   * <p>
+   * Returns statistics showing how many leads came from each source.
+   * Optionally filter by date range based on lead creation date.
+   *
+   * @param startDate Optional start date for filtering (inclusive)
+   * @param endDate Optional end date for filtering (inclusive)
+   * @return Map of source to count
+   */
+  @Operation(
+      summary = "Get lead counts by source",
+      description = "Retrieves lead counts grouped by source. " +
+                    "Optionally filter by date range based on lead creation date.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Lead counts retrieved successfully"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @GetMapping("/stats/by-source")
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<Map<String, Long>> getLeadCountsBySource(
+      @RequestParam(required = false)
+      @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+      LocalDate startDate,
+      @RequestParam(required = false)
+      @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+      LocalDate endDate) {
+    
+    LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+    LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+    
+    Map<String, Long> counts = leadService.getLeadCountsBySource(startDateTime, endDateTime);
+    return ResponseEntity.ok(counts);
   }
 
   /**

@@ -67,4 +67,13 @@ public interface LeadService {
   long getQualifiedLeadCount();
 
   long getLeadsCreatedSince(LocalDateTime date);
+
+  /**
+   * Gets lead counts grouped by source with optional date filtering.
+   *
+   * @param startDate Optional start date for filtering (inclusive)
+   * @param endDate Optional end date for filtering (inclusive)
+   * @return Map of source to count
+   */
+  java.util.Map<String, Long> getLeadCountsBySource(LocalDateTime startDate, LocalDateTime endDate);
 }

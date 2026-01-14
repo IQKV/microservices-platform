@@ -243,4 +243,19 @@ public class LeadServiceImpl implements LeadService {
   public long getLeadsCreatedSince(final LocalDateTime date) {
     return leadRepository.countLeadsCreatedSince(date);
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public java.util.Map<String, Long> getLeadCountsBySource(
+      final LocalDateTime startDate,
+      final LocalDateTime endDate) {
+    List<LeadRepository.LeadSourceCount> counts = 
+        leadRepository.countLeadsBySource(startDate, endDate);
+    
+    return counts.stream()
+        .collect(java.util.stream.Collectors.toMap(
+            LeadRepository.LeadSourceCount::getSource,
+            LeadRepository.LeadSourceCount::getCount
+        ));
+  }
 }
