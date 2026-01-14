@@ -1,8 +1,9 @@
 package com.iqscaffold.pipelineservice.event;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Event published when a lead moves between pipeline stages.

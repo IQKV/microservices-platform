@@ -340,7 +340,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
   private String toJson(final Map<String, Object> data) {
     try {
       return objectMapper.writeValueAsString(data);
-    } catch (JsonProcessingException e) {
+    } catch (final JsonProcessingException e) {
       logger.error("Failed to convert metadata to JSON", e);
       return null;
     }

@@ -1,8 +1,9 @@
 package com.iqscaffold.pipelineservice.event;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Event for lead lifecycle events consumed by Pipeline Service.

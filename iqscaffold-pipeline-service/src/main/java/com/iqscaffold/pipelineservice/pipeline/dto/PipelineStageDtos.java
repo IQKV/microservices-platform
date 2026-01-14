@@ -1,10 +1,11 @@
 package com.iqscaffold.pipelineservice.pipeline.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * DTOs for Pipeline Stage operations.

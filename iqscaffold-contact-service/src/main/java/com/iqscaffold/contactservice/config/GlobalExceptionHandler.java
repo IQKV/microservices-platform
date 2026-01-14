@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
 
     // Add field errors
     Map<String, String> fieldErrors = new HashMap<>();
-    for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+    for (final FieldError error : ex.getBindingResult().getFieldErrors()) {
       fieldErrors.put(error.getField(), error.getDefaultMessage());
     }
     problemDetail.setProperty("errors", fieldErrors);

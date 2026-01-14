@@ -1,5 +1,12 @@
 package com.iqscaffold.pipelineservice.dashboard;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.iqscaffold.pipelineservice.config.IqScaffoldProperties;
 import com.iqscaffold.pipelineservice.dashboard.dto.DashboardDtos;
 import com.iqscaffold.pipelineservice.pipeline.PipelineItem;
@@ -13,13 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of dashboard service for statistics and metrics.
@@ -139,7 +139,10 @@ public class DashboardServiceImpl implements DashboardService {
   /**
    * Filters pipeline items by date range based on creation date.
    */
-  private List<PipelineItem> filterByDateRange(List<PipelineItem> items, LocalDate startDate, LocalDate endDate) {
+  private List<PipelineItem> filterByDateRange(
+      final List<PipelineItem> items,
+      final LocalDate startDate,
+      final LocalDate endDate) {
     if (startDate == null && endDate == null) {
       return items;
     }
@@ -157,14 +160,14 @@ public class DashboardServiceImpl implements DashboardService {
   /**
    * Calculates average days spent in each stage.
    */
-  private Map<String, Double> calculateStageVelocity(List<PipelineItem> items) {
+  private Map<String, Double> calculateStageVelocity(final List<PipelineItem> items) {
     List<PipelineStage> stages = stageRepository.findAllByOrderByDisplayOrderAsc();
     Map<Long, String> stageIdToName = stages.stream()
         .collect(Collectors.toMap(PipelineStage::getId, PipelineStage::getName));
 
     Map<String, List<Integer>> daysInStageByStage = new HashMap<>();
 
-    for (PipelineItem item : items) {
+    for (final PipelineItem item : items) {
       String stageName = stageIdToName.getOrDefault(item.getStageId(), "Unknown");
       int daysInStage = item.getDaysInStage() != null ? item.getDaysInStage() : 0;
 
@@ -184,7 +187,7 @@ public class DashboardServiceImpl implements DashboardService {
   /**
    * Calls Lead Service to get lead counts by source using WebClient.
    */
-  private Map<String, Long> getLeadsBySourceFromLeadService(LocalDate startDate, LocalDate endDate) {
+  private Map<String, Long> getLeadsBySourceFromLeadService(final LocalDate startDate, final LocalDate endDate) {
     try {
       String leadServiceUrl = properties.getServices().getLeadServiceUrl();
 
@@ -209,12 +212,12 @@ public class DashboardServiceImpl implements DashboardService {
 
       return result != null ? result : new HashMap<>();
 
-    } catch (WebClientResponseException e) {
+    } catch (final WebClientResponseException e) {
       log.error("Failed to fetch leads by source from Lead Service: {} - {}", 
           e.getStatusCode(), e.getMessage());
       // Return empty map on failure - dashboard should still work with pipeline data
       return new HashMap<>();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       log.error("Unexpected error calling Lead Service", e);
       return new HashMap<>();
     }

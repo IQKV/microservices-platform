@@ -1,10 +1,11 @@
 package com.iqscaffold.pipelineservice.config;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -111,12 +112,12 @@ public class MetricsConfig {
    * @return the conversion rate gauge
    */
   @Bean
-  public Gauge conversionRateGauge(MeterRegistry registry) {
+  public Gauge conversionRateGauge(final MeterRegistry registry) {
     return Gauge.builder("pipeline.conversion.rate", this, config -> {
-          int total = config.totalLeads.get();
-          int converted = config.convertedLeads.get();
-          return total > 0 ? (converted * 100.0 / total) : 0.0;
-        })
+      int total = config.totalLeads.get();
+      int converted = config.convertedLeads.get();
+      return total > 0 ? (converted * 100.0 / total) : 0.0;
+    })
         .description("Lead conversion rate percentage")
         .tag("service", "pipeline-service")
         .register(registry);

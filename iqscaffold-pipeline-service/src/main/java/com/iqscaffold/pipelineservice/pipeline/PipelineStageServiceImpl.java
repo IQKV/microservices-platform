@@ -1,10 +1,11 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.iqscaffold.pipelineservice.shared.exception.BusinessException;
 import com.iqscaffold.pipelineservice.shared.exception.ConflictException;
 import com.iqscaffold.pipelineservice.shared.exception.ResourceNotFoundException;
-import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -97,8 +98,8 @@ public class PipelineStageServiceImpl implements PipelineStageService {
         .orElseThrow(() -> new ResourceNotFoundException("Pipeline stage", "id", id));
 
     // Check for duplicate name (excluding current stage)
-    if (!existingStage.getName().equals(updatedStage.getName()) &&
-        stageRepository.existsByName(updatedStage.getName())) {
+    if (!existingStage.getName().equals(updatedStage.getName())
+        && stageRepository.existsByName(updatedStage.getName())) {
       throw new ConflictException("Pipeline stage", "name", updatedStage.getName());
     }
 

@@ -1,12 +1,13 @@
 package com.iqscaffold.pipelineservice.followup.dto;
 
-import com.iqscaffold.pipelineservice.followup.FollowUpPriority;
-import com.iqscaffold.pipelineservice.followup.FollowUpStatus;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+
+import com.iqscaffold.pipelineservice.followup.FollowUpPriority;
+import com.iqscaffold.pipelineservice.followup.FollowUpStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * DTOs for Follow-Up operations.
