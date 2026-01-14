@@ -25,6 +25,7 @@
         <spring-boot.run.jvmArguments>-Duser.timezone=UTC</spring-boot.run.jvmArguments>
         <checkstyle.skip>true</checkstyle.skip>
         <maven.gitcommitid.skip>false</maven.gitcommitid.skip>
+        <jacoco.skip>false</jacoco.skip>
     </properties>
 
     <modules>
