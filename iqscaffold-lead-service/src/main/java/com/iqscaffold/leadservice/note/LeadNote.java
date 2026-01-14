@@ -1,6 +1,5 @@
 package com.iqscaffold.leadservice.note;
 
-import com.iqscaffold.leadservice.lead.Lead;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,9 +9,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import com.iqscaffold.leadservice.lead.Lead;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,7 +57,8 @@ public class LeadNote {
   private String updatedBy;
 
   // Constructors
-  public LeadNote() {}
+  public LeadNote() {
+  }
 
   public LeadNote(final Lead lead, final String content, final String createdBy) {
     this.lead = lead;
@@ -151,13 +152,13 @@ public class LeadNote {
   @Override
   public String toString() {
     return "LeadNote{"
-        + "id=" + id
-        + ", leadId=" + (lead != null ? lead.getId() : null)
-        + ", content='" + (content != null && content.length() > 50 
-            ? content.substring(0, 50) + "..." 
-            : content) + '\''
-        + ", isPinned=" + isPinned
-        + ", createdAt=" + createdAt
-        + '}';
+           + "id=" + id
+           + ", leadId=" + (lead != null ? lead.getId() : null)
+           + ", content='" + (content != null && content.length() > 50
+                                  ? content.substring(0, 50) + "..."
+                                  : content) + '\''
+           + ", isPinned=" + isPinned
+           + ", createdAt=" + createdAt
+           + '}';
   }
 }

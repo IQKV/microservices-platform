@@ -48,7 +48,7 @@ public final class LeadMapper {
   /**
    * Converts a CreateLeadRequest DTO to a Lead entity.
    *
-   * @param request The create request DTO
+   * @param request   The create request DTO
    * @param createdBy User ID creating the lead
    * @return Lead entity
    */
@@ -76,8 +76,8 @@ public final class LeadMapper {
   /**
    * Updates an existing Lead entity with data from UpdateLeadRequest DTO.
    *
-   * @param lead The lead entity to update
-   * @param request The update request DTO
+   * @param lead      The lead entity to update
+   * @param request   The update request DTO
    * @param updatedBy User ID updating the lead
    */
   public static void updateEntity(

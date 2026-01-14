@@ -1,5 +1,12 @@
 package com.iqscaffold.leadservice.security;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iqscaffold.leadservice.lead.Lead;
 import com.iqscaffold.leadservice.lead.LeadRepository;
@@ -19,17 +26,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Integration tests for tenant data isolation and JWT authentication.
  * Tests Requirements: 9.3, 9.4, 10.1, 10.2
- * 
+ * <p>
  * NOTE: These tests are temporarily disabled because they require tenant schema setup.
  * See backend/TENANT_ISOLATION_TEST_SOLUTION.md for implementation details.
  */

@@ -1,8 +1,9 @@
 package com.iqscaffold.leadservice.activity;
 
+import java.util.List;
+
 import com.iqscaffold.leadservice.lead.Lead;
 import com.iqscaffold.leadservice.note.LeadNote;
-import java.util.List;
 
 /**
  * Service interface for activity logging operations.
@@ -26,7 +27,7 @@ public interface ActivityLogService {
   /**
    * Log lead deletion activity.
    *
-   * @param leadId the ID of the deleted lead
+   * @param leadId    the ID of the deleted lead
    * @param deletedBy the user who deleted the lead
    */
   void logLeadDeleted(Long leadId, String deletedBy);
@@ -50,8 +51,8 @@ public interface ActivityLogService {
   /**
    * Log note deleted activity.
    *
-   * @param lead the lead from which the note was deleted
-   * @param noteId the ID of the deleted note
+   * @param lead      the lead from which the note was deleted
+   * @param noteId    the ID of the deleted note
    * @param deletedBy the user who deleted the note
    */
   void logNoteDeleted(Lead lead, Long noteId, String deletedBy);
@@ -59,18 +60,18 @@ public interface ActivityLogService {
   /**
    * Log stage change activity (event listener).
    *
-   * @param leadId the lead ID
+   * @param leadId     the lead ID
    * @param oldStageId the old stage ID
    * @param newStageId the new stage ID
-   * @param changedBy the user who changed the stage
+   * @param changedBy  the user who changed the stage
    */
   void logStageChange(Long leadId, Long oldStageId, Long newStageId, String changedBy);
 
   /**
    * Log follow-up scheduled activity.
    *
-   * @param leadId the lead ID
-   * @param followUpId the follow-up ID
+   * @param leadId      the lead ID
+   * @param followUpId  the follow-up ID
    * @param scheduledBy the user who scheduled the follow-up
    */
   void logFollowUpScheduled(Long leadId, Long followUpId, String scheduledBy);
@@ -78,8 +79,8 @@ public interface ActivityLogService {
   /**
    * Log follow-up completed activity.
    *
-   * @param leadId the lead ID
-   * @param followUpId the follow-up ID
+   * @param leadId      the lead ID
+   * @param followUpId  the follow-up ID
    * @param completedBy the user who completed the follow-up
    */
   void logFollowUpCompleted(Long leadId, Long followUpId, String completedBy);

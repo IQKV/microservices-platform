@@ -1,13 +1,14 @@
 package com.iqscaffold.leadservice.note;
 
+import jakarta.validation.Valid;
+import java.util.List;
+
 import com.iqscaffold.leadservice.note.dto.LeadNoteDtos;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,7 +56,7 @@ public class LeadNoteRestResource {
   /**
    * Adds a new note to a lead.
    *
-   * @param leadId The lead ID
+   * @param leadId  The lead ID
    * @param request The note creation request
    * @return The created note
    */
@@ -103,8 +104,8 @@ public class LeadNoteRestResource {
   /**
    * Updates an existing note.
    *
-   * @param leadId The lead ID
-   * @param noteId The note ID
+   * @param leadId  The lead ID
+   * @param noteId  The note ID
    * @param request The note update request
    * @return The updated note
    */

@@ -1,10 +1,10 @@
 package com.iqscaffold.leadservice.lead;
 
-import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -72,7 +72,7 @@ public interface LeadService {
    * Gets lead counts grouped by source with optional date filtering.
    *
    * @param startDate Optional start date for filtering (inclusive)
-   * @param endDate Optional end date for filtering (inclusive)
+   * @param endDate   Optional end date for filtering (inclusive)
    * @return Map of source to count
    */
   java.util.Map<String, Long> getLeadCountsBySource(LocalDateTime startDate, LocalDateTime endDate);

@@ -99,7 +99,8 @@ public class Lead {
   private String assignedTo;
 
   // Constructors
-  public Lead() {}
+  public Lead() {
+  }
 
   public Lead(final String firstName, final String lastName, final String email, final String source) {
     this.firstName = firstName;
@@ -294,14 +295,14 @@ public class Lead {
   @Override
   public String toString() {
     return "Lead{"
-        + "id=" + id
-        + ", firstName='" + firstName + '\''
-        + ", lastName='" + lastName + '\''
-        + ", email='" + email + '\''
-        + ", company='" + company + '\''
-        + ", source='" + source + '\''
-        + ", status=" + status
-        + ", score=" + score
-        + '}';
+           + "id=" + id
+           + ", firstName='" + firstName + '\''
+           + ", lastName='" + lastName + '\''
+           + ", email='" + email + '\''
+           + ", company='" + company + '\''
+           + ", source='" + source + '\''
+           + ", status=" + status
+           + ", score=" + score
+           + '}';
   }
 }

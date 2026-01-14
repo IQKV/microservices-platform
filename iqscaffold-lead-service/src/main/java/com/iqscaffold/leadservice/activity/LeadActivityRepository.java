@@ -1,6 +1,7 @@
 package com.iqscaffold.leadservice.activity;
 
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,7 @@ public interface LeadActivityRepository extends JpaRepository<LeadActivity, Long
    * Find all activities of a specific type for a lead.
    *
    * @param leadId the lead ID
-   * @param type the activity type
+   * @param type   the activity type
    * @return list of activities
    */
   List<LeadActivity> findByLeadIdAndType(Long leadId, ActivityType type);

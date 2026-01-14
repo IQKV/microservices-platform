@@ -1,5 +1,8 @@
 package com.iqscaffold.leadservice.note;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.iqscaffold.leadservice.activity.ActivityLogService;
 import com.iqscaffold.leadservice.lead.Lead;
 import com.iqscaffold.leadservice.lead.LeadRepository;
@@ -7,8 +10,6 @@ import com.iqscaffold.leadservice.note.dto.LeadNoteDtos;
 import com.iqscaffold.leadservice.note.dto.LeadNoteMapper;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import com.iqscaffold.leadservice.shared.exception.LeadNoteNotFoundException;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

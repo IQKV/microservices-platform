@@ -27,10 +27,10 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
   Page<Lead> findByAssignedTo(String assignedTo, Pageable pageable);
 
   @Query("SELECT l FROM Lead l WHERE "
-      + "LOWER(l.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.company) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+         + "LOWER(l.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.company) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
   Page<Lead> searchLeads(@Param("searchTerm") String searchTerm, Pageable pageable);
 
   @Query("SELECT l FROM Lead l WHERE l.score >= :minScore")
@@ -57,15 +57,15 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
   long countLeadsCreatedSince(@Param("date") LocalDateTime date);
 
   @Query("SELECT l FROM Lead l WHERE "
-      + "(:searchTerm IS NULL OR "
-      + "LOWER(l.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.company) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
-      + "LOWER(l.phone) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
-      + "AND (:source IS NULL OR l.source = :source) "
-      + "AND (:status IS NULL OR l.status = :status) "
-      + "AND (:assignedTo IS NULL OR l.assignedTo = :assignedTo)")
+         + "(:searchTerm IS NULL OR "
+         + "LOWER(l.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.company) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+         + "LOWER(l.phone) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
+         + "AND (:source IS NULL OR l.source = :source) "
+         + "AND (:status IS NULL OR l.status = :status) "
+         + "AND (:assignedTo IS NULL OR l.assignedTo = :assignedTo)")
   Page<Lead> findLeadsWithFilters(
       @Param("searchTerm") String searchTerm,
       @Param("source") String source,
@@ -75,9 +75,9 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
   );
 
   @Query("SELECT l.source as source, COUNT(l) as count FROM Lead l WHERE "
-      + "(:startDate IS NULL OR l.createdAt >= :startDate) "
-      + "AND (:endDate IS NULL OR l.createdAt <= :endDate) "
-      + "GROUP BY l.source")
+         + "(:startDate IS NULL OR l.createdAt >= :startDate) "
+         + "AND (:endDate IS NULL OR l.createdAt <= :endDate) "
+         + "GROUP BY l.source")
   List<LeadSourceCount> countLeadsBySource(
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate
@@ -88,6 +88,7 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
    */
   interface LeadSourceCount {
     String getSource();
+
     Long getCount();
   }
 }

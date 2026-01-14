@@ -1,9 +1,10 @@
 package com.iqscaffold.leadservice.note.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * DTOs for Lead Note REST API operations.
@@ -18,7 +19,7 @@ public final class LeadNoteDtos {
   /**
    * Request DTO for creating a new lead note.
    *
-   * @param content Note content (required, max 5000 chars)
+   * @param content  Note content (required, max 5000 chars)
    * @param isPinned Whether the note should be pinned (optional, defaults to false)
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -34,7 +35,7 @@ public final class LeadNoteDtos {
   /**
    * Request DTO for updating an existing lead note.
    *
-   * @param content Note content (required, max 5000 chars)
+   * @param content  Note content (required, max 5000 chars)
    * @param isPinned Whether the note should be pinned (optional)
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,10 +51,10 @@ public final class LeadNoteDtos {
   /**
    * Response DTO for lead note information.
    *
-   * @param id Note's unique identifier
-   * @param leadId Associated lead's ID
-   * @param content Note content
-   * @param isPinned Whether the note is pinned
+   * @param id        Note's unique identifier
+   * @param leadId    Associated lead's ID
+   * @param content   Note content
+   * @param isPinned  Whether the note is pinned
    * @param createdAt Creation timestamp
    * @param updatedAt Last update timestamp
    * @param createdBy User who created the note

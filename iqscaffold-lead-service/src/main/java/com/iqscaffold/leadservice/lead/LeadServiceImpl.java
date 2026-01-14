@@ -1,13 +1,13 @@
 package com.iqscaffold.leadservice.lead;
 
-import com.iqscaffold.leadservice.lead.dto.LeadDtos;
-import com.iqscaffold.leadservice.lead.dto.LeadMapper;
-import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
-import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.leadservice.lead.dto.LeadDtos;
+import com.iqscaffold.leadservice.lead.dto.LeadMapper;
+import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
+import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -249,9 +249,9 @@ public class LeadServiceImpl implements LeadService {
   public java.util.Map<String, Long> getLeadCountsBySource(
       final LocalDateTime startDate,
       final LocalDateTime endDate) {
-    List<LeadRepository.LeadSourceCount> counts = 
+    List<LeadRepository.LeadSourceCount> counts =
         leadRepository.countLeadsBySource(startDate, endDate);
-    
+
     return counts.stream()
         .collect(java.util.stream.Collectors.toMap(
             LeadRepository.LeadSourceCount::getSource,

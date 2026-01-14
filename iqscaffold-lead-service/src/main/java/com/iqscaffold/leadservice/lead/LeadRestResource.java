@@ -1,5 +1,10 @@
 package com.iqscaffold.leadservice.lead;
 
+import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import com.iqscaffold.leadservice.lead.dto.LeadMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,10 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * REST API for lead management operations.
@@ -110,18 +110,18 @@ public class LeadRestResource {
   /**
    * Lists leads with optional search and filtering.
    *
-   * @param search Search term to match against name, email, company, or phone
-   * @param source Filter by lead source
-   * @param status Filter by lead status
+   * @param search     Search term to match against name, email, company, or phone
+   * @param source     Filter by lead source
+   * @param status     Filter by lead status
    * @param assignedTo Filter by assigned user
-   * @param pageable Pagination parameters (page, size, sort)
+   * @param pageable   Pagination parameters (page, size, sort)
    * @return Paginated list of leads
    */
   @Operation(
       summary = "List leads",
       description = "Retrieves a paginated list of leads with optional search and filtering. "
-          + "Search term matches against first name, last name, email, company, and phone. "
-          + "Multiple filters are combined with AND logic.")
+                    + "Search term matches against first name, last name, email, company, and phone. "
+                    + "Multiple filters are combined with AND logic.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Leads retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -142,7 +142,7 @@ public class LeadRestResource {
   /**
    * Updates an existing lead.
    *
-   * @param id The lead ID
+   * @param id      The lead ID
    * @param request The lead update request
    * @return The updated lead
    */
@@ -195,7 +195,7 @@ public class LeadRestResource {
    * Optionally filter by date range based on lead creation date.
    *
    * @param startDate Optional start date for filtering (inclusive)
-   * @param endDate Optional end date for filtering (inclusive)
+   * @param endDate   Optional end date for filtering (inclusive)
    * @return Map of source to count
    */
   @Operation(
@@ -215,10 +215,10 @@ public class LeadRestResource {
       @RequestParam(required = false)
       @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
       LocalDate endDate) {
-    
+
     LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
     LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
-    
+
     Map<String, Long> counts = leadService.getLeadCountsBySource(startDateTime, endDateTime);
     return ResponseEntity.ok(counts);
   }

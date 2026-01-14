@@ -1,7 +1,8 @@
 package com.iqscaffold.leadservice.activity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * DTO for Lead Activity responses.

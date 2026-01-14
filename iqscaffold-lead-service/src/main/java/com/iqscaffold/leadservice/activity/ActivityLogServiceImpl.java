@@ -1,14 +1,15 @@
 package com.iqscaffold.leadservice.activity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iqscaffold.leadservice.lead.Lead;
 import com.iqscaffold.leadservice.lead.LeadRepository;
 import com.iqscaffold.leadservice.note.LeadNote;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -348,7 +349,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
   /**
    * Truncate a string to a maximum length.
    *
-   * @param text the text to truncate
+   * @param text      the text to truncate
    * @param maxLength the maximum length
    * @return truncated text
    */

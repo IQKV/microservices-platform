@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Metrics configuration for Lead Service observability.
- * 
+ *
  * <p>This configuration provides custom Prometheus metrics for monitoring
  * lead management operations and business KPIs.
- * 
+ *
  * <h3>Custom Metrics:</h3>
  * <ul>
  *   <li><strong>lead.created</strong> - Counter for lead creation events</li>
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
  *   <li><strong>lead.creation.time</strong> - Timer for lead creation duration</li>
  *   <li><strong>lead.search.time</strong> - Timer for lead search duration</li>
  * </ul>
- * 
+ *
  * @see MeterRegistry
  */
 @Configuration

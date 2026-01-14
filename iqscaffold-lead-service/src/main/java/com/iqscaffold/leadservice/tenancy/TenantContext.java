@@ -342,6 +342,7 @@ public final class TenantContext {
   }
 
   // Legacy method names for backward compatibility
+
   /**
    * @deprecated Use {@link #setCurrentTenantId(String)} instead
    */

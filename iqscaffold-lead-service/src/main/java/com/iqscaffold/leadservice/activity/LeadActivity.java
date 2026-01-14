@@ -1,6 +1,5 @@
 package com.iqscaffold.leadservice.activity;
 
-import com.iqscaffold.leadservice.lead.Lead;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,6 +15,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import com.iqscaffold.leadservice.lead.Lead;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -57,7 +58,8 @@ public class LeadActivity {
   private String createdBy;
 
   // Constructors
-  public LeadActivity() {}
+  public LeadActivity() {
+  }
 
   public LeadActivity(
       final Lead lead,
@@ -147,11 +149,11 @@ public class LeadActivity {
   @Override
   public String toString() {
     return "LeadActivity{"
-        + "id=" + id
-        + ", type=" + type
-        + ", description='" + description + '\''
-        + ", createdAt=" + createdAt
-        + ", createdBy='" + createdBy + '\''
-        + '}';
+           + "id=" + id
+           + ", type=" + type
+           + ", description='" + description + '\''
+           + ", createdAt=" + createdAt
+           + ", createdBy='" + createdBy + '\''
+           + '}';
   }
 }

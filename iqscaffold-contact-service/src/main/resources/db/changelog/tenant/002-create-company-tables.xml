@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <changeSet id="002-create-companies-table" author="iqscaffold">
@@ -60,18 +60,18 @@
         </createIndex>
 
         <addForeignKeyConstraint
-            baseTableName="companies"
-            baseColumnNames="parent_company_id"
-            referencedTableName="companies"
-            referencedColumnNames="id"
-            constraintName="fk_companies_parent_company"/>
+                baseTableName="companies"
+                baseColumnNames="parent_company_id"
+                referencedTableName="companies"
+                referencedColumnNames="id"
+                constraintName="fk_companies_parent_company"/>
 
         <addForeignKeyConstraint
-            baseTableName="contacts"
-            baseColumnNames="company_id"
-            referencedTableName="companies"
-            referencedColumnNames="id"
-            constraintName="fk_contacts_company"/>
+                baseTableName="contacts"
+                baseColumnNames="company_id"
+                referencedTableName="companies"
+                referencedColumnNames="id"
+                constraintName="fk_contacts_company"/>
     </changeSet>
 
 </databaseChangeLog>

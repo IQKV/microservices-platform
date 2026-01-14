@@ -22,12 +22,14 @@ public record IqScaffoldProperties(
       Duration messageCacheDuration,
       boolean fallbackToSystemLocale,
       boolean useCodeAsDefaultMessage
-  ) {}
+  ) {
+  }
 
   public record LiquibaseProperties(
       String systemChangeLog,
       String tenantChangeLog
-  ) {}
+  ) {
+  }
 
   public record LeadProperties(
       @NestedConfigurationProperty SecurityProperties security,
@@ -41,7 +43,8 @@ public record IqScaffoldProperties(
       public record JwtProperties(
           String jwkSetUri,
           String issuer
-      ) {}
+      ) {
+      }
     }
 
     public record ScoringProperties(
@@ -49,13 +52,15 @@ public record IqScaffoldProperties(
         int defaultScore,
         int maxScore,
         int minQualificationScore
-    ) {}
+    ) {
+    }
 
     public record QualificationProperties(
         boolean enableAutoQualification,
         boolean requireEmail,
         boolean requirePhone,
         boolean requireCompany
-    ) {}
+    ) {
+    }
   }
 }

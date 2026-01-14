@@ -1,13 +1,14 @@
 package com.iqscaffold.leadservice.config;
 
-import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
-import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
-import com.iqscaffold.leadservice.shared.exception.LeadNoteNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
+import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
+import com.iqscaffold.leadservice.shared.exception.LeadNoteNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles validation errors from @Valid annotations.
    *
-   * @param ex The validation exception
+   * @param ex      The validation exception
    * @param request The HTTP request
    * @return Problem detail response with field errors
    */
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles constraint violation exceptions.
    *
-   * @param ex The constraint violation exception
+   * @param ex      The constraint violation exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -85,7 +86,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles lead not found exceptions.
    *
-   * @param ex The not found exception
+   * @param ex      The not found exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -108,7 +109,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles lead note not found exceptions.
    *
-   * @param ex The not found exception
+   * @param ex      The not found exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -131,7 +132,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles duplicate resource exceptions.
    *
-   * @param ex The duplicate resource exception
+   * @param ex      The duplicate resource exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -154,7 +155,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles access denied exceptions.
    *
-   * @param ex The access denied exception
+   * @param ex      The access denied exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -177,7 +178,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles authentication exceptions.
    *
-   * @param ex The authentication exception
+   * @param ex      The authentication exception
    * @param request The HTTP request
    * @return Problem detail response
    */
@@ -200,7 +201,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles all other unhandled exceptions.
    *
-   * @param ex The exception
+   * @param ex      The exception
    * @param request The HTTP request
    * @return Problem detail response
    */
