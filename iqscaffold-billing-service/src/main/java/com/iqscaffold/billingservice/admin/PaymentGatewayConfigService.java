@@ -53,7 +53,7 @@ public class PaymentGatewayConfigService {
   @CacheEvict(value = "gatewayConfigs", key = "#tenantId + ':' + #request.gatewayProvider()")
   public GatewayConfigDtos.GatewayConfigResponse createGatewayConfig(GatewayConfigDtos.CreateGatewayConfigRequest request) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
-    
+
     logger.info("Creating gateway configuration for tenant {} and provider {}", tenantId, request.gatewayProvider());
 
     // Check if configuration already exists
@@ -174,7 +174,7 @@ public class PaymentGatewayConfigService {
   @Transactional(readOnly = true)
   public <T extends GatewayConfigDtos.GatewayConfigData> T getDecryptedGatewayConfig(
       String tenantId, PaymentGatewayProvider provider, Class<T> configClass) {
-    
+
     PaymentGatewayConfig config = repository.findByTenantIdAndGatewayProvider(tenantId, provider)
         .orElseThrow(() -> new IllegalArgumentException(
             "Gateway configuration not found for tenant " + tenantId + " and provider " + provider));
@@ -190,7 +190,7 @@ public class PaymentGatewayConfigService {
     try {
       return objectMapper.readValue(decryptedJson, configClass);
     } catch (final JsonProcessingException e) {
-      logger.error("Failed to deserialize gateway config for tenant {} and provider {}: {}", 
+      logger.error("Failed to deserialize gateway config for tenant {} and provider {}: {}",
           tenantId, provider, e.getMessage(), e);
       throw new RuntimeException("Failed to deserialize gateway configuration", e);
     }

@@ -564,13 +564,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_123\",\"type\":\"payment_intent.succeeded\"}";
     String sigHeader = "t=123,v1=sig";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -582,12 +582,12 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_123");
     when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
-    
+
     com.stripe.model.StripeObject mockObject = mock(com.stripe.model.PaymentIntent.class);
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
     when(deserializer.getObject()).thenReturn(Optional.of(mockObject));
-    
+
     com.stripe.model.PaymentIntent pi = mock(com.stripe.model.PaymentIntent.class);
     when(pi.getId()).thenReturn("pi_123");
     when(pi.getMetadata()).thenReturn(Map.of("tenant_id", "tenant-123"));
@@ -613,13 +613,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "invalid";
     String sigHeader = "invalid";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -644,13 +644,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_456\",\"type\":\"charge.refunded\"}";
     String sigHeader = "t=456,v1=sig456";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -662,10 +662,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_456");
     when(mockEvent.getType()).thenReturn("charge.refunded");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.Charge charge = mock(com.stripe.model.Charge.class);
     when(charge.getPaymentIntent()).thenReturn("pi_456");
     when(charge.getRefunded()).thenReturn(true);
@@ -691,13 +691,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_789\",\"type\":\"payout.paid\"}";
     String sigHeader = "t=789,v1=sig789";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -709,10 +709,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_789");
     when(mockEvent.getType()).thenReturn("payout.paid");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.Payout payout = mock(com.stripe.model.Payout.class);
     when(payout.getId()).thenReturn("po_123");
     when(payout.getAmount()).thenReturn(10000L);
@@ -739,13 +739,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_account\",\"type\":\"account.updated\"}";
     String sigHeader = "t=999,v1=sig999";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -757,10 +757,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_account");
     when(mockEvent.getType()).thenReturn("account.updated");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.Account account = mock(com.stripe.model.Account.class);
     when(account.getId()).thenReturn("acct_123");
     when(account.getChargesEnabled()).thenReturn(true);
@@ -787,13 +787,13 @@ class StripePaymentProviderTest {
     String tenantId = "tenant-123";
     BigDecimal amount = new BigDecimal("100.00");
     String currency = "usd";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -801,10 +801,10 @@ class StripePaymentProviderTest {
     lenient().when(billing.security()).thenReturn(security);
     lenient().when(security.encryption()).thenReturn(encryption);
     lenient().when(encryption.useTenantSpecificConfig()).thenReturn(true);
-    
-    GatewayConfigDtos.StripeGatewayConfigData tenantConfig = 
+
+    GatewayConfigDtos.StripeGatewayConfigData tenantConfig =
         new GatewayConfigDtos.StripeGatewayConfigData("sk_test_tenant", "whsec_tenant", null, null);
-    
+
     when(gatewayConfigService.getDecryptedGatewayConfig(
         eq(tenantId),
         eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
@@ -817,7 +817,7 @@ class StripePaymentProviderTest {
 
     try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
          MockedStatic<PaymentIntent> intentMock = mockStatic(PaymentIntent.class)) {
-      
+
       contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
       intentMock.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
           .thenReturn(mockIntent);
@@ -844,13 +844,13 @@ class StripePaymentProviderTest {
     String tenantId = "tenant-123";
     BigDecimal amount = new BigDecimal("100.00");
     String currency = "usd";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     when(iqScaffoldProperties.billing()).thenReturn(billing);
     when(billing.payment()).thenReturn(payment);
     when(payment.stripe()).thenReturn(stripe);
@@ -858,7 +858,7 @@ class StripePaymentProviderTest {
     when(billing.security()).thenReturn(security);
     when(security.encryption()).thenReturn(encryption);
     when(encryption.useTenantSpecificConfig()).thenReturn(true);
-    
+
     when(gatewayConfigService.getDecryptedGatewayConfig(
         eq(tenantId),
         eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
@@ -871,7 +871,7 @@ class StripePaymentProviderTest {
 
     try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
          MockedStatic<PaymentIntent> intentMock = mockStatic(PaymentIntent.class)) {
-      
+
       contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
       intentMock.when(() -> PaymentIntent.create(any(PaymentIntentCreateParams.class), any(RequestOptions.class)))
           .thenReturn(mockIntent);
@@ -893,13 +893,13 @@ class StripePaymentProviderTest {
     String tenantId = "tenant-123";
     String payload = "{\"id\":\"evt_tenant\",\"type\":\"payment_intent.succeeded\"}";
     String sigHeader = "t=123,v1=sig";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -907,10 +907,10 @@ class StripePaymentProviderTest {
     lenient().when(billing.security()).thenReturn(security);
     lenient().when(security.encryption()).thenReturn(encryption);
     lenient().when(encryption.useTenantSpecificConfig()).thenReturn(true);
-    
-    GatewayConfigDtos.StripeGatewayConfigData tenantConfig = 
+
+    GatewayConfigDtos.StripeGatewayConfigData tenantConfig =
         new GatewayConfigDtos.StripeGatewayConfigData("sk_test_tenant", "whsec_tenant", null, null);
-    
+
     when(gatewayConfigService.getDecryptedGatewayConfig(
         eq(tenantId),
         eq(com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE),
@@ -920,10 +920,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_tenant");
     when(mockEvent.getType()).thenReturn("payment_intent.succeeded");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.PaymentIntent pi = mock(com.stripe.model.PaymentIntent.class);
     when(pi.getId()).thenReturn("pi_tenant");
     when(pi.getMetadata()).thenReturn(Map.of());
@@ -931,7 +931,7 @@ class StripePaymentProviderTest {
 
     try (MockedStatic<SecurityContextHelper> contextMock = mockStatic(SecurityContextHelper.class);
          MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class)) {
-      
+
       contextMock.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
       webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, "whsec_tenant"))
           .thenReturn(mockEvent);
@@ -1343,13 +1343,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_sub_created\",\"type\":\"customer.subscription.created\"}";
     String sigHeader = "t=123,v1=sig";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -1361,10 +1361,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_sub_created");
     when(mockEvent.getType()).thenReturn("customer.subscription.created");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.Subscription subscription = mock(com.stripe.model.Subscription.class);
     when(subscription.getId()).thenReturn("sub_123");
     when(subscription.getStatus()).thenReturn("active");
@@ -1391,13 +1391,13 @@ class StripePaymentProviderTest {
     // Given
     String payload = "{\"id\":\"evt_invoice_paid\",\"type\":\"invoice.paid\"}";
     String sigHeader = "t=123,v1=sig";
-    
+
     IqScaffoldProperties.Billing billing = mock(IqScaffoldProperties.Billing.class);
     IqScaffoldProperties.Billing.Payment payment = mock(IqScaffoldProperties.Billing.Payment.class);
     IqScaffoldProperties.Billing.Payment.Stripe stripe = mock(IqScaffoldProperties.Billing.Payment.Stripe.class);
     IqScaffoldProperties.Billing.Security security = mock(IqScaffoldProperties.Billing.Security.class);
     IqScaffoldProperties.Billing.Security.Encryption encryption = mock(IqScaffoldProperties.Billing.Security.Encryption.class);
-    
+
     lenient().when(iqScaffoldProperties.billing()).thenReturn(billing);
     lenient().when(billing.payment()).thenReturn(payment);
     lenient().when(payment.stripe()).thenReturn(stripe);
@@ -1409,10 +1409,10 @@ class StripePaymentProviderTest {
     com.stripe.model.Event mockEvent = mock(com.stripe.model.Event.class);
     when(mockEvent.getId()).thenReturn("evt_invoice_paid");
     when(mockEvent.getType()).thenReturn("invoice.paid");
-    
+
     com.stripe.model.EventDataObjectDeserializer deserializer = mock(com.stripe.model.EventDataObjectDeserializer.class);
     when(mockEvent.getDataObjectDeserializer()).thenReturn(deserializer);
-    
+
     com.stripe.model.Invoice invoice = mock(com.stripe.model.Invoice.class);
     when(invoice.getId()).thenReturn("in_123");
     when(invoice.getStatus()).thenReturn("paid");

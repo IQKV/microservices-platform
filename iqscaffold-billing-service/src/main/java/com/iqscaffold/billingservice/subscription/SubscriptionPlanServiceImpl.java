@@ -55,7 +55,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     if (request.features() != null) {
       plan.setFeatures(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.features()).toString());
     }
-    
+
     if (request.metadata() != null) {
       plan.setMetadata(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.metadata()).toString());
     }
@@ -160,16 +160,16 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
       // Create Stripe Product if not exists
       if (plan.getStripeProductId() == null) {
         log.info("Creating Stripe Product for plan: {}", plan.getName());
-        
+
         java.util.Map<String, String> metadata = new java.util.HashMap<>();
         metadata.put("plan_id", plan.getId().toString());
-        
+
         String productId = provider.createProduct(
             plan.getName(),
             plan.getDescription(),
             metadata
         );
-        
+
         plan.setStripeProductId(productId);
         log.info("Created Stripe Product: {}", productId);
       }
@@ -177,10 +177,10 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
       // Create Stripe Price if not exists
       if (plan.getStripePriceId() == null) {
         log.info("Creating Stripe Price for plan: {}", plan.getName());
-        
+
         java.util.Map<String, String> metadata = new java.util.HashMap<>();
         metadata.put("plan_id", plan.getId().toString());
-        
+
         String priceId = provider.createPrice(
             plan.getStripeProductId(),
             plan.getAmount(),
@@ -189,14 +189,14 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
             plan.getIntervalCount(),
             metadata
         );
-        
+
         plan.setStripePriceId(priceId);
         log.info("Created Stripe Price: {}", priceId);
       }
 
       planRepository.save(plan);
       log.info("Successfully synced plan {} with Stripe", id);
-      
+
     } catch (final Exception e) {
       log.error("Failed to sync plan {} with Stripe: {}", id, e.getMessage(), e);
       throw new RuntimeException("Failed to sync plan with Stripe: " + e.getMessage(), e);

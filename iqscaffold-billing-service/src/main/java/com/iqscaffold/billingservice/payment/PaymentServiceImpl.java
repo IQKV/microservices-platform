@@ -50,15 +50,15 @@ public class PaymentServiceImpl implements PaymentService {
 
     // 2. Resolve Gateway Configuration for Current Tenant
     // This determines which payment gateway to use (Stripe, PayPal, etc.)
-    GatewayConfigurationService.GatewayConfiguration gatewayConfig = 
+    GatewayConfigurationService.GatewayConfiguration gatewayConfig =
         gatewayConfigService.resolveGatewayForCurrentTenant();
-    
+
     // 3. Get the appropriate payment provider adapter
     PaymentProviderAdapter paymentProvider = gatewayConfigService.getProviderForCurrentTenant();
-    
+
     // 4. Extract gateway configuration details
     Optional<String> connectedAccountId = gatewayConfig.gatewayAccountId();
-    
+
     // Platform fee logic (use config or default to 0)
     BigDecimal applicationFee = BigDecimal.ZERO;
     if (gatewayConfig.hasConfiguration() && connectedAccountId.isPresent()) {

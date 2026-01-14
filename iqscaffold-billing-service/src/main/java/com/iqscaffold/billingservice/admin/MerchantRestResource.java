@@ -72,7 +72,7 @@ public class MerchantRestResource {
   public ResponseEntity<MerchantStatusResponse> getMerchantStatus(
       @Parameter(description = "Organization ID", required = true)
       @PathVariable Long organizationId) {
-    
+
     var config = onboardingService.getMerchantStatusByOrganization(organizationId)
         .orElse(null);
 

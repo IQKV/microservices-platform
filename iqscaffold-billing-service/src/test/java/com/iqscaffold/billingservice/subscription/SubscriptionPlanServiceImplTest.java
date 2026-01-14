@@ -50,7 +50,7 @@ class SubscriptionPlanServiceImplTest {
   @BeforeEach
   void setUp() {
     planService = new SubscriptionPlanServiceImpl(planRepository, paymentProviderFactory);
-    
+
     // Setup common mocks
     lenient().when(paymentProviderFactory.getProvider(PaymentGatewayProvider.STRIPE))
         .thenReturn(paymentProvider);
@@ -297,7 +297,7 @@ class SubscriptionPlanServiceImplTest {
     when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
     when(paymentProvider.createProduct(anyString(), anyString(), anyMap()))
         .thenReturn("prod_123");
-    when(paymentProvider.createPrice(anyString(), any(BigDecimal.class), anyString(), 
+    when(paymentProvider.createPrice(anyString(), any(BigDecimal.class), anyString(),
         anyString(), any(Integer.class), anyMap()))
         .thenReturn("price_123");
     when(planRepository.save(plan)).thenReturn(plan);
@@ -307,7 +307,7 @@ class SubscriptionPlanServiceImplTest {
 
     // Then
     verify(paymentProvider).createProduct(eq("Test Plan"), eq("Test Description"), anyMap());
-    verify(paymentProvider).createPrice(eq("prod_123"), eq(new BigDecimal("29.99")), 
+    verify(paymentProvider).createPrice(eq("prod_123"), eq(new BigDecimal("29.99")),
         eq("USD"), eq("MONTH"), eq(1), anyMap());
     verify(planRepository).save(plan);
   }
@@ -322,7 +322,7 @@ class SubscriptionPlanServiceImplTest {
     plan.setStripePriceId(null);
 
     when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
-    when(paymentProvider.createPrice(anyString(), any(BigDecimal.class), anyString(), 
+    when(paymentProvider.createPrice(anyString(), any(BigDecimal.class), anyString(),
         anyString(), any(Integer.class), anyMap()))
         .thenReturn("price_123");
     when(planRepository.save(plan)).thenReturn(plan);
@@ -332,7 +332,7 @@ class SubscriptionPlanServiceImplTest {
 
     // Then
     verify(paymentProvider, never()).createProduct(anyString(), anyString(), anyMap());
-    verify(paymentProvider).createPrice(eq("prod_existing"), eq(new BigDecimal("29.99")), 
+    verify(paymentProvider).createPrice(eq("prod_existing"), eq(new BigDecimal("29.99")),
         eq("USD"), eq("MONTH"), eq(1), anyMap());
     verify(planRepository).save(plan);
   }
@@ -354,7 +354,7 @@ class SubscriptionPlanServiceImplTest {
 
     // Then
     verify(paymentProvider, never()).createProduct(anyString(), anyString(), anyMap());
-    verify(paymentProvider, never()).createPrice(anyString(), any(BigDecimal.class), 
+    verify(paymentProvider, never()).createPrice(anyString(), any(BigDecimal.class),
         anyString(), anyString(), any(Integer.class), anyMap());
     verify(planRepository).save(plan);
   }

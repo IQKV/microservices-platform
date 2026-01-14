@@ -84,7 +84,7 @@ class SubscriptionWebhookEventHandlerTest {
     // Given
     String subscriptionId = "sub_123";
     String customerId = "cus_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_CREATED,
@@ -114,7 +114,7 @@ class SubscriptionWebhookEventHandlerTest {
     // Given
     String subscriptionId = "sub_123";
     TenantSubscription existingSubscription = new TenantSubscription();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_CREATED,
@@ -139,7 +139,7 @@ class SubscriptionWebhookEventHandlerTest {
   void handleEvent_SubscriptionCreated_NoTenantId_ShouldLogWarning() {
     // Given
     String subscriptionId = "sub_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_CREATED,
@@ -163,7 +163,7 @@ class SubscriptionWebhookEventHandlerTest {
     // Given
     String subscriptionId = "sub_123";
     TenantSubscription subscription = new TenantSubscription();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_UPDATED,
@@ -191,7 +191,7 @@ class SubscriptionWebhookEventHandlerTest {
   void handleEvent_SubscriptionUpdated_SubscriptionNotFound_ShouldTryToCreate() {
     // Given
     String subscriptionId = "sub_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_UPDATED,
@@ -217,7 +217,7 @@ class SubscriptionWebhookEventHandlerTest {
     // Given
     String subscriptionId = "sub_123";
     TenantSubscription subscription = new TenantSubscription();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_CANCELED,
@@ -242,7 +242,7 @@ class SubscriptionWebhookEventHandlerTest {
   void handleEvent_SubscriptionCanceled_SubscriptionNotFound_ShouldLogWarning() {
     // Given
     String subscriptionId = "sub_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_CANCELED,
@@ -268,7 +268,7 @@ class SubscriptionWebhookEventHandlerTest {
     // Given
     String subscriptionId = "sub_123";
     TenantSubscription subscription = new TenantSubscription();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING,
@@ -293,7 +293,7 @@ class SubscriptionWebhookEventHandlerTest {
   void handleEvent_SubscriptionTrialEnding_SubscriptionNotFound_ShouldLogWarning() {
     // Given
     String subscriptionId = "sub_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING,

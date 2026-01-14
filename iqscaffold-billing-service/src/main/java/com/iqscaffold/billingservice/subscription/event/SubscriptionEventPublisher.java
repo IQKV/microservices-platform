@@ -41,7 +41,7 @@ public class SubscriptionEventPublisher {
   public void publish(SubscriptionEvent event) {
     try {
       String routingKey = getRoutingKey(event.getEventType());
-      
+
       log.debug("Publishing subscription event: type={}, subscriptionId={}, tenantId={}",
           event.getEventType(), event.getSubscriptionId(), event.getTenantId());
 

@@ -92,7 +92,7 @@ class InvoiceWebhookEventHandlerTest {
     String invoiceId = "in_123";
     String subscriptionId = "sub_123";
     TenantSubscription tenantSubscription = new TenantSubscription();
-    
+
     when(stripeInvoice.getId()).thenReturn(invoiceId);
     when(stripeInvoice.getNumber()).thenReturn("INV-001");
     when(stripeInvoice.getAmountDue()).thenReturn(1000L);
@@ -129,7 +129,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
     SubscriptionInvoice existingInvoice = new SubscriptionInvoice();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.INVOICE_CREATED,
@@ -155,7 +155,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
     SubscriptionInvoice invoice = new SubscriptionInvoice();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.INVOICE_FINALIZED,
@@ -181,7 +181,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
     SubscriptionInvoice invoice = new SubscriptionInvoice();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.INVOICE_PAID,
@@ -206,7 +206,7 @@ class InvoiceWebhookEventHandlerTest {
   void handleEvent_InvoicePaymentFailed_ShouldLogWarning() {
     // Given
     String invoiceId = "in_123";
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.INVOICE_PAYMENT_FAILED,
@@ -230,7 +230,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
     SubscriptionInvoice invoice = new SubscriptionInvoice();
-    
+
     WebhookEvent event = new WebhookEvent(
         "evt_123",
         WebhookEvent.EventType.INVOICE_VOIDED,
@@ -276,7 +276,7 @@ class InvoiceWebhookEventHandlerTest {
   void handleEvent_InvoiceCreated_NoSubscriptionInMetadata_ShouldLogWarning() {
     // Given
     String invoiceId = "in_123";
-    
+
     when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(
@@ -304,7 +304,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
     String subscriptionId = "sub_123";
-    
+
     when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(
@@ -332,7 +332,7 @@ class InvoiceWebhookEventHandlerTest {
   void handleEvent_StatusUpdate_InvoiceNotFound_ShouldTryToCreate() {
     // Given
     String invoiceId = "in_123";
-    
+
     when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(

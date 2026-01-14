@@ -80,8 +80,8 @@ public class SubscriptionStateMachine {
     // Allow initial creation (null -> INCOMPLETE or null -> TRIALING or null -> ACTIVE)
     if (currentStatus == null) {
       return newStatus == SubscriptionStatus.INCOMPLETE
-          || newStatus == SubscriptionStatus.TRIALING
-          || newStatus == SubscriptionStatus.ACTIVE;
+             || newStatus == SubscriptionStatus.TRIALING
+             || newStatus == SubscriptionStatus.ACTIVE;
     }
 
     // No transition if statuses are the same
@@ -141,7 +141,7 @@ public class SubscriptionStateMachine {
    */
   public boolean isActiveBillingState(SubscriptionStatus status) {
     return status == SubscriptionStatus.ACTIVE
-        || status == SubscriptionStatus.TRIALING
-        || status == SubscriptionStatus.PAST_DUE;
+           || status == SubscriptionStatus.TRIALING
+           || status == SubscriptionStatus.PAST_DUE;
   }
 }

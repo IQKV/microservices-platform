@@ -44,9 +44,9 @@ public record UserContext(
    */
   public boolean hasBillingAccess() {
     return authorities.contains("SUPER_ADMIN")
-        || authorities.contains("TENANT_OWNER")
-        || authorities.contains("BILLING_ADMIN")
-        || authorities.contains("FINANCE_VIEWER");
+           || authorities.contains("TENANT_OWNER")
+           || authorities.contains("BILLING_ADMIN")
+           || authorities.contains("FINANCE_VIEWER");
   }
 
   /**
@@ -58,8 +58,8 @@ public record UserContext(
    */
   public boolean canModifyBilling() {
     return authorities.contains("SUPER_ADMIN")
-        || authorities.contains("TENANT_OWNER")
-        || authorities.contains("BILLING_ADMIN");
+           || authorities.contains("TENANT_OWNER")
+           || authorities.contains("BILLING_ADMIN");
   }
 
   /**

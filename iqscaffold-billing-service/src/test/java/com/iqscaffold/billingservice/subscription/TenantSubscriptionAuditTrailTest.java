@@ -164,7 +164,7 @@ class TenantSubscriptionAuditTrailTest {
   void auditTrail_shouldHandleAllStatusTransitions() {
     // Test various status transitions
     SubscriptionStatus[] statuses = SubscriptionStatus.values();
-    
+
     for (int i = 0; i < statuses.length - 1; i++) {
       // Given
       TenantSubscriptionAuditTrail trail = new TenantSubscriptionAuditTrail();

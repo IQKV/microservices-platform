@@ -21,10 +21,10 @@ class SubscriptionItemTest {
   @BeforeEach
   void setUp() {
     subscriptionItem = new SubscriptionItem();
-    
+
     tenantSubscription = new TenantSubscription();
     tenantSubscription.setId(UUID.randomUUID());
-    
+
     plan = new SubscriptionPlan();
     plan.setId(UUID.randomUUID());
     plan.setName("Test Plan");

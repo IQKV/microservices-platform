@@ -54,7 +54,7 @@ class TenantContextTest {
     assertThrows(TenantContextException.InvalidTenantIdException.class, () -> {
       TenantContext.setCurrentTenantId(null);
     });
-    
+
     // Verify original context remains unchanged
     assertEquals("tenant123", TenantContext.getCurrentTenantId());
   }

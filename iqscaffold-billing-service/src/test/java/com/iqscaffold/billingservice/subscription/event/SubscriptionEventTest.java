@@ -281,19 +281,19 @@ class SubscriptionEventTest {
   void subscriptionEventType_shouldHaveAllExpectedValues() {
     // When & Then
     assertEquals(7, SubscriptionEvent.SubscriptionEventType.values().length);
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_CREATED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_CREATED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_CREATED"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_UPDATED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_UPDATED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_UPDATED"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_CANCELED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_CANCELED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_CANCELED"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_PAUSED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_PAUSED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_PAUSED"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_RESUMED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_RESUMED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_RESUMED"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_TRIAL_ENDING, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_TRIAL_ENDING,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_TRIAL_ENDING"));
-    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_PLAN_CHANGED, 
+    assertEquals(SubscriptionEvent.SubscriptionEventType.SUBSCRIPTION_PLAN_CHANGED,
         SubscriptionEvent.SubscriptionEventType.valueOf("SUBSCRIPTION_PLAN_CHANGED"));
   }
 }

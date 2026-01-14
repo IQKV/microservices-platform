@@ -51,29 +51,29 @@ public class MerchantOnboardingService {
   /**
    * Initiates merchant onboarding for an organization with specified payment gateway.
    *
-   * @param organizationId Organization ID from user service
+   * @param organizationId  Organization ID from user service
    * @param gatewayProvider Payment gateway provider (Stripe, PayPal, etc.)
-   * @param refreshUrl URL to redirect if onboarding link expires
-   * @param returnUrl URL to redirect after onboarding completion
+   * @param refreshUrl      URL to redirect if onboarding link expires
+   * @param returnUrl       URL to redirect after onboarding completion
    * @return Onboarding link response with URL and account details
    */
   @Transactional
   public OnboardingLinkResponse initiateOnboarding(
-      Long organizationId, 
+      Long organizationId,
       PaymentGatewayProvider gatewayProvider,
-      String refreshUrl, 
+      String refreshUrl,
       String returnUrl) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
     UserContext user = SecurityContextHelper.getCurrentUserContextOrThrow();
 
-    logger.info("Initiating {} merchant onboarding for organization {} by user {}", 
+    logger.info("Initiating {} merchant onboarding for organization {} by user {}",
         gatewayProvider, organizationId, user.userId());
 
     // 1. Validate gateway provider is supported
     if (!paymentProviderFactory.isProviderSupported(gatewayProvider)) {
       throw new IllegalArgumentException("Unsupported payment gateway provider: " + gatewayProvider);
     }
-    
+
     // Get payment provider adapter
     PaymentProviderAdapter paymentProvider = paymentProviderFactory.getProvider(gatewayProvider);
 
@@ -93,23 +93,23 @@ public class MerchantOnboardingService {
     // 3. Check if already onboarded for this gateway provider
     var existingConfig = repository.findByOrganizationIdAndGatewayProvider(
         organizationId, gatewayProvider);
-        
+
     if (existingConfig.isPresent()) {
       var config = existingConfig.get();
       if (config.isChargesEnabled() && config.isPayoutsEnabled()) {
         throw new IllegalStateException(
             "Organization already fully onboarded with " + gatewayProvider);
       }
-      
+
       // Re-generate onboarding link for incomplete onboarding
-      logger.info("Re-generating {} onboarding link for organization {}", 
+      logger.info("Re-generating {} onboarding link for organization {}",
           gatewayProvider, organizationId);
       String accountLink = paymentProvider.createAccountLink(
-          config.getGatewayAccountId(), 
-          refreshUrl, 
+          config.getGatewayAccountId(),
+          refreshUrl,
           returnUrl
       );
-      
+
       return new OnboardingLinkResponse(
           accountLink,
           config.getGatewayAccountId(),
@@ -132,7 +132,7 @@ public class MerchantOnboardingService {
     config.setPayoutsEnabled(false);
     repository.save(config);
 
-    logger.info("Saved merchant config for organization {} with {} account {}", 
+    logger.info("Saved merchant config for organization {} with {} account {}",
         organizationId, gatewayProvider, accountId);
 
     // 6. Publish event for user service to update organization
@@ -154,42 +154,42 @@ public class MerchantOnboardingService {
    */
   public Optional<MerchantPaymentConfig> getMerchantStatusByOrganization(Long organizationId) {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
-    
+
     var config = repository.findByOrganizationId(organizationId);
-    
+
     // Validate tenant access
     if (config.isPresent() && !config.get().getTenantId().equals(tenantId)) {
-      logger.warn("Access denied: Merchant config for organization {} does not belong to tenant {}", 
+      logger.warn("Access denied: Merchant config for organization {} does not belong to tenant {}",
           organizationId, tenantId);
       throw new AccessDeniedException("Access denied to merchant configuration");
     }
-    
+
     return config;
   }
 
-  private void publishMerchantOnboardedEvent(Long organizationId, String tenantId, String gatewayAccountId, 
+  private void publishMerchantOnboardedEvent(Long organizationId, String tenantId, String gatewayAccountId,
                                              PaymentGatewayProvider gatewayProvider,
                                              boolean chargesEnabled, boolean payoutsEnabled) {
     try {
-      var event = new MerchantOnboardedEvent(organizationId, tenantId, gatewayAccountId, 
+      var event = new MerchantOnboardedEvent(organizationId, tenantId, gatewayAccountId,
           gatewayProvider, chargesEnabled, payoutsEnabled);
       eventPublisher.publishMerchantOnboarded(event);
-      logger.info("Published MerchantOnboardedEvent for organization {} with {}", 
+      logger.info("Published MerchantOnboardedEvent for organization {} with {}",
           organizationId, gatewayProvider);
     } catch (final Exception e) {
-      logger.error("Failed to publish MerchantOnboardedEvent for organization {}: {}", 
+      logger.error("Failed to publish MerchantOnboardedEvent for organization {}: {}",
           organizationId, e.getMessage(), e);
       // Don't fail the onboarding if event publishing fails
     }
   }
 
-  private void sendOnboardingEmail(OrganizationDto organization, UserContext user, 
+  private void sendOnboardingEmail(OrganizationDto organization, UserContext user,
                                    String onboardingUrl, PaymentGatewayProvider gatewayProvider) {
     try {
-      String recipientEmail = organization.billingEmail() != null 
-          ? organization.billingEmail() 
+      String recipientEmail = organization.billingEmail() != null
+          ? organization.billingEmail()
           : user.email();
-      
+
       if (recipientEmail != null) {
         emailService.sendEmail(
             recipientEmail,
@@ -205,7 +205,7 @@ public class MerchantOnboardingService {
         logger.info("Sent onboarding email to {} for organization {}", recipientEmail, organization.id());
       }
     } catch (final Exception e) {
-      logger.error("Failed to send onboarding email for organization {}: {}", 
+      logger.error("Failed to send onboarding email for organization {}: {}",
           organization.id(), e.getMessage(), e);
       // Don't fail the onboarding if email fails
     }

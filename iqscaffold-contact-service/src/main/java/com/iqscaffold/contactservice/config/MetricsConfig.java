@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Metrics configuration for Contact Service observability.
- * 
+ *
  * <p>This configuration provides custom Prometheus metrics for monitoring
  * contact and company management operations.
- * 
+ *
  * <h3>Custom Metrics:</h3>
  * <ul>
  *   <li><strong>contact.created</strong> - Counter for contact creation events</li>
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
  *   <li><strong>contact.from.lead</strong> - Counter for contacts created from leads</li>
  *   <li><strong>contact.creation.time</strong> - Timer for contact creation duration</li>
  * </ul>
- * 
+ *
  * @see MeterRegistry
  */
 @Configuration

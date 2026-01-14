@@ -106,7 +106,7 @@ class SubscriptionServiceImplTest {
 
     when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
     when(subscriptionRepository.findActive()).thenReturn(Optional.empty());
-    when(paymentProvider.createSubscription(anyString(), anyString(), any(Integer.class), 
+    when(paymentProvider.createSubscription(anyString(), anyString(), any(Integer.class),
         anyMap(), anyString())).thenReturn("sub_123");
     when(subscriptionRepository.save(any(TenantSubscription.class))).thenReturn(savedSubscription);
     when(auditTrailRepository.save(any(TenantSubscriptionAuditTrail.class)))
@@ -123,7 +123,7 @@ class SubscriptionServiceImplTest {
     assertEquals("ACTIVE", response.status());
 
     verify(stateMachine).validateTransition(null, SubscriptionStatus.INCOMPLETE);
-    verify(paymentProvider).createSubscription(anyString(), eq(plan.getStripePriceId()), 
+    verify(paymentProvider).createSubscription(anyString(), eq(plan.getStripePriceId()),
         eq(14), anyMap(), anyString());
     verify(subscriptionRepository).save(any(TenantSubscription.class));
     verify(auditTrailRepository).save(any(TenantSubscriptionAuditTrail.class));
@@ -134,7 +134,7 @@ class SubscriptionServiceImplTest {
   void createSubscription_shouldThrowExceptionWhenNoTenantContext() {
     // Given
     tenantContextMock.when(TenantContext::hasTenantContext).thenReturn(false);
-    
+
     SubscriptionDtos.CreateSubscriptionRequest request = new SubscriptionDtos.CreateSubscriptionRequest(
         UUID.randomUUID(), null, null, null
     );
@@ -428,10 +428,10 @@ class SubscriptionServiceImplTest {
     // Given
     UUID subscriptionId = UUID.randomUUID();
     UUID newPlanId = UUID.randomUUID();
-    
+
     TenantSubscription subscription = createTestSubscription(createTestPlan(UUID.randomUUID()));
     subscription.setId(subscriptionId);
-    
+
     SubscriptionPlan newPlan = createTestPlan(newPlanId);
     newPlan.setName("New Plan");
 
@@ -450,7 +450,7 @@ class SubscriptionServiceImplTest {
 
     // Then
     assertNotNull(response);
-    verify(paymentProvider).updateSubscription(subscription.getStripeSubscriptionId(), 
+    verify(paymentProvider).updateSubscription(subscription.getStripeSubscriptionId(),
         newPlan.getStripePriceId(), request.metadata());
     verify(subscriptionRepository).save(subscription);
     verify(auditTrailRepository).save(any(TenantSubscriptionAuditTrail.class));
@@ -462,10 +462,10 @@ class SubscriptionServiceImplTest {
     // Given
     UUID subscriptionId = UUID.randomUUID();
     UUID newPlanId = UUID.randomUUID();
-    
+
     TenantSubscription subscription = createTestSubscription(createTestPlan(UUID.randomUUID()));
     subscription.setId(subscriptionId);
-    
+
     SubscriptionPlan inactivePlan = createTestPlan(newPlanId);
     inactivePlan.setIsActive(false);
 

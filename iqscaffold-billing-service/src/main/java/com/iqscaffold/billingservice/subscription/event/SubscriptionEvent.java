@@ -56,7 +56,7 @@ public class SubscriptionEvent {
   // Static factory methods for common events
 
   public static SubscriptionEvent created(UUID subscriptionId, String tenantId, UUID planId,
-      String planName, String stripeSubscriptionId) {
+                                          String planName, String stripeSubscriptionId) {
     return new SubscriptionEvent(
         UUID.randomUUID().toString(),
         SubscriptionEventType.SUBSCRIPTION_CREATED,
@@ -72,7 +72,7 @@ public class SubscriptionEvent {
   }
 
   public static SubscriptionEvent updated(UUID subscriptionId, String tenantId, UUID planId,
-      String planName, String status) {
+                                          String planName, String status) {
     return new SubscriptionEvent(
         UUID.randomUUID().toString(),
         SubscriptionEventType.SUBSCRIPTION_UPDATED,
@@ -149,7 +149,7 @@ public class SubscriptionEvent {
   }
 
   public static SubscriptionEvent planChanged(UUID subscriptionId, String tenantId,
-      UUID oldPlanId, UUID newPlanId, String newPlanName) {
+                                              UUID oldPlanId, UUID newPlanId, String newPlanName) {
     Map<String, Object> metadata = Map.of(
         "old_plan_id", oldPlanId.toString(),
         "new_plan_id", newPlanId.toString()

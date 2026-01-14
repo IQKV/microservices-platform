@@ -150,7 +150,7 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
     invoice.setTenantSubscription(tenantSubscription);
     // No need to set tenant_id - schema provides context
     invoice.setInvoiceNumber(stripeInvoice.getNumber());
-    
+
     // Set amounts
     if (stripeInvoice.getAmountDue() != null) {
       invoice.setAmountDue(java.math.BigDecimal.valueOf(stripeInvoice.getAmountDue()).divide(java.math.BigDecimal.valueOf(100)));
@@ -158,14 +158,14 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
     if (stripeInvoice.getAmountPaid() != null) {
       invoice.setAmountPaid(java.math.BigDecimal.valueOf(stripeInvoice.getAmountPaid()).divide(java.math.BigDecimal.valueOf(100)));
     }
-    
+
     invoice.setCurrency(stripeInvoice.getCurrency().toUpperCase());
     invoice.setStatus(mapStripeStatusToLocal(stripeInvoice.getStatus()));
-    
+
     // Set URLs
     invoice.setHostedInvoiceUrl(stripeInvoice.getHostedInvoiceUrl());
     invoice.setInvoicePdfUrl(stripeInvoice.getInvoicePdf());
-    
+
     // Set due date if available
     if (stripeInvoice.getDueDate() != null) {
       invoice.setDueDate(java.time.Instant.ofEpochSecond(stripeInvoice.getDueDate()));

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Updating existing plans</li>
  *   <li>Synchronizing plans with Stripe</li>
  * </ul>
- * 
+ *
  * <h4>Authorization:</h4>
  * Plan management requires: SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN role
  */

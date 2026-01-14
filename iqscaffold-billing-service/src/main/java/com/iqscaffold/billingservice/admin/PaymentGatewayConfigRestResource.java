@@ -67,11 +67,11 @@ public class PaymentGatewayConfigRestResource {
   })
   public ResponseEntity<GatewayConfigDtos.GatewayConfigResponse> createGatewayConfig(
       @Valid @RequestBody GatewayConfigDtos.CreateGatewayConfigRequest request) {
-    
+
     logger.info("Creating gateway configuration for provider {}", request.gatewayProvider());
-    
+
     GatewayConfigDtos.GatewayConfigResponse response = gatewayConfigService.createGatewayConfig(request);
-    
+
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -99,11 +99,11 @@ public class PaymentGatewayConfigRestResource {
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider,
       @Valid @RequestBody GatewayConfigDtos.UpdateGatewayConfigRequest request) {
-    
+
     logger.info("Updating gateway configuration for provider {}", provider);
-    
+
     GatewayConfigDtos.GatewayConfigResponse response = gatewayConfigService.updateGatewayConfig(provider, request);
-    
+
     return ResponseEntity.ok(response);
   }
 
@@ -127,11 +127,11 @@ public class PaymentGatewayConfigRestResource {
   public ResponseEntity<GatewayConfigDtos.GatewayConfigResponse> getGatewayConfig(
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider) {
-    
+
     logger.debug("Retrieving gateway configuration for provider {}", provider);
-    
+
     GatewayConfigDtos.GatewayConfigResponse response = gatewayConfigService.getGatewayConfig(provider);
-    
+
     return ResponseEntity.ok(response);
   }
 
@@ -152,9 +152,9 @@ public class PaymentGatewayConfigRestResource {
   })
   public ResponseEntity<List<GatewayConfigDtos.GatewayConfigSummary>> listGatewayConfigs() {
     logger.debug("Listing all gateway configurations");
-    
+
     List<GatewayConfigDtos.GatewayConfigSummary> summaries = gatewayConfigService.listGatewayConfigs();
-    
+
     return ResponseEntity.ok(summaries);
   }
 
@@ -175,9 +175,9 @@ public class PaymentGatewayConfigRestResource {
   })
   public ResponseEntity<List<GatewayConfigDtos.GatewayConfigSummary>> listActiveGatewayConfigs() {
     logger.debug("Listing active gateway configurations");
-    
+
     List<GatewayConfigDtos.GatewayConfigSummary> summaries = gatewayConfigService.listActiveGatewayConfigs();
-    
+
     return ResponseEntity.ok(summaries);
   }
 
@@ -199,7 +199,7 @@ public class PaymentGatewayConfigRestResource {
   })
   public ResponseEntity<GatewayConfigDtos.GatewayConfigResponse> getPrimaryGatewayConfig() {
     logger.debug("Retrieving primary gateway configuration");
-    
+
     return gatewayConfigService.getPrimaryGatewayConfig()
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -225,11 +225,11 @@ public class PaymentGatewayConfigRestResource {
   public ResponseEntity<GatewayConfigDtos.GatewayStatusResponse> activateGateway(
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider) {
-    
+
     logger.info("Activating gateway {}", provider);
-    
+
     GatewayConfigDtos.GatewayStatusResponse response = gatewayConfigService.activateGateway(provider);
-    
+
     return ResponseEntity.ok(response);
   }
 
@@ -254,11 +254,11 @@ public class PaymentGatewayConfigRestResource {
   public ResponseEntity<GatewayConfigDtos.GatewayStatusResponse> deactivateGateway(
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider) {
-    
+
     logger.info("Deactivating gateway {}", provider);
-    
+
     GatewayConfigDtos.GatewayStatusResponse response = gatewayConfigService.deactivateGateway(provider);
-    
+
     return ResponseEntity.ok(response);
   }
 
@@ -284,11 +284,11 @@ public class PaymentGatewayConfigRestResource {
   public ResponseEntity<GatewayConfigDtos.GatewayStatusResponse> setPrimaryGateway(
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider) {
-    
+
     logger.info("Setting gateway {} as primary", provider);
-    
+
     GatewayConfigDtos.GatewayStatusResponse response = gatewayConfigService.setPrimaryGateway(provider);
-    
+
     return ResponseEntity.ok(response);
   }
 
@@ -313,11 +313,11 @@ public class PaymentGatewayConfigRestResource {
   public ResponseEntity<Void> deleteGatewayConfig(
       @Parameter(description = "Payment gateway provider", required = true)
       @PathVariable PaymentGatewayProvider provider) {
-    
+
     logger.info("Deleting gateway configuration for provider {}", provider);
-    
+
     gatewayConfigService.deleteGatewayConfig(provider);
-    
+
     return ResponseEntity.noContent().build();
   }
 }

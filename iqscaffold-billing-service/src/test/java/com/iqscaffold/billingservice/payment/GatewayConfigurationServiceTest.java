@@ -55,10 +55,10 @@ class GatewayConfigurationServiceTest {
     // Given
     String tenantId = "tenant-123";
     Long organizationId = 456L;
-    
-    OrganizationDto organization = 
+
+    OrganizationDto organization =
         new OrganizationDto(organizationId, "Test Org", tenantId, null, null, null, null, null, true);
-    
+
     MerchantPaymentConfig merchantConfig = new MerchantPaymentConfig();
     merchantConfig.setOrganizationId(organizationId);
     merchantConfig.setGatewayProvider(PaymentGatewayProvider.STRIPE);
@@ -69,7 +69,7 @@ class GatewayConfigurationServiceTest {
 
     try (MockedStatic<SecurityContextHelper> mockedHelper = mockStatic(SecurityContextHelper.class)) {
       mockedHelper.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
-      
+
       when(userServiceClient.getOrganizationByTenantId(tenantId))
           .thenReturn(Optional.of(organization));
       when(merchantConfigRepository.findByOrganizationId(organizationId))
@@ -98,7 +98,7 @@ class GatewayConfigurationServiceTest {
 
     try (MockedStatic<SecurityContextHelper> mockedHelper = mockStatic(SecurityContextHelper.class)) {
       mockedHelper.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
-      
+
       when(userServiceClient.getOrganizationByTenantId(tenantId))
           .thenReturn(Optional.empty());
 
@@ -121,13 +121,13 @@ class GatewayConfigurationServiceTest {
     // Given
     String tenantId = "tenant-123";
     Long organizationId = 456L;
-    
-    OrganizationDto organization = 
+
+    OrganizationDto organization =
         new OrganizationDto(organizationId, "Test Org", tenantId, null, null, null, null, null, true);
 
     try (MockedStatic<SecurityContextHelper> mockedHelper = mockStatic(SecurityContextHelper.class)) {
       mockedHelper.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
-      
+
       when(userServiceClient.getOrganizationByTenantId(tenantId))
           .thenReturn(Optional.of(organization));
       when(merchantConfigRepository.findByOrganizationId(organizationId))
@@ -147,7 +147,7 @@ class GatewayConfigurationServiceTest {
   void resolveGatewayForOrganization_shouldReturnConfiguredGateway() {
     // Given
     Long organizationId = 456L;
-    
+
     MerchantPaymentConfig merchantConfig = new MerchantPaymentConfig();
     merchantConfig.setOrganizationId(organizationId);
     merchantConfig.setGatewayProvider(PaymentGatewayProvider.STRIPE);
@@ -193,10 +193,10 @@ class GatewayConfigurationServiceTest {
     // Given
     String tenantId = "tenant-123";
     Long organizationId = 456L;
-    
-    OrganizationDto organization = 
+
+    OrganizationDto organization =
         new OrganizationDto(organizationId, "Test Org", tenantId, null, null, null, null, null, true);
-    
+
     MerchantPaymentConfig merchantConfig = new MerchantPaymentConfig();
     merchantConfig.setGatewayProvider(PaymentGatewayProvider.STRIPE);
 
@@ -204,7 +204,7 @@ class GatewayConfigurationServiceTest {
 
     try (MockedStatic<SecurityContextHelper> mockedHelper = mockStatic(SecurityContextHelper.class)) {
       mockedHelper.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
-      
+
       when(userServiceClient.getOrganizationByTenantId(tenantId))
           .thenReturn(Optional.of(organization));
       when(merchantConfigRepository.findByOrganizationId(organizationId))
@@ -226,7 +226,7 @@ class GatewayConfigurationServiceTest {
   void getProviderForOrganization_shouldReturnCorrectProvider() {
     // Given
     Long organizationId = 456L;
-    
+
     MerchantPaymentConfig merchantConfig = new MerchantPaymentConfig();
     merchantConfig.setGatewayProvider(PaymentGatewayProvider.STRIPE);
 

@@ -14,14 +14,14 @@ import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
  * Each provider adapter is responsible for parsing their native event format
  * (e.g., Stripe Event, PayPal Webhook, Square Event) into this common structure.
  *
- * @param eventId           Unique identifier for the event
- * @param eventType         Normalized event type (e.g., "payment.succeeded", "payment.failed")
- * @param provider          Which payment gateway sent this event
- * @param tenantId          Optional tenant ID resolved from event metadata
- * @param resourceId        The ID of the primary resource (e.g., payment intent ID, payout ID)
- * @param resourceType      Type of resource (e.g., "payment_intent", "payout", "account")
- * @param metadata          Additional event-specific metadata
- * @param rawPayload        Original event object for provider-specific handling
+ * @param eventId      Unique identifier for the event
+ * @param eventType    Normalized event type (e.g., "payment.succeeded", "payment.failed")
+ * @param provider     Which payment gateway sent this event
+ * @param tenantId     Optional tenant ID resolved from event metadata
+ * @param resourceId   The ID of the primary resource (e.g., payment intent ID, payout ID)
+ * @param resourceType Type of resource (e.g., "payment_intent", "payout", "account")
+ * @param metadata     Additional event-specific metadata
+ * @param rawPayload   Original event object for provider-specific handling
  */
 public record WebhookEvent(
     String eventId,
@@ -45,13 +45,13 @@ public record WebhookEvent(
     public static final String PAYOUT_PAID = "payout.paid";
     public static final String PAYOUT_FAILED = "payout.failed";
     public static final String ACCOUNT_UPDATED = "account.updated";
-    
+
     // Subscription events
     public static final String SUBSCRIPTION_CREATED = "subscription.created";
     public static final String SUBSCRIPTION_UPDATED = "subscription.updated";
     public static final String SUBSCRIPTION_CANCELED = "subscription.canceled";
     public static final String SUBSCRIPTION_TRIAL_ENDING = "subscription.trial_ending";
-    
+
     // Invoice events
     public static final String INVOICE_CREATED = "invoice.created";
     public static final String INVOICE_FINALIZED = "invoice.finalized";

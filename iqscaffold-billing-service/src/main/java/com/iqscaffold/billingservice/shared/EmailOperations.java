@@ -85,15 +85,15 @@ public interface EmailOperations {
   /**
    * Send invoice paid notification email.
    *
-   * @param customerEmail  The customer's email address
-   * @param customerName   The customer's name (optional)
-   * @param invoiceNumber  The invoice identifier
-   * @param amount         The paid amount
-   * @param currency       The payment currency
-   * @param paymentDate    Date when payment was received
-   * @param paymentMethod  Payment method used (optional)
-   * @param transactionId  Transaction identifier (optional)
-   * @param receiptUrl     Receipt download URL (optional)
+   * @param customerEmail The customer's email address
+   * @param customerName  The customer's name (optional)
+   * @param invoiceNumber The invoice identifier
+   * @param amount        The paid amount
+   * @param currency      The payment currency
+   * @param paymentDate   Date when payment was received
+   * @param paymentMethod Payment method used (optional)
+   * @param transactionId Transaction identifier (optional)
+   * @param receiptUrl    Receipt download URL (optional)
    */
   void sendInvoicePaidEmail(String customerEmail, String customerName, String invoiceNumber,
                             BigDecimal amount, String currency, LocalDateTime paymentDate,
@@ -102,16 +102,16 @@ public interface EmailOperations {
   /**
    * Send subscription created welcome email.
    *
-   * @param customerEmail    The customer's email address
-   * @param customerName     The customer's name
-   * @param planName         The subscription plan name
-   * @param amount           The subscription amount
-   * @param currency         The subscription currency
-   * @param interval         Billing interval (e.g., "month", "year")
-   * @param status           Subscription status
-   * @param trialEnd         Trial end date (optional)
-   * @param nextBillingDate  Next billing date (optional)
-   * @param dashboardUrl     Dashboard URL (optional)
+   * @param customerEmail   The customer's email address
+   * @param customerName    The customer's name
+   * @param planName        The subscription plan name
+   * @param amount          The subscription amount
+   * @param currency        The subscription currency
+   * @param interval        Billing interval (e.g., "month", "year")
+   * @param status          Subscription status
+   * @param trialEnd        Trial end date (optional)
+   * @param nextBillingDate Next billing date (optional)
+   * @param dashboardUrl    Dashboard URL (optional)
    */
   void sendSubscriptionCreatedEmail(String customerEmail, String customerName, String planName,
                                     BigDecimal amount, String currency, String interval, String status,
@@ -120,15 +120,15 @@ public interface EmailOperations {
   /**
    * Send subscription trial ending reminder email.
    *
-   * @param customerEmail    The customer's email address
-   * @param customerName     The customer's name
-   * @param planName         The subscription plan name
-   * @param amount           The subscription amount
-   * @param currency         The subscription currency
-   * @param interval         Billing interval (e.g., "month", "year")
-   * @param trialEnd         Trial end date
-   * @param nextBillingDate  First billing date after trial
-   * @param manageUrl        Subscription management URL (optional)
+   * @param customerEmail   The customer's email address
+   * @param customerName    The customer's name
+   * @param planName        The subscription plan name
+   * @param amount          The subscription amount
+   * @param currency        The subscription currency
+   * @param interval        Billing interval (e.g., "month", "year")
+   * @param trialEnd        Trial end date
+   * @param nextBillingDate First billing date after trial
+   * @param manageUrl       Subscription management URL (optional)
    */
   void sendSubscriptionTrialEndingEmail(String customerEmail, String customerName, String planName,
                                         BigDecimal amount, String currency, String interval,
@@ -137,15 +137,15 @@ public interface EmailOperations {
   /**
    * Send subscription renewed confirmation email.
    *
-   * @param customerEmail    The customer's email address
-   * @param customerName     The customer's name
-   * @param planName         The subscription plan name
-   * @param amount           The renewal amount
-   * @param currency         The renewal currency
-   * @param renewalDate      Date of renewal
-   * @param nextBillingDate  Next billing date
-   * @param invoiceUrl       Invoice URL (optional)
-   * @param dashboardUrl     Dashboard URL (optional)
+   * @param customerEmail   The customer's email address
+   * @param customerName    The customer's name
+   * @param planName        The subscription plan name
+   * @param amount          The renewal amount
+   * @param currency        The renewal currency
+   * @param renewalDate     Date of renewal
+   * @param nextBillingDate Next billing date
+   * @param invoiceUrl      Invoice URL (optional)
+   * @param dashboardUrl    Dashboard URL (optional)
    */
   void sendSubscriptionRenewedEmail(String customerEmail, String customerName, String planName,
                                     BigDecimal amount, String currency, LocalDateTime renewalDate,
@@ -154,15 +154,15 @@ public interface EmailOperations {
   /**
    * Send subscription payment failed notification email.
    *
-   * @param customerEmail     The customer's email address
-   * @param customerName      The customer's name
-   * @param planName          The subscription plan name
-   * @param amount            The attempted payment amount
-   * @param currency          The payment currency
-   * @param attemptDate       Date of payment attempt
-   * @param errorMessage      Error message describing the failure
-   * @param retryDate         Next automatic retry date (optional)
-   * @param updatePaymentUrl  URL to update payment method (optional)
+   * @param customerEmail    The customer's email address
+   * @param customerName     The customer's name
+   * @param planName         The subscription plan name
+   * @param amount           The attempted payment amount
+   * @param currency         The payment currency
+   * @param attemptDate      Date of payment attempt
+   * @param errorMessage     Error message describing the failure
+   * @param retryDate        Next automatic retry date (optional)
+   * @param updatePaymentUrl URL to update payment method (optional)
    */
   void sendSubscriptionPaymentFailedEmail(String customerEmail, String customerName, String planName,
                                           BigDecimal amount, String currency, LocalDateTime attemptDate,
@@ -171,14 +171,14 @@ public interface EmailOperations {
   /**
    * Send subscription canceled confirmation email.
    *
-   * @param customerEmail     The customer's email address
-   * @param customerName      The customer's name
-   * @param planName          The subscription plan name
-   * @param cancellationDate  Date of cancellation
-   * @param accessEndDate     Date when access ends (optional)
-   * @param reason            Cancellation reason (optional)
-   * @param feedbackUrl       Feedback form URL (optional)
-   * @param reactivateUrl     Reactivation URL (optional)
+   * @param customerEmail    The customer's email address
+   * @param customerName     The customer's name
+   * @param planName         The subscription plan name
+   * @param cancellationDate Date of cancellation
+   * @param accessEndDate    Date when access ends (optional)
+   * @param reason           Cancellation reason (optional)
+   * @param feedbackUrl      Feedback form URL (optional)
+   * @param reactivateUrl    Reactivation URL (optional)
    */
   void sendSubscriptionCanceledEmail(String customerEmail, String customerName, String planName,
                                      LocalDateTime cancellationDate, LocalDateTime accessEndDate,

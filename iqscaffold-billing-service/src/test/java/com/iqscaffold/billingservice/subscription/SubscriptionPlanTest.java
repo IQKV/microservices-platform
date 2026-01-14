@@ -223,14 +223,14 @@ class SubscriptionPlanTest {
   void plan_shouldSupportAllIntervals() {
     // Test all subscription intervals
     SubscriptionInterval[] intervals = SubscriptionInterval.values();
-    
+
     for (final SubscriptionInterval interval : intervals) {
       // Given
       SubscriptionPlan testPlan = new SubscriptionPlan();
-      
+
       // When
       testPlan.setInterval(interval);
-      
+
       // Then
       assertEquals(interval, testPlan.getInterval());
     }

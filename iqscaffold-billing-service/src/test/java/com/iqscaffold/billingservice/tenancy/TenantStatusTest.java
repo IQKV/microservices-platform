@@ -17,7 +17,7 @@ class TenantStatusTest {
     assertNotNull(values);
     assertEquals(3, values.length);
     assertArrayEquals(
-        new TenantStatus[]{TenantStatus.ACTIVE, TenantStatus.SUSPENDED, TenantStatus.ARCHIVED},
+        new TenantStatus[] {TenantStatus.ACTIVE, TenantStatus.SUSPENDED, TenantStatus.ARCHIVED},
         values
     );
   }

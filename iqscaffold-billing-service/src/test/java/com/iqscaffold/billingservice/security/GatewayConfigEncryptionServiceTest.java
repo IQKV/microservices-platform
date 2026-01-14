@@ -93,7 +93,7 @@ class GatewayConfigEncryptionServiceTest {
     String encrypted = encryptionService.encrypt(plaintext, "tenant-1");
 
     // When & Then
-    assertThrows(RuntimeException.class, () -> 
+    assertThrows(RuntimeException.class, () ->
         encryptionService.decrypt(encrypted, "tenant-2")
     );
   }
@@ -101,7 +101,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void encrypt_shouldThrowExceptionForNullPlaintext() {
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.encrypt(null, "tenant-123")
     );
   }
@@ -109,7 +109,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void encrypt_shouldThrowExceptionForEmptyPlaintext() {
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.encrypt("", "tenant-123")
     );
   }
@@ -117,7 +117,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void encrypt_shouldThrowExceptionForNullTenantId() {
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.encrypt("test", null)
     );
   }
@@ -125,7 +125,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void decrypt_shouldThrowExceptionForNullCiphertext() {
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.decrypt(null, "tenant-123")
     );
   }
@@ -133,7 +133,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void decrypt_shouldThrowExceptionForEmptyCiphertext() {
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.decrypt("", "tenant-123")
     );
   }
@@ -144,7 +144,7 @@ class GatewayConfigEncryptionServiceTest {
     String encrypted = encryptionService.encrypt("test", "tenant-123");
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, () -> 
+    assertThrows(IllegalArgumentException.class, () ->
         encryptionService.decrypt(encrypted, null)
     );
   }
@@ -152,7 +152,7 @@ class GatewayConfigEncryptionServiceTest {
   @Test
   void decrypt_shouldThrowExceptionForInvalidCiphertext() {
     // When & Then
-    assertThrows(RuntimeException.class, () -> 
+    assertThrows(RuntimeException.class, () ->
         encryptionService.decrypt("invalid-base64-data", "tenant-123")
     );
   }

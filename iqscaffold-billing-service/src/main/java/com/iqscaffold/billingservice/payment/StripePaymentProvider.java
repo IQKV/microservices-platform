@@ -310,7 +310,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       // Get tenant-specific webhook secret if available
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
       String webhookSecret = getWebhookSecret(tenantId);
-      
+
       event = com.stripe.net.Webhook.constructEvent(payload, sigHeader, webhookSecret);
     } catch (final com.stripe.exception.SignatureVerificationException e) {
       org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
@@ -353,7 +353,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private com.iqscaffold.billingservice.webhook.WebhookEvent parseStripeEventToWebhookEvent(com.stripe.model.Event event) {
     String normalizedEventType = normalizeStripeEventType(event.getType());
     var dataObject = event.getDataObjectDeserializer().getObject().orElse(null);
-    
+
     String resourceId = null;
     String resourceType = null;
     java.util.Optional<String> tenantId = java.util.Optional.empty();
@@ -382,7 +382,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.ACCOUNT;
       metadata.put("charges_enabled", account.getChargesEnabled());
       metadata.put("payouts_enabled", account.getPayoutsEnabled());
-      
+
       // Note: Tenant resolution from account ID is handled in event handlers
     } else if (dataObject instanceof com.stripe.model.Subscription subscription) {
       resourceId = subscription.getId();
@@ -396,7 +396,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     } else if (dataObject instanceof com.stripe.model.Invoice invoice) {
       resourceId = invoice.getId();
       resourceType = com.iqscaffold.billingservice.webhook.WebhookEvent.ResourceType.INVOICE;
-      
+
       metadata.put("customer", invoice.getCustomer());
       metadata.put("status", invoice.getStatus());
       metadata.put("currency", invoice.getCurrency());
@@ -431,20 +431,20 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       case "payout.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_PAID;
       case "payout.failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYOUT_FAILED;
       case "account.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.ACCOUNT_UPDATED;
-      
+
       // Subscription events
       case "customer.subscription.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
       case "customer.subscription.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
       case "customer.subscription.deleted" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
       case "customer.subscription.trial_will_end" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
-      
+
       // Invoice events
       case "invoice.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_CREATED;
       case "invoice.finalized" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_FINALIZED;
       case "invoice.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAID;
       case "invoice.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
       case "invoice.voided" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_VOIDED;
-      
+
       default -> stripeEventType; // Keep original for unsupported events
     };
   }

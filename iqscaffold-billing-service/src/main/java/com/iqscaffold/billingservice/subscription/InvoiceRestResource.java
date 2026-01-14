@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Listing invoices for subscriptions</li>
  *   <li>Listing invoices for current tenant</li>
  * </ul>
- * 
+ *
  * <h4>Authorization:</h4>
  * Invoice access requires: Owner (same tenant), BILLING_ADMIN, or FINANCE_VIEWER role
  */
@@ -62,10 +62,10 @@ public class InvoiceRestResource {
   public ResponseEntity<SubscriptionDtos.InvoiceResponse> getInvoice(@PathVariable UUID id) {
     // Verify authorization with ownership check
     authorizationService.requireInvoiceViewPermission(id);
-    
+
     SubscriptionInvoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + id));
-    
+
     return ResponseEntity.ok(mapToResponse(invoice));
   }
 
@@ -82,12 +82,12 @@ public class InvoiceRestResource {
   public ResponseEntity<Page<SubscriptionDtos.InvoiceResponse>> listInvoices(Pageable pageable) {
     // Verify authorization
     authorizationService.requireInvoiceListPermission();
-    
+
     // Validate tenant context
     if (!TenantContext.hasTenantContext()) {
       throw new IllegalStateException("Tenant context is required");
     }
-    
+
     // Simply findAll - schema routing ensures we only see current tenant's data
     Page<SubscriptionInvoice> invoices = invoiceRepository.findAll(pageable);
     return ResponseEntity.ok(invoices.map(this::mapToResponse));
@@ -109,7 +109,7 @@ public class InvoiceRestResource {
       Pageable pageable) {
     // Verify authorization for subscription access
     authorizationService.requireSubscriptionViewPermission(subscriptionId);
-    
+
     Page<SubscriptionInvoice> invoices = invoiceRepository.findByTenantSubscriptionId(subscriptionId, pageable);
     return ResponseEntity.ok(invoices.map(this::mapToResponse));
   }
@@ -127,12 +127,12 @@ public class InvoiceRestResource {
   public ResponseEntity<java.util.List<SubscriptionDtos.InvoiceResponse>> listOpenInvoices() {
     // Verify authorization
     authorizationService.requireInvoiceListPermission();
-    
+
     // Validate tenant context
     if (!TenantContext.hasTenantContext()) {
       throw new IllegalStateException("Tenant context is required");
     }
-    
+
     // Simply find open invoices - schema routing ensures we only see current tenant's data
     java.util.List<SubscriptionInvoice> invoices = invoiceRepository.findOpenInvoices();
     return ResponseEntity.ok(invoices.stream().map(this::mapToResponse).toList());

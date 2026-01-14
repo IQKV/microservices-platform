@@ -110,17 +110,17 @@ public interface PaymentProviderAdapter {
    * @param metadata      Additional metadata
    * @return Price ID
    */
-  String createPrice(String productId, BigDecimal amount, String currency, 
+  String createPrice(String productId, BigDecimal amount, String currency,
                      String interval, Integer intervalCount, java.util.Map<String, String> metadata);
 
   /**
    * Create a Subscription for a customer.
    *
-   * @param customerId        Customer ID
-   * @param priceId           Price ID to subscribe to
-   * @param trialPeriodDays   Number of trial days (optional)
-   * @param metadata          Additional metadata
-   * @param idempotencyKey    Key to ensure operation is not repeated
+   * @param customerId      Customer ID
+   * @param priceId         Price ID to subscribe to
+   * @param trialPeriodDays Number of trial days (optional)
+   * @param metadata        Additional metadata
+   * @param idempotencyKey  Key to ensure operation is not repeated
    * @return Subscription ID
    */
   String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
@@ -139,7 +139,7 @@ public interface PaymentProviderAdapter {
   /**
    * Cancel a subscription.
    *
-   * @param subscriptionId  Subscription ID
+   * @param subscriptionId    Subscription ID
    * @param cancelAtPeriodEnd If true, cancel at end of current period; if false, cancel immediately
    */
   void cancelSubscription(String subscriptionId, boolean cancelAtPeriodEnd);

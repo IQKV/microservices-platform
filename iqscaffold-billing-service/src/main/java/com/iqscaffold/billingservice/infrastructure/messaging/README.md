@@ -20,10 +20,12 @@ infrastructure/messaging/
 ## 🎯 Event Listeners (NEW)
 
 ### UserEventListener
+
 **Consumes**: `iqscaffold.user.events` queue  
 **Purpose**: Maintains billing data consistency with User Service
 
 **Handles**:
+
 - `USER_CREATED` → Creates customer record in billing system
 - `USER_UPDATED` → Updates customer information
 - `USER_DELETED` → Cancels subscriptions and archives data
@@ -33,10 +35,12 @@ infrastructure/messaging/
 **Status**: ⚠️ Structure complete, implementation TODO
 
 ### BillingEventListener
+
 **Consumes**: `iqscaffold.billing.events` queue  
 **Purpose**: Async processing of billing operations
 
 **Handles**:
+
 - `PAYMENT_SUCCESSFUL` → Updates analytics, generates invoices
 - `PAYMENT_FAILED` → Schedules retries, suspends subscriptions
 - `PAYMENT_REFUNDED` → Adjusts metrics, handles refunds
@@ -46,10 +50,12 @@ infrastructure/messaging/
 **Status**: ⚠️ Structure complete, implementation TODO
 
 ### NotificationEventListener
+
 **Consumes**: `iqscaffold.notifications` queue  
 **Purpose**: Tracks notification delivery and engagement
 
 **Handles**:
+
 - `EMAIL` → Tracks email delivery
 - `SMS` → Tracks SMS delivery and costs
 - `PUSH` → Tracks push notifications
@@ -155,16 +161,17 @@ spring:
 
 ### Exchanges and Queues
 
-| Exchange | Queue | Routing Pattern | Listener |
-|----------|-------|-----------------|----------|
-| `iqscaffold.events` | `iqscaffold.user.events` | `user.*` | UserEventListener |
-| `iqscaffold.events` | `iqscaffold.billing.events` | `billing.*` | BillingEventListener |
-| `iqscaffold.events` | `iqscaffold.notifications` | `notification.*` | NotificationEventListener |
-| `iqscaffold.dlx` | `iqscaffold.dlq` | `#` | Manual processing |
+| Exchange            | Queue                       | Routing Pattern  | Listener                  |
+|---------------------|-----------------------------|------------------|---------------------------|
+| `iqscaffold.events` | `iqscaffold.user.events`    | `user.*`         | UserEventListener         |
+| `iqscaffold.events` | `iqscaffold.billing.events` | `billing.*`      | BillingEventListener      |
+| `iqscaffold.events` | `iqscaffold.notifications`  | `notification.*` | NotificationEventListener |
+| `iqscaffold.dlx`    | `iqscaffold.dlq`            | `#`              | Manual processing         |
 
 ## 📋 Implementation Checklist
 
 ### UserEventListener
+
 - [ ] Implement customer creation logic
 - [ ] Implement Stripe customer sync
 - [ ] Implement subscription cancellation
@@ -174,6 +181,7 @@ spring:
 - [ ] Write integration tests
 
 ### BillingEventListener
+
 - [ ] Implement analytics integration
 - [ ] Implement retry scheduling logic
 - [ ] Implement subscription management
@@ -183,6 +191,7 @@ spring:
 - [ ] Write integration tests
 
 ### NotificationEventListener
+
 - [ ] Implement notification audit logging
 - [ ] Implement delivery tracking
 - [ ] Implement customer preference management
@@ -242,6 +251,7 @@ public void handleEvent(Event event) {
 ```
 
 ### Retry Mechanism
+
 - Initial interval: 1 second
 - Max attempts: 3
 - Multiplier: 2.0
@@ -250,6 +260,7 @@ public void handleEvent(Event event) {
 ## 📊 Monitoring
 
 ### Metrics to Track
+
 - Event processing rates
 - Event processing latency
 - Error rates by event type
@@ -257,6 +268,7 @@ public void handleEvent(Event event) {
 - DLQ message count
 
 ### Logging
+
 - Structured JSON logging
 - Correlation IDs (TODO: implement)
 - Tenant context
@@ -265,18 +277,21 @@ public void handleEvent(Event event) {
 ## 🎯 Next Steps
 
 ### Priority 1: Critical
+
 1. Implement `UserEventListener.handleUserCreated()`
 2. Implement `UserEventListener.handleUserDeleted()`
 3. Add idempotency keys to all events
 4. Add correlation IDs for distributed tracing
 
 ### Priority 2: High
+
 5. Implement `BillingEventListener.handlePaymentSuccessful()`
 6. Implement `BillingEventListener.handlePaymentFailed()`
 7. Implement notification tracking
 8. Add comprehensive integration tests
 
 ### Priority 3: Medium
+
 9. Implement subscription event handling
 10. Implement accounting software sync
 11. Add event versioning

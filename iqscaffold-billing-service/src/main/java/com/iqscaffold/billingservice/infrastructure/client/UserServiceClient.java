@@ -35,7 +35,7 @@ public class UserServiceClient {
     try {
       var url = properties.userServiceUrl() + "/api/v1/admin/organizations/" + organizationId;
       logger.debug("Fetching organization {} from user service: {}", organizationId, url);
-      
+
       var response = restTemplate.getForEntity(url, OrganizationDto.class);
       return Optional.ofNullable(response.getBody());
     } catch (final HttpClientErrorException.NotFound e) {
@@ -54,7 +54,7 @@ public class UserServiceClient {
     try {
       var url = properties.userServiceUrl() + "/api/v1/admin/organizations/tenant/" + tenantId;
       logger.debug("Fetching organization for tenant {} from user service: {}", tenantId, url);
-      
+
       var response = restTemplate.getForEntity(url, OrganizationDto.class);
       return Optional.ofNullable(response.getBody());
     } catch (final HttpClientErrorException.NotFound e) {
@@ -74,17 +74,17 @@ public class UserServiceClient {
     try {
       var url = properties.userServiceUrl() + "/api/v1/admin/organizations/" + organizationId;
       logger.info("Updating organization {} with Stripe account {}", organizationId, stripeAccountId);
-      
+
       // Create update request with only stripe_account_id
       var request = new UpdateOrganizationStripeAccountRequest(stripeAccountId);
       restTemplate.patchForObject(url, request, Void.class);
-      
+
       logger.info("Successfully updated organization {} with Stripe account", organizationId);
     } catch (final HttpClientErrorException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         logger.error("Organization not found: {}", organizationId);
       } else {
-        logger.error("Error updating organization {}: {} - {}", 
+        logger.error("Error updating organization {}: {} - {}",
             organizationId, e.getStatusCode(), e.getMessage());
       }
       throw new UserServiceException("Failed to update organization Stripe account", e);
@@ -97,7 +97,8 @@ public class UserServiceClient {
   /**
    * Request DTO for updating Stripe account ID.
    */
-  private record UpdateOrganizationStripeAccountRequest(String stripeAccountId) {}
+  private record UpdateOrganizationStripeAccountRequest(String stripeAccountId) {
+  }
 
   /**
    * Exception thrown when user service communication fails.

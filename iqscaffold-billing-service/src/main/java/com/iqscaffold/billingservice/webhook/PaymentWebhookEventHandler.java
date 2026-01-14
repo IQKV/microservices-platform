@@ -70,14 +70,14 @@ public class PaymentWebhookEventHandler implements WebhookEventHandler {
 
   private void handleRefund(WebhookEvent event, boolean fullRefund) {
     String paymentIntentId = event.resourceId();
-    
+
     // Check if this is a full or partial refund from metadata
     boolean isFullyRefunded = event.getMetadataBoolean("refunded").orElse(fullRefund);
-    
+
     String status = isFullyRefunded
-        ? BillingConstants.PaymentStatus.REFUNDED 
+        ? BillingConstants.PaymentStatus.REFUNDED
         : BillingConstants.PaymentStatus.PARTIALLY_REFUNDED;
-    
+
     paymentService.updateStatus(paymentIntentId, status);
     logger.info("Updated payment status to {}: paymentIntentId={}, provider={}",
         status, paymentIntentId, event.provider());

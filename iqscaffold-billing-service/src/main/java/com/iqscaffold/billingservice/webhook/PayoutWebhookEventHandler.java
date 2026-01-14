@@ -57,7 +57,7 @@ public class PayoutWebhookEventHandler implements WebhookEventHandler {
     // Delegate to PayoutService which handles provider-specific payout objects
     // For Stripe, the raw payload will be a com.stripe.model.Payout
     Object rawPayload = event.rawPayload();
-    
+
     if (rawPayload instanceof com.stripe.model.Payout stripePayout) {
       payoutService.processPayout(stripePayout);
       logger.info("Processed Stripe payout: payoutId={}, amount={}, currency={}",

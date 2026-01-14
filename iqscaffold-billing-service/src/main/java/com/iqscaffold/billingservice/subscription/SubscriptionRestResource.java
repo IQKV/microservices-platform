@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Canceling subscriptions</li>
  *   <li>Pausing and resuming subscriptions</li>
  * </ul>
- * 
+ *
  * <h4>Authorization:</h4>
  * <ul>
  *   <li>Subscription creation: Requires authenticated user with SUPER_ADMIN, TENANT_OWNER, or BILLING_ADMIN</li>

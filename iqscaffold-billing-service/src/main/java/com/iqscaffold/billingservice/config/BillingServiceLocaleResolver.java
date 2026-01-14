@@ -57,19 +57,19 @@ public class BillingServiceLocaleResolver extends AcceptHeaderLocaleResolver {
     if (locale == null || locale.getLanguage().isEmpty()) {
       return false;
     }
-    
+
     // Check if the language code is a valid ISO 639 language
     // Invalid language codes will have the same value as the display language
     // For valid codes, getDisplayLanguage() returns a human-readable name
     String language = locale.getLanguage();
     String displayLanguage = locale.getDisplayLanguage(Locale.ENGLISH);
-    
+
     // If display language equals the language code, it's likely invalid
     // Valid languages have different display names (e.g., "en" -> "English")
     if (language.equals(displayLanguage)) {
       return false;
     }
-    
+
     return true;
   }
 

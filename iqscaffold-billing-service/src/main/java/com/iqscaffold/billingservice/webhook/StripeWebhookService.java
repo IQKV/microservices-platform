@@ -184,12 +184,12 @@ public class StripeWebhookService implements WebhookService {
         var merchant = config.get();
         boolean chargesEnabled = Boolean.TRUE.equals(account.getChargesEnabled());
         boolean payoutsEnabled = Boolean.TRUE.equals(account.getPayoutsEnabled());
-        
+
         merchant.setChargesEnabled(chargesEnabled);
         merchant.setPayoutsEnabled(payoutsEnabled);
         merchantConfigRepository.save(merchant);
         logger.info("Updated merchant capabilities for account: {}", accountId);
-        
+
         // Publish event to sync capabilities to user service
         if (merchant.getOrganizationId() != null) {
           var capabilitiesEvent = new com.iqscaffold.billingservice.infrastructure.messaging.MerchantCapabilitiesUpdatedEvent(

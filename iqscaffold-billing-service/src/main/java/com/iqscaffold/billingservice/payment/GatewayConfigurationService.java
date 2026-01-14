@@ -108,29 +108,29 @@ public class GatewayConfigurationService {
    */
   public GatewayConfiguration resolveGatewayForCurrentTenant() {
     String tenantId = SecurityContextHelper.getCurrentTenantId();
-    
+
     logger.debug("Resolving payment gateway configuration for tenant: {}", tenantId);
 
     // Get organization for this tenant
     var organization = userServiceClient.getOrganizationByTenantId(tenantId);
-    
+
     if (organization.isEmpty()) {
-      logger.warn("No organization found for tenant {}, using default gateway: {}", 
+      logger.warn("No organization found for tenant {}, using default gateway: {}",
           tenantId, DEFAULT_GATEWAY);
       return GatewayConfiguration.defaultConfig(DEFAULT_GATEWAY);
     }
 
     // Check if organization has payment gateway configured
     var merchantConfig = merchantConfigRepository.findByOrganizationId(organization.get().id());
-    
+
     if (merchantConfig.isEmpty()) {
-      logger.debug("No merchant configuration for organization {}, using default gateway: {}", 
+      logger.debug("No merchant configuration for organization {}, using default gateway: {}",
           organization.get().id(), DEFAULT_GATEWAY);
       return GatewayConfiguration.defaultConfig(DEFAULT_GATEWAY);
     }
 
     MerchantPaymentConfig config = merchantConfig.get();
-    logger.info("Resolved gateway {} for tenant {} (organization: {})", 
+    logger.info("Resolved gateway {} for tenant {} (organization: {})",
         config.getGatewayProvider(), tenantId, config.getOrganizationId());
 
     return GatewayConfiguration.fromMerchantConfig(config);
@@ -148,15 +148,15 @@ public class GatewayConfigurationService {
     logger.debug("Resolving payment gateway configuration for organization: {}", organizationId);
 
     var merchantConfig = merchantConfigRepository.findByOrganizationId(organizationId);
-    
+
     if (merchantConfig.isEmpty()) {
-      logger.debug("No merchant configuration for organization {}, using default gateway: {}", 
+      logger.debug("No merchant configuration for organization {}, using default gateway: {}",
           organizationId, DEFAULT_GATEWAY);
       return GatewayConfiguration.defaultConfig(DEFAULT_GATEWAY);
     }
 
     MerchantPaymentConfig config = merchantConfig.get();
-    logger.info("Resolved gateway {} for organization {}", 
+    logger.info("Resolved gateway {} for organization {}",
         config.getGatewayProvider(), organizationId);
 
     return GatewayConfiguration.fromMerchantConfig(config);

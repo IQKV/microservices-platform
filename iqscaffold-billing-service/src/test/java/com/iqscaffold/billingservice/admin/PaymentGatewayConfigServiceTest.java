@@ -65,7 +65,7 @@ class PaymentGatewayConfigServiceTest {
 
     try (MockedStatic<SecurityContextHelper> mockedStatic = mockStatic(SecurityContextHelper.class)) {
       mockedStatic.when(SecurityContextHelper::getCurrentTenantId).thenReturn(tenantId);
-      
+
       when(repository.existsByTenantIdAndGatewayProvider(tenantId, PaymentGatewayProvider.STRIPE))
           .thenReturn(false);
       when(encryptionService.encrypt(anyString(), eq(tenantId))).thenReturn(encryptedConfig);

@@ -49,16 +49,16 @@ class EmailServiceTest {
   @BeforeEach
   void setUp() {
     emailService = new EmailService(mailSender, templateEngine, properties, messageService);
-    
+
     // Setup common mocks
     IqScaffoldProperties.Email emailConfig = mock(IqScaffoldProperties.Email.class);
     IqScaffoldProperties.Email.Sender senderConfig = mock(IqScaffoldProperties.Email.Sender.class);
-    
+
     lenient().when(properties.email()).thenReturn(emailConfig);
     lenient().when(emailConfig.sender()).thenReturn(senderConfig);
     lenient().when(senderConfig.fromEmail()).thenReturn("noreply@example.com");
     lenient().when(senderConfig.fromName()).thenReturn("Billing Service");
-    
+
     lenient().when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
     lenient().when(templateEngine.process(any(String.class), any(Context.class))).thenReturn("<html>Test Email</html>");
   }
@@ -69,7 +69,7 @@ class EmailServiceTest {
     String merchantEmail = "merchant@example.com";
     String merchantName = "Test Merchant";
     String onboardingUrl = "https://example.com/onboard";
-    
+
     when(messageService.getMessage("email.merchant.onboarding.subject", Locale.ENGLISH))
         .thenReturn("Complete Your Merchant Onboarding");
 
@@ -87,7 +87,7 @@ class EmailServiceTest {
     String merchantEmail = "merchant@example.com";
     String merchantName = "Test Merchant";
     String onboardingUrl = "https://example.com/onboard";
-    
+
     lenient().when(messageService.getMessage("email.merchant.onboarding.subject", Locale.ENGLISH))
         .thenReturn("Complete Your Merchant Onboarding");
     when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("MIME creation failed"));
@@ -104,10 +104,11 @@ class EmailServiceTest {
     String merchantEmail = "merchant@example.com";
     String merchantName = "Test Merchant";
     String onboardingUrl = "https://example.com/onboard";
-    
+
     when(messageService.getMessage("email.merchant.onboarding.subject", Locale.ENGLISH))
         .thenReturn("Complete Your Merchant Onboarding");
-    doThrow(new MailException("Mail sending failed") {}).when(mailSender).send(any(MimeMessage.class));
+    doThrow(new MailException("Mail sending failed") {
+    }).when(mailSender).send(any(MimeMessage.class));
 
     // When & Then
     assertThrows(EmailService.EmailServiceException.class, () ->
@@ -127,7 +128,7 @@ class EmailServiceTest {
     LocalDateTime paymentDate = LocalDateTime.now();
     String paymentMethod = "Visa ending in 4242";
     String receiptUrl = "https://example.com/receipt";
-    
+
     when(messageService.getMessage("email.payment.successful.subject", Locale.ENGLISH))
         .thenReturn("Payment Successful");
 
@@ -152,7 +153,7 @@ class EmailServiceTest {
     LocalDateTime attemptDate = LocalDateTime.now();
     String errorMessage = "Card declined";
     String retryUrl = "https://example.com/retry";
-    
+
     when(messageService.getMessage("email.payment.failed.subject", Locale.ENGLISH))
         .thenReturn("Payment Failed");
 
@@ -175,7 +176,7 @@ class EmailServiceTest {
     String currency = "USD";
     String refundId = "ref_123";
     LocalDateTime refundDate = LocalDateTime.now();
-    
+
     when(messageService.getMessage("email.payment.refunded.subject", Locale.ENGLISH))
         .thenReturn("Payment Refunded");
 
@@ -200,7 +201,7 @@ class EmailServiceTest {
     LocalDateTime dueDate = LocalDateTime.now().plusDays(30);
     String description = "Monthly subscription";
     String invoiceUrl = "https://example.com/invoice";
-    
+
     when(messageService.getMessage("email.invoice.generated.subject", Locale.ENGLISH))
         .thenReturn("New Invoice Generated");
 
@@ -225,7 +226,7 @@ class EmailServiceTest {
     String paymentMethod = "Visa ending in 4242";
     String transactionId = "txn_123";
     String receiptUrl = "https://example.com/receipt";
-    
+
     when(messageService.getMessage("email.invoice.paid.subject", Locale.ENGLISH))
         .thenReturn("Invoice Paid");
 
@@ -251,7 +252,7 @@ class EmailServiceTest {
     LocalDateTime trialEnd = LocalDateTime.now().plusDays(7);
     LocalDateTime nextBillingDate = LocalDateTime.now().plusDays(30);
     String dashboardUrl = "https://example.com/dashboard";
-    
+
     when(messageService.getMessage("email.subscription.created.subject", Locale.ENGLISH))
         .thenReturn("Subscription Created");
 
@@ -276,7 +277,7 @@ class EmailServiceTest {
     LocalDateTime trialEnd = LocalDateTime.now().plusDays(3);
     LocalDateTime nextBillingDate = LocalDateTime.now().plusDays(3);
     String manageUrl = "https://example.com/manage";
-    
+
     when(messageService.getMessage("email.subscription.trial.ending.subject", Locale.ENGLISH))
         .thenReturn("Trial Ending Soon");
 
@@ -301,7 +302,7 @@ class EmailServiceTest {
     LocalDateTime nextBillingDate = LocalDateTime.now().plusDays(30);
     String invoiceUrl = "https://example.com/invoice";
     String dashboardUrl = "https://example.com/dashboard";
-    
+
     when(messageService.getMessage("email.subscription.renewed.subject", Locale.ENGLISH))
         .thenReturn("Subscription Renewed");
 
@@ -326,7 +327,7 @@ class EmailServiceTest {
     String errorMessage = "Card declined";
     LocalDateTime retryDate = LocalDateTime.now().plusDays(3);
     String updatePaymentUrl = "https://example.com/update-payment";
-    
+
     when(messageService.getMessage("email.subscription.payment.failed.subject", Locale.ENGLISH))
         .thenReturn("Subscription Payment Failed");
 
@@ -350,7 +351,7 @@ class EmailServiceTest {
     String reason = "User requested";
     String feedbackUrl = "https://example.com/feedback";
     String reactivateUrl = "https://example.com/reactivate";
-    
+
     when(messageService.getMessage("email.subscription.canceled.subject", Locale.ENGLISH))
         .thenReturn("Subscription Canceled");
 
@@ -371,7 +372,7 @@ class EmailServiceTest {
     String paymentId = "pay_123";
     BigDecimal amount = new BigDecimal("99.99");
     String currency = "USD";
-    
+
     when(messageService.getMessage("email.payment.successful.subject", Locale.ENGLISH))
         .thenReturn("Payment Successful");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)
@@ -392,7 +393,7 @@ class EmailServiceTest {
     String paymentId = "pay_123";
     BigDecimal amount = new BigDecimal("99.99");
     String currency = "USD";
-    
+
     when(messageService.getMessage("email.payment.failed.subject", Locale.ENGLISH))
         .thenReturn("Payment Failed");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)
@@ -413,7 +414,7 @@ class EmailServiceTest {
     String paymentId = "pay_123";
     BigDecimal amount = new BigDecimal("99.99");
     String currency = "USD";
-    
+
     when(messageService.getMessage("email.payment.refunded.subject", Locale.ENGLISH))
         .thenReturn("Payment Refunded");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)
@@ -434,7 +435,7 @@ class EmailServiceTest {
     String invoiceNumber = "INV-001";
     BigDecimal amount = new BigDecimal("199.99");
     String currency = "USD";
-    
+
     when(messageService.getMessage("email.invoice.generated.subject", Locale.ENGLISH))
         .thenReturn("New Invoice Generated");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)
@@ -456,7 +457,7 @@ class EmailServiceTest {
     BigDecimal amount = new BigDecimal("199.99");
     String currency = "USD";
     LocalDateTime paymentDate = LocalDateTime.now();
-    
+
     when(messageService.getMessage("email.invoice.paid.subject", Locale.ENGLISH))
         .thenReturn("Invoice Paid");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)
@@ -479,7 +480,7 @@ class EmailServiceTest {
     String currency = "USD";
     String interval = "month";
     String status = "active";
-    
+
     when(messageService.getMessage("email.subscription.created.subject", Locale.ENGLISH))
         .thenReturn("Subscription Created");
     doThrow(new RuntimeException("Template processing failed")).when(templateEngine)

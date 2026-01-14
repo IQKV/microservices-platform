@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class CacheManagementService {
 
   private static final Logger log = LoggerFactory.getLogger(CacheManagementService.class);
-  
+
   private final EntityManagerFactory entityManagerFactory;
 
   public CacheManagementService(final EntityManagerFactory entityManagerFactory) {
@@ -71,7 +71,7 @@ public class CacheManagementService {
   public Map<String, Object> getCacheStatistics() {
     SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
     Statistics statistics = sessionFactory.getStatistics();
-    
+
     return Map.of(
         "statisticsEnabled", statistics.isStatisticsEnabled(),
         "secondLevelCacheHitCount", statistics.getSecondLevelCacheHitCount(),

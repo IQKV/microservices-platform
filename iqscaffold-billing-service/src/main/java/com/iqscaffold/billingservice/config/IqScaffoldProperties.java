@@ -139,7 +139,7 @@ public record IqScaffoldProperties(
           @NotBlank String issuer
       ) {
       }
-      
+
       public record Encryption(
           @NotBlank String masterKey,
           boolean useTenantSpecificConfig

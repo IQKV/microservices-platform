@@ -2,14 +2,14 @@ package com.iqscaffold.billingservice.tenancy;
 
 /**
  * Enumeration of tenant lifecycle states.
- * 
+ *
  * <p>Defines the possible states a tenant can be in during its lifecycle:
  * <ul>
  *   <li><strong>ACTIVE</strong> - Tenant is fully operational and accessible</li>
  *   <li><strong>SUSPENDED</strong> - Tenant is temporarily disabled but data is preserved; can be restored</li>
  *   <li><strong>ARCHIVED</strong> - Tenant is archived; data is preserved but inaccessible; cannot be restored</li>
  * </ul>
- * 
+ *
  * <p>State Transitions:
  * <pre>
  * ACTIVE → SUSPENDED → ARCHIVED

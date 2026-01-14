@@ -78,7 +78,7 @@ public class TenantEventListener {
     try {
       // Create tenant schema in billing database
       var schemaName = resolveSchemaName(event.getTenantId());
-      
+
       log.info("Creating schema '{}' for tenant: {}", schemaName, event.getTenantId());
       jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + schemaName);
 
@@ -101,13 +101,13 @@ public class TenantEventListener {
    */
   private void handleTenantUpdated(TenantEvent event) {
     log.info("Processing tenant updated event for tenant: {}", event.getTenantId());
-    
+
     // Placeholder for future implementation
     // Could be used to:
     // - Apply schema migrations
     // - Update tenant configuration
     // - Sync organization details
-    
+
     log.debug("Tenant updated event processed for tenant: {}", event.getTenantId());
   }
 
@@ -128,7 +128,7 @@ public class TenantEventListener {
 
     log.warn("Tenant deleted event received for: {}. Billing data archived but schema retained for compliance.",
         event.getTenantId());
-    
+
     log.debug("Tenant deleted event processed for tenant: {}", event.getTenantId());
   }
 
@@ -145,7 +145,7 @@ public class TenantEventListener {
       // - Stop accepting new payment requests
       // - Mark existing transactions as suspended
       // - Maintain schema and data for restoration
-      
+
       log.info("Successfully suspended billing operations for tenant: {}", event.getTenantId());
     } catch (final Exception e) {
       log.error("Failed to suspend billing operations for tenant: {}", event.getTenantId(), e);
@@ -167,7 +167,7 @@ public class TenantEventListener {
       // - Archive transaction records
       // - Retain schema for compliance and audit
       // - This is a terminal state - no restoration possible
-      
+
       log.warn("Successfully archived billing data for tenant: {}", event.getTenantId());
     } catch (final Exception e) {
       log.error("Failed to archive billing data for tenant: {}", event.getTenantId(), e);
@@ -187,7 +187,7 @@ public class TenantEventListener {
       // - Re-enable payment processing
       // - Restore transaction processing
       // - Resume normal billing operations
-      
+
       log.info("Successfully restored billing operations for tenant: {}", event.getTenantId());
     } catch (final Exception e) {
       log.error("Failed to restore billing operations for tenant: {}", event.getTenantId(), e);

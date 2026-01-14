@@ -20,7 +20,7 @@ class TenantSubscriptionTest {
   @BeforeEach
   void setUp() {
     subscription = new TenantSubscription();
-    
+
     plan = new SubscriptionPlan();
     plan.setId(UUID.randomUUID());
     plan.setName("Test Plan");
@@ -302,11 +302,11 @@ class TenantSubscriptionTest {
   void subscription_shouldSupportAllStatuses() {
     // Test all subscription statuses
     SubscriptionStatus[] statuses = SubscriptionStatus.values();
-    
+
     for (final SubscriptionStatus status : statuses) {
       // When
       subscription.setStatus(status);
-      
+
       // Then
       assertEquals(status, subscription.getStatus());
     }

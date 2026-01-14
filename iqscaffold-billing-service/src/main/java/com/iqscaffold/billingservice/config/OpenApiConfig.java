@@ -34,18 +34,18 @@ public class OpenApiConfig {
         .addTagsItem(new Tag()
             .name("Subscriptions")
             .description("Tenant subscription lifecycle management. " +
-                "Manage subscription creation, updates, cancellations, and state transitions. " +
-                "Lifecycle states: ACTIVE → PAUSED → ACTIVE, ACTIVE → CANCELED → EXPIRED. " +
-                "Supports immediate and end-of-period cancellations."))
+                         "Manage subscription creation, updates, cancellations, and state transitions. " +
+                         "Lifecycle states: ACTIVE → PAUSED → ACTIVE, ACTIVE → CANCELED → EXPIRED. " +
+                         "Supports immediate and end-of-period cancellations."))
         .addTagsItem(new Tag()
             .name("Subscription Plans")
             .description("Platform-wide subscription plan management (admin). " +
-                "Create and manage subscription plans with pricing tiers, features, and billing intervals. " +
-                "Plans are synchronized with Stripe for payment processing."))
+                         "Create and manage subscription plans with pricing tiers, features, and billing intervals. " +
+                         "Plans are synchronized with Stripe for payment processing."))
         .addTagsItem(new Tag()
             .name("Invoices")
             .description("Subscription invoice management. " +
-                "View and manage invoices generated for subscription billing cycles. " +
-                "Track payment status, due dates, and access invoice documents."));
+                         "View and manage invoices generated for subscription billing cycles. " +
+                         "Track payment status, due dates, and access invoice documents."));
   }
 }

@@ -193,7 +193,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional
   public SubscriptionDtos.SubscriptionResponse updateSubscription(UUID id,
-      SubscriptionDtos.UpdateSubscriptionRequest request) {
+                                                                  SubscriptionDtos.UpdateSubscriptionRequest request) {
     // Validate tenant context
     if (!TenantContext.hasTenantContext()) {
       throw new IllegalStateException("Tenant context is required");
@@ -394,7 +394,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     try {
       Object stripeSubscriptionObj = paymentProvider.getSubscription(stripeSubscriptionId);
-      
+
       // In a real implementation, extract details from the Stripe subscription object
       // For now, just log the sync
       log.info("Retrieved subscription from Stripe: {}", stripeSubscriptionId);
@@ -413,7 +413,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     // and check if customer ID already exists
     // For now, return a placeholder customer ID
     log.debug("Creating Stripe customer for tenant: {}", tenantId);
-    
+
     // TODO: Implement actual customer creation via PaymentProviderAdapter
     // The interface doesn't currently have a createCustomer method
     // For now, return a placeholder
@@ -421,7 +421,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   }
 
   private void createAuditTrail(TenantSubscription subscription, SubscriptionStatus oldStatus,
-      SubscriptionStatus newStatus, String notes) {
+                                SubscriptionStatus newStatus, String notes) {
     TenantSubscriptionAuditTrail audit = new TenantSubscriptionAuditTrail();
     audit.setTenantSubscription(subscription);
     audit.setOldStatus(oldStatus);

@@ -86,7 +86,8 @@ public class Contact {
   private LocalDateTime convertedAt;
 
   // Constructors
-  public Contact() {}
+  public Contact() {
+  }
 
   public Contact(final String firstName, final String lastName, final String email) {
     this.firstName = firstName;
@@ -252,11 +253,11 @@ public class Contact {
   @Override
   public String toString() {
     return "Contact{" +
-        "id=" + id +
-        ", firstName='" + firstName + '\'' +
-        ", lastName='" + lastName + '\'' +
-        ", email='" + email + '\'' +
-        ", status=" + status +
-        '}';
+           "id=" + id +
+           ", firstName='" + firstName + '\'' +
+           ", lastName='" + lastName + '\'' +
+           ", email='" + email + '\'' +
+           ", status=" + status +
+           '}';
   }
 }

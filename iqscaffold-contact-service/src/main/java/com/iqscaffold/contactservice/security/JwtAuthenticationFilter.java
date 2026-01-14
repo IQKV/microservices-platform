@@ -1,6 +1,5 @@
 package com.iqscaffold.contactservice.security;
 
-import com.iqscaffold.contactservice.tenancy.TenantContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +9,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.iqscaffold.contactservice.tenancy.TenantContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,10 +21,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * JWT Authentication Filter that extracts user context from JWT claims and sets tenant context.
- * 
+ *
  * <p>This filter runs after Spring Security's OAuth2 Resource Server has validated the JWT token.
  * It extracts user information from JWT claims and establishes the tenant context for the request.
- * 
+ *
  * <h3>Responsibilities:</h3>
  * <ul>
  *   <li>Extract user context from JWT claims</li>
@@ -31,13 +32,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *   <li>Add correlation ID to MDC for distributed tracing</li>
  *   <li>Clear context in finally block to prevent memory leaks</li>
  * </ul>
- * 
+ *
  * <h3>Tenant Context Priority:</h3>
  * <ol>
  *   <li>X-Tenant-ID header (set by Gateway Service)</li>
  *   <li>JWT tenant_id claim</li>
  * </ol>
- * 
+ *
  * @see UserContext
  * @see TenantContext
  */
@@ -97,7 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /**
    * Extract tenant ID with priority: X-Tenant-ID header > JWT claim.
    *
-   * @param request the HTTP request
+   * @param request     the HTTP request
    * @param userContext the user context extracted from JWT
    * @return the tenant ID or null if not found
    */

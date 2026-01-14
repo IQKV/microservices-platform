@@ -44,7 +44,7 @@ public class BillingAuthorizationService {
    */
   public void requireSubscriptionCreatePermission() {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
+
     if (!userContext.canModifyBilling()) {
       log.warn("User {} attempted to create subscription without permission", userContext.userId());
       throw new AccessDeniedException("Insufficient permissions to create subscriptions");
@@ -56,12 +56,12 @@ public class BillingAuthorizationService {
    * Requires: Owner (same tenant via schema) or BILLING_ADMIN role
    *
    * @param subscriptionId The subscription ID
-   * @throws AccessDeniedException if user lacks permission
+   * @throws AccessDeniedException         if user lacks permission
    * @throws SubscriptionNotFoundException if subscription not found
    */
   public void requireSubscriptionManagePermission(UUID subscriptionId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
+
     // Verify subscription exists and is accessible (schema isolation ensures ownership)
     if (!subscriptionRepository.existsById(subscriptionId)) {
       throw new SubscriptionNotFoundException("Subscription not found: " + subscriptionId);
@@ -75,7 +75,7 @@ public class BillingAuthorizationService {
     // Schema isolation ensures we can only see our own subscriptions
     // If we found it, we own it. Just check role permissions.
     if (!userContext.hasAuthority("BILLING_ADMIN") && !userContext.isTenantOwner()) {
-      log.warn("User {} attempted to manage subscription {} without permission", 
+      log.warn("User {} attempted to manage subscription {} without permission",
           userContext.userId(), subscriptionId);
       throw new AccessDeniedException("Insufficient permissions to manage this subscription");
     }
@@ -86,12 +86,12 @@ public class BillingAuthorizationService {
    * Requires: Owner (same tenant via schema), BILLING_ADMIN, or FINANCE_VIEWER role
    *
    * @param subscriptionId The subscription ID
-   * @throws AccessDeniedException if user lacks permission
+   * @throws AccessDeniedException         if user lacks permission
    * @throws SubscriptionNotFoundException if subscription not found
    */
   public void requireSubscriptionViewPermission(UUID subscriptionId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
+
     // Verify subscription exists and is accessible (schema isolation ensures ownership)
     if (!subscriptionRepository.existsById(subscriptionId)) {
       throw new SubscriptionNotFoundException("Subscription not found: " + subscriptionId);
@@ -105,7 +105,7 @@ public class BillingAuthorizationService {
     // Schema isolation ensures we can only see our own subscriptions
     // If we found it, we own it. Just check role permissions.
     if (!userContext.hasBillingAccess()) {
-      log.warn("User {} attempted to view subscription {} without permission", 
+      log.warn("User {} attempted to view subscription {} without permission",
           userContext.userId(), subscriptionId);
       throw new AccessDeniedException("Insufficient permissions to view this subscription");
     }
@@ -119,9 +119,9 @@ public class BillingAuthorizationService {
    */
   public void requirePlanManagePermission() {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
-    if (!userContext.isSuperAdmin() 
-        && !userContext.isTenantOwner() 
+
+    if (!userContext.isSuperAdmin()
+        && !userContext.isTenantOwner()
         && !userContext.hasAuthority("BILLING_ADMIN")) {
       log.warn("User {} attempted to manage subscription plans without permission", userContext.userId());
       throw new AccessDeniedException("Insufficient permissions to manage subscription plans");
@@ -137,7 +137,7 @@ public class BillingAuthorizationService {
    */
   public void requireInvoiceViewPermission(UUID invoiceId) {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
+
     // Verify invoice exists and is accessible (schema isolation ensures ownership)
     if (!invoiceRepository.existsById(invoiceId)) {
       throw new IllegalArgumentException("Invoice not found: " + invoiceId);
@@ -151,7 +151,7 @@ public class BillingAuthorizationService {
     // Schema isolation ensures we can only see our own invoices
     // If we found it, we own it. Just check role permissions.
     if (!userContext.hasBillingAccess()) {
-      log.warn("User {} attempted to view invoice {} without permission", 
+      log.warn("User {} attempted to view invoice {} without permission",
           userContext.userId(), invoiceId);
       throw new AccessDeniedException("Insufficient permissions to view this invoice");
     }
@@ -165,7 +165,7 @@ public class BillingAuthorizationService {
    */
   public void requireInvoiceListPermission() {
     UserContext userContext = SecurityContextHelper.getCurrentUserContextOrThrow();
-    
+
     if (!userContext.hasBillingAccess()) {
       log.warn("User {} attempted to list invoices without permission", userContext.userId());
       throw new AccessDeniedException("Insufficient permissions to view invoices");

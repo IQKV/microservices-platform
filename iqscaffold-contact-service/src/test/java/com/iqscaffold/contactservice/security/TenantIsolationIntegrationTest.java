@@ -1,5 +1,9 @@
 package com.iqscaffold.contactservice.security;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import com.iqscaffold.contactservice.contact.Contact;
 import com.iqscaffold.contactservice.contact.ContactRepository;
 import com.iqscaffold.contactservice.contact.ContactStatus;
@@ -14,14 +18,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Integration tests for tenant data isolation and JWT authentication in Contact Service.
  * Tests Requirements: 9.3, 9.4, 10.1, 10.2
- * 
+ * <p>
  * NOTE: These tests are temporarily disabled because they require tenant schema setup.
  * See backend/TENANT_ISOLATION_TEST_SOLUTION.md for implementation details.
  */

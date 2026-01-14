@@ -42,7 +42,7 @@ public interface SubscriptionService {
    *
    * @param request The subscription creation request
    * @return The created subscription response
-   * @throws SubscriptionNotFoundException If the specified plan does not exist
+   * @throws SubscriptionNotFoundException     If the specified plan does not exist
    * @throws InvalidSubscriptionStateException If subscription state transition is invalid
    */
   SubscriptionDtos.SubscriptionResponse createSubscription(SubscriptionDtos.CreateSubscriptionRequest request);
@@ -74,21 +74,21 @@ public interface SubscriptionService {
   /**
    * Updates an existing subscription (e.g., change plan, update payment method).
    *
-   * @param id The subscription UUID
+   * @param id      The subscription UUID
    * @param request The update request
    * @return The updated subscription response
-   * @throws SubscriptionNotFoundException If subscription not found
+   * @throws SubscriptionNotFoundException     If subscription not found
    * @throws InvalidSubscriptionStateException If update is not allowed in current state
    */
   SubscriptionDtos.SubscriptionResponse updateSubscription(UUID id,
-      SubscriptionDtos.UpdateSubscriptionRequest request);
+                                                           SubscriptionDtos.UpdateSubscriptionRequest request);
 
   /**
    * Cancels a subscription at the end of the current billing period.
    *
    * @param id The subscription UUID
    * @return The updated subscription response showing canceled status
-   * @throws SubscriptionNotFoundException If subscription not found
+   * @throws SubscriptionNotFoundException     If subscription not found
    * @throws InvalidSubscriptionStateException If cancellation is not allowed in current state
    */
   SubscriptionDtos.SubscriptionResponse cancelSubscription(UUID id);
@@ -98,7 +98,7 @@ public interface SubscriptionService {
    *
    * @param id The subscription UUID
    * @return The updated subscription response showing canceled status
-   * @throws SubscriptionNotFoundException If subscription not found
+   * @throws SubscriptionNotFoundException     If subscription not found
    * @throws InvalidSubscriptionStateException If cancellation is not allowed in current state
    */
   SubscriptionDtos.SubscriptionResponse cancelSubscriptionImmediately(UUID id);
@@ -108,7 +108,7 @@ public interface SubscriptionService {
    *
    * @param id The subscription UUID
    * @return The updated subscription response showing paused status
-   * @throws SubscriptionNotFoundException If subscription not found
+   * @throws SubscriptionNotFoundException     If subscription not found
    * @throws InvalidSubscriptionStateException If pause is not allowed in current state
    */
   SubscriptionDtos.SubscriptionResponse pauseSubscription(UUID id);
@@ -118,7 +118,7 @@ public interface SubscriptionService {
    *
    * @param id The subscription UUID
    * @return The updated subscription response showing active status
-   * @throws SubscriptionNotFoundException If subscription not found
+   * @throws SubscriptionNotFoundException     If subscription not found
    * @throws InvalidSubscriptionStateException If resume is not allowed in current state
    */
   SubscriptionDtos.SubscriptionResponse resumeSubscription(UUID id);

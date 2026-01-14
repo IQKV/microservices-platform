@@ -165,7 +165,7 @@ public class GatewayConfigEncryptionService {
    */
   private SecretKey deriveKey(String tenantId) throws Exception {
     String masterKey = properties.billing().security().encryption().masterKey();
-    
+
     if (masterKey == null || masterKey.isEmpty()) {
       throw new IllegalStateException("Master encryption key not configured");
     }

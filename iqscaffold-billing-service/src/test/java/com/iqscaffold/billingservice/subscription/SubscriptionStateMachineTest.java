@@ -213,7 +213,7 @@ class SubscriptionStateMachineTest {
         InvalidSubscriptionStateException.class,
         () -> stateMachine.validateTransition(currentStatus, newStatus)
     );
-    
+
     assertTrue(exception.getMessage().contains("Invalid subscription state transition"));
     assertTrue(exception.getMessage().contains("CANCELED"));
     assertTrue(exception.getMessage().contains("ACTIVE"));

@@ -22,12 +22,14 @@ public record IqScaffoldProperties(
       Duration messageCacheDuration,
       boolean fallbackToSystemLocale,
       boolean useCodeAsDefaultMessage
-  ) {}
+  ) {
+  }
 
   public record LiquibaseProperties(
       String systemChangeLog,
       String tenantChangeLog
-  ) {}
+  ) {
+  }
 
   public record CrmProperties(
       @NestedConfigurationProperty SecurityProperties security,
@@ -42,7 +44,8 @@ public record IqScaffoldProperties(
       public record JwtProperties(
           String jwkSetUri,
           String issuer
-      ) {}
+      ) {
+      }
     }
 
     public record ContactProperties(
@@ -51,17 +54,20 @@ public record IqScaffoldProperties(
         boolean enableEmailIntegration,
         int defaultLeadScore,
         int maxLeadScore
-    ) {}
+    ) {
+    }
 
     public record CompanyProperties(
         boolean enableCompanyHierarchy,
         boolean enableCompanyScoring
-    ) {}
+    ) {
+    }
 
     public record ActivityProperties(
         boolean enableAutoLogging,
         int retentionDays,
         int maxActivitiesPerContact
-    ) {}
+    ) {
+    }
   }
 }

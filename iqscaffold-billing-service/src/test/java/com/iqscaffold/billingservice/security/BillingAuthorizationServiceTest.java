@@ -46,7 +46,7 @@ class BillingAuthorizationServiceTest {
   @Test
   void requireSubscriptionCreatePermission_WithBillingAdmin_ShouldPass() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -58,7 +58,7 @@ class BillingAuthorizationServiceTest {
   @Test
   void requireSubscriptionCreatePermission_WithTenantOwner_ShouldPass() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("TENANT_OWNER"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -70,7 +70,7 @@ class BillingAuthorizationServiceTest {
   @Test
   void requireSubscriptionCreatePermission_WithSuperAdmin_ShouldPass() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("SUPER_ADMIN"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -82,13 +82,13 @@ class BillingAuthorizationServiceTest {
   @Test
   void requireSubscriptionCreatePermission_WithoutPermission_ShouldThrow() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("USER"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(AccessDeniedException.class, 
+    assertThrows(AccessDeniedException.class,
         () -> authorizationService.requireSubscriptionCreatePermission());
   }
 
@@ -96,9 +96,9 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithSuperAdmin_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("SUPER_ADMIN"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -111,9 +111,9 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithBillingAdmin_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -126,9 +126,9 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithTenantOwner_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("TENANT_OWNER"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -141,15 +141,15 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_WithoutPermission_ShouldThrow() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("USER"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(AccessDeniedException.class, 
+    assertThrows(AccessDeniedException.class,
         () -> authorizationService.requireSubscriptionManagePermission(subscriptionId));
   }
 
@@ -157,15 +157,15 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionManagePermission_SubscriptionNotFound_ShouldThrow() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(false);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(SubscriptionNotFoundException.class, 
+    assertThrows(SubscriptionNotFoundException.class,
         () -> authorizationService.requireSubscriptionManagePermission(subscriptionId));
   }
 
@@ -173,9 +173,9 @@ class BillingAuthorizationServiceTest {
   void requireSubscriptionViewPermission_WithFinanceViewer_ShouldPass() {
     // Given
     UUID subscriptionId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("FINANCE_VIEWER"), "tenant1", 1L, "John", "Doe");
-    
+
     when(subscriptionRepository.existsById(subscriptionId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -187,7 +187,7 @@ class BillingAuthorizationServiceTest {
   @Test
   void requirePlanManagePermission_WithSuperAdmin_ShouldPass() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("SUPER_ADMIN"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -199,13 +199,13 @@ class BillingAuthorizationServiceTest {
   @Test
   void requirePlanManagePermission_WithoutPermission_ShouldThrow() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("USER"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(AccessDeniedException.class, 
+    assertThrows(AccessDeniedException.class,
         () -> authorizationService.requirePlanManagePermission());
   }
 
@@ -213,9 +213,9 @@ class BillingAuthorizationServiceTest {
   void requireInvoiceViewPermission_WithBillingAccess_ShouldPass() {
     // Given
     UUID invoiceId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
-    
+
     when(invoiceRepository.existsById(invoiceId)).thenReturn(true);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -228,22 +228,22 @@ class BillingAuthorizationServiceTest {
   void requireInvoiceViewPermission_InvoiceNotFound_ShouldThrow() {
     // Given
     UUID invoiceId = UUID.randomUUID();
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("BILLING_ADMIN"), "tenant1", 1L, "John", "Doe");
-    
+
     when(invoiceRepository.existsById(invoiceId)).thenReturn(false);
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(IllegalArgumentException.class, 
+    assertThrows(IllegalArgumentException.class,
         () -> authorizationService.requireInvoiceViewPermission(invoiceId));
   }
 
   @Test
   void requireInvoiceListPermission_WithBillingAccess_ShouldPass() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("FINANCE_VIEWER"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
@@ -255,13 +255,13 @@ class BillingAuthorizationServiceTest {
   @Test
   void requireInvoiceListPermission_WithoutPermission_ShouldThrow() {
     // Given
-    UserContext userContext = new UserContext(1L, "user", "user@test.com", 
+    UserContext userContext = new UserContext(1L, "user", "user@test.com",
         Set.of("USER"), "tenant1", 1L, "John", "Doe");
     securityContextHelperMock.when(SecurityContextHelper::getCurrentUserContextOrThrow)
         .thenReturn(userContext);
 
     // When & Then
-    assertThrows(AccessDeniedException.class, 
+    assertThrows(AccessDeniedException.class,
         () -> authorizationService.requireInvoiceListPermission());
   }
 }
