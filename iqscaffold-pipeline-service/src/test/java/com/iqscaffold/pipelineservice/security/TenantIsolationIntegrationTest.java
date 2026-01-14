@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Disabled("Temporarily disabled - requires tenant schema configuration. See TENANT_ISOLATION_TEST_SOLUTION.md")
+@Disabled("Temporarily disabled - requires tenant schema configuration.")
 class TenantIsolationIntegrationTest {
 
   @Autowired
