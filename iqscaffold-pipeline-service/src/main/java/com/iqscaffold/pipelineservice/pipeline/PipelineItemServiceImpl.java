@@ -1,9 +1,15 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
+import com.iqscaffold.pipelineservice.config.RabbitMQConfig;
+import com.iqscaffold.pipelineservice.event.StageChangeEvent;
 import com.iqscaffold.pipelineservice.shared.exception.ResourceNotFoundException;
+import com.iqscaffold.pipelineservice.tenancy.TenantContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,14 +22,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PipelineItemServiceImpl implements PipelineItemService {
 
+  private static final Logger log = LoggerFactory.getLogger(PipelineItemServiceImpl.class);
+
   private final PipelineItemRepository pipelineItemRepository;
   private final PipelineStageRepository pipelineStageRepository;
+  private final RabbitTemplate rabbitTemplate;
 
   public PipelineItemServiceImpl(
       final PipelineItemRepository pipelineItemRepository,
-      final PipelineStageRepository pipelineStageRepository) {
+      final PipelineStageRepository pipelineStageRepository,
+      final RabbitTemplate rabbitTemplate) {
     this.pipelineItemRepository = pipelineItemRepository;
     this.pipelineStageRepository = pipelineStageRepository;
+    this.rabbitTemplate = rabbitTemplate;
   }
 
   @Override
@@ -90,12 +101,47 @@ public class PipelineItemServiceImpl implements PipelineItemService {
     PipelineStage newStage = pipelineStageRepository.findById(newStageId)
         .orElseThrow(() -> new ResourceNotFoundException("Pipeline stage", "id", newStageId));
 
+    // Capture old stage ID for event publishing
+    final Long oldStageId = item.getStageId();
+
     // Update the stage
     item.setStageId(newStageId);
     item.setEnteredStageAt(LocalDateTime.now());
     item.setDaysInStage(0);
 
-    return pipelineItemRepository.save(item);
+    final PipelineItem savedItem = pipelineItemRepository.save(item);
+
+    // Publish stage.changed event
+    publishStageChangeEvent(item.getLeadId(), oldStageId, newStageId);
+
+    return savedItem;
+  }
+
+  /**
+   * Publishes a stage.changed event to RabbitMQ.
+   *
+   * @param leadId the lead ID
+   * @param oldStageId the old stage ID
+   * @param newStageId the new stage ID
+   */
+  private void publishStageChangeEvent(final Long leadId, final Long oldStageId, final Long newStageId) {
+    try {
+      final String tenantId = TenantContext.getTenantId();
+      final StageChangeEvent event = new StageChangeEvent(leadId, oldStageId, newStageId, tenantId);
+
+      rabbitTemplate.convertAndSend(
+          RabbitMQConfig.EXCHANGE_NAME,
+          RabbitMQConfig.STAGE_CHANGED_ROUTING_KEY,
+          event
+      );
+
+      log.info("Published stage.changed event for lead ID: {} from stage {} to stage {}",
+          leadId, oldStageId, newStageId);
+
+    } catch (final Exception e) {
+      log.error("Error publishing stage.changed event for lead ID: {}", leadId, e);
+      // Don't throw exception - event publishing failure shouldn't fail the operation
+    }
   }
 
   @Override
