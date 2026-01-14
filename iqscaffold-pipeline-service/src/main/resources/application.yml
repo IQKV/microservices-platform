@@ -106,6 +106,8 @@ iqscaffold:
     enable-auto-stage-progression: ${PIPELINE_ENABLE_AUTO_STAGE_PROGRESSION:false}
     enable-follow-up-reminders: ${PIPELINE_ENABLE_FOLLOW_UP_REMINDERS:true}
     enable-activity-tracking: ${PIPELINE_ENABLE_ACTIVITY_TRACKING:true}
+  services:
+    lead-service-url: ${LEAD_SERVICE_URL:http://localhost:8084}
 
 logging:
   level:

@@ -8,6 +8,7 @@ public class IqScaffoldProperties {
   private String tenantIdHeader = "X-Tenant-ID";
   private final Observability observability = new Observability();
   private final Pipeline pipeline = new Pipeline();
+  private final Services services = new Services();
 
   public String getTenantIdHeader() {
     return tenantIdHeader;
@@ -23,6 +24,10 @@ public class IqScaffoldProperties {
 
   public Pipeline getPipeline() {
     return pipeline;
+  }
+
+  public Services getServices() {
+    return services;
   }
 
   public static class Observability {
@@ -90,6 +95,18 @@ public class IqScaffoldProperties {
 
     public void setEnableActivityTracking(boolean enableActivityTracking) {
       this.enableActivityTracking = enableActivityTracking;
+    }
+  }
+
+  public static class Services {
+    private String leadServiceUrl = "http://localhost:8084";
+
+    public String getLeadServiceUrl() {
+      return leadServiceUrl;
+    }
+
+    public void setLeadServiceUrl(String leadServiceUrl) {
+      this.leadServiceUrl = leadServiceUrl;
     }
   }
 }
