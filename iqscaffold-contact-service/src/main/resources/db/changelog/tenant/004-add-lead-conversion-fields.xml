@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="004-add-lead-conversion-fields" author="iqscaffold">
+        <comment>Add lead conversion tracking fields to contacts table</comment>
+        
+        <addColumn tableName="contacts">
+            <column name="converted_from_lead_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="contacts">
+            <column name="converted_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_converted_from_lead_id">
+            <column name="converted_from_lead_id"/>
+        </createIndex>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_converted_at">
+            <column name="converted_at"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

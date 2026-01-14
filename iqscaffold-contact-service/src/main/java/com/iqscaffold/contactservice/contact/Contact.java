@@ -79,6 +79,12 @@ public class Contact {
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
 
+  @Column(name = "converted_from_lead_id")
+  private Long convertedFromLeadId;
+
+  @Column(name = "converted_at")
+  private LocalDateTime convertedAt;
+
   // Constructors
   public Contact() {}
 
@@ -201,9 +207,29 @@ public class Contact {
     this.updatedBy = updatedBy;
   }
 
+  public Long getConvertedFromLeadId() {
+    return convertedFromLeadId;
+  }
+
+  public void setConvertedFromLeadId(Long convertedFromLeadId) {
+    this.convertedFromLeadId = convertedFromLeadId;
+  }
+
+  public LocalDateTime getConvertedAt() {
+    return convertedAt;
+  }
+
+  public void setConvertedAt(LocalDateTime convertedAt) {
+    this.convertedAt = convertedAt;
+  }
+
   // Helper methods
   public String getFullName() {
     return firstName + " " + lastName;
+  }
+
+  public boolean isConvertedFromLead() {
+    return convertedFromLeadId != null;
   }
 
   @Override
