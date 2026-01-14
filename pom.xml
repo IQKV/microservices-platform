@@ -31,6 +31,8 @@
         <module>iqscaffold-user-service</module>
         <module>iqscaffold-gateway-service</module>
         <module>iqscaffold-billing-service</module>
+        <module>iqscaffold-contact-service</module>
+        <module>iqscaffold-lead-service</module>
     </modules>
 
     <build>

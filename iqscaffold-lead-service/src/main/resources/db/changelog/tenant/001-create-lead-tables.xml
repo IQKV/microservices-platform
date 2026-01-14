@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-create-leads-table" author="iqscaffold">
+        <createTable tableName="leads">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="company" type="VARCHAR(255)"/>
+            <column name="job_title" type="VARCHAR(100)"/>
+            <column name="source" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="NEW">
+                <constraints nullable="false"/>
+            </column>
+            <column name="score" type="INTEGER" defaultValue="0"/>
+            <column name="qualified" type="BOOLEAN" defaultValue="false"/>
+            <column name="notes" type="TEXT"/>
+            <column name="converted_at" type="TIMESTAMP"/>
+            <column name="converted_to_contact_id" type="BIGINT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assigned_to" type="VARCHAR(100)"/>
+        </createTable>
+
+        <createIndex tableName="leads" indexName="idx_leads_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_source">
+            <column name="source"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_score">
+            <column name="score"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_qualified">
+            <column name="qualified"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_assigned_to">
+            <column name="assigned_to"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_created_at">
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_name">
+            <column name="first_name"/>
+            <column name="last_name"/>
+        </createIndex>
+
+        <createIndex tableName="leads" indexName="idx_leads_company">
+            <column name="company"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

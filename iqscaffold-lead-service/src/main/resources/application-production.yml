@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://prod-db:5432/iqscaffold_lead_production}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_lead}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD}
+    hikari:
+      pool-name: LeadServiceHikariPool-Production
+      maximum-pool-size: 25
+      minimum-idle: 5
+
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.iqscaffold.leadservice: INFO
+    org.hibernate.SQL: WARN
+
+# Production environment overrides for IQ Scaffold properties
+iqscaffold:
+  lead:
+    scoring:
+      enable-auto-scoring: true
+      default-score: 0
+      max-score: 100
+      min-qualification-score: 70
+    qualification:
+      enable-auto-qualification: true
+      require-email: true
+      require-phone: true
+      require-company: true

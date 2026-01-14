@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-lead-sources-table" author="iqscaffold">
+        <createTable tableName="lead_sources">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(500)"/>
+            <column name="is_active" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="lead_sources" indexName="idx_lead_sources_name">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex tableName="lead_sources" indexName="idx_lead_sources_type">
+            <column name="type"/>
+        </createIndex>
+
+        <createIndex tableName="lead_sources" indexName="idx_lead_sources_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <!-- Insert default lead sources -->
+        <insert tableName="lead_sources">
+            <column name="name" value="Website"/>
+            <column name="type" value="ONLINE"/>
+            <column name="description" value="Leads from website contact form"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Referral"/>
+            <column name="type" value="REFERRAL"/>
+            <column name="description" value="Leads from customer referrals"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Cold Call"/>
+            <column name="type" value="OUTBOUND"/>
+            <column name="description" value="Leads from cold calling"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Social Media"/>
+            <column name="type" value="ONLINE"/>
+            <column name="description" value="Leads from social media platforms"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Email Campaign"/>
+            <column name="type" value="MARKETING"/>
+            <column name="description" value="Leads from email marketing campaigns"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Trade Show"/>
+            <column name="type" value="EVENT"/>
+            <column name="description" value="Leads from trade shows and events"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Partner"/>
+            <column name="type" value="PARTNER"/>
+            <column name="description" value="Leads from business partners"/>
+        </insert>
+
+        <insert tableName="lead_sources">
+            <column name="name" value="Other"/>
+            <column name="type" value="OTHER"/>
+            <column name="description" value="Other lead sources"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

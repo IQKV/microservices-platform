@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        multiTenancy: NONE  # Disable multi-tenancy for tests
+  
+  liquibase:
+    enabled: false  # Disable Liquibase for tests
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    com.iqscaffold.leadservice: DEBUG
+
+# Test-specific IQ Scaffold properties
+iqscaffold:
+  tenant-id-header: X-Tenant-ID
+  user-service-url: http://localhost:8080
+  lead:
+    scoring:
+      enable-auto-scoring: true
+      default-score: 0
+      max-score: 100
+      min-qualification-score: 60
+    qualification:
+      enable-auto-qualification: false
+      require-email: true
+      require-phone: false
+      require-company: false
