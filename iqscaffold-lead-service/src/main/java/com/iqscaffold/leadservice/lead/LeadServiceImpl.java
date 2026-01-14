@@ -1,10 +1,13 @@
 package com.iqscaffold.leadservice.lead;
 
+import com.iqscaffold.leadservice.lead.dto.LeadDtos;
+import com.iqscaffold.leadservice.lead.dto.LeadMapper;
+import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
+import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,9 +29,32 @@ public class LeadServiceImpl implements LeadService {
   }
 
   @Override
+  public LeadDtos.LeadResponse createLead(
+      final LeadDtos.CreateLeadRequest request,
+      final String createdBy) {
+    // Check for duplicate email
+    if (leadRepository.existsByEmail(request.email())) {
+      throw new DuplicateResourceException(
+          "Lead with email " + request.email() + " already exists");
+    }
+
+    Lead lead = LeadMapper.toEntity(request, createdBy);
+    Lead savedLead = leadRepository.save(lead);
+    return LeadMapper.toResponse(savedLead);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public Optional<Lead> getLeadById(final Long id) {
     return leadRepository.findById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public LeadDtos.LeadResponse getLeadResponseById(final Long id) {
+    Lead lead = leadRepository.findById(id)
+        .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
+    return LeadMapper.toResponse(lead);
   }
 
   @Override
@@ -89,6 +115,26 @@ public class LeadServiceImpl implements LeadService {
     existingLead.setUpdatedBy(lead.getUpdatedBy());
 
     return leadRepository.save(existingLead);
+  }
+
+  @Override
+  public LeadDtos.LeadResponse updateLead(
+      final Long id,
+      final LeadDtos.UpdateLeadRequest request,
+      final String updatedBy) {
+    Lead existingLead = leadRepository.findById(id)
+        .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
+
+    // Check for duplicate email if email is being changed
+    if (!existingLead.getEmail().equals(request.email())
+        && leadRepository.existsByEmail(request.email())) {
+      throw new DuplicateResourceException(
+          "Lead with email " + request.email() + " already exists");
+    }
+
+    LeadMapper.updateEntity(existingLead, request, updatedBy);
+    Lead savedLead = leadRepository.save(existingLead);
+    return LeadMapper.toResponse(savedLead);
   }
 
   @Override

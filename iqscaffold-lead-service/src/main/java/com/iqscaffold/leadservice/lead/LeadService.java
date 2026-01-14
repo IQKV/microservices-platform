@@ -1,5 +1,6 @@
 package com.iqscaffold.leadservice.lead;
 
+import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +12,11 @@ public interface LeadService {
 
   Lead createLead(Lead lead);
 
+  LeadDtos.LeadResponse createLead(LeadDtos.CreateLeadRequest request, String createdBy);
+
   Optional<Lead> getLeadById(Long id);
+
+  LeadDtos.LeadResponse getLeadResponseById(Long id);
 
   Optional<Lead> getLeadByEmail(String email);
 
@@ -28,6 +33,8 @@ public interface LeadService {
   List<Lead> getQualifiedLeads(LeadStatus status);
 
   Lead updateLead(Long id, Lead lead);
+
+  LeadDtos.LeadResponse updateLead(Long id, LeadDtos.UpdateLeadRequest request, String updatedBy);
 
   Lead updateLeadStatus(Long id, LeadStatus status);
 
