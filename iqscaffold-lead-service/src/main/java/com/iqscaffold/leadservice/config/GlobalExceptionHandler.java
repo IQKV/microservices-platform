@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -171,6 +172,29 @@ public class GlobalExceptionHandler {
 
     logger.warn("Access denied on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
+  }
+
+  /**
+   * Handles authentication exceptions.
+   *
+   * @param ex The authentication exception
+   * @param request The HTTP request
+   * @return Problem detail response
+   */
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ProblemDetail> handleAuthenticationException(
+      AuthenticationException ex,
+      HttpServletRequest request) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.UNAUTHORIZED,
+        "Authentication failed"
+    );
+    problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/unauthorized"));
+    problemDetail.setTitle("Unauthorized");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+    logger.warn("Authentication failed on {}: {}", request.getRequestURI(), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problemDetail);
   }
 
   /**

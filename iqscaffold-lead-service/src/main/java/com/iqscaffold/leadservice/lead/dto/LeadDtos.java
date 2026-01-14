@@ -2,6 +2,8 @@ package com.iqscaffold.leadservice.lead.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iqscaffold.leadservice.lead.LeadStatus;
+import com.iqscaffold.leadservice.shared.validation.ValidLeadSource;
+import com.iqscaffold.leadservice.shared.validation.ValidPhone;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,10 +26,10 @@ public final class LeadDtos {
    * @param firstName Lead's first name (required, max 100 chars)
    * @param lastName Lead's last name (required, max 100 chars)
    * @param email Lead's email address (required, valid email format, max 255 chars)
-   * @param phone Lead's phone number (optional, max 20 chars)
+   * @param phone Lead's phone number (optional, max 20 chars, valid phone format)
    * @param company Lead's company name (optional, max 255 chars)
    * @param jobTitle Lead's job title (optional, max 100 chars)
-   * @param source Lead source (required, max 100 chars)
+   * @param source Lead source (required, max 100 chars, must be valid source)
    * @param notes Additional notes (optional, max 2000 chars)
    * @param assignedTo User ID to assign the lead to (optional, max 100 chars)
    */
@@ -47,6 +49,7 @@ public final class LeadDtos {
       String email,
 
       @Size(max = 20, message = "Phone must not exceed 20 characters")
+      @ValidPhone
       String phone,
 
       @Size(max = 255, message = "Company must not exceed 255 characters")
@@ -57,6 +60,7 @@ public final class LeadDtos {
 
       @NotBlank(message = "Source is required")
       @Size(max = 100, message = "Source must not exceed 100 characters")
+      @ValidLeadSource
       String source,
 
       @Size(max = 2000, message = "Notes must not exceed 2000 characters")
@@ -73,10 +77,10 @@ public final class LeadDtos {
    * @param firstName Lead's first name (required, max 100 chars)
    * @param lastName Lead's last name (required, max 100 chars)
    * @param email Lead's email address (required, valid email format, max 255 chars)
-   * @param phone Lead's phone number (optional, max 20 chars)
+   * @param phone Lead's phone number (optional, max 20 chars, valid phone format)
    * @param company Lead's company name (optional, max 255 chars)
    * @param jobTitle Lead's job title (optional, max 100 chars)
-   * @param source Lead source (required, max 100 chars)
+   * @param source Lead source (required, max 100 chars, must be valid source)
    * @param notes Additional notes (optional, max 2000 chars)
    * @param assignedTo User ID to assign the lead to (optional, max 100 chars)
    */
@@ -96,6 +100,7 @@ public final class LeadDtos {
       String email,
 
       @Size(max = 20, message = "Phone must not exceed 20 characters")
+      @ValidPhone
       String phone,
 
       @Size(max = 255, message = "Company must not exceed 255 characters")
@@ -106,6 +111,7 @@ public final class LeadDtos {
 
       @NotBlank(message = "Source is required")
       @Size(max = 100, message = "Source must not exceed 100 characters")
+      @ValidLeadSource
       String source,
 
       @Size(max = 2000, message = "Notes must not exceed 2000 characters")

@@ -1,11 +1,10 @@
-package com.iqscaffold.pipelineservice.config;
+package com.iqscaffold.contactservice.config;
 
-import com.iqscaffold.pipelineservice.shared.exception.BusinessException;
-import com.iqscaffold.pipelineservice.shared.exception.ConflictException;
-import com.iqscaffold.pipelineservice.shared.exception.ResourceNotFoundException;
+import com.iqscaffold.contactservice.shared.exception.ContactNotFoundException;
+import com.iqscaffold.contactservice.shared.exception.DuplicateResourceException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -21,9 +20,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Global exception handler for the Pipeline Service.
- * <p>
- * Handles exceptions and converts them to RFC 7807 Problem Details format.
+ * Global exception handler for the Contact Service.
+ * Provides centralized error handling with RFC 7807 Problem Details compliance.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,14 +33,12 @@ public class GlobalExceptionHandler {
    *
    * @param ex The validation exception
    * @param request The HTTP request
-   * @return Problem detail with validation errors
+   * @return Problem detail response with field errors
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleValidationException(
-      final MethodArgumentNotValidException ex,
-      final HttpServletRequest request) {
-    logger.warn("Validation error: {}", ex.getMessage());
-
+      MethodArgumentNotValidException ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.BAD_REQUEST,
         "Validation failed for one or more fields"
@@ -50,32 +46,52 @@ public class GlobalExceptionHandler {
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/validation-error"));
     problemDetail.setTitle("Validation Error");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
-    Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach(error -> {
-      String fieldName = ((FieldError) error).getField();
-      String errorMessage = error.getDefaultMessage();
-      errors.put(fieldName, errorMessage);
-    });
-    problemDetail.setProperty("errors", errors);
+    // Add field errors
+    Map<String, String> fieldErrors = new HashMap<>();
+    for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+      fieldErrors.put(error.getField(), error.getDefaultMessage());
+    }
+    problemDetail.setProperty("errors", fieldErrors);
 
+    logger.warn("Validation error on {}: {}", request.getRequestURI(), fieldErrors);
     return ResponseEntity.badRequest().body(problemDetail);
   }
 
   /**
-   * Handles resource not found exceptions.
+   * Handles constraint violation exceptions.
+   *
+   * @param ex The constraint violation exception
+   * @param request The HTTP request
+   * @return Problem detail response
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ProblemDetail> handleConstraintViolationException(
+      ConstraintViolationException ex,
+      HttpServletRequest request) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST,
+        ex.getMessage()
+    );
+    problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/validation-error"));
+    problemDetail.setTitle("Constraint Violation");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+    logger.warn("Constraint violation on {}: {}", request.getRequestURI(), ex.getMessage());
+    return ResponseEntity.badRequest().body(problemDetail);
+  }
+
+  /**
+   * Handles contact not found exceptions.
    *
    * @param ex The not found exception
    * @param request The HTTP request
-   * @return Problem detail with error message
+   * @return Problem detail response
    */
-  @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleResourceNotFoundException(
-      final ResourceNotFoundException ex,
-      final HttpServletRequest request) {
-    logger.warn("Resource not found: {}", ex.getMessage());
-
+  @ExceptionHandler(ContactNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleContactNotFoundException(
+      ContactNotFoundException ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.NOT_FOUND,
         ex.getMessage()
@@ -83,24 +99,22 @@ public class GlobalExceptionHandler {
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/not-found"));
     problemDetail.setTitle("Resource Not Found");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
+    logger.warn("Contact not found on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
   }
 
   /**
-   * Handles conflict exceptions (e.g., duplicate resources).
+   * Handles duplicate resource exceptions.
    *
-   * @param ex The conflict exception
+   * @param ex The duplicate resource exception
    * @param request The HTTP request
-   * @return Problem detail with error message
+   * @return Problem detail response
    */
-  @ExceptionHandler(ConflictException.class)
-  public ResponseEntity<ProblemDetail> handleConflictException(
-      final ConflictException ex,
-      final HttpServletRequest request) {
-    logger.warn("Conflict error: {}", ex.getMessage());
-
+  @ExceptionHandler(DuplicateResourceException.class)
+  public ResponseEntity<ProblemDetail> handleDuplicateResourceException(
+      DuplicateResourceException ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.CONFLICT,
         ex.getMessage()
@@ -108,34 +122,9 @@ public class GlobalExceptionHandler {
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/conflict"));
     problemDetail.setTitle("Resource Conflict");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
+    logger.warn("Duplicate resource on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
-  }
-
-  /**
-   * Handles business rule violations.
-   *
-   * @param ex The business exception
-   * @param request The HTTP request
-   * @return Problem detail with error message
-   */
-  @ExceptionHandler(BusinessException.class)
-  public ResponseEntity<ProblemDetail> handleBusinessException(
-      final BusinessException ex,
-      final HttpServletRequest request) {
-    logger.warn("Business rule violation: {}", ex.getMessage());
-
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST,
-        ex.getMessage()
-    );
-    problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/business-rule-violation"));
-    problemDetail.setTitle("Business Rule Violation");
-    problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
-
-    return ResponseEntity.badRequest().body(problemDetail);
   }
 
   /**
@@ -143,14 +132,12 @@ public class GlobalExceptionHandler {
    *
    * @param ex The authentication exception
    * @param request The HTTP request
-   * @return Problem detail with error message
+   * @return Problem detail response
    */
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ProblemDetail> handleAuthenticationException(
-      final AuthenticationException ex,
-      final HttpServletRequest request) {
-    logger.warn("Authentication failed: {}", ex.getMessage());
-
+      AuthenticationException ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.UNAUTHORIZED,
         "Authentication failed"
@@ -158,8 +145,8 @@ public class GlobalExceptionHandler {
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/unauthorized"));
     problemDetail.setTitle("Unauthorized");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
+    logger.warn("Authentication failed on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problemDetail);
   }
 
@@ -168,48 +155,44 @@ public class GlobalExceptionHandler {
    *
    * @param ex The access denied exception
    * @param request The HTTP request
-   * @return Problem detail with error message
+   * @return Problem detail response
    */
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<ProblemDetail> handleAccessDeniedException(
-      final AccessDeniedException ex,
-      final HttpServletRequest request) {
-    logger.warn("Access denied: {}", ex.getMessage());
-
+      AccessDeniedException ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.FORBIDDEN,
-        "You do not have permission to access this resource"
+        "Access denied"
     );
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/forbidden"));
     problemDetail.setTitle("Access Denied");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
+    logger.warn("Access denied on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problemDetail);
   }
 
   /**
-   * Handles all other unexpected exceptions.
+   * Handles all other unhandled exceptions.
    *
    * @param ex The exception
    * @param request The HTTP request
-   * @return Problem detail with generic error message
+   * @return Problem detail response
    */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleGenericException(
-      final Exception ex,
-      final HttpServletRequest request) {
-    logger.error("Unexpected error occurred", ex);
-
+      Exception ex,
+      HttpServletRequest request) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
         HttpStatus.INTERNAL_SERVER_ERROR,
-        "An unexpected error occurred. Please try again later."
+        "An unexpected error occurred"
     );
     problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/internal-error"));
     problemDetail.setTitle("Internal Server Error");
     problemDetail.setInstance(URI.create(request.getRequestURI()));
-    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
+    logger.error("Unexpected error on {}: ", request.getRequestURI(), ex);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
   }
 }
