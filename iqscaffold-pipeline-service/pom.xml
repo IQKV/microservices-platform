@@ -163,6 +163,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- MockWebServer for testing HTTP clients -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Resilience4j for Circuit Breaker and Time Limiter -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
