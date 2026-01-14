@@ -1,16 +1,23 @@
 package com.iqscaffold.pipelineservice.followup;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "follow_ups")
@@ -67,9 +74,10 @@ public class FollowUp {
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
 
-  public FollowUp() {}
+  public FollowUp() {
+  }
 
-  public FollowUp(Long leadId, String title, LocalDateTime dueDate) {
+  public FollowUp(final Long leadId, final String title, final LocalDateTime dueDate) {
     this.leadId = leadId;
     this.title = title;
     this.dueDate = dueDate;
@@ -186,8 +194,12 @@ public class FollowUp {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     FollowUp followUp = (FollowUp) o;
     return Objects.equals(id, followUp.id);
   }
@@ -200,11 +212,11 @@ public class FollowUp {
   @Override
   public String toString() {
     return "FollowUp{" +
-        "id=" + id +
-        ", leadId=" + leadId +
-        ", title='" + title + '\'' +
-        ", dueDate=" + dueDate +
-        ", status=" + status +
-        '}';
+           "id=" + id +
+           ", leadId=" + leadId +
+           ", title='" + title + '\'' +
+           ", dueDate=" + dueDate +
+           ", status=" + status +
+           '}';
   }
 }

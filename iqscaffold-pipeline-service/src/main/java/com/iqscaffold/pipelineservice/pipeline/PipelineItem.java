@@ -1,15 +1,20 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "pipeline_items")
@@ -54,9 +59,10 @@ public class PipelineItem {
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
 
-  public PipelineItem() {}
+  public PipelineItem() {
+  }
 
-  public PipelineItem(Long leadId, Long stageId) {
+  public PipelineItem(final Long leadId, final Long stageId) {
     this.leadId = leadId;
     this.stageId = stageId;
     this.enteredStageAt = LocalDateTime.now();
@@ -153,8 +159,12 @@ public class PipelineItem {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PipelineItem that = (PipelineItem) o;
     return Objects.equals(id, that.id);
   }
@@ -167,10 +177,10 @@ public class PipelineItem {
   @Override
   public String toString() {
     return "PipelineItem{" +
-        "id=" + id +
-        ", leadId=" + leadId +
-        ", stageId=" + stageId +
-        ", enteredStageAt=" + enteredStageAt +
-        '}';
+           "id=" + id +
+           ", leadId=" + leadId +
+           ", stageId=" + stageId +
+           ", enteredStageAt=" + enteredStageAt +
+           '}';
   }
 }

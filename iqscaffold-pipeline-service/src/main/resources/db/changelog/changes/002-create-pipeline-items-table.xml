@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <changeSet id="002-create-pipeline-items-table" author="iqscaffold">
@@ -45,13 +45,13 @@
         </createIndex>
 
         <addForeignKeyConstraint
-            baseTableName="pipeline_items"
-            baseColumnNames="stage_id"
-            constraintName="fk_pipeline_items_stage"
-            referencedTableName="pipeline_stages"
-            referencedColumnNames="id"
-            onDelete="RESTRICT"
-            onUpdate="CASCADE"/>
+                baseTableName="pipeline_items"
+                baseColumnNames="stage_id"
+                constraintName="fk_pipeline_items_stage"
+                referencedTableName="pipeline_stages"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"
+                onUpdate="CASCADE"/>
     </changeSet>
 
 </databaseChangeLog>

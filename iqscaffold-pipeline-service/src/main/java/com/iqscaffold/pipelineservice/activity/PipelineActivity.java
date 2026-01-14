@@ -1,13 +1,20 @@
 package com.iqscaffold.pipelineservice.activity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "pipeline_activities")
@@ -47,9 +54,10 @@ public class PipelineActivity {
   @Column(name = "created_by", nullable = false, updatable = false)
   private String createdBy;
 
-  public PipelineActivity() {}
+  public PipelineActivity() {
+  }
 
-  public PipelineActivity(Long leadId, ActivityType activityType, String description) {
+  public PipelineActivity(final Long leadId, final ActivityType activityType, final String description) {
     this.leadId = leadId;
     this.activityType = activityType;
     this.description = description;
@@ -130,8 +138,12 @@ public class PipelineActivity {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PipelineActivity that = (PipelineActivity) o;
     return Objects.equals(id, that.id);
   }
@@ -144,11 +156,11 @@ public class PipelineActivity {
   @Override
   public String toString() {
     return "PipelineActivity{" +
-        "id=" + id +
-        ", leadId=" + leadId +
-        ", activityType=" + activityType +
-        ", description='" + description + '\'' +
-        ", createdAt=" + createdAt +
-        '}';
+           "id=" + id +
+           ", leadId=" + leadId +
+           ", activityType=" + activityType +
+           ", description='" + description + '\'' +
+           ", createdAt=" + createdAt +
+           '}';
   }
 }

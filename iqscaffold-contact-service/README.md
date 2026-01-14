@@ -36,11 +36,13 @@ A comprehensive CRM contact management service built with Spring Boot, providing
 ### Local Development
 
 1. **Start infrastructure services**:
+
    ```bash
    docker-compose up -d postgres-contact redis-contact rabbitmq-contact
    ```
 
 2. **Run the application**:
+
    ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=local
    ```
@@ -63,6 +65,7 @@ docker-compose up -d
 ## API Endpoints
 
 ### Contacts
+
 - `GET /api/v1/crm/contacts` - List contacts
 - `POST /api/v1/crm/contacts` - Create contact
 - `GET /api/v1/crm/contacts/{id}` - Get contact by ID
@@ -70,6 +73,7 @@ docker-compose up -d
 - `DELETE /api/v1/crm/contacts/{id}` - Delete contact
 
 ### Companies
+
 - `GET /api/v1/crm/companies` - List companies
 - `POST /api/v1/crm/companies` - Create company
 - `GET /api/v1/crm/companies/{id}` - Get company by ID
@@ -77,6 +81,7 @@ docker-compose up -d
 - `DELETE /api/v1/crm/companies/{id}` - Delete company
 
 ### Activities
+
 - `GET /api/v1/crm/activities` - List activities
 - `POST /api/v1/crm/activities` - Create activity
 - `GET /api/v1/crm/activities/{id}` - Get activity by ID
@@ -130,9 +135,11 @@ The service uses schema-per-tenant isolation:
 ## Database Schema
 
 ### System Schema (public)
+
 - `tenant_info` - Tenant metadata and schema mapping
 
 ### Tenant Schemas
+
 - `contacts` - Contact information and lead scoring
 - `companies` - Company details and hierarchies
 - `activities` - Interaction tracking and task management
@@ -155,6 +162,7 @@ mvn clean verify jacoco:report
 ### Code Quality
 
 The project includes:
+
 - Checkstyle for code style
 - JaCoCo for test coverage (70% minimum)
 - ArchUnit for architecture testing
@@ -169,14 +177,17 @@ The project includes:
 ## Monitoring
 
 ### Health Checks
+
 - Liveness: `/actuator/health/liveness`
 - Readiness: `/actuator/health/readiness`
 
 ### Metrics
+
 - Prometheus: `/actuator/prometheus`
 - Application metrics: `/actuator/metrics`
 
 ### Tracing
+
 - OpenTelemetry integration
 - Distributed tracing support
 

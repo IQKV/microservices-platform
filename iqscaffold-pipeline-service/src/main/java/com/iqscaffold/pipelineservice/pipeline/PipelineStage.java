@@ -1,15 +1,20 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "pipeline_stages")
@@ -56,9 +61,10 @@ public class PipelineStage {
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
 
-  public PipelineStage() {}
+  public PipelineStage() {
+  }
 
-  public PipelineStage(String name, Integer displayOrder) {
+  public PipelineStage(final String name, final Integer displayOrder) {
     this.name = name;
     this.displayOrder = displayOrder;
   }
@@ -154,8 +160,12 @@ public class PipelineStage {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PipelineStage that = (PipelineStage) o;
     return Objects.equals(id, that.id);
   }
@@ -168,10 +178,10 @@ public class PipelineStage {
   @Override
   public String toString() {
     return "PipelineStage{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", displayOrder=" + displayOrder +
-        ", isActive=" + isActive +
-        '}';
+           "id=" + id +
+           ", name='" + name + '\'' +
+           ", displayOrder=" + displayOrder +
+           ", isActive=" + isActive +
+           '}';
   }
 }

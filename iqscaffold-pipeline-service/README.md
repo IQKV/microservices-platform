@@ -36,11 +36,13 @@ A CRM pipeline management service built with Spring Boot, providing lead trackin
 ### Local Development
 
 1. **Start infrastructure services**:
+
    ```bash
    docker-compose up -d postgres-pipeline redis-pipeline rabbitmq-pipeline
    ```
 
 2. **Run the application**:
+
    ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=local
    ```
@@ -63,6 +65,7 @@ docker-compose up -d
 ## API Endpoints
 
 ### Pipeline Stages
+
 - `GET /api/v1/pipeline/stages` - List all pipeline stages
 - `POST /api/v1/pipeline/stages` - Create pipeline stage
 - `GET /api/v1/pipeline/stages/{id}` - Get stage by ID
@@ -71,6 +74,7 @@ docker-compose up -d
 - `PUT /api/v1/pipeline/stages/{id}/order` - Reorder stages
 
 ### Pipeline Items (Leads in Pipeline)
+
 - `GET /api/v1/pipeline/items` - List pipeline items
 - `POST /api/v1/pipeline/items` - Add lead to pipeline
 - `GET /api/v1/pipeline/items/{id}` - Get pipeline item
@@ -79,6 +83,7 @@ docker-compose up -d
 - `DELETE /api/v1/pipeline/items/{id}` - Remove from pipeline
 
 ### Follow-ups
+
 - `GET /api/v1/pipeline/follow-ups` - List follow-ups
 - `POST /api/v1/pipeline/follow-ups` - Schedule follow-up
 - `GET /api/v1/pipeline/follow-ups/{id}` - Get follow-up
@@ -88,12 +93,14 @@ docker-compose up -d
 - `GET /api/v1/pipeline/follow-ups/overdue` - Get overdue follow-ups
 
 ### Activity Log
+
 - `GET /api/v1/pipeline/activities` - List activities
 - `POST /api/v1/pipeline/activities` - Log activity
 - `GET /api/v1/pipeline/activities/{id}` - Get activity
 - `GET /api/v1/pipeline/activities/lead/{leadId}` - Get lead activities
 
 ### Dashboard & Stats
+
 - `GET /api/v1/pipeline/dashboard/stats` - Get pipeline statistics
 - `GET /api/v1/pipeline/dashboard/conversion` - Get conversion rates
 - `GET /api/v1/pipeline/dashboard/velocity` - Get pipeline velocity
@@ -143,9 +150,11 @@ The service uses schema-per-tenant isolation:
 ## Database Schema
 
 ### System Schema (public)
+
 - `tenant_info` - Tenant metadata and schema mapping
 
 ### Tenant Schemas
+
 - `pipeline_stages` - Pipeline stage definitions and ordering
 - `pipeline_items` - Leads in pipeline with current stage
 - `follow_ups` - Scheduled follow-ups with due dates
@@ -154,6 +163,7 @@ The service uses schema-per-tenant isolation:
 ## Pipeline Stages
 
 Default pipeline stages:
+
 1. **New** - Newly created leads
 2. **Contacted** - Initial contact made
 3. **Qualified** - Lead qualified as potential customer
@@ -179,6 +189,7 @@ mvn clean verify jacoco:report
 ### Code Quality
 
 The project includes:
+
 - Checkstyle for code style
 - JaCoCo for test coverage (70% minimum)
 - ArchUnit for architecture testing
@@ -186,14 +197,17 @@ The project includes:
 ## Monitoring
 
 ### Health Checks
+
 - Liveness: `/actuator/health/liveness`
 - Readiness: `/actuator/health/readiness`
 
 ### Metrics
+
 - Prometheus: `/actuator/prometheus`
 - Application metrics: `/actuator/metrics`
 
 ### Tracing
+
 - OpenTelemetry integration
 - Distributed tracing support
 

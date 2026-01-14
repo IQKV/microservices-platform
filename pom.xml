@@ -33,6 +33,7 @@
         <module>iqscaffold-billing-service</module>
         <module>iqscaffold-contact-service</module>
         <module>iqscaffold-lead-service</module>
+        <module>iqscaffold-pipeline-service</module>
     </modules>
 
     <build>

@@ -2,11 +2,11 @@ package com.iqscaffold.pipelineservice.shared.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 
-  public ResourceNotFoundException(String message) {
+  public ResourceNotFoundException(final String message) {
     super(message);
   }
 
-  public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
+  public ResourceNotFoundException(final String resourceName, final String fieldName, final Object fieldValue) {
     super(String.format("%s not found with %s: '%s'", resourceName, fieldName, fieldValue));
   }
 }

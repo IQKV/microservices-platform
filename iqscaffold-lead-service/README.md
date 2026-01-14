@@ -41,11 +41,13 @@ A comprehensive CRM lead management service built with Spring Boot, providing mu
 ### Local Development
 
 1. **Start infrastructure services**:
+
    ```bash
    docker-compose up -d postgres-lead redis-lead rabbitmq-lead
    ```
 
 2. **Run the application**:
+
    ```bash
    mvn spring-boot:run -Dspring-boot.run.profiles=local
    ```
@@ -68,6 +70,7 @@ docker-compose up -d
 ## API Endpoints
 
 ### Leads
+
 - `GET /api/v1/leads` - List leads with pagination and filters
 - `POST /api/v1/leads` - Create new lead
 - `GET /api/v1/leads/{id}` - Get lead by ID
@@ -79,6 +82,7 @@ docker-compose up -d
 - `GET /api/v1/leads?assignedTo={user}` - Filter by assignment
 
 ### Lead Actions
+
 - `PATCH /api/v1/leads/{id}/qualify` - Qualify lead
 - `PATCH /api/v1/leads/{id}/disqualify` - Disqualify lead
 - `PATCH /api/v1/leads/{id}/assign` - Assign lead to user
@@ -86,6 +90,7 @@ docker-compose up -d
 - `POST /api/v1/leads/{id}/convert` - Convert lead to contact
 
 ### Lead Notes
+
 - `GET /api/v1/leads/{id}/notes` - Get lead notes
 - `POST /api/v1/leads/{id}/notes` - Add note to lead
 - `PUT /api/v1/leads/{id}/notes/{noteId}` - Update note
@@ -93,10 +98,12 @@ docker-compose up -d
 - `PATCH /api/v1/leads/{id}/notes/{noteId}/pin` - Pin/unpin note
 
 ### Lead Activities
+
 - `GET /api/v1/leads/{id}/activities` - Get lead activity timeline
 - `POST /api/v1/leads/{id}/activities` - Log activity
 
 ### Lead Sources
+
 - `GET /api/v1/leads/sources` - List available lead sources
 
 ## Configuration
@@ -178,6 +185,7 @@ LOST    LOST    UNQUALIFIED
 - **Auto-scoring**: Configurable based on lead attributes
 
 ### Scoring Factors (Example)
+
 - Email provided: +10
 - Phone provided: +10
 - Company provided: +15
@@ -196,9 +204,11 @@ The service uses schema-per-tenant isolation:
 ## Database Schema
 
 ### System Schema (public)
+
 - `tenant_info` - Tenant metadata and schema mapping
 
 ### Tenant Schemas
+
 - `leads` - Lead information with scoring and qualification
 - `lead_sources` - Available lead sources
 - `lead_notes` - Notes attached to leads
@@ -248,6 +258,7 @@ mvn clean verify jacoco:report
 ### Code Quality
 
 The project includes:
+
 - Checkstyle for code style
 - JaCoCo for test coverage (70% minimum)
 - ArchUnit for architecture testing
@@ -262,28 +273,34 @@ The project includes:
 ## Monitoring
 
 ### Health Checks
+
 - Liveness: `/actuator/health/liveness`
 - Readiness: `/actuator/health/readiness`
 
 ### Metrics
+
 - Prometheus: `/actuator/prometheus`
 - Application metrics: `/actuator/metrics`
 
 ### Tracing
+
 - OpenTelemetry integration
 - Distributed tracing support
 
 ## Integration with Other Services
 
 ### User Service
+
 - JWT authentication
 - User information for assignments
 
 ### Contact Service
+
 - Lead conversion creates contacts
 - Event-driven communication
 
 ### Pipeline Service (Future)
+
 - Lead pipeline management
 - Stage tracking
 
