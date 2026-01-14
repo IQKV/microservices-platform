@@ -99,41 +99,43 @@ Payment Processing              RabbitMQ                    Async Processing
 ### Publishing Events (Already Working)
 
 ```java
+
 @Service
 public class PaymentService {
-    
-    private final MessagingService messagingService;
-    
-    public void processPayment(Payment payment) {
-        // Process payment...
-        
-        // Publish event
-        messagingService.publishPaymentSuccessful(
+
+  private final MessagingService messagingService;
+
+  public void processPayment(Payment payment) {
+    // Process payment...
+
+    // Publish event
+    messagingService.publishPaymentSuccessful(
             payment.getId(),
             payment.getTenantId(),
             payment.getCustomerEmail()
-        );
-    }
+    );
+  }
 }
 ```
 
 ### Consuming Events (NEW - TODO Implementation)
 
 ```java
+
 @Component
 public class UserEventListener {
-    
-    @RabbitListener(queues = "iqscaffold.user.events")
-    public void handleUserEvent(UserEvent event) {
-        switch (event.getEventType()) {
-            case "USER_CREATED":
-                // TODO: Implement customer creation
-                // Customer customer = new Customer();
-                // customer.setUserId(event.getUserId());
-                // customerRepository.save(customer);
-                break;
-        }
+
+  @RabbitListener(queues = "iqscaffold.user.events")
+  public void handleUserEvent(UserEvent event) {
+    switch (event.getEventType()) {
+      case "USER_CREATED":
+        // TODO: Implement customer creation
+        // Customer customer = new Customer();
+        // customer.setUserId(event.getUserId());
+        // customerRepository.save(customer);
+        break;
     }
+  }
 }
 ```
 
@@ -204,31 +206,32 @@ spring:
 ### Unit Test Example
 
 ```java
+
 @ExtendWith(MockitoExtension.class)
 class UserEventListenerTest {
-    
-    @Mock
-    private CustomerRepository customerRepository;
-    
-    @InjectMocks
-    private UserEventListener listener;
-    
-    @Test
-    void shouldHandleUserCreatedEvent() {
-        // Arrange
-        UserEvent event = new UserEvent();
-        event.setEventType("USER_CREATED");
-        event.setUserId("user-123");
-        event.setTenantId("tenant-1");
-        event.setEmail("user@example.com");
-        
-        // Act
-        listener.handleUserEvent(event);
-        
-        // Assert
-        // TODO: Verify customer was created
-        // verify(customerRepository).save(any(Customer.class));
-    }
+
+  @Mock
+  private CustomerRepository customerRepository;
+
+  @InjectMocks
+  private UserEventListener listener;
+
+  @Test
+  void shouldHandleUserCreatedEvent() {
+    // Arrange
+    UserEvent event = new UserEvent();
+    event.setEventType("USER_CREATED");
+    event.setUserId("user-123");
+    event.setTenantId("tenant-1");
+    event.setEmail("user@example.com");
+
+    // Act
+    listener.handleUserEvent(event);
+
+    // Assert
+    // TODO: Verify customer was created
+    // verify(customerRepository).save(any(Customer.class));
+  }
 }
 ```
 
@@ -237,16 +240,17 @@ class UserEventListenerTest {
 All listeners follow this pattern:
 
 ```java
+
 @RabbitListener(queues = "queue.name")
 public void handleEvent(Event event) {
-    try {
-        log.info("Processing event: {}", event.getEventId());
-        // Business logic...
-        log.debug("Successfully processed event");
-    } catch (final Exception e) {
-        log.error("Error processing event: {}", event.getEventId(), e);
-        throw e; // Triggers retry or DLQ routing
-    }
+  try {
+    log.info("Processing event: {}", event.getEventId());
+    // Business logic...
+    log.debug("Successfully processed event");
+  } catch (final Exception e) {
+    log.error("Error processing event: {}", event.getEventId(), e);
+    throw e; // Triggers retry or DLQ routing
+  }
 }
 ```
 
