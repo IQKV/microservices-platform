@@ -1,5 +1,5 @@
 ${AnsiColor.BLUE} ===============================
-${AnsiColor.BLUE}  CRM Contact Management Service
+${AnsiColor.BLUE}  CRM Pipeline Service
 ${AnsiColor.BLUE}  Running Spring Boot ${spring-boot.version}
 ${AnsiColor.BLUE} ===============================
 ${AnsiColor.DEFAULT}

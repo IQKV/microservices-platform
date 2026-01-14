@@ -1,0 +1,117 @@
+spring:
+  application:
+    name: iqscaffold-pipeline-service
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5436/iqscaffold_pipeline_local}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_pipeline}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+        javax:
+          cache:
+            provider: org.ehcache.jsr107.EhcacheCachingProvider
+            uri: classpath:ehcache.xml
+  
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: public
+  
+  rabbitmq:
+    host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:localhost}
+    port: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PORT:5675}
+    username: ${IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME:iqscaffold}
+    password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD:iqscaffold_password}
+    virtual-host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_VHOST:/}
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8081}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8081/.well-known/jwks.json}
+
+server:
+  port: ${SERVER_PORT:8085}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+  http2:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: ${IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE:1.0}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+iqscaffold:
+  tenant-id-header: ${IQSCAFFOLD_TENANT_ID_HEADER:X-Tenant-ID}
+  observability:
+    tracing:
+      enabled: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENABLED:true}
+      sampling-rate: ${IQSCAFFOLD_OBSERVABILITY_TRACING_SAMPLING_RATE:1.0}
+      endpoint: ${IQSCAFFOLD_OBSERVABILITY_TRACING_ENDPOINT:http://localhost:4317}
+  pipeline:
+    enable-auto-stage-progression: ${PIPELINE_ENABLE_AUTO_STAGE_PROGRESSION:false}
+    enable-follow-up-reminders: ${PIPELINE_ENABLE_FOLLOW_UP_REMINDERS:true}
+    enable-activity-tracking: ${PIPELINE_ENABLE_ACTIVITY_TRACKING:true}
+
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.pipelineservice: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="005-insert-default-pipeline-stages" author="iqscaffold">
+        <insert tableName="pipeline_stages">
+            <column name="name" value="New"/>
+            <column name="description" value="Newly created leads"/>
+            <column name="display_order" valueNumeric="1"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="false"/>
+            <column name="color_code" value="#3B82F6"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+
+        <insert tableName="pipeline_stages">
+            <column name="name" value="Contacted"/>
+            <column name="description" value="Initial contact made"/>
+            <column name="display_order" valueNumeric="2"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="false"/>
+            <column name="color_code" value="#8B5CF6"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+
+        <insert tableName="pipeline_stages">
+            <column name="name" value="Qualified"/>
+            <column name="description" value="Lead qualified as potential customer"/>
+            <column name="display_order" valueNumeric="3"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="false"/>
+            <column name="color_code" value="#F59E0B"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+
+        <insert tableName="pipeline_stages">
+            <column name="name" value="Proposal"/>
+            <column name="description" value="Proposal sent to lead"/>
+            <column name="display_order" valueNumeric="4"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="false"/>
+            <column name="color_code" value="#10B981"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+
+        <insert tableName="pipeline_stages">
+            <column name="name" value="Won"/>
+            <column name="description" value="Deal closed successfully"/>
+            <column name="display_order" valueNumeric="5"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="true"/>
+            <column name="color_code" value="#22C55E"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+
+        <insert tableName="pipeline_stages">
+            <column name="name" value="Lost"/>
+            <column name="description" value="Deal lost"/>
+            <column name="display_order" valueNumeric="6"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_final_stage" valueBoolean="true"/>
+            <column name="color_code" value="#EF4444"/>
+            <column name="created_by" value="system"/>
+            <column name="updated_by" value="system"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
