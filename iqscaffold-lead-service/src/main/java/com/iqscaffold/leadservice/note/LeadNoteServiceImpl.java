@@ -1,5 +1,6 @@
 package com.iqscaffold.leadservice.note;
 
+import com.iqscaffold.leadservice.activity.ActivityLogService;
 import com.iqscaffold.leadservice.lead.Lead;
 import com.iqscaffold.leadservice.lead.LeadRepository;
 import com.iqscaffold.leadservice.note.dto.LeadNoteDtos;
@@ -24,12 +25,15 @@ public class LeadNoteServiceImpl implements LeadNoteService {
 
   private final LeadNoteRepository leadNoteRepository;
   private final LeadRepository leadRepository;
+  private final ActivityLogService activityLogService;
 
   public LeadNoteServiceImpl(
       final LeadNoteRepository leadNoteRepository,
-      final LeadRepository leadRepository) {
+      final LeadRepository leadRepository,
+      final ActivityLogService activityLogService) {
     this.leadNoteRepository = leadNoteRepository;
     this.leadRepository = leadRepository;
+    this.activityLogService = activityLogService;
   }
 
   @Override
@@ -53,6 +57,9 @@ public class LeadNoteServiceImpl implements LeadNoteService {
 
     LeadNote savedNote = leadNoteRepository.save(note);
     logger.info("Created note ID: {} for lead ID: {}", savedNote.getId(), leadId);
+
+    // Log activity for note creation (Requirement 7.3)
+    activityLogService.logNoteAdded(lead, savedNote);
 
     return LeadNoteMapper.toResponse(savedNote);
   }

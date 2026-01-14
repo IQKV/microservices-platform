@@ -46,7 +46,7 @@ public class LeadActivity {
   private String description;
 
   @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", columnDefinition = "jsonb")
+  @Column(name = "metadata", columnDefinition = "TEXT")
   private String metadata;
 
   @CreationTimestamp
