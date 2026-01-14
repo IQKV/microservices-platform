@@ -2,6 +2,7 @@ package com.iqscaffold.leadservice.config;
 
 import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
+import com.iqscaffold.leadservice.shared.exception.LeadNoteNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -100,6 +101,29 @@ public class GlobalExceptionHandler {
     problemDetail.setInstance(URI.create(request.getRequestURI()));
 
     logger.warn("Lead not found on {}: {}", request.getRequestURI(), ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+  }
+
+  /**
+   * Handles lead note not found exceptions.
+   *
+   * @param ex The not found exception
+   * @param request The HTTP request
+   * @return Problem detail response
+   */
+  @ExceptionHandler(LeadNoteNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleLeadNoteNotFoundException(
+      LeadNoteNotFoundException ex,
+      HttpServletRequest request) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.NOT_FOUND,
+        ex.getMessage()
+    );
+    problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/not-found"));
+    problemDetail.setTitle("Resource Not Found");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+    logger.warn("Lead note not found on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
   }
 
