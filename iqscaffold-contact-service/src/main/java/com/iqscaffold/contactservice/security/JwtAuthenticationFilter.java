@@ -74,6 +74,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           TenantContext.setCurrentTenantId(tenantId);
         }
 
+        // Add user context to MDC for structured logging
+        if (userContext.userId() != null) {
+          org.slf4j.MDC.put("userId", userContext.userId().toString());
+        }
+        if (userContext.username() != null) {
+          org.slf4j.MDC.put("username", userContext.username());
+        }
+
         // Store user context in request attribute for service layer access
         request.setAttribute("userContext", userContext);
       }

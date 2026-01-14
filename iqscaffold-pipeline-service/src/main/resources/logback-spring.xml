@@ -8,7 +8,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [tenantId=%X{tenantId:-NONE}] [correlationId=%X{correlationId:-NONE}] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -19,7 +19,7 @@
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [tenantId=%X{tenantId:-NONE}] [correlationId=%X{correlationId:-NONE}] - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -32,8 +32,44 @@
 
     <springProfile name="production">
         <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <customFields>{"service_name":"${springAppName}"}</customFields>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp>
+                        <fieldName>timestamp</fieldName>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+                    <version/>
+                    <logLevel>
+                        <fieldName>level</fieldName>
+                    </logLevel>
+                    <loggerName>
+                        <fieldName>logger</fieldName>
+                    </loggerName>
+                    <threadName>
+                        <fieldName>thread</fieldName>
+                    </threadName>
+                    <mdc>
+                        <includeMdcKeyName>tenantId</includeMdcKeyName>
+                        <includeMdcKeyName>correlationId</includeMdcKeyName>
+                        <includeMdcKeyName>userId</includeMdcKeyName>
+                        <includeMdcKeyName>username</includeMdcKeyName>
+                    </mdc>
+                    <arguments/>
+                    <message>
+                        <fieldName>message</fieldName>
+                    </message>
+                    <stackTrace>
+                        <fieldName>stackTrace</fieldName>
+                    </stackTrace>
+                    <pattern>
+                        <pattern>
+                            {
+                                "service": "pipeline-service",
+                                "environment": "${SPRING_PROFILES_ACTIVE:-local}"
+                            }
+                        </pattern>
+                    </pattern>
+                </providers>
             </encoder>
         </appender>
 
@@ -41,4 +77,8 @@
             <appender-ref ref="JSON"/>
         </root>
     </springProfile>
+
+    <logger name="com.iqscaffold.pipelineservice" level="DEBUG"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.hibernate.SQL" level="DEBUG"/>
 </configuration>
