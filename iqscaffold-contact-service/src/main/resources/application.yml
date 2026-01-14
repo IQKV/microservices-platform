@@ -1,0 +1,259 @@
+server:
+  port: 8083
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  application:
+    name: iqscaffold-contact-service
+  profiles:
+    active: local
+  
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  # Internationalization Configuration
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    cache-duration: PT1H
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
+  # Database Configuration
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5432/iqscaffold_contact}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_contact}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD:iqscaffold_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      auto-commit: false
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        multiTenancy: SCHEMA
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        # Second Level Cache Configuration
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+          use_structured_entries: true
+        javax:
+          cache:
+            provider: org.ehcache.jsr107.EhcacheCachingProvider
+            uri: classpath:ehcache.xml
+        # Enable statistics for cache monitoring
+        generate_statistics: true
+    open-in-view: false
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}
+      port: ${IQSCAFFOLD_CACHE_REDIS_PORT:6379}
+      password: ${IQSCAFFOLD_CACHE_REDIS_PASSWORD:}
+      database: ${IQSCAFFOLD_CACHE_REDIS_DATABASE:2}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Messaging Configuration - RabbitMQ
+  rabbitmq:
+    host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_HOST:localhost}
+    port: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PORT:5672}
+    username: ${IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME:iqscaffold}
+    password: ${IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD:iqscaffold_password}
+    virtual-host: ${IQSCAFFOLD_MESSAGING_RABBITMQ_VHOST:/}
+    connection-timeout: 30000ms
+    requested-heartbeat: 60s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+      retry:
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+        multiplier: 2.0
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 10
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
+          multiplier: 2.0
+
+  # Liquibase Configuration
+  # Disabled globally - migrations are run programmatically per schema via TenantLiquibaseRunner
+  liquibase:
+    enabled: false
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
+          issuer-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+    groups:
+      enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    groups-order: ASC
+    operations-sorter: alpha
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
+    display-operation-id: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: contacts
+      display-name: Contact APIs
+      paths-to-match: /api/*/crm/contacts/**
+    - group: companies
+      display-name: Company APIs
+      paths-to-match: /api/*/crm/companies/**
+    - group: activities
+      display-name: Activity APIs
+      paths-to-match: /api/*/crm/activities/**
+    - group: leads
+      display-name: Lead APIs
+      paths-to-match: /api/*/crm/leads/**
+    - group: admin
+      display-name: Admin APIs
+      paths-to-match: /api/*/admin/crm/**
+  show-actuator: true
+  use-management-port: false
+
+# Management and Observability Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,liquibase,openapi
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    liquibase:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+    tags:
+      application: ${spring.application.name}
+      service: contact-service
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Logging Configuration - Structured JSON Logging
+logging:
+  level:
+    root: INFO
+    com.iqscaffold.contactservice: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+    liquibase: INFO
+    net.logstash.logback: INFO
+  config: classpath:logback-spring.xml
+
+# IQ Scaffold-specific configuration properties
+iqscaffold:
+  # Tenant identification header
+  tenant-id-header: X-Tenant-ID
+  
+  # User Service URL for inter-service communication
+  user-service-url: ${USER_SERVICE_URL:http://localhost:8080}
+  
+  # Internationalization configuration
+  i18n:
+    supported-locales:
+      - en
+      - es
+      - fr
+    default-locale: en
+    message-basename: i18n/messages
+    message-cache-duration: PT1H  # 1 hour
+    fallback-to-system-locale: false
+    use-code-as-default-message: true
+  
+  # Liquibase configuration for multi-tenant schema management
+  liquibase:
+    system-change-log: classpath:db/changelog/system/master.xml
+    tenant-change-log: classpath:db/changelog/tenant/master.xml
+  
+  # CRM configuration
+  crm:
+    security:
+      jwt:
+        jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
+        issuer: ${JWT_ISSUER:iqscaffold-user-service}
+    contact:
+      enable-lead-scoring: ${CRM_ENABLE_LEAD_SCORING:true}
+      enable-activity-tracking: ${CRM_ENABLE_ACTIVITY_TRACKING:true}
+      enable-email-integration: ${CRM_ENABLE_EMAIL_INTEGRATION:true}
+      default-lead-score: 0
+      max-lead-score: 100
+    company:
+      enable-company-hierarchy: true
+      enable-company-scoring: true
+    activity:
+      enable-auto-logging: true
+      retention-days: 365
+      max-activities-per-contact: 1000

@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://prod-db:5432/iqscaffold_contact_production}
+    username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_contact}
+    password: ${IQSCAFFOLD_DATABASE_PASSWORD}
+    hikari:
+      pool-name: ContactServiceHikariPool-Production
+      maximum-pool-size: 25
+      minimum-idle: 5
+
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: WARN
+    com.iqscaffold.contactservice: INFO
+    org.hibernate.SQL: WARN
+
+# Production environment overrides for IQ Scaffold properties
+iqscaffold:
+  crm:
+    contact:
+      enable-lead-scoring: true
+      enable-activity-tracking: true
+      enable-email-integration: true
+    company:
+      enable-company-hierarchy: true
+      enable-company-scoring: true
+    activity:
+      enable-auto-logging: true
+      retention-days: 365

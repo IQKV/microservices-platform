@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-companies-table" author="iqscaffold">
+        <createTable tableName="companies">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="website" type="VARCHAR(255)"/>
+            <column name="industry" type="VARCHAR(100)"/>
+            <column name="size" type="VARCHAR(50)"/>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="address_line1" type="VARCHAR(255)"/>
+            <column name="address_line2" type="VARCHAR(255)"/>
+            <column name="city" type="VARCHAR(100)"/>
+            <column name="state" type="VARCHAR(100)"/>
+            <column name="postal_code" type="VARCHAR(20)"/>
+            <column name="country" type="VARCHAR(100)"/>
+            <column name="parent_company_id" type="BIGINT"/>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="companies" indexName="idx_companies_name">
+            <column name="name"/>
+        </createIndex>
+
+        <createIndex tableName="companies" indexName="idx_companies_industry">
+            <column name="industry"/>
+        </createIndex>
+
+        <createIndex tableName="companies" indexName="idx_companies_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="companies" indexName="idx_companies_parent">
+            <column name="parent_company_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+            baseTableName="companies"
+            baseColumnNames="parent_company_id"
+            referencedTableName="companies"
+            referencedColumnNames="id"
+            constraintName="fk_companies_parent_company"/>
+
+        <addForeignKeyConstraint
+            baseTableName="contacts"
+            baseColumnNames="company_id"
+            referencedTableName="companies"
+            referencedColumnNames="id"
+            constraintName="fk_contacts_company"/>
+    </changeSet>
+
+</databaseChangeLog>

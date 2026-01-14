@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-create-contacts-table" author="iqscaffold">
+        <createTable tableName="contacts">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="job_title" type="VARCHAR(100)"/>
+            <column name="company_id" type="BIGINT"/>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lead_score" type="INTEGER" defaultValue="0"/>
+            <column name="notes" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_company_id">
+            <column name="company_id"/>
+        </createIndex>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_lead_score">
+            <column name="lead_score"/>
+        </createIndex>
+
+        <createIndex tableName="contacts" indexName="idx_contacts_name">
+            <column name="first_name"/>
+            <column name="last_name"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

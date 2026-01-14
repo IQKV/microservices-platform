@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Tenant-specific changes (per tenant schema) -->
+    <include file="db/changelog/tenant/001-create-contact-tables.xml"/>
+    <include file="db/changelog/tenant/002-create-company-tables.xml"/>
+    <include file="db/changelog/tenant/003-create-activity-tables.xml"/>
+
+</databaseChangeLog>
