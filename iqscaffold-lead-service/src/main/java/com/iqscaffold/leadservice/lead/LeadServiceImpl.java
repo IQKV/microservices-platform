@@ -89,6 +89,17 @@ public class LeadServiceImpl implements LeadService {
 
   @Override
   @Transactional(readOnly = true)
+  public Page<Lead> findLeadsWithFilters(
+      final String searchTerm,
+      final String source,
+      final LeadStatus status,
+      final String assignedTo,
+      final Pageable pageable) {
+    return leadRepository.findLeadsWithFilters(searchTerm, source, status, assignedTo, pageable);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public List<Lead> getLeadsBySource(final String source) {
     return leadRepository.findBySource(source);
   }

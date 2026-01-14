@@ -55,4 +55,22 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
 
   @Query("SELECT COUNT(l) FROM Lead l WHERE l.createdAt >= :date")
   long countLeadsCreatedSince(@Param("date") LocalDateTime date);
+
+  @Query("SELECT l FROM Lead l WHERE "
+      + "(:searchTerm IS NULL OR "
+      + "LOWER(l.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+      + "LOWER(l.lastName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+      + "LOWER(l.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+      + "LOWER(l.company) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR "
+      + "LOWER(l.phone) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
+      + "AND (:source IS NULL OR l.source = :source) "
+      + "AND (:status IS NULL OR l.status = :status) "
+      + "AND (:assignedTo IS NULL OR l.assignedTo = :assignedTo)")
+  Page<Lead> findLeadsWithFilters(
+      @Param("searchTerm") String searchTerm,
+      @Param("source") String source,
+      @Param("status") LeadStatus status,
+      @Param("assignedTo") String assignedTo,
+      Pageable pageable
+  );
 }

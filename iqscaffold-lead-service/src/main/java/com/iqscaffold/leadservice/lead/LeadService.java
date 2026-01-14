@@ -28,6 +28,14 @@ public interface LeadService {
 
   Page<Lead> searchLeads(String searchTerm, Pageable pageable);
 
+  Page<Lead> findLeadsWithFilters(
+      String searchTerm,
+      String source,
+      LeadStatus status,
+      String assignedTo,
+      Pageable pageable
+  );
+
   List<Lead> getLeadsBySource(String source);
 
   List<Lead> getQualifiedLeads(LeadStatus status);

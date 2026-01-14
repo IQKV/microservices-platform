@@ -1,12 +1,15 @@
 package com.iqscaffold.leadservice.lead;
 
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
+import com.iqscaffold.leadservice.lead.dto.LeadMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -96,6 +100,38 @@ public class LeadRestResource {
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<LeadDtos.LeadResponse> getLeadById(@PathVariable Long id) {
     LeadDtos.LeadResponse response = leadService.getLeadResponseById(id);
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Lists leads with optional search and filtering.
+   *
+   * @param search Search term to match against name, email, company, or phone
+   * @param source Filter by lead source
+   * @param status Filter by lead status
+   * @param assignedTo Filter by assigned user
+   * @param pageable Pagination parameters (page, size, sort)
+   * @return Paginated list of leads
+   */
+  @Operation(
+      summary = "List leads",
+      description = "Retrieves a paginated list of leads with optional search and filtering. "
+          + "Search term matches against first name, last name, email, company, and phone. "
+          + "Multiple filters are combined with AND logic.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Leads retrieved successfully"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @GetMapping
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<Page<LeadDtos.LeadResponse>> listLeads(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String source,
+      @RequestParam(required = false) LeadStatus status,
+      @RequestParam(required = false) String assignedTo,
+      Pageable pageable) {
+    Page<Lead> leads = leadService.findLeadsWithFilters(search, source, status, assignedTo, pageable);
+    Page<LeadDtos.LeadResponse> response = leads.map(LeadMapper::toResponse);
     return ResponseEntity.ok(response);
   }
 
