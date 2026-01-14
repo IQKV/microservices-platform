@@ -109,6 +109,14 @@ public class PipelineItemServiceImpl implements PipelineItemService {
     item.setEnteredStageAt(LocalDateTime.now());
     item.setDaysInStage(0);
 
+    // Handle Won stage - set converted_at timestamp
+    if ("Won".equalsIgnoreCase(newStage.getName()) && newStage.getIsFinalStage()) {
+      item.setConvertedAt(LocalDateTime.now());
+    } else {
+      // Clear converted_at if moving away from Won stage
+      item.setConvertedAt(null);
+    }
+
     final PipelineItem savedItem = pipelineItemRepository.save(item);
 
     // Publish stage.changed event

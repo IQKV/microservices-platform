@@ -10,5 +10,6 @@
     <include file="db/changelog/changes/003-create-follow-ups-table.xml"/>
     <include file="db/changelog/changes/004-create-pipeline-activities-table.xml"/>
     <include file="db/changelog/changes/005-insert-default-pipeline-stages.xml"/>
+    <include file="db/changelog/changes/006-add-converted-at-to-pipeline-items.xml"/>
 
 </databaseChangeLog>

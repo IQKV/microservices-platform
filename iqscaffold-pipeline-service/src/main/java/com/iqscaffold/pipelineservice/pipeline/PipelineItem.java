@@ -45,6 +45,9 @@ public class PipelineItem {
   @Column(name = "days_in_stage")
   private Integer daysInStage;
 
+  @Column(name = "converted_at")
+  private LocalDateTime convertedAt;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -123,6 +126,14 @@ public class PipelineItem {
 
   public void setDaysInStage(Integer daysInStage) {
     this.daysInStage = daysInStage;
+  }
+
+  public LocalDateTime getConvertedAt() {
+    return convertedAt;
+  }
+
+  public void setConvertedAt(LocalDateTime convertedAt) {
+    this.convertedAt = convertedAt;
   }
 
   public LocalDateTime getCreatedAt() {

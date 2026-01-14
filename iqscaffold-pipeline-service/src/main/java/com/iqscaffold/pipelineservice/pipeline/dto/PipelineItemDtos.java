@@ -53,6 +53,9 @@ public final class PipelineItemDtos {
       @Schema(description = "Number of days the lead has been in the current stage", example = "5")
       Integer daysInStage,
 
+      @Schema(description = "Timestamp when the lead was converted (Won stage)")
+      LocalDateTime convertedAt,
+
       @Schema(description = "Timestamp when the pipeline item was created")
       LocalDateTime createdAt,
 

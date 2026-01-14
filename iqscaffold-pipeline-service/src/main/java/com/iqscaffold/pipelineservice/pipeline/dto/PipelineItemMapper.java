@@ -30,6 +30,7 @@ public final class PipelineItemMapper {
         item.getProbability(),
         item.getEnteredStageAt(),
         item.getDaysInStage(),
+        item.getConvertedAt(),
         item.getCreatedAt(),
         item.getUpdatedAt(),
         item.getCreatedBy(),

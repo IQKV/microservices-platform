@@ -12,6 +12,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+  
+  cache:
+    type: none
   
   liquibase:
     enabled: false
