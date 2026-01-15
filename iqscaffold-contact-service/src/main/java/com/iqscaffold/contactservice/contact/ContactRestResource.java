@@ -1,7 +1,9 @@
 package com.iqscaffold.contactservice.contact;
 
 import jakarta.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.iqscaffold.contactservice.contact.dto.ContactDtos;
@@ -273,6 +275,257 @@ public class ContactRestResource {
       @Valid @RequestBody ContactDtos.UpdateLeadScoreRequest request) {
     Contact updatedContact = contactService.updateLeadScore(id, request.score());
     ContactDtos.ContactResponse response = ContactMapper.toResponse(updatedContact);
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Bulk creates multiple contacts.
+   *
+   * @param request The bulk create request containing list of contacts
+   * @return Bulk operation response with results
+   */
+  @Operation(
+      summary = "Bulk create contacts",
+      description = "Creates multiple contacts in a single operation. Maximum 100 contacts per request. "
+                    + "Returns success/failure status for each contact.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Bulk operation completed"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or validation error"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @PostMapping("/bulk")
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<ContactDtos.BulkOperationResponse> bulkCreateContacts(
+      @Valid @RequestBody ContactDtos.BulkCreateContactsRequest request) {
+    String userId = getCurrentUserId();
+
+    List<ContactDtos.BulkOperationResponse.BulkOperationResult> results = new ArrayList<>();
+    List<Contact> contactsToCreate = new ArrayList<>();
+
+    // Validate and prepare contacts
+    for (final ContactDtos.CreateContactRequest contactRequest : request.contacts()) {
+      try {
+        // Check for duplicate email if provided
+        if (contactRequest.email() != null && !contactRequest.email().isBlank()) {
+          if (contactService.existsByEmail(contactRequest.email())) {
+            results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+                null,
+                contactRequest.email(),
+                false,
+                "Contact with email already exists",
+                null
+            ));
+            continue;
+          }
+        }
+
+        Contact contact = ContactMapper.toEntity(contactRequest, userId);
+        contactsToCreate.add(contact);
+      } catch (final Exception e) {
+        results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+            null,
+            contactRequest.email(),
+            false,
+            "Validation error: " + e.getMessage(),
+            null
+        ));
+      }
+    }
+
+    // Bulk create contacts
+    List<Contact> createdContacts = contactService.bulkCreateContacts(contactsToCreate);
+
+    // Add successful results
+    for (final Contact contact : createdContacts) {
+      results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+          contact.getId(),
+          contact.getEmail(),
+          true,
+          "Contact created successfully",
+          ContactMapper.toResponse(contact)
+      ));
+    }
+
+    int successCount = (int) results.stream().filter(ContactDtos.BulkOperationResponse.BulkOperationResult::success).count();
+    int failureCount = results.size() - successCount;
+
+    ContactDtos.BulkOperationResponse response = new ContactDtos.BulkOperationResponse(
+        successCount,
+        failureCount,
+        results
+    );
+
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Bulk updates contact status.
+   *
+   * @param request The bulk update status request
+   * @return Bulk operation response with results
+   */
+  @Operation(
+      summary = "Bulk update contact status",
+      description = "Updates the status for multiple contacts in a single operation. "
+                    + "Maximum 100 contacts per request.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Bulk operation completed"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or validation error"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @PatchMapping("/bulk/status")
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<ContactDtos.BulkOperationResponse> bulkUpdateStatus(
+      @Valid @RequestBody ContactDtos.BulkUpdateStatusRequest request) {
+    String userId = getCurrentUserId();
+
+    Map<Long, Contact> updatedContacts = contactService.bulkUpdateStatus(
+        request.contactIds(),
+        request.status(),
+        userId
+    );
+
+    List<ContactDtos.BulkOperationResponse.BulkOperationResult> results = new ArrayList<>();
+
+    for (final Long contactId : request.contactIds()) {
+      if (updatedContacts.containsKey(contactId)) {
+        Contact contact = updatedContacts.get(contactId);
+        results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+            contactId,
+            contact.getEmail(),
+            true,
+            "Status updated successfully",
+            ContactMapper.toResponse(contact)
+        ));
+      } else {
+        results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+            contactId,
+            null,
+            false,
+            "Contact not found or update failed",
+            null
+        ));
+      }
+    }
+
+    int successCount = updatedContacts.size();
+    int failureCount = request.contactIds().size() - successCount;
+
+    ContactDtos.BulkOperationResponse response = new ContactDtos.BulkOperationResponse(
+        successCount,
+        failureCount,
+        results
+    );
+
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Bulk deletes multiple contacts.
+   *
+   * @param request The bulk delete request containing list of contact IDs
+   * @return Bulk operation response with results
+   */
+  @Operation(
+      summary = "Bulk delete contacts",
+      description = "Deletes multiple contacts in a single operation. Maximum 100 contacts per request.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Bulk operation completed"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or validation error"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or SUPER_ADMIN role")
+  })
+  @DeleteMapping("/bulk")
+  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<ContactDtos.BulkOperationResponse> bulkDeleteContacts(
+      @Valid @RequestBody ContactDtos.BulkDeleteContactsRequest request) {
+
+    Map<Long, Boolean> deleteResults = contactService.bulkDeleteContacts(request.contactIds());
+
+    List<ContactDtos.BulkOperationResponse.BulkOperationResult> results = new ArrayList<>();
+
+    for (final Map.Entry<Long, Boolean> entry : deleteResults.entrySet()) {
+      results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+          entry.getKey(),
+          null,
+          entry.getValue(),
+          entry.getValue() ? "Contact deleted successfully" : "Contact not found or delete failed",
+          null
+      ));
+    }
+
+    long successCount = deleteResults.values().stream().filter(Boolean::booleanValue).count();
+    int failureCount = (int) (deleteResults.size() - successCount);
+
+    ContactDtos.BulkOperationResponse response = new ContactDtos.BulkOperationResponse(
+        (int) successCount,
+        failureCount,
+        results
+    );
+
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Bulk updates lead scores for multiple contacts.
+   *
+   * @param request The bulk update lead scores request
+   * @return Bulk operation response with results
+   */
+  @Operation(
+      summary = "Bulk update lead scores",
+      description = "Updates lead scores for multiple contacts in a single operation. "
+                    + "Maximum 100 contacts per request.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Bulk operation completed"),
+      @ApiResponse(responseCode = "400", description = "Invalid input or validation error"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @PatchMapping("/bulk/scores")
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<ContactDtos.BulkOperationResponse> bulkUpdateLeadScores(
+      @Valid @RequestBody ContactDtos.BulkUpdateLeadScoresRequest request) {
+
+    Map<Long, Integer> contactScores = new java.util.HashMap<>();
+    for (final ContactDtos.BulkUpdateLeadScoresRequest.LeadScoreUpdate update : request.updates()) {
+      contactScores.put(update.contactId(), update.score());
+    }
+
+    Map<Long, Contact> updatedContacts = contactService.bulkUpdateLeadScores(contactScores);
+
+    List<ContactDtos.BulkOperationResponse.BulkOperationResult> results = new ArrayList<>();
+
+    for (final ContactDtos.BulkUpdateLeadScoresRequest.LeadScoreUpdate update : request.updates()) {
+      Long contactId = update.contactId();
+      if (updatedContacts.containsKey(contactId)) {
+        Contact contact = updatedContacts.get(contactId);
+        results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+            contactId,
+            contact.getEmail(),
+            true,
+            "Lead score updated successfully",
+            ContactMapper.toResponse(contact)
+        ));
+      } else {
+        results.add(new ContactDtos.BulkOperationResponse.BulkOperationResult(
+            contactId,
+            null,
+            false,
+            "Contact not found or update failed",
+            null
+        ));
+      }
+    }
+
+    int successCount = updatedContacts.size();
+    int failureCount = request.updates().size() - successCount;
+
+    ContactDtos.BulkOperationResponse response = new ContactDtos.BulkOperationResponse(
+        successCount,
+        failureCount,
+        results
+    );
+
     return ResponseEntity.ok(response);
   }
 

@@ -1,6 +1,7 @@
 package com.iqscaffold.contactservice.contact;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -31,4 +32,13 @@ public interface ContactService {
   long getContactCountByStatus(ContactStatus status);
 
   Contact updateLeadScore(Long id, Integer score);
+
+  // Bulk operations
+  List<Contact> bulkCreateContacts(List<Contact> contacts);
+
+  Map<Long, Contact> bulkUpdateStatus(List<Long> contactIds, ContactStatus status, String userId);
+
+  Map<Long, Boolean> bulkDeleteContacts(List<Long> contactIds);
+
+  Map<Long, Contact> bulkUpdateLeadScores(Map<Long, Integer> contactScores);
 }

@@ -1,11 +1,15 @@
 package com.iqscaffold.contactservice.contact.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iqscaffold.contactservice.contact.ContactStatus;
@@ -160,5 +164,96 @@ public final class ContactDtos {
       String createdBy,
       String updatedBy
   ) {
+  }
+
+  /**
+   * Request DTO for bulk creating contacts.
+   *
+   * @param contacts List of contacts to create (max 100)
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record BulkCreateContactsRequest(
+      @NotEmpty(message = "Contacts list is required")
+      @Size(min = 1, max = 100, message = "Contacts list must contain between 1 and 100 items")
+      @Valid
+      List<CreateContactRequest> contacts
+  ) {
+  }
+
+  /**
+   * Request DTO for bulk updating contact status.
+   *
+   * @param contactIds List of contact IDs to update (max 100)
+   * @param status     New status to apply
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record BulkUpdateStatusRequest(
+      @NotEmpty(message = "Contact IDs list is required")
+      @Size(min = 1, max = 100, message = "Contact IDs list must contain between 1 and 100 items")
+      List<Long> contactIds,
+
+      @NotNull(message = "Status is required")
+      ContactStatus status
+  ) {
+  }
+
+  /**
+   * Request DTO for bulk deleting contacts.
+   *
+   * @param contactIds List of contact IDs to delete (max 100)
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record BulkDeleteContactsRequest(
+      @NotEmpty(message = "Contact IDs list is required")
+      @Size(min = 1, max = 100, message = "Contact IDs list must contain between 1 and 100 items")
+      List<Long> contactIds
+  ) {
+  }
+
+  /**
+   * Request DTO for bulk updating lead scores.
+   *
+   * @param updates List of contact ID and score pairs (max 100)
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record BulkUpdateLeadScoresRequest(
+      @NotEmpty(message = "Updates list is required")
+      @Size(min = 1, max = 100, message = "Updates list must contain between 1 and 100 items")
+      @Valid
+      List<LeadScoreUpdate> updates
+  ) {
+    public record LeadScoreUpdate(
+        @NotNull(message = "Contact ID is required")
+        Long contactId,
+
+        @NotNull(message = "Lead score is required")
+        @Min(value = 0, message = "Lead score must be at least 0")
+        @Max(value = 100, message = "Lead score must not exceed 100")
+        Integer score
+    ) {
+    }
+  }
+
+  /**
+   * Response DTO for bulk operations.
+   *
+   * @param successCount Number of successful operations
+   * @param failureCount Number of failed operations
+   * @param results      List of individual operation results
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record BulkOperationResponse(
+      int successCount,
+      int failureCount,
+      List<BulkOperationResult> results
+  ) {
+    public record BulkOperationResult(
+        Long contactId,
+        String email,
+        boolean success,
+        String message,
+        ContactResponse contact
+    ) {
+    }
   }
 }

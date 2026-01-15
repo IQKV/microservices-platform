@@ -5,6 +5,7 @@ A comprehensive CRM contact management service built with Spring Boot, providing
 ## Features
 
 - **Contact Management**: Complete REST API for contact CRUD operations with lead scoring
+- **Bulk Operations**: Efficient bulk create, update status, delete, and update lead scores (max 100 per request)
 - **Lead Conversion**: Track contacts converted from leads with conversion timestamps
 - **Event Publishing**: RabbitMQ events for contact lifecycle (created, updated, deleted)
 - **Multi-tenancy**: Schema-per-tenant isolation with automatic tenant context resolution
@@ -79,6 +80,15 @@ docker-compose up -d
 - `GET /api/v1/contacts/company/{companyId}` - Get contacts by company
 - `PATCH /api/v1/contacts/{id}/score` - Update lead score
 
+### Bulk Operations
+
+**Base Path:** `/api/v1/contacts`
+
+- `POST /api/v1/contacts/bulk` - Bulk create contacts (max 100)
+- `PATCH /api/v1/contacts/bulk/status` - Bulk update contact status (max 100)
+- `DELETE /api/v1/contacts/bulk` - Bulk delete contacts (max 100)
+- `PATCH /api/v1/contacts/bulk/scores` - Bulk update lead scores (max 100)
+
 ### Query Parameters
 
 **List Contacts (`GET /api/v1/contacts`):**
@@ -87,6 +97,74 @@ docker-compose up -d
 - `page` - Page number (default: 0)
 - `size` - Page size (default: 20)
 - `sort` - Sort field and direction (e.g., `lastName,asc`)
+
+### Bulk Operations
+
+All bulk operations support up to 100 items per request and return a detailed response with success/failure status for each item.
+
+**Bulk Create (`POST /api/v1/contacts/bulk`):**
+```json
+{
+  "contacts": [
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1234567890",
+      "status": "ACTIVE"
+    }
+  ]
+}
+```
+
+**Bulk Update Status (`PATCH /api/v1/contacts/bulk/status`):**
+```json
+{
+  "contactIds": [1, 2, 3],
+  "status": "CUSTOMER"
+}
+```
+
+**Bulk Delete (`DELETE /api/v1/contacts/bulk`):**
+```json
+{
+  "contactIds": [1, 2, 3]
+}
+```
+
+**Bulk Update Lead Scores (`PATCH /api/v1/contacts/bulk/scores`):**
+```json
+{
+  "updates": [
+    { "contactId": 1, "score": 85 },
+    { "contactId": 2, "score": 90 }
+  ]
+}
+```
+
+**Bulk Operation Response:**
+```json
+{
+  "successCount": 2,
+  "failureCount": 1,
+  "results": [
+    {
+      "contactId": 1,
+      "email": "john.doe@example.com",
+      "success": true,
+      "message": "Contact created successfully",
+      "contact": { ... }
+    },
+    {
+      "contactId": null,
+      "email": "duplicate@example.com",
+      "success": false,
+      "message": "Contact with email already exists",
+      "contact": null
+    }
+  ]
+}
+```
 
 ### Event Publishing
 
