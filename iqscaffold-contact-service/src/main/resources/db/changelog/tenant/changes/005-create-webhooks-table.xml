@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="005-create-webhooks-table" author="system">
+        <createTable tableName="webhooks">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="secret" type="VARCHAR(255)"/>
+            <column name="events" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retry_count" type="INT" defaultValueNumeric="3">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timeout_seconds" type="INT" defaultValueNumeric="30">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(500)"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP"/>
+            <column name="created_by" type="VARCHAR(100)"/>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="last_triggered_at" type="TIMESTAMP"/>
+            <column name="success_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="failure_count" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="webhooks" indexName="idx_webhooks_active">
+            <column name="active"/>
+        </createIndex>
+
+        <createIndex tableName="webhooks" indexName="idx_webhooks_events">
+            <column name="events"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

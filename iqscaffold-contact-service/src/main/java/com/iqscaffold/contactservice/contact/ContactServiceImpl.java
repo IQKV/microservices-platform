@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.iqscaffold.contactservice.event.ContactEventPublisher;
 import com.iqscaffold.contactservice.shared.exception.ContactNotFoundException;
+import com.iqscaffold.contactservice.webhook.WebhookService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,12 +24,15 @@ public class ContactServiceImpl implements ContactService {
 
   private final ContactRepository contactRepository;
   private final ContactEventPublisher eventPublisher;
+  private final WebhookService webhookService;
 
   public ContactServiceImpl(
       final ContactRepository contactRepository,
-      final ContactEventPublisher eventPublisher) {
+      final ContactEventPublisher eventPublisher,
+      final WebhookService webhookService) {
     this.contactRepository = contactRepository;
     this.eventPublisher = eventPublisher;
+    this.webhookService = webhookService;
   }
 
   @Override
@@ -36,6 +40,8 @@ public class ContactServiceImpl implements ContactService {
     Contact savedContact = contactRepository.save(contact);
     // Publish contact created event
     eventPublisher.publishContactCreated(savedContact);
+    // Trigger webhooks
+    webhookService.triggerWebhooks("contact.created", savedContact);
     return savedContact;
   }
 
@@ -93,6 +99,8 @@ public class ContactServiceImpl implements ContactService {
     Contact updatedContact = contactRepository.save(existingContact);
     // Publish contact updated event
     eventPublisher.publishContactUpdated(updatedContact);
+    // Trigger webhooks
+    webhookService.triggerWebhooks("contact.updated", updatedContact);
     return updatedContact;
   }
 
@@ -106,6 +114,8 @@ public class ContactServiceImpl implements ContactService {
     
     // Publish contact deleted event
     eventPublisher.publishContactDeleted(id, email);
+    // Trigger webhooks
+    webhookService.triggerWebhooks("contact.deleted", contact);
   }
 
   @Override

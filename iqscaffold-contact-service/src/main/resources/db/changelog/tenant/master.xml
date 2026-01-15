@@ -10,5 +10,6 @@
     <include file="db/changelog/tenant/002-create-company-tables.xml"/>
     <include file="db/changelog/tenant/003-create-activity-tables.xml"/>
     <include file="db/changelog/tenant/004-add-lead-conversion-fields.xml"/>
+    <include file="db/changelog/tenant/changes/005-create-webhooks-table.xml"/>
 
 </databaseChangeLog>
