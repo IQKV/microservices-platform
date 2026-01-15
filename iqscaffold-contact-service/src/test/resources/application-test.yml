@@ -13,6 +13,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         multiTenancy: NONE  # Disable multi-tenancy for tests
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+  
+  cache:
+    type: none
   
   liquibase:
     enabled: false  # Disable Liquibase for tests

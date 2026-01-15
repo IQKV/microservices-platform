@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iqscaffold.pipelineservice.followup.FollowUp;
+import com.iqscaffold.pipelineservice.followup.FollowUpPriority;
 import com.iqscaffold.pipelineservice.followup.FollowUpRepository;
+import com.iqscaffold.pipelineservice.followup.FollowUpStatus;
 import com.iqscaffold.pipelineservice.followup.dto.FollowUpDtos;
 import com.iqscaffold.pipelineservice.pipeline.PipelineItem;
 import com.iqscaffold.pipelineservice.pipeline.PipelineItemRepository;
@@ -211,18 +213,20 @@ class TenantIsolationIntegrationTest {
     TenantContext.setCurrentTenantId("tenant-m");
     FollowUp followUpM1 = new FollowUp();
     followUpM1.setLeadId(301L);
+    followUpM1.setTitle("Call prospect");
     followUpM1.setDescription("Call prospect");
-    followUpM1.setDueDate(LocalDate.now().plusDays(1));
-    followUpM1.setCompleted(false);
+    followUpM1.setDueDate(LocalDate.now().plusDays(1).atStartOfDay());
+    followUpM1.setStatus(FollowUpStatus.PENDING);
     followUpM1.setCreatedBy("user-m");
     followUpM1.setUpdatedBy("user-m");
     followUpRepository.save(followUpM1);
 
     FollowUp followUpM2 = new FollowUp();
     followUpM2.setLeadId(302L);
+    followUpM2.setTitle("Send proposal");
     followUpM2.setDescription("Send proposal");
-    followUpM2.setDueDate(LocalDate.now().plusDays(2));
-    followUpM2.setCompleted(false);
+    followUpM2.setDueDate(LocalDate.now().plusDays(2).atStartOfDay());
+    followUpM2.setStatus(FollowUpStatus.PENDING);
     followUpM2.setCreatedBy("user-m");
     followUpM2.setUpdatedBy("user-m");
     followUpRepository.save(followUpM2);
@@ -230,9 +234,10 @@ class TenantIsolationIntegrationTest {
     TenantContext.setCurrentTenantId("tenant-n");
     FollowUp followUpN1 = new FollowUp();
     followUpN1.setLeadId(401L);
+    followUpN1.setTitle("Schedule demo");
     followUpN1.setDescription("Schedule demo");
-    followUpN1.setDueDate(LocalDate.now().plusDays(1));
-    followUpN1.setCompleted(false);
+    followUpN1.setDueDate(LocalDate.now().plusDays(1).atStartOfDay());
+    followUpN1.setStatus(FollowUpStatus.PENDING);
     followUpN1.setCreatedBy("user-n");
     followUpN1.setUpdatedBy("user-n");
     followUpRepository.save(followUpN1);
@@ -336,7 +341,10 @@ class TenantIsolationIntegrationTest {
     FollowUpDtos.CreateFollowUpRequest request = new FollowUpDtos.CreateFollowUpRequest(
         501L,
         "Follow up on pricing discussion",
-        LocalDate.now().plusDays(3)
+        "Follow up on pricing discussion",
+        LocalDate.now().plusDays(3).atStartOfDay(),
+        FollowUpPriority.MEDIUM,
+        null
     );
 
     // When - Create follow-up as tenant-t
