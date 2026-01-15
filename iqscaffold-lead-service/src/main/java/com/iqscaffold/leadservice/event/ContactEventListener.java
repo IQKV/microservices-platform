@@ -59,7 +59,7 @@ public class ContactEventListener {
       Object convertedFromLeadIdObj = event.getMetadata().get("convertedFromLeadId");
       if (convertedFromLeadIdObj != null) {
         Long leadId = convertedFromLeadIdObj instanceof Integer
-            ? ((Integer) convertedFromLeadIdObj).longValue()
+            ? Long.valueOf(((Integer) convertedFromLeadIdObj).longValue())
             : (Long) convertedFromLeadIdObj;
 
         log.info("Contact {} was converted from lead {}, updating lead conversion tracking",
