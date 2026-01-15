@@ -118,7 +118,7 @@ public final class ContactDtos {
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record UpdateLeadScoreRequest(
-      @NotBlank(message = "Lead score is required")
+      @NotNull(message = "Lead score is required")
       @Min(value = 0, message = "Lead score must be at least 0")
       @Max(value = 100, message = "Lead score must not exceed 100")
       Integer score
