@@ -316,6 +316,31 @@ public class ActivityLogServiceImpl implements ActivityLogService {
   }
 
   @Override
+  public void logLeadConverted(final Long leadId, final String description) {
+    logger.debug("Logging lead converted activity for lead ID: {}", leadId);
+
+    Lead lead = leadRepository.findById(leadId)
+        .orElseThrow(() -> new LeadNotFoundException("Lead not found with ID: " + leadId));
+
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("leadId", leadId);
+    metadata.put("contactId", lead.getConvertedToContactId());
+    metadata.put("convertedAt", lead.getConvertedAt());
+
+    LeadActivity activity = new LeadActivity(
+        lead,
+        ActivityType.LEAD_CONVERTED,
+        description,
+        "system" // Conversion is triggered by event, not direct user action
+    );
+    activity.setMetadata(toJson(metadata));
+
+    activityRepository.save(activity);
+    logger.info("Logged LEAD_CONVERTED activity for lead ID: {}, contact ID: {}",
+        leadId, lead.getConvertedToContactId());
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public List<LeadActivity> getLeadActivityTimeline(final Long leadId) {
     logger.debug("Retrieving activity timeline for lead ID: {}", leadId);

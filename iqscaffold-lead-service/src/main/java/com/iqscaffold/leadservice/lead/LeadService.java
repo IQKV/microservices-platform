@@ -56,6 +56,20 @@ public interface LeadService {
 
   Lead convertLead(Long id, Long contactId);
 
+  /**
+   * Converts a lead to a contact by creating a contact in the Contact Service.
+   *
+   * @param id           The lead ID to convert
+   * @param request      The conversion request with optional company and notes
+   * @param bearerToken  JWT bearer token for authentication
+   * @return Conversion response with lead and contact IDs
+   */
+  LeadDtos.ConvertLeadResponse convertLeadToContact(
+      Long id,
+      LeadDtos.ConvertLeadRequest request,
+      String bearerToken
+  );
+
   void deleteLead(Long id);
 
   boolean existsByEmail(String email);

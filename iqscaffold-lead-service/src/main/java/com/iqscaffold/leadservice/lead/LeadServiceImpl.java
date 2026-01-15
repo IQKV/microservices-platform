@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.leadservice.infrastructure.client.ContactServiceClient;
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import com.iqscaffold.leadservice.lead.dto.LeadMapper;
 import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LeadServiceImpl implements LeadService {
 
-  private final LeadRepository leadRepository;
+  private static final Logger log = LoggerFactory.getLogger(LeadServiceImpl.class);
 
-  public LeadServiceImpl(final LeadRepository leadRepository) {
+  private final LeadRepository leadRepository;
+  private final ContactServiceClient contactServiceClient;
+
+  public LeadServiceImpl(
+      final LeadRepository leadRepository,
+      final ContactServiceClient contactServiceClient) {
     this.leadRepository = leadRepository;
+    this.contactServiceClient = contactServiceClient;
   }
 
   @Override
@@ -204,6 +213,64 @@ public class LeadServiceImpl implements LeadService {
     lead.setConvertedAt(LocalDateTime.now());
     lead.setConvertedToContactId(contactId);
     return leadRepository.save(lead);
+  }
+
+  @Override
+  public LeadDtos.ConvertLeadResponse convertLeadToContact(
+      final Long id,
+      final LeadDtos.ConvertLeadRequest request,
+      final String bearerToken) {
+    log.info("Converting lead {} to contact", id);
+
+    // Get the lead
+    Lead lead = leadRepository.findById(id)
+        .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
+
+    // Validate lead can be converted
+    if (lead.getStatus() == LeadStatus.CONVERTED) {
+      throw new IllegalStateException(
+          "Lead " + id + " has already been converted to contact " + lead.getConvertedToContactId());
+    }
+
+    // Prepare contact creation request
+    String contactNotes = request.notes() != null ? request.notes() : lead.getNotes();
+    ContactServiceClient.CreateContactRequest contactRequest =
+        new ContactServiceClient.CreateContactRequest(
+            lead.getFirstName(),
+            lead.getLastName(),
+            lead.getEmail(),
+            lead.getPhone(),
+            lead.getJobTitle(),
+            request.companyId(),
+            "CUSTOMER", // Set status to CUSTOMER for converted leads
+            lead.getScore(),
+            contactNotes
+        );
+
+    // Create contact in Contact Service
+    ContactServiceClient.ContactResponse contactResponse;
+    try {
+      contactResponse = contactServiceClient.createContact(contactRequest, bearerToken);
+      log.info("Successfully created contact {} from lead {}", contactResponse.id(), id);
+    } catch (final ContactServiceClient.ContactServiceException e) {
+      log.error("Failed to create contact from lead {}", id, e);
+      throw new RuntimeException("Failed to convert lead to contact: " + e.getMessage(), e);
+    }
+
+    // Update lead status
+    lead.setStatus(LeadStatus.CONVERTED);
+    lead.setConvertedAt(LocalDateTime.now());
+    lead.setConvertedToContactId(contactResponse.id());
+    leadRepository.save(lead);
+
+    log.info("Lead {} successfully converted to contact {}", id, contactResponse.id());
+
+    return new LeadDtos.ConvertLeadResponse(
+        id,
+        contactResponse.id(),
+        lead.getConvertedAt(),
+        "Lead successfully converted to contact"
+    );
   }
 
   @Override

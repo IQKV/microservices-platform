@@ -189,6 +189,48 @@ public class LeadRestResource {
   }
 
   /**
+   * Converts a lead to a contact.
+   * <p>
+   * Creates a new contact in the Contact Service with the lead's information
+   * and marks the lead as converted. The lead status will be set to CONVERTED
+   * and the conversion timestamp will be recorded.
+   *
+   * @param id      The lead ID to convert
+   * @param request The conversion request with optional company and notes
+   * @return The conversion response with lead and contact IDs
+   */
+  @Operation(
+      summary = "Convert lead to contact",
+      description = "Converts a qualified lead to a contact by creating a contact record " +
+                    "in the Contact Service. The lead will be marked as CONVERTED and linked " +
+                    "to the created contact.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Lead converted successfully"),
+      @ApiResponse(responseCode = "400", description = "Lead already converted or invalid state"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "404", description = "Lead not found"),
+      @ApiResponse(responseCode = "502", description = "Contact Service unavailable")
+  })
+  @PostMapping("/{id}/convert")
+  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<LeadDtos.ConvertLeadResponse> convertLead(
+      @PathVariable Long id,
+      @Valid @RequestBody(required = false) LeadDtos.ConvertLeadRequest request) {
+    // Extract bearer token from current authentication
+    String bearerToken = extractBearerToken();
+
+    // Use empty request if none provided
+    LeadDtos.ConvertLeadRequest conversionRequest = request != null
+        ? request
+        : new LeadDtos.ConvertLeadRequest(null, null);
+
+    LeadDtos.ConvertLeadResponse response =
+        leadService.convertLeadToContact(id, conversionRequest, bearerToken);
+
+    return ResponseEntity.ok(response);
+  }
+
+  /**
    * Gets lead counts grouped by source.
    * <p>
    * Returns statistics showing how many leads came from each source.
@@ -240,5 +282,19 @@ public class LeadRestResource {
       return jwt.getSubject();
     }
     return "system";
+  }
+
+  /**
+   * Extracts the bearer token from the current authentication.
+   *
+   * @return The JWT token value
+   */
+  private String extractBearerToken() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth instanceof JwtAuthenticationToken jwtAuth) {
+      Jwt jwt = jwtAuth.getToken();
+      return jwt.getTokenValue();
+    }
+    throw new IllegalStateException("No JWT token found in security context");
   }
 }

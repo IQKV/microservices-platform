@@ -86,6 +86,14 @@ public interface ActivityLogService {
   void logFollowUpCompleted(Long leadId, Long followUpId, String completedBy);
 
   /**
+   * Log lead converted to contact activity.
+   *
+   * @param leadId      the lead ID
+   * @param description the conversion description
+   */
+  void logLeadConverted(Long leadId, String description);
+
+  /**
    * Get activity timeline for a lead.
    *
    * @param leadId the lead ID

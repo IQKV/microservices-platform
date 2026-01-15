@@ -148,7 +148,7 @@ springdoc:
   group-configs:
     - group: contacts
       display-name: Contact APIs
-      paths-to-match: /api/*/crm/contacts/**
+      paths-to-match: /api/*/contacts/**
     - group: companies
       display-name: Company APIs
       paths-to-match: /api/*/crm/companies/**

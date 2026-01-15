@@ -221,6 +221,9 @@ iqscaffold:
   # User Service URL for inter-service communication
   user-service-url: ${USER_SERVICE_URL:http://localhost:8080}
   
+  # Contact Service URL for lead conversion
+  contact-service-url: ${CONTACT_SERVICE_URL:http://localhost:8083}
+  
   # Internationalization configuration
   i18n:
     supported-locales:

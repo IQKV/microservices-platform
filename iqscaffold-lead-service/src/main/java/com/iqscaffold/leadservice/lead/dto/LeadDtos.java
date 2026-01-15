@@ -168,4 +168,35 @@ public final class LeadDtos {
       String assignedTo
   ) {
   }
+
+  /**
+   * Request DTO for converting a lead to a contact.
+   *
+   * @param companyId Optional company ID to associate with the contact
+   * @param notes     Optional additional notes for the conversion
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record ConvertLeadRequest(
+      Long companyId,
+      @Size(max = 1000, message = "Notes must not exceed 1000 characters")
+      String notes
+  ) {
+  }
+
+  /**
+   * Response DTO for lead conversion.
+   *
+   * @param leadId     The ID of the converted lead
+   * @param contactId  The ID of the created contact
+   * @param convertedAt Timestamp when the conversion occurred
+   * @param message    Success message
+   */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  public record ConvertLeadResponse(
+      Long leadId,
+      Long contactId,
+      LocalDateTime convertedAt,
+      String message
+  ) {
+  }
 }
