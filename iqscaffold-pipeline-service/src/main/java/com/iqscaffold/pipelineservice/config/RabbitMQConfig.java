@@ -22,8 +22,10 @@ public class RabbitMQConfig {
   public static final String EXCHANGE_NAME = "crm.events";
   public static final String LEAD_CREATED_QUEUE = "pipeline-service.lead.created";
   public static final String LEAD_DELETED_QUEUE = "pipeline-service.lead.deleted";
+  public static final String CONTACT_CREATED_QUEUE = "pipeline-service.contact.created";
   public static final String LEAD_CREATED_ROUTING_KEY = "lead.created";
   public static final String LEAD_DELETED_ROUTING_KEY = "lead.deleted";
+  public static final String CONTACT_CREATED_ROUTING_KEY = "contact.created";
   public static final String STAGE_CHANGED_ROUTING_KEY = "stage.changed";
 
   @Bean
@@ -42,6 +44,11 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  public Queue contactCreatedQueue() {
+    return new Queue(CONTACT_CREATED_QUEUE, true);
+  }
+
+  @Bean
   public Binding leadCreatedBinding(final Queue leadCreatedQueue, final TopicExchange crmEventsExchange) {
     return BindingBuilder.bind(leadCreatedQueue)
         .to(crmEventsExchange)
@@ -53,6 +60,13 @@ public class RabbitMQConfig {
     return BindingBuilder.bind(leadDeletedQueue)
         .to(crmEventsExchange)
         .with(LEAD_DELETED_ROUTING_KEY);
+  }
+
+  @Bean
+  public Binding contactCreatedBinding(final Queue contactCreatedQueue, final TopicExchange crmEventsExchange) {
+    return BindingBuilder.bind(contactCreatedQueue)
+        .to(crmEventsExchange)
+        .with(CONTACT_CREATED_ROUTING_KEY);
   }
 
   @Bean
