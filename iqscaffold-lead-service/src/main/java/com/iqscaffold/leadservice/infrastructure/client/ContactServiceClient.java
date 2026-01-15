@@ -3,6 +3,9 @@ package com.iqscaffold.leadservice.infrastructure.client;
 import java.time.LocalDateTime;
 
 import com.iqscaffold.leadservice.tenancy.TenantContext;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +43,9 @@ public class ContactServiceClient {
    * @return The created contact response
    * @throws ContactServiceException if the request fails
    */
+  @CircuitBreaker(name = "contactService", fallbackMethod = "createContactFallback")
+  @Retry(name = "contactService")
+  @TimeLimiter(name = "contactService")
   public ContactResponse createContact(
       final CreateContactRequest request,
       final String bearerToken) {
@@ -71,12 +77,36 @@ public class ContactServiceClient {
   }
 
   /**
+   * Fallback method for contact creation when circuit breaker is open or retries exhausted.
+   *
+   * @param request     The contact creation request
+   * @param bearerToken JWT bearer token for authentication
+   * @param throwable   The exception that triggered the fallback
+   * @return Never returns, always throws exception
+   * @throws ContactServiceException with circuit breaker information
+   */
+  private ContactResponse createContactFallback(
+      final CreateContactRequest request,
+      final String bearerToken,
+      final Throwable throwable) {
+    log.error("Contact Service is unavailable or circuit breaker is open. Fallback triggered.", throwable);
+    throw new ContactServiceException(
+        "Contact Service is currently unavailable. Please try again later. "
+            + "Reason: " + throwable.getMessage(),
+        throwable
+    );
+  }
+
+  /**
    * Deletes a contact in the Contact Service (used for rollback).
    *
    * @param contactId   The ID of the contact to delete
    * @param bearerToken JWT bearer token for authentication
    * @throws ContactServiceException if the request fails
    */
+  @CircuitBreaker(name = "contactService", fallbackMethod = "deleteContactFallback")
+  @Retry(name = "contactService")
+  @TimeLimiter(name = "contactService")
   public void deleteContact(final Long contactId, final String bearerToken) {
     String tenantId = TenantContext.getCurrentTenant();
 
@@ -102,6 +132,27 @@ public class ContactServiceClient {
       throw new ContactServiceException(
           "Unexpected error deleting contact for rollback: " + e.getMessage(), e);
     }
+  }
+
+  /**
+   * Fallback method for contact deletion when circuit breaker is open or retries exhausted.
+   *
+   * @param contactId   The ID of the contact to delete
+   * @param bearerToken JWT bearer token for authentication
+   * @param throwable   The exception that triggered the fallback
+   * @throws ContactServiceException with circuit breaker information
+   */
+  private void deleteContactFallback(
+      final Long contactId,
+      final String bearerToken,
+      final Throwable throwable) {
+    log.error("Contact Service is unavailable or circuit breaker is open during rollback. "
+        + "Contact {} may need manual cleanup.", contactId, throwable);
+    throw new ContactServiceException(
+        "Contact Service is currently unavailable for rollback. Manual cleanup may be required for contact "
+            + contactId + ". Reason: " + throwable.getMessage(),
+        throwable
+    );
   }
 
   /**
