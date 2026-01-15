@@ -71,7 +71,7 @@ public class ContactEventListener {
 
       // Convert to Long (handle both Integer and Long from JSON)
       final Long leadId = convertedFromLeadIdObj instanceof Integer
-          ? ((Integer) convertedFromLeadIdObj).longValue()
+          ? Long.valueOf((Integer) convertedFromLeadIdObj)
           : (Long) convertedFromLeadIdObj;
 
       log.info("Contact {} was converted from lead {}, moving pipeline item to Won stage",

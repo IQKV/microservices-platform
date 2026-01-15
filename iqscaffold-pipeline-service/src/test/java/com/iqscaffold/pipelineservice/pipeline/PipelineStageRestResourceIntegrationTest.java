@@ -383,9 +383,9 @@ class PipelineStageRestResourceIntegrationTest {
   @WithMockUser(authorities = {"ADMIN"})
   void testReorderStages() throws Exception {
     // Given - Create multiple stages
-    PipelineStage stage1 = createStage("Stage 1", 0);
-    PipelineStage stage2 = createStage("Stage 2", 1);
-    PipelineStage stage3 = createStage("Stage 3", 2);
+    createStage("Stage 1", 0);
+    createStage("Stage 2", 1);
+    createStage("Stage 3", 2);
     PipelineStage stage4 = createStage("Stage 4", 3);
 
     // When & Then - Move stage4 to position 1 (between stage1 and stage2)
@@ -421,8 +421,8 @@ class PipelineStageRestResourceIntegrationTest {
   void testReorderStageToEnd() throws Exception {
     // Given - Create multiple stages
     PipelineStage stage1 = createStage("Stage 1", 0);
-    PipelineStage stage2 = createStage("Stage 2", 1);
-    PipelineStage stage3 = createStage("Stage 3", 2);
+    createStage("Stage 2", 1);
+    createStage("Stage 3", 2);
 
     // When & Then - Move stage1 to the end
     mockMvc.perform(put("/api/v1/pipeline/stages/{id}/order", stage1.getId())
