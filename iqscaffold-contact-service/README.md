@@ -92,6 +92,7 @@ docker-compose up -d
 ### Query Parameters
 
 **List Contacts (`GET /api/v1/contacts`):**
+
 - `search` - Search term (matches first name, last name, email)
 - `status` - Filter by contact status (ACTIVE, INACTIVE, LEAD, PROSPECT, CUSTOMER, ARCHIVED)
 - `page` - Page number (default: 0)
@@ -103,6 +104,7 @@ docker-compose up -d
 All bulk operations support up to 100 items per request and return a detailed response with success/failure status for each item.
 
 **Bulk Create (`POST /api/v1/contacts/bulk`):**
+
 ```json
 {
   "contacts": [
@@ -118,6 +120,7 @@ All bulk operations support up to 100 items per request and return a detailed re
 ```
 
 **Bulk Update Status (`PATCH /api/v1/contacts/bulk/status`):**
+
 ```json
 {
   "contactIds": [1, 2, 3],
@@ -126,6 +129,7 @@ All bulk operations support up to 100 items per request and return a detailed re
 ```
 
 **Bulk Delete (`DELETE /api/v1/contacts/bulk`):**
+
 ```json
 {
   "contactIds": [1, 2, 3]
@@ -133,6 +137,7 @@ All bulk operations support up to 100 items per request and return a detailed re
 ```
 
 **Bulk Update Lead Scores (`PATCH /api/v1/contacts/bulk/scores`):**
+
 ```json
 {
   "updates": [
@@ -143,6 +148,7 @@ All bulk operations support up to 100 items per request and return a detailed re
 ```
 
 **Bulk Operation Response:**
+
 ```json
 {
   "successCount": 2,
@@ -175,6 +181,7 @@ The service publishes RabbitMQ events for contact lifecycle operations:
 **Events Published:**
 
 1. **contact.created** - When a new contact is created
+
    ```json
    {
      "eventId": "uuid",
@@ -194,6 +201,7 @@ The service publishes RabbitMQ events for contact lifecycle operations:
    ```
 
 2. **contact.updated** - When a contact is updated
+
    ```json
    {
      "eventId": "uuid",
@@ -225,18 +233,21 @@ The service publishes RabbitMQ events for contact lifecycle operations:
    ```
 
 **Event Consumers:**
+
 - Lead Service listens to `contact.created` events to update lead conversion tracking
 - Pipeline Service listens to `contact.created` events to move pipeline items to "Won" stage
 
 ### Integration with Other Services
 
 **Lead Service Integration:**
+
 - Contacts can be created from lead conversions via `POST /api/v1/leads/{id}/convert`
 - Lead Service calls Contact Service REST API to create contact
 - Contact Service publishes `contact.created` event with `convertedFromLeadId`
 - Lead Service consumes event to update lead status and log activity
 
 **Pipeline Service Integration:**
+
 - Pipeline Service listens to `contact.created` events
 - When contact is created from lead, pipeline item moves to "Won" stage
 - Conversion timestamp is recorded on pipeline item
@@ -244,6 +255,7 @@ The service publishes RabbitMQ events for contact lifecycle operations:
 ### Current Implementation
 
 The service provides complete REST API functionality:
+
 - **REST Endpoints**: Full CRUD operations with search and filtering
 - **Domain Model**: Contact entity with lead scoring and conversion tracking
 - **Repository Layer**: JPA repository with custom queries
@@ -304,6 +316,7 @@ The service uses schema-per-tenant isolation:
 ### Tenant Schemas
 
 Each tenant has its own schema with:
+
 - `contacts` - Contact information with lead scoring and conversion tracking
   - Basic info: first name, last name, email, phone, job title
   - Lead scoring: lead_score field for qualification

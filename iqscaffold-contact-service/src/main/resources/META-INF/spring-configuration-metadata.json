@@ -1,0 +1,333 @@
+{
+  "groups": [
+    {
+      "name": "iqscaffold",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "IQ Scaffold custom configuration properties for the Contact Service."
+    },
+    {
+      "name": "iqscaffold.i18n",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "Internationalization configuration for the Contact Service."
+    },
+    {
+      "name": "iqscaffold.liquibase",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$LiquibaseProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "Liquibase configuration for multi-tenant schema management."
+    },
+    {
+      "name": "iqscaffold.crm",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "CRM-specific configuration properties for contact and company management."
+    },
+    {
+      "name": "iqscaffold.crm.security",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$SecurityProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties",
+      "description": "Security configuration for the Contact Service."
+    },
+    {
+      "name": "iqscaffold.crm.security.jwt",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$SecurityProperties$JwtProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$SecurityProperties",
+      "description": "JWT configuration for authentication and authorization."
+    },
+    {
+      "name": "iqscaffold.crm.contact",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties",
+      "description": "Contact management configuration including lead scoring and activity tracking."
+    },
+    {
+      "name": "iqscaffold.crm.company",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$CompanyProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties",
+      "description": "Company management configuration including hierarchy and scoring features."
+    },
+    {
+      "name": "iqscaffold.crm.activity",
+      "type": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ActivityProperties",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties",
+      "description": "Activity tracking and logging configuration for CRM interactions."
+    }
+  ],
+  "properties": [
+    {
+      "name": "iqscaffold.tenant-id-header",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "HTTP header name used to identify the tenant in multi-tenant requests.",
+      "defaultValue": "X-Tenant-ID"
+    },
+    {
+      "name": "iqscaffold.user-service-url",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties",
+      "description": "Base URL of the User Service for inter-service communication.",
+      "defaultValue": "http://localhost:8080"
+    },
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "List of supported locale codes for internationalization (e.g., en, es, fr).",
+      "defaultValue": ["en", "es", "fr"]
+    },
+    {
+      "name": "iqscaffold.i18n.default-locale",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Default locale to use when no locale is specified or the requested locale is not supported.",
+      "defaultValue": "en"
+    },
+    {
+      "name": "iqscaffold.i18n.message-basename",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Base name for message resource bundles (e.g., i18n/messages).",
+      "defaultValue": "i18n/messages"
+    },
+    {
+      "name": "iqscaffold.i18n.message-cache-duration",
+      "type": "java.time.Duration",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Duration to cache message resources. Use ISO-8601 duration format (e.g., PT1H for 1 hour).",
+      "defaultValue": "PT1H"
+    },
+    {
+      "name": "iqscaffold.i18n.fallback-to-system-locale",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Whether to fall back to the system locale if the requested locale is not found.",
+      "defaultValue": false
+    },
+    {
+      "name": "iqscaffold.i18n.use-code-as-default-message",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
+      "description": "Whether to use the message code as the default message if no message is found.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.liquibase.system-change-log",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$LiquibaseProperties",
+      "description": "Path to the Liquibase changelog file for system-level database migrations.",
+      "defaultValue": "classpath:db/changelog/system/master.xml"
+    },
+    {
+      "name": "iqscaffold.liquibase.tenant-change-log",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$LiquibaseProperties",
+      "description": "Path to the Liquibase changelog file for tenant-specific database migrations.",
+      "defaultValue": "classpath:db/changelog/tenant/master.xml"
+    },
+    {
+      "name": "iqscaffold.crm.security.jwt.jwk-set-uri",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$SecurityProperties$JwtProperties",
+      "description": "URI to fetch the JSON Web Key Set (JWKS) for JWT token validation.",
+      "defaultValue": "http://localhost:8080/.well-known/jwks.json"
+    },
+    {
+      "name": "iqscaffold.crm.security.jwt.issuer",
+      "type": "java.lang.String",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$SecurityProperties$JwtProperties",
+      "description": "Expected issuer claim value in JWT tokens for validation.",
+      "defaultValue": "iqscaffold-user-service"
+    },
+    {
+      "name": "iqscaffold.crm.contact.enable-lead-scoring",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "description": "Enable lead scoring functionality for contacts to prioritize sales efforts.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.contact.enable-activity-tracking",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "description": "Enable tracking of all activities and interactions with contacts.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.contact.enable-email-integration",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "description": "Enable email integration for sending and tracking emails with contacts.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.contact.default-lead-score",
+      "type": "java.lang.Integer",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "description": "Default lead score assigned to new contacts when lead scoring is enabled.",
+      "defaultValue": 0
+    },
+    {
+      "name": "iqscaffold.crm.contact.max-lead-score",
+      "type": "java.lang.Integer",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ContactProperties",
+      "description": "Maximum possible lead score a contact can achieve.",
+      "defaultValue": 100
+    },
+    {
+      "name": "iqscaffold.crm.company.enable-company-hierarchy",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$CompanyProperties",
+      "description": "Enable company hierarchy management for parent-subsidiary relationships.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.company.enable-company-scoring",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$CompanyProperties",
+      "description": "Enable scoring functionality for companies to prioritize business opportunities.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.activity.enable-auto-logging",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ActivityProperties",
+      "description": "Enable automatic logging of activities such as emails, calls, and meetings.",
+      "defaultValue": true
+    },
+    {
+      "name": "iqscaffold.crm.activity.retention-days",
+      "type": "java.lang.Integer",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ActivityProperties",
+      "description": "Number of days to retain activity records before archival or deletion.",
+      "defaultValue": 365
+    },
+    {
+      "name": "iqscaffold.crm.activity.max-activities-per-contact",
+      "type": "java.lang.Integer",
+      "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$CrmProperties$ActivityProperties",
+      "description": "Maximum number of activities that can be associated with a single contact.",
+      "defaultValue": 1000
+    }
+  ],
+  "hints": [
+    {
+      "name": "iqscaffold.i18n.supported-locales",
+      "values": [
+        {
+          "value": "en",
+          "description": "English"
+        },
+        {
+          "value": "es",
+          "description": "Spanish"
+        },
+        {
+          "value": "fr",
+          "description": "French"
+        },
+        {
+          "value": "de",
+          "description": "German"
+        },
+        {
+          "value": "it",
+          "description": "Italian"
+        },
+        {
+          "value": "pt",
+          "description": "Portuguese"
+        },
+        {
+          "value": "zh",
+          "description": "Chinese"
+        },
+        {
+          "value": "ja",
+          "description": "Japanese"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.i18n.default-locale",
+      "values": [
+        {
+          "value": "en",
+          "description": "English"
+        },
+        {
+          "value": "es",
+          "description": "Spanish"
+        },
+        {
+          "value": "fr",
+          "description": "French"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.crm.contact.max-lead-score",
+      "values": [
+        {
+          "value": 100,
+          "description": "Standard 0-100 scoring scale"
+        },
+        {
+          "value": 10,
+          "description": "Simple 0-10 scoring scale"
+        },
+        {
+          "value": 1000,
+          "description": "Extended 0-1000 scoring scale for granular scoring"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.crm.activity.retention-days",
+      "values": [
+        {
+          "value": 30,
+          "description": "1 month - short-term retention"
+        },
+        {
+          "value": 90,
+          "description": "3 months - quarterly retention"
+        },
+        {
+          "value": 365,
+          "description": "1 year - annual retention (recommended)"
+        },
+        {
+          "value": 730,
+          "description": "2 years - extended retention"
+        },
+        {
+          "value": 1825,
+          "description": "5 years - long-term retention for compliance"
+        }
+      ]
+    },
+    {
+      "name": "iqscaffold.crm.activity.max-activities-per-contact",
+      "values": [
+        {
+          "value": 500,
+          "description": "Low limit - suitable for small teams"
+        },
+        {
+          "value": 1000,
+          "description": "Medium limit - balanced for most use cases"
+        },
+        {
+          "value": 5000,
+          "description": "High limit - for high-volume sales teams"
+        },
+        {
+          "value": -1,
+          "description": "Unlimited - no limit on activities (use with caution)"
+        }
+      ]
+    }
+  ]
+}
