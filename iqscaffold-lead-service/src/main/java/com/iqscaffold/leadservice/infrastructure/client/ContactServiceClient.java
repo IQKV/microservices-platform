@@ -71,6 +71,40 @@ public class ContactServiceClient {
   }
 
   /**
+   * Deletes a contact in the Contact Service (used for rollback).
+   *
+   * @param contactId   The ID of the contact to delete
+   * @param bearerToken JWT bearer token for authentication
+   * @throws ContactServiceException if the request fails
+   */
+  public void deleteContact(final Long contactId, final String bearerToken) {
+    String tenantId = TenantContext.getCurrentTenant();
+
+    log.debug("Deleting contact {} in Contact Service for tenant: {}", contactId, tenantId);
+
+    try {
+      contactServiceWebClient
+          .delete()
+          .uri("/api/v1/contacts/{id}", contactId)
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken)
+          .header("X-Tenant-ID", tenantId)
+          .retrieve()
+          .bodyToMono(Void.class)
+          .block();
+      log.info("Successfully deleted contact {} for rollback", contactId);
+    } catch (final WebClientResponseException e) {
+      log.error("Failed to delete contact {} in Contact Service: {} - {}",
+          contactId, e.getStatusCode(), e.getResponseBodyAsString());
+      throw new ContactServiceException(
+          "Failed to delete contact for rollback: " + e.getMessage(), e);
+    } catch (final Exception e) {
+      log.error("Unexpected error deleting contact {} in Contact Service", contactId, e);
+      throw new ContactServiceException(
+          "Unexpected error deleting contact for rollback: " + e.getMessage(), e);
+    }
+  }
+
+  /**
    * Request DTO for creating a contact.
    */
   public record CreateContactRequest(

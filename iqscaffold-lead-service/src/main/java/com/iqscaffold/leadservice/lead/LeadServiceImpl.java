@@ -8,6 +8,7 @@ import com.iqscaffold.leadservice.infrastructure.client.ContactServiceClient;
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import com.iqscaffold.leadservice.lead.dto.LeadMapper;
 import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
+import com.iqscaffold.leadservice.shared.exception.LeadConversionException;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +233,11 @@ public class LeadServiceImpl implements LeadService {
           "Lead " + id + " has already been converted to contact " + lead.getConvertedToContactId());
     }
 
+    // Store original lead state for rollback
+    LeadStatus originalStatus = lead.getStatus();
+    LocalDateTime originalConvertedAt = lead.getConvertedAt();
+    Long originalContactId = lead.getConvertedToContactId();
+
     // Prepare contact creation request
     String contactNotes = request.notes() != null ? request.notes() : lead.getNotes();
     ContactServiceClient.CreateContactRequest contactRequest =
@@ -248,29 +254,71 @@ public class LeadServiceImpl implements LeadService {
         );
 
     // Create contact in Contact Service
-    ContactServiceClient.ContactResponse contactResponse;
+    ContactServiceClient.ContactResponse contactResponse = null;
+    boolean contactCreated = false;
+
     try {
       contactResponse = contactServiceClient.createContact(contactRequest, bearerToken);
+      contactCreated = true;
       log.info("Successfully created contact {} from lead {}", contactResponse.id(), id);
-    } catch (final ContactServiceClient.ContactServiceException e) {
-      log.error("Failed to create contact from lead {}", id, e);
-      throw new RuntimeException("Failed to convert lead to contact: " + e.getMessage(), e);
+
+      // Update lead status
+      lead.setStatus(LeadStatus.CONVERTED);
+      lead.setConvertedAt(LocalDateTime.now());
+      lead.setConvertedToContactId(contactResponse.id());
+      leadRepository.save(lead);
+
+      log.info("Lead {} successfully converted to contact {}", id, contactResponse.id());
+
+      return new LeadDtos.ConvertLeadResponse(
+          id,
+          contactResponse.id(),
+          lead.getConvertedAt(),
+          "Lead successfully converted to contact"
+      );
+
+    } catch (final Exception e) {
+      log.error("Error during lead conversion for lead {}", id, e);
+
+      // Rollback: Delete the created contact if it was created
+      boolean rollbackSuccessful = false;
+      if (contactCreated && contactResponse != null) {
+        log.warn("Rolling back conversion: deleting contact {}", contactResponse.id());
+        try {
+          contactServiceClient.deleteContact(contactResponse.id(), bearerToken);
+          rollbackSuccessful = true;
+          log.info("Successfully rolled back contact creation for contact {}", contactResponse.id());
+        } catch (final Exception rollbackException) {
+          log.error("Failed to rollback contact creation for contact {}. Manual cleanup may be required.",
+              contactResponse.id(), rollbackException);
+          // Continue to restore lead state even if contact deletion fails
+        }
+      } else {
+        // No contact was created, so rollback is considered successful
+        rollbackSuccessful = true;
+      }
+
+      // Restore lead to original state
+      lead.setStatus(originalStatus);
+      lead.setConvertedAt(originalConvertedAt);
+      lead.setConvertedToContactId(originalContactId);
+      leadRepository.save(lead);
+      log.info("Lead {} restored to original state after failed conversion", id);
+
+      // Throw custom exception with rollback status
+      String errorMessage = rollbackSuccessful
+          ? "Failed to convert lead to contact. Rollback successful - lead restored to original state."
+          : "Failed to convert lead to contact. Rollback partially failed - manual cleanup may be required for contact "
+              + (contactResponse != null ? contactResponse.id() : "unknown");
+
+      throw new LeadConversionException(
+          errorMessage,
+          e,
+          id,
+          contactResponse != null ? contactResponse.id() : null,
+          rollbackSuccessful
+      );
     }
-
-    // Update lead status
-    lead.setStatus(LeadStatus.CONVERTED);
-    lead.setConvertedAt(LocalDateTime.now());
-    lead.setConvertedToContactId(contactResponse.id());
-    leadRepository.save(lead);
-
-    log.info("Lead {} successfully converted to contact {}", id, contactResponse.id());
-
-    return new LeadDtos.ConvertLeadResponse(
-        id,
-        contactResponse.id(),
-        lead.getConvertedAt(),
-        "Lead successfully converted to contact"
-    );
   }
 
   @Override

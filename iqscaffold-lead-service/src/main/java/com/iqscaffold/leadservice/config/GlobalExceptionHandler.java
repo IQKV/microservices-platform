@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
+import com.iqscaffold.leadservice.shared.exception.LeadConversionException;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import com.iqscaffold.leadservice.shared.exception.LeadNoteNotFoundException;
 import org.slf4j.Logger;
@@ -150,6 +151,43 @@ public class GlobalExceptionHandler {
 
     logger.warn("Duplicate resource on {}: {}", request.getRequestURI(), ex.getMessage());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(problemDetail);
+  }
+
+  /**
+   * Handles lead conversion exceptions.
+   *
+   * @param ex      The lead conversion exception
+   * @param request The HTTP request
+   * @return Problem detail response
+   */
+  @ExceptionHandler(LeadConversionException.class)
+  public ResponseEntity<ProblemDetail> handleLeadConversionException(
+      LeadConversionException ex,
+      HttpServletRequest request) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ex.getMessage()
+    );
+    problemDetail.setType(URI.create("https://api.iqscaffold.com/errors/conversion-error"));
+    problemDetail.setTitle("Lead Conversion Failed");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+    // Add conversion-specific details
+    Map<String, Object> conversionDetails = new HashMap<>();
+    conversionDetails.put("leadId", ex.getLeadId());
+    conversionDetails.put("contactId", ex.getContactId());
+    conversionDetails.put("rollbackSuccessful", ex.isRollbackSuccessful());
+    problemDetail.setProperty("conversionDetails", conversionDetails);
+
+    if (ex.isRollbackSuccessful()) {
+      logger.warn("Lead conversion failed on {} but rollback successful: {}",
+          request.getRequestURI(), ex.getMessage());
+    } else {
+      logger.error("Lead conversion failed on {} and rollback failed - manual cleanup required: {}",
+          request.getRequestURI(), ex.getMessage(), ex);
+    }
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
   }
 
   /**
