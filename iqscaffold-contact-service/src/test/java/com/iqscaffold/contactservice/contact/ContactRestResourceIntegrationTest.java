@@ -63,7 +63,7 @@ class ContactRestResourceIntegrationTest {
         "Test contact"
     );
 
-    MvcResult result = mockMvc.perform(post("/api/v1/contacts")
+    mockMvc.perform(post("/api/v1/contacts")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -74,8 +74,7 @@ class ContactRestResourceIntegrationTest {
         .andExpect(jsonPath("$.jobTitle").value("Software Engineer"))
         .andExpect(jsonPath("$.status").value("ACTIVE"))
         .andExpect(jsonPath("$.leadScore").value(75))
-        .andExpect(jsonPath("$.id").exists())
-        .andReturn();
+        .andExpect(jsonPath("$.id").exists());
 
     assertThat(contactRepository.count()).isEqualTo(1);
   }
