@@ -27,6 +27,8 @@ public class RabbitMQConfig {
   public static final String LEAD_DELETED_ROUTING_KEY = "lead.deleted";
   public static final String CONTACT_CREATED_ROUTING_KEY = "contact.created";
   public static final String STAGE_CHANGED_ROUTING_KEY = "stage.changed";
+  public static final String FOLLOWUP_SCHEDULED_ROUTING_KEY = "followup.scheduled";
+  public static final String FOLLOWUP_COMPLETED_ROUTING_KEY = "followup.completed";
 
   @Bean
   public TopicExchange crmEventsExchange() {

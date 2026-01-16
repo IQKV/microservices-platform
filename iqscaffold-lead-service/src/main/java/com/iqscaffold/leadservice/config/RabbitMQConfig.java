@@ -27,7 +27,9 @@ public class RabbitMQConfig {
   public static final String CONTACT_UPDATED_ROUTING_KEY = "contact.updated";
   public static final String CONTACT_DELETED_ROUTING_KEY = "contact.deleted";
   public static final String LEAD_CREATED_ROUTING_KEY = "lead.created";
+  public static final String LEAD_UPDATED_ROUTING_KEY = "lead.updated";
   public static final String LEAD_DELETED_ROUTING_KEY = "lead.deleted";
+  public static final String LEAD_CONVERTED_ROUTING_KEY = "lead.converted";
 
   /**
    * Creates the CRM events topic exchange.

@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.pipelineservice.event.FollowUpEventPublisher;
 import com.iqscaffold.pipelineservice.shared.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,14 +29,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class FollowUpServiceImpl implements FollowUpService {
 
   private final FollowUpRepository followUpRepository;
+  private final FollowUpEventPublisher followUpEventPublisher;
 
-  public FollowUpServiceImpl(final FollowUpRepository followUpRepository) {
+  public FollowUpServiceImpl(
+      final FollowUpRepository followUpRepository,
+      final FollowUpEventPublisher followUpEventPublisher) {
     this.followUpRepository = followUpRepository;
+    this.followUpEventPublisher = followUpEventPublisher;
   }
 
   @Override
   public FollowUp scheduleFollowUp(final FollowUp followUp) {
-    return followUpRepository.save(followUp);
+    final FollowUp savedFollowUp = followUpRepository.save(followUp);
+    
+    // Publish followup.scheduled event
+    followUpEventPublisher.publishFollowUpScheduled(savedFollowUp);
+    
+    return savedFollowUp;
   }
 
   @Override
@@ -115,7 +125,12 @@ public class FollowUpServiceImpl implements FollowUpService {
     followUp.setStatus(FollowUpStatus.COMPLETED);
     followUp.setCompletedAt(LocalDateTime.now());
 
-    return followUpRepository.save(followUp);
+    final FollowUp savedFollowUp = followUpRepository.save(followUp);
+    
+    // Publish followup.completed event
+    followUpEventPublisher.publishFollowUpCompleted(savedFollowUp);
+    
+    return savedFollowUp;
   }
 
   @Override

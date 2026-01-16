@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.leadservice.event.LeadEventPublisher;
 import com.iqscaffold.leadservice.infrastructure.client.ContactServiceClient;
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import com.iqscaffold.leadservice.lead.dto.LeadMapper;
@@ -25,17 +26,25 @@ public class LeadServiceImpl implements LeadService {
 
   private final LeadRepository leadRepository;
   private final ContactServiceClient contactServiceClient;
+  private final LeadEventPublisher leadEventPublisher;
 
   public LeadServiceImpl(
       final LeadRepository leadRepository,
-      final ContactServiceClient contactServiceClient) {
+      final ContactServiceClient contactServiceClient,
+      final LeadEventPublisher leadEventPublisher) {
     this.leadRepository = leadRepository;
     this.contactServiceClient = contactServiceClient;
+    this.leadEventPublisher = leadEventPublisher;
   }
 
   @Override
   public Lead createLead(final Lead lead) {
-    return leadRepository.save(lead);
+    final Lead savedLead = leadRepository.save(lead);
+    
+    // Publish lead.created event for Pipeline Service
+    leadEventPublisher.publishLeadCreated(savedLead);
+    
+    return savedLead;
   }
 
   @Override
@@ -50,6 +59,10 @@ public class LeadServiceImpl implements LeadService {
 
     Lead lead = LeadMapper.toEntity(request, createdBy);
     Lead savedLead = leadRepository.save(lead);
+    
+    // Publish lead.created event for Pipeline Service
+    leadEventPublisher.publishLeadCreated(savedLead);
+    
     return LeadMapper.toResponse(savedLead);
   }
 
@@ -135,7 +148,12 @@ public class LeadServiceImpl implements LeadService {
     existingLead.setNotes(lead.getNotes());
     existingLead.setUpdatedBy(lead.getUpdatedBy());
 
-    return leadRepository.save(existingLead);
+    final Lead savedLead = leadRepository.save(existingLead);
+    
+    // Publish lead.updated event
+    leadEventPublisher.publishLeadUpdated(savedLead);
+    
+    return savedLead;
   }
 
   @Override
@@ -155,6 +173,10 @@ public class LeadServiceImpl implements LeadService {
 
     LeadMapper.updateEntity(existingLead, request, updatedBy);
     Lead savedLead = leadRepository.save(existingLead);
+    
+    // Publish lead.updated event
+    leadEventPublisher.publishLeadUpdated(savedLead);
+    
     return LeadMapper.toResponse(savedLead);
   }
 
@@ -270,6 +292,9 @@ public class LeadServiceImpl implements LeadService {
 
       log.info("Lead {} successfully converted to contact {}", id, contactResponse.id());
 
+      // Publish lead.converted event
+      leadEventPublisher.publishLeadConverted(lead, contactResponse.id());
+
       return new LeadDtos.ConvertLeadResponse(
           id,
           contactResponse.id(),
@@ -323,10 +348,17 @@ public class LeadServiceImpl implements LeadService {
 
   @Override
   public void deleteLead(final Long id) {
-    if (!leadRepository.existsById(id)) {
-      throw new LeadNotFoundException("Lead not found with id: " + id);
-    }
+    Lead lead = leadRepository.findById(id)
+        .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
+    
+    // Store email for event publishing
+    final String email = lead.getEmail();
+    
+    // Delete the lead
     leadRepository.deleteById(id);
+    
+    // Publish lead.deleted event for Pipeline Service
+    leadEventPublisher.publishLeadDeleted(id, email);
   }
 
   @Override
