@@ -42,7 +42,7 @@ public class FollowUpEventPublisher {
    * @param followUp The scheduled follow-up
    */
   public void publishFollowUpScheduled(final FollowUp followUp) {
-    final String tenantId = TenantContext.getCurrentTenant();
+    final String tenantId = TenantContext.getCurrentTenantId();
 
     final Map<String, Object> metadata = new HashMap<>();
     metadata.put("title", followUp.getTitle());
@@ -85,7 +85,7 @@ public class FollowUpEventPublisher {
    * @param followUp The completed follow-up
    */
   public void publishFollowUpCompleted(final FollowUp followUp) {
-    final String tenantId = TenantContext.getCurrentTenant();
+    final String tenantId = TenantContext.getCurrentTenantId();
 
     final Map<String, Object> metadata = new HashMap<>();
     metadata.put("title", followUp.getTitle());
