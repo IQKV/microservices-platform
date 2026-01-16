@@ -213,10 +213,10 @@ spring:
               args:
                 redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: contact-service-companies
+        - id: contact-service-webhooks
           uri: ${iqscaffold.gateway.routing.services.contact-service.uri}
           predicates:
-            - Path=/api/v1/companies/**
+            - Path=/api/v1/webhooks/**
           filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
@@ -455,7 +455,7 @@ iqscaffold:
         # - /api/v1/follow-ups/** (requires Bearer token + USER role)
         # - /api/v1/dashboard/** (requires Bearer token + USER role)
         # - /api/v1/contacts/** (requires Bearer token + USER role)
-        # - /api/v1/companies/** (requires Bearer token + USER role)
+        # - /api/v1/webhooks/** (requires Bearer token + ADMIN/SUPER_ADMIN role)
     
     rate-limiting:
       enabled: true
@@ -606,6 +606,16 @@ iqscaffold:
             requests-per-minute: 200
             burst-capacity: 500
             enable-tenant-quotas: false  # Webhooks from external providers
+          
+          # Contact Service Webhook Management (admin operations)
+          "/api/v1/webhooks":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/webhooks/**":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000
