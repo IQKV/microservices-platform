@@ -1,17 +1,17 @@
-# 🚀 IQ Scaffold Microservices Platform
+# 🚀 IQ Scaffold CRM Template
 
 > Production-ready microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
 ## Table of Contents
 
-- [Business Pillars](#business-pillars)
+- [Business Purpose](#business-purpose)
 - [Platform Ecosystem](#platform-ecosystem)
 - [Common Business Infrastructure](#common-business-infrastructure)
 - [Architecture & Tech Stack](#architecture--tech-stack)
 - [Getting Started](#getting-started)
 - [Adapting for Your Domain](#adapting-for-your-domain)
 
-## Business Pillars
+## Business Purpose
 
 The platform centralizes three critical business domains to accelerate product development:
 
