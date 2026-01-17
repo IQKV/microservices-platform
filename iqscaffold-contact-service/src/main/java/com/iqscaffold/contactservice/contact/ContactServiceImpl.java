@@ -108,10 +108,10 @@ public class ContactServiceImpl implements ContactService {
   public void deleteContact(Long id) {
     Contact contact = contactRepository.findById(id)
         .orElseThrow(() -> new ContactNotFoundException("Contact not found with id: " + id));
-    
+
     String email = contact.getEmail();
     contactRepository.deleteById(id);
-    
+
     // Publish contact deleted event
     eventPublisher.publishContactDeleted(id, email);
     // Trigger webhooks

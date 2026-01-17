@@ -8,23 +8,23 @@ import org.springframework.data.domain.Pageable;
 
 public interface CompanyService {
 
-    Company createCompany(Company company);
+  Company createCompany(Company company);
 
-    Optional<Company> getCompanyById(Long id);
+  Optional<Company> getCompanyById(Long id);
 
-    Page<Company> getAllCompanies(Pageable pageable);
+  Page<Company> getAllCompanies(Pageable pageable);
 
-    Page<Company> searchCompanies(String name, Pageable pageable);
+  Page<Company> searchCompanies(String name, Pageable pageable);
 
-    Page<Company> getCompaniesByIndustry(String industry, Pageable pageable);
+  Page<Company> getCompaniesByIndustry(String industry, Pageable pageable);
 
-    Page<Company> getCompaniesByStatus(CompanyStatus status, Pageable pageable);
+  Page<Company> getCompaniesByStatus(CompanyStatus status, Pageable pageable);
 
-    List<Company> getChildCompanies(Long parentId);
+  List<Company> getChildCompanies(Long parentId);
 
-    Company updateCompany(Long id, Company company);
+  Company updateCompany(Long id, Company company);
 
-    void deleteCompany(Long id);
+  void deleteCompany(Long id);
 
-    boolean existsByName(String name);
+  boolean existsByName(String name);
 }

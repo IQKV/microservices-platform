@@ -30,10 +30,10 @@ public class ContactEvent {
   /**
    * Creates a new contact event.
    *
-   * @param eventType  Type of event (CONTACT_CREATED, CONTACT_UPDATED, CONTACT_DELETED)
-   * @param contactId  ID of the contact
-   * @param tenantId   Tenant ID
-   * @param metadata   Additional event metadata
+   * @param eventType Type of event (CONTACT_CREATED, CONTACT_UPDATED, CONTACT_DELETED)
+   * @param contactId ID of the contact
+   * @param tenantId  Tenant ID
+   * @param metadata  Additional event metadata
    */
   public ContactEvent(
       final String eventType,

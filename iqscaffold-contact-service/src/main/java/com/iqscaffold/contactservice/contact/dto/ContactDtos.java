@@ -27,15 +27,15 @@ public final class ContactDtos {
   /**
    * Request DTO for creating a new contact.
    *
-   * @param firstName  Contact's first name (required, max 100 chars)
-   * @param lastName   Contact's last name (required, max 100 chars)
-   * @param email      Contact's email address (optional, valid email format, max 255 chars)
-   * @param phone      Contact's phone number (optional, max 20 chars)
-   * @param jobTitle   Contact's job title (optional, max 100 chars)
-   * @param companyId  Company ID (optional)
-   * @param status     Contact status (optional, defaults to ACTIVE)
-   * @param leadScore  Lead score 0-100 (optional, defaults to 0)
-   * @param notes      Additional notes (optional, max 1000 chars)
+   * @param firstName Contact's first name (required, max 100 chars)
+   * @param lastName  Contact's last name (required, max 100 chars)
+   * @param email     Contact's email address (optional, valid email format, max 255 chars)
+   * @param phone     Contact's phone number (optional, max 20 chars)
+   * @param jobTitle  Contact's job title (optional, max 100 chars)
+   * @param companyId Company ID (optional)
+   * @param status    Contact status (optional, defaults to ACTIVE)
+   * @param leadScore Lead score 0-100 (optional, defaults to 0)
+   * @param notes     Additional notes (optional, max 1000 chars)
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record CreateContactRequest(
@@ -73,14 +73,14 @@ public final class ContactDtos {
   /**
    * Request DTO for updating an existing contact.
    *
-   * @param firstName  Contact's first name (required, max 100 chars)
-   * @param lastName   Contact's last name (required, max 100 chars)
-   * @param email      Contact's email address (optional, valid email format, max 255 chars)
-   * @param phone      Contact's phone number (optional, max 20 chars)
-   * @param jobTitle   Contact's job title (optional, max 100 chars)
-   * @param companyId  Company ID (optional)
-   * @param status     Contact status (optional)
-   * @param notes      Additional notes (optional, max 1000 chars)
+   * @param firstName Contact's first name (required, max 100 chars)
+   * @param lastName  Contact's last name (required, max 100 chars)
+   * @param email     Contact's email address (optional, valid email format, max 255 chars)
+   * @param phone     Contact's phone number (optional, max 20 chars)
+   * @param jobTitle  Contact's job title (optional, max 100 chars)
+   * @param companyId Company ID (optional)
+   * @param status    Contact status (optional)
+   * @param notes     Additional notes (optional, max 1000 chars)
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record UpdateContactRequest(
@@ -128,22 +128,22 @@ public final class ContactDtos {
   /**
    * Response DTO for contact information.
    *
-   * @param id                   Contact's unique identifier
-   * @param firstName            Contact's first name
-   * @param lastName             Contact's last name
-   * @param email                Contact's email address
-   * @param phone                Contact's phone number
-   * @param jobTitle             Contact's job title
-   * @param companyId            Company ID
-   * @param status               Contact status
-   * @param leadScore            Lead score (0-100)
-   * @param notes                Additional notes
-   * @param convertedFromLeadId  Lead ID if converted from lead
-   * @param convertedAt          Timestamp when converted from lead
-   * @param createdAt            Creation timestamp
-   * @param updatedAt            Last update timestamp
-   * @param createdBy            User who created the contact
-   * @param updatedBy            User who last updated the contact
+   * @param id                  Contact's unique identifier
+   * @param firstName           Contact's first name
+   * @param lastName            Contact's last name
+   * @param email               Contact's email address
+   * @param phone               Contact's phone number
+   * @param jobTitle            Contact's job title
+   * @param companyId           Company ID
+   * @param status              Contact status
+   * @param leadScore           Lead score (0-100)
+   * @param notes               Additional notes
+   * @param convertedFromLeadId Lead ID if converted from lead
+   * @param convertedAt         Timestamp when converted from lead
+   * @param createdAt           Creation timestamp
+   * @param updatedAt           Last update timestamp
+   * @param createdBy           User who created the contact
+   * @param updatedBy           User who last updated the contact
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record ContactResponse(

@@ -75,7 +75,11 @@
       "type": "java.util.List<java.lang.String>",
       "sourceType": "com.iqscaffold.contactservice.config.IqScaffoldProperties$I18nProperties",
       "description": "List of supported locale codes for internationalization (e.g., en, es, fr).",
-      "defaultValue": ["en", "es", "fr"]
+      "defaultValue": [
+        "en",
+        "es",
+        "fr"
+      ]
     },
     {
       "name": "iqscaffold.i18n.default-locale",

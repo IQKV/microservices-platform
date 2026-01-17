@@ -10,13 +10,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
-    Page<Company> findByNameContainingIgnoreCase(String name, Pageable pageable);
+  Page<Company> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    Page<Company> findByIndustry(String industry, Pageable pageable);
+  Page<Company> findByIndustry(String industry, Pageable pageable);
 
-    Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
+  Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
 
-    List<Company> findByParentCompanyId(Long parentCompanyId);
+  List<Company> findByParentCompanyId(Long parentCompanyId);
 
-    boolean existsByNameIgnoreCase(String name);
+  boolean existsByNameIgnoreCase(String name);
 }
