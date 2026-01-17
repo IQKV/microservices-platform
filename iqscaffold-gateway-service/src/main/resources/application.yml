@@ -233,6 +233,16 @@ spring:
               args:
                 redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: company-service
+          uri: ${iqscaffold.gateway.routing.services.contact-service.uri}
+          predicates:
+            - Path=/api/v1/companies/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
         - id: health-check
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates:
@@ -455,6 +465,7 @@ iqscaffold:
         # - /api/v1/follow-ups/** (requires Bearer token + USER role)
         # - /api/v1/dashboard/** (requires Bearer token + USER role)
         # - /api/v1/contacts/** (requires Bearer token + USER role)
+        # - /api/v1/companies/** (requires Bearer token + USER role)
         # - /api/v1/webhooks/** (requires Bearer token + ADMIN/SUPER_ADMIN role)
     
     rate-limiting:
@@ -615,6 +626,12 @@ iqscaffold:
           "/api/v1/webhooks/**":
             requests-per-minute: 40
             burst-capacity: 60
+            enable-tenant-quotas: true
+          
+          # Company Service Rate Limiting
+          "/api/v1/companies/**":
+            requests-per-minute: 100
+            burst-capacity: 150
             enable-tenant-quotas: true
       tenant-quotas:
         enabled: true
