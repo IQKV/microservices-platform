@@ -17,7 +17,7 @@ The platform centralizes three critical business domains to accelerate product d
 
 - **Identity & Access Management**: Centralized authentication with JWT tokens, role-based access control (RBAC), and multi-tenant user lifecycle management.
 - **Financial Orchestration**: End-to-end payment orchestration with Stripe Connect, automated merchant onboarding, and complex revenue/subscription management.
-- **CRM & Growth Engine**: Comprehensive sales lifecycle—from lead capture and chronological activity tracking to visual pipeline management and contact relationship history.
+- **CRM & Growth Engine**: Sales lifecycle - from lead capture and chronological activity tracking to visual pipeline management and contact relationship history.
 
 ## Platform Ecosystem
 
