@@ -57,6 +57,16 @@ spring:
               args:
                 redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        - id: billing-service-admin
+          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
+          predicates:
+            - Path=/api/v1/admin/billing/**
+          filters:
+            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenish-rate: 30  # Lower rate limit for admin operations
+                redis-rate-limiter.burst-capacity: 50
         - id: user-service-admin
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates:
@@ -133,16 +143,6 @@ spring:
               args:
                 redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
                 redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: billing-service-admin
-          uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
-          predicates:
-            - Path=/api/v1/admin/billing/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: 30  # Lower rate limit for admin operations
-                redis-rate-limiter.burst-capacity: 50
         - id: billing-service
           uri: ${iqscaffold.gateway.routing.services.billing-service.uri}
           predicates:
