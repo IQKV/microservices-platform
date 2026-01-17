@@ -38,21 +38,21 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
  * <p>
  * Provides endpoints for:
  * <ul>
- *   <li>Scheduling follow-ups with leads</li>
- *   <li>Listing follow-ups with pagination</li>
- *   <li>Getting today's follow-ups</li>
- *   <li>Getting overdue follow-ups</li>
- *   <li>Marking follow-ups as completed</li>
- *   <li>Deleting follow-ups</li>
+ * <li>Scheduling follow-ups with leads</li>
+ * <li>Listing follow-ups with pagination</li>
+ * <li>Getting today's follow-ups</li>
+ * <li>Getting overdue follow-ups</li>
+ * <li>Marking follow-ups as completed</li>
+ * <li>Deleting follow-ups</li>
  * </ul>
  *
  * <h4>Authorization:</h4>
  * <ul>
- *   <li>All operations require USER, ADMIN, or SUPER_ADMIN role</li>
+ * <li>All operations require USER, ADMIN, or SUPER_ADMIN role</li>
  * </ul>
  */
 @RestController
-@RequestMapping("/api/v1/follow-ups")
+@RequestMapping("/api/v1/pipeline/follow-ups")
 @Tag(name = "Follow-Ups", description = "Follow-up management operations")
 @SecurityRequirement(name = "bearerAuth")
 public class FollowUpRestResource {
@@ -66,15 +66,14 @@ public class FollowUpRestResource {
   /**
    * Schedules a new follow-up for a lead.
    * <p>
-   * Creates a follow-up with the specified due date, title, and optional description.
+   * Creates a follow-up with the specified due date, title, and optional
+   * description.
    * The follow-up is created in PENDING status.
    *
    * @param request The follow-up creation request
    * @return The created follow-up
    */
-  @Operation(
-      summary = "Schedule a follow-up",
-      description = "Creates a new follow-up for a lead with the specified due date and details")
+  @Operation(summary = "Schedule a follow-up", description = "Creates a new follow-up for a lead with the specified due date and details")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Follow-up scheduled successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
@@ -112,9 +111,7 @@ public class FollowUpRestResource {
    * @param pageable Pagination parameters
    * @return Page of follow-ups
    */
-  @Operation(
-      summary = "List follow-ups",
-      description = "Retrieves all follow-ups with pagination. Results are sorted by due date ascending by default.")
+  @Operation(summary = "List follow-ups", description = "Retrieves all follow-ups with pagination. Results are sorted by due date ascending by default.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Follow-ups retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -137,9 +134,7 @@ public class FollowUpRestResource {
    *
    * @return List of today's follow-ups
    */
-  @Operation(
-      summary = "Get today's follow-ups",
-      description = "Retrieves all pending follow-ups with due dates matching the current date")
+  @Operation(summary = "Get today's follow-ups", description = "Retrieves all pending follow-ups with due dates matching the current date")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Today's follow-ups retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -158,13 +153,12 @@ public class FollowUpRestResource {
   /**
    * Gets overdue follow-ups.
    * <p>
-   * Returns all pending follow-ups with due dates before the current date and time.
+   * Returns all pending follow-ups with due dates before the current date and
+   * time.
    *
    * @return List of overdue follow-ups
    */
-  @Operation(
-      summary = "Get overdue follow-ups",
-      description = "Retrieves all pending follow-ups with due dates before the current date and time")
+  @Operation(summary = "Get overdue follow-ups", description = "Retrieves all pending follow-ups with due dates before the current date and time")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Overdue follow-ups retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -183,15 +177,14 @@ public class FollowUpRestResource {
   /**
    * Updates a follow-up.
    * <p>
-   * Updates the follow-up's title, description, due date, priority, or assigned user.
+   * Updates the follow-up's title, description, due date, priority, or assigned
+   * user.
    *
-   * @param id The follow-up ID
+   * @param id      The follow-up ID
    * @param request The update request
    * @return The updated follow-up
    */
-  @Operation(
-      summary = "Update follow-up",
-      description = "Updates the follow-up's title, description, due date, priority, or assigned user")
+  @Operation(summary = "Update follow-up", description = "Updates the follow-up's title, description, due date, priority, or assigned user")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Follow-up updated successfully"),
       @ApiResponse(responseCode = "400", description = "Invalid request data"),
@@ -201,8 +194,7 @@ public class FollowUpRestResource {
   @PutMapping("/{id}")
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<FollowUpDtos.FollowUpResponse> updateFollowUp(
-      @Parameter(description = "Follow-up ID")
-      @PathVariable Long id,
+      @Parameter(description = "Follow-up ID") @PathVariable Long id,
       @Valid @RequestBody FollowUpDtos.UpdateFollowUpRequest request) {
 
     String userId = getCurrentUserId();
@@ -229,9 +221,7 @@ public class FollowUpRestResource {
    * @param id The follow-up ID
    * @return The updated follow-up
    */
-  @Operation(
-      summary = "Mark follow-up as completed",
-      description = "Updates the follow-up status to COMPLETED and records the completion timestamp")
+  @Operation(summary = "Mark follow-up as completed", description = "Updates the follow-up status to COMPLETED and records the completion timestamp")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Follow-up marked as completed successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -240,8 +230,7 @@ public class FollowUpRestResource {
   @PutMapping("/{id}/complete")
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<FollowUpDtos.FollowUpResponse> completeFollowUp(
-      @Parameter(description = "Follow-up ID")
-      @PathVariable Long id) {
+      @Parameter(description = "Follow-up ID") @PathVariable Long id) {
 
     FollowUp completed = followUpService.completeFollowUp(id);
     FollowUpDtos.FollowUpResponse response = FollowUpMapper.toResponse(completed);
@@ -257,9 +246,7 @@ public class FollowUpRestResource {
    * @param id The follow-up ID
    * @return No content response
    */
-  @Operation(
-      summary = "Delete follow-up",
-      description = "Permanently removes a follow-up from the system")
+  @Operation(summary = "Delete follow-up", description = "Permanently removes a follow-up from the system")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "204", description = "Follow-up deleted successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -268,8 +255,7 @@ public class FollowUpRestResource {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteFollowUp(
-      @Parameter(description = "Follow-up ID")
-      @PathVariable Long id) {
+      @Parameter(description = "Follow-up ID") @PathVariable Long id) {
 
     followUpService.deleteFollowUp(id);
     return ResponseEntity.noContent().build();

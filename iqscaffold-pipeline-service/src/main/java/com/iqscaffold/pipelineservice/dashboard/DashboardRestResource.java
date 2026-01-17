@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>
  * Provides endpoints for:
  * <ul>
- *   <li>Getting pipeline statistics (leads by stage and source)</li>
- *   <li>Getting conversion metrics (conversion rate and velocity)</li>
+ * <li>Getting pipeline statistics (leads by stage and source)</li>
+ * <li>Getting conversion metrics (conversion rate and velocity)</li>
  * </ul>
  *
  * <h4>Authorization:</h4>
  * <ul>
- *   <li>All operations require USER, ADMIN, or SUPER_ADMIN role</li>
+ * <li>All operations require USER, ADMIN, or SUPER_ADMIN role</li>
  * </ul>
  */
 @RestController
-@RequestMapping("/api/v1/dashboard")
+@RequestMapping("/api/v1/pipeline/dashboard")
 @Tag(name = "Dashboard", description = "Dashboard statistics and metrics operations")
 @SecurityRequirement(name = "bearerAuth")
 public class DashboardRestResource {
@@ -48,19 +48,18 @@ public class DashboardRestResource {
    * <p>
    * Returns aggregated statistics for the pipeline including:
    * <ul>
-   *   <li>Lead counts by pipeline stage</li>
-   *   <li>Lead counts by source</li>
-   *   <li>Total, active, won, and lost lead counts</li>
+   * <li>Lead counts by pipeline stage</li>
+   * <li>Lead counts by source</li>
+   * <li>Total, active, won, and lost lead counts</li>
    * </ul>
    *
    * @param startDate Optional start date for filtering (inclusive)
-   * @param endDate Optional end date for filtering (inclusive)
+   * @param endDate   Optional end date for filtering (inclusive)
    * @return Dashboard statistics
    */
-  @Operation(
-      summary = "Get dashboard statistics",
-      description = "Retrieves pipeline statistics including lead counts by stage and source. " +
-                    "Optionally filter by date range based on lead creation date.")
+  @Operation(summary = "Get dashboard statistics", description = "Retrieves pipeline statistics including lead counts by stage and source. "
+      +
+      "Optionally filter by date range based on lead creation date.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Dashboard statistics retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -68,14 +67,8 @@ public class DashboardRestResource {
   @GetMapping("/stats")
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<DashboardDtos.DashboardStatsResponse> getDashboardStats(
-      @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)")
-      @RequestParam(required = false)
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-      LocalDate startDate,
-      @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)")
-      @RequestParam(required = false)
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-      LocalDate endDate) {
+      @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
     DashboardDtos.DashboardStatsResponse stats = dashboardService.getDashboardStats(startDate, endDate);
     return ResponseEntity.ok(stats);
@@ -86,19 +79,18 @@ public class DashboardRestResource {
    * <p>
    * Returns conversion analytics including:
    * <ul>
-   *   <li>Conversion rate (percentage of leads converted to Won)</li>
-   *   <li>Average time to convert (days from creation to Won)</li>
-   *   <li>Stage velocity (average days spent in each stage)</li>
+   * <li>Conversion rate (percentage of leads converted to Won)</li>
+   * <li>Average time to convert (days from creation to Won)</li>
+   * <li>Stage velocity (average days spent in each stage)</li>
    * </ul>
    *
    * @param startDate Optional start date for filtering (inclusive)
-   * @param endDate Optional end date for filtering (inclusive)
+   * @param endDate   Optional end date for filtering (inclusive)
    * @return Conversion metrics
    */
-  @Operation(
-      summary = "Get conversion metrics",
-      description = "Retrieves conversion metrics including conversion rate, average time to convert, " +
-                    "and stage velocity. Optionally filter by date range based on lead creation date.")
+  @Operation(summary = "Get conversion metrics", description = "Retrieves conversion metrics including conversion rate, average time to convert, "
+      +
+      "and stage velocity. Optionally filter by date range based on lead creation date.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Conversion metrics retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -106,14 +98,8 @@ public class DashboardRestResource {
   @GetMapping("/conversion")
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<DashboardDtos.ConversionMetricsResponse> getConversionMetrics(
-      @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)")
-      @RequestParam(required = false)
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-      LocalDate startDate,
-      @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)")
-      @RequestParam(required = false)
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-      LocalDate endDate) {
+      @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+      @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
     DashboardDtos.ConversionMetricsResponse metrics = dashboardService.getConversionMetrics(startDate, endDate);
     return ResponseEntity.ok(metrics);

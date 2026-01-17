@@ -186,7 +186,7 @@ spring:
         - id: pipeline-service-dashboard
           uri: ${iqscaffold.gateway.routing.services.pipeline-service.uri}
           predicates:
-            - Path=/api/v1/dashboard/**
+            - Path=/api/v1/pipeline/dashboard/**
           filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
@@ -196,7 +196,7 @@ spring:
         - id: pipeline-service-follow-ups
           uri: ${iqscaffold.gateway.routing.services.pipeline-service.uri}
           predicates:
-            - Path=/api/v1/follow-ups/**
+            - Path=/api/v1/pipeline/follow-ups/**
           filters:
             - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
             - name: RequestRateLimiter
@@ -417,6 +417,9 @@ iqscaffold:
         # Billing Service Webhooks (public - no authentication required)
         - /api/v1/billing/webhooks/**
         
+        # Contact Service Webhooks (public - for external providers)
+        - /api/v1/webhooks/**
+        
         # Billing Service OpenAPI Documentation (public)
         - /billing-service/v3/api-docs/**
         - /billing-service/swagger-resources/**
@@ -462,11 +465,11 @@ iqscaffold:
         # - /api/v1/leads/{leadId}/notes/** (requires Bearer token + USER role)
         # - /api/v1/leads/{leadId}/activities/** (requires Bearer token + USER role)
         # - /api/v1/pipeline/** (requires Bearer token + USER role)
-        # - /api/v1/follow-ups/** (requires Bearer token + USER role)
-        # - /api/v1/dashboard/** (requires Bearer token + USER role)
+        # - /api/v1/pipeline/follow-ups/** (requires Bearer token + USER role)
+        # - /api/v1/pipeline/dashboard/** (requires Bearer token + USER role)
         # - /api/v1/contacts/** (requires Bearer token + USER role)
         # - /api/v1/companies/** (requires Bearer token + USER role)
-        # - /api/v1/webhooks/** (requires Bearer token + ADMIN/SUPER_ADMIN role)
+        # - /api/v1/webhooks/** (Public - for external providers; management requires ADMIN role)
     
     rate-limiting:
       enabled: true
