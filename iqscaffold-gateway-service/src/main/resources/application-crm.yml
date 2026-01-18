@@ -1,0 +1,90 @@
+iqscaffold:
+  gateway:
+    routing:
+      services:
+        lead-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_LEAD_SERVICE_URI:http://localhost:8084}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Lead Service APIs"
+            description: "Lead management and tracking"
+            context-path: "lead-service"
+        pipeline-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_PIPELINE_SERVICE_URI:http://localhost:8085}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Pipeline Service APIs"
+            description: "Sales pipeline and follow-up management"
+            context-path: "pipeline-service"
+        contact-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_CONTACT_SERVICE_URI:http://localhost:8083}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Contact Service APIs"
+            description: "Contact and company management"
+            context-path: "contact-service"
+    
+    rate-limiting:
+      policies:
+        endpoints:
+          # Contact Service Webhook Management (admin operations)
+          "/api/v1/crm/webhooks":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/crm/webhooks/**":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
+          
+          # Company Service Rate Limiting
+          "/api/v1/companies/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+            
+          # Contact Service Rate Limiting
+          "/api/v1/contacts/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+
+          # Lead Service Rate Limiting
+          "/api/v1/leads/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/leads/*/activities/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+          "/api/v1/leads/*/notes/**":
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
+
+          # Pipeline Service Rate Limiting
+          "/api/v1/pipeline/**":
+             requests-per-minute: 100
+             burst-capacity: 150
+             enable-tenant-quotas: true
+          "/api/v1/pipeline/dashboard/**":
+             requests-per-minute: 50
+             burst-capacity: 100
+             enable-tenant-quotas: true
+          "/api/v1/pipeline/follow-ups/**":
+             requests-per-minute: 100
+             burst-capacity: 150
+             enable-tenant-quotas: true

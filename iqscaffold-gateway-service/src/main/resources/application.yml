@@ -76,96 +76,6 @@ spring:
             - Path=/.well-known/jwks.json
           filters:
             - StripPrefix=0
-        - id: lead-service-activities
-          uri: ${iqscaffold.gateway.routing.services.lead-service.uri}
-          predicates:
-            - Path=/api/v1/leads/{leadId}/activities/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: lead-service-notes
-          uri: ${iqscaffold.gateway.routing.services.lead-service.uri}
-          predicates:
-            - Path=/api/v1/leads/{leadId}/notes/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: lead-service
-          uri: ${iqscaffold.gateway.routing.services.lead-service.uri}
-          predicates:
-            - Path=/api/v1/leads/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: pipeline-service-dashboard
-          uri: ${iqscaffold.gateway.routing.services.pipeline-service.uri}
-          predicates:
-            - Path=/api/v1/pipeline/dashboard/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: pipeline-service-follow-ups
-          uri: ${iqscaffold.gateway.routing.services.pipeline-service.uri}
-          predicates:
-            - Path=/api/v1/pipeline/follow-ups/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: pipeline-service
-          uri: ${iqscaffold.gateway.routing.services.pipeline-service.uri}
-          predicates:
-            - Path=/api/v1/pipeline/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: contact-service-webhooks
-          uri: ${iqscaffold.gateway.routing.services.contact-service.uri}
-          predicates:
-            - Path=/api/v1/webhooks/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: contact-service
-          uri: ${iqscaffold.gateway.routing.services.contact-service.uri}
-          predicates:
-            - Path=/api/v1/contacts/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
-        - id: company-service
-          uri: ${iqscaffold.gateway.routing.services.contact-service.uri}
-          predicates:
-            - Path=/api/v1/companies/**
-          filters:
-            - StripPrefix=${iqscaffold.gateway.routing.api-prefix.strip-count:0}
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
         - id: health-check
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
           predicates:
@@ -240,39 +150,6 @@ iqscaffold:
             display-name: "Business Service APIs"
             description: "Business domain logic and processes"
             context-path: "business-service"
-        lead-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_LEAD_SERVICE_URI:http://localhost:8084}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "Lead Service APIs"
-            description: "Lead management and tracking"
-            context-path: "lead-service"
-        pipeline-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_PIPELINE_SERVICE_URI:http://localhost:8085}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "Pipeline Service APIs"
-            description: "Sales pipeline and follow-up management"
-            context-path: "pipeline-service"
-        contact-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_CONTACT_SERVICE_URI:http://localhost:8083}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "Contact Service APIs"
-            description: "Contact and company management"
-            context-path: "contact-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -341,7 +218,7 @@ iqscaffold:
         - /api/v1/billing/webhooks/**
         
         # Contact Service Webhooks (public - for external providers)
-        - /api/v1/webhooks/**
+        - /api/v1/crm/webhooks/**
         
         # Billing Service OpenAPI Documentation (public)
         - /billing-service/v3/api-docs/**
@@ -456,21 +333,6 @@ iqscaffold:
             burst-capacity: 75
             enable-tenant-quotas: true
           
-          # Contact Service Webhook Management (admin operations)
-          "/api/v1/webhooks":
-            requests-per-minute: 30
-            burst-capacity: 50
-            enable-tenant-quotas: true
-          "/api/v1/webhooks/**":
-            requests-per-minute: 40
-            burst-capacity: 60
-            enable-tenant-quotas: true
-          
-          # Company Service Rate Limiting
-          "/api/v1/companies/**":
-            requests-per-minute: 100
-            burst-capacity: 150
-            enable-tenant-quotas: true
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000
