@@ -54,7 +54,7 @@ public interface PaymentProviderAdapter {
    * @param connectedAccountId Stripe Connect Account ID (optional)
    */
   void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
-                     Optional<String> connectedAccountId);
+      Optional<String> connectedAccountId);
 
   /**
    * Create a Stripe Connect Account.
@@ -74,18 +74,34 @@ public interface PaymentProviderAdapter {
   String createAccountLink(String accountId, String refreshUrl, String returnUrl);
 
   /**
-   * Verify webhook signature and parse the webhook payload into a normalized event.
+   * Verify webhook signature and parse the webhook payload into a normalized
+   * event.
    * <p>
-   * This method performs cryptographic signature verification to ensure the webhook
+   * This method performs cryptographic signature verification to ensure the
+   * webhook
    * is authentic and originated from the payment provider. It then parses the
    * provider-specific event format into a unified {@link WebhookEvent} structure.
    *
    * @param payload   The raw JSON payload from the request body
-   * @param sigHeader The signature header value (e.g., Stripe-Signature, PayPal-Transmission-Sig)
+   * @param sigHeader The signature header value (e.g., Stripe-Signature,
+   *                  PayPal-Transmission-Sig)
    * @return Normalized webhook event
-   * @throws IllegalArgumentException If signature verification fails or payload is invalid
+   * @throws IllegalArgumentException If signature verification fails or payload
+   *                                  is invalid
    */
   WebhookEvent verifyAndParseWebhook(String payload, String sigHeader);
+
+  // ==================== Customer Management Methods ====================
+
+  /**
+   * Create a Customer in the payment provider.
+   *
+   * @param email    Customer email
+   * @param name     Customer name
+   * @param tenantId Tenant ID (for metadata/tracking)
+   * @return Customer ID
+   */
+  String createCustomer(String email, String name, String tenantId);
 
   // ==================== Subscription Management Methods ====================
 
@@ -111,7 +127,7 @@ public interface PaymentProviderAdapter {
    * @return Price ID
    */
   String createPrice(String productId, BigDecimal amount, String currency,
-                     String interval, Integer intervalCount, java.util.Map<String, String> metadata);
+      String interval, Integer intervalCount, java.util.Map<String, String> metadata);
 
   /**
    * Create a Subscription for a customer.
@@ -124,7 +140,7 @@ public interface PaymentProviderAdapter {
    * @return Subscription ID
    */
   String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
-                            java.util.Map<String, String> metadata, String idempotencyKey);
+      java.util.Map<String, String> metadata, String idempotencyKey);
 
   /**
    * Update a subscription (e.g., change plan, update quantity).
@@ -140,7 +156,8 @@ public interface PaymentProviderAdapter {
    * Cancel a subscription.
    *
    * @param subscriptionId    Subscription ID
-   * @param cancelAtPeriodEnd If true, cancel at end of current period; if false, cancel immediately
+   * @param cancelAtPeriodEnd If true, cancel at end of current period; if false,
+   *                          cancel immediately
    */
   void cancelSubscription(String subscriptionId, boolean cancelAtPeriodEnd);
 

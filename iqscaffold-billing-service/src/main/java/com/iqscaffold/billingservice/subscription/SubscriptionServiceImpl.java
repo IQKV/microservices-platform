@@ -19,14 +19,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of SubscriptionService for managing tenant subscription lifecycle.
+ * Implementation of SubscriptionService for managing tenant subscription
+ * lifecycle.
  * <p>
  * This service coordinates subscription operations including:
  * <ul>
- *   <li>Creating new subscriptions with Stripe integration</li>
- *   <li>Managing state transitions (pause, resume, cancel)</li>
- *   <li>Synchronization with Stripe subscription state</li>
- *   <li>Audit trail management</li>
+ * <li>Creating new subscriptions with Stripe integration</li>
+ * <li>Managing state transitions (pause, resume, cancel)</li>
+ * <li>Synchronization with Stripe subscription state</li>
+ * <li>Audit trail management</li>
  * </ul>
  */
 @Service
@@ -88,7 +89,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     PaymentProviderAdapter paymentProvider = gatewayConfigService.getProviderForCurrentTenant();
 
     // 5. Create or get Stripe customer
-    // In a real implementation, we'd store and retrieve customer ID from tenant metadata
+    // In a real implementation, we'd store and retrieve customer ID from tenant
+    // metadata
     String stripeCustomerId = createOrGetStripeCustomer(paymentProvider, TenantContext.getCurrentTenantId());
 
     // 6. Determine trial period
@@ -116,7 +118,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       throw new RuntimeException("Failed to create subscription with payment provider", e);
     }
 
-    // 9. Create local subscription record (no tenant_id needed - schema provides context)
+    // 9. Create local subscription record (no tenant_id needed - schema provides
+    // context)
     TenantSubscription subscription = new TenantSubscription();
     subscription.setPlan(plan);
     subscription.setStripeSubscriptionId(stripeSubscriptionId);
@@ -141,9 +144,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             TenantContext.getCurrentTenantId(),
             plan.getId(),
             plan.getName(),
-            stripeSubscriptionId
-        )
-    );
+            stripeSubscriptionId));
 
     log.info("Created subscription: {}", subscription.getId());
 
@@ -161,7 +162,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // No tenant_id check needed - schema isolation ensures we can only see our own data
+    // No tenant_id check needed - schema isolation ensures we can only see our own
+    // data
     return mapToResponse(subscription);
   }
 
@@ -193,7 +195,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional
   public SubscriptionDtos.SubscriptionResponse updateSubscription(UUID id,
-                                                                  SubscriptionDtos.UpdateSubscriptionRequest request) {
+      SubscriptionDtos.UpdateSubscriptionRequest request) {
     // Validate tenant context
     if (!TenantContext.hasTenantContext()) {
       throw new IllegalStateException("Tenant context is required");
@@ -202,7 +204,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // No tenant check needed - schema isolation ensures we can only access our own data
+    // No tenant check needed - schema isolation ensures we can only access our own
+    // data
 
     log.info("Updating subscription: {}", id);
 
@@ -240,9 +243,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             TenantContext.getCurrentTenantId(),
             subscription.getPlan().getId(),
             subscription.getPlan().getName(),
-            subscription.getStatus().name()
-        )
-    );
+            subscription.getStatus().name()));
 
     log.info("Updated subscription: {}", id);
     return mapToResponse(subscription);
@@ -269,7 +270,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // No tenant check needed - schema isolation ensures we can only access our own data
+    // No tenant check needed - schema isolation ensures we can only access our own
+    // data
 
     log.info("Canceling subscription: {}, immediately: {}", id, immediately);
 
@@ -291,9 +293,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
           SubscriptionEvent.canceled(
               subscription.getId(),
               TenantContext.getCurrentTenantId(),
-              SubscriptionStatus.CANCELED.name()
-          )
-      );
+              SubscriptionStatus.CANCELED.name()));
     } catch (final Exception e) {
       log.error("Failed to cancel subscription: {}", id, e);
       throw new RuntimeException("Failed to cancel subscription with payment provider", e);
@@ -314,7 +314,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // No tenant check needed - schema isolation ensures we can only access our own data
+    // No tenant check needed - schema isolation ensures we can only access our own
+    // data
 
     log.info("Pausing subscription: {}", id);
 
@@ -331,8 +332,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
       // Publish event
       eventPublisher.publishSubscriptionPaused(
-          SubscriptionEvent.paused(subscription.getId(), TenantContext.getCurrentTenantId())
-      );
+          SubscriptionEvent.paused(subscription.getId(), TenantContext.getCurrentTenantId()));
     } catch (final Exception e) {
       log.error("Failed to pause subscription: {}", id, e);
       throw new RuntimeException("Failed to pause subscription with payment provider", e);
@@ -353,7 +353,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     TenantSubscription subscription = subscriptionRepository.findById(id)
         .orElseThrow(() -> new SubscriptionNotFoundException("Subscription not found: " + id));
 
-    // No tenant check needed - schema isolation ensures we can only access our own data
+    // No tenant check needed - schema isolation ensures we can only access our own
+    // data
 
     log.info("Resuming subscription: {}", id);
 
@@ -370,8 +371,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
       // Publish event
       eventPublisher.publishSubscriptionResumed(
-          SubscriptionEvent.resumed(subscription.getId(), TenantContext.getCurrentTenantId())
-      );
+          SubscriptionEvent.resumed(subscription.getId(), TenantContext.getCurrentTenantId()));
     } catch (final Exception e) {
       log.error("Failed to resume subscription: {}", id, e);
       throw new RuntimeException("Failed to resume subscription with payment provider", e);
@@ -410,18 +410,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   private String createOrGetStripeCustomer(PaymentProviderAdapter paymentProvider, String tenantId) {
     // In a real implementation, we'd fetch tenant details from tenant service
-    // and check if customer ID already exists
-    // For now, return a placeholder customer ID
-    log.debug("Creating Stripe customer for tenant: {}", tenantId);
+    // For now, we'll use a placeholder email based on tenant ID if we can't fetch
+    // real user details
+    // TODO: Integrate with User/Tenant Service to get actual admin email
+    String email = "admin@" + tenantId + ".iqscaffold.com";
+    String name = "Admin for " + tenantId;
 
-    // TODO: Implement actual customer creation via PaymentProviderAdapter
-    // The interface doesn't currently have a createCustomer method
-    // For now, return a placeholder
-    return "cus_" + tenantId.replace("-", "").substring(0, Math.min(14, tenantId.length()));
+    log.debug("Creating/Retrieving Stripe customer for tenant: {}, email: {}", tenantId, email);
+
+    return paymentProvider.createCustomer(email, name, tenantId);
   }
 
   private void createAuditTrail(TenantSubscription subscription, SubscriptionStatus oldStatus,
-                                SubscriptionStatus newStatus, String notes) {
+      SubscriptionStatus newStatus, String notes) {
     TenantSubscriptionAuditTrail audit = new TenantSubscriptionAuditTrail();
     audit.setTenantSubscription(subscription);
     audit.setOldStatus(oldStatus);

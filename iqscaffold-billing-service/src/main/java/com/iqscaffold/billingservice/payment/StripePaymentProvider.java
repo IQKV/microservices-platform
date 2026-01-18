@@ -59,7 +59,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   /**
    * Gets the Stripe API key for the current tenant.
-   * Falls back to global configuration if tenant-specific config is not available.
+   * Falls back to global configuration if tenant-specific config is not
+   * available.
    */
   private String getStripeApiKey(String tenantId) {
     if (iqScaffoldProperties.billing().security().encryption().useTenantSpecificConfig()) {
@@ -67,8 +68,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
         var config = gatewayConfigService.getDecryptedGatewayConfig(
             tenantId,
             com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
-            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class
-        );
+            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class);
         return config.apiKey();
       } catch (final Exception e) {
         // Log and fall back to global config
@@ -122,7 +122,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
     try {
       // Get tenant ID and tenant-specific API key
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       // 1. Upsert Customer if email provided
       String customerId = null;
@@ -186,7 +187,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
    * This logic mimics the `Hi.Events` reference implementation for customer
    * consistency.
    */
-  private String upsertCustomer(String email, String name, Optional<String> connectedAccountId, String apiKey) throws StripeException {
+  private String upsertCustomer(String email, String name, Optional<String> connectedAccountId, String apiKey)
+      throws StripeException {
     String accountId = connectedAccountId.orElse(null); // Null for platform
     // Note: Tenant ID is needed for local persistence.
     // In a real app we'd pass it or fetch from context.
@@ -236,11 +238,12 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
-                            Optional<String> connectedAccountId) {
+      Optional<String> connectedAccountId) {
     try {
       // Get tenant-specific API key
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RefundCreateParams.Builder paramsBuilder = RefundCreateParams.builder()
           .setPaymentIntent(paymentIntentId);
@@ -327,7 +330,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   /**
    * Gets the Stripe webhook secret for the current tenant.
-   * Falls back to global configuration if tenant-specific config is not available.
+   * Falls back to global configuration if tenant-specific config is not
+   * available.
    */
   private String getWebhookSecret(String tenantId) {
     if (iqScaffoldProperties.billing().security().encryption().useTenantSpecificConfig() && tenantId != null) {
@@ -335,8 +339,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
         var config = gatewayConfigService.getDecryptedGatewayConfig(
             tenantId,
             com.iqscaffold.billingservice.shared.PaymentGatewayProvider.STRIPE,
-            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class
-        );
+            com.iqscaffold.billingservice.admin.dto.GatewayConfigDtos.StripeGatewayConfigData.class);
         return config.webhookSecret();
       } catch (final Exception e) {
         org.slf4j.LoggerFactory.getLogger(StripePaymentProvider.class)
@@ -350,7 +353,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   /**
    * Converts a Stripe Event to a normalized WebhookEvent.
    */
-  private com.iqscaffold.billingservice.webhook.WebhookEvent parseStripeEventToWebhookEvent(com.stripe.model.Event event) {
+  private com.iqscaffold.billingservice.webhook.WebhookEvent parseStripeEventToWebhookEvent(
+      com.stripe.model.Event event) {
     String normalizedEventType = normalizeStripeEventType(event.getType());
     var dataObject = event.getDataObjectDeserializer().getObject().orElse(null);
 
@@ -412,8 +416,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
         resourceId != null ? resourceId : event.getId(),
         resourceType != null ? resourceType : "unknown",
         metadata,
-        dataObject
-    );
+        dataObject);
   }
 
   /**
@@ -422,7 +425,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private String normalizeStripeEventType(String stripeEventType) {
     return switch (stripeEventType) {
       case "payment_intent.succeeded" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_SUCCEEDED;
-      case "payment_intent.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_FAILED;
+      case "payment_intent.payment_failed" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_FAILED;
       case "charge.refunded" -> {
         // Determine if full or partial refund based on charge object
         // This will be checked in the event handler
@@ -433,16 +437,21 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       case "account.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.ACCOUNT_UPDATED;
 
       // Subscription events
-      case "customer.subscription.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
-      case "customer.subscription.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
-      case "customer.subscription.deleted" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
-      case "customer.subscription.trial_will_end" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
+      case "customer.subscription.created" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
+      case "customer.subscription.updated" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
+      case "customer.subscription.deleted" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
+      case "customer.subscription.trial_will_end" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
 
       // Invoice events
       case "invoice.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_CREATED;
       case "invoice.finalized" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_FINALIZED;
       case "invoice.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAID;
-      case "invoice.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
+      case "invoice.payment_failed" ->
+        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
       case "invoice.voided" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_VOIDED;
 
       default -> stripeEventType; // Keep original for unsupported events
@@ -452,20 +461,39 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private RuntimeException handleStripeException(StripeException e) {
     return switch (e) {
       case com.stripe.exception.CardException ce -> new PaymentException("Card declined: " + ce.getMessage(), ce);
-      case com.stripe.exception.InvalidRequestException ire -> new PaymentException("Invalid request: " + ire.getMessage(), ire);
+      case com.stripe.exception.InvalidRequestException ire ->
+        new PaymentException("Invalid request: " + ire.getMessage(), ire);
       case com.stripe.exception.AuthenticationException ae -> new PaymentException("Authentication failed", ae);
       case com.stripe.exception.ApiConnectionException ace -> new PaymentException("Stripe connection failed", ace);
       case com.stripe.exception.StripeException se -> new PaymentException("Stripe error: " + se.getMessage(), se);
     };
   }
 
-  // ==================== Subscription Management Implementation ====================
+  // ==================== Customer Management Implementation ====================
+
+  @Override
+  public String createCustomer(String email, String name, String tenantId) {
+    try {
+      // Use tenant-specific key if configured
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      // Reuse existing upsert logic which handles both creation and updates + local
+      // persistence
+      return upsertCustomer(email, name, Optional.empty(), apiKey);
+    } catch (final StripeException e) {
+      throw handleStripeException(e);
+    }
+  }
+
+  // ==================== Subscription Management Implementation
+  // ====================
 
   @Override
   public String createProduct(String name, String description, java.util.Map<String, String> metadata) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       var paramsBuilder = com.stripe.param.ProductCreateParams.builder()
           .setName(name)
@@ -486,10 +514,11 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public String createPrice(String productId, BigDecimal amount, String currency,
-                            String interval, Integer intervalCount, java.util.Map<String, String> metadata) {
+      String interval, Integer intervalCount, java.util.Map<String, String> metadata) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       // Map interval string to Stripe enum
       com.stripe.param.PriceCreateParams.Recurring.Interval stripeInterval = switch (interval.toLowerCase()) {
@@ -528,10 +557,11 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
-                                   java.util.Map<String, String> metadata, String idempotencyKey) {
+      java.util.Map<String, String> metadata, String idempotencyKey) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       var itemBuilder = com.stripe.param.SubscriptionCreateParams.Item.builder()
           .setPrice(priceId);
@@ -570,7 +600,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public String updateSubscription(String subscriptionId, String newPriceId, java.util.Map<String, String> metadata) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
 
@@ -609,7 +640,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public void cancelSubscription(String subscriptionId, boolean cancelAtPeriodEnd) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
       var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
@@ -634,7 +666,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public void pauseSubscription(String subscriptionId) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
       var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
@@ -657,7 +690,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public void resumeSubscription(String subscriptionId) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
       var subscription = com.stripe.model.Subscription.retrieve(subscriptionId, options);
@@ -676,7 +710,8 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   public Object getSubscription(String subscriptionId) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
-      String apiKey = tenantId != null ? getStripeApiKey(tenantId) : iqScaffoldProperties.billing().payment().stripe().apiKey();
+      String apiKey = tenantId != null ? getStripeApiKey(tenantId)
+          : iqScaffoldProperties.billing().payment().stripe().apiKey();
 
       RequestOptions options = RequestOptions.builder().setApiKey(apiKey).build();
       return com.stripe.model.Subscription.retrieve(subscriptionId, options);

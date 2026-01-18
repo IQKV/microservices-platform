@@ -1,9 +1,12 @@
 package com.iqscaffold.billingservice.subscription.webhook;
 
+import com.iqscaffold.billingservice.subscription.SubscriptionService;
+import com.iqscaffold.billingservice.subscription.SubscriptionStateMachine;
 import com.iqscaffold.billingservice.subscription.SubscriptionStatus;
 import com.iqscaffold.billingservice.subscription.TenantSubscription;
 import com.iqscaffold.billingservice.subscription.TenantSubscriptionRepository;
 import com.iqscaffold.billingservice.webhook.WebhookEvent;
+import com.iqscaffold.billingservice.webhook.WebhookEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,19 +15,30 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Handles subscription lifecycle webhook events from payment providers.
  * <p>
- * Processes events like subscription created, updated, canceled, and trial ending
+ * Processes events like subscription created, updated, canceled, and trial
+ * ending
  * to keep local subscription state in sync with Stripe.
  */
 @Component
 @Transactional
-public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingservice.webhook.WebhookEventHandler {
+public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(SubscriptionWebhookEventHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(SubscriptionWebhookEventHandler.class);
 
   private final TenantSubscriptionRepository subscriptionRepository;
+  private final SubscriptionService subscriptionService;
+  private final SubscriptionStateMachine subscriptionStateMachine;
+  private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
-  public SubscriptionWebhookEventHandler(final TenantSubscriptionRepository subscriptionRepository) {
+  public SubscriptionWebhookEventHandler(
+      final TenantSubscriptionRepository subscriptionRepository,
+      final SubscriptionService subscriptionService,
+      final SubscriptionStateMachine subscriptionStateMachine,
+      final com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
     this.subscriptionRepository = subscriptionRepository;
+    this.subscriptionService = subscriptionService;
+    this.subscriptionStateMachine = subscriptionStateMachine;
+    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -39,14 +53,14 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
    */
   @Override
   public void handleEvent(WebhookEvent event) {
-    log.debug("Processing subscription webhook event: {} - {}", event.eventType(), event.resourceId());
+    logger.debug("Processing subscription webhook event: {} - {}", event.eventType(), event.resourceId());
 
     switch (event.eventType()) {
       case WebhookEvent.EventType.SUBSCRIPTION_CREATED -> handleSubscriptionCreated(event);
       case WebhookEvent.EventType.SUBSCRIPTION_UPDATED -> handleSubscriptionUpdated(event);
       case WebhookEvent.EventType.SUBSCRIPTION_CANCELED -> handleSubscriptionCanceled(event);
       case WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING -> handleSubscriptionTrialEnding(event);
-      default -> log.warn("Unhandled subscription event type: {}", event.eventType());
+      default -> logger.warn("Unhandled subscription event type: {}", event.eventType());
     }
   }
 
@@ -55,16 +69,16 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     String tenantId = event.tenantId().orElse(null);
 
     if (tenantId == null) {
-      log.warn("Cannot process subscription.created without tenant_id: {}", stripeSubscriptionId);
+      logger.warn("Cannot process subscription.created without tenant_id: {}", stripeSubscriptionId);
       return;
     }
 
-    log.info("Processing subscription.created for tenant: {}, subscription: {}", tenantId, stripeSubscriptionId);
+    logger.info("Processing subscription.created for tenant: {}, subscription: {}", tenantId, stripeSubscriptionId);
 
     // Check if subscription already exists
     var existing = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
     if (existing.isPresent()) {
-      log.info("Subscription already exists: {}", stripeSubscriptionId);
+      logger.info("Subscription already exists: {}", stripeSubscriptionId);
       return;
     }
 
@@ -72,7 +86,8 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     String status = event.getMetadataString("status").orElse("active");
     String customerId = event.getMetadataString("customer").orElse(null);
 
-    // Create local subscription record (no tenant_id needed - schema provides context)
+    // Create local subscription record (no tenant_id needed - schema provides
+    // context)
     TenantSubscription subscription = new TenantSubscription();
     subscription.setStripeSubscriptionId(stripeSubscriptionId);
     subscription.setStripeCustomerId(customerId);
@@ -85,17 +100,17 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     }
 
     subscriptionRepository.save(subscription);
-    log.info("Created local subscription record for: {}", stripeSubscriptionId);
+    logger.info("Created local subscription record for: {}", stripeSubscriptionId);
   }
 
   private void handleSubscriptionUpdated(WebhookEvent event) {
     String stripeSubscriptionId = event.resourceId();
 
-    log.info("Processing subscription.updated for: {}", stripeSubscriptionId);
+    logger.info("Processing subscription.updated for: {}", stripeSubscriptionId);
 
     var subscriptionOpt = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
     if (subscriptionOpt.isEmpty()) {
-      log.warn("Subscription not found for update: {}", stripeSubscriptionId);
+      logger.warn("Subscription not found for update: {}", stripeSubscriptionId);
       // Try to create it
       handleSubscriptionCreated(event);
       return;
@@ -115,17 +130,17 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     }
 
     subscriptionRepository.save(subscription);
-    log.info("Updated local subscription record for: {}", stripeSubscriptionId);
+    logger.info("Updated local subscription record for: {}", stripeSubscriptionId);
   }
 
   private void handleSubscriptionCanceled(WebhookEvent event) {
     String stripeSubscriptionId = event.resourceId();
 
-    log.info("Processing subscription.canceled for: {}", stripeSubscriptionId);
+    logger.info("Processing subscription.canceled for: {}", stripeSubscriptionId);
 
     var subscriptionOpt = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
     if (subscriptionOpt.isEmpty()) {
-      log.warn("Subscription not found for cancellation: {}", stripeSubscriptionId);
+      logger.warn("Received subscription deleted event for {} but no local subscription found", stripeSubscriptionId);
       return;
     }
 
@@ -134,22 +149,22 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
     subscription.setCanceledAt(java.time.Instant.now());
 
     subscriptionRepository.save(subscription);
-    log.info("Canceled local subscription record for: {}", stripeSubscriptionId);
+    logger.info("Canceled local subscription record for: {}", stripeSubscriptionId);
   }
 
   private void handleSubscriptionTrialEnding(WebhookEvent event) {
     String stripeSubscriptionId = event.resourceId();
 
-    log.info("Processing subscription.trial_ending for: {}", stripeSubscriptionId);
+    logger.info("Processing subscription.trial_ending for: {}", stripeSubscriptionId);
 
     var subscriptionOpt = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
     if (subscriptionOpt.isEmpty()) {
-      log.warn("Subscription not found for trial ending notification: {}", stripeSubscriptionId);
+      logger.warn("Subscription not found for trial ending notification: {}", stripeSubscriptionId);
       return;
     }
 
     // TODO: Send notification email to tenant about trial ending
-    log.info("Trial ending soon for subscription: {}", stripeSubscriptionId);
+    logger.info("Handling trial will end event for subscription: {}", stripeSubscriptionId);
   }
 
   /**
@@ -165,7 +180,7 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
       case "unpaid" -> SubscriptionStatus.UNPAID;
       case "paused" -> SubscriptionStatus.PAUSED;
       default -> {
-        log.warn("Unknown Stripe status: {}, defaulting to ACTIVE", stripeStatus);
+        logger.warn("Unknown Stripe status: {}, defaulting to ACTIVE", stripeStatus);
         yield SubscriptionStatus.ACTIVE;
       }
     };
@@ -173,12 +188,47 @@ public class SubscriptionWebhookEventHandler implements com.iqscaffold.billingse
 
   /**
    * Populate subscription entity from Stripe subscription object.
-   * Note: Detailed field extraction skipped due to Stripe SDK version compatibility.
+   * Note: Detailed field extraction skipped due to Stripe SDK version
+   * compatibility.
    * Main subscription status and customer info are still populated.
    */
-  private void populateFromStripeSubscription(TenantSubscription subscription, com.stripe.model.Subscription stripeSubscription) {
+  private void populateFromStripeSubscription(TenantSubscription subscription,
+      com.stripe.model.Subscription stripeSubscription) {
     // Status and customer are already set from metadata
-    // Additional fields would be extracted here if needed
-    // For now, webhook metadata contains the essential information
+
+    // Use Jackson to parse raw JSON as standard getters (getCurrentPeriodEnd/Start)
+    // are accessible via toJson() string in this SDK version
+    try {
+      String jsonString = stripeSubscription.toJson();
+      com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(jsonString);
+
+      if (root.has("current_period_start") && !root.get("current_period_start").isNull()) {
+        subscription.setCurrentPeriodStart(java.time.Instant.ofEpochSecond(root.get("current_period_start").asLong()));
+      }
+
+      if (root.has("current_period_end") && !root.get("current_period_end").isNull()) {
+        subscription.setCurrentPeriodEnd(java.time.Instant.ofEpochSecond(root.get("current_period_end").asLong()));
+      }
+    } catch (Exception e) {
+      logger.error("Failed to parse Stripe subscription JSON for dates", e);
+    }
+
+    if (stripeSubscription.getTrialEnd() != null) {
+      subscription.setTrialEnd(java.time.Instant.ofEpochSecond(stripeSubscription.getTrialEnd()));
+    }
+
+    if (stripeSubscription.getCancelAt() != null) {
+      subscription.setCancelAt(java.time.Instant.ofEpochSecond(stripeSubscription.getCancelAt()));
+    }
+
+    if (stripeSubscription.getCanceledAt() != null) {
+      subscription.setCanceledAt(java.time.Instant.ofEpochSecond(stripeSubscription.getCanceledAt()));
+    }
+
+    // Also map cancellation reason/details if available
+    if (stripeSubscription.getCancellationDetails() != null
+        && stripeSubscription.getCancellationDetails().getReason() != null) {
+      subscription.setCancellationReason(stripeSubscription.getCancellationDetails().getReason());
+    }
   }
 }
