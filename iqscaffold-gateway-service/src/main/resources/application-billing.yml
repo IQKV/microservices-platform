@@ -1,0 +1,106 @@
+iqscaffold:
+  gateway:
+    routing:
+      services:
+        billing-service:
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI:http://localhost:8082}
+          path: /v1/**
+          enabled: true
+          connect-timeout: 5000
+          response-timeout: 30000
+          openapi:
+            enabled: true
+            display-name: "Billing Service APIs"
+            description: "Payments, subscriptions and invoicing"
+            context-path: "billing-service"
+    
+    rate-limiting:
+      policies:
+        endpoints:
+          # Billing Service Rate Limiting Policies
+          
+          # Payment Operations
+          "/api/v1/billing/payments/intent":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/billing/payments/**":
+            requests-per-minute: 60
+            burst-capacity: 100
+            enable-tenant-quotas: true
+          "/api/v1/billing/payments/*/refund":
+            requests-per-minute: 10
+            burst-capacity: 20
+            enable-tenant-quotas: true
+          
+          # Subscription Operations
+          "/api/v1/billing/subscriptions":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscriptions/**":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscriptions/*/cancel":
+            requests-per-minute: 10
+            burst-capacity: 15
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscriptions/*/pause":
+            requests-per-minute: 10
+            burst-capacity: 15
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscriptions/*/resume":
+            requests-per-minute: 10
+            burst-capacity: 15
+            enable-tenant-quotas: true
+          
+          # Subscription Plan Management
+          "/api/v1/billing/subscription-plans":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/billing/subscription-plans/**":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
+          
+          # Invoice Operations
+          "/api/v1/billing/invoices":
+            requests-per-minute: 50
+            burst-capacity: 75
+            enable-tenant-quotas: true
+          "/api/v1/billing/invoices/**":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
+          
+          # Payout Operations
+          "/api/v1/billing/payouts":
+            requests-per-minute: 30
+            burst-capacity: 50
+            enable-tenant-quotas: true
+          "/api/v1/billing/payouts/**":
+            requests-per-minute: 40
+            burst-capacity: 60
+            enable-tenant-quotas: true
+          
+          # Admin Billing Operations
+          "/api/v1/admin/billing/merchants/**":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: true
+          "/api/v1/admin/billing/gateway-config":
+            requests-per-minute: 15
+            burst-capacity: 25
+            enable-tenant-quotas: true
+          "/api/v1/admin/billing/gateway-config/**":
+            requests-per-minute: 20
+            burst-capacity: 30
+            enable-tenant-quotas: true
+          
+          # Webhook Operations (external providers - higher limits, no tenant quotas)
+          "/api/v1/billing/webhooks/**":
+            requests-per-minute: 200
+            burst-capacity: 500
+            enable-tenant-quotas: false  # Webhooks from external providers
