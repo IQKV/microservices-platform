@@ -127,28 +127,6 @@ iqscaffold:
             display-name: "User Service APIs"
             description: "Authentication and user management APIs"
             context-path: "user-service"
-        business-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BUSINESS_SERVICE_URI:http://localhost:8081}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "Business Service APIs"
-            description: "Business domain logic and processes"
-            context-path: "business-service"
-        business-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BUSINESS_SERVICE_URI:http://localhost:8081}
-          path: /v1/**
-          enabled: true
-          connect-timeout: 5000
-          response-timeout: 30000
-          openapi:
-            enabled: true
-            display-name: "Business Service APIs"
-            description: "Business domain logic and processes"
-            context-path: "business-service"
       enable-service-discovery: false
       load-balancing:
         strategy: round-robin
@@ -201,8 +179,6 @@ iqscaffold:
         - /api-docs/**
         - /user-service/swagger-ui/**
         - /user-service/api-docs/**
-        - /business-service/swagger-ui/**
-        - /business-service/api-docs/**
         - /billing-service/swagger-ui/**
         - /billing-service/api-docs/**
         - /lead-service/swagger-ui/**
