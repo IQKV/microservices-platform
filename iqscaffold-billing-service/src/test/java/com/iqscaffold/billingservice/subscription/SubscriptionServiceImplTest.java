@@ -73,8 +73,7 @@ class SubscriptionServiceImplTest {
         auditTrailRepository,
         gatewayConfigService,
         stateMachine,
-        eventPublisher
-    );
+        eventPublisher);
 
     // Mock TenantContext
     tenantContextMock = Mockito.mockStatic(TenantContext.class);
@@ -98,14 +97,14 @@ class SubscriptionServiceImplTest {
         planId,
         "pm_123",
         14,
-        Map.of("source", "web")
-    );
+        Map.of("source", "web"));
 
     SubscriptionPlan plan = createTestPlan(planId);
     TenantSubscription savedSubscription = createTestSubscription(plan);
 
     when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
     when(subscriptionRepository.findActive()).thenReturn(Optional.empty());
+    when(paymentProvider.createCustomer(anyString(), anyString(), anyString())).thenReturn("cus_123");
     when(paymentProvider.createSubscription(anyString(), anyString(), any(Integer.class),
         anyMap(), anyString())).thenReturn("sub_123");
     when(subscriptionRepository.save(any(TenantSubscription.class))).thenReturn(savedSubscription);
@@ -136,14 +135,12 @@ class SubscriptionServiceImplTest {
     tenantContextMock.when(TenantContext::hasTenantContext).thenReturn(false);
 
     SubscriptionDtos.CreateSubscriptionRequest request = new SubscriptionDtos.CreateSubscriptionRequest(
-        UUID.randomUUID(), null, null, null
-    );
+        UUID.randomUUID(), null, null, null);
 
     // When & Then
     IllegalStateException exception = assertThrows(
         IllegalStateException.class,
-        () -> subscriptionService.createSubscription(request)
-    );
+        () -> subscriptionService.createSubscription(request));
 
     assertEquals("Tenant context is required", exception.getMessage());
   }
@@ -153,16 +150,14 @@ class SubscriptionServiceImplTest {
     // Given
     UUID planId = UUID.randomUUID();
     SubscriptionDtos.CreateSubscriptionRequest request = new SubscriptionDtos.CreateSubscriptionRequest(
-        planId, null, null, null
-    );
+        planId, null, null, null);
 
     when(planRepository.findById(planId)).thenReturn(Optional.empty());
 
     // When & Then
     SubscriptionNotFoundException exception = assertThrows(
         SubscriptionNotFoundException.class,
-        () -> subscriptionService.createSubscription(request)
-    );
+        () -> subscriptionService.createSubscription(request));
 
     assertEquals("Subscription plan not found: " + planId, exception.getMessage());
   }
@@ -175,16 +170,14 @@ class SubscriptionServiceImplTest {
     inactivePlan.setIsActive(false);
 
     SubscriptionDtos.CreateSubscriptionRequest request = new SubscriptionDtos.CreateSubscriptionRequest(
-        planId, null, null, null
-    );
+        planId, null, null, null);
 
     when(planRepository.findById(planId)).thenReturn(Optional.of(inactivePlan));
 
     // When & Then
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
-        () -> subscriptionService.createSubscription(request)
-    );
+        () -> subscriptionService.createSubscription(request));
 
     assertEquals("Subscription plan is not active: " + planId, exception.getMessage());
   }
@@ -197,8 +190,7 @@ class SubscriptionServiceImplTest {
     TenantSubscription existingSubscription = createTestSubscription(plan);
 
     SubscriptionDtos.CreateSubscriptionRequest request = new SubscriptionDtos.CreateSubscriptionRequest(
-        planId, null, null, null
-    );
+        planId, null, null, null);
 
     when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
     when(subscriptionRepository.findActive()).thenReturn(Optional.of(existingSubscription));
@@ -206,8 +198,7 @@ class SubscriptionServiceImplTest {
     // When & Then
     IllegalStateException exception = assertThrows(
         IllegalStateException.class,
-        () -> subscriptionService.createSubscription(request)
-    );
+        () -> subscriptionService.createSubscription(request));
 
     assertEquals("Tenant already has an active subscription", exception.getMessage());
   }
@@ -239,8 +230,7 @@ class SubscriptionServiceImplTest {
     // When & Then
     SubscriptionNotFoundException exception = assertThrows(
         SubscriptionNotFoundException.class,
-        () -> subscriptionService.getSubscription(subscriptionId)
-    );
+        () -> subscriptionService.getSubscription(subscriptionId));
 
     assertEquals("Subscription not found: " + subscriptionId, exception.getMessage());
   }
@@ -277,8 +267,7 @@ class SubscriptionServiceImplTest {
     Pageable pageable = PageRequest.of(0, 10);
     List<TenantSubscription> subscriptions = List.of(
         createTestSubscription(createTestPlan(UUID.randomUUID())),
-        createTestSubscription(createTestPlan(UUID.randomUUID()))
-    );
+        createTestSubscription(createTestPlan(UUID.randomUUID())));
     Page<TenantSubscription> subscriptionPage = new PageImpl<>(subscriptions, pageable, 2);
 
     when(subscriptionRepository.findAll(pageable)).thenReturn(subscriptionPage);
@@ -417,8 +406,7 @@ class SubscriptionServiceImplTest {
     // When & Then
     SubscriptionNotFoundException exception = assertThrows(
         SubscriptionNotFoundException.class,
-        () -> subscriptionService.syncSubscriptionFromStripe(stripeSubscriptionId)
-    );
+        () -> subscriptionService.syncSubscriptionFromStripe(stripeSubscriptionId));
 
     assertEquals("Subscription not found for Stripe ID: " + stripeSubscriptionId, exception.getMessage());
   }
@@ -436,8 +424,7 @@ class SubscriptionServiceImplTest {
     newPlan.setName("New Plan");
 
     SubscriptionDtos.UpdateSubscriptionRequest request = new SubscriptionDtos.UpdateSubscriptionRequest(
-        newPlanId, "pm_new", Map.of("updated", "true")
-    );
+        newPlanId, "pm_new", Map.of("updated", "true"));
 
     when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
     when(planRepository.findById(newPlanId)).thenReturn(Optional.of(newPlan));
@@ -470,8 +457,7 @@ class SubscriptionServiceImplTest {
     inactivePlan.setIsActive(false);
 
     SubscriptionDtos.UpdateSubscriptionRequest request = new SubscriptionDtos.UpdateSubscriptionRequest(
-        newPlanId, null, null
-    );
+        newPlanId, null, null);
 
     when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
     when(planRepository.findById(newPlanId)).thenReturn(Optional.of(inactivePlan));
@@ -479,8 +465,7 @@ class SubscriptionServiceImplTest {
     // When & Then
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
-        () -> subscriptionService.updateSubscription(subscriptionId, request)
-    );
+        () -> subscriptionService.updateSubscription(subscriptionId, request));
 
     assertEquals("Target plan is not active: " + newPlanId, exception.getMessage());
     verify(paymentProvider, never()).updateSubscription(anyString(), anyString(), anyMap());
