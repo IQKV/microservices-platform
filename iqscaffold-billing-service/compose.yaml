@@ -16,7 +16,7 @@ services:
     networks:
       - billing-service-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U iqscaffold_billing -d iqscaffold_billing_local -h localhost" ]
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_billing -d iqscaffold_billing_local -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,7 +50,7 @@ services:
     networks:
       - billing-service-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -80,7 +80,7 @@ services:
     networks:
       - billing-service-network
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -168,7 +168,7 @@ services:
     networks:
       - billing-service-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health/readiness" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3

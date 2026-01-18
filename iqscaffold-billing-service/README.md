@@ -215,7 +215,7 @@ Request Flow:
 The service enforces strict transitions to ensure financial consistency:
 
 | Initial State | Event        | Target State         | Notes                      |
-|:--------------|:-------------|:---------------------|:---------------------------|
+| :------------ | :----------- | :------------------- | :------------------------- |
 | `null`        | Create       | `PENDING`            | Initial record creation    |
 | `PENDING`     | API Call     | `PROCESSING`         | Intent sent to Stripe      |
 | `PROCESSING`  | Webhook      | `SUCCEEDED`          | Success confirmation       |
@@ -435,15 +435,17 @@ The service implements a unified webhook handling system that works across all p
 #### Stripe Webhook Configuration
 
 1. **Create Webhook Endpoint in Stripe Dashboard**:
-  - Go to Developers → Webhooks
-  - Click "Add endpoint"
-  - URL: `https://your-domain.com/api/v1/billing/webhooks/stripe`
-  - Select events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `payout.paid`, `payout.failed`, `account.updated`
+
+- Go to Developers → Webhooks
+- Click "Add endpoint"
+- URL: `https://your-domain.com/api/v1/billing/webhooks/stripe`
+- Select events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.refunded`, `payout.paid`, `payout.failed`, `account.updated`
 
 2. **Configure Webhook Secret**:
-  - Copy the webhook signing secret from Stripe dashboard
-  - Add to environment variables: `STRIPE_WEBHOOK_SECRET=whsec_...`
-  - Or configure per-tenant in gateway configuration
+
+- Copy the webhook signing secret from Stripe dashboard
+- Add to environment variables: `STRIPE_WEBHOOK_SECRET=whsec_...`
+- Or configure per-tenant in gateway configuration
 
 3. **Test Webhook**:
    ```bash
@@ -456,36 +458,42 @@ The service implements a unified webhook handling system that works across all p
 #### PayPal Webhook Configuration (Future)
 
 1. **Create Webhook in PayPal Developer Portal**:
-  - Go to REST API apps → Your App → Webhooks
-  - Click "Add Webhook"
-  - URL: `https://your-domain.com/api/v1/billing/webhooks/paypal`
-  - Select events: `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.DENIED`, `PAYMENT.SALE.REFUNDED`
+
+- Go to REST API apps → Your App → Webhooks
+- Click "Add Webhook"
+- URL: `https://your-domain.com/api/v1/billing/webhooks/paypal`
+- Select events: `PAYMENT.SALE.COMPLETED`, `PAYMENT.SALE.DENIED`, `PAYMENT.SALE.REFUNDED`
 
 2. **Configure Webhook Credentials**:
-  - Store webhook ID in gateway configuration
-  - PayPal uses certificate-based signature verification
+
+- Store webhook ID in gateway configuration
+- PayPal uses certificate-based signature verification
 
 #### Square Webhook Configuration (Future)
 
 1. **Create Webhook in Square Developer Portal**:
-  - Go to Applications → Your App → Webhooks
-  - Add webhook URL: `https://your-domain.com/api/v1/billing/webhooks/square`
-  - Subscribe to: `payment.created`, `payment.failed`, `refund.created`
+
+- Go to Applications → Your App → Webhooks
+- Add webhook URL: `https://your-domain.com/api/v1/billing/webhooks/square`
+- Subscribe to: `payment.created`, `payment.failed`, `refund.created`
 
 2. **Configure Signature Key**:
-  - Copy signature key from Square dashboard
-  - Add to tenant-specific gateway configuration
+
+- Copy signature key from Square dashboard
+- Add to tenant-specific gateway configuration
 
 #### Braintree Webhook Configuration (Future)
 
 1. **Configure Webhook in Braintree Control Panel**:
-  - Go to Settings → Webhooks
-  - URL: `https://your-domain.com/api/v1/billing/webhooks/braintree`
-  - Enable notifications for subscription and transaction events
+
+- Go to Settings → Webhooks
+- URL: `https://your-domain.com/api/v1/billing/webhooks/braintree`
+- Enable notifications for subscription and transaction events
 
 2. **Webhook Verification**:
-  - Braintree uses public key cryptography for webhook verification
-  - Store public key in gateway configuration
+
+- Braintree uses public key cryptography for webhook verification
+- Store public key in gateway configuration
 
 ## Payment Gateway Configuration
 
@@ -701,29 +709,29 @@ The billing service implements comprehensive authorization controls with multi-l
 ### Authorization Rules
 
 | Operation                 | Required Roles                                                           | Ownership Check |
-|---------------------------|--------------------------------------------------------------------------|-----------------|
+| ------------------------- | ------------------------------------------------------------------------ | --------------- |
 | **Payments**              |
-| Create payment            | `USER`                                                                   | ❌               |
-| View payment              | `USER`                                                                   | ✅               |
-| List payments             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅               |
-| Refund payment            | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅               |
+| Create payment            | `USER`                                                                   | ❌              |
+| View payment              | `USER`                                                                   | ✅              |
+| List payments             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
+| Refund payment            | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
 | **Subscriptions**         |
-| Create subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌               |
-| View subscription         | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`, `USER` | ✅               |
-| Manage subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅               |
+| Create subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View subscription         | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`, `USER` | ✅              |
+| Manage subscription       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ✅              |
 | **Subscription Plans**    |
-| Manage plans              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌               |
-| View plans                | Any authenticated user                                                   | ❌               |
+| Manage plans              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View plans                | Any authenticated user                                                   | ❌              |
 | **Invoices**              |
-| View invoices             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅               |
+| View invoices             | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
 | **Payouts**               |
-| View payouts              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅               |
+| View payouts              | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ✅              |
 | **Merchant Onboarding**   |
-| Initiate onboarding       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌               |
-| View merchant status      | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌               |
+| Initiate onboarding       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View merchant status      | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌              |
 | **Gateway Configuration** |
-| Manage gateway config     | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌               |
-| View gateway config       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌               |
+| Manage gateway config     | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`                           | ❌              |
+| View gateway config       | `SUPER_ADMIN`, `TENANT_OWNER`, `BILLING_ADMIN`, `FINANCE_VIEWER`         | ❌              |
 
 ### Key Features
 
