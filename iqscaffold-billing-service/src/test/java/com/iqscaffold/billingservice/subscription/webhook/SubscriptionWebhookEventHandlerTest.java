@@ -28,13 +28,23 @@ class SubscriptionWebhookEventHandlerTest {
   private TenantSubscriptionRepository subscriptionRepository;
 
   @Mock
+  private com.iqscaffold.billingservice.subscription.SubscriptionService subscriptionService;
+
+  @Mock
+  private com.iqscaffold.billingservice.subscription.SubscriptionStateMachine subscriptionStateMachine;
+
+  @Mock
+  private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
+  @Mock
   private Subscription stripeSubscription;
 
   private SubscriptionWebhookEventHandler handler;
 
   @BeforeEach
   void setUp() {
-    handler = new SubscriptionWebhookEventHandler(subscriptionRepository);
+    handler = new SubscriptionWebhookEventHandler(subscriptionRepository, subscriptionService, subscriptionStateMachine,
+        objectMapper);
   }
 
   @Test
@@ -48,8 +58,7 @@ class SubscriptionWebhookEventHandlerTest {
         "sub_123",
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     // When
     boolean result = handler.supports(event);
@@ -69,8 +78,7 @@ class SubscriptionWebhookEventHandlerTest {
         "pi_123",
         WebhookEvent.ResourceType.PAYMENT_INTENT,
         Map.of(),
-        null
-    );
+        null);
 
     // When
     boolean result = handler.supports(event);
@@ -95,10 +103,8 @@ class SubscriptionWebhookEventHandlerTest {
         Map.of(
             "status", "active",
             "customer", customerId,
-            "subscription", stripeSubscription
-        ),
-        null
-    );
+            "subscription", stripeSubscription),
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
 
@@ -123,10 +129,10 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
-    when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(existingSubscription));
+    when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId))
+        .thenReturn(Optional.of(existingSubscription));
 
     // When
     handler.handleEvent(event);
@@ -148,8 +154,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     // When
     handler.handleEvent(event);
@@ -173,10 +178,8 @@ class SubscriptionWebhookEventHandlerTest {
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(
             "status", "past_due",
-            "subscription", stripeSubscription
-        ),
-        null
-    );
+            "subscription", stripeSubscription),
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(subscription));
 
@@ -200,8 +203,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of("status", "active"),
-        null
-    );
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
 
@@ -209,7 +211,8 @@ class SubscriptionWebhookEventHandlerTest {
     handler.handleEvent(event);
 
     // Then - Should attempt to create the subscription since it wasn't found
-    // The method calls handleSubscriptionCreated when subscription is not found during update
+    // The method calls handleSubscriptionCreated when subscription is not found
+    // during update
   }
 
   @Test
@@ -226,8 +229,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(subscription));
 
@@ -251,8 +253,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
 
@@ -277,8 +278,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(subscription));
 
@@ -302,8 +302,7 @@ class SubscriptionWebhookEventHandlerTest {
         subscriptionId,
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
 
@@ -325,8 +324,7 @@ class SubscriptionWebhookEventHandlerTest {
         "sub_123",
         WebhookEvent.ResourceType.SUBSCRIPTION,
         Map.of(),
-        null
-    );
+        null);
 
     // When
     handler.handleEvent(event);
