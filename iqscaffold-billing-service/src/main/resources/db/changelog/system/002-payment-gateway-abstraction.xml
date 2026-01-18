@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="002-1-rename-merchant-stripe-config-table" author="iqscaffold">
         <comment>Rename merchant_stripe_config table to merchant_payment_config for multi-gateway support</comment>
-        
-        <renameTable 
-            oldTableName="merchant_stripe_config"
-            newTableName="merchant_payment_config"/>
+
+        <renameTable
+                oldTableName="merchant_stripe_config"
+                newTableName="merchant_payment_config"/>
 
         <rollback>
-            <renameTable 
-                oldTableName="merchant_payment_config"
-                newTableName="merchant_stripe_config"/>
+            <renameTable
+                    oldTableName="merchant_payment_config"
+                    newTableName="merchant_stripe_config"/>
         </rollback>
     </changeSet>
 
     <changeSet id="002-2-rename-merchant-stripe-account-column" author="iqscaffold">
         <comment>Rename stripe_account_id to gateway_account_id in merchant_payment_config table</comment>
-        
-        <renameColumn 
-            tableName="merchant_payment_config"
-            oldColumnName="stripe_account_id"
-            newColumnName="gateway_account_id"
-            columnDataType="VARCHAR(255)"/>
+
+        <renameColumn
+                tableName="merchant_payment_config"
+                oldColumnName="stripe_account_id"
+                newColumnName="gateway_account_id"
+                columnDataType="VARCHAR(255)"/>
 
         <rollback>
-            <renameColumn 
-                tableName="merchant_payment_config"
-                oldColumnName="gateway_account_id"
-                newColumnName="stripe_account_id"
-                columnDataType="VARCHAR(255)"/>
+            <renameColumn
+                    tableName="merchant_payment_config"
+                    oldColumnName="gateway_account_id"
+                    newColumnName="stripe_account_id"
+                    columnDataType="VARCHAR(255)"/>
         </rollback>
     </changeSet>
 
     <changeSet id="002-3-add-merchant-gateway-provider" author="iqscaffold">
         <comment>Add gateway_provider column to merchant_payment_config table</comment>
-        
+
         <addColumn tableName="merchant_payment_config">
             <column name="gateway_provider" type="VARCHAR(50)" defaultValue="STRIPE">
                 <constraints nullable="false"/>
@@ -53,7 +53,7 @@
 
     <changeSet id="002-4-create-merchant-indexes" author="iqscaffold">
         <comment>Create indexes for merchant_payment_config table</comment>
-        
+
         <createIndex indexName="idx_merchant_payment_config_gateway_account" tableName="merchant_payment_config">
             <column name="gateway_account_id"/>
             <column name="gateway_provider"/>

@@ -54,7 +54,7 @@ public interface PaymentProviderAdapter {
    * @param connectedAccountId Stripe Connect Account ID (optional)
    */
   void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
-      Optional<String> connectedAccountId);
+                     Optional<String> connectedAccountId);
 
   /**
    * Create a Stripe Connect Account.
@@ -127,7 +127,7 @@ public interface PaymentProviderAdapter {
    * @return Price ID
    */
   String createPrice(String productId, BigDecimal amount, String currency,
-      String interval, Integer intervalCount, java.util.Map<String, String> metadata);
+                     String interval, Integer intervalCount, java.util.Map<String, String> metadata);
 
   /**
    * Create a Subscription for a customer.
@@ -140,7 +140,7 @@ public interface PaymentProviderAdapter {
    * @return Subscription ID
    */
   String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
-      java.util.Map<String, String> metadata, String idempotencyKey);
+                            java.util.Map<String, String> metadata, String idempotencyKey);
 
   /**
    * Update a subscription (e.g., change plan, update quantity).

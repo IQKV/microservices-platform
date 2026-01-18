@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="006-1-create-payment-gateway-config-table" author="iqscaffold">
         <comment>Create payment_gateway_config table for tenant-specific gateway configurations</comment>
-        
+
         <createTable tableName="payment_gateway_config" schemaName="public">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            
+
             <column name="tenant_id" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="gateway_provider" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="is_active" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="is_primary" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="mode" type="VARCHAR(20)">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="config_data" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="display_name" type="VARCHAR(255)"/>
-            
+
             <column name="description" type="VARCHAR(500)"/>
-            
+
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            
+
             <column name="updated_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -57,24 +57,24 @@
 
     <changeSet id="006-2-add-unique-constraint-tenant-provider" author="iqscaffold">
         <comment>Add unique constraint for tenant_id and gateway_provider combination</comment>
-        
+
         <addUniqueConstraint
-            tableName="payment_gateway_config"
-            schemaName="public"
-            columnNames="tenant_id, gateway_provider"
-            constraintName="uq_gateway_config_tenant_provider"/>
+                tableName="payment_gateway_config"
+                schemaName="public"
+                columnNames="tenant_id, gateway_provider"
+                constraintName="uq_gateway_config_tenant_provider"/>
 
         <rollback>
             <dropUniqueConstraint
-                tableName="payment_gateway_config"
-                schemaName="public"
-                constraintName="uq_gateway_config_tenant_provider"/>
+                    tableName="payment_gateway_config"
+                    schemaName="public"
+                    constraintName="uq_gateway_config_tenant_provider"/>
         </rollback>
     </changeSet>
 
     <changeSet id="006-3-create-gateway-config-indexes" author="iqscaffold">
         <comment>Create indexes for payment_gateway_config table</comment>
-        
+
         <!-- Index for tenant lookups -->
         <createIndex indexName="idx_gateway_config_tenant" tableName="payment_gateway_config" schemaName="public">
             <column name="tenant_id"/>
@@ -108,36 +108,36 @@
 
     <changeSet id="006-4-add-comments-to-gateway-config-table" author="iqscaffold">
         <comment>Add descriptive comments to payment_gateway_config table and columns</comment>
-        
+
         <setTableRemarks tableName="payment_gateway_config" schemaName="public"
-            remarks="Stores tenant-specific payment gateway configurations with encrypted credentials"/>
-        
+                         remarks="Stores tenant-specific payment gateway configurations with encrypted credentials"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="id"
-            remarks="Primary key UUID"/>
-        
+                          remarks="Primary key UUID"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="tenant_id"
-            remarks="Tenant identifier linking configuration to specific tenant"/>
-        
+                          remarks="Tenant identifier linking configuration to specific tenant"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="gateway_provider"
-            remarks="Payment gateway provider type (STRIPE, PAYPAL, SQUARE, BRAINTREE)"/>
-        
+                          remarks="Payment gateway provider type (STRIPE, PAYPAL, SQUARE, BRAINTREE)"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="is_active"
-            remarks="Whether this gateway is currently active and can process payments"/>
-        
+                          remarks="Whether this gateway is currently active and can process payments"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="is_primary"
-            remarks="Whether this is the primary/default gateway for the tenant"/>
-        
+                          remarks="Whether this is the primary/default gateway for the tenant"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="mode"
-            remarks="Gateway mode: test or live"/>
-        
+                          remarks="Gateway mode: test or live"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="config_data"
-            remarks="Encrypted JSON containing gateway-specific configuration (API keys, secrets)"/>
-        
+                          remarks="Encrypted JSON containing gateway-specific configuration (API keys, secrets)"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="display_name"
-            remarks="Optional display name for this gateway configuration"/>
-        
+                          remarks="Optional display name for this gateway configuration"/>
+
         <setColumnRemarks tableName="payment_gateway_config" schemaName="public" columnName="description"
-            remarks="Optional description or notes about this configuration"/>
+                          remarks="Optional description or notes about this configuration"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -193,7 +193,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
    * Main subscription status and customer info are still populated.
    */
   private void populateFromStripeSubscription(TenantSubscription subscription,
-      com.stripe.model.Subscription stripeSubscription) {
+                                              com.stripe.model.Subscription stripeSubscription) {
     // Status and customer are already set from metadata
 
     // Use Jackson to parse raw JSON as standard getters (getCurrentPeriodEnd/Start)
@@ -209,7 +209,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
       if (root.has("current_period_end") && !root.get("current_period_end").isNull()) {
         subscription.setCurrentPeriodEnd(java.time.Instant.ofEpochSecond(root.get("current_period_end").asLong()));
       }
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to parse Stripe subscription JSON for dates", e);
     }
 

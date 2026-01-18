@@ -71,7 +71,7 @@ class VerificationResponseTest {
 
   @Test
   void shouldCompareVerificationResponses() {
-    var verifiedAt = LocalDateTime.of(2024, 1, 15, 10, 30);
+    var verifiedAt = LocalDateTime.of(2025, 1, 15, 10, 30);
     var response1 = new VerificationResponse(
         true,
         "Success",
@@ -92,8 +92,8 @@ class VerificationResponseTest {
 
   @Test
   void shouldHandleDifferentTimestamps() {
-    var time1 = LocalDateTime.of(2024, 1, 15, 10, 30);
-    var time2 = LocalDateTime.of(2024, 1, 15, 10, 31);
+    var time1 = LocalDateTime.of(2025, 1, 15, 10, 30);
+    var time2 = LocalDateTime.of(2025, 1, 15, 10, 31);
 
     var response1 = new VerificationResponse(true, "Success", "john.doe", time1);
     var response2 = new VerificationResponse(true, "Success", "john.doe", time2);

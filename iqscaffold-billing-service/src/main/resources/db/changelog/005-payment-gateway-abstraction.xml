@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="005-1-rename-stripe-customer-table" author="iqscaffold">
         <comment>Rename stripe_customer table to payment_gateway_customer for multi-gateway support</comment>
-        
-        <renameTable 
-            oldTableName="stripe_customer"
-            newTableName="payment_gateway_customer"/>
+
+        <renameTable
+                oldTableName="stripe_customer"
+                newTableName="payment_gateway_customer"/>
 
         <rollback>
-            <renameTable 
-                oldTableName="payment_gateway_customer"
-                newTableName="stripe_customer"/>
+            <renameTable
+                    oldTableName="payment_gateway_customer"
+                    newTableName="stripe_customer"/>
         </rollback>
     </changeSet>
 
     <changeSet id="005-2-rename-customer-columns" author="iqscaffold">
         <comment>Rename stripe-specific columns in payment_gateway_customer table</comment>
-        
-        <renameColumn 
-            tableName="payment_gateway_customer"
-            oldColumnName="stripe_customer_id"
-            newColumnName="gateway_customer_id"
-            columnDataType="VARCHAR(255)"/>
 
-        <renameColumn 
-            tableName="payment_gateway_customer"
-            oldColumnName="stripe_account_id"
-            newColumnName="gateway_account_id"
-            columnDataType="VARCHAR(255)"/>
+        <renameColumn
+                tableName="payment_gateway_customer"
+                oldColumnName="stripe_customer_id"
+                newColumnName="gateway_customer_id"
+                columnDataType="VARCHAR(255)"/>
+
+        <renameColumn
+                tableName="payment_gateway_customer"
+                oldColumnName="stripe_account_id"
+                newColumnName="gateway_account_id"
+                columnDataType="VARCHAR(255)"/>
 
         <rollback>
-            <renameColumn 
-                tableName="payment_gateway_customer"
-                oldColumnName="gateway_customer_id"
-                newColumnName="stripe_customer_id"
-                columnDataType="VARCHAR(255)"/>
-            <renameColumn 
-                tableName="payment_gateway_customer"
-                oldColumnName="gateway_account_id"
-                newColumnName="stripe_account_id"
-                columnDataType="VARCHAR(255)"/>
+            <renameColumn
+                    tableName="payment_gateway_customer"
+                    oldColumnName="gateway_customer_id"
+                    newColumnName="stripe_customer_id"
+                    columnDataType="VARCHAR(255)"/>
+            <renameColumn
+                    tableName="payment_gateway_customer"
+                    oldColumnName="gateway_account_id"
+                    newColumnName="stripe_account_id"
+                    columnDataType="VARCHAR(255)"/>
         </rollback>
     </changeSet>
 
     <changeSet id="005-3-add-customer-gateway-provider" author="iqscaffold">
         <comment>Add gateway_provider column to payment_gateway_customer table</comment>
-        
+
         <addColumn tableName="payment_gateway_customer">
             <column name="gateway_provider" type="VARCHAR(50)" defaultValue="STRIPE">
                 <constraints nullable="false"/>
@@ -64,7 +64,7 @@
 
     <changeSet id="005-4-create-customer-indexes" author="iqscaffold">
         <comment>Create indexes for payment_gateway_customer table</comment>
-        
+
         <createIndex indexName="idx_payment_gateway_customer_email_provider" tableName="payment_gateway_customer">
             <column name="email"/>
             <column name="gateway_provider"/>

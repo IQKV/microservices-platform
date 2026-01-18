@@ -14,26 +14,26 @@
             </column>
         </addColumn>
 
-        <createIndex indexName="idx_merchant_config_organization_id" 
-                     tableName="merchant_stripe_config" 
+        <createIndex indexName="idx_merchant_config_organization_id"
+                     tableName="merchant_stripe_config"
                      schemaName="public">
             <column name="organization_id"/>
         </createIndex>
 
-        <addUniqueConstraint 
+        <addUniqueConstraint
                 tableName="merchant_stripe_config"
                 columnNames="organization_id"
                 constraintName="uq_merchant_config_organization_id"
                 schemaName="public"/>
 
         <rollback>
-            <dropUniqueConstraint tableName="merchant_stripe_config" 
+            <dropUniqueConstraint tableName="merchant_stripe_config"
                                   constraintName="uq_merchant_config_organization_id"
                                   schemaName="public"/>
-            <dropIndex indexName="idx_merchant_config_organization_id" 
+            <dropIndex indexName="idx_merchant_config_organization_id"
                        tableName="merchant_stripe_config"
                        schemaName="public"/>
-            <dropColumn tableName="merchant_stripe_config" 
+            <dropColumn tableName="merchant_stripe_config"
                         columnName="organization_id"
                         schemaName="public"/>
         </rollback>

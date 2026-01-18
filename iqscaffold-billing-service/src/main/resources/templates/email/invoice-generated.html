@@ -248,7 +248,8 @@
 
     <div class="due-date-notice" th:if="${dueDate}">
       <h3>⏰ Payment Due</h3>
-      <p th:text="#{email.invoice.generated.due.notice(${#temporals.format(dueDate, 'MMM dd, yyyy')})}">Payment is due by Feb 15, 2024. Please ensure payment is made by this date to avoid any service interruptions.</p>
+      <p th:text="#{email.invoice.generated.due.notice(${#temporals.format(dueDate, 'MMM dd, yyyy')})}">Payment is due by Feb 15, 2024. Please ensure payment is made by this date to avoid
+        any service interruptions.</p>
     </div>
 
     <div class="button-container" th:if="${invoiceUrl}">
@@ -266,7 +267,8 @@
 
     <div class="support-info">
       <h3 th:text="#{email.invoice.generated.support.title}">Questions?</h3>
-      <p th:text="#{email.invoice.generated.support.body}">If you have any questions about this invoice, please contact our billing team with Invoice Number: <strong th:text="${invoiceNumber}">INV-2024-001</strong></p>
+      <p th:text="#{email.invoice.generated.support.body}">If you have any questions about this invoice, please contact our billing team with Invoice Number: <strong
+              th:text="${invoiceNumber}">INV-2024-001</strong></p>
     </div>
 
     <p>Best regards,</p>

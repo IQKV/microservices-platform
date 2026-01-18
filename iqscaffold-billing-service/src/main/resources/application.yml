@@ -294,4 +294,4 @@ iqscaffold:
       proration-behavior: CREATE_PRORATIONS
       notifications:
         trial-ending-days-notice: 3
-        payment-retry-schedule: [1, 3, 5, 7]
+        payment-retry-schedule: [ 1, 3, 5, 7 ]

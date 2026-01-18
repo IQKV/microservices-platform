@@ -230,7 +230,8 @@
 
     <div class="retry-info" th:if="${retryDate}">
       <h3>🔄 Automatic Retry</h3>
-      <p th:text="#{email.subscription.payment.failed.retry.info(${#temporals.format(retryDate, 'MMM dd, yyyy')})}">We will automatically retry your payment on Feb 18, 2024. You can also update your payment method now to avoid any service interruption.</p>
+      <p th:text="#{email.subscription.payment.failed.retry.info(${#temporals.format(retryDate, 'MMM dd, yyyy')})}">We will automatically retry your payment on Feb 18, 2024. You can also
+        update your payment method now to avoid any service interruption.</p>
     </div>
 
     <div class="button-container" th:if="${updatePaymentUrl}">

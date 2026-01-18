@@ -100,8 +100,8 @@ class UserRegistrationResponseTest {
 
   @Test
   void shouldHandleDifferentTimestamps() {
-    var time1 = LocalDateTime.of(2024, 1, 15, 10, 30);
-    var time2 = LocalDateTime.of(2024, 1, 15, 10, 31);
+    var time1 = LocalDateTime.of(2025, 1, 15, 10, 30);
+    var time2 = LocalDateTime.of(2025, 1, 15, 10, 31);
 
     var response1 = new UserRegistrationResponse(
         1L,
@@ -130,7 +130,7 @@ class UserRegistrationResponseTest {
 
   @Test
   void shouldCompareEqualResponses() {
-    var createdAt = LocalDateTime.of(2024, 1, 15, 10, 30);
+    var createdAt = LocalDateTime.of(2025, 1, 15, 10, 30);
     var response1 = new UserRegistrationResponse(
         1L,
         "john_doe",

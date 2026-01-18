@@ -54,7 +54,7 @@ iqscaffold:
             requests-per-minute: 100
             burst-capacity: 150
             enable-tenant-quotas: true
-            
+
           # Contact Service Rate Limiting
           "/api/v1/contacts/**":
             requests-per-minute: 100
@@ -77,14 +77,14 @@ iqscaffold:
 
           # Pipeline Service Rate Limiting
           "/api/v1/pipeline/**":
-             requests-per-minute: 100
-             burst-capacity: 150
-             enable-tenant-quotas: true
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true
           "/api/v1/pipeline/dashboard/**":
-             requests-per-minute: 50
-             burst-capacity: 100
-             enable-tenant-quotas: true
+            requests-per-minute: 50
+            burst-capacity: 100
+            enable-tenant-quotas: true
           "/api/v1/pipeline/follow-ups/**":
-             requests-per-minute: 100
-             burst-capacity: 150
-             enable-tenant-quotas: true
+            requests-per-minute: 100
+            burst-capacity: 150
+            enable-tenant-quotas: true

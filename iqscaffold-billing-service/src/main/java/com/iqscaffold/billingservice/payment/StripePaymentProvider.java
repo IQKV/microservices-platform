@@ -238,7 +238,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public void refundPayment(String paymentIntentId, Optional<BigDecimal> amount, String currency,
-      Optional<String> connectedAccountId) {
+                            Optional<String> connectedAccountId) {
     try {
       // Get tenant-specific API key
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
@@ -425,8 +425,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private String normalizeStripeEventType(String stripeEventType) {
     return switch (stripeEventType) {
       case "payment_intent.succeeded" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_SUCCEEDED;
-      case "payment_intent.payment_failed" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_FAILED;
+      case "payment_intent.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.PAYMENT_FAILED;
       case "charge.refunded" -> {
         // Determine if full or partial refund based on charge object
         // This will be checked in the event handler
@@ -437,21 +436,16 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
       case "account.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.ACCOUNT_UPDATED;
 
       // Subscription events
-      case "customer.subscription.created" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
-      case "customer.subscription.updated" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
-      case "customer.subscription.deleted" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
-      case "customer.subscription.trial_will_end" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
+      case "customer.subscription.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CREATED;
+      case "customer.subscription.updated" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_UPDATED;
+      case "customer.subscription.deleted" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_CANCELED;
+      case "customer.subscription.trial_will_end" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.SUBSCRIPTION_TRIAL_ENDING;
 
       // Invoice events
       case "invoice.created" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_CREATED;
       case "invoice.finalized" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_FINALIZED;
       case "invoice.paid" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAID;
-      case "invoice.payment_failed" ->
-        com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
+      case "invoice.payment_failed" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_PAYMENT_FAILED;
       case "invoice.voided" -> com.iqscaffold.billingservice.webhook.WebhookEvent.EventType.INVOICE_VOIDED;
 
       default -> stripeEventType; // Keep original for unsupported events
@@ -461,8 +455,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
   private RuntimeException handleStripeException(StripeException e) {
     return switch (e) {
       case com.stripe.exception.CardException ce -> new PaymentException("Card declined: " + ce.getMessage(), ce);
-      case com.stripe.exception.InvalidRequestException ire ->
-        new PaymentException("Invalid request: " + ire.getMessage(), ire);
+      case com.stripe.exception.InvalidRequestException ire -> new PaymentException("Invalid request: " + ire.getMessage(), ire);
       case com.stripe.exception.AuthenticationException ae -> new PaymentException("Authentication failed", ae);
       case com.stripe.exception.ApiConnectionException ace -> new PaymentException("Stripe connection failed", ace);
       case com.stripe.exception.StripeException se -> new PaymentException("Stripe error: " + se.getMessage(), se);
@@ -514,7 +507,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public String createPrice(String productId, BigDecimal amount, String currency,
-      String interval, Integer intervalCount, java.util.Map<String, String> metadata) {
+                            String interval, Integer intervalCount, java.util.Map<String, String> metadata) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
       String apiKey = tenantId != null ? getStripeApiKey(tenantId)
@@ -557,7 +550,7 @@ public class StripePaymentProvider implements PaymentProviderAdapter {
 
   @Override
   public String createSubscription(String customerId, String priceId, Integer trialPeriodDays,
-      java.util.Map<String, String> metadata, String idempotencyKey) {
+                                   java.util.Map<String, String> metadata, String idempotencyKey) {
     try {
       String tenantId = com.iqscaffold.billingservice.security.SecurityContextHelper.getCurrentTenantId();
       String apiKey = tenantId != null ? getStripeApiKey(tenantId)

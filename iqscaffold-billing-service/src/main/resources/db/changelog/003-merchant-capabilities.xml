@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="003-merchant-capabilities" author="iqscaffold">
@@ -24,8 +24,8 @@
           I'll fix 001 XML first, then write this one properly.
         -->
         <addColumn tableName="merchant_stripe_config">
-             <column name="charges_enabled" type="boolean" defaultValueBoolean="false"/>
-             <column name="payouts_enabled" type="boolean" defaultValueBoolean="false"/>
+            <column name="charges_enabled" type="boolean" defaultValueBoolean="false"/>
+            <column name="payouts_enabled" type="boolean" defaultValueBoolean="false"/>
         </addColumn>
     </changeSet>
 

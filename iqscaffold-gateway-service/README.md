@@ -458,7 +458,8 @@ public ResponseEntity<?> protectedEndpoint(
 }
 ```
 
-**Security Note**: The gateway sanitizes all incoming user/tenant context headers before processing the request. This prevents clients from spoofing user identity by injecting malicious headers. Only the gateway can set these headers after JWT validation.
+**Security Note**: The gateway sanitizes all incoming user/tenant context headers before processing the request. This prevents clients from spoofing user identity by injecting malicious
+headers. Only the gateway can set these headers after JWT validation.
 
 ### JWT Validation Configuration
 

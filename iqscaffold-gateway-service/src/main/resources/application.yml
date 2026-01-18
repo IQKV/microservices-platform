@@ -27,8 +27,8 @@ spring:
         locator:
           enabled: false
       routes:
-                redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
-                redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
+        redis-rate-limiter.replenish-rate: ${iqscaffold.gateway.rate-limiting.policies.default-requests-per-minute}
+        redis-rate-limiter.burst-capacity: ${iqscaffold.gateway.rate-limiting.policies.default-burst-capacity}
 
         - id: user-service-public-signup
           uri: ${iqscaffold.gateway.routing.services.user-service.uri}
@@ -332,7 +332,7 @@ iqscaffold:
             requests-per-minute: 50
             burst-capacity: 75
             enable-tenant-quotas: true
-          
+
       tenant-quotas:
         enabled: true
         default-tenant-requests-per-minute: 1000

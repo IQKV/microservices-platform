@@ -572,7 +572,11 @@
       "name": "iqscaffold.i18n.supported-locales",
       "type": "java.util.List<java.lang.String>",
       "description": "List of supported locales (format: 'xx' or 'xx-XX')",
-      "defaultValue": ["en", "es", "fr"]
+      "defaultValue": [
+        "en",
+        "es",
+        "fr"
+      ]
     },
     {
       "name": "iqscaffold.i18n.default-locale",

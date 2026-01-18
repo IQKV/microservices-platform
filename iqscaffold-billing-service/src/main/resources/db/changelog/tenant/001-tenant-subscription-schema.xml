@@ -63,7 +63,7 @@
             </column>
             <column name="tenant_subscription_id" type="uuid">
                 <constraints nullable="false" foreignKeyName="fk_subscription_invoice_tenant_subscription"
-                            references="tenant_subscription(id)"/>
+                             references="tenant_subscription(id)"/>
             </column>
             <column name="invoice_number" type="varchar(100)"/>
             <column name="amount_due" type="decimal(19, 2)">
@@ -114,7 +114,7 @@
             </column>
             <column name="tenant_subscription_id" type="uuid">
                 <constraints nullable="false" foreignKeyName="fk_subscription_item_tenant_subscription"
-                            references="tenant_subscription(id)"/>
+                             references="tenant_subscription(id)"/>
             </column>
             <column name="plan_id" type="uuid"/>
             <column name="quantity" type="int" defaultValueNumeric="1">
@@ -146,7 +146,7 @@
             </column>
             <column name="tenant_subscription_id" type="uuid">
                 <constraints nullable="false" foreignKeyName="fk_tenant_subscription_audit_trail_tenant_subscription"
-                            references="tenant_subscription(id)"/>
+                             references="tenant_subscription(id)"/>
             </column>
             <column name="old_status" type="varchar(50)"/>
             <column name="new_status" type="varchar(50)">

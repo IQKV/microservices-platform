@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
+
     <!-- Console Appender with JSON format for structured logging -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -87,7 +87,7 @@
                 <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
             </encoder>
         </appender>
-        
+
         <root level="INFO">
             <appender-ref ref="CONSOLE_PRETTY"/>
         </root>
@@ -133,7 +133,7 @@
     <logger name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="liquibase" level="INFO"/>
-    
+
     <!-- Default root logger -->
     <root level="INFO">
         <appender-ref ref="ASYNC_CONSOLE"/>

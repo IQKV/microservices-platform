@@ -73,7 +73,7 @@ class VerificationStatusResponseTest {
 
   @Test
   void shouldCompareStatusResponses() {
-    var registrationDate = LocalDateTime.of(2024, 1, 15, 10, 30);
+    var registrationDate = LocalDateTime.of(2025, 1, 15, 10, 30);
     var response1 = new VerificationStatusResponse(
         "user@example.com",
         true,
