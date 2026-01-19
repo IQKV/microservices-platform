@@ -1,5 +1,6 @@
 package com.iqscaffold.billingservice.subscription.webhook;
 
+import com.iqscaffold.billingservice.shared.PaymentGatewayProvider;
 import com.iqscaffold.billingservice.subscription.InvoiceStatus;
 import com.iqscaffold.billingservice.subscription.SubscriptionInvoice;
 import com.iqscaffold.billingservice.subscription.SubscriptionInvoiceRepository;
@@ -14,7 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
  * Handles invoice webhook events from payment providers.
  * <p>
  * Processes invoice created, paid, payment failed, and voided events
- * to keep local invoice state in sync with Stripe.
+ * to keep local invoice state in sync with payment providers.
+ * <p>
+ * Provider-specific data extraction is delegated to specialized services
+ * to maintain separation of concerns and support multiple payment gateways.
  */
 @Component
 @Transactional
@@ -24,12 +28,15 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
 
   private final SubscriptionInvoiceRepository invoiceRepository;
   private final TenantSubscriptionRepository subscriptionRepository;
+  private final StripeInvoiceDataExtractor stripeDataExtractor;
 
   public InvoiceWebhookEventHandler(
       final SubscriptionInvoiceRepository invoiceRepository,
-      final TenantSubscriptionRepository subscriptionRepository) {
+      final TenantSubscriptionRepository subscriptionRepository,
+      final StripeInvoiceDataExtractor stripeDataExtractor) {
     this.invoiceRepository = invoiceRepository;
     this.subscriptionRepository = subscriptionRepository;
+    this.stripeDataExtractor = stripeDataExtractor;
   }
 
   @Override
@@ -57,25 +64,32 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
   }
 
   private void handleInvoiceCreated(WebhookEvent event) {
-    String stripeInvoiceId = event.resourceId();
+    String invoiceId = event.resourceId();
 
-    log.info("Processing invoice.created for: {}", stripeInvoiceId);
+    log.info("Processing invoice.created for: {}", invoiceId);
 
     // Check if invoice already exists
-    var existing = invoiceRepository.findByStripeInvoiceId(stripeInvoiceId);
+    var existing = findExistingInvoice(invoiceId, event.provider());
     if (existing.isPresent()) {
-      log.info("Invoice already exists: {}", stripeInvoiceId);
+      log.info("Invoice already exists: {}", invoiceId);
       return;
     }
 
-    // Extract invoice from metadata
-    Object rawInvoice = event.metadata().get("invoice");
-    if (!(rawInvoice instanceof com.stripe.model.Invoice stripeInvoice)) {
-      log.warn("Invoice object not found in metadata for: {}", stripeInvoiceId);
+    // Extract invoice data using provider-specific extractor
+    var invoiceData = extractInvoiceData(event);
+    if (invoiceData == null) {
+      log.warn("Failed to extract invoice data from event: {}", invoiceId);
       return;
     }
 
-    createOrUpdateInvoice(stripeInvoice, event);
+    // Extract provider-specific invoice object
+    var providerInvoice = extractProviderInvoice(event);
+    if (providerInvoice == null) {
+      log.warn("Provider invoice object not found in metadata for: {}", invoiceId);
+      return;
+    }
+
+    createOrUpdateInvoice(providerInvoice, invoiceData, event);
   }
 
   private void handleInvoiceFinalized(WebhookEvent event) {
@@ -88,7 +102,7 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
     updateInvoiceStatus(event, InvoiceStatus.PAID);
 
     // Mark payment timestamp
-    var invoiceOpt = invoiceRepository.findByStripeInvoiceId(event.resourceId());
+    var invoiceOpt = findExistingInvoice(event.resourceId(), event.provider());
     invoiceOpt.ifPresent(invoice -> {
       invoice.setPaidAt(java.time.Instant.now());
       invoiceRepository.save(invoice);
@@ -107,11 +121,11 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
   }
 
   private void updateInvoiceStatus(WebhookEvent event, InvoiceStatus status) {
-    String stripeInvoiceId = event.resourceId();
+    String invoiceId = event.resourceId();
 
-    var invoiceOpt = invoiceRepository.findByStripeInvoiceId(stripeInvoiceId);
+    var invoiceOpt = findExistingInvoice(invoiceId, event.provider());
     if (invoiceOpt.isEmpty()) {
-      log.warn("Invoice not found for status update: {}", stripeInvoiceId);
+      log.warn("Invoice not found for status update: {}", invoiceId);
       // Try to create it
       handleInvoiceCreated(event);
       return;
@@ -121,71 +135,110 @@ public class InvoiceWebhookEventHandler implements com.iqscaffold.billingservice
     invoice.setStatus(status);
     invoiceRepository.save(invoice);
 
-    log.info("Updated invoice {} status to: {}", stripeInvoiceId, status);
+    log.info("Updated invoice {} status to: {}", invoiceId, status);
   }
 
-  private void createOrUpdateInvoice(com.stripe.model.Invoice stripeInvoice, WebhookEvent event) {
-    String stripeInvoiceId = stripeInvoice.getId();
+  /**
+   * Find existing invoice by provider-specific ID.
+   */
+  private java.util.Optional<SubscriptionInvoice> findExistingInvoice(String invoiceId, PaymentGatewayProvider provider) {
+    return switch (provider) {
+      case STRIPE -> invoiceRepository.findByStripeInvoiceId(invoiceId);
+      // Add other providers as needed
+      // case PAYPAL -> invoiceRepository.findByPaypalInvoiceId(invoiceId);
+      default -> {
+        log.warn("Unsupported provider for invoice lookup: {}", provider);
+        yield java.util.Optional.empty();
+      }
+    };
+  }
 
-    // Find tenant subscription - extract from metadata or event
-    String stripeSubscriptionId = event.getMetadataString("subscription").orElse(null);
-    if (stripeSubscriptionId == null) {
-      log.warn("Invoice has no subscription in metadata: {}", stripeInvoiceId);
+  /**
+   * Extract invoice data using provider-specific extractor.
+   */
+  private StripeInvoiceDataExtractor.InvoiceData extractInvoiceData(WebhookEvent event) {
+    return switch (event.provider()) {
+      case STRIPE -> stripeDataExtractor.extractBasicData(event);
+      // Add other providers as needed
+      default -> {
+        log.warn("Unsupported provider for invoice data extraction: {}", event.provider());
+        yield null;
+      }
+    };
+  }
+
+  /**
+   * Extract provider-specific invoice object from webhook event.
+   */
+  private Object extractProviderInvoice(WebhookEvent event) {
+    return switch (event.provider()) {
+      case STRIPE -> stripeDataExtractor.extractStripeInvoice(event);
+      // Add other providers as needed
+      default -> {
+        log.warn("Unsupported provider for invoice object extraction: {}", event.provider());
+        yield null;
+      }
+    };
+  }
+
+  /**
+   * Create or update invoice using provider-specific data.
+   */
+  private void createOrUpdateInvoice(Object providerInvoice, StripeInvoiceDataExtractor.InvoiceData invoiceData, WebhookEvent event) {
+    // Find tenant subscription
+    if (invoiceData.subscriptionId() == null) {
+      log.warn("Invoice has no subscription in metadata: {}", invoiceData.invoiceId());
       return;
     }
 
-    var subscriptionOpt = subscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
+    var subscriptionOpt = findSubscriptionByProvider(invoiceData.subscriptionId(), event.provider());
     if (subscriptionOpt.isEmpty()) {
-      log.warn("Subscription not found for invoice: {}", stripeSubscriptionId);
+      log.warn("Subscription not found for invoice: {}", invoiceData.subscriptionId());
       return;
     }
 
     var tenantSubscription = subscriptionOpt.get();
 
     // Create or update invoice
-    var invoiceOpt = invoiceRepository.findByStripeInvoiceId(stripeInvoiceId);
+    var invoiceOpt = findExistingInvoice(invoiceData.invoiceId(), event.provider());
     SubscriptionInvoice invoice = invoiceOpt.orElse(new SubscriptionInvoice());
 
-    invoice.setStripeInvoiceId(stripeInvoiceId);
+    // Set basic invoice data
     invoice.setTenantSubscription(tenantSubscription);
-    // No need to set tenant_id - schema provides context
-    invoice.setInvoiceNumber(stripeInvoice.getNumber());
 
-    // Set amounts
-    if (stripeInvoice.getAmountDue() != null) {
-      invoice.setAmountDue(java.math.BigDecimal.valueOf(stripeInvoice.getAmountDue()).divide(java.math.BigDecimal.valueOf(100)));
-    }
-    if (stripeInvoice.getAmountPaid() != null) {
-      invoice.setAmountPaid(java.math.BigDecimal.valueOf(stripeInvoice.getAmountPaid()).divide(java.math.BigDecimal.valueOf(100)));
-    }
-
-    invoice.setCurrency(stripeInvoice.getCurrency().toUpperCase());
-    invoice.setStatus(mapStripeStatusToLocal(stripeInvoice.getStatus()));
-
-    // Set URLs
-    invoice.setHostedInvoiceUrl(stripeInvoice.getHostedInvoiceUrl());
-    invoice.setInvoicePdfUrl(stripeInvoice.getInvoicePdf());
-
-    // Set due date if available
-    if (stripeInvoice.getDueDate() != null) {
-      invoice.setDueDate(java.time.Instant.ofEpochSecond(stripeInvoice.getDueDate()));
-    }
+    // Populate with provider-specific data
+    populateInvoiceFromProvider(invoice, providerInvoice, event.provider());
 
     invoiceRepository.save(invoice);
-    log.info("Created/updated local invoice record for: {}", stripeInvoiceId);
+    log.info("Created/updated local invoice record for: {}", invoiceData.invoiceId());
   }
 
-  private InvoiceStatus mapStripeStatusToLocal(String stripeStatus) {
-    return switch (stripeStatus.toLowerCase()) {
-      case "draft" -> InvoiceStatus.DRAFT;
-      case "open" -> InvoiceStatus.OPEN;
-      case "paid" -> InvoiceStatus.PAID;
-      case "void" -> InvoiceStatus.VOID;
-      case "uncollectible" -> InvoiceStatus.UNCOLLECTIBLE;
+  /**
+   * Find subscription by provider-specific ID.
+   */
+  private java.util.Optional<com.iqscaffold.billingservice.subscription.TenantSubscription> findSubscriptionByProvider(String subscriptionId, PaymentGatewayProvider provider) {
+    return switch (provider) {
+      case STRIPE -> subscriptionRepository.findByStripeSubscriptionId(subscriptionId);
+      // Add other providers as needed
       default -> {
-        log.warn("Unknown Stripe invoice status: {}, defaulting to OPEN", stripeStatus);
-        yield InvoiceStatus.OPEN;
+        log.warn("Unsupported provider for subscription lookup: {}", provider);
+        yield java.util.Optional.empty();
       }
     };
+  }
+
+  /**
+   * Populate invoice with provider-specific data.
+   */
+  private void populateInvoiceFromProvider(SubscriptionInvoice invoice, Object providerInvoice, PaymentGatewayProvider provider) {
+    switch (provider) {
+      case STRIPE -> {
+        if (providerInvoice instanceof com.stripe.model.Invoice stripeInvoice) {
+          stripeDataExtractor.populateFromStripeInvoice(invoice, stripeInvoice);
+        }
+      }
+      // Add other providers as needed
+      default -> log.warn("Unsupported provider for invoice population: {}", provider);
+    }
   }
 }

@@ -34,7 +34,7 @@ class SubscriptionWebhookEventHandlerTest {
   private com.iqscaffold.billingservice.subscription.SubscriptionStateMachine subscriptionStateMachine;
 
   @Mock
-  private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+  private StripeSubscriptionDataExtractor stripeDataExtractor;
 
   @Mock
   private Subscription stripeSubscription;
@@ -44,7 +44,7 @@ class SubscriptionWebhookEventHandlerTest {
   @BeforeEach
   void setUp() {
     handler = new SubscriptionWebhookEventHandler(subscriptionRepository, subscriptionService, subscriptionStateMachine,
-        objectMapper);
+        stripeDataExtractor);
   }
 
   @Test
@@ -106,13 +106,21 @@ class SubscriptionWebhookEventHandlerTest {
             "subscription", stripeSubscription),
         null);
 
+    StripeSubscriptionDataExtractor.SubscriptionData subscriptionData = 
+        new StripeSubscriptionDataExtractor.SubscriptionData(
+            subscriptionId, 
+            customerId, 
+            com.iqscaffold.billingservice.subscription.SubscriptionStatus.ACTIVE);
+
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
+    when(stripeDataExtractor.extractBasicData(event)).thenReturn(subscriptionData);
 
     // When
     handler.handleEvent(event);
 
     // Then
     verify(subscriptionRepository).save(any(TenantSubscription.class));
+    verify(stripeDataExtractor).populateFromStripeSubscription(any(TenantSubscription.class), any(WebhookEvent.class));
   }
 
   @Test
@@ -181,7 +189,14 @@ class SubscriptionWebhookEventHandlerTest {
             "subscription", stripeSubscription),
         null);
 
+    StripeSubscriptionDataExtractor.SubscriptionData subscriptionData = 
+        new StripeSubscriptionDataExtractor.SubscriptionData(
+            subscriptionId, 
+            "cus_123", 
+            com.iqscaffold.billingservice.subscription.SubscriptionStatus.PAST_DUE);
+
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(subscription));
+    when(stripeDataExtractor.extractBasicData(event)).thenReturn(subscriptionData);
 
     // When
     handler.handleEvent(event);

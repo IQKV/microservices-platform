@@ -35,13 +35,16 @@ class InvoiceWebhookEventHandlerTest {
   private TenantSubscriptionRepository subscriptionRepository;
 
   @Mock
+  private StripeInvoiceDataExtractor stripeDataExtractor;
+
+  @Mock
   private Invoice stripeInvoice;
 
   private InvoiceWebhookEventHandler handler;
 
   @BeforeEach
   void setUp() {
-    handler = new InvoiceWebhookEventHandler(invoiceRepository, subscriptionRepository);
+    handler = new InvoiceWebhookEventHandler(invoiceRepository, subscriptionRepository, stripeDataExtractor);
   }
 
   @Test
@@ -114,14 +117,20 @@ class InvoiceWebhookEventHandlerTest {
         null
     );
 
+    StripeInvoiceDataExtractor.InvoiceData invoiceData = 
+        new StripeInvoiceDataExtractor.InvoiceData(invoiceId, subscriptionId);
+
     when(invoiceRepository.findByStripeInvoiceId(invoiceId)).thenReturn(Optional.empty());
     when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.of(tenantSubscription));
+    when(stripeDataExtractor.extractBasicData(event)).thenReturn(invoiceData);
+    when(stripeDataExtractor.extractStripeInvoice(event)).thenReturn(stripeInvoice);
 
     // When
     handler.handleEvent(event);
 
     // Then
     verify(invoiceRepository).save(any(SubscriptionInvoice.class));
+    verify(stripeDataExtractor).populateFromStripeInvoice(any(SubscriptionInvoice.class), any(Invoice.class));
   }
 
   @Test
