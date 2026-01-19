@@ -15,27 +15,17 @@
                 <thread>thread</thread>
                 <logger>logger</logger>
             </fieldNames>
-            <!-- Include MDC fields for correlation tracking -->
-            <mdcEntryWriter>
-                <mdcKeyFieldName>mdc</mdcKeyFieldName>
-            </mdcEntryWriter>
             <!-- Include structured arguments -->
             <argumentsFieldName>args</argumentsFieldName>
             <!-- Include stack traces for exceptions -->
             <includeStackTrace>true</includeStackTrace>
-            <stackTracePattern>
-                <pattern>
-                    <omitCommonFrames>true</omitCommonFrames>
-                    <maxDepthPerThrowable>30</maxDepthPerThrowable>
-                </pattern>
-            </stackTracePattern>
         </encoder>
     </appender>
 
     <!-- File Appender with JSON format for production logging -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/iqscaffold-billing-service.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>logs/iqscaffold-billing-service.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
@@ -52,9 +42,6 @@
                 <thread>thread</thread>
                 <logger>logger</logger>
             </fieldNames>
-            <mdcEntryWriter>
-                <mdcKeyFieldName>mdc</mdcKeyFieldName>
-            </mdcEntryWriter>
             <argumentsFieldName>args</argumentsFieldName>
             <includeStackTrace>true</includeStackTrace>
         </encoder>

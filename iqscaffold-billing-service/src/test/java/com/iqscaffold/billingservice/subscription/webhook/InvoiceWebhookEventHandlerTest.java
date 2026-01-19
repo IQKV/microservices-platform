@@ -3,6 +3,7 @@ package com.iqscaffold.billingservice.subscription.webhook;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -96,15 +97,16 @@ class InvoiceWebhookEventHandlerTest {
     String subscriptionId = "sub_123";
     TenantSubscription tenantSubscription = new TenantSubscription();
 
-    when(stripeInvoice.getId()).thenReturn(invoiceId);
-    when(stripeInvoice.getNumber()).thenReturn("INV-001");
-    when(stripeInvoice.getAmountDue()).thenReturn(1000L);
-    when(stripeInvoice.getAmountPaid()).thenReturn(0L);
-    when(stripeInvoice.getCurrency()).thenReturn("usd");
-    when(stripeInvoice.getStatus()).thenReturn("open");
-    when(stripeInvoice.getHostedInvoiceUrl()).thenReturn("https://invoice.stripe.com/123");
-    when(stripeInvoice.getInvoicePdf()).thenReturn("https://invoice.stripe.com/123.pdf");
-    when(stripeInvoice.getDueDate()).thenReturn(Instant.now().getEpochSecond());
+    // Use lenient stubbing for mocks that may not be called
+    lenient().when(stripeInvoice.getId()).thenReturn(invoiceId);
+    lenient().when(stripeInvoice.getNumber()).thenReturn("INV-001");
+    lenient().when(stripeInvoice.getAmountDue()).thenReturn(1000L);
+    lenient().when(stripeInvoice.getAmountPaid()).thenReturn(0L);
+    lenient().when(stripeInvoice.getCurrency()).thenReturn("usd");
+    lenient().when(stripeInvoice.getStatus()).thenReturn("open");
+    lenient().when(stripeInvoice.getHostedInvoiceUrl()).thenReturn("https://invoice.stripe.com/123");
+    lenient().when(stripeInvoice.getInvoicePdf()).thenReturn("https://invoice.stripe.com/123.pdf");
+    lenient().when(stripeInvoice.getDueDate()).thenReturn(Instant.now().getEpochSecond());
 
     WebhookEvent event = new WebhookEvent(
         "evt_123",
@@ -286,7 +288,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
 
-    when(stripeInvoice.getId()).thenReturn(invoiceId);
+    lenient().when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(
         "evt_123",
@@ -314,7 +316,7 @@ class InvoiceWebhookEventHandlerTest {
     String invoiceId = "in_123";
     String subscriptionId = "sub_123";
 
-    when(stripeInvoice.getId()).thenReturn(invoiceId);
+    lenient().when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(
         "evt_123",
@@ -328,7 +330,7 @@ class InvoiceWebhookEventHandlerTest {
     );
 
     when(invoiceRepository.findByStripeInvoiceId(invoiceId)).thenReturn(Optional.empty());
-    when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
+    lenient().when(subscriptionRepository.findByStripeSubscriptionId(subscriptionId)).thenReturn(Optional.empty());
 
     // When
     handler.handleEvent(event);
@@ -342,7 +344,7 @@ class InvoiceWebhookEventHandlerTest {
     // Given
     String invoiceId = "in_123";
 
-    when(stripeInvoice.getId()).thenReturn(invoiceId);
+    lenient().when(stripeInvoice.getId()).thenReturn(invoiceId);
 
     WebhookEvent event = new WebhookEvent(
         "evt_123",

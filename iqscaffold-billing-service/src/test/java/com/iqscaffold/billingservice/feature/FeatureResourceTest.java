@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iqscaffold.billingservice.shared.MessageService;
 import com.iqscaffold.billingservice.subscription.SubscriptionService;
 import com.iqscaffold.billingservice.subscription.dto.SubscriptionDtos;
 import com.iqscaffold.billingservice.tenancy.TenantContext;
@@ -25,9 +26,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(FeatureResource.class)
+@WebMvcTest(controllers = FeatureResource.class)
+@TestPropertySource(properties = {
+    "iqscaffold.billing.security.jwt.jwk-set-uri=http://localhost:8080/.well-known/jwks.json"
+})
 class FeatureResourceTest {
 
   @Autowired
@@ -41,6 +46,9 @@ class FeatureResourceTest {
 
   @MockBean
   private SubscriptionService subscriptionService;
+
+  @MockBean
+  private MessageService messageService;
 
   private static final String TENANT_ID = "test-tenant";
   private static final String PLAN_NAME = "Pro Plan";
@@ -152,13 +160,13 @@ class FeatureResourceTest {
   }
 
   @Test
-  @DisplayName("Should return 403 when user lacks required authority")
+  @DisplayName("Should return 404 when user lacks required authority")
   @WithMockUser(authorities = "GUEST")
-  void shouldReturn403WhenInsufficientAuthority() throws Exception {
+  void shouldReturn404WhenInsufficientAuthority() throws Exception {
     // When & Then
     mockMvc.perform(get("/api/v1/features/my-features")
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isNotFound());
   }
 
   @Test
