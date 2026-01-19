@@ -16,6 +16,33 @@ GET /api/v1/features/enabled
 ```
 Returns only enabled features for faster loading.
 
+## Gateway Integration
+
+The feature API endpoints are integrated with the Spring Cloud Gateway and include:
+
+### Route Configuration
+- **Feature Routes**: Optimized for high-frequency frontend calls
+  - `/api/v1/features/my-features` - Rate limit: 100 req/min, burst: 150
+  - `/api/v1/features/enabled` - Rate limit: 200 req/min, burst: 300
+- **Circuit Breaker**: Automatic fallback when billing service is unavailable
+- **Retry Logic**: Automatic retries for transient failures
+- **Request Transformation**: Automatic header enrichment and tenant context
+
+### Fallback Behavior
+When the billing service is unavailable, the gateway returns:
+```json
+{
+  "enabledFeatures": [],
+  "allFeatures": [],
+  "planName": "Service Unavailable",
+  "subscriptionStatus": "UNKNOWN",
+  "tenantId": "unknown",
+  "error": "Feature service temporarily unavailable"
+}
+```
+
+This allows React applications to continue functioning with graceful degradation.
+
 ## React Implementation Examples
 
 ### 1. Feature Hook
@@ -53,10 +80,12 @@ export const useFeatures = () => {
   useEffect(() => {
     const fetchFeatures = async () => {
       try {
+        // API Gateway URL - routes to billing service
         const response = await fetch('/api/v1/features/my-features', {
           headers: {
             'Authorization': `Bearer ${getAuthToken()}`,
             'Content-Type': 'application/json',
+            'X-Tenant-ID': getTenantId(), // Required for multi-tenant routing
           },
         });
 
@@ -65,6 +94,13 @@ export const useFeatures = () => {
         }
 
         const data = await response.json();
+        
+        // Handle fallback responses from gateway circuit breaker
+        if (response.headers.get('X-Fallback-Response') === 'true') {
+          console.warn('Feature service unavailable, using fallback data');
+          setError('Feature service temporarily unavailable');
+        }
+        
         setFeatures(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch features');
@@ -106,10 +142,16 @@ export const useFeatures = () => {
   };
 };
 
-// Helper function to get auth token (implement based on your auth system)
+// Helper functions to get auth token and tenant ID (implement based on your auth system)
 const getAuthToken = (): string => {
   // Return JWT token from localStorage, cookies, or auth context
   return localStorage.getItem('authToken') || '';
+};
+
+const getTenantId = (): string => {
+  // Return tenant ID from JWT token, localStorage, or auth context
+  // This is extracted from JWT by the gateway and passed to services
+  return localStorage.getItem('tenantId') || '';
 };
 ```
 
