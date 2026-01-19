@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles validation errors from @Valid annotations.
    *
-   * @param ex The validation exception
+   * @param ex      The validation exception
    * @param request The HTTP request
    * @return Problem detail with validation errors
    */
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles resource not found exceptions.
    *
-   * @param ex The not found exception
+   * @param ex      The not found exception
    * @param request The HTTP request
    * @return Problem detail with error message
    */
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles conflict exceptions (e.g., duplicate resources).
    *
-   * @param ex The conflict exception
+   * @param ex      The conflict exception
    * @param request The HTTP request
    * @return Problem detail with error message
    */
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles business rule violations.
    *
-   * @param ex The business exception
+   * @param ex      The business exception
    * @param request The HTTP request
    * @return Problem detail with error message
    */
@@ -142,7 +142,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles authentication exceptions.
    *
-   * @param ex The authentication exception
+   * @param ex      The authentication exception
    * @param request The HTTP request
    * @return Problem detail with error message
    */
@@ -167,7 +167,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles access denied exceptions.
    *
-   * @param ex The access denied exception
+   * @param ex      The access denied exception
    * @param request The HTTP request
    * @return Problem detail with error message
    */
@@ -192,7 +192,7 @@ public class GlobalExceptionHandler {
   /**
    * Handles all other unexpected exceptions.
    *
-   * @param ex The exception
+   * @param ex      The exception
    * @param request The HTTP request
    * @return Problem detail with generic error message
    */

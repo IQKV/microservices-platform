@@ -129,7 +129,7 @@ public class PipelineItemServiceImpl implements PipelineItemService {
   /**
    * Publishes a stage.changed event to RabbitMQ.
    *
-   * @param leadId the lead ID
+   * @param leadId     the lead ID
    * @param oldStageId the old stage ID
    * @param newStageId the new stage ID
    */

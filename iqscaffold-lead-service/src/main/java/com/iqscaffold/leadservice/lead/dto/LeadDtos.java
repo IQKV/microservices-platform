@@ -186,10 +186,10 @@ public final class LeadDtos {
   /**
    * Response DTO for lead conversion.
    *
-   * @param leadId     The ID of the converted lead
-   * @param contactId  The ID of the created contact
+   * @param leadId      The ID of the converted lead
+   * @param contactId   The ID of the created contact
    * @param convertedAt Timestamp when the conversion occurred
-   * @param message    Success message
+   * @param message     Success message
    */
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record ConvertLeadResponse(

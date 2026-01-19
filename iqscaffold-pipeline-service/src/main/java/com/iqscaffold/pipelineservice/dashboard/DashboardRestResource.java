@@ -58,8 +58,8 @@ public class DashboardRestResource {
    * @return Dashboard statistics
    */
   @Operation(summary = "Get dashboard statistics", description = "Retrieves pipeline statistics including lead counts by stage and source. "
-      +
-      "Optionally filter by date range based on lead creation date.")
+                                                                 +
+                                                                 "Optionally filter by date range based on lead creation date.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Dashboard statistics retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -89,8 +89,8 @@ public class DashboardRestResource {
    * @return Conversion metrics
    */
   @Operation(summary = "Get conversion metrics", description = "Retrieves conversion metrics including conversion rate, average time to convert, "
-      +
-      "and stage velocity. Optionally filter by date range based on lead creation date.")
+                                                               +
+                                                               "and stage velocity. Optionally filter by date range based on lead creation date.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Conversion metrics retrieved successfully"),
       @ApiResponse(responseCode = "401", description = "Unauthorized")

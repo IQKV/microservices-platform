@@ -11,6 +11,7 @@
     <include file="db/changelog/20251110160000-add-organization-id-to-merchant-config.xml"/>
     <include file="db/changelog/system/006-payment-gateway-config-table.xml"/>
     <include file="db/changelog/system/007-subscription-schema.xml"/>
+    <include file="db/changelog/system/008-drop-legacy-features-column.xml"/>
     <include file="db/changelog/system/008-feature-management-schema.xml"/>
 
 </databaseChangeLog>

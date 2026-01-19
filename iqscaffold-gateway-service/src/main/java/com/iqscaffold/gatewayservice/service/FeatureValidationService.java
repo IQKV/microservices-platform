@@ -13,7 +13,7 @@ import reactor.util.retry.Retry;
 
 /**
  * Service for validating feature access at the gateway level.
- * 
+ *
  * <p>This service communicates with the billing service to check feature enablement
  * and builds feature contexts for downstream services. It includes caching and
  * resilience patterns for high performance and reliability.
@@ -27,8 +27,8 @@ public class FeatureValidationService {
   private final FeatureUsageTrackingService usageTrackingService;
 
   public FeatureValidationService(
-      WebClient.Builder webClientBuilder,
-      FeatureUsageTrackingService usageTrackingService) {
+      final WebClient.Builder webClientBuilder,
+      final FeatureUsageTrackingService usageTrackingService) {
     this.billingServiceClient = webClientBuilder
         .baseUrl("http://iqscaffold-billing-service")
         .build();
@@ -37,10 +37,10 @@ public class FeatureValidationService {
 
   /**
    * Validates that a tenant has access to all required features.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId         the tenant identifier
    * @param requiredFeatures set of features required for the operation
-   * @param endpoint the endpoint being accessed (for usage tracking)
+   * @param endpoint         the endpoint being accessed (for usage tracking)
    * @return validation result with access decision and feature context
    */
   @Cacheable(value = "featureValidation", key = "#tenantId + ':' + #requiredFeatures.hashCode()")
@@ -55,13 +55,13 @@ public class FeatureValidationService {
 
           if (isAllowed) {
             // Track feature usage asynchronously
-            requiredFeatures.forEach(feature -> 
+            requiredFeatures.forEach(feature ->
                 usageTrackingService.recordFeatureUsage(tenantId, feature, endpoint));
           }
 
           return new ValidationResult(isAllowed, featureContext, missingFeatures);
         })
-        .doOnError(error -> logger.error("Error validating feature access for tenant {}: {}", 
+        .doOnError(error -> logger.error("Error validating feature access for tenant {}: {}",
             tenantId, error.getMessage(), error))
         .onErrorReturn(new ValidationResult(false, FeatureContext.empty(tenantId), requiredFeatures));
   }
@@ -78,7 +78,7 @@ public class FeatureValidationService {
         .retryWhen(Retry.backoff(3, Duration.ofMillis(100))
             .maxBackoff(Duration.ofSeconds(2)))
         .timeout(Duration.ofSeconds(5))
-        .doOnSuccess(context -> logger.debug("Retrieved feature context for tenant {}: {} features", 
+        .doOnSuccess(context -> logger.debug("Retrieved feature context for tenant {}: {} features",
             tenantId, context.getEnabledFeatureCount()))
         .onErrorResume(error -> {
           logger.warn("Failed to retrieve feature context for tenant {}: {}", tenantId, error.getMessage());
@@ -129,7 +129,7 @@ public class FeatureValidationService {
     private final FeatureContext featureContext;
     private final Set<String> missingFeatures;
 
-    public ValidationResult(boolean allowed, FeatureContext featureContext, Set<String> missingFeatures) {
+    public ValidationResult(final boolean allowed, final FeatureContext featureContext, final Set<String> missingFeatures) {
       this.allowed = allowed;
       this.featureContext = featureContext;
       this.missingFeatures = missingFeatures;
@@ -150,10 +150,10 @@ public class FeatureValidationService {
     @Override
     public String toString() {
       return "ValidationResult{" +
-          "allowed=" + allowed +
-          ", missingFeatures=" + missingFeatures +
-          ", planName=" + (featureContext != null ? featureContext.getPlanName() : "unknown") +
-          '}';
+             "allowed=" + allowed +
+             ", missingFeatures=" + missingFeatures +
+             ", planName=" + (featureContext != null ? featureContext.getPlanName() : "unknown") +
+             '}';
     }
   }
 
@@ -171,13 +171,14 @@ public class FeatureValidationService {
     private java.util.Map<String, String> tiers = java.util.Map.of();
 
     // Default constructor for JSON deserialization
-    public FeatureContext() {}
+    public FeatureContext() {
+    }
 
-    public FeatureContext(String tenantId) {
+    public FeatureContext(final String tenantId) {
       this.tenantId = tenantId;
     }
 
-    public static FeatureContext empty(String tenantId) {
+    public static FeatureContext empty(final String tenantId) {
       return new FeatureContext(tenantId);
     }
 

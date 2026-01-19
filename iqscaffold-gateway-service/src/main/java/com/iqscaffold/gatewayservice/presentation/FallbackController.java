@@ -1,5 +1,9 @@
 package com.iqscaffold.gatewayservice.presentation;
 
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,13 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Map;
-
 /**
  * Fallback controller for circuit breaker responses.
- * 
+ *
  * <p>Provides graceful degradation when downstream services are unavailable.
  * Returns appropriate fallback responses based on the endpoint type.
  */
@@ -36,7 +36,7 @@ public class FallbackController {
         "error", "Feature service temporarily unavailable",
         "timestamp", Instant.now()
     );
-    
+
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
         .header("X-Fallback-Response", "true")
         .body(fallbackResponse);
@@ -55,7 +55,7 @@ public class FallbackController {
         "timestamp", Instant.now(),
         "status", HttpStatus.SERVICE_UNAVAILABLE.value()
     );
-    
+
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
         .header("X-Fallback-Response", "true")
         .body(fallbackResponse);
@@ -72,7 +72,7 @@ public class FallbackController {
         "status", "queued",
         "timestamp", Instant.now()
     );
-    
+
     return ResponseEntity.accepted()
         .header("X-Fallback-Response", "true")
         .body(fallbackResponse);
@@ -91,7 +91,7 @@ public class FallbackController {
         "error", "Internal service temporarily unavailable",
         "timestamp", Instant.now()
     );
-    
+
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
         .header("X-Fallback-Response", "true")
         .header("X-Internal-Fallback", "true")

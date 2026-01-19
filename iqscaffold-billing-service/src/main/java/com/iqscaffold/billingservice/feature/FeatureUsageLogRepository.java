@@ -45,7 +45,9 @@ public interface FeatureUsageLogRepository extends JpaRepository<FeatureUsageLog
   /**
    * Gets feature usage statistics for a tenant.
    */
-  @Query("SELECT f.featureKey, COUNT(f) as usageCount FROM FeatureUsageLog f WHERE f.tenantId = :tenantId AND f.timestamp BETWEEN :startTime AND :endTime GROUP BY f.featureKey ORDER BY usageCount DESC")
+  @Query(
+      "SELECT f.featureKey, COUNT(f) as usageCount FROM FeatureUsageLog f WHERE f.tenantId = :tenantId AND f.timestamp BETWEEN :startTime AND :endTime GROUP BY f.featureKey ORDER BY "
+      + "usageCount DESC")
   List<Object[]> getFeatureUsageStatsByTenant(
       @Param("tenantId") String tenantId,
       @Param("startTime") Instant startTime,
@@ -63,7 +65,9 @@ public interface FeatureUsageLogRepository extends JpaRepository<FeatureUsageLog
   /**
    * Gets endpoint usage for a specific feature.
    */
-  @Query("SELECT f.endpoint, COUNT(f) as usageCount FROM FeatureUsageLog f WHERE f.featureKey = :featureKey AND f.timestamp BETWEEN :startTime AND :endTime GROUP BY f.endpoint ORDER BY usageCount DESC")
+  @Query(
+      "SELECT f.endpoint, COUNT(f) as usageCount FROM FeatureUsageLog f WHERE f.featureKey = :featureKey AND f.timestamp BETWEEN :startTime AND :endTime GROUP BY f.endpoint ORDER BY "
+      + "usageCount DESC")
   List<Object[]> getEndpointUsageByFeature(
       @Param("featureKey") String featureKey,
       @Param("startTime") Instant startTime,
@@ -77,7 +81,9 @@ public interface FeatureUsageLogRepository extends JpaRepository<FeatureUsageLog
   /**
    * Gets daily usage counts for a feature.
    */
-  @Query(value = "SELECT DATE(timestamp) as usage_date, COUNT(*) as usage_count FROM feature_usage_log WHERE feature_key = :featureKey AND timestamp BETWEEN :startTime AND :endTime GROUP BY DATE(timestamp) ORDER BY usage_date", nativeQuery = true)
+  @Query(value = "SELECT DATE(timestamp) as usage_date, COUNT(*) as usage_count FROM feature_usage_log WHERE feature_key = :featureKey AND timestamp BETWEEN :startTime AND :endTime GROUP "
+                 + "BY DATE(timestamp) ORDER BY usage_date",
+         nativeQuery = true)
   List<Object[]> getDailyUsageByFeature(
       @Param("featureKey") String featureKey,
       @Param("startTime") Instant startTime,

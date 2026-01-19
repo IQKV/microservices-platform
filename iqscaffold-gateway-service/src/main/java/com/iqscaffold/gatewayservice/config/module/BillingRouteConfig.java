@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Gateway route configuration for Billing Service endpoints.
- * 
+ *
  * <p>Configures routing for all billing-related endpoints including:
  * <ul>
  *   <li>Feature management endpoints (/api/v1/features/**)</li>
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
  *   <li>Admin billing operations (/api/v1/admin/billing/**)</li>
  *   <li>Webhook endpoints (/api/v1/billing/webhooks/**)</li>
  * </ul>
- * 
+ *
  * <p>Each route includes:
  * <ul>
  *   <li>Rate limiting based on endpoint type</li>
@@ -44,7 +44,7 @@ public class BillingRouteConfig {
   @Bean
   public RouteLocator billingServiceRoutes(RouteLocatorBuilder builder) {
     return builder.routes()
-        
+
         // Feature Management Routes (High Priority - Frontend Usage)
         .route("billing-service-features-my-features", r -> r
             .path("/api/v1/features/my-features")
@@ -55,7 +55,7 @@ public class BillingRouteConfig {
                     .setFallbackUri("forward:/fallback/features"))
                 .retry(config -> config.setRetries(2)))
             .uri(billingServiceUri))
-            
+
         .route("billing-service-features-enabled", r -> r
             .path("/api/v1/features/enabled")
             .filters(f -> f

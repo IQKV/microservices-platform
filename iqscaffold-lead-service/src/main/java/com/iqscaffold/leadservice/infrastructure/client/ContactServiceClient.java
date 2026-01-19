@@ -92,7 +92,7 @@ public class ContactServiceClient {
     log.error("Contact Service is unavailable or circuit breaker is open. Fallback triggered.", throwable);
     throw new ContactServiceException(
         "Contact Service is currently unavailable. Please try again later. "
-            + "Reason: " + throwable.getMessage(),
+        + "Reason: " + throwable.getMessage(),
         throwable
     );
   }
@@ -147,10 +147,10 @@ public class ContactServiceClient {
       final String bearerToken,
       final Throwable throwable) {
     log.error("Contact Service is unavailable or circuit breaker is open during rollback. "
-        + "Contact {} may need manual cleanup.", contactId, throwable);
+              + "Contact {} may need manual cleanup.", contactId, throwable);
     throw new ContactServiceException(
         "Contact Service is currently unavailable for rollback. Manual cleanup may be required for contact "
-            + contactId + ". Reason: " + throwable.getMessage(),
+        + contactId + ". Reason: " + throwable.getMessage(),
         throwable
     );
   }

@@ -25,10 +25,10 @@ import org.hibernate.type.SqlTypes;
 
 /**
  * Association entity between subscription plans and features.
- * 
+ *
  * <p>Defines which features are enabled for each subscription plan and their specific configuration.
  * Stored in public schema as plan-feature associations are shared across all tenants.
- * 
+ *
  * <p>The configuration field allows plan-specific customization of features:
  * <ul>
  *   <li>For QUOTA features: {"quota": 50000, "resetPeriod": "monthly"}</li>
@@ -74,15 +74,16 @@ public class PlanFeature {
   private String updatedBy;
 
   // Constructors
-  public PlanFeature() {}
+  public PlanFeature() {
+  }
 
-  public PlanFeature(SubscriptionPlan plan, FeatureDefinition feature, boolean enabled) {
+  public PlanFeature(final SubscriptionPlan plan, final FeatureDefinition feature, final boolean enabled) {
     this.plan = plan;
     this.feature = feature;
     this.enabled = enabled;
   }
 
-  public PlanFeature(SubscriptionPlan plan, FeatureDefinition feature, boolean enabled, Map<String, Object> configuration) {
+  public PlanFeature(final SubscriptionPlan plan, final FeatureDefinition feature, final boolean enabled, final Map<String, Object> configuration) {
     this.plan = plan;
     this.feature = feature;
     this.enabled = enabled;
@@ -112,7 +113,7 @@ public class PlanFeature {
     if (!feature.isQuotaFeature()) {
       return null;
     }
-    
+
     // Check plan-specific configuration first
     if (configuration != null && configuration.containsKey("quota")) {
       Object quota = configuration.get("quota");
@@ -120,7 +121,7 @@ public class PlanFeature {
         return ((Number) quota).longValue();
       }
     }
-    
+
     // Fall back to feature default
     return feature.getDefaultQuota();
   }
@@ -133,7 +134,7 @@ public class PlanFeature {
     if (!feature.isLimitFeature()) {
       return null;
     }
-    
+
     // Check plan-specific configuration first
     if (configuration != null && configuration.containsKey("limit")) {
       Object limit = configuration.get("limit");
@@ -141,7 +142,7 @@ public class PlanFeature {
         return ((Number) limit).longValue();
       }
     }
-    
+
     // Fall back to feature default
     return feature.getDefaultLimit();
   }
@@ -153,7 +154,7 @@ public class PlanFeature {
     if (feature.getType() != FeatureType.TIER || configuration == null) {
       return null;
     }
-    
+
     Object tier = configuration.get("tier");
     return tier instanceof String ? (String) tier : null;
   }
@@ -232,8 +233,12 @@ public class PlanFeature {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlanFeature that = (PlanFeature) o;
     return Objects.equals(plan, that.plan) && Objects.equals(feature, that.feature);
   }
@@ -246,10 +251,10 @@ public class PlanFeature {
   @Override
   public String toString() {
     return "PlanFeature{" +
-        "plan=" + (plan != null ? plan.getId() : null) +
-        ", feature=" + (feature != null ? feature.getFeatureKey() : null) +
-        ", enabled=" + enabled +
-        '}';
+           "plan=" + (plan != null ? plan.getId() : null) +
+           ", feature=" + (feature != null ? feature.getFeatureKey() : null) +
+           ", enabled=" + enabled +
+           '}';
   }
 
   /**
@@ -259,9 +264,10 @@ public class PlanFeature {
     private UUID plan;
     private String feature;
 
-    public PlanFeatureId() {}
+    public PlanFeatureId() {
+    }
 
-    public PlanFeatureId(UUID plan, String feature) {
+    public PlanFeatureId(final UUID plan, final String feature) {
       this.plan = plan;
       this.feature = feature;
     }
@@ -284,8 +290,12 @@ public class PlanFeature {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
       PlanFeatureId that = (PlanFeatureId) o;
       return Objects.equals(plan, that.plan) && Objects.equals(feature, that.feature);
     }

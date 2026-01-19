@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
@@ -87,7 +85,7 @@ class FeatureAccessFilterTest {
         .get("/api/v1/analytics/reports")
         .build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     // Add tenant context
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);
@@ -123,7 +121,7 @@ class FeatureAccessFilterTest {
         .get("/api/v1/analytics/reports")
         .build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     // Add tenant context
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);
@@ -189,7 +187,7 @@ class FeatureAccessFilterTest {
         .get("/api/v1/users/profile") // Path not in feature mappings
         .build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     // Add tenant context
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);
@@ -209,7 +207,7 @@ class FeatureAccessFilterTest {
         .post("/api/v1/export/csv")
         .build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     // Add tenant context
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);
@@ -240,7 +238,7 @@ class FeatureAccessFilterTest {
         .get("/api/v1/analytics/reports")
         .build();
     var exchange = MockServerWebExchange.from(request);
-    
+
     // Add tenant context
     var tenantContext = new TenantExtractionFilter.TenantContext("tenant-123");
     exchange.getAttributes().put(GatewayConstants.Attributes.TENANT_CONTEXT, tenantContext);

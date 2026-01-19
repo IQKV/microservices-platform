@@ -30,7 +30,7 @@ class BillingRouteConfigTest {
     var featureRoutes = routes.stream()
         .filter(route -> route.getId().contains("features"))
         .toList();
-    
+
     assertThat(featureRoutes).hasSize(2);
     assertThat(featureRoutes).anyMatch(route -> route.getId().equals("billing-service-features-my-features"));
     assertThat(featureRoutes).anyMatch(route -> route.getId().equals("billing-service-features-enabled"));
@@ -39,7 +39,7 @@ class BillingRouteConfigTest {
     var billingRoutes = routes.stream()
         .filter(route -> route.getId().contains("billing-service"))
         .toList();
-    
+
     assertThat(billingRoutes).hasSizeGreaterThanOrEqualTo(8); // At least 8 billing routes
 
     // Verify specific route IDs exist
@@ -66,15 +66,15 @@ class BillingRouteConfigTest {
 
     // Then
     assertThat(routes).isNotNull();
-    
+
     // All billing service routes should point to the same URI
     var billingRoutes = routes.stream()
         .filter(route -> route.getId().startsWith("billing-service"))
         .toList();
-    
-    assertThat(billingRoutes).allMatch(route -> 
-        route.getUri().toString().contains("localhost:8082") || 
-        route.getUri().toString().contains("billing-service"));
+
+    assertThat(billingRoutes).allMatch(route ->
+        route.getUri().toString().contains("localhost:8082")
+        || route.getUri().toString().contains("billing-service"));
   }
 
   @Test
@@ -85,21 +85,21 @@ class BillingRouteConfigTest {
 
     // Then
     assertThat(routes).isNotNull();
-    
+
     // All routes should have filters configured
     var billingRoutes = routes.stream()
         .filter(route -> route.getId().startsWith("billing-service"))
         .toList();
-    
+
     assertThat(billingRoutes).allMatch(route -> !route.getFilters().isEmpty());
-    
+
     // Verify that routes have filters configured
     billingRoutes.forEach(route -> {
       var filters = route.getFilters();
-      
+
       // Each route should have at least one filter (StripPrefix is always present)
       assertThat(filters).isNotEmpty();
-      
+
       // Verify that filters are properly configured
       // Note: The actual filter implementations are added at runtime
       // We can only verify that filters exist, not their specific types

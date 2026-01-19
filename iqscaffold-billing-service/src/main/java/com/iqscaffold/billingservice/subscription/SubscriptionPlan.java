@@ -70,17 +70,7 @@ public class SubscriptionPlan {
   @Column(name = "is_active", nullable = false)
   private Boolean isActive = true;
 
-  /**
-   * Features included in this plan (JSON format).
-   * Example: ["feature1", "feature2", "feature3"]
-   * 
-   * @deprecated Use {@link #planFeatures} relationship instead.
-   * This field is maintained for backward compatibility during migration.
-   */
-  @Deprecated(since = "1.1.0", forRemoval = true)
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
-  private String features;
+
 
   /**
    * Structured features enabled for this plan.
@@ -205,13 +195,7 @@ public class SubscriptionPlan {
     this.isActive = isActive;
   }
 
-  public String getFeatures() {
-    return features;
-  }
 
-  public void setFeatures(String features) {
-    this.features = features;
-  }
 
   public Set<PlanFeature> getPlanFeatures() {
     return planFeatures;

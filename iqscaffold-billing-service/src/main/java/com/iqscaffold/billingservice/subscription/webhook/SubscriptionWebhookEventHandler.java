@@ -94,7 +94,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
 
     // Create local subscription record
     TenantSubscription subscription = createSubscriptionEntity(subscriptionData, event);
-    
+
     // Populate with detailed provider-specific data
     populateDetailedSubscriptionData(subscription, event);
 
@@ -116,7 +116,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
     }
 
     TenantSubscription subscription = subscriptionOpt.get();
-    
+
     // Update basic subscription data
     var subscriptionData = extractSubscriptionData(event);
     if (subscriptionData != null) {
@@ -201,7 +201,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
    */
   private TenantSubscription createSubscriptionEntity(StripeSubscriptionDataExtractor.SubscriptionData data, WebhookEvent event) {
     TenantSubscription subscription = new TenantSubscription();
-    
+
     // Set provider-specific fields based on the provider
     switch (event.provider()) {
       case STRIPE -> {
@@ -211,7 +211,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
       // Add other providers as needed
       default -> logger.warn("Unsupported provider for subscription creation: {}", event.provider());
     }
-    
+
     subscription.setStatus(data.status());
     return subscription;
   }
@@ -221,7 +221,7 @@ public class SubscriptionWebhookEventHandler implements WebhookEventHandler {
    */
   private void updateSubscriptionFromData(TenantSubscription subscription, StripeSubscriptionDataExtractor.SubscriptionData data) {
     subscription.setStatus(data.status());
-    
+
     // Update provider-specific fields if needed
     if (data.customerId() != null) {
       // Determine provider based on existing subscription data

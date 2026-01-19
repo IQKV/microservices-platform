@@ -41,7 +41,7 @@ public final class PipelineStageMapper {
    * Converts a CreateStageRequest DTO to a PipelineStage entity.
    *
    * @param request The create stage request
-   * @param userId The user creating the stage
+   * @param userId  The user creating the stage
    * @return The pipeline stage entity
    */
   public static PipelineStage toEntity(final PipelineStageDtos.CreateStageRequest request, final String userId) {
@@ -65,9 +65,9 @@ public final class PipelineStageMapper {
   /**
    * Updates a PipelineStage entity from an UpdateStageRequest DTO.
    *
-   * @param stage The pipeline stage entity to update
+   * @param stage   The pipeline stage entity to update
    * @param request The update stage request
-   * @param userId The user updating the stage
+   * @param userId  The user updating the stage
    */
   public static void updateEntity(final PipelineStage stage, final PipelineStageDtos.UpdateStageRequest request, final String userId) {
     if (stage == null || request == null) {

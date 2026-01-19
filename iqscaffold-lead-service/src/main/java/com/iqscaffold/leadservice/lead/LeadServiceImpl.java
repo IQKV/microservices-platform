@@ -40,10 +40,10 @@ public class LeadServiceImpl implements LeadService {
   @Override
   public Lead createLead(final Lead lead) {
     final Lead savedLead = leadRepository.save(lead);
-    
+
     // Publish lead.created event for Pipeline Service
     leadEventPublisher.publishLeadCreated(savedLead);
-    
+
     return savedLead;
   }
 
@@ -59,10 +59,10 @@ public class LeadServiceImpl implements LeadService {
 
     Lead lead = LeadMapper.toEntity(request, createdBy);
     Lead savedLead = leadRepository.save(lead);
-    
+
     // Publish lead.created event for Pipeline Service
     leadEventPublisher.publishLeadCreated(savedLead);
-    
+
     return LeadMapper.toResponse(savedLead);
   }
 
@@ -149,10 +149,10 @@ public class LeadServiceImpl implements LeadService {
     existingLead.setUpdatedBy(lead.getUpdatedBy());
 
     final Lead savedLead = leadRepository.save(existingLead);
-    
+
     // Publish lead.updated event
     leadEventPublisher.publishLeadUpdated(savedLead);
-    
+
     return savedLead;
   }
 
@@ -173,10 +173,10 @@ public class LeadServiceImpl implements LeadService {
 
     LeadMapper.updateEntity(existingLead, request, updatedBy);
     Lead savedLead = leadRepository.save(existingLead);
-    
+
     // Publish lead.updated event
     leadEventPublisher.publishLeadUpdated(savedLead);
-    
+
     return LeadMapper.toResponse(savedLead);
   }
 
@@ -334,7 +334,7 @@ public class LeadServiceImpl implements LeadService {
       String errorMessage = rollbackSuccessful
           ? "Failed to convert lead to contact. Rollback successful - lead restored to original state."
           : "Failed to convert lead to contact. Rollback partially failed - manual cleanup may be required for contact "
-              + (contactResponse != null ? contactResponse.id() : "unknown");
+            + (contactResponse != null ? contactResponse.id() : "unknown");
 
       throw new LeadConversionException(
           errorMessage,
@@ -350,13 +350,13 @@ public class LeadServiceImpl implements LeadService {
   public void deleteLead(final Long id) {
     Lead lead = leadRepository.findById(id)
         .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
-    
+
     // Store email for event publishing
     final String email = lead.getEmail();
-    
+
     // Delete the lead
     leadRepository.deleteById(id);
-    
+
     // Publish lead.deleted event for Pipeline Service
     leadEventPublisher.publishLeadDeleted(id, email);
   }

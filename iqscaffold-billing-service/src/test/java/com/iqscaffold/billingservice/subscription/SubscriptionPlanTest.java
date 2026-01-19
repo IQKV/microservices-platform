@@ -39,7 +39,6 @@ class SubscriptionPlanTest {
     assertNull(newPlan.getStripeProductId());
     assertNull(newPlan.getStripePriceId());
     assertEquals(Boolean.TRUE, newPlan.getIsActive()); // Default value in entity
-    assertNull(newPlan.getFeatures());
     assertNull(newPlan.getMaxUsers());
     assertNull(newPlan.getMaxStorageGb());
     assertNull(newPlan.getMaxApiCalls());
@@ -62,7 +61,6 @@ class SubscriptionPlanTest {
     String stripeProductId = "prod_123";
     String stripePriceId = "price_123";
     Boolean isActive = true;
-    String features = "[\"feature1\", \"feature2\"]";
     Integer maxUsers = 10;
     Integer maxStorageGb = 100;
     Long maxApiCalls = 10000L;
@@ -82,7 +80,6 @@ class SubscriptionPlanTest {
     plan.setStripeProductId(stripeProductId);
     plan.setStripePriceId(stripePriceId);
     plan.setIsActive(isActive);
-    plan.setFeatures(features);
     plan.setMaxUsers(maxUsers);
     plan.setMaxStorageGb(maxStorageGb);
     plan.setMaxApiCalls(maxApiCalls);
@@ -102,7 +99,6 @@ class SubscriptionPlanTest {
     assertEquals(stripeProductId, plan.getStripeProductId());
     assertEquals(stripePriceId, plan.getStripePriceId());
     assertEquals(isActive, plan.getIsActive());
-    assertEquals(features, plan.getFeatures());
     assertEquals(maxUsers, plan.getMaxUsers());
     assertEquals(maxStorageGb, plan.getMaxStorageGb());
     assertEquals(maxApiCalls, plan.getMaxApiCalls());
@@ -234,18 +230,6 @@ class SubscriptionPlanTest {
       // Then
       assertEquals(interval, testPlan.getInterval());
     }
-  }
-
-  @Test
-  void plan_shouldHandleComplexFeatures() {
-    // Given
-    String complexFeatures = "[{\"name\":\"API Access\",\"limit\":1000},{\"name\":\"Storage\",\"limit\":\"100GB\"}]";
-
-    // When
-    plan.setFeatures(complexFeatures);
-
-    // Then
-    assertEquals(complexFeatures, plan.getFeatures());
   }
 
   @Test

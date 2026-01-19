@@ -45,7 +45,7 @@ public final class FollowUpMapper {
    * Converts a create request DTO to a FollowUp entity.
    *
    * @param request The create request
-   * @param userId The user creating the follow-up
+   * @param userId  The user creating the follow-up
    * @return The follow-up entity
    */
   public static FollowUp toEntity(final FollowUpDtos.CreateFollowUpRequest request, final String userId) {
@@ -70,10 +70,10 @@ public final class FollowUpMapper {
    * Updates a FollowUp entity from an update request DTO.
    *
    * @param followUp The follow-up entity to update
-   * @param request The update request
-   * @param userId The user updating the follow-up
+   * @param request  The update request
+   * @param userId   The user updating the follow-up
    */
-  public static void updateFromRequest(final FollowUp followUp, 
+  public static void updateFromRequest(final FollowUp followUp,
                                        final FollowUpDtos.UpdateFollowUpRequest request,
                                        final String userId) {
     if (followUp == null || request == null) {

@@ -280,7 +280,7 @@ public record IqScaffoldProperties(
           if (methods == null || methods.isEmpty()) {
             methods = List.of("GET", "POST", "PUT", "DELETE", "PATCH");
           }
-          
+
           // Ensure required features is not null
           if (requiredFeatures == null) {
             requiredFeatures = Set.of();

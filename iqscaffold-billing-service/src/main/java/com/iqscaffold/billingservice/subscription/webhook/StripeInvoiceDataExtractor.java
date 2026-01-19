@@ -50,17 +50,17 @@ public class StripeInvoiceDataExtractor {
     // Set basic invoice information
     invoice.setStripeInvoiceId(stripeInvoice.getId());
     invoice.setInvoiceNumber(stripeInvoice.getNumber());
-    
+
     // Set amounts (convert from cents to decimal)
     populateAmounts(invoice, stripeInvoice);
-    
+
     // Set currency and status
     invoice.setCurrency(stripeInvoice.getCurrency().toUpperCase());
     invoice.setStatus(mapStripeStatusToLocal(stripeInvoice.getStatus()));
-    
+
     // Set URLs
     populateUrls(invoice, stripeInvoice);
-    
+
     // Set due date
     populateDueDate(invoice, stripeInvoice);
   }
@@ -88,7 +88,7 @@ public class StripeInvoiceDataExtractor {
           BigDecimal.valueOf(stripeInvoice.getAmountDue()).divide(BigDecimal.valueOf(100))
       );
     }
-    
+
     if (stripeInvoice.getAmountPaid() != null) {
       invoice.setAmountPaid(
           BigDecimal.valueOf(stripeInvoice.getAmountPaid()).divide(BigDecimal.valueOf(100))
@@ -113,5 +113,6 @@ public class StripeInvoiceDataExtractor {
   public record InvoiceData(
       String invoiceId,
       String subscriptionId
-  ) {}
+  ) {
+  }
 }

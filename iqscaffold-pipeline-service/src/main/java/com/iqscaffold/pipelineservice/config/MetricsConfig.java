@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Metrics configuration for Pipeline Service observability.
- * 
+ *
  * <p>This configuration provides custom Prometheus metrics for monitoring
  * pipeline operations, conversion tracking, and follow-up management.
- * 
+ *
  * <h3>Custom Metrics:</h3>
  * <ul>
  *   <li><strong>pipeline.stage.changed</strong> - Counter for stage transition events</li>
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
  *   <li><strong>pipeline.conversion.rate</strong> - Gauge for conversion rate percentage</li>
  *   <li><strong>pipeline.stage.duration</strong> - Timer for time spent in stages</li>
  * </ul>
- * 
+ *
  * @see MeterRegistry
  */
 @Configuration

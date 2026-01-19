@@ -116,7 +116,6 @@ public class SubscriptionDtos {
    * @param intervalCount Number of intervals
    * @param trialDays     Trial days
    * @param isActive      Active status
-   * @param features      JSON object containing plan features
    * @param metadata      Additional metadata
    */
   public record UpsertPlanRequest(
@@ -128,7 +127,6 @@ public class SubscriptionDtos {
       Integer intervalCount,
       Integer trialDays,
       Boolean isActive,
-      java.util.Map<String, Object> features,
       java.util.Map<String, String> metadata) {
   }
 

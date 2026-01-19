@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Integration tests for tenant data isolation and JWT authentication in Pipeline Service.
  * Tests Requirements: 9.3, 9.4, 10.1, 10.2
- * 
+ * <p>
  * NOTE: These tests are temporarily disabled because they require tenant schema setup.
  * See backend/TENANT_ISOLATION_TEST_SOLUTION.md for implementation details.
  */

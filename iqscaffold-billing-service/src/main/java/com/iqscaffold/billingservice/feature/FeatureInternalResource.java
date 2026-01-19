@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Internal API for feature management used by other services.
- * 
+ *
  * <p>This controller provides internal endpoints for the gateway and other services
  * to check feature enablement and track usage. These endpoints are not exposed
  * to external clients and should only be accessible within the service mesh.
- * 
+ *
  * <p>Endpoints:
  * <ul>
  *   <li>GET /api/v1/internal/features/context/{tenantId} - Get feature context</li>
@@ -39,8 +39,8 @@ public class FeatureInternalResource {
   private final FeatureUsageTrackingService usageTrackingService;
 
   public FeatureInternalResource(
-      FeatureEnablementService featureEnablementService,
-      FeatureUsageTrackingService usageTrackingService) {
+      final FeatureEnablementService featureEnablementService,
+      final FeatureUsageTrackingService usageTrackingService) {
     this.featureEnablementService = featureEnablementService;
     this.usageTrackingService = usageTrackingService;
   }
@@ -48,7 +48,7 @@ public class FeatureInternalResource {
   /**
    * Gets the complete feature context for a tenant.
    * Used by the gateway to validate feature access and propagate context.
-   * 
+   *
    * @param tenantId the tenant identifier
    * @return feature context with enabled features, quotas, and limits
    */
@@ -59,21 +59,21 @@ public class FeatureInternalResource {
   )
   public ResponseEntity<FeatureContext> getFeatureContext(
       @Parameter(description = "Tenant identifier", required = true)
-      @PathVariable String tenantId) {
-    
+      @PathVariable final String tenantId) {
+
     logger.debug("Getting feature context for tenant: {}", tenantId);
 
     try {
       FeatureContext context = featureEnablementService.getFeatureContext(tenantId);
-      
-      logger.debug("Retrieved feature context for tenant {}: {} features enabled", 
+
+      logger.debug("Retrieved feature context for tenant {}: {} features enabled",
           tenantId, context.getEnabledFeatureCount());
-      
+
       return ResponseEntity.ok(context);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error retrieving feature context for tenant {}: {}", tenantId, e.getMessage(), e);
-      
+
       // Return empty context on error to avoid blocking requests
       return ResponseEntity.ok(FeatureContext.empty(tenantId));
     }
@@ -82,7 +82,7 @@ public class FeatureInternalResource {
   /**
    * Records feature usage for analytics and billing.
    * Used by the gateway and other services to track feature usage.
-   * 
+   *
    * @param usageRequest the usage tracking request
    * @return success response
    */
@@ -92,8 +92,8 @@ public class FeatureInternalResource {
       description = "Records feature usage for analytics and billing purposes"
   )
   public ResponseEntity<Void> recordFeatureUsage(@RequestBody FeatureUsageRequest usageRequest) {
-    
-    logger.debug("Recording feature usage: tenant={}, feature={}, endpoint={}", 
+
+    logger.debug("Recording feature usage: tenant={}, feature={}, endpoint={}",
         usageRequest.getTenantId(), usageRequest.getFeatureKey(), usageRequest.getEndpoint());
 
     try {
@@ -124,10 +124,10 @@ public class FeatureInternalResource {
 
       return ResponseEntity.ok().build();
 
-    } catch (Exception e) {
-      logger.error("Error recording feature usage for tenant {} and feature {}: {}", 
+    } catch (final Exception e) {
+      logger.error("Error recording feature usage for tenant {} and feature {}: {}",
           usageRequest.getTenantId(), usageRequest.getFeatureKey(), e.getMessage(), e);
-      
+
       // Don't fail the request if usage tracking fails
       return ResponseEntity.ok().build();
     }
@@ -136,8 +136,8 @@ public class FeatureInternalResource {
   /**
    * Checks if a specific feature is enabled for a tenant.
    * Used for simple feature checks without full context.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature key to check
    * @return feature enablement status
    */
@@ -148,21 +148,21 @@ public class FeatureInternalResource {
   )
   public ResponseEntity<FeatureEnabledResponse> isFeatureEnabled(
       @Parameter(description = "Tenant identifier", required = true)
-      @PathVariable String tenantId,
+      @PathVariable final String tenantId,
       @Parameter(description = "Feature key to check", required = true)
-      @PathVariable String featureKey) {
-    
+      @PathVariable final String featureKey) {
+
     logger.debug("Checking feature enablement: tenant={}, feature={}", tenantId, featureKey);
 
     try {
       boolean enabled = featureEnablementService.isFeatureEnabled(tenantId, featureKey);
-      
+
       return ResponseEntity.ok(new FeatureEnabledResponse(enabled, featureKey, tenantId));
 
-    } catch (Exception e) {
-      logger.error("Error checking feature enablement for tenant {} and feature {}: {}", 
+    } catch (final Exception e) {
+      logger.error("Error checking feature enablement for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
-      
+
       // Return false on error to fail closed
       return ResponseEntity.ok(new FeatureEnabledResponse(false, featureKey, tenantId));
     }
@@ -179,9 +179,10 @@ public class FeatureInternalResource {
     private String correlationId;
 
     // Default constructor for JSON deserialization
-    public FeatureUsageRequest() {}
+    public FeatureUsageRequest() {
+    }
 
-    public FeatureUsageRequest(String tenantId, String featureKey, String endpoint) {
+    public FeatureUsageRequest(final String tenantId, final String featureKey, final String endpoint) {
       this.tenantId = tenantId;
       this.featureKey = featureKey;
       this.endpoint = endpoint;
@@ -237,9 +238,10 @@ public class FeatureInternalResource {
     private String featureKey;
     private String tenantId;
 
-    public FeatureEnabledResponse() {}
+    public FeatureEnabledResponse() {
+    }
 
-    public FeatureEnabledResponse(boolean enabled, String featureKey, String tenantId) {
+    public FeatureEnabledResponse(final boolean enabled, final String featureKey, final String tenantId) {
       this.enabled = enabled;
       this.featureKey = featureKey;
       this.tenantId = tenantId;

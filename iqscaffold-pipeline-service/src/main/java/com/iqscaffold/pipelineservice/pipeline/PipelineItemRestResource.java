@@ -61,7 +61,7 @@ public class PipelineItemRestResource {
    * <p>
    * Returns paginated results sorted by creation date descending by default.
    *
-   * @param stageId Optional stage ID to filter by
+   * @param stageId  Optional stage ID to filter by
    * @param pageable Pagination parameters
    * @return Page of pipeline items
    */
@@ -123,7 +123,7 @@ public class PipelineItemRestResource {
    * Updates the pipeline item's stage and resets the entered_stage_at timestamp.
    * This operation logs the stage change in the activity log.
    *
-   * @param id The pipeline item ID
+   * @param id      The pipeline item ID
    * @param request The move request containing the target stage ID
    * @return The updated pipeline item
    */

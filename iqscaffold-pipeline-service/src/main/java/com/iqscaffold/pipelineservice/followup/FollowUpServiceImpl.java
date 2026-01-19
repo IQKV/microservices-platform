@@ -41,10 +41,10 @@ public class FollowUpServiceImpl implements FollowUpService {
   @Override
   public FollowUp scheduleFollowUp(final FollowUp followUp) {
     final FollowUp savedFollowUp = followUpRepository.save(followUp);
-    
+
     // Publish followup.scheduled event
     followUpEventPublisher.publishFollowUpScheduled(savedFollowUp);
-    
+
     return savedFollowUp;
   }
 
@@ -126,10 +126,10 @@ public class FollowUpServiceImpl implements FollowUpService {
     followUp.setCompletedAt(LocalDateTime.now());
 
     final FollowUp savedFollowUp = followUpRepository.save(followUp);
-    
+
     // Publish followup.completed event
     followUpEventPublisher.publishFollowUpCompleted(savedFollowUp);
-    
+
     return savedFollowUp;
   }
 

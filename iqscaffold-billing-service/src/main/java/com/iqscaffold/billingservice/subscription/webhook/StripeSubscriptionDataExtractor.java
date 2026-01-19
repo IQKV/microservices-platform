@@ -34,7 +34,7 @@ public class StripeSubscriptionDataExtractor {
   public SubscriptionData extractBasicData(WebhookEvent event) {
     String status = event.getMetadataString("status").orElse("active");
     String customerId = event.getMetadataString("customer").orElse(null);
-    
+
     return new SubscriptionData(
         event.resourceId(),
         customerId,
@@ -74,20 +74,20 @@ public class StripeSubscriptionDataExtractor {
   /**
    * Populate subscription entity from Stripe subscription object.
    */
-  private void populateFromStripeObject(TenantSubscription subscription, 
-                                       com.stripe.model.Subscription stripeSubscription) {
+  private void populateFromStripeObject(TenantSubscription subscription,
+                                        com.stripe.model.Subscription stripeSubscription) {
     // Extract period dates using JSON parsing for SDK compatibility
     extractPeriodDates(subscription, stripeSubscription);
-    
+
     // Extract trial and cancellation dates
     extractTrialAndCancellationDates(subscription, stripeSubscription);
-    
+
     // Extract cancellation details
     extractCancellationDetails(subscription, stripeSubscription);
   }
 
-  private void extractPeriodDates(TenantSubscription subscription, 
-                                 com.stripe.model.Subscription stripeSubscription) {
+  private void extractPeriodDates(TenantSubscription subscription,
+                                  com.stripe.model.Subscription stripeSubscription) {
     try {
       String jsonString = stripeSubscription.toJson();
       JsonNode root = objectMapper.readTree(jsonString);
@@ -109,7 +109,7 @@ public class StripeSubscriptionDataExtractor {
   }
 
   private void extractTrialAndCancellationDates(TenantSubscription subscription,
-                                               com.stripe.model.Subscription stripeSubscription) {
+                                                com.stripe.model.Subscription stripeSubscription) {
     if (stripeSubscription.getTrialEnd() != null) {
       subscription.setTrialEnd(Instant.ofEpochSecond(stripeSubscription.getTrialEnd()));
     }
@@ -124,7 +124,7 @@ public class StripeSubscriptionDataExtractor {
   }
 
   private void extractCancellationDetails(TenantSubscription subscription,
-                                        com.stripe.model.Subscription stripeSubscription) {
+                                          com.stripe.model.Subscription stripeSubscription) {
     if (stripeSubscription.getCancellationDetails() != null
         && stripeSubscription.getCancellationDetails().getReason() != null) {
       subscription.setCancellationReason(
@@ -140,5 +140,6 @@ public class StripeSubscriptionDataExtractor {
       String subscriptionId,
       String customerId,
       SubscriptionStatus status
-  ) {}
+  ) {
+  }
 }

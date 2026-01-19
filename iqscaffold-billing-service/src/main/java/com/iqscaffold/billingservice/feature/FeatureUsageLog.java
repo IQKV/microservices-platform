@@ -17,10 +17,10 @@ import org.hibernate.type.SqlTypes;
 
 /**
  * Entity for tracking feature usage across tenants.
- * 
+ *
  * <p>Stores usage events for analytics, billing, and monitoring purposes.
  * This data helps understand feature adoption and usage patterns.
- * 
+ *
  * <p>Stored in tenant-specific schema for data isolation.
  */
 @Entity
@@ -65,15 +65,16 @@ public class FeatureUsageLog {
   private Map<String, Object> metadata;
 
   // Constructors
-  public FeatureUsageLog() {}
+  public FeatureUsageLog() {
+  }
 
-  public FeatureUsageLog(String tenantId, String featureKey, String endpoint) {
+  public FeatureUsageLog(final String tenantId, final String featureKey, final String endpoint) {
     this.tenantId = tenantId;
     this.featureKey = featureKey;
     this.endpoint = endpoint;
   }
 
-  public FeatureUsageLog(String tenantId, String featureKey, String endpoint, String userId) {
+  public FeatureUsageLog(final String tenantId, final String featureKey, final String endpoint, final String userId) {
     this.tenantId = tenantId;
     this.featureKey = featureKey;
     this.endpoint = endpoint;
@@ -163,8 +164,12 @@ public class FeatureUsageLog {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     FeatureUsageLog that = (FeatureUsageLog) o;
     return Objects.equals(id, that.id);
   }
@@ -177,11 +182,11 @@ public class FeatureUsageLog {
   @Override
   public String toString() {
     return "FeatureUsageLog{" +
-        "id=" + id +
-        ", tenantId='" + tenantId + '\'' +
-        ", featureKey='" + featureKey + '\'' +
-        ", endpoint='" + endpoint + '\'' +
-        ", timestamp=" + timestamp +
-        '}';
+           "id=" + id +
+           ", tenantId='" + tenantId + '\'' +
+           ", featureKey='" + featureKey + '\'' +
+           ", endpoint='" + endpoint + '\'' +
+           ", timestamp=" + timestamp +
+           '}';
   }
 }

@@ -113,7 +113,7 @@ public class PipelineStageRestResource {
   /**
    * Updates an existing pipeline stage.
    *
-   * @param id The stage ID
+   * @param id      The stage ID
    * @param request The stage update request
    * @return The updated stage
    */
@@ -134,14 +134,14 @@ public class PipelineStageRestResource {
       @PathVariable Long id,
       @Valid @RequestBody PipelineStageDtos.UpdateStageRequest request) {
     String userId = getCurrentUserId();
-    
+
     // Fetch existing stage to update
     PipelineStage existingStage = stageService.getStageById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Pipeline stage", "id", id));
-    
+
     // Update the stage with request data
     PipelineStageMapper.updateEntity(existingStage, request, userId);
-    
+
     // Save the updated stage
     PipelineStage updated = stageService.updateStage(id, existingStage);
     PipelineStageDtos.StageResponse response = PipelineStageMapper.toResponse(updated);
@@ -178,7 +178,7 @@ public class PipelineStageRestResource {
    * <p>
    * Updates the display order of the specified stage and adjusts other stages accordingly.
    *
-   * @param id The stage ID
+   * @param id       The stage ID
    * @param newOrder The new display order position
    * @return The updated stage
    */

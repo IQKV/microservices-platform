@@ -68,7 +68,6 @@ class SubscriptionPlanServiceImplTest {
         1,
         14,
         true,
-        Map.of("feature1", "value1"),
         Map.of("tier", "premium")
     );
 
@@ -106,7 +105,6 @@ class SubscriptionPlanServiceImplTest {
         1,
         0,
         true,
-        null,
         null
     );
 
@@ -138,7 +136,6 @@ class SubscriptionPlanServiceImplTest {
         null,
         null,
         false,
-        Map.of("updated_feature", "value"),
         Map.of("updated", "true")
     );
 
@@ -167,7 +164,6 @@ class SubscriptionPlanServiceImplTest {
         1,
         0,
         true,
-        null,
         null
     );
 

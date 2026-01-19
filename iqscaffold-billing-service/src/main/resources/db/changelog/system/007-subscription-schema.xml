@@ -42,7 +42,6 @@
             <column name="is_active" type="boolean" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>
-            <column name="features" type="jsonb"/>
             <column name="max_users" type="int"/>
             <column name="max_storage_gb" type="int"/>
             <column name="max_api_calls" type="bigint"/>

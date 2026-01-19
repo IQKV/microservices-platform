@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Configuration for feature management system.
- * 
+ *
  * <p>Configures caching, async processing, and feature-related properties.
  */
 @Configuration
@@ -31,14 +31,14 @@ public class FeatureConfiguration {
   @Bean("featureCacheManager")
   public CacheManager featureCacheManager() {
     ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-    
+
     // Pre-create caches
     cacheManager.setCacheNames(java.util.List.of(
         "featureEnablement",
         "featureContext",
         "featureDefinitions"
     ));
-    
+
     return cacheManager;
   }
 

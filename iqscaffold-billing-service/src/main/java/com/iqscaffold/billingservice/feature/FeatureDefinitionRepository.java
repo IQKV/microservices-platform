@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for managing feature definitions.
- * 
+ *
  * <p>Provides access to platform-wide feature definitions stored in the public schema.
  * Features are cached for performance as they are frequently accessed.
  */

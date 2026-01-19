@@ -2,7 +2,7 @@ package com.iqscaffold.billingservice.feature;
 
 /**
  * Enumeration of feature types supported by the platform.
- * 
+ *
  * <p>Different feature types enable different validation and configuration patterns:
  * <ul>
  *   <li>BOOLEAN - Simple on/off features (e.g., "advanced_analytics")</li>
@@ -12,25 +12,25 @@ package com.iqscaffold.billingservice.feature;
  * </ul>
  */
 public enum FeatureType {
-  
+
   /**
    * Simple boolean feature - either enabled or disabled.
    * No additional configuration required.
    */
   BOOLEAN,
-  
+
   /**
    * Quota-based feature with usage tracking.
    * Requires quota configuration in metadata (e.g., monthly limits).
    */
   QUOTA,
-  
+
   /**
    * Limit-based feature with capacity constraints.
    * Requires limit configuration in metadata (e.g., max users, storage).
    */
   LIMIT,
-  
+
   /**
    * Tiered feature with multiple levels.
    * Requires tier configuration in metadata (e.g., basic, premium, enterprise).

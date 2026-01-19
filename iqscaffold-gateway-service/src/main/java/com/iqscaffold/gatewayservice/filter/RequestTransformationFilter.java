@@ -97,7 +97,7 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
   private void addFeatureContextHeaders(HttpHeaders headers, FeatureValidationService.FeatureContext featureContext) {
     // Add enabled features as comma-separated list
     if (!featureContext.getEnabledFeatures().isEmpty()) {
-      headers.set(GatewayConstants.Headers.X_ENABLED_FEATURES, 
+      headers.set(GatewayConstants.Headers.X_ENABLED_FEATURES,
           String.join(",", featureContext.getEnabledFeatures()));
     }
 
@@ -132,7 +132,7 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
     try {
       var json = new StringBuilder("{");
       var first = true;
-      for (var entry : map.entrySet()) {
+      for (final var entry : map.entrySet()) {
         if (!first) {
           json.append(",");
         }
@@ -141,7 +141,7 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
       }
       json.append("}");
       return json.toString();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.warn("Failed to serialize map to JSON: {}", e.getMessage());
       return "{}";
     }

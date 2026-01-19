@@ -117,8 +117,8 @@ public class DashboardServiceImpl implements DashboardService {
     // Calculate average time to convert (for Won leads only)
     List<PipelineItem> wonItems = wonStage != null
         ? filteredItems.stream()
-            .filter(item -> item.getStageId().equals(wonStage.getId()) && item.getConvertedAt() != null)
-            .toList()
+        .filter(item -> item.getStageId().equals(wonStage.getId()) && item.getConvertedAt() != null)
+        .toList()
         : List.of();
 
     Double averageTimeToConvert = wonItems.isEmpty() ? 0.0 : wonItems.stream()
@@ -196,24 +196,25 @@ public class DashboardServiceImpl implements DashboardService {
       Map<String, Long> result = webClient.get()
           .uri(uriBuilder -> {
             uriBuilder.path(leadServiceUrl + LEAD_SERVICE_STATS_BY_SOURCE_PATH);
-            
+
             if (startDate != null) {
               uriBuilder.queryParam("startDate", startDate.toString());
             }
             if (endDate != null) {
               uriBuilder.queryParam("endDate", endDate.toString());
             }
-            
+
             return uriBuilder.build();
           })
           .retrieve()
-          .bodyToMono(new ParameterizedTypeReference<Map<String, Long>>() {})
+          .bodyToMono(new ParameterizedTypeReference<Map<String, Long>>() {
+          })
           .block();
 
       return result != null ? result : new HashMap<>();
 
     } catch (final WebClientResponseException e) {
-      log.error("Failed to fetch leads by source from Lead Service: {} - {}", 
+      log.error("Failed to fetch leads by source from Lead Service: {} - {}",
           e.getStatusCode(), e.getMessage());
       // Return empty map on failure - dashboard should still work with pipeline data
       return new HashMap<>();

@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for tracking feature usage for analytics and billing purposes.
- * 
+ *
  * <p>This service records feature usage events asynchronously to avoid impacting
  * request performance. Usage data is used for:
  * <ul>
@@ -33,37 +33,37 @@ public class FeatureUsageTrackingService {
 
   private final FeatureUsageLogRepository usageLogRepository;
 
-  public FeatureUsageTrackingService(FeatureUsageLogRepository usageLogRepository) {
+  public FeatureUsageTrackingService(final FeatureUsageLogRepository usageLogRepository) {
     this.usageLogRepository = usageLogRepository;
   }
 
   /**
    * Records feature usage asynchronously.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature that was used
-   * @param endpoint the endpoint where the feature was used (optional)
+   * @param endpoint   the endpoint where the feature was used (optional)
    */
   @Async
   public void recordUsage(String tenantId, String featureKey, String endpoint) {
     try {
       FeatureUsageLog usageLog = new FeatureUsageLog(tenantId, featureKey, endpoint);
-      
+
       // Capture additional context from MDC if available
       String userId = MDC.get("userId");
       String correlationId = MDC.get("correlationId");
       String sessionId = MDC.get("sessionId");
-      
+
       usageLog.setUserId(userId);
       usageLog.setCorrelationId(correlationId);
       usageLog.setSessionId(sessionId);
-      
+
       usageLogRepository.save(usageLog);
-      
+
       logger.debug("Recorded feature usage: tenant={}, feature={}, endpoint={}", tenantId, featureKey, endpoint);
-      
-    } catch (Exception e) {
-      logger.error("Failed to record feature usage for tenant {} and feature {}: {}", 
+
+    } catch (final Exception e) {
+      logger.error("Failed to record feature usage for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
       // Don't rethrow - usage tracking should not fail the main request
     }
@@ -76,24 +76,24 @@ public class FeatureUsageTrackingService {
   public void recordUsage(String tenantId, String featureKey, String endpoint, Map<String, Object> metadata) {
     try {
       FeatureUsageLog usageLog = new FeatureUsageLog(tenantId, featureKey, endpoint);
-      
+
       // Capture additional context from MDC if available
       String userId = MDC.get("userId");
       String correlationId = MDC.get("correlationId");
       String sessionId = MDC.get("sessionId");
-      
+
       usageLog.setUserId(userId);
       usageLog.setCorrelationId(correlationId);
       usageLog.setSessionId(sessionId);
       usageLog.setMetadata(metadata);
-      
+
       usageLogRepository.save(usageLog);
-      
-      logger.debug("Recorded feature usage with metadata: tenant={}, feature={}, endpoint={}", 
+
+      logger.debug("Recorded feature usage with metadata: tenant={}, feature={}, endpoint={}",
           tenantId, featureKey, endpoint);
-      
-    } catch (Exception e) {
-      logger.error("Failed to record feature usage with metadata for tenant {} and feature {}: {}", 
+
+    } catch (final Exception e) {
+      logger.error("Failed to record feature usage with metadata for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
     }
   }
@@ -110,14 +110,14 @@ public class FeatureUsageTrackingService {
    */
   public Map<String, Long> getUsageStatistics(String tenantId, Instant startTime, Instant endTime) {
     List<Object[]> results = usageLogRepository.getFeatureUsageStatsByTenant(tenantId, startTime, endTime);
-    
+
     Map<String, Long> statistics = new HashMap<>();
-    for (Object[] result : results) {
+    for (final Object[] result : results) {
       String featureKey = (String) result[0];
       Long usageCount = (Long) result[1];
       statistics.put(featureKey, usageCount);
     }
-    
+
     return statistics;
   }
 
@@ -127,7 +127,7 @@ public class FeatureUsageTrackingService {
   public long getDailyUsageCount(String tenantId, String featureKey) {
     Instant endTime = Instant.now();
     Instant startTime = endTime.minus(1, ChronoUnit.DAYS);
-    
+
     return usageLogRepository.countByTenantAndFeatureInTimeRange(tenantId, featureKey, startTime, endTime);
   }
 
@@ -137,7 +137,7 @@ public class FeatureUsageTrackingService {
   public long getMonthlyUsageCount(String tenantId, String featureKey) {
     Instant endTime = Instant.now();
     Instant startTime = endTime.minus(30, ChronoUnit.DAYS);
-    
+
     return usageLogRepository.countByTenantAndFeatureInTimeRange(tenantId, featureKey, startTime, endTime);
   }
 
@@ -147,7 +147,7 @@ public class FeatureUsageTrackingService {
   public boolean hasRecentUsage(String tenantId, String featureKey) {
     Instant endTime = Instant.now();
     Instant startTime = endTime.minus(7, ChronoUnit.DAYS);
-    
+
     long usageCount = usageLogRepository.countByTenantAndFeatureInTimeRange(tenantId, featureKey, startTime, endTime);
     return usageCount > 0;
   }
@@ -158,17 +158,17 @@ public class FeatureUsageTrackingService {
   public Map<String, Long> getMostUsedFeatures(int limit) {
     Instant endTime = Instant.now();
     Instant startTime = endTime.minus(30, ChronoUnit.DAYS);
-    
-    List<Object[]> results = usageLogRepository.getMostUsedFeatures(startTime, endTime, 
+
+    List<Object[]> results = usageLogRepository.getMostUsedFeatures(startTime, endTime,
         org.springframework.data.domain.PageRequest.of(0, limit));
-    
+
     Map<String, Long> mostUsed = new HashMap<>();
-    for (Object[] result : results) {
+    for (final Object[] result : results) {
       String featureKey = (String) result[0];
       Long usageCount = (Long) result[1];
       mostUsed.put(featureKey, usageCount);
     }
-    
+
     return mostUsed;
   }
 
@@ -179,11 +179,11 @@ public class FeatureUsageTrackingService {
   @Transactional
   public void cleanupOldUsageLogs(int retentionDays) {
     Instant cutoffTime = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
-    
+
     try {
       usageLogRepository.deleteByTimestampBefore(cutoffTime);
       logger.info("Cleaned up feature usage logs older than {} days", retentionDays);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Failed to cleanup old usage logs: {}", e.getMessage(), e);
     }
   }

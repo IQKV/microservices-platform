@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <!-- 
+        Drop legacy features column from subscription_plan table
+        
+        This changeset removes the deprecated JSON features column that was used
+        for backward compatibility during the migration to structured PlanFeature entities.
+        
+        Since this is a greenfield project, we can safely remove this legacy column
+        without any migration logic.
+    -->
+    <changeSet id="008-drop-legacy-features-column" author="iqscaffold">
+        <comment>Drop legacy JSON features column from subscription_plan table</comment>
+        
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="subscription_plan" columnName="features" schemaName="public"/>
+        </preConditions>
+        
+        <dropColumn tableName="subscription_plan" columnName="features" schemaName="public"/>
+        
+        <rollback>
+            <addColumn tableName="subscription_plan" schemaName="public">
+                <column name="features" type="jsonb"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

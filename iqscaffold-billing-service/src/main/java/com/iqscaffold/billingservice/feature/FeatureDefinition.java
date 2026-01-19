@@ -21,10 +21,10 @@ import org.hibernate.type.SqlTypes;
 
 /**
  * Platform-wide feature definition entity.
- * 
+ *
  * <p>Defines all available features that can be enabled in subscription plans.
  * Stored in public schema as features are shared across all tenants.
- * 
+ *
  * <p>Features support different types:
  * <ul>
  *   <li>BOOLEAN - Simple on/off features</li>
@@ -32,7 +32,7 @@ import org.hibernate.type.SqlTypes;
  *   <li>LIMIT - Capacity-based features</li>
  *   <li>TIER - Multi-level features</li>
  * </ul>
- * 
+ *
  * <p>Example feature definitions:
  * <pre>
  * {
@@ -41,10 +41,10 @@ import org.hibernate.type.SqlTypes;
  *   "displayName": "Advanced Analytics",
  *   "description": "Access to advanced reporting and analytics dashboards"
  * }
- * 
+ *
  * {
  *   "featureKey": "api_calls_monthly",
- *   "type": "QUOTA", 
+ *   "type": "QUOTA",
  *   "displayName": "API Calls per Month",
  *   "metadata": {"defaultQuota": 10000, "unit": "calls"}
  * }
@@ -103,9 +103,10 @@ public class FeatureDefinition {
   private String updatedBy;
 
   // Constructors
-  public FeatureDefinition() {}
+  public FeatureDefinition() {
+  }
 
-  public FeatureDefinition(String featureKey, String displayName, String description, FeatureType type) {
+  public FeatureDefinition(final String featureKey, final String displayName, final String description, final FeatureType type) {
     this.featureKey = featureKey;
     this.displayName = displayName;
     this.description = description;
@@ -126,7 +127,7 @@ public class FeatureDefinition {
   }
 
   // Business methods
-  
+
   /**
    * Checks if this feature has dependencies on other features.
    */
@@ -285,8 +286,12 @@ public class FeatureDefinition {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     FeatureDefinition that = (FeatureDefinition) o;
     return Objects.equals(featureKey, that.featureKey);
   }
@@ -299,10 +304,10 @@ public class FeatureDefinition {
   @Override
   public String toString() {
     return "FeatureDefinition{" +
-        "featureKey='" + featureKey + '\'' +
-        ", displayName='" + displayName + '\'' +
-        ", type=" + type +
-        ", deprecated=" + deprecated +
-        '}';
+           "featureKey='" + featureKey + '\'' +
+           ", displayName='" + displayName + '\'' +
+           ", type=" + type +
+           ", deprecated=" + deprecated +
+           '}';
   }
 }

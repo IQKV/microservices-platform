@@ -1,8 +1,6 @@
 package com.iqscaffold.gatewayservice.filter;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.iqscaffold.gatewayservice.common.GatewayConstants;
@@ -24,11 +22,11 @@ import reactor.core.publisher.Mono;
 
 /**
  * Gateway filter that enforces feature-based access control.
- * 
+ *
  * <p>This filter validates that tenants have access to features required by specific endpoints.
  * It runs after tenant extraction and JWT authentication but before rate limiting to ensure
  * feature access is validated early in the request pipeline.
- * 
+ *
  * <p>Key responsibilities:
  * <ul>
  *   <li>Map endpoints to required features</li>
@@ -48,8 +46,8 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
   private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
   public FeatureAccessFilter(
-      FeatureValidationService featureValidationService,
-      IqScaffoldProperties properties) {
+      final FeatureValidationService featureValidationService,
+      final IqScaffoldProperties properties) {
     this.featureValidationService = featureValidationService;
     this.properties = properties;
   }
@@ -57,7 +55,7 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     var featureAccessConfig = properties.gateway().featureAccess();
-    
+
     // Skip feature validation if disabled
     if (!featureAccessConfig.enabled()) {
       logger.debug("Feature access validation is disabled");
@@ -67,7 +65,7 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
     var request = exchange.getRequest();
     var path = request.getPath().value();
     var method = request.getMethod();
-    
+
     // Skip validation for excluded paths
     if (isPathExcluded(path, featureAccessConfig.excludedPaths())) {
       logger.debug("Path {} is excluded from feature validation", path);
@@ -100,23 +98,23 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
     return featureValidationService.validateFeatureAccess(tenantId, requiredFeatures, path)
         .flatMap(validationResult -> {
           if (!validationResult.isAllowed()) {
-            logger.warn("Feature access denied for tenant {} on path {}: missing features {}", 
+            logger.warn("Feature access denied for tenant {} on path {}: missing features {}",
                 tenantId, path, validationResult.getMissingFeatures());
             return handleFeatureAccessDenied(exchange, validationResult);
           }
 
           // Add feature context to exchange for downstream services
           exchange.getAttributes().put(GatewayConstants.Attributes.FEATURE_CONTEXT, validationResult.getFeatureContext());
-          
+
           // Add feature context to MDC for logging
-          MDC.put(GatewayConstants.MdcKeys.ENABLED_FEATURES, 
+          MDC.put(GatewayConstants.MdcKeys.ENABLED_FEATURES,
               String.join(",", validationResult.getFeatureContext().getEnabledFeatures()));
 
           logger.debug("Feature access granted for tenant {} on path {}", tenantId, path);
           return chain.filter(exchange);
         })
         .onErrorResume(error -> {
-          logger.error("Feature validation service error for tenant {} on path {}: {}", 
+          logger.error("Feature validation service error for tenant {} on path {}: {}",
               tenantId, path, error.getMessage(), error);
           // On validation service error, allow the request to proceed (fail-open policy)
           logger.warn("Allowing request to proceed due to feature validation service error");
@@ -150,9 +148,9 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
   /**
    * Checks if a path and method match a feature mapping.
    */
-  private boolean matchesPathAndMethod(String path, String method, 
-      IqScaffoldProperties.GatewayProperties.FeatureAccessProperties.FeatureMapping mapping) {
-    
+  private boolean matchesPathAndMethod(String path, String method,
+                                       IqScaffoldProperties.GatewayProperties.FeatureAccessProperties.FeatureMapping mapping) {
+
     // Check path pattern
     boolean pathMatches = pathMatcher.match(mapping.pathPattern(), path);
     if (!pathMatches) {
@@ -187,16 +185,16 @@ public class FeatureAccessFilter implements GlobalFilter, Ordered {
    */
   private String createFeatureAccessErrorResponse(FeatureValidationService.ValidationResult validationResult) {
     return String.format("""
-        {
-          "error": "FEATURE_ACCESS_DENIED",
-          "message": "Access to this feature is not available in your current subscription plan",
-          "details": {
-            "missingFeatures": %s,
-            "currentPlan": "%s",
-            "upgradeRequired": true
-          },
-          "timestamp": "%s"
-        }""",
+            {
+              "error": "FEATURE_ACCESS_DENIED",
+              "message": "Access to this feature is not available in your current subscription plan",
+              "details": {
+                "missingFeatures": %s,
+                "currentPlan": "%s",
+                "upgradeRequired": true
+              },
+              "timestamp": "%s"
+            }""",
         formatFeatureList(validationResult.getMissingFeatures()),
         validationResult.getFeatureContext().getPlanName(),
         java.time.Instant.now().toString()

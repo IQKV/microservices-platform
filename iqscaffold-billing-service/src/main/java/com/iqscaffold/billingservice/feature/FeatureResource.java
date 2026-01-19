@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>{@code
  * // React component
  * const { data: features } = useFetch('/api/v1/features/my-features');
- * 
+ *
  * if (features.enabledFeatures.some(f => f.code === 'advanced_analytics')) {
  *   // Show advanced analytics UI
  * }
@@ -76,7 +76,7 @@ public class FeatureResource {
   @PreAuthorize("hasAuthority('USER')")
   public ResponseEntity<UserFeaturesResponse> getMyFeatures() {
     String tenantId = TenantContext.getCurrentTenantId();
-    
+
     if (tenantId == null) {
       logger.warn("No tenant context available for feature request");
       return ResponseEntity.badRequest().build();
@@ -93,13 +93,13 @@ public class FeatureResource {
       }
 
       var subscription = activeSubscription.get();
-      
+
       // Get feature context for the tenant
       FeatureContext featureContext = featureEnablementService.getFeatureContext(tenantId);
-      
+
       // Get all available features
       List<FeatureDefinition> allFeatures = featureEnablementService.getAllFeatures();
-      
+
       // Build enabled features list
       List<FeatureDto> enabledFeatures = allFeatures.stream()
           .filter(feature -> featureContext.isFeatureEnabled(feature.getFeatureKey()))
@@ -126,12 +126,12 @@ public class FeatureResource {
           tenantId
       );
 
-      logger.debug("Retrieved {} enabled features out of {} total features for tenant: {}", 
+      logger.debug("Retrieved {} enabled features out of {} total features for tenant: {}",
           enabledFeatures.size(), allFeatures.size(), tenantId);
 
       return ResponseEntity.ok(response);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error retrieving features for tenant {}: {}", tenantId, e.getMessage(), e);
       return ResponseEntity.internalServerError().build();
     }
@@ -149,7 +149,7 @@ public class FeatureResource {
   @PreAuthorize("hasAuthority('USER')")
   public ResponseEntity<List<FeatureDto>> getEnabledFeatures() {
     String tenantId = TenantContext.getCurrentTenantId();
-    
+
     if (tenantId == null) {
       logger.warn("No tenant context available for enabled features request");
       return ResponseEntity.badRequest().build();
@@ -167,7 +167,7 @@ public class FeatureResource {
 
       // Get feature context for the tenant
       FeatureContext featureContext = featureEnablementService.getFeatureContext(tenantId);
-      
+
       // Get all available features and filter enabled ones
       List<FeatureDto> enabledFeatures = featureEnablementService.getAllFeatures().stream()
           .filter(feature -> featureContext.isFeatureEnabled(feature.getFeatureKey()))
@@ -178,7 +178,7 @@ public class FeatureResource {
 
       return ResponseEntity.ok(enabledFeatures);
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error retrieving enabled features for tenant {}: {}", tenantId, e.getMessage(), e);
       return ResponseEntity.internalServerError().build();
     }
@@ -205,7 +205,9 @@ public class FeatureResource {
         // TODO: Get current usage from usage tracking service
         // currentUsage = usageTrackingService.getCurrentUsage(tenantId, feature.getFeatureKey());
       }
-      // BOOLEAN and TIER features don't have usage limits
+      default -> {
+        // BOOLEAN and TIER features don't have usage limits
+      }
     }
 
     return new FeatureDto(

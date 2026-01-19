@@ -129,7 +129,7 @@ public class PipelineStageServiceImpl implements PipelineStageService {
     if (itemCount > 0) {
       throw new BusinessException(
           String.format("Cannot delete stage '%s' because %d lead(s) are currently in this stage. " +
-              "Please move the leads to another stage first.", stage.getName(), itemCount));
+                        "Please move the leads to another stage first.", stage.getName(), itemCount));
     }
 
     stageRepository.delete(stage);

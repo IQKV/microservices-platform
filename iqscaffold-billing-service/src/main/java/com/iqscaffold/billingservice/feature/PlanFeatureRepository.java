@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository for managing plan-feature associations.
- * 
+ *
  * <p>Provides access to the relationships between subscription plans and features,
  * including their specific configurations and enablement status.
  */

@@ -52,10 +52,6 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     plan.setTrialPeriodDays(request.trialDays() != null ? request.trialDays() : 0);
     plan.setIsActive(request.isActive() != null ? request.isActive() : true);
 
-    if (request.features() != null) {
-      plan.setFeatures(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.features()).toString());
-    }
-
     if (request.metadata() != null) {
       plan.setMetadata(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.metadata()).toString());
     }
@@ -82,9 +78,6 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService {
     }
     if (request.isActive() != null) {
       existingPlan.setIsActive(request.isActive());
-    }
-    if (request.features() != null) {
-      existingPlan.setFeatures(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.features()).toString());
     }
     if (request.metadata() != null) {
       existingPlan.setMetadata(new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(request.metadata()).toString());

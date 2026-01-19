@@ -8,11 +8,10 @@ import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  * Service for tracking feature usage at the gateway level.
- * 
+ *
  * <p>This service asynchronously reports feature usage to the billing service
  * for analytics and billing purposes. It includes resilience patterns to ensure
  * that usage tracking failures don't impact request processing.
@@ -24,7 +23,7 @@ public class FeatureUsageTrackingService {
 
   private final WebClient billingServiceClient;
 
-  public FeatureUsageTrackingService(WebClient.Builder webClientBuilder) {
+  public FeatureUsageTrackingService(final WebClient.Builder webClientBuilder) {
     this.billingServiceClient = webClientBuilder
         .baseUrl("http://iqscaffold-billing-service")
         .build();
@@ -32,15 +31,15 @@ public class FeatureUsageTrackingService {
 
   /**
    * Records feature usage asynchronously.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature that was used
-   * @param endpoint the endpoint where the feature was used
+   * @param endpoint   the endpoint where the feature was used
    */
   @Async
   public void recordFeatureUsage(String tenantId, String featureKey, String endpoint) {
     try {
-      var usageRequest = new FeatureUsageRequest(tenantId, featureKey, endpoint, 
+      var usageRequest = new FeatureUsageRequest(tenantId, featureKey, endpoint,
           MDC.get("userId"), MDC.get("correlationId"));
 
       billingServiceClient
@@ -51,14 +50,14 @@ public class FeatureUsageTrackingService {
           .bodyToMono(Void.class)
           .timeout(Duration.ofSeconds(5))
           .subscribe(
-              result -> logger.debug("Recorded feature usage: tenant={}, feature={}, endpoint={}", 
+              result -> logger.debug("Recorded feature usage: tenant={}, feature={}, endpoint={}",
                   tenantId, featureKey, endpoint),
-              error -> logger.warn("Failed to record feature usage for tenant {} and feature {}: {}", 
+              error -> logger.warn("Failed to record feature usage for tenant {} and feature {}: {}",
                   tenantId, featureKey, error.getMessage())
           );
 
-    } catch (Exception e) {
-      logger.error("Error recording feature usage for tenant {} and feature {}: {}", 
+    } catch (final Exception e) {
+      logger.error("Error recording feature usage for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
       // Don't rethrow - usage tracking should not fail the main request
     }
@@ -82,9 +81,10 @@ public class FeatureUsageTrackingService {
     private String userId;
     private String correlationId;
 
-    public FeatureUsageRequest() {}
+    public FeatureUsageRequest() {
+    }
 
-    public FeatureUsageRequest(String tenantId, String featureKey, String endpoint, String userId, String correlationId) {
+    public FeatureUsageRequest(final String tenantId, final String featureKey, final String endpoint, final String userId, final String correlationId) {
       this.tenantId = tenantId;
       this.featureKey = featureKey;
       this.endpoint = endpoint;

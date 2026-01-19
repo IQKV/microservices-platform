@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import com.iqscaffold.billingservice.subscription.TenantSubscription;
 import com.iqscaffold.billingservice.subscription.TenantSubscriptionRepository;
@@ -19,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Core service for feature enablement and validation.
- * 
+ *
  * <p>This service provides the primary interface for checking feature availability
  * and building feature contexts for tenants based on their subscription plans.
- * 
+ *
  * <p>Key responsibilities:
  * <ul>
  *   <li>Feature enablement checking</li>
@@ -47,10 +46,10 @@ public class FeatureEnablementService {
   private final Map<String, FeatureDefinition> featureDefinitionCache = new ConcurrentHashMap<>();
 
   public FeatureEnablementService(
-      TenantSubscriptionRepository subscriptionRepository,
-      PlanFeatureRepository planFeatureRepository,
-      FeatureDefinitionRepository featureDefinitionRepository,
-      FeatureUsageTrackingService usageTrackingService) {
+      final TenantSubscriptionRepository subscriptionRepository,
+      final PlanFeatureRepository planFeatureRepository,
+      final FeatureDefinitionRepository featureDefinitionRepository,
+      final FeatureUsageTrackingService usageTrackingService) {
     this.subscriptionRepository = subscriptionRepository;
     this.planFeatureRepository = planFeatureRepository;
     this.featureDefinitionRepository = featureDefinitionRepository;
@@ -59,8 +58,8 @@ public class FeatureEnablementService {
 
   /**
    * Checks if a specific feature is enabled for a tenant.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature key to check
    * @return true if the feature is enabled, false otherwise
    */
@@ -88,8 +87,8 @@ public class FeatureEnablementService {
       logger.debug("Feature {} is {} for tenant {}", featureKey, enabled ? "enabled" : "disabled", tenantId);
       return enabled;
 
-    } catch (Exception e) {
-      logger.error("Error checking feature enablement for tenant {} and feature {}: {}", 
+    } catch (final Exception e) {
+      logger.error("Error checking feature enablement for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
       return false; // Fail closed for security
     }
@@ -97,7 +96,7 @@ public class FeatureEnablementService {
 
   /**
    * Gets the complete feature context for a tenant.
-   * 
+   *
    * @param tenantId the tenant identifier
    * @return the feature context containing all enabled features, quotas, and limits
    */
@@ -126,7 +125,7 @@ public class FeatureEnablementService {
 
       Set<String> enabledFeatures = new HashSet<>();
 
-      for (PlanFeature planFeature : planFeatures) {
+      for (final PlanFeature planFeature : planFeatures) {
         FeatureDefinition feature = planFeature.getFeature();
         String featureKey = feature.getFeatureKey();
 
@@ -156,6 +155,7 @@ public class FeatureEnablementService {
               contextBuilder.addTier(featureKey, tier);
             }
           }
+          default -> logger.warn("Unknown feature type {} for feature {}", feature.getType(), featureKey);
         }
       }
 
@@ -163,10 +163,10 @@ public class FeatureEnablementService {
 
       FeatureContext context = contextBuilder.build();
       logger.debug("Built feature context for tenant {} with {} features", tenantId, context.getEnabledFeatureCount());
-      
+
       return context;
 
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Error building feature context for tenant {}: {}", tenantId, e.getMessage(), e);
       return FeatureContext.empty(tenantId); // Fail closed
     }
@@ -174,16 +174,16 @@ public class FeatureEnablementService {
 
   /**
    * Records feature usage for analytics and billing.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature that was used
-   * @param endpoint the endpoint where the feature was used (optional)
+   * @param endpoint   the endpoint where the feature was used (optional)
    */
   public void recordFeatureUsage(String tenantId, String featureKey, String endpoint) {
     try {
       usageTrackingService.recordUsage(tenantId, featureKey, endpoint);
-    } catch (Exception e) {
-      logger.error("Error recording feature usage for tenant {} and feature {}: {}", 
+    } catch (final Exception e) {
+      logger.error("Error recording feature usage for tenant {} and feature {}: {}",
           tenantId, featureKey, e.getMessage(), e);
       // Don't fail the request if usage tracking fails
     }
@@ -191,8 +191,8 @@ public class FeatureEnablementService {
 
   /**
    * Gets quota information for a specific feature.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the quota-based feature key
    * @return the quota value, or null if not configured
    */
@@ -203,8 +203,8 @@ public class FeatureEnablementService {
 
   /**
    * Gets limit information for a specific feature.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the limit-based feature key
    * @return the limit value, or null if not configured
    */
@@ -215,10 +215,10 @@ public class FeatureEnablementService {
 
   /**
    * Validates that all dependencies for a feature are satisfied.
-   * 
-   * @param tenantId the tenant identifier
+   *
+   * @param tenantId   the tenant identifier
    * @param featureKey the feature to validate
-   * @param planId the subscription plan ID
+   * @param planId     the subscription plan ID
    * @return true if all dependencies are satisfied
    */
   private boolean validateFeatureDependencies(String tenantId, String featureKey, UUID planId) {
@@ -227,7 +227,7 @@ public class FeatureEnablementService {
       return true; // No dependencies to validate
     }
 
-    for (String dependencyKey : feature.getDependencies()) {
+    for (final String dependencyKey : feature.getDependencies()) {
       if (!planFeatureRepository.isFeatureEnabledForPlan(planId, dependencyKey)) {
         logger.warn("Feature {} dependency {} not satisfied for tenant {}", featureKey, dependencyKey, tenantId);
         return false;

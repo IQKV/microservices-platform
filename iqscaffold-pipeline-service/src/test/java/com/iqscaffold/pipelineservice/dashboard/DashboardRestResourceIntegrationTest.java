@@ -231,17 +231,17 @@ class DashboardRestResourceIntegrationTest {
   void testGetConversionMetricsWithAverageTimeToConvert() throws Exception {
     // Given - Create Won leads with different conversion times
     LocalDateTime now = LocalDateTime.now();
-    
+
     // Lead 1: Created 10 days ago, converted today (10 days to convert)
     PipelineItem item1 = createPipelineItem(1L, wonStage.getId(), now.minusDays(10));
     item1.setConvertedAt(now);
     pipelineItemRepository.save(item1);
-    
+
     // Lead 2: Created 20 days ago, converted 15 days ago (5 days to convert)
     PipelineItem item2 = createPipelineItem(2L, wonStage.getId(), now.minusDays(20));
     item2.setConvertedAt(now.minusDays(15));
     pipelineItemRepository.save(item2);
-    
+
     // Lead 3: Still in New stage (not converted)
     createPipelineItem(3L, newStage.getId(), now.minusDays(3));
 
@@ -267,11 +267,11 @@ class DashboardRestResourceIntegrationTest {
     PipelineItem item1 = createPipelineItem(1L, newStage.getId(), LocalDateTime.now().minusDays(5));
     item1.setDaysInStage(5);
     pipelineItemRepository.save(item1);
-    
+
     PipelineItem item2 = createPipelineItem(2L, newStage.getId(), LocalDateTime.now().minusDays(3));
     item2.setDaysInStage(3);
     pipelineItemRepository.save(item2);
-    
+
     PipelineItem item3 = createPipelineItem(3L, contactedStage.getId(), LocalDateTime.now().minusDays(2));
     item3.setDaysInStage(2);
     pipelineItemRepository.save(item3);
@@ -295,10 +295,10 @@ class DashboardRestResourceIntegrationTest {
   void testGetConversionMetricsWithDateRange() throws Exception {
     // Given - Create pipeline items with different creation dates
     LocalDateTime now = LocalDateTime.now();
-    
+
     // Outside range
     createPipelineItem(1L, wonStage.getId(), now.minusDays(20));
-    
+
     // Within range
     createPipelineItem(2L, wonStage.getId(), now.minusDays(5));
     createPipelineItem(3L, newStage.getId(), now.minusDays(3));

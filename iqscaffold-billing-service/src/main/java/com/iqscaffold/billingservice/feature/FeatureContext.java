@@ -7,7 +7,7 @@ import java.util.Set;
 
 /**
  * Context object containing all feature enablement information for a tenant.
- * 
+ *
  * <p>This immutable object encapsulates:
  * <ul>
  *   <li>Enabled features (boolean features)</li>
@@ -15,7 +15,7 @@ import java.util.Set;
  *   <li>Feature limits (capacity constraints)</li>
  *   <li>Feature tiers (multi-level features)</li>
  * </ul>
- * 
+ *
  * <p>Used by gateway filters and downstream services to make feature-based decisions.
  */
 public class FeatureContext {
@@ -29,7 +29,7 @@ public class FeatureContext {
   private final Map<String, String> tiers;
   private final Map<String, Object> metadata;
 
-  private FeatureContext(Builder builder) {
+  private FeatureContext(final Builder builder) {
     this.tenantId = builder.tenantId;
     this.planId = builder.planId;
     this.planName = builder.planName;
@@ -45,7 +45,7 @@ public class FeatureContext {
   /**
    * Creates an empty feature context (no features enabled).
    */
-  public static FeatureContext empty(String tenantId) {
+  public static FeatureContext empty(final String tenantId) {
     return new Builder(tenantId).build();
   }
 
@@ -139,14 +139,14 @@ public class FeatureContext {
   @Override
   public String toString() {
     return "FeatureContext{" +
-        "tenantId='" + tenantId + '\'' +
-        ", planId='" + planId + '\'' +
-        ", planName='" + planName + '\'' +
-        ", enabledFeatures=" + enabledFeatures.size() +
-        ", quotas=" + quotas.size() +
-        ", limits=" + limits.size() +
-        ", tiers=" + tiers.size() +
-        '}';
+           "tenantId='" + tenantId + '\'' +
+           ", planId='" + planId + '\'' +
+           ", planName='" + planName + '\'' +
+           ", enabledFeatures=" + enabledFeatures.size() +
+           ", quotas=" + quotas.size() +
+           ", limits=" + limits.size() +
+           ", tiers=" + tiers.size() +
+           '}';
   }
 
   /**
@@ -162,7 +162,7 @@ public class FeatureContext {
     private Map<String, String> tiers = new HashMap<>();
     private Map<String, Object> metadata = new HashMap<>();
 
-    private Builder(String tenantId) {
+    private Builder(final String tenantId) {
       this.tenantId = tenantId;
     }
 
