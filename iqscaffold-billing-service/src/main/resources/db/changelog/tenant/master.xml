@@ -7,5 +7,6 @@
 
     <include file="db/changelog/001-initial-schema.xml"/>
     <include file="db/changelog/002-advanced-schema.xml"/>
+    <include file="db/changelog/tenant/002-feature-usage-tracking.xml"/>
 
 </databaseChangeLog>

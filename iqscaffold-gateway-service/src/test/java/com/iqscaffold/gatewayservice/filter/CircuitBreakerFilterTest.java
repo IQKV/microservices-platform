@@ -329,7 +329,7 @@ class CircuitBreakerFilterTest {
     );
 
     var requestTransform = new IqScaffoldProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
-        true, true, true, true, List.of(), Map.of()
+        true, true, true, true, true, List.of(), Map.of()
     );
 
     var responseTransform = new IqScaffoldProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
@@ -341,8 +341,7 @@ class CircuitBreakerFilterTest {
     );
 
     var gateway = new IqScaffoldProperties.GatewayProperties(
-        routing, security, rateLimiting, circuitBreaker, cors, transformation
-    );
+        routing, security, rateLimiting, circuitBreaker, cors, transformation, null);
 
     var cacheRedis = new IqScaffoldProperties.CacheProperties.RedisProperties(
         "localhost", 6379, null, 0, Duration.ofSeconds(5),
@@ -430,7 +429,7 @@ class CircuitBreakerFilterTest {
     );
 
     var requestTransform = new IqScaffoldProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
-        true, true, true, true, List.of(), Map.of()
+        true, true, true, true, true, List.of(), Map.of()
     );
 
     var responseTransform = new IqScaffoldProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
@@ -442,8 +441,7 @@ class CircuitBreakerFilterTest {
     );
 
     var gateway = new IqScaffoldProperties.GatewayProperties(
-        routing, security, rateLimiting, circuitBreaker, cors, transformation
-    );
+        routing, security, rateLimiting, circuitBreaker, cors, transformation, null);
 
     var cacheRedis = new IqScaffoldProperties.CacheProperties.RedisProperties(
         "localhost", 6379, null, 0, Duration.ofSeconds(5),
@@ -477,3 +475,5 @@ class CircuitBreakerFilterTest {
     return new IqScaffoldProperties(cache, gateway, i18n, observability);
   }
 }
+
+

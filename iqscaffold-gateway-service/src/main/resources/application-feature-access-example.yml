@@ -1,0 +1,75 @@
+# Example configuration for feature-based access control
+# This file demonstrates how to configure the gateway to enforce feature access based on subscription plans
+
+iqscaffold:
+  gateway:
+    feature-access:
+      enabled: true
+      excluded-paths:
+        - "/actuator/**"
+        - "/api/v1/public/**"
+        - "/api/v1/auth/**"
+        - "/api/v1/health"
+      mappings:
+        # Analytics features (Premium plan required)
+        - path-pattern: "/api/v1/analytics/**"
+          methods: ["GET", "POST"]
+          required-features: ["advanced_analytics"]
+          description: "Advanced analytics endpoints"
+        
+        # Data export features (Pro plan or higher)
+        - path-pattern: "/api/v1/export/**"
+          methods: ["GET", "POST"]
+          required-features: ["data_export"]
+          description: "Data export endpoints"
+        
+        # Bulk operations (Enterprise plan required)
+        - path-pattern: "/api/v1/bulk/**"
+          required-features: ["bulk_operations"]
+          description: "Bulk operation endpoints"
+        
+        # Advanced reporting (Premium plan required)
+        - path-pattern: "/api/v1/reports/advanced/**"
+          methods: ["GET"]
+          required-features: ["advanced_reporting"]
+          description: "Advanced reporting endpoints"
+        
+        # API integrations (Pro plan or higher)
+        - path-pattern: "/api/v1/integrations/**"
+          required-features: ["api_integrations"]
+          description: "Third-party API integration endpoints"
+        
+        # Custom fields (Pro plan or higher)
+        - path-pattern: "/api/v1/*/custom-fields/**"
+          required-features: ["custom_fields"]
+          description: "Custom field management endpoints"
+        
+        # Automation features (Premium plan required)
+        - path-pattern: "/api/v1/automation/**"
+          required-features: ["automation"]
+          description: "Workflow automation endpoints"
+        
+        # Multi-tenant admin (Enterprise plan required)
+        - path-pattern: "/api/v1/admin/tenants/**"
+          methods: ["GET", "POST", "PUT", "DELETE"]
+          required-features: ["multi_tenant_admin"]
+          description: "Multi-tenant administration endpoints"
+      
+      cache:
+        ttl: PT15M  # 15 minutes
+        max-size: 1000
+        enable-statistics: true
+
+# Billing service configuration for feature validation
+billing-service:
+  base-url: "http://billing-service:8080"
+  timeout: PT5S
+  retry:
+    max-attempts: 3
+    delay: PT1S
+
+# Logging configuration for feature access
+logging:
+  level:
+    com.iqscaffold.gatewayservice.filter.FeatureAccessFilter: DEBUG
+    com.iqscaffold.gatewayservice.service.FeatureValidationService: DEBUG

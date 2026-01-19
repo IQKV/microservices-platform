@@ -61,4 +61,12 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
    */
   @Query("SELECT p FROM SubscriptionPlan p WHERE p.interval = :interval AND p.isActive = true")
   List<SubscriptionPlan> findActiveByInterval(SubscriptionInterval interval);
+
+  /**
+   * Find plans that have legacy JSON features (for migration).
+   *
+   * @return List of plans with legacy features
+   */
+  @Query("SELECT p FROM SubscriptionPlan p WHERE p.features IS NOT NULL AND p.features != '' AND p.features != '[]'")
+  List<SubscriptionPlan> findPlansWithLegacyFeatures();
 }

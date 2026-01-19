@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -68,7 +69,8 @@ public record IqScaffoldProperties(
       @Valid @NotNull RateLimitingProperties rateLimiting,
       @Valid @NotNull CircuitBreakerProperties circuitBreaker,
       @Valid @NotNull CorsProperties cors,
-      @Valid @NotNull TransformationProperties transformation
+      @Valid @NotNull TransformationProperties transformation,
+      @Valid @NotNull FeatureAccessProperties featureAccess
   ) {
 
     public record RoutingProperties(
@@ -234,6 +236,7 @@ public record IqScaffoldProperties(
           boolean enableHeaderEnrichment,
           boolean enableUserContextPropagation,
           boolean enableTenantContextPropagation,
+          boolean enableFeatureContextPropagation,
           List<String> headersToRemove,
           Map<String, String> additionalHeaders
       ) {
@@ -246,6 +249,52 @@ public record IqScaffoldProperties(
           boolean enableCorrelationHeaders,
           boolean removeInternalHeaders,
           List<String> additionalHeadersToRemove
+      ) {
+
+      }
+    }
+
+    /**
+     * Feature access configuration properties.
+     * Controls feature-based access control at the gateway level.
+     */
+    public record FeatureAccessProperties(
+        boolean enabled,
+        List<String> excludedPaths,
+        List<FeatureMapping> mappings,
+        @Valid @NotNull CacheProperties cache
+    ) {
+
+      /**
+       * Mapping between endpoint patterns and required features.
+       */
+      public record FeatureMapping(
+          @NotBlank String pathPattern,
+          List<String> methods,
+          Set<String> requiredFeatures,
+          String description
+      ) {
+
+        public FeatureMapping {
+          // Default to all methods if not specified
+          if (methods == null || methods.isEmpty()) {
+            methods = List.of("GET", "POST", "PUT", "DELETE", "PATCH");
+          }
+          
+          // Ensure required features is not null
+          if (requiredFeatures == null) {
+            requiredFeatures = Set.of();
+          }
+        }
+      }
+
+      /**
+       * Caching configuration for feature validation.
+       */
+      public record CacheProperties(
+          @NotNull Duration ttl,
+          @Min(100) @Max(10000) int maxSize,
+          boolean enableStatistics
       ) {
 
       }

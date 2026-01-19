@@ -2,11 +2,13 @@ package com.iqscaffold.gatewayservice.filter;
 
 import com.iqscaffold.gatewayservice.common.GatewayConstants;
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
+import com.iqscaffold.gatewayservice.service.FeatureValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,6 +43,9 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
       var tenantId = MDC.get(GatewayConstants.MdcKeys.TENANT_ID);
       var userId = MDC.get(GatewayConstants.MdcKeys.USER_ID);
 
+      // Get feature context from exchange attributes
+      var featureContext = exchange.getAttribute(GatewayConstants.Attributes.FEATURE_CONTEXT);
+
       // Build transformed request with enriched headers
       var requestBuilder = request.mutate();
 
@@ -58,6 +63,11 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
         // Add user context for authorization
         if (userId != null && transformationConfig.enableUserContextPropagation()) {
           headers.set(GatewayConstants.Headers.X_USER_ID, userId);
+        }
+
+        // Add feature context for downstream services
+        if (featureContext != null && transformationConfig.enableFeatureContextPropagation()) {
+          addFeatureContextHeaders(headers, (FeatureValidationService.FeatureContext) featureContext);
         }
 
         // Add service identification headers
@@ -79,6 +89,62 @@ public class RequestTransformationFilter extends AbstractGatewayFilterFactory<Re
       // Continue with transformed request
       return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
     };
+  }
+
+  /**
+   * Adds feature context headers to the request for downstream services.
+   */
+  private void addFeatureContextHeaders(HttpHeaders headers, FeatureValidationService.FeatureContext featureContext) {
+    // Add enabled features as comma-separated list
+    if (!featureContext.getEnabledFeatures().isEmpty()) {
+      headers.set(GatewayConstants.Headers.X_ENABLED_FEATURES, 
+          String.join(",", featureContext.getEnabledFeatures()));
+    }
+
+    // Add plan information
+    if (featureContext.getPlanId() != null) {
+      headers.set(GatewayConstants.Headers.X_PLAN_ID, featureContext.getPlanId());
+    }
+    if (featureContext.getPlanName() != null) {
+      headers.set(GatewayConstants.Headers.X_PLAN_NAME, featureContext.getPlanName());
+    }
+
+    // Add quotas as JSON string
+    if (!featureContext.getQuotas().isEmpty()) {
+      headers.set(GatewayConstants.Headers.X_FEATURE_QUOTAS, serializeMap(featureContext.getQuotas()));
+    }
+
+    // Add limits as JSON string
+    if (!featureContext.getLimits().isEmpty()) {
+      headers.set(GatewayConstants.Headers.X_FEATURE_LIMITS, serializeMap(featureContext.getLimits()));
+    }
+
+    // Add tiers as JSON string
+    if (!featureContext.getTiers().isEmpty()) {
+      headers.set(GatewayConstants.Headers.X_FEATURE_TIERS, serializeMap(featureContext.getTiers()));
+    }
+  }
+
+  /**
+   * Serializes a map to JSON string for header transmission.
+   */
+  private String serializeMap(java.util.Map<String, ?> map) {
+    try {
+      var json = new StringBuilder("{");
+      var first = true;
+      for (var entry : map.entrySet()) {
+        if (!first) {
+          json.append(",");
+        }
+        json.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
+        first = false;
+      }
+      json.append("}");
+      return json.toString();
+    } catch (Exception e) {
+      logger.warn("Failed to serialize map to JSON: {}", e.getMessage());
+      return "{}";
+    }
   }
 
   /**

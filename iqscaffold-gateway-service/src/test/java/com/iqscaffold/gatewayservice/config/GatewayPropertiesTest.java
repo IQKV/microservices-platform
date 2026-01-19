@@ -50,7 +50,8 @@ class GatewayPropertiesTest {
           createValidRateLimitingProperties(),
           createValidCircuitBreakerProperties(),
           createValidCorsProperties(),
-          createValidTransformationProperties()
+          createValidTransformationProperties(),
+          createValidFeatureAccessProperties()
       );
 
       Set<ConstraintViolation<IqScaffoldProperties.GatewayProperties>> violations = validator.validate(gatewayProperties);
@@ -1141,6 +1142,7 @@ class GatewayPropertiesTest {
           true,
           true,
           true,
+          true, // enableFeatureContextPropagation
           List.of("X-Internal-Header"),
           Map.of("X-Custom-Header", "custom-value")
       );
@@ -1194,7 +1196,8 @@ class GatewayPropertiesTest {
         createValidRateLimitingProperties(),
         createValidCircuitBreakerProperties(),
         createValidCorsProperties(),
-        createValidTransformationProperties()
+        createValidTransformationProperties(),
+        createValidFeatureAccessProperties()
     );
   }
 
@@ -1327,6 +1330,7 @@ class GatewayPropertiesTest {
         true,
         true,
         true,
+        true, // enableFeatureContextPropagation
         List.of(),
         Map.of()
     );
@@ -1339,6 +1343,26 @@ class GatewayPropertiesTest {
         true,
         true,
         List.of()
+    );
+  }
+
+  private IqScaffoldProperties.GatewayProperties.FeatureAccessProperties createValidFeatureAccessProperties() {
+    return new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties(
+        true,
+        List.of("/actuator/**", "/api/v1/public/**"),
+        List.of(
+            new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties.FeatureMapping(
+                "/api/v1/analytics/**",
+                List.of("GET", "POST"),
+                Set.of("advanced_analytics"),
+                "Analytics endpoints"
+            )
+        ),
+        new IqScaffoldProperties.GatewayProperties.FeatureAccessProperties.CacheProperties(
+            Duration.ofMinutes(15),
+            1000,
+            true
+        )
     );
   }
 }

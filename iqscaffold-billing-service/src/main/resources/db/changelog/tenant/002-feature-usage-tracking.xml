@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="002-001-create-feature-usage-log-table" author="system">
+    <comment>Create feature_usage_log table for tracking feature usage per tenant</comment>
+    
+    <createTable tableName="feature_usage_log">
+      <column name="id" type="bigserial">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tenant_id" type="varchar(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="feature_key" type="varchar(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="endpoint" type="varchar(500)"/>
+      <column name="user_id" type="varchar(100)"/>
+      <column name="timestamp" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="session_id" type="varchar(100)"/>
+      <column name="correlation_id" type="varchar(100)"/>
+      <column name="metadata" type="jsonb"/>
+    </createTable>
+
+    <!-- Indexes for performance and analytics -->
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_tenant_feature">
+      <column name="tenant_id"/>
+      <column name="feature_key"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_timestamp">
+      <column name="timestamp"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_tenant_timestamp">
+      <column name="tenant_id"/>
+      <column name="timestamp"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_feature_timestamp">
+      <column name="feature_key"/>
+      <column name="timestamp"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_user_id">
+      <column name="user_id"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_usage_log" indexName="idx_feature_usage_correlation_id">
+      <column name="correlation_id"/>
+    </createIndex>
+
+    <!-- Partial index for recent usage (last 30 days) for better performance -->
+    <sql>
+      CREATE INDEX idx_feature_usage_recent 
+      ON feature_usage_log (tenant_id, feature_key, timestamp) 
+      WHERE timestamp > (NOW() - INTERVAL '30 days');
+    </sql>
+  </changeSet>
+
+  <changeSet id="002-002-add-feature-usage-partitioning" author="system">
+    <comment>Add table partitioning for feature usage logs (optional optimization)</comment>
+    
+    <!-- This is optional and can be enabled for high-volume environments -->
+    <sql>
+      -- Create monthly partitions for feature usage logs
+      -- This helps with performance and data retention
+      
+      -- Example: Create partition for current month
+      -- CREATE TABLE feature_usage_log_y2024m01 PARTITION OF feature_usage_log
+      -- FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+      
+      -- Note: Partitioning setup would typically be done via a separate script
+      -- or automated process based on deployment requirements
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>

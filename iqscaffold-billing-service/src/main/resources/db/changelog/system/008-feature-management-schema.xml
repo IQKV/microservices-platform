@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+  <changeSet id="008-001-create-feature-definition-table" author="system">
+    <comment>Create feature_definition table for platform-wide feature definitions</comment>
+    
+    <createTable tableName="feature_definition" schemaName="public">
+      <column name="feature_key" type="varchar(100)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="display_name" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="text"/>
+      <column name="type" type="varchar(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="category" type="varchar(100)"/>
+      <column name="metadata" type="jsonb"/>
+      <column name="dependencies" type="jsonb"/>
+      <column name="deprecated" type="boolean" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="deprecation_message" type="varchar(500)"/>
+      <column name="sort_order" type="integer"/>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_by" type="varchar(100)"/>
+      <column name="updated_by" type="varchar(100)"/>
+    </createTable>
+
+    <!-- Indexes for performance -->
+    <createIndex tableName="feature_definition" indexName="idx_feature_definition_type" schemaName="public">
+      <column name="type"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_definition" indexName="idx_feature_definition_category" schemaName="public">
+      <column name="category"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_definition" indexName="idx_feature_definition_deprecated" schemaName="public">
+      <column name="deprecated"/>
+    </createIndex>
+    
+    <createIndex tableName="feature_definition" indexName="idx_feature_definition_sort_order" schemaName="public">
+      <column name="sort_order"/>
+    </createIndex>
+
+    <!-- Add constraint for valid feature types -->
+    <sql>
+      ALTER TABLE public.feature_definition 
+      ADD CONSTRAINT chk_feature_type 
+      CHECK (type IN ('BOOLEAN', 'QUOTA', 'LIMIT', 'TIER'));
+    </sql>
+  </changeSet>
+
+  <changeSet id="008-002-create-plan-feature-table" author="system">
+    <comment>Create plan_feature table for plan-feature associations</comment>
+    
+    <createTable tableName="plan_feature" schemaName="public">
+      <column name="plan_id" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+      <column name="feature_key" type="varchar(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="enabled" type="boolean" defaultValueBoolean="true">
+        <constraints nullable="false"/>
+      </column>
+      <column name="configuration" type="jsonb"/>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_by" type="varchar(100)"/>
+      <column name="updated_by" type="varchar(100)"/>
+    </createTable>
+
+    <!-- Composite primary key -->
+    <addPrimaryKey tableName="plan_feature" columnNames="plan_id,feature_key" schemaName="public"/>
+
+    <!-- Foreign key constraints -->
+    <addForeignKeyConstraint
+        baseTableName="plan_feature"
+        baseColumnNames="plan_id"
+        baseTableSchemaName="public"
+        referencedTableName="subscription_plan"
+        referencedColumnNames="id"
+        referencedTableSchemaName="public"
+        constraintName="fk_plan_feature_plan_id"
+        onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+        baseTableName="plan_feature"
+        baseColumnNames="feature_key"
+        baseTableSchemaName="public"
+        referencedTableName="feature_definition"
+        referencedColumnNames="feature_key"
+        referencedTableSchemaName="public"
+        constraintName="fk_plan_feature_feature_key"
+        onDelete="CASCADE"/>
+
+    <!-- Indexes for performance -->
+    <createIndex tableName="plan_feature" indexName="idx_plan_feature_plan_id" schemaName="public">
+      <column name="plan_id"/>
+    </createIndex>
+    
+    <createIndex tableName="plan_feature" indexName="idx_plan_feature_feature_key" schemaName="public">
+      <column name="feature_key"/>
+    </createIndex>
+    
+    <createIndex tableName="plan_feature" indexName="idx_plan_feature_enabled" schemaName="public">
+      <column name="enabled"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="008-003-insert-default-features" author="system">
+    <comment>Insert default platform features</comment>
+    
+    <!-- Core Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="basic_dashboard"/>
+      <column name="display_name" value="Basic Dashboard"/>
+      <column name="description" value="Access to basic dashboard with essential metrics and reports"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="dashboard"/>
+      <column name="sort_order" valueNumeric="10"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="advanced_analytics"/>
+      <column name="display_name" value="Advanced Analytics"/>
+      <column name="description" value="Access to advanced analytics, custom reports, and data visualization tools"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="analytics"/>
+      <column name="dependencies" value='["basic_dashboard"]'/>
+      <column name="sort_order" valueNumeric="20"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="data_export"/>
+      <column name="display_name" value="Data Export"/>
+      <column name="description" value="Export data in various formats (CSV, Excel, PDF)"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="data"/>
+      <column name="sort_order" valueNumeric="30"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <!-- Quota-based Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="api_calls_monthly"/>
+      <column name="display_name" value="API Calls per Month"/>
+      <column name="description" value="Monthly API call quota for external integrations"/>
+      <column name="type" value="QUOTA"/>
+      <column name="category" value="api"/>
+      <column name="metadata" value='{"defaultQuota": 10000, "unit": "calls", "resetPeriod": "monthly"}'/>
+      <column name="sort_order" valueNumeric="40"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="storage_quota"/>
+      <column name="display_name" value="Storage Quota"/>
+      <column name="description" value="File storage quota in gigabytes"/>
+      <column name="type" value="QUOTA"/>
+      <column name="category" value="storage"/>
+      <column name="metadata" value='{"defaultQuota": 10, "unit": "GB"}'/>
+      <column name="sort_order" valueNumeric="50"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <!-- Limit-based Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="max_team_members"/>
+      <column name="display_name" value="Maximum Team Members"/>
+      <column name="description" value="Maximum number of team members allowed"/>
+      <column name="type" value="LIMIT"/>
+      <column name="category" value="team"/>
+      <column name="metadata" value='{"defaultLimit": 5, "unit": "users"}'/>
+      <column name="sort_order" valueNumeric="60"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <!-- Integration Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="third_party_integrations"/>
+      <column name="display_name" value="Third-party Integrations"/>
+      <column name="description" value="Connect with external services and APIs"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="integrations"/>
+      <column name="sort_order" valueNumeric="70"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <!-- Support Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="support_level"/>
+      <column name="display_name" value="Support Level"/>
+      <column name="description" value="Level of customer support provided"/>
+      <column name="type" value="TIER"/>
+      <column name="category" value="support"/>
+      <column name="metadata" value='{"tiers": ["basic", "standard", "premium", "enterprise"]}'/>
+      <column name="sort_order" valueNumeric="80"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <!-- Security Features -->
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="sso_integration"/>
+      <column name="display_name" value="Single Sign-On (SSO)"/>
+      <column name="description" value="Enterprise SSO integration with SAML/OAuth providers"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="security"/>
+      <column name="sort_order" valueNumeric="90"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+
+    <insert tableName="feature_definition" schemaName="public">
+      <column name="feature_key" value="audit_logging"/>
+      <column name="display_name" value="Audit Logging"/>
+      <column name="description" value="Comprehensive audit trail and compliance logging"/>
+      <column name="type" value="BOOLEAN"/>
+      <column name="category" value="security"/>
+      <column name="sort_order" valueNumeric="100"/>
+      <column name="created_at" valueDate="now()"/>
+      <column name="updated_at" valueDate="now()"/>
+      <column name="created_by" value="system"/>
+    </insert>
+  </changeSet>
+
+</databaseChangeLog>

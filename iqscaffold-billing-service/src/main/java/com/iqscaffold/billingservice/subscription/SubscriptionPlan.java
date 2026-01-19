@@ -1,18 +1,24 @@
 package com.iqscaffold.billingservice.subscription;
 
 import jakarta.persistence.Cacheable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import com.iqscaffold.billingservice.feature.PlanFeature;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -67,10 +73,22 @@ public class SubscriptionPlan {
   /**
    * Features included in this plan (JSON format).
    * Example: ["feature1", "feature2", "feature3"]
+   * 
+   * @deprecated Use {@link #planFeatures} relationship instead.
+   * This field is maintained for backward compatibility during migration.
    */
+  @Deprecated(since = "1.1.0", forRemoval = true)
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
   private String features;
+
+  /**
+   * Structured features enabled for this plan.
+   * Replaces the legacy JSON features field with proper entity relationships.
+   */
+  @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+  private Set<PlanFeature> planFeatures = new HashSet<>();
 
   @Column(name = "max_users")
   private Integer maxUsers;
@@ -193,6 +211,30 @@ public class SubscriptionPlan {
 
   public void setFeatures(String features) {
     this.features = features;
+  }
+
+  public Set<PlanFeature> getPlanFeatures() {
+    return planFeatures;
+  }
+
+  public void setPlanFeatures(Set<PlanFeature> planFeatures) {
+    this.planFeatures = planFeatures;
+  }
+
+  /**
+   * Adds a feature to this plan.
+   */
+  public void addFeature(PlanFeature planFeature) {
+    planFeatures.add(planFeature);
+    planFeature.setPlan(this);
+  }
+
+  /**
+   * Removes a feature from this plan.
+   */
+  public void removeFeature(PlanFeature planFeature) {
+    planFeatures.remove(planFeature);
+    planFeature.setPlan(null);
   }
 
   public Integer getMaxUsers() {

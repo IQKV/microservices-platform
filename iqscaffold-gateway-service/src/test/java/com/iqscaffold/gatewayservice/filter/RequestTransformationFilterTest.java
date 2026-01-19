@@ -45,7 +45,7 @@ class RequestTransformationFilterTest {
     );
 
     var requestTransformation = new IqScaffoldProperties.GatewayProperties.TransformationProperties.RequestTransformationProperties(
-        true, true, true, true, List.of(), Map.of()
+        true, true, true, true, true, List.of(), Map.of()
     );
 
     var responseTransformation = new IqScaffoldProperties.GatewayProperties.TransformationProperties.ResponseTransformationProperties(
@@ -57,7 +57,7 @@ class RequestTransformationFilterTest {
     );
 
     var gatewayProperties = new IqScaffoldProperties.GatewayProperties(
-        null, null, null, null, null, transformation
+        null, null, null, null, null, transformation, null
     );
 
     var observabilityProperties = new IqScaffoldProperties.ObservabilityProperties(null, null, null);

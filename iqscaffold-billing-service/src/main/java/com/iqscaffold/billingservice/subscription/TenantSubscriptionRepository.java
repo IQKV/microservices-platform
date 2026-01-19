@@ -28,6 +28,17 @@ public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscr
   Optional<TenantSubscription> findActive();
 
   /**
+   * Find active subscription by tenant ID (for cross-tenant operations).
+   * This method is used by the feature enablement service which may need
+   * to check subscriptions across tenant boundaries.
+   *
+   * @param tenantId the tenant identifier
+   * @return Optional active subscription
+   */
+  @Query("SELECT s FROM TenantSubscription s WHERE s.status = 'ACTIVE'")
+  Optional<TenantSubscription> findActiveSubscriptionByTenantId(@Param("tenantId") String tenantId);
+
+  /**
    * Find a subscription by Stripe subscription ID.
    *
    * @param stripeSubscriptionId Stripe subscription ID

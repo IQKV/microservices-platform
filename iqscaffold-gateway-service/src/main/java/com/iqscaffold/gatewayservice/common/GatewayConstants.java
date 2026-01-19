@@ -37,6 +37,14 @@ public final class GatewayConstants {
     public static final String X_USER_LOCALE = "X-User-Locale";
     public static final String X_ORGANIZATION_ID = "X-Organization-ID";
 
+    // Feature Context Headers
+    public static final String X_ENABLED_FEATURES = "X-Enabled-Features";
+    public static final String X_FEATURE_QUOTAS = "X-Feature-Quotas";
+    public static final String X_FEATURE_LIMITS = "X-Feature-Limits";
+    public static final String X_FEATURE_TIERS = "X-Feature-Tiers";
+    public static final String X_PLAN_ID = "X-Plan-ID";
+    public static final String X_PLAN_NAME = "X-Plan-Name";
+
     // Gateway Identification Headers
     public static final String X_GATEWAY_SERVICE = "X-Gateway-Service";
     public static final String X_GATEWAY_VERSION = "X-Gateway-Version";
@@ -88,6 +96,7 @@ public final class GatewayConstants {
     public static final String USERNAME = "username";
     public static final String REQUEST_PATH = "requestPath";
     public static final String LOCALE = "locale";
+    public static final String ENABLED_FEATURES = "enabledFeatures";
   }
 
   /**
@@ -103,6 +112,7 @@ public final class GatewayConstants {
     public static final String REQUEST_ID = "requestId";
     public static final String TENANT_CONTEXT = "tenantContext";
     public static final String USER_CONTEXT = "userContext";
+    public static final String FEATURE_CONTEXT = "featureContext";
     public static final String REQUEST_START_TIME = "requestStartTime";
     public static final String LOCALE = "locale";
   }
@@ -238,5 +248,6 @@ public final class GatewayConstants {
     public static final int LOCALE_EXTRACTION_FILTER = -250;
     public static final int TENANT_EXTRACTION_FILTER = -200;
     public static final int JWT_AUTHENTICATION_FILTER = -100;
+    public static final int FEATURE_ACCESS_FILTER = -50;
   }
 }
