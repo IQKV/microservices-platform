@@ -5,6 +5,7 @@ import java.util.List;
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @Profile("billing")
+@ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class BillingOpenApiConfig {
 
   private static final Logger log = LoggerFactory.getLogger(BillingOpenApiConfig.class);

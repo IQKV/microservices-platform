@@ -1,6 +1,7 @@
 package com.iqscaffold.gatewayservice.config.module;
 
 import com.iqscaffold.gatewayservice.config.IqScaffoldProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 @Profile("crm")
+@ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class CrmRouteConfig {
 
   private final IqScaffoldProperties properties;

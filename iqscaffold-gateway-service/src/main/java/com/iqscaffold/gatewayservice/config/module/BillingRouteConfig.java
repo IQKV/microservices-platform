@@ -1,6 +1,7 @@
 package com.iqscaffold.gatewayservice.config.module;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +29,11 @@ import org.springframework.context.annotation.Configuration;
  *   <li>Circuit breaker protection</li>
  *   <li>Correlation ID propagation</li>
  * </ul>
+ *
+ * <p>This configuration is only active when the Spring Cloud Gateway is enabled.
  */
 @Configuration
+@ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class BillingRouteConfig {
 
   @Value("${iqscaffold.gateway.routing.services.billing-service.uri:http://localhost:8082}")
