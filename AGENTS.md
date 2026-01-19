@@ -620,7 +620,7 @@ quality_gates:
 
 #### Maven Command Best Practices for AI Agents
 
-**STRICT RECOMMENDATION: Always use `-Dcheckstyle.skip=true` when running Maven commands during development.**
+**STRICT RECOMMENDATION: Always use `"-Dcheckstyle.skip=true"` when running Maven commands during development.**
 
 ```yaml
 maven_commands:

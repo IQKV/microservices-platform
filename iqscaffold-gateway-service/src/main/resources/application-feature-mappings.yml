@@ -118,6 +118,85 @@ iqscaffold:
         - path-pattern: "/api/v1/support/chat/**"
           required-features: ["support_level"]
           description: "Live chat support (tier-dependent)"
+        
+        # CRM Lead Management Features
+        - path-pattern: "/api/v1/leads"
+          methods: ["POST"]
+          required-features: ["max_leads"]
+          description: "Lead creation (subject to plan limits)"
+        
+        - path-pattern: "/api/v1/leads/**"
+          methods: ["GET", "PUT", "PATCH"]
+          required-features: ["lead_management"]
+          description: "Lead management operations"
+        
+        - path-pattern: "/api/v1/leads/*/activities/**"
+          required-features: ["lead_management"]
+          description: "Lead activity tracking"
+        
+        - path-pattern: "/api/v1/leads/*/notes/**"
+          required-features: ["lead_management"]
+          description: "Lead notes management"
+        
+        - path-pattern: "/api/v1/leads/export"
+          methods: ["POST"]
+          required-features: ["data_export", "lead_management"]
+          description: "Lead data export"
+        
+        # CRM Contact Management Features
+        - path-pattern: "/api/v1/contacts"
+          methods: ["POST"]
+          required-features: ["max_contacts"]
+          description: "Contact creation (subject to plan limits)"
+        
+        - path-pattern: "/api/v1/contacts/**"
+          methods: ["GET", "PUT", "PATCH"]
+          required-features: ["contact_management"]
+          description: "Contact management operations"
+        
+        - path-pattern: "/api/v1/companies"
+          methods: ["POST"]
+          required-features: ["max_companies"]
+          description: "Company creation (subject to plan limits)"
+        
+        - path-pattern: "/api/v1/companies/**"
+          methods: ["GET", "PUT", "PATCH"]
+          required-features: ["contact_management"]
+          description: "Company management operations"
+        
+        - path-pattern: "/api/v1/contacts/export"
+          methods: ["POST"]
+          required-features: ["data_export", "contact_management"]
+          description: "Contact data export"
+        
+        # CRM Pipeline Management Features
+        - path-pattern: "/api/v1/pipeline/stages"
+          methods: ["POST"]
+          required-features: ["max_pipeline_stages"]
+          description: "Pipeline stage creation (subject to plan limits)"
+        
+        - path-pattern: "/api/v1/pipeline/**"
+          methods: ["GET", "PUT", "PATCH"]
+          required-features: ["pipeline_management"]
+          description: "Pipeline management operations"
+        
+        - path-pattern: "/api/v1/pipeline/dashboard/**"
+          required-features: ["advanced_analytics", "pipeline_management"]
+          description: "Advanced pipeline analytics dashboard"
+        
+        - path-pattern: "/api/v1/pipeline/follow-ups/**"
+          required-features: ["pipeline_management"]
+          description: "Follow-up management"
+        
+        - path-pattern: "/api/v1/pipeline/export"
+          methods: ["POST"]
+          required-features: ["data_export", "pipeline_management"]
+          description: "Pipeline data export"
+        
+        # CRM Integration Features
+        - path-pattern: "/api/v1/crm/webhooks/**"
+          required-features: ["third_party_integrations"]
+          description: "CRM webhook management for integrations"
 
     # Request transformation configuration
     transformation:
