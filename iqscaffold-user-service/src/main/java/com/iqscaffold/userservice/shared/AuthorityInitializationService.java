@@ -62,7 +62,7 @@ public class AuthorityInitializationService {
     var skippedCount = 0;
     
     // Initialize authorities from configuration
-    for (var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
+    for (final var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
       var authorityName = authorityEntry.getKey();
       var authorityDefinition = authorityEntry.getValue();
       
@@ -89,7 +89,7 @@ public class AuthorityInitializationService {
    * @param authorityDefinition the authority definition from configuration
    * @return true if the authority was created, false if it already existed
    */
-  private boolean initializeAuthority(String authorityName, PlatformConfigurationProperties.AuthorityDefinition authorityDefinition) {
+  private boolean initializeAuthority(final String authorityName, final PlatformConfigurationProperties.AuthorityDefinition authorityDefinition) {
     var existingAuthority = authorityRepository.findByName(authorityName);
     
     if (existingAuthority.isPresent()) {
@@ -152,7 +152,7 @@ public class AuthorityInitializationService {
     var createdCount = 0;
     
     // Initialize from configuration
-    for (var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
+    for (final var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
       if (initializeAuthority(authorityEntry.getKey(), authorityEntry.getValue())) {
         createdCount++;
       }
@@ -169,7 +169,7 @@ public class AuthorityInitializationService {
    */
   public boolean areAllAuthoritiesInitialized() {
     // Check configured authorities
-    for (var authorityName : platformConfig.authorities().getAuthorityNames()) {
+    for (final var authorityName : platformConfig.authorities().getAuthorityNames()) {
       if (authorityRepository.findByName(authorityName).isEmpty()) {
         return false;
       }
@@ -187,7 +187,7 @@ public class AuthorityInitializationService {
     var missingCount = 0L;
     
     // Count missing configured authorities
-    for (var authorityName : platformConfig.authorities().getAuthorityNames()) {
+    for (final var authorityName : platformConfig.authorities().getAuthorityNames()) {
       if (authorityRepository.findByName(authorityName).isEmpty()) {
         missingCount++;
       }

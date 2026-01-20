@@ -10,6 +10,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,12 +31,14 @@ class AuthConfigurationPropertiesTest {
     var jwt = createValidJwtProperties();
     var security = createValidSecurityProperties();
     var oauth2 = createValidOAuth2Properties();
+    var authorities = createValidAuthorityProperties();
 
-    var config = new AuthConfigurationProperties(jwt, security, oauth2);
+    var config = new AuthConfigurationProperties(jwt, security, oauth2, authorities);
 
     assertNotNull(config.jwt());
     assertNotNull(config.security());
     assertNotNull(config.oauth2());
+    assertNotNull(config.authorities());
   }
 
   @Test
@@ -243,6 +246,12 @@ class AuthConfigurationPropertiesTest {
     return new AuthConfigurationProperties.OAuth2Properties(
         true,
         Map.of("google", provider)
+    );
+  }
+
+  private AuthConfigurationProperties.AuthorityProperties createValidAuthorityProperties() {
+    return new AuthConfigurationProperties.AuthorityProperties(
+        List.of("USER", "ADMIN")
     );
   }
 }

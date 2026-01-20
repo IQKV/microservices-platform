@@ -2,8 +2,8 @@ package com.iqscaffold.gatewayservice.security;
 
 import java.util.List;
 
-import com.iqscaffold.gatewayservice.config.PlatformConfigurationProperties;
 import com.iqscaffold.gatewayservice.common.GatewayConstants;
+import com.iqscaffold.gatewayservice.config.PlatformConfigurationProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -137,12 +137,12 @@ public class UnifiedMicroserviceAccessFilter implements GlobalFilter, Ordered {
    * Extract access type from path for error messages.
    */
   private String getAccessType(String path) {
-    if (path.contains("/crm/") || path.contains("/leads/") || 
-        path.contains("/contacts/") || path.contains("/pipeline/")) {
+    if (path.contains("/crm/") || path.contains("/leads/") 
+        || path.contains("/contacts/") || path.contains("/pipeline/")) {
       return "CRM";
     }
-    if (path.contains("/billing/") || path.contains("/payments/") || 
-        path.contains("/subscriptions/") || path.contains("/invoices/")) {
+    if (path.contains("/billing/") || path.contains("/payments/") 
+        || path.contains("/subscriptions/") || path.contains("/invoices/")) {
       return "Billing";
     }
     if (path.contains("/admin/") || path.contains("/actuator/")) {

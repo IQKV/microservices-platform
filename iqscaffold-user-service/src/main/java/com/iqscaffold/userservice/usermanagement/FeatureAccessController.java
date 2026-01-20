@@ -1,7 +1,9 @@
 package com.iqscaffold.userservice.usermanagement;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
 
 import com.iqscaffold.userservice.shared.ConfigurableFeatureService;
 import com.iqscaffold.userservice.shared.MicroserviceAccessService;
@@ -10,9 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -291,14 +291,13 @@ public class FeatureAccessController {
     }
     
     // Validate feature codes
-    var invalidFeatures = List.<String>builder()
-        .addAll(request.enableFeatures().stream()
-            .filter(code -> configurableFeatureService.getFeatureDefinition(code) == null)
-            .toList())
-        .addAll(request.disableFeatures().stream()
-            .filter(code -> configurableFeatureService.getFeatureDefinition(code) == null)
-            .toList())
-        .build();
+    var invalidFeatures = new java.util.ArrayList<String>();
+    invalidFeatures.addAll(request.enableFeatures().stream()
+        .filter(code -> configurableFeatureService.getFeatureDefinition(code) == null)
+        .toList());
+    invalidFeatures.addAll(request.disableFeatures().stream()
+        .filter(code -> configurableFeatureService.getFeatureDefinition(code) == null)
+        .toList());
     
     if (!invalidFeatures.isEmpty()) {
       return ResponseEntity.badRequest().body(new BulkFeatureUpdateResponse(
@@ -308,20 +307,19 @@ public class FeatureAccessController {
     }
     
     // Check if features are composable
-    var nonComposableFeatures = List.<String>builder()
-        .addAll(request.enableFeatures().stream()
-            .filter(code -> {
-              var def = configurableFeatureService.getFeatureDefinition(code);
-              return def != null && !def.composable();
-            })
-            .toList())
-        .addAll(request.disableFeatures().stream()
-            .filter(code -> {
-              var def = configurableFeatureService.getFeatureDefinition(code);
-              return def != null && !def.composable();
-            })
-            .toList())
-        .build();
+    var nonComposableFeatures = new java.util.ArrayList<String>();
+    nonComposableFeatures.addAll(request.enableFeatures().stream()
+        .filter(code -> {
+          var def = configurableFeatureService.getFeatureDefinition(code);
+          return def != null && !def.composable();
+        })
+        .toList());
+    nonComposableFeatures.addAll(request.disableFeatures().stream()
+        .filter(code -> {
+          var def = configurableFeatureService.getFeatureDefinition(code);
+          return def != null && !def.composable();
+        })
+        .toList());
     
     if (!nonComposableFeatures.isEmpty()) {
       return ResponseEntity.badRequest().body(new BulkFeatureUpdateResponse(
@@ -334,13 +332,13 @@ public class FeatureAccessController {
     var enabledCount = 0;
     var disabledCount = 0;
     
-    for (var featureCode : request.enableFeatures()) {
+    for (final var featureCode : request.enableFeatures()) {
       if (configurableFeatureService.enableFeature(userId, featureCode)) {
         enabledCount++;
       }
     }
     
-    for (var featureCode : request.disableFeatures()) {
+    for (final var featureCode : request.disableFeatures()) {
       if (configurableFeatureService.disableFeature(userId, featureCode)) {
         disabledCount++;
       }

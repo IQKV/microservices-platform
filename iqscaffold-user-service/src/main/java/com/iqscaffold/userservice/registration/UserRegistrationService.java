@@ -2,8 +2,8 @@ package com.iqscaffold.userservice.registration;
 
 import java.util.List;
 
-import com.iqscaffold.userservice.emailverification.EmailVerificationService;
 import com.iqscaffold.userservice.config.PlatformConfigurationProperties;
+import com.iqscaffold.userservice.emailverification.EmailVerificationService;
 import com.iqscaffold.userservice.security.InputSanitizer;
 import com.iqscaffold.userservice.security.SecurityAuditService;
 import com.iqscaffold.userservice.shared.Authority;
@@ -116,7 +116,7 @@ public class UserRegistrationService {
 
     // Assign configured default authorities
     var defaultAuthorities = findOrCreateDefaultAuthorities();
-    for (var authority : defaultAuthorities) {
+    for (final var authority : defaultAuthorities) {
       user.addAuthority(authority);
     }
 

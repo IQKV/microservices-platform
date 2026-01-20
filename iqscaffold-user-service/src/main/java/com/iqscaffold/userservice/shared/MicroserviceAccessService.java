@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.iqscaffold.userservice.config.PlatformConfigurationProperties;
 import com.iqscaffold.userservice.usermanagement.User;
 import com.iqscaffold.userservice.usermanagement.UserRepository;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

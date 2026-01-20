@@ -6,12 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.iqscaffold.userservice.config.PlatformConfigurationProperties;
 import com.iqscaffold.userservice.emailverification.EmailVerificationService;
 import com.iqscaffold.userservice.security.InputSanitizer;
 import com.iqscaffold.userservice.security.SecurityAuditService;
@@ -51,6 +54,9 @@ class UserRegistrationServiceTest {
   @Mock
   private EmailVerificationService emailVerificationService;
 
+  @Mock
+  private PlatformConfigurationProperties platformConfig;
+
   private UserRegistrationService service;
   private SignupRequest signupRequest;
   private Authority userRole;
@@ -63,7 +69,8 @@ class UserRegistrationServiceTest {
         passwordEncoder,
         securityAuditService,
         inputSanitizer,
-        emailVerificationService
+        emailVerificationService,
+        platformConfig
     );
 
     signupRequest = new SignupRequest(
@@ -84,6 +91,16 @@ class UserRegistrationServiceTest {
     lenient().when(inputSanitizer.sanitizeInput(anyString())).thenAnswer(i -> i.getArgument(0));
     lenient().when(inputSanitizer.isInputSafe(anyString())).thenReturn(true);
     lenient().when(inputSanitizer.containsSqlInjection(anyString())).thenReturn(false);
+    
+    // Setup platform config mocks
+    var mockAuthorities = mock(PlatformConfigurationProperties.Authorities.class);
+    lenient().when(mockAuthorities.defaultAuthorities()).thenReturn(List.of("USER"));
+    lenient().when(mockAuthorities.getAuthority("USER")).thenReturn(
+        new PlatformConfigurationProperties.AuthorityDefinition(
+            "User", "Standard user access", "core", false, 1
+        )
+    );
+    lenient().when(platformConfig.authorities()).thenReturn(mockAuthorities);
   }
 
   @Test

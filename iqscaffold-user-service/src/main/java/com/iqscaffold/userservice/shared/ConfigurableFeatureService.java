@@ -1,6 +1,7 @@
 package com.iqscaffold.userservice.shared;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -129,7 +130,7 @@ public class ConfigurableFeatureService {
     }
     
     // Enable dependencies first
-    for (var dependency : featureDefinition.dependencies()) {
+    for (final var dependency : featureDefinition.dependencies()) {
       if (!hasFeatureAccess(user, dependency)) {
         logger.info("Enabling dependency {} for feature {} for user {}", 
             dependency, featureCode, user.getUsername());
@@ -199,7 +200,7 @@ public class ConfigurableFeatureService {
         .filter(authority -> featureAuthorityNames.contains(authority.getName()))
         .toList();
     
-    for (var authority : authoritiesToRemove) {
+    for (final var authority : authoritiesToRemove) {
       user.removeAuthority(authority);
     }
     
@@ -250,12 +251,11 @@ public class ConfigurableFeatureService {
       return List.of();
     }
     
-    var authorityNames = List.<String>builder()
-        .addAll(featureDefinition.allAuthorities())
-        .addAll(platformConfig.authorities().adminAuthorities())
-        .build();
+    var authorityNames = List.<String>of(featureDefinition.allAuthorities().toArray(new String[0]));
+    var allAuthorityNames = new java.util.ArrayList<>(authorityNames);
+    allAuthorityNames.addAll(platformConfig.authorities().adminAuthorities());
     
-    return userRepository.findUsersWithAnyAuthority(authorityNames);
+    return userRepository.findUsersWithAnyAuthority(allAuthorityNames);
   }
 
   /**
