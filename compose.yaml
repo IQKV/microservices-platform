@@ -1,6 +1,29 @@
 version: "3.8"
 
 services:
+  # Traefik Reverse Proxy
+  traefik:
+    image: traefik:v3.0
+    container_name: iqscaffold-traefik
+    command:
+      - --configfile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
+      - "8080:8080" # Traefik Dashboard & Gateway
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web"
+    restart: unless-stopped
+
   # PostgreSQL Database for User Service
   postgres-user:
     image: postgres:15-alpine
@@ -9,8 +32,8 @@ services:
       POSTGRES_DB: iqscaffold_user
       POSTGRES_USER: iqscaffold_user
       POSTGRES_PASSWORD: iqscaffold_password
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_user_data:/var/lib/postgresql/data
       - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
@@ -31,8 +54,8 @@ services:
       POSTGRES_DB: iqscaffold_billing
       POSTGRES_USER: iqscaffold_billing
       POSTGRES_PASSWORD: iqscaffold_password
-    ports:
-      - "5433:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_billing_data:/var/lib/postgresql/data
       - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql
@@ -45,12 +68,78 @@ services:
       retries: 5
       start_period: 30s
 
+  # PostgreSQL Database for Contact Service
+  postgres-contact:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-contact
+    environment:
+      POSTGRES_DB: iqscaffold_contact
+      POSTGRES_USER: iqscaffold_contact
+      POSTGRES_PASSWORD: iqscaffold_password
+    expose:
+      - "5432"
+    volumes:
+      - postgres_contact_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-contact.sql:/docker-entrypoint-initdb.d/init-contact.sql
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_contact -d iqscaffold_contact"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # PostgreSQL Database for Lead Service
+  postgres-lead:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-lead
+    environment:
+      POSTGRES_DB: iqscaffold_lead
+      POSTGRES_USER: iqscaffold_lead
+      POSTGRES_PASSWORD: iqscaffold_password
+    expose:
+      - "5432"
+    volumes:
+      - postgres_lead_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-lead.sql:/docker-entrypoint-initdb.d/init-lead.sql
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_lead -d iqscaffold_lead"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # PostgreSQL Database for Pipeline Service
+  postgres-pipeline:
+    image: postgres:15-alpine
+    container_name: iqscaffold-postgres-pipeline
+    environment:
+      POSTGRES_DB: iqscaffold_pipeline
+      POSTGRES_USER: iqscaffold_pipeline
+      POSTGRES_PASSWORD: iqscaffold_password
+    expose:
+      - "5432"
+    volumes:
+      - postgres_pipeline_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-pipeline.sql:/docker-entrypoint-initdb.d/init-pipeline.sql
+    networks:
+      - iqscaffold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqscaffold_pipeline -d iqscaffold_pipeline"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
     container_name: iqscaffold-redis
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     networks:
@@ -71,15 +160,20 @@ services:
       RABBITMQ_DEFAULT_USER: iqscaffold
       RABBITMQ_DEFAULT_PASS: iqscaffold_password
       RABBITMQ_DEFAULT_VHOST: /
-    ports:
-      - "5672:5672" # AMQP port
-      - "15672:15672" # Management UI
+    expose:
+      - "5672"  # AMQP port
+      - "15672" # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+      - "traefik.http.routers.rabbitmq.entrypoints=web"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -91,11 +185,16 @@ services:
   mailhog:
     image: mailhog/mailhog:latest
     container_name: iqscaffold-mailhog
-    ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI
+    expose:
+      - "1025" # SMTP port
+      - "8025" # Web UI
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailhog.rule=Host(`mailhog.localhost`)"
+      - "traefik.http.routers.mailhog.entrypoints=web"
+      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
     restart: unless-stopped
 
   # User Service
@@ -118,8 +217,8 @@ services:
       IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
       IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
       IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       postgres-user:
         condition: service_healthy
@@ -129,6 +228,11 @@ services:
         condition: service_healthy
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.user-service.rule=Host(`user-service.localhost`) || PathPrefix(`/api/users`)"
+      - "traefik.http.routers.user-service.entrypoints=gateway"
+      - "traefik.http.services.user-service.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -159,13 +263,13 @@ services:
       IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
       # Service Integration
       IQSCAFFOLD_USER_SERVICE_URL: http://user-service:8080
-      EMAIL_SERVICE_URL: http://email-service:8084
+      EMAIL_SERVICE_URL: http://email-service:8080
       # Email Configuration (MailHog for local development)
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       EMAIL_FROM_EMAIL: billing@iqscaffold.local
       EMAIL_FROM_NAME: IQ Scaffold Billing (Local)
-      APP_BASE_URL: http://localhost:8080
+      APP_BASE_URL: http://localhost:80
       # JWT Configuration
       JWT_ISSUER: iqscaffold-user-service
       # Payment Configuration
@@ -181,8 +285,8 @@ services:
       # Notification Configuration
       BILLING_EMAIL_NOTIFICATIONS: "true"
       BILLING_WEBHOOK_NOTIFICATIONS: "true"
-    ports:
-      - "8082:8082"
+    expose:
+      - "8080"
     depends_on:
       postgres-billing:
         condition: service_healthy
@@ -196,8 +300,179 @@ services:
         condition: service_started
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.billing-service.rule=Host(`billing-service.localhost`) || PathPrefix(`/api/billing`)"
+      - "traefik.http.routers.billing-service.entrypoints=gateway"
+      - "traefik.http.services.billing-service.loadbalancer.server.port=8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Contact Service
+  contact-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-contact-service/Dockerfile
+    container_name: iqscaffold-contact-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_APPLICATION_NAME: iqscaffold-contact-service
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contact:5432/iqscaffold_contact
+      SPRING_DATASOURCE_USERNAME: iqscaffold_contact
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      # Cache Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      # Messaging Configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: iqscaffold
+      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      # JWT Configuration
+      USER_SERVICE_URL: http://user-service:8080
+      JWT_ISSUER: iqscaffold-user-service
+      # Multi-tenancy Configuration
+      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+    expose:
+      - "8080"
+    depends_on:
+      postgres-contact:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.contact-service.rule=Host(`contact-service.localhost`) || PathPrefix(`/api/contacts`)"
+      - "traefik.http.routers.contact-service.entrypoints=gateway"
+      - "traefik.http.services.contact-service.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Lead Service
+  lead-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-lead-service/Dockerfile
+    container_name: iqscaffold-lead-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_APPLICATION_NAME: iqscaffold-lead-service
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lead:5432/iqscaffold_lead
+      SPRING_DATASOURCE_USERNAME: iqscaffold_lead
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      # Cache Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      # Messaging Configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: iqscaffold
+      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      # JWT Configuration
+      USER_SERVICE_URL: http://user-service:8080
+      JWT_ISSUER: iqscaffold-user-service
+      # Multi-tenancy Configuration
+      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+      # Lead Configuration
+      LEAD_ENABLE_AUTO_SCORING: true
+      LEAD_ENABLE_AUTO_QUALIFICATION: false
+    expose:
+      - "8080"
+    depends_on:
+      postgres-lead:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lead-service.rule=Host(`lead-service.localhost`) || PathPrefix(`/api/leads`)"
+      - "traefik.http.routers.lead-service.entrypoints=gateway"
+      - "traefik.http.services.lead-service.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  # Pipeline Service
+  pipeline-service:
+    build:
+      context: .
+      dockerfile: iqscaffold-pipeline-service/Dockerfile
+    container_name: iqscaffold-pipeline-service
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_APPLICATION_NAME: iqscaffold-pipeline-service
+      # Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pipeline:5432/iqscaffold_pipeline
+      SPRING_DATASOURCE_USERNAME: iqscaffold_pipeline
+      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      # Cache Configuration
+      IQSCAFFOLD_CACHE_REDIS_HOST: redis
+      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      # Messaging Configuration
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: iqscaffold
+      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_VIRTUAL_HOST: /
+      # JWT Configuration
+      USER_SERVICE_URL: http://user-service:8080
+      JWT_ISSUER: iqscaffold-user-service
+      # Lead Service Integration
+      LEAD_SERVICE_URL: http://lead-service:8080
+      # Multi-tenancy Configuration
+      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+    expose:
+      - "8080"
+    depends_on:
+      postgres-pipeline:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      lead-service:
+        condition: service_healthy
+    networks:
+      - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pipeline-service.rule=Host(`pipeline-service.localhost`) || PathPrefix(`/api/pipeline`)"
+      - "traefik.http.routers.pipeline-service.entrypoints=gateway"
+      - "traefik.http.services.pipeline-service.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -219,20 +494,35 @@ services:
       IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
       IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
       IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI: http://user-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8082
+      IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
       IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     depends_on:
       user-service:
         condition: service_healthy
       billing-service:
         condition: service_healthy
+      contact-service:
+        condition: service_healthy
+      lead-service:
+        condition: service_healthy
+      pipeline-service:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-service.rule=Host(`gateway.localhost`) || Host(`localhost`)"
+      - "traefik.http.routers.gateway-service.entrypoints=web"
+      - "traefik.http.services.gateway-service.loadbalancer.server.port=8080"
+      - "traefik.http.routers.gateway-service.priority=1"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -245,13 +535,18 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: iqscaffold-prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -264,8 +559,8 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: iqscaffold-grafana
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
@@ -273,6 +568,11 @@ services:
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     depends_on:
       - prometheus
 
@@ -280,13 +580,18 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: iqscaffold-loki
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
     networks:
       - iqscaffold-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
+      - "traefik.http.routers.loki.entrypoints=web"
+      - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/etc/loki/local-config.yaml
 
   # Observability Stack - Promtail
@@ -309,10 +614,18 @@ networks:
     name: iqscaffold-network
 
 volumes:
+  traefik_letsencrypt:
+    name: iqscaffold_traefik_letsencrypt
   postgres_user_data:
     name: iqscaffold_postgres_user_data
   postgres_billing_data:
     name: iqscaffold_postgres_billing_data
+  postgres_contact_data:
+    name: iqscaffold_postgres_contact_data
+  postgres_lead_data:
+    name: iqscaffold_postgres_lead_data
+  postgres_pipeline_data:
+    name: iqscaffold_postgres_pipeline_data
   redis_data:
     name: iqscaffold_redis_data
   rabbitmq_data:
