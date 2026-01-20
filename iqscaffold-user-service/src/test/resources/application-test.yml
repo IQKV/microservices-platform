@@ -86,6 +86,8 @@ iqscaffold:
     oauth2:
       enabled: false
       providers: { }
+    authorities:
+      defaultAuthorities: ["USER"]
 
   cache:
     redis:
