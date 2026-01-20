@@ -1,4 +1,4 @@
-# 🚀 IQ Scaffold CRM Platform
+# 🚀 IQ Scaffold Microservices Platform
 
 > Production-ready Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
