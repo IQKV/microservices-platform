@@ -43,6 +43,57 @@ services:
     restart: unless-stopped
     command: --global-response-templating --verbose --port 8080
 
+  # Mock Lead Service for Gateway testing (local development)
+  mock-lead-service:
+    image: wiremock/wiremock:3-alpine
+    container_name: iqscaffold-mock-lead-service-dev
+    ports:
+      - "8084:8080"
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    command: --global-response-templating --verbose --port 8080
+
+  # Mock Pipeline Service for Gateway testing (local development)
+  mock-pipeline-service:
+    image: wiremock/wiremock:3-alpine
+    container_name: iqscaffold-mock-pipeline-service-dev
+    ports:
+      - "8085:8080"
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    command: --global-response-templating --verbose --port 8080
+
+  # Mock Contact Service for Gateway testing (local development)
+  mock-contact-service:
+    image: wiremock/wiremock:3-alpine
+    container_name: iqscaffold-mock-contact-service-dev
+    ports:
+      - "8083:8080"
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/__admin/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    command: --global-response-templating --verbose --port 8080
+
   # Gateway Service - Local Development
   gateway-service:
     build:
@@ -53,7 +104,7 @@ services:
     container_name: iqscaffold-gateway-service-dev
     environment:
       # Spring Configuration
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: dev,crm
       SPRING_APPLICATION_NAME: iqscaffold-gateway-service
 
       # Redis Configuration
@@ -64,6 +115,9 @@ services:
 
       # Gateway Routing Configuration
       IQSCAFFOLD_GATEWAY_ROUTING_SERVICES_USER_SERVICE_URI: http://mock-user-service:8080
+      IQSCAFFOLD_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://mock-lead-service:8084
+      IQSCAFFOLD_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://mock-pipeline-service:8085
+      IQSCAFFOLD_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://mock-contact-service:8083
       USER_SERVICE_JWK_URI: http://mock-user-service:8080/.well-known/jwks.json
 
       # CORS Configuration
@@ -92,6 +146,12 @@ services:
         condition: service_healthy
       mock-user-service:
         condition: service_healthy
+      mock-lead-service:
+        condition: service_healthy
+      mock-pipeline-service:
+        condition: service_healthy
+      mock-contact-service:
+        condition: service_healthy
     networks:
       - gateway-network
     healthcheck:
@@ -108,10 +168,10 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: 1536Mi
+          memory: 1536M
         reservations:
           cpus: "0.5"
-          memory: 768Mi
+          memory: 768M
 
 networks:
   gateway-network:

@@ -317,6 +317,10 @@ spring:
 - `GET /api/v1/billing/subscription-plans/active` - List active subscription plans
 - `POST /api/v1/billing/webhooks/**` - Payment provider webhooks (Stripe, PayPal, etc.)
 
+#### CRM Services
+
+- `POST /api/v1/crm/webhooks/**` - External CRM provider webhooks (HubSpot, Salesforce, etc.)
+
 ### Protected Endpoints (Requires JWT)
 
 #### User Service
@@ -338,6 +342,30 @@ spring:
 - `POST /api/v1/admin/billing/merchants/onboard` - Merchant onboarding (BILLING_ADMIN+ role)
 - `GET /api/v1/admin/billing/merchants/status/{orgId}` - Merchant status (BILLING_ADMIN+ role)
 - `GET/POST/PUT/DELETE /api/v1/admin/billing/gateway-config/**` - Gateway configuration (BILLING_ADMIN+ role)
+
+#### CRM Services
+
+- `GET /api/v1/leads/**` - Lead management operations (USER+ role)
+- `POST /api/v1/leads` - Create new leads (USER+ role)
+- `PUT /api/v1/leads/{id}` - Update lead information (USER+ role)
+- `DELETE /api/v1/leads/{id}` - Delete leads (USER+ role)
+- `GET /api/v1/leads/{id}/activities/**` - Lead activity tracking (USER+ role)
+- `POST /api/v1/leads/{id}/activities` - Add lead activities (USER+ role)
+- `GET /api/v1/leads/{id}/notes/**` - Lead notes management (USER+ role)
+- `POST /api/v1/leads/{id}/notes` - Add lead notes (USER+ role)
+- `GET /api/v1/pipeline/**` - Pipeline management (USER+ role)
+- `POST /api/v1/pipeline` - Create pipeline stages (USER+ role)
+- `PUT /api/v1/pipeline/{id}` - Update pipeline configuration (USER+ role)
+- `GET /api/v1/pipeline/dashboard/**` - Pipeline dashboard data (USER+ role)
+- `GET /api/v1/pipeline/follow-ups/**` - Follow-up management (USER+ role)
+- `POST /api/v1/pipeline/follow-ups` - Create follow-up tasks (USER+ role)
+- `GET /api/v1/contacts/**` - Contact management (USER+ role)
+- `POST /api/v1/contacts` - Create new contacts (USER+ role)
+- `PUT /api/v1/contacts/{id}` - Update contact information (USER+ role)
+- `DELETE /api/v1/contacts/{id}` - Delete contacts (USER+ role)
+- `GET /api/v1/companies/**` - Company management (USER+ role)
+- `POST /api/v1/companies` - Create new companies (USER+ role)
+- `GET /api/v1/crm/webhooks` - CRM webhook management (ADMIN+ role)
 
 ### Monitoring Endpoints
 
