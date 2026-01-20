@@ -16,7 +16,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaAuditing
 @EnableTransactionManagement
 @EnableScheduling
-@ConfigurationPropertiesScan(basePackages = "com.iqscaffold.userservice.infrastructure.config")
+@ConfigurationPropertiesScan(basePackages = {
+    "com.iqscaffold.userservice.infrastructure.config",
+    "com.iqscaffold.userservice.config"
+})
 public class UserServiceApplication {
 
   public static void main(String[] args) {
