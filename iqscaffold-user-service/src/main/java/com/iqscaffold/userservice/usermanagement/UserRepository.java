@@ -124,4 +124,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
       """)
   List<User> findUnverifiedUsers();
 
+  /**
+   * Find users who have any of the specified authorities.
+   * Useful for finding users with CRM access or admin privileges.
+   *
+   * @param authorityNames list of authority names to search for
+   * @return list of users who have at least one of the specified authorities
+   */
+  @Query("""
+      SELECT DISTINCT u FROM User u 
+      JOIN u.authorities a 
+      WHERE a.name IN :authorityNames
+      ORDER BY u.createdAt DESC
+      """)
+  List<User> findUsersWithAnyAuthority(@Param("authorityNames") List<String> authorityNames);
+
 }

@@ -100,6 +100,101 @@ public final class GatewayConstants {
   }
 
   /**
+   * Authority names used for access control across services.
+   * These constants ensure consistency between gateway routing and service authorization.
+   */
+  public static final class Authorities {
+
+    private Authorities() {
+      throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
+    // Basic User Authorities
+    public static final String USER = "USER";
+    public static final String BASIC_USER = "BASIC_USER";
+    public static final String STANDARD_USER = "STANDARD_USER";
+
+    // Administrative Authorities
+    public static final String ADMIN = "ADMIN";
+    public static final String SUPER_ADMIN = "SUPER_ADMIN";
+    public static final String TENANT_ADMIN = "TENANT_ADMIN";
+
+    // CRM Authorities (Exclusive Access)
+    public static final String CRM_ACCESS = "CRM_ACCESS";
+    public static final String CRM_LEAD_MANAGER = "CRM_LEAD_MANAGER";
+    public static final String CRM_CONTACT_MANAGER = "CRM_CONTACT_MANAGER";
+    public static final String CRM_PIPELINE_MANAGER = "CRM_PIPELINE_MANAGER";
+    public static final String CRM_ADMIN = "CRM_ADMIN";
+
+    // Billing Authorities
+    public static final String BILLING_ACCESS = "BILLING_ACCESS";
+    public static final String BILLING_MANAGER = "BILLING_MANAGER";
+    public static final String BILLING_ADMIN = "BILLING_ADMIN";
+
+    // System Authorities
+    public static final String SYSTEM_SERVICE = "SYSTEM_SERVICE";
+    public static final String API_ACCESS = "API_ACCESS";
+  }
+
+  /**
+   * Route patterns for different service modules and microservices.
+   * Used for authority-based routing and access control.
+   */
+  public static final class Routes {
+
+    private Routes() {
+      throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
+    // CRM Microservices Routes (contact-service, lead-service, pipeline-service)
+    public static final String CRM_BASE = "/api/*/crm/**";
+    public static final String CRM_LEADS = "/api/*/leads/**";
+    public static final String CRM_CONTACTS = "/api/*/contacts/**";
+    public static final String CRM_PIPELINE = "/api/*/pipeline/**";
+
+    // Billing Microservice Routes (billing-service)
+    public static final String BILLING_BASE = "/api/*/billing/**";
+    public static final String BILLING_SUBSCRIPTIONS = "/api/*/subscriptions/**";
+    public static final String BILLING_PAYMENTS = "/api/*/payments/**";
+    public static final String BILLING_INVOICES = "/api/*/invoices/**";
+
+    // User Microservice Routes (user-service)
+    public static final String USER_BASE = "/api/*/users/**";
+    public static final String AUTH_BASE = "/api/*/auth/**";
+    public static final String FEATURES_BASE = "/api/*/features/**";
+
+    // Admin Routes (cross-service admin functions)
+    public static final String ADMIN_BASE = "/api/*/admin/**";
+    public static final String ACTUATOR_BASE = "/actuator/**";
+
+    // API Access Routes (general platform API usage)
+    public static final String API_BASE = "/api/**";
+  }
+
+  /**
+   * Microservice names used in the platform.
+   * Used for service discovery and access control.
+   */
+  public static final class Microservices {
+
+    private Microservices() {
+      throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
+
+    // Core Platform Services
+    public static final String USER_SERVICE = "user-service";
+    public static final String GATEWAY_SERVICE = "gateway-service";
+
+    // CRM Microservices
+    public static final String CONTACT_SERVICE = "contact-service";
+    public static final String LEAD_SERVICE = "lead-service";
+    public static final String PIPELINE_SERVICE = "pipeline-service";
+
+    // Business Microservices
+    public static final String BILLING_SERVICE = "billing-service";
+  }
+
+  /**
    * Exchange attribute names for storing context in ServerWebExchange.
    */
   public static final class Attributes {

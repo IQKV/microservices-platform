@@ -1,6 +1,9 @@
 package com.iqscaffold.userservice.registration;
 
+import java.util.List;
+
 import com.iqscaffold.userservice.emailverification.EmailVerificationService;
+import com.iqscaffold.userservice.config.PlatformConfigurationProperties;
 import com.iqscaffold.userservice.security.InputSanitizer;
 import com.iqscaffold.userservice.security.SecurityAuditService;
 import com.iqscaffold.userservice.shared.Authority;
@@ -14,7 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Enhanced service for user registration with security measures. Includes input sanitization, audit logging, and security validation.
+ * Enhanced service for user registration with security measures and configurable default authorities.
+ * Includes input sanitization, audit logging, security validation, and flexible authority assignment.
  */
 @Service
 @Transactional
@@ -28,19 +32,22 @@ public class UserRegistrationService {
   private final SecurityAuditService securityAuditService;
   private final InputSanitizer inputSanitizer;
   private final EmailVerificationService emailVerificationService;
+  private final PlatformConfigurationProperties platformConfig;
 
   public UserRegistrationService(final UserRepository userRepository,
                                  final AuthorityRepository authorityRepository,
                                  final PasswordEncoder passwordEncoder,
                                  final SecurityAuditService securityAuditService,
                                  final InputSanitizer inputSanitizer,
-                                 final EmailVerificationService emailVerificationService) {
+                                 final EmailVerificationService emailVerificationService,
+                                 final PlatformConfigurationProperties platformConfig) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
     this.passwordEncoder = passwordEncoder;
     this.securityAuditService = securityAuditService;
     this.inputSanitizer = inputSanitizer;
     this.emailVerificationService = emailVerificationService;
+    this.platformConfig = platformConfig;
   }
 
   /**
@@ -107,14 +114,22 @@ public class UserRegistrationService {
     // Ensure emailVerified is false for new users
     user.setEmailVerified(false);
 
-    // Assign default USER role
-    var userRole = findOrCreateUserRole();
-    user.addAuthority(userRole);
+    // Assign configured default authorities
+    var defaultAuthorities = findOrCreateDefaultAuthorities();
+    for (var authority : defaultAuthorities) {
+      user.addAuthority(authority);
+    }
 
     // Save user
     var savedUser = userRepository.save(user);
 
-    // Log successful registration
+    // Log successful registration with assigned authorities
+    var authorityNames = defaultAuthorities.stream()
+        .map(Authority::getName)
+        .toList();
+    logger.info("User registered successfully: {} with authorities: {}", 
+        savedUser.getUsername(), authorityNames);
+    
     securityAuditService.logUserRegistration(
         savedUser.getUsername(), savedUser.getEmail(), ipAddress, userAgent);
 
@@ -141,19 +156,52 @@ public class UserRegistrationService {
   }
 
   /**
-   * Find or create the default USER role.
+   * Find or create the configured default authorities for new users.
+   * Uses the configurable list from platform configuration properties.
    */
-  private Authority findOrCreateUserRole() {
-    var userRoleOptional = authorityRepository.findByName("USER");
+  private List<Authority> findOrCreateDefaultAuthorities() {
+    var configuredAuthorities = platformConfig.authorities().defaultAuthorities();
+    
+    logger.debug("Finding or creating default authorities: {}", configuredAuthorities);
+    
+    return configuredAuthorities.stream()
+        .map(this::findOrCreateAuthority)
+        .toList();
+  }
 
-    if (userRoleOptional.isPresent()) {
-      return userRoleOptional.get();
+  /**
+   * Find or create a specific authority by name.
+   * Creates the authority with appropriate description if it doesn't exist.
+   */
+  private Authority findOrCreateAuthority(String authorityName) {
+    var existingAuthority = authorityRepository.findByName(authorityName);
+    
+    if (existingAuthority.isPresent()) {
+      return existingAuthority.get();
     }
 
-    // Create default USER role if it doesn't exist
-    var userRole = new Authority("USER", "Default user role");
-    return authorityRepository.save(userRole);
+    // Get description from platform configuration if available
+    var description = getAuthorityDescription(authorityName);
+    var newAuthority = new Authority(authorityName, description);
+    var savedAuthority = authorityRepository.save(newAuthority);
+    
+    logger.info("Created new authority: {} - {}", authorityName, description);
+    return savedAuthority;
   }
+
+  /**
+   * Get authority description from platform configuration.
+   */
+  private String getAuthorityDescription(String authorityName) {
+    var authorityDefinition = platformConfig.authorities().getAuthority(authorityName);
+    if (authorityDefinition != null) {
+      return authorityDefinition.description();
+    }
+    
+    // Provide generic description for authorities not in configuration
+    return "Configurable authority: " + authorityName;
+  }
+
 
 
   /**

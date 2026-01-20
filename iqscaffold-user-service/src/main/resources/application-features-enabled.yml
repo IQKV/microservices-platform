@@ -1,0 +1,71 @@
+# Configuration example for enabling composable features for newly registered users
+# This profile demonstrates how to configure default authorities for different feature sets
+
+spring:
+  profiles:
+    active: local,features-enabled
+
+# IQ Scaffold configuration with multiple features enabled for new users
+iqscaffold:
+  auth:
+    authorities:
+      default-authorities:
+        - USER          # Standard user access (always required)
+        - CRM_ACCESS    # Enable CRM microservices access
+        - API_ACCESS    # Enable general API access
+        # Optional: Add additional feature authorities for new users
+        # - BILLING_ACCESS        # Enable billing microservice access
+        # - CRM_LEAD_MANAGER      # Manage leads and lead pipeline
+        # - CRM_CONTACT_MANAGER   # Manage customer contacts
+
+# Example configurations for different deployment scenarios:
+
+# Configuration for basic users (minimal access):
+# iqscaffold:
+#   auth:
+#     authorities:
+#       default-authorities:
+#         - USER
+
+# Configuration for CRM-focused organization:
+# iqscaffold:
+#   auth:
+#     authorities:
+#       default-authorities:
+#         - USER
+#         - CRM_ACCESS
+#         - CRM_LEAD_MANAGER
+#         - CRM_CONTACT_MANAGER
+#         - CRM_PIPELINE_MANAGER
+
+# Configuration for full-featured SaaS platform:
+# iqscaffold:
+#   auth:
+#     authorities:
+#       default-authorities:
+#         - USER
+#         - CRM_ACCESS
+#         - BILLING_ACCESS
+#         - API_ACCESS
+
+# Configuration for enterprise deployment:
+# iqscaffold:
+#   auth:
+#     authorities:
+#       default-authorities:
+#         - USER
+#         - CRM_ACCESS
+#         - BILLING_ACCESS
+#         - API_ACCESS
+#         - CRM_LEAD_MANAGER
+#         - CRM_CONTACT_MANAGER
+#         - BILLING_MANAGER
+
+# Notes:
+# 1. USER authority is always recommended as a base authority
+# 2. Feature access authorities (CRM_ACCESS, BILLING_ACCESS) enable microservice access
+# 3. Manager authorities provide granular permissions within features
+# 4. Changes take effect for newly registered users only
+# 5. Existing users need authority updates via unified feature management endpoints
+# 6. Each feature maps to specific microservices for access control
+# 7. Gateway enforces microservice access based on user authorities

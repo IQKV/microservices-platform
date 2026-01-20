@@ -92,6 +92,68 @@ iqscaffold:
       - fr
     default-locale: en
   
+  # Platform Configuration - Extensible Feature and Authority Management
+  platform:
+    security:
+      routeProtection:
+        publicPaths:
+          - "/.well-known/jwks.json"
+          - "/api/v1/public/**"
+          - "/api/v1/auth/login"
+          - "/api/v1/auth/signup"
+          - "/api/v1/auth/refresh"
+          - "/api/v1/auth/validate"
+          - "/api/v1/auth/health"
+          - "/api/v1/auth/email/verify"
+          - "/api/v1/auth/email/resend"
+          - "/api/v1/auth/email/status"
+          - "/api/v1/auth/password/forgot"
+          - "/api/v1/auth/password/reset"
+          - "/actuator/health"
+          - "/actuator/info"
+          - "/api/v1/docs"
+          - "/swagger-ui/**"
+          - "/api-docs/**"
+          - "/billing-service/swagger-ui/**"
+          - "/billing-service/api-docs/**"
+          - "/lead-service/swagger-ui/**"
+          - "/lead-service/api-docs/**"
+          - "/pipeline-service/swagger-ui/**"
+          - "/pipeline-service/api-docs/**"
+          - "/contact-service/swagger-ui/**"
+          - "/contact-service/api-docs/**"
+          - "/actuator/prometheus"
+          - "/api/v1/billing/webhooks/**"
+          - "/api/v1/crm/webhooks/**"
+          - "/api/v1/billing/subscription-plans/active"
+          - "/api/v1/billing/subscription-plans"
+        
+        protectedRoutes:
+          # CRM Routes
+          "/api/*/crm/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/leads/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/contacts/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/pipeline/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          
+          # Billing Routes
+          "/api/*/billing/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/payments/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/subscriptions/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/invoices/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          
+          # Admin Routes
+          "/api/*/admin/**": ["ADMIN", "SUPER_ADMIN"]
+          "/actuator/**": ["ADMIN", "SUPER_ADMIN"]
+          
+          # API Routes (general)
+          "/api/**": ["API_ACCESS", "CRM_ACCESS", "BILLING_ACCESS", "USER", "ADMIN", "SUPER_ADMIN"]
+      
+      accessControl:
+        enableFeatureValidation: true
+        enableMicroserviceValidation: true
+        enableRouteValidation: true
+        bypassAuthorities: ["SUPER_ADMIN"]
+  
   cache:
     redis:
       host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}

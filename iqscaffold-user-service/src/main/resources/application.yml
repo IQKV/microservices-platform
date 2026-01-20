@@ -262,6 +262,209 @@ iqscaffold:
     oauth2:
       enabled: false
       providers: { }
+  
+  # Platform Configuration - Extensible Feature and Authority Management
+  platform:
+    features:
+      definitions:
+        # Core Platform Features
+        user-management:
+          displayName: "User Management"
+          description: "Manage users, authentication, and basic platform access"
+          requiredAuthorities: ["USER"]
+          allAuthorities: ["USER", "ADMIN", "SUPER_ADMIN"]
+          microservices: ["user-service"]
+          routePatterns: ["/api/*/users/**", "/api/*/auth/**"]
+          dependencies: []
+          composable: false
+          enabled: true
+        
+        # CRM Feature
+        crm:
+          displayName: "Customer Relationship Management"
+          description: "Manage leads, contacts, and sales pipeline"
+          requiredAuthorities: ["CRM_ACCESS"]
+          allAuthorities: ["CRM_ACCESS", "CRM_LEAD_MANAGER", "CRM_CONTACT_MANAGER", "CRM_PIPELINE_MANAGER", "CRM_ADMIN"]
+          microservices: ["contact-service", "lead-service", "pipeline-service"]
+          routePatterns: ["/api/*/crm/**", "/api/*/leads/**", "/api/*/contacts/**", "/api/*/pipeline/**"]
+          dependencies: []
+          composable: true
+          enabled: true
+        
+        # Billing Feature
+        billing:
+          displayName: "Billing & Payments"
+          description: "Manage subscriptions, payments, and invoicing"
+          requiredAuthorities: ["BILLING_ACCESS"]
+          allAuthorities: ["BILLING_ACCESS", "BILLING_MANAGER", "BILLING_ADMIN"]
+          microservices: ["billing-service"]
+          routePatterns: ["/api/*/billing/**", "/api/*/payments/**", "/api/*/subscriptions/**", "/api/*/invoices/**"]
+          dependencies: []
+          composable: true
+          enabled: true
+        
+        # API Access Feature
+        api:
+          displayName: "API Access"
+          description: "Access to platform APIs and integrations"
+          requiredAuthorities: ["API_ACCESS"]
+          allAuthorities: ["API_ACCESS"]
+          microservices: ["gateway-service"]
+          routePatterns: ["/api/**"]
+          dependencies: []
+          composable: true
+          enabled: true
+        
+        # Administration Feature
+        admin:
+          displayName: "Administration"
+          description: "Administrative access to platform features and services"
+          requiredAuthorities: ["ADMIN"]
+          allAuthorities: ["ADMIN", "SUPER_ADMIN", "TENANT_ADMIN"]
+          microservices: ["user-service", "gateway-service"]
+          routePatterns: ["/api/*/admin/**", "/actuator/**"]
+          dependencies: []
+          composable: false
+          enabled: true
+    
+    authorities:
+      definitions:
+        # Core Authorities
+        USER:
+          displayName: "User"
+          description: "Standard user access to basic platform features"
+          category: "core"
+          systemAuthority: true
+          priority: 1
+        
+        ADMIN:
+          displayName: "Administrator"
+          description: "Administrative access to tenant features and user management"
+          category: "admin"
+          systemAuthority: true
+          priority: 90
+        
+        SUPER_ADMIN:
+          displayName: "Super Administrator"
+          description: "Full platform access including system administration"
+          category: "admin"
+          systemAuthority: true
+          priority: 100
+        
+        TENANT_ADMIN:
+          displayName: "Tenant Administrator"
+          description: "Administrative access within a specific tenant"
+          category: "admin"
+          systemAuthority: false
+          priority: 80
+        
+        # CRM Authorities
+        CRM_ACCESS:
+          displayName: "CRM Access"
+          description: "Basic access to CRM features"
+          category: "crm"
+          systemAuthority: false
+          priority: 10
+        
+        CRM_LEAD_MANAGER:
+          displayName: "CRM Lead Manager"
+          description: "Manage leads and lead pipeline"
+          category: "crm"
+          systemAuthority: false
+          priority: 20
+        
+        CRM_CONTACT_MANAGER:
+          displayName: "CRM Contact Manager"
+          description: "Manage contacts and customer relationships"
+          category: "crm"
+          systemAuthority: false
+          priority: 20
+        
+        CRM_PIPELINE_MANAGER:
+          displayName: "CRM Pipeline Manager"
+          description: "Manage sales pipeline and processes"
+          category: "crm"
+          systemAuthority: false
+          priority: 25
+        
+        CRM_ADMIN:
+          displayName: "CRM Administrator"
+          description: "Full administrative access to CRM features"
+          category: "crm"
+          systemAuthority: false
+          priority: 30
+        
+        # Billing Authorities
+        BILLING_ACCESS:
+          displayName: "Billing Access"
+          description: "Basic access to billing and payment features"
+          category: "billing"
+          systemAuthority: false
+          priority: 10
+        
+        BILLING_MANAGER:
+          displayName: "Billing Manager"
+          description: "Manage billing, subscriptions, and invoices"
+          category: "billing"
+          systemAuthority: false
+          priority: 20
+        
+        BILLING_ADMIN:
+          displayName: "Billing Administrator"
+          description: "Full administrative access to billing features"
+          category: "billing"
+          systemAuthority: false
+          priority: 30
+        
+        # API Authorities
+        API_ACCESS:
+          displayName: "API Access"
+          description: "Access to platform APIs and integrations"
+          category: "api"
+          systemAuthority: false
+          priority: 10
+      
+      adminAuthorities: ["ADMIN", "SUPER_ADMIN"]
+      defaultAuthorities: ["USER"]  # Default authorities for newly registered users
+    
+    security:
+      routeProtection:
+        publicPaths:
+          - "/api/*/auth/login"
+          - "/api/*/auth/register"
+          - "/api/*/auth/forgot-password"
+          - "/api/*/auth/reset-password"
+          - "/api/*/auth/verify-email"
+          - "/api/*/health"
+          - "/actuator/health"
+          - "/swagger-ui/**"
+          - "/api-docs/**"
+        
+        protectedRoutes:
+          # CRM Routes
+          "/api/*/crm/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/leads/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/contacts/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/pipeline/**": ["CRM_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          
+          # Billing Routes
+          "/api/*/billing/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/payments/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/subscriptions/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          "/api/*/invoices/**": ["BILLING_ACCESS", "ADMIN", "SUPER_ADMIN"]
+          
+          # Admin Routes
+          "/api/*/admin/**": ["ADMIN", "SUPER_ADMIN"]
+          "/actuator/**": ["ADMIN", "SUPER_ADMIN"]
+          
+          # API Routes (general)
+          "/api/**": ["API_ACCESS", "CRM_ACCESS", "BILLING_ACCESS", "USER", "ADMIN", "SUPER_ADMIN"]
+      
+      accessControl:
+        enableFeatureValidation: true
+        enableMicroserviceValidation: true
+        enableRouteValidation: true
+        bypassAuthorities: ["SUPER_ADMIN"]
   email:
     smtp:
       host: ${SMTP_HOST:localhost}

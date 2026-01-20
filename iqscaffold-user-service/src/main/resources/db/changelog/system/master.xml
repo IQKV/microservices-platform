@@ -7,6 +7,7 @@
 
     <include file="db/changelog/system/00000000000000-create-tenants-table.xml"/>
     <include file="db/changelog/system/00000000000001-create-authorities-table.xml"/>
+    <include file="db/changelog/system/002-initialize-crm-authorities.xml"/>
     <include file="db/changelog/20251110154600-organizations-public-schema.xml"/>
     <include file="db/changelog/20251110154700-add-organization-capabilities.xml"/>
 

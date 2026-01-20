@@ -7,20 +7,22 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Authentication configuration properties with iqscaffold.auth prefix. Handles JWT, security, and OAuth2 configuration for the user service.
+ * Authentication configuration properties with iqscaffold.auth prefix. Handles JWT, security, OAuth2, and authority configuration for the user service.
  */
 @ConfigurationProperties(prefix = "iqscaffold.auth")
 @Validated
 public record AuthConfigurationProperties(
     @Valid @NotNull JwtProperties jwt,
     @Valid @NotNull SecurityProperties security,
-    @Valid @NotNull OAuth2Properties oauth2
+    @Valid @NotNull OAuth2Properties oauth2,
+    @Valid @NotNull AuthorityProperties authorities
 ) {
 
   /**
@@ -138,6 +140,31 @@ public record AuthConfigurationProperties(
           throw new IllegalArgumentException("OAuth2 provider requires both clientId and clientSecret when enabled");
         }
       }
+    }
+  }
+
+  /**
+   * Authority configuration properties for role-based access control.
+   */
+  public record AuthorityProperties(
+      @NotNull(message = "Default authorities list must not be null")
+      List<@NotBlank(message = "Authority name must not be blank") String> defaultAuthorities
+  ) {
+
+    /**
+     * Validates that at least one default authority is configured.
+     */
+    public AuthorityProperties {
+      if (defaultAuthorities == null || defaultAuthorities.isEmpty()) {
+        throw new IllegalArgumentException("At least one default authority must be configured");
+      }
+    }
+
+    /**
+     * Check if an authority is in the default list.
+     */
+    public boolean isDefaultAuthority(String authorityName) {
+      return defaultAuthorities.contains(authorityName);
     }
   }
 }
