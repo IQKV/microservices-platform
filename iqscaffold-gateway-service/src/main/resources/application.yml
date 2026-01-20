@@ -213,10 +213,10 @@ iqscaffold:
         issuer: iqscaffold-user-service
         audience: iqscaffold-services
         algorithm: RS256
-        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://localhost:8080/.well-known/jwks.json}
+        jwk-set-uri: ${USER_SERVICE_JWK_URI:http://user-service:8080/.well-known/jwks.json}
       authentication:
         enabled: true
-        user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://localhost:8080}
+        user-service-url: ${IQSCAFFOLD_GATEWAY_SECURITY_USER_SERVICE_URL:http://user-service:8080}
         token-validation-timeout: PT5S
         enable-user-context-propagation: true
       public-paths:

@@ -56,8 +56,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8081}
-          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8081/.well-known/jwks.json}
+          issuer-uri: ${JWT_ISSUER_URI:http://user-service:8080}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://user-service:8080/.well-known/jwks.json}
 
 server:
   port: ${SERVER_PORT:8085}
@@ -107,7 +107,7 @@ iqscaffold:
     enable-follow-up-reminders: ${PIPELINE_ENABLE_FOLLOW_UP_REMINDERS:true}
     enable-activity-tracking: ${PIPELINE_ENABLE_ACTIVITY_TRACKING:true}
   services:
-    lead-service-url: ${LEAD_SERVICE_URL:http://localhost:8084}
+    lead-service-url: ${LEAD_SERVICE_URL:http://lead-service:8080}
 
 logging:
   level:

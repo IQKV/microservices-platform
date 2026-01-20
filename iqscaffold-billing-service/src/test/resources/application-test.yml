@@ -67,7 +67,7 @@ iqscaffold:
   billing:
     security:
       jwt:
-        jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+        jwk-set-uri: http://user-service:8080/.well-known/jwks.json
         issuer: test-issuer
     payment:
       provider: stripe

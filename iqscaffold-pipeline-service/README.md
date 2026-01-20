@@ -48,9 +48,9 @@ A CRM pipeline management service built with Spring Boot, providing lead trackin
    ```
 
 3. **Access the application**:
-   - API: http://localhost:8085
-   - Swagger UI: http://localhost:8085/swagger-ui.html
-   - Health Check: http://localhost:8085/actuator/health
+   - API: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - Health Check: http://localhost:8080/actuator/health
 
 ### Docker Development
 
@@ -126,11 +126,11 @@ IQSCAFFOLD_MESSAGING_RABBITMQ_HOST=localhost
 IQSCAFFOLD_MESSAGING_RABBITMQ_PORT=5672
 
 # Security
-USER_SERVICE_URL=http://localhost:8081
+USER_SERVICE_URL=http://user-service:8080
 JWT_ISSUER=iqscaffold-user-service
 
 # Lead Service Integration
-LEAD_SERVICE_URL=http://localhost:8084
+LEAD_SERVICE_URL=http://lead-service:8080
 ```
 
 ### Profiles

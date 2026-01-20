@@ -123,8 +123,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
-          issuer-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}
+          jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://user-service:8080}/.well-known/jwks.json
+          issuer-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://user-service:8080}
 
 # SpringDoc OpenAPI Configuration
 springdoc:
@@ -281,7 +281,7 @@ iqscaffold:
   tenant-id-header: X-Tenant-ID
   
   # User Service URL for inter-service communication
-  user-service-url: ${USER_SERVICE_URL:http://localhost:8080}
+  user-service-url: ${USER_SERVICE_URL:http://user-service:8080}
   
   # Contact Service URL for lead conversion
   contact-service-url: ${CONTACT_SERVICE_URL:http://localhost:8083}
@@ -307,7 +307,7 @@ iqscaffold:
   lead:
     security:
       jwt:
-        jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://localhost:8080}/.well-known/jwks.json
+        jwk-set-uri: ${IQSCAFFOLD_USER_SERVICE_URL:http://user-service:8080}/.well-known/jwks.json
         issuer: ${JWT_ISSUER:iqscaffold-user-service}
     scoring:
       enable-auto-scoring: ${LEAD_ENABLE_AUTO_SCORING:true}

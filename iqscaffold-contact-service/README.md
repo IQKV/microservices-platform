@@ -50,11 +50,11 @@ A comprehensive CRM contact management service built with Spring Boot, providing
    ```
 
 3. **Access the application**:
-   - API: http://localhost:8083
-   - Swagger UI: http://localhost:8083/swagger-ui.html
-   - API Docs: http://localhost:8083/api-docs
-   - Health Check: http://localhost:8083/actuator/health
-   - Prometheus Metrics: http://localhost:8083/actuator/prometheus
+   - API: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - API Docs: http://localhost:8080/api-docs
+   - Health Check: http://localhost:8080/actuator/health
+   - Prometheus Metrics: http://localhost:8080/actuator/prometheus
 
 ### Docker Development
 
@@ -284,7 +284,7 @@ IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME=iqscaffold
 IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD=iqscaffold_password
 
 # Security
-USER_SERVICE_URL=http://localhost:8081
+USER_SERVICE_URL=http://user-service:8080
 JWT_ISSUER=iqscaffold-user-service
 
 # CRM Features

@@ -642,7 +642,7 @@ SMTP_USERNAME=billing@iqscaffold.com
 SMTP_PASSWORD=email_password
 
 # Service Integration
-IQSCAFFOLD_USER_SERVICE_URL=http://localhost:8080
+IQSCAFFOLD_USER_SERVICE_URL=http://user-service:8080
 ```
 
 ## Observability & Monitoring
@@ -787,7 +787,7 @@ public ResponseEntity<Response> cancelSubscription(@PathVariable UUID id) {
 ### Creating a Stripe Gateway Configuration
 
 ```bash
-curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config \
+curl -X POST http://localhost:8080/api/v1/admin/billing/gateway-config \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123" \
   -H "Content-Type: application/json" \
@@ -809,7 +809,7 @@ curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config \
 ### Creating a Subscription
 
 ```bash
-curl -X POST http://localhost:8082/api/v1/billing/subscriptions \
+curl -X POST http://localhost:8080/api/v1/billing/subscriptions \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123" \
   -H "Content-Type: application/json" \
@@ -827,7 +827,7 @@ curl -X POST http://localhost:8082/api/v1/billing/subscriptions \
 ### Creating a Subscription Plan
 
 ```bash
-curl -X POST http://localhost:8082/api/v1/billing/subscription-plans \
+curl -X POST http://localhost:8080/api/v1/billing/subscription-plans \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123" \
   -H "Content-Type: application/json" \
@@ -851,7 +851,7 @@ curl -X POST http://localhost:8082/api/v1/billing/subscription-plans \
 ### Listing Gateway Configurations
 
 ```bash
-curl -X GET http://localhost:8082/api/v1/admin/billing/gateway-config \
+curl -X GET http://localhost:8080/api/v1/admin/billing/gateway-config \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123"
 ```
@@ -859,7 +859,7 @@ curl -X GET http://localhost:8082/api/v1/admin/billing/gateway-config \
 ### Getting Active Subscription
 
 ```bash
-curl -X GET http://localhost:8082/api/v1/billing/subscriptions/active \
+curl -X GET http://localhost:8080/api/v1/billing/subscriptions/active \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123"
 ```
@@ -867,7 +867,7 @@ curl -X GET http://localhost:8082/api/v1/billing/subscriptions/active \
 ### Listing Invoices
 
 ```bash
-curl -X GET http://localhost:8082/api/v1/billing/invoices \
+curl -X GET http://localhost:8080/api/v1/billing/invoices \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123"
 ```
@@ -875,7 +875,7 @@ curl -X GET http://localhost:8082/api/v1/billing/invoices \
 ### Setting a Gateway as Primary
 
 ```bash
-curl -X POST http://localhost:8082/api/v1/admin/billing/gateway-config/STRIPE/set-primary \
+curl -X POST http://localhost:8080/api/v1/admin/billing/gateway-config/STRIPE/set-primary \
   -H "Authorization: Bearer ${JWT_TOKEN}" \
   -H "X-Tenant-ID: tenant-123"
 ```

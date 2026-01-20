@@ -342,11 +342,11 @@ docker-compose up
 Once services are running, access Swagger UI:
 
 - User Service: http://user-service:8080/swagger-ui.html
-- Gateway Service: http://gateway-service:8081/swagger-ui.html
-- Billing Service: http://billing-service:8082/swagger-ui.html
-- Contact Service: http://contact-service:8083/swagger-ui.html
-- Lead Service: http://lead-service:8084/swagger-ui.html
-- Pipeline Service: http://pipeline-service:8085/swagger-ui.html
+- Gateway Service: http://gateway-service:8080/swagger-ui.html
+- Billing Service: http://billing-service:8080/swagger-ui.html
+- Contact Service: http://contact-service:8080/swagger-ui.html
+- Lead Service: http://lead-service:8080/swagger-ui.html
+- Pipeline Service: http://pipeline-service:8080/swagger-ui.html
 
 ### Monitoring
 

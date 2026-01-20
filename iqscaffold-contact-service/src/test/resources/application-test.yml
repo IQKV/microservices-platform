@@ -27,7 +27,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+          jwk-set-uri: http://user-service:8080/.well-known/jwks.json
 
 logging:
   level:
@@ -37,7 +37,7 @@ logging:
 # Test-specific IQ Scaffold properties
 iqscaffold:
   tenant-id-header: X-Tenant-ID
-  user-service-url: http://localhost:8080
+  user-service-url: http://user-service:8080
   crm:
     contact:
       enable-lead-scoring: true

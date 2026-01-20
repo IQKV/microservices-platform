@@ -63,10 +63,10 @@ iqscaffold:
         issuer: "iqscaffold-test"
         audience: "iqscaffold-api"
         algorithm: "RS256"
-        jwk-set-uri: "http://localhost:8081/api/v1/auth/.well-known/jwks.json"
+        jwk-set-uri: "http://user-service:8080/api/v1/auth/.well-known/jwks.json"
       authentication:
         enabled: false
-        user-service-url: "http://localhost:8081"
+        user-service-url: "http://user-service:8080"
         token-validation-timeout: PT5S
         enable-user-context-propagation: false
       public-paths:
