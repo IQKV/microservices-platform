@@ -65,7 +65,7 @@ public class DashboardRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/stats")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<DashboardDtos.DashboardStatsResponse> getDashboardStats(
       @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -96,7 +96,7 @@ public class DashboardRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/conversion")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<DashboardDtos.ConversionMetricsResponse> getConversionMetrics(
       @Parameter(description = "Start date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @Parameter(description = "End date for filtering (inclusive, format: yyyy-MM-dd)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {

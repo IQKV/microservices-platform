@@ -73,7 +73,7 @@ public class FeatureResource {
       @ApiResponse(responseCode = "404", description = "No active subscription found")
   })
   @GetMapping("/my-features")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<UserFeaturesResponse> getMyFeatures() {
     String tenantId = TenantContext.getCurrentTenantId();
 
@@ -146,7 +146,7 @@ public class FeatureResource {
       @ApiResponse(responseCode = "404", description = "No active subscription found")
   })
   @GetMapping("/enabled")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<List<FeatureDto>> getEnabledFeatures() {
     String tenantId = TenantContext.getCurrentTenantId();
 

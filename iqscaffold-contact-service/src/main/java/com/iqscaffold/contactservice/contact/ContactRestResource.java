@@ -83,7 +83,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "409", description = "Contact with email already exists")
   })
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.ContactResponse> createContact(
       @Valid @RequestBody ContactDtos.CreateContactRequest request) {
     String userId = getCurrentUserId();
@@ -117,7 +117,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "404", description = "Contact not found")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.ContactResponse> getContactById(@PathVariable Long id) {
     Contact contact = contactService.getContactById(id)
         .orElseThrow(() -> new ContactNotFoundException("Contact not found with id: " + id));
@@ -142,7 +142,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Page<ContactDtos.ContactResponse>> listContacts(
       @RequestParam(required = false) String search,
       @RequestParam(required = false) ContactStatus status,
@@ -180,7 +180,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "409", description = "Contact with email already exists")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.ContactResponse> updateContact(
       @PathVariable Long id,
       @Valid @RequestBody ContactDtos.UpdateContactRequest request) {
@@ -222,7 +222,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "404", description = "Contact not found")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteContact(@PathVariable Long id) {
     contactService.deleteContact(id);
     return ResponseEntity.noContent().build();
@@ -242,7 +242,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/company/{companyId}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<List<ContactDtos.ContactResponse>> getContactsByCompany(
       @PathVariable Long companyId) {
     List<Contact> contacts = contactService.getContactsByCompany(companyId);
@@ -269,7 +269,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "404", description = "Contact not found")
   })
   @PatchMapping("/{id}/score")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.ContactResponse> updateLeadScore(
       @PathVariable Long id,
       @Valid @RequestBody ContactDtos.UpdateLeadScoreRequest request) {
@@ -294,7 +294,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @PostMapping("/bulk")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.BulkOperationResponse> bulkCreateContacts(
       @Valid @RequestBody ContactDtos.BulkCreateContactsRequest request) {
     String userId = getCurrentUserId();
@@ -374,7 +374,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @PatchMapping("/bulk/status")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.BulkOperationResponse> bulkUpdateStatus(
       @Valid @RequestBody ContactDtos.BulkUpdateStatusRequest request) {
     String userId = getCurrentUserId();
@@ -436,7 +436,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "403", description = "Forbidden - requires ADMIN or SUPER_ADMIN role")
   })
   @DeleteMapping("/bulk")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.BulkOperationResponse> bulkDeleteContacts(
       @Valid @RequestBody ContactDtos.BulkDeleteContactsRequest request) {
 
@@ -482,7 +482,7 @@ public class ContactRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @PatchMapping("/bulk/scores")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_CONTACT_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<ContactDtos.BulkOperationResponse> bulkUpdateLeadScores(
       @Valid @RequestBody ContactDtos.BulkUpdateLeadScoresRequest request) {
 

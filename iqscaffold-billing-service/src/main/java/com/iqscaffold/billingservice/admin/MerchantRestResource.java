@@ -45,7 +45,7 @@ public class MerchantRestResource {
       @ApiResponse(responseCode = "404", description = "Organization not found")
   })
   @PostMapping("/onboard")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER')")
   public ResponseEntity<OnboardingLinkResponse> initiateOnboarding(
       @Valid @RequestBody OnboardingRequest request) {
     var response = onboardingService.initiateOnboarding(
@@ -68,7 +68,7 @@ public class MerchantRestResource {
       @ApiResponse(responseCode = "404", description = "Merchant configuration not found")
   })
   @GetMapping("/status/{organizationId}")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   public ResponseEntity<MerchantStatusResponse> getMerchantStatus(
       @Parameter(description = "Organization ID", required = true)
       @PathVariable Long organizationId) {

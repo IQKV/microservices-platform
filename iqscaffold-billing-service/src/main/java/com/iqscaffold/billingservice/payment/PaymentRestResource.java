@@ -39,7 +39,7 @@ public class PaymentRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @PostMapping("/intent")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PaymentDtos.PaymentResponse> createPaymentIntent(@Valid @RequestBody PaymentDtos.CreatePaymentRequest request) {
     return ResponseEntity.ok(paymentService.createPaymentIntent(request));
   }
@@ -50,7 +50,7 @@ public class PaymentRestResource {
       @ApiResponse(responseCode = "404", description = "Payment not found or access denied")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PaymentDtos.PaymentResponse> getPayment(@PathVariable UUID id) {
     return ResponseEntity.ok(paymentService.getPayment(id));
   }
@@ -62,7 +62,7 @@ public class PaymentRestResource {
       @ApiResponse(responseCode = "403", description = "Forbidden - requires BILLING_ADMIN, FINANCE_VIEWER, TENANT_OWNER, or SUPER_ADMIN role")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   public ResponseEntity<org.springframework.data.domain.Page<PaymentDtos.PaymentResponse>> listPayments(org.springframework.data.domain.Pageable pageable) {
     return ResponseEntity.ok(paymentService.getPayments(pageable));
   }
@@ -76,7 +76,7 @@ public class PaymentRestResource {
       @ApiResponse(responseCode = "404", description = "Payment not found")
   })
   @PostMapping("/{id}/refund")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER')")
   public ResponseEntity<Void> refundPayment(@PathVariable UUID id) {
     refundService.processRefund(id);
     return ResponseEntity.noContent().build();

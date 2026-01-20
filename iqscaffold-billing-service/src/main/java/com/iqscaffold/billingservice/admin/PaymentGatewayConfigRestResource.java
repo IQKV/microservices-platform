@@ -54,7 +54,7 @@ public class PaymentGatewayConfigRestResource {
    * @return Created gateway configuration
    */
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER')")
   @Operation(
       summary = "Create gateway configuration",
       description = "Creates a new payment gateway configuration for the current tenant. " +
@@ -83,7 +83,7 @@ public class PaymentGatewayConfigRestResource {
    * @return Updated gateway configuration
    */
   @PutMapping("/{provider}")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER')")
   @Operation(
       summary = "Update gateway configuration",
       description = "Updates an existing payment gateway configuration. " +
@@ -114,7 +114,7 @@ public class PaymentGatewayConfigRestResource {
    * @return Gateway configuration (with masked sensitive data)
    */
   @GetMapping("/{provider}")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   @Operation(
       summary = "Get gateway configuration",
       description = "Retrieves a payment gateway configuration. Sensitive data is masked in the response."
@@ -141,7 +141,7 @@ public class PaymentGatewayConfigRestResource {
    * @return List of gateway configuration summaries
    */
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   @Operation(
       summary = "List all gateway configurations",
       description = "Lists all payment gateway configurations for the current tenant."

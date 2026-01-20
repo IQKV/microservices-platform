@@ -78,7 +78,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "409", description = "Lead with email already exists")
   })
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<LeadDtos.LeadResponse> createLead(
       @Valid @RequestBody LeadDtos.CreateLeadRequest request) {
     String userId = getCurrentUserId();
@@ -101,7 +101,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "404", description = "Lead not found")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<LeadDtos.LeadResponse> getLeadById(@PathVariable Long id) {
     LeadDtos.LeadResponse response = leadService.getLeadResponseById(id);
     return ResponseEntity.ok(response);
@@ -127,7 +127,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Page<LeadDtos.LeadResponse>> listLeads(
       @RequestParam(required = false) String search,
       @RequestParam(required = false) String source,
@@ -157,7 +157,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "409", description = "Lead with email already exists")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<LeadDtos.LeadResponse> updateLead(
       @PathVariable Long id,
       @Valid @RequestBody LeadDtos.UpdateLeadRequest request) {
@@ -182,7 +182,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "404", description = "Lead not found")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteLead(@PathVariable Long id) {
     leadService.deleteLead(id);
     return ResponseEntity.noContent().build();
@@ -212,7 +212,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "502", description = "Contact Service unavailable")
   })
   @PostMapping("/{id}/convert")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<LeadDtos.ConvertLeadResponse> convertLead(
       @PathVariable Long id,
       @Valid @RequestBody(required = false) LeadDtos.ConvertLeadRequest request) {
@@ -249,7 +249,7 @@ public class LeadRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/stats/by-source")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_LEAD_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Map<String, Long>> getLeadCountsBySource(
       @RequestParam(required = false)
       @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)

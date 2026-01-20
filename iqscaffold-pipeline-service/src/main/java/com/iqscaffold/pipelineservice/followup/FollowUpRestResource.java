@@ -80,7 +80,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<FollowUpDtos.FollowUpResponse> scheduleFollowUp(
       @Valid @RequestBody FollowUpDtos.CreateFollowUpRequest request) {
 
@@ -117,7 +117,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Page<FollowUpDtos.FollowUpResponse>> listFollowUps(
       @PageableDefault(size = 20, sort = "dueDate", direction = Sort.Direction.ASC) Pageable pageable) {
 
@@ -140,7 +140,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/today")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<List<FollowUpDtos.FollowUpResponse>> getTodaysFollowUps() {
     List<FollowUp> followUps = followUpService.getTodayFollowUps();
     List<FollowUpDtos.FollowUpResponse> response = followUps.stream()
@@ -164,7 +164,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/overdue")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<List<FollowUpDtos.FollowUpResponse>> getOverdueFollowUps() {
     List<FollowUp> followUps = followUpService.getOverdueFollowUps();
     List<FollowUpDtos.FollowUpResponse> response = followUps.stream()
@@ -192,7 +192,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "404", description = "Follow-up not found")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<FollowUpDtos.FollowUpResponse> updateFollowUp(
       @Parameter(description = "Follow-up ID") @PathVariable Long id,
       @Valid @RequestBody FollowUpDtos.UpdateFollowUpRequest request) {
@@ -228,7 +228,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "404", description = "Follow-up not found")
   })
   @PutMapping("/{id}/complete")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<FollowUpDtos.FollowUpResponse> completeFollowUp(
       @Parameter(description = "Follow-up ID") @PathVariable Long id) {
 
@@ -253,7 +253,7 @@ public class FollowUpRestResource {
       @ApiResponse(responseCode = "404", description = "Follow-up not found")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteFollowUp(
       @Parameter(description = "Follow-up ID") @PathVariable Long id) {
 

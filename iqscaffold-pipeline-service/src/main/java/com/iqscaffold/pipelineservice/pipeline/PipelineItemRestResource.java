@@ -73,7 +73,7 @@ public class PipelineItemRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Page<PipelineItemDtos.PipelineItemResponse>> listPipelineItems(
       @Parameter(description = "Optional stage ID to filter by")
       @RequestParam(required = false) Long stageId,
@@ -105,7 +105,7 @@ public class PipelineItemRestResource {
       @ApiResponse(responseCode = "404", description = "Pipeline item not found")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PipelineItemDtos.PipelineItemResponse> getPipelineItem(
       @Parameter(description = "Pipeline item ID")
       @PathVariable Long id) {
@@ -137,7 +137,7 @@ public class PipelineItemRestResource {
       @ApiResponse(responseCode = "404", description = "Pipeline item or stage not found")
   })
   @PutMapping("/{id}/stage")
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PipelineItemDtos.PipelineItemResponse> moveToStage(
       @Parameter(description = "Pipeline item ID")
       @PathVariable Long id,

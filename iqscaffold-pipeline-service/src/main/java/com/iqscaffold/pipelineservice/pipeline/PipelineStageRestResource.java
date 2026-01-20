@@ -74,7 +74,7 @@ public class PipelineStageRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<List<PipelineStageDtos.StageResponse>> listStages() {
     List<PipelineStage> stages = stageService.getAllStages();
     List<PipelineStageDtos.StageResponse> response = stages.stream()
@@ -100,7 +100,7 @@ public class PipelineStageRestResource {
       @ApiResponse(responseCode = "409", description = "Stage with name already exists")
   })
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PipelineStageDtos.StageResponse> createStage(
       @Valid @RequestBody PipelineStageDtos.CreateStageRequest request) {
     String userId = getCurrentUserId();
@@ -129,7 +129,7 @@ public class PipelineStageRestResource {
       @ApiResponse(responseCode = "409", description = "Stage with name already exists")
   })
   @PutMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PipelineStageDtos.StageResponse> updateStage(
       @PathVariable Long id,
       @Valid @RequestBody PipelineStageDtos.UpdateStageRequest request) {
@@ -167,7 +167,7 @@ public class PipelineStageRestResource {
       @ApiResponse(responseCode = "404", description = "Stage not found")
   })
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<Void> deleteStage(@PathVariable Long id) {
     stageService.deleteStage(id);
     return ResponseEntity.noContent().build();
@@ -193,7 +193,7 @@ public class PipelineStageRestResource {
       @ApiResponse(responseCode = "404", description = "Stage not found")
   })
   @PutMapping("/{id}/order")
-  @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPER_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<PipelineStageDtos.StageResponse> reorderStage(
       @PathVariable Long id,
       @RequestParam Integer newOrder) {

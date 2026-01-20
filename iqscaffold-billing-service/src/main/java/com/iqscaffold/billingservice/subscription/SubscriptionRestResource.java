@@ -68,7 +68,7 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "404", description = "Subscription plan not found")
   })
   @PostMapping
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> createSubscription(
       @Valid @RequestBody SubscriptionDtos.CreateSubscriptionRequest request) {
     // Verify authorization
@@ -85,7 +85,7 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping("/active")
-  @PreAuthorize("hasAuthority('USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> getActiveSubscription() {
     return subscriptionService.getActiveSubscription()
         .map(ResponseEntity::ok)
@@ -102,7 +102,7 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "404", description = "Subscription not found or access denied")
   })
   @GetMapping("/{id}")
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER', 'USER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_ACCESS', 'BILLING_MANAGER', 'BILLING_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   public ResponseEntity<SubscriptionDtos.SubscriptionResponse> getSubscription(
       @PathVariable UUID id) {
     // Verify authorization with ownership check
@@ -118,7 +118,7 @@ public class SubscriptionRestResource {
       @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   @GetMapping
-  @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'TENANT_OWNER', 'BILLING_ADMIN', 'FINANCE_VIEWER')")
+  @PreAuthorize("hasAnyAuthority('BILLING_MANAGER', 'BILLING_ADMIN', 'ADMIN', 'SUPER_ADMIN', 'TENANT_OWNER', 'FINANCE_VIEWER')")
   public ResponseEntity<Page<SubscriptionDtos.SubscriptionResponse>> listSubscriptions(
       Pageable pageable) {
     return ResponseEntity.ok(subscriptionService.getSubscriptions(pageable));
