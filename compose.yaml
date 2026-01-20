@@ -8,8 +8,8 @@ services:
     command:
       - --configfile=/etc/traefik/traefik.yml
     ports:
-      - "80:80"     # HTTP
-      - "443:443"   # HTTPS
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
       - "8080:8080" # Traefik Dashboard & Gateway
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -161,7 +161,7 @@ services:
       RABBITMQ_DEFAULT_PASS: iqscaffold_password
       RABBITMQ_DEFAULT_VHOST: /
     expose:
-      - "5672"  # AMQP port
+      - "5672" # AMQP port
       - "15672" # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq

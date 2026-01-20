@@ -19,10 +19,12 @@ Traefik acts as a reverse proxy and load balancer, providing a single entry poin
 When running locally, you can access services through:
 
 #### Via Gateway Service (Recommended)
+
 - **Gateway**: `http://localhost` or `http://gateway.localhost`
   - Routes to all downstream services through the gateway
 
 #### Direct Service Access (Development)
+
 - **User Service**: `http://user-service.localhost:8080` or `http://localhost:8080/api/users`
 - **Billing Service**: `http://billing-service.localhost:8080` or `http://localhost:8080/api/billing`
 - **Contact Service**: `http://contact-service.localhost:8080` or `http://localhost:8080/api/contacts`
@@ -30,19 +32,23 @@ When running locally, you can access services through:
 - **Pipeline Service**: `http://pipeline-service.localhost:8080` or `http://localhost:8080/api/pipeline`
 
 #### Observability Services
+
 - **Traefik Dashboard**: `http://traefik.localhost` or `http://localhost:8080`
 - **Prometheus**: `http://prometheus.localhost` or `http://localhost:9090`
 - **Grafana**: `http://grafana.localhost` or `http://localhost:3000`
 - **Loki**: `http://loki.localhost` or `http://localhost:3100`
 
 #### Infrastructure Services
+
 - **RabbitMQ Management**: `http://localhost:15672`
 - **MailHog**: `http://localhost:8025`
 
 ## Configuration Files
 
 ### traefik.yml
+
 Static configuration file that defines:
+
 - Entry points (ports 80, 443, 8080)
 - Docker provider configuration
 - API dashboard settings
