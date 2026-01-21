@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="20250121000000-demo-pipeline-records" author="iqscaffold" context="demo">
+        <comment>Create demo pipeline records for demo-tenant with pipeline items, follow-ups, and activities</comment>
+
+        <!-- Demo Tenant Info for Pipeline Service -->
+        <!-- Links demo-tenant to its schema for pipeline service operations -->
+        <insert tableName="tenant_info" schemaName="public">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="tenant_name" value="Demo Tech Solutions"/>
+            <column name="schema_name" value="demo_tenant"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+
+        <!-- 1. Pipeline Item for David Kim (High-Value Qualified Lead) -->
+        <!-- Represents David Kim from lead service in "Qualified" stage with high expected value -->
+        <insert tableName="pipeline_items">
+            <column name="lead_id" value="1001"/>
+            <column name="stage_id" valueComputed="(SELECT id FROM pipeline_stages WHERE name = 'Qualified')"/>
+            <column name="expected_value" value="85000.00"/>
+            <column name="probability" value="75.00"/>
+            <column name="entered_stage_at" valueDate="2024-12-18T10:30:00Z"/>
+            <column name="days_in_stage" value="34"/>
+            <column name="converted_at" value=""/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="admin"/>
+        </insert>
+
+        <!-- 2. Pipeline Item for Michael Rodriguez (Converted Customer) -->
+        <!-- Represents Michael Rodriguez from lead service in "Won" stage with conversion timestamp -->
+        <insert tableName="pipeline_items">
+            <column name="lead_id" value="1002"/>
+            <column name="stage_id" valueComputed="(SELECT id FROM pipeline_stages WHERE name = 'Won')"/>
+            <column name="expected_value" value="180000.00"/>
+            <column name="probability" value="100.00"/>
+            <column name="entered_stage_at" valueDate="2024-11-15T16:30:00Z"/>
+            <column name="days_in_stage" value="67"/>
+            <column name="converted_at" valueDate="2024-11-15T16:30:00Z"/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="billing"/>
+        </insert>
+
+        <!-- 3. Pipeline Item for Lisa Thompson (New Lead) -->
+        <!-- Represents Lisa Thompson from lead service in "New" stage with lower expected value -->
+        <insert tableName="pipeline_items">
+            <column name="lead_id" value="1003"/>
+            <column name="stage_id" valueComputed="(SELECT id FROM pipeline_stages WHERE name = 'New')"/>
+            <column name="expected_value" value="25000.00"/>
+            <column name="probability" value="25.00"/>
+            <column name="entered_stage_at" valueDate="2025-01-20T14:15:00Z"/>
+            <column name="days_in_stage" value="1"/>
+            <column name="converted_at" value=""/>
+            <column name="created_by" value="manager"/>
+            <column name="updated_by" value="manager"/>
+        </insert>
+
+        <rollback>
+            <!-- Remove pipeline items -->
+            <delete tableName="pipeline_items">
+                <where>lead_id IN (1001, 1002, 1003)</where>
+            </delete>
+            
+            <!-- Remove tenant info -->
+            <delete tableName="tenant_info" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
