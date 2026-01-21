@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +20,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "pipeline_activities")
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = "PipelineActivity.basic"
+    // No attributeNodes - just the basic entity (no relationships to load)
+  )
+})
 public class PipelineActivity {
 
   @Id

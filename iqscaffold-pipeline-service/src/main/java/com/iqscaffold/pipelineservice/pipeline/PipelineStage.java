@@ -5,10 +5,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.annotations.Cache;
@@ -19,6 +24,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "pipeline_stages")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = "PipelineStage.withItems",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("pipelineItems")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "PipelineStage.basic"
+    // No attributeNodes - just the basic entity
+  )
+})
 public class PipelineStage {
 
   @Id
@@ -60,6 +77,9 @@ public class PipelineStage {
 
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
+
+  @OneToMany(mappedBy = "stage")
+  private List<PipelineItem> pipelineItems = new ArrayList<>();
 
   public PipelineStage() {
   }
@@ -156,6 +176,14 @@ public class PipelineStage {
 
   public void setUpdatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
+  }
+
+  public List<PipelineItem> getPipelineItems() {
+    return pipelineItems;
+  }
+
+  public void setPipelineItems(List<PipelineItem> pipelineItems) {
+    this.pipelineItems = pipelineItems;
   }
 
   @Override

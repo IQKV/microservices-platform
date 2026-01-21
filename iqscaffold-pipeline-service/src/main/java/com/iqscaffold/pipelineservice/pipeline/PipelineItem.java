@@ -2,9 +2,14 @@ package com.iqscaffold.pipelineservice.pipeline;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -19,6 +24,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "pipeline_items")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = "PipelineItem.withStage",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("stage")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "PipelineItem.basic"
+    // No attributeNodes - just the basic entity
+  )
+})
 public class PipelineItem {
 
   @Id
@@ -32,6 +49,10 @@ public class PipelineItem {
   @NotNull
   @Column(name = "stage_id", nullable = false)
   private Long stageId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "stage_id", insertable = false, updatable = false)
+  private PipelineStage stage;
 
   @Column(name = "expected_value", precision = 15, scale = 2)
   private BigDecimal expectedValue;
@@ -94,6 +115,14 @@ public class PipelineItem {
 
   public void setStageId(Long stageId) {
     this.stageId = stageId;
+  }
+
+  public PipelineStage getStage() {
+    return stage;
+  }
+
+  public void setStage(PipelineStage stage) {
+    this.stage = stage;
   }
 
   public BigDecimal getExpectedValue() {

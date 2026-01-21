@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,9 +14,27 @@ public interface PipelineItemRepository extends JpaRepository<PipelineItem, Long
 
   Optional<PipelineItem> findByLeadId(Long leadId);
 
+  @EntityGraph("PipelineItem.withStage")
+  Optional<PipelineItem> findWithStageByLeadId(Long leadId);
+
+  @EntityGraph("PipelineItem.withStage")
+  Optional<PipelineItem> findWithStageById(Long id);
+
+  @EntityGraph("PipelineItem.basic")
+  Optional<PipelineItem> findBasicById(Long id);
+
+  @EntityGraph("PipelineItem.basic")
+  Optional<PipelineItem> findBasicByLeadId(Long leadId);
+
   Page<PipelineItem> findByStageId(Long stageId, Pageable pageable);
 
+  @EntityGraph("PipelineItem.withStage")
+  Page<PipelineItem> findWithStageByStageId(Long stageId, Pageable pageable);
+
   List<PipelineItem> findByStageId(Long stageId);
+
+  @EntityGraph("PipelineItem.withStage")
+  List<PipelineItem> findWithStageByStageId(Long stageId);
 
   long countByStageId(Long stageId);
 
