@@ -1,13 +1,15 @@
 package com.iqscaffold.userservice.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.iqscaffold.userservice.usermanagement.UserContext;
 import java.util.Map;
 import java.util.Set;
-
-import com.iqscaffold.userservice.usermanagement.UserContext;
 import org.junit.jupiter.api.Test;
+
 
 class TokenResponseTest {
 

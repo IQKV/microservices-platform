@@ -1,22 +1,24 @@
 package com.iqscaffold.userservice.usermanagement;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.Duration;
 import java.util.List;
-
-import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+
 
 /**
  * Unit tests for LocaleValidator class.
