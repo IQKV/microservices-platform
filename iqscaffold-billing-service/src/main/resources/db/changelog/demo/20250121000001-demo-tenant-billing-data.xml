@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20250121000001-demo-tenant-billing-data" author="iqscaffold" context="demo">
+        <comment>Create demo tenant-specific billing data: active subscription, paid invoice, and successful payment</comment>
+
+        <!-- 1. Demo Tenant Subscription - Active Enterprise Subscription -->
+        <!-- This represents Demo Tech Solutions' current active subscription to the Enterprise plan -->
+        <insert tableName="tenant_subscription">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440010"/>
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="organization_id" valueComputed="(SELECT id FROM public.organizations WHERE tenant_id = 'demo-tenant')"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="stripe_subscription_id" value="sub_demo_tech_enterprise"/>
+            <column name="stripe_customer_id" value="cus_demo_tech_solutions"/>
+            <column name="current_period_start" valueDate="2024-12-01T00:00:00Z"/>
+            <column name="current_period_end" valueDate="2025-01-01T00:00:00Z"/>
+            <column name="trial_end" valueDate="2024-11-15T23:59:59Z"/>
+            <column name="cancel_at" value=""/>
+            <column name="canceled_at" value=""/>
+            <column name="cancellation_reason" value=""/>
+            <column name="metadata" value='{"signup_source": "website", "sales_rep": "alice.johnson", "contract_type": "monthly", "auto_renewal": true, "payment_method": "card", "billing_contact": "billing@demo.iqscaffold.com"}'/>
+        </insert>
+
+        <!-- 2. Demo Subscription Invoice - December 2024 Billing Cycle -->
+        <!-- Represents a successfully paid monthly invoice for the Enterprise plan -->
+        <insert tableName="subscription_invoice">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440020"/>
+            <column name="tenant_subscription_id" value="550e8400-e29b-41d4-a716-446655440010"/>
+            <column name="invoice_number" value="INV-DEMO-2024-12-001"/>
+            <column name="amount_due" value="299.00"/>
+            <column name="amount_paid" value="299.00"/>
+            <column name="currency" value="USD"/>
+            <column name="status" value="PAID"/>
+            <column name="due_date" valueDate="2024-12-01T23:59:59Z"/>
+            <column name="paid_at" valueDate="2024-12-01T14:32:15Z"/>
+            <column name="stripe_invoice_id" value="in_demo_december_2024"/>
+            <column name="hosted_invoice_url" value="https://invoice.stripe.com/i/acct_demo/in_demo_december_2024"/>
+            <column name="invoice_pdf_url" value="https://pay.stripe.com/invoice/acct_demo/in_demo_december_2024/pdf"/>
+            <column name="metadata" value='{"billing_period": "2024-12-01 to 2025-01-01", "payment_method": "card_ending_4242", "tax_rate": 0.0875, "tax_amount": 26.18, "subtotal": 299.00, "total": 325.18, "auto_collection": true}'/>
+        </insert>
+
+        <!-- 3. Demo Payment Record - Successful Payment for December Invoice -->
+        <!-- Represents the successful credit card payment that settled the December invoice -->
+        <insert tableName="payment">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440030"/>
+            <column name="amount" value="325.18"/>
+            <column name="currency" value="USD"/>
+            <column name="status" value="succeeded"/>
+            <column name="payment_intent_id" value="pi_demo_december_payment"/>
+            <column name="client_secret" value="pi_demo_december_payment_secret_demo"/>
+            <column name="application_fee_amount" value="8.13"/>
+            <column name="merchant_account_id" value="acct_demo_tech_solutions"/>
+        </insert>
+
+        <!-- 4. Subscription Item - Line item for the Enterprise plan -->
+        <!-- Represents the specific plan item within the subscription -->
+        <insert tableName="subscription_item">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440040"/>
+            <column name="tenant_subscription_id" value="550e8400-e29b-41d4-a716-446655440010"/>
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="quantity" value="1"/>
+            <column name="unit_amount" value="299.00"/>
+            <column name="stripe_subscription_item_id" value="si_demo_enterprise_item"/>
+        </insert>
+
+        <!-- 5. Subscription Audit Trail - Record of subscription activation -->
+        <!-- Tracks the subscription lifecycle event when it moved from trial to active -->
+        <insert tableName="tenant_subscription_audit_trail">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440050"/>
+            <column name="tenant_subscription_id" value="550e8400-e29b-41d4-a716-446655440010"/>
+            <column name="old_status" value="TRIALING"/>
+            <column name="new_status" value="ACTIVE"/>
+            <column name="changed_by" value="system"/>
+            <column name="reason" value="Trial period ended successfully, first payment processed"/>
+            <column name="metadata" value='{"trial_start": "2024-11-01T00:00:00Z", "trial_end": "2024-11-15T23:59:59Z", "first_payment_date": "2024-12-01T14:32:15Z", "payment_method_verified": true, "billing_address_confirmed": true}'/>
+        </insert>
+
+        <!-- 6. Feature Usage Log Samples - Demonstrate feature usage tracking -->
+        <!-- Sample API usage for quota tracking -->
+        <insert tableName="feature_usage_log">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="feature_key" value="api_calls_monthly"/>
+            <column name="endpoint" value="/api/v1/analytics/reports"/>
+            <column name="user_id" value="owner"/>
+            <column name="timestamp" valueDate="2024-12-15T10:30:00Z"/>
+            <column name="session_id" value="sess_demo_analytics_001"/>
+            <column name="correlation_id" value="corr_demo_report_generation"/>
+            <column name="metadata" value='{"request_size": 1024, "response_size": 15360, "processing_time_ms": 245, "cache_hit": false}'/>
+        </insert>
+
+        <!-- Sample advanced analytics usage -->
+        <insert tableName="feature_usage_log">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="feature_key" value="advanced_analytics"/>
+            <column name="endpoint" value="/api/v1/analytics/dashboard/custom"/>
+            <column name="user_id" value="admin"/>
+            <column name="timestamp" valueDate="2024-12-15T14:45:00Z"/>
+            <column name="session_id" value="sess_demo_dashboard_002"/>
+            <column name="correlation_id" value="corr_demo_custom_dashboard"/>
+            <column name="metadata" value='{"dashboard_type": "custom", "widgets_count": 8, "data_points": 50000, "export_format": "pdf"}'/>
+        </insert>
+
+        <!-- Sample SSO integration usage -->
+        <insert tableName="feature_usage_log">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="feature_key" value="sso_integration"/>
+            <column name="endpoint" value="/auth/sso/saml/login"/>
+            <column name="user_id" value="manager"/>
+            <column name="timestamp" valueDate="2024-12-15T09:15:00Z"/>
+            <column name="session_id" value="sess_demo_sso_003"/>
+            <column name="correlation_id" value="corr_demo_saml_auth"/>
+            <column name="metadata" value='{"sso_provider": "Azure AD", "authentication_method": "SAML", "login_success": true, "session_duration_minutes": 480}'/>
+        </insert>
+
+        <rollback>
+            <!-- Remove feature usage logs -->
+            <delete tableName="feature_usage_log">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+            
+            <!-- Remove audit trail -->
+            <delete tableName="tenant_subscription_audit_trail">
+                <where>tenant_subscription_id = '550e8400-e29b-41d4-a716-446655440010'</where>
+            </delete>
+            
+            <!-- Remove subscription item -->
+            <delete tableName="subscription_item">
+                <where>tenant_subscription_id = '550e8400-e29b-41d4-a716-446655440010'</where>
+            </delete>
+            
+            <!-- Remove payment -->
+            <delete tableName="payment">
+                <where>id = '550e8400-e29b-41d4-a716-446655440030'</where>
+            </delete>
+            
+            <!-- Remove invoice -->
+            <delete tableName="subscription_invoice">
+                <where>tenant_subscription_id = '550e8400-e29b-41d4-a716-446655440010'</where>
+            </delete>
+            
+            <!-- Remove subscription -->
+            <delete tableName="tenant_subscription">
+                <where>id = '550e8400-e29b-41d4-a716-446655440010'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

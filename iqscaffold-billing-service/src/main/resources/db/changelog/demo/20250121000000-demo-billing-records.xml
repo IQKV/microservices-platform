@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20250121000000-demo-billing-records" author="iqscaffold" context="demo">
+        <comment>Create demo billing records for demo-tenant organization with subscription, invoice, and payment data</comment>
+
+        <!-- 1. Demo Subscription Plan - Enterprise Plan for Demo Organization -->
+        <!-- This plan matches the subscription_plan referenced in the user service organization -->
+        <insert tableName="subscription_plan" schemaName="public">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="name" value="Enterprise"/>
+            <column name="description" value="Enterprise plan with advanced features, unlimited users, and premium support for growing businesses"/>
+            <column name="amount" value="299.00"/>
+            <column name="currency" value="USD"/>
+            <column name="interval" value="MONTHLY"/>
+            <column name="interval_count" value="1"/>
+            <column name="trial_period_days" value="14"/>
+            <column name="stripe_product_id" value="prod_demo_enterprise"/>
+            <column name="stripe_price_id" value="price_demo_enterprise_monthly"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="max_users" value="100"/>
+            <column name="max_storage_gb" value="500"/>
+            <column name="max_api_calls" value="1000000"/>
+            <column name="metadata" value='{"features": ["advanced_analytics", "sso_integration", "audit_logging", "third_party_integrations"], "support_level": "enterprise", "sla": "99.9%", "dedicated_support": true}'/>
+        </insert>
+
+        <!-- 2. Merchant Stripe Configuration for Demo Tenant -->
+        <!-- Links the demo tenant to a Stripe Connect account for payment processing -->
+        <insert tableName="merchant_stripe_config" schemaName="public">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440002"/>
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="organization_id" valueComputed="(SELECT id FROM public.organizations WHERE tenant_id = 'demo-tenant')"/>
+            <column name="stripe_account_id" value="acct_demo_tech_solutions"/>
+            <column name="charges_enabled" valueBoolean="true"/>
+            <column name="payouts_enabled" valueBoolean="true"/>
+            <column name="application_fee_percent" value="2.50"/>
+        </insert>
+
+        <!-- 3. Plan Features for Enterprise Plan -->
+        <!-- Associate the enterprise plan with specific features and their configurations -->
+        
+        <!-- Advanced Analytics Feature -->
+        <insert tableName="plan_feature" schemaName="public">
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="feature_key" value="advanced_analytics"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="configuration" value='{"dashboards": "unlimited", "custom_reports": true, "data_retention_months": 24}'/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- API Calls Monthly Quota -->
+        <insert tableName="plan_feature" schemaName="public">
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="feature_key" value="api_calls_monthly"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="configuration" value='{"quota": 1000000, "resetPeriod": "monthly", "overage_rate": 0.001}'/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- Storage Quota -->
+        <insert tableName="plan_feature" schemaName="public">
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="feature_key" value="storage_quota"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="configuration" value='{"quota": 500, "unit": "GB", "overage_rate": 0.10}'/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- SSO Integration -->
+        <insert tableName="plan_feature" schemaName="public">
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="feature_key" value="sso_integration"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="configuration" value='{"providers": ["SAML", "OAuth2", "OIDC"], "max_connections": 10}'/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- Support Level -->
+        <insert tableName="plan_feature" schemaName="public">
+            <column name="plan_id" value="550e8400-e29b-41d4-a716-446655440001"/>
+            <column name="feature_key" value="support_level"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="configuration" value='{"tier": "enterprise", "response_time_hours": 2, "dedicated_manager": true, "phone_support": true}'/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <rollback>
+            <!-- Remove plan features -->
+            <delete tableName="plan_feature" schemaName="public">
+                <where>plan_id = '550e8400-e29b-41d4-a716-446655440001'</where>
+            </delete>
+            
+            <!-- Remove merchant config -->
+            <delete tableName="merchant_stripe_config" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+            
+            <!-- Remove subscription plan -->
+            <delete tableName="subscription_plan" schemaName="public">
+                <where>id = '550e8400-e29b-41d4-a716-446655440001'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

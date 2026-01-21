@@ -13,5 +13,8 @@
     <include file="db/changelog/system/007-subscription-schema.xml"/>
     <include file="db/changelog/system/008-drop-legacy-features-column.xml"/>
     <include file="db/changelog/system/008-feature-management-schema.xml"/>
+    
+    <!-- Demo data for development and testing (context: demo) -->
+    <include file="db/changelog/demo/20250121000000-demo-billing-records.xml"/>
 
 </databaseChangeLog>

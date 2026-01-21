@@ -5,8 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
-    <include file="db/changelog/001-initial-schema.xml"/>
-    <include file="db/changelog/002-advanced-schema.xml"/>
+    <include file="db/changelog/tenant/001-tenant-subscription-schema.xml"/>
     <include file="db/changelog/tenant/002-feature-usage-tracking.xml"/>
+    
+    <!-- Demo data for development and testing (context: demo) -->
+    <include file="db/changelog/demo/master.xml"/>
 
 </databaseChangeLog>

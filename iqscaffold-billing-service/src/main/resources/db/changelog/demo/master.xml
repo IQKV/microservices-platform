@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <!-- Demo data migrations for development and testing -->
+    <!-- System-wide demo data (subscription plans, merchant configs) -->
+    <include file="db/changelog/demo/20250121000000-demo-billing-records.xml"/>
+    
+    <!-- Tenant-specific demo data (subscriptions, invoices, payments) -->
+    <include file="db/changelog/demo/20250121000001-demo-tenant-billing-data.xml"/>
+
+</databaseChangeLog>
