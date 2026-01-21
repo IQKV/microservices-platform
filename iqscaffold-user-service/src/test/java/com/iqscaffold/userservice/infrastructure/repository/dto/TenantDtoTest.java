@@ -2,8 +2,8 @@ package com.iqscaffold.userservice.infrastructure.repository.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -339,3 +339,4 @@ class TenantDtoTest {
     assertTrue(validator.validate(request).isEmpty());
   }
 }
+

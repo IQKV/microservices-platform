@@ -8,6 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -21,7 +24,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 /**
  * Authority entity representing roles and permissions in the RBAC system.
- * 
+ *
  * <p>Authorities are stored in the PUBLIC schema (system-wide) to ensure consistency
  * across all tenants. This design provides:
  * <ul>
@@ -35,6 +38,14 @@ import org.hibernate.annotations.CreationTimestamp;
 @Table(name = "authorities", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.shared.Authority")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "authority-with-users",
+        attributeNodes = {
+            @NamedAttributeNode("users")
+        }
+    )
+})
 public class Authority {
 
   @Id

@@ -78,7 +78,7 @@ public class SelfServiceProvisioningService {
    * 7. Send email verification
    * 8. Log audit event
    *
-   * @param request signup request with tenant, org, and admin user details
+   * @param request   signup request with tenant, org, and admin user details
    * @param ipAddress client IP address for security audit
    * @param userAgent client user agent for security audit
    * @return response with created tenant, organization, and admin user details
@@ -159,7 +159,7 @@ public class SelfServiceProvisioningService {
 
     } catch (final Exception e) {
       logger.error("Failed to provision tenant for organization: {}", request.organizationName(), e);
-      
+
       // Log failure for security audit
       securityAuditService.logSuspiciousActivity(
           request.adminEmail(),
@@ -303,7 +303,7 @@ public class SelfServiceProvisioningService {
 
     // Note: Organization association is implicit via tenant context
     // The organization ID is passed to this method for setting as the organization's ownerUserId
-    
+
     // Set email as not verified (verification email will be sent)
     user.setEmailVerified(false);
 
@@ -357,7 +357,7 @@ public class SelfServiceProvisioningService {
       metadata.put("storageQuotaGb", tenant.storageQuotaGb());
       metadata.put("apiRateLimitPerMinute", tenant.apiRateLimitPerMinute());
       metadata.put("domain", tenant.domain());
-      
+
       messagingService.publishTenantCreated(tenantId, organizationName, metadata);
       logger.info("Published tenant created event for: {}", tenantId);
     } catch (final Exception e) {

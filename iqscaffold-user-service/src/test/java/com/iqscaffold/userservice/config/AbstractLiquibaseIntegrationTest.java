@@ -12,12 +12,12 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * Base class for integration tests that require Liquibase migrations.
  * This class automatically runs migrations for test tenant schemas.
- * 
+ *
  * <p>Usage example:
  * <pre>
  * {@code
  * class MyServiceTest extends AbstractLiquibaseIntegrationTest {
- *   
+ *
  *   @Test
  *   void testWithRealSchema() {
  *     // Your test code here - schema is already migrated
@@ -43,7 +43,7 @@ public abstract class AbstractLiquibaseIntegrationTest {
    * Default is a single test tenant.
    */
   protected String[] getTestTenantSchemas() {
-    return new String[]{"tenant_test"};
+    return new String[] {"tenant_test"};
   }
 
   /**

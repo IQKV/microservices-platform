@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.iqscaffold.userservice.shared.PaymentGatewayProvider;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,24 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, Long> {
+
+  /**
+   * Find organization by tenant ID with complete profile (tenant and preferences).
+   */
+  @EntityGraph("organization-complete")
+  Optional<Organization> findByTenantIdWithComplete(String tenantId);
+
+  /**
+   * Find organization by tenant ID with tenant loaded.
+   */
+  @EntityGraph("organization-with-tenant")
+  Optional<Organization> findByTenantIdWithTenant(String tenantId);
+
+  /**
+   * Find organization by ID with preferences loaded.
+   */
+  @EntityGraph("organization-with-preferences")
+  Optional<Organization> findByIdWithPreferences(Long id);
 
   /**
    * Find organization by tenant ID.

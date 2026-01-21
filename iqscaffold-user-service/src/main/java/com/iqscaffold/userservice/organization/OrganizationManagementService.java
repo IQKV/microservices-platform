@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for organization management operations.
- * 
+ *
  * <p>Organizations are stored in PUBLIC schema (system-wide) and represent billing entities
  * with a 1:1 relationship to tenants. This service provides CRUD operations with proper
  * authorization checks.
- * 
+ *
  * <h3>Access Control</h3>
  * <ul>
  *   <li>SUPER_ADMIN - Can manage all organizations across all tenants</li>
@@ -58,7 +58,7 @@ public class OrganizationManagementService {
     validateAdminAccess(currentUser, "LIST_ORGANIZATIONS");
 
     Page<Organization> organizations;
-    
+
     if (currentUser.hasAuthority("SUPER_ADMIN")) {
       // Super admin sees all organizations
       organizations = organizationRepository.findAll(pageable);
@@ -121,8 +121,8 @@ public class OrganizationManagementService {
    * Create a default organization for self-service tenant provisioning.
    * This method is used internally during tenant signup and does not require user context.
    *
-   * @param name organization name
-   * @param tenantId tenant ID to associate with
+   * @param name      organization name
+   * @param tenantId  tenant ID to associate with
    * @param createdBy creator identifier (admin username or email)
    * @return created organization entity
    */
@@ -333,7 +333,7 @@ public class OrganizationManagementService {
 
   private void validateOwnerUser(Long userId, String tenantId) {
     // Execute in tenant context to check if user exists
-    var userExists = TenantContext.executeInTenantContext(tenantId, () -> 
+    var userExists = TenantContext.executeInTenantContext(tenantId, () ->
         userRepository.existsById(userId)
     );
 

@@ -211,3 +211,4 @@ class ResetPasswordRequestTest {
     assertFalse(violations.isEmpty());
   }
 }
+

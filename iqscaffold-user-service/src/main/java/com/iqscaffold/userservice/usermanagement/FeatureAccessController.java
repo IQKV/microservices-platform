@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Unified REST controller for managing composable feature access.
- * 
+ *
  * <p>This controller provides a unified API for managing access to all composable
  * features (CRM, Billing, API, etc.) rather than having separate controllers for
  * each feature. This approach provides:
@@ -38,14 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Centralized feature access management</li>
  *   <li>Scalable architecture for new features</li>
  * </ul>
- * 
+ *
  * <h3>Supported Features</h3>
  * <ul>
  *   <li><strong>crm</strong> - Customer Relationship Management</li>
  *   <li><strong>billing</strong> - Payments and subscriptions</li>
  *   <li><strong>api</strong> - Platform API access</li>
  * </ul>
- * 
+ *
  * <h3>Security Requirements</h3>
  * <ul>
  *   <li>All endpoints require ADMIN or SUPER_ADMIN authority</li>
@@ -90,9 +90,9 @@ public class FeatureAccessController {
       @PathVariable Long userId,
       @Parameter(description = "Feature code (crm, billing, api)", required = true)
       @PathVariable String featureCode) {
-    
+
     logger.info("Enabling feature {} for user ID: {}", featureCode, userId);
-    
+
     // Validate feature
     var featureDefinition = configurableFeatureService.getFeatureDefinition(featureCode);
     if (featureDefinition == null) {
@@ -100,27 +100,27 @@ public class FeatureAccessController {
           userId, null, featureCode, false, "Invalid feature code: " + featureCode
       ));
     }
-    
+
     if (!featureDefinition.composable()) {
       return ResponseEntity.badRequest().body(new FeatureAccessResponse(
           userId, null, featureCode, false, "Feature is not composable: " + featureDefinition.displayName()
       ));
     }
-    
+
     // Validate user
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var enabled = configurableFeatureService.enableFeature(userId, featureCode);
     if (!enabled) {
       return ResponseEntity.status(409).body(new FeatureAccessResponse(
-          userId, user.get().getUsername(), featureCode, true, 
+          userId, user.get().getUsername(), featureCode, true,
           "User already has access to " + featureDefinition.displayName()
       ));
     }
-    
+
     return ResponseEntity.ok(new FeatureAccessResponse(
         userId, user.get().getUsername(), featureCode, true,
         featureDefinition.displayName() + " access enabled successfully"
@@ -145,9 +145,9 @@ public class FeatureAccessController {
       @PathVariable Long userId,
       @Parameter(description = "Feature code (crm, billing, api)", required = true)
       @PathVariable String featureCode) {
-    
+
     logger.info("Disabling feature {} for user ID: {}", featureCode, userId);
-    
+
     // Validate feature
     var featureDefinition = configurableFeatureService.getFeatureDefinition(featureCode);
     if (featureDefinition == null) {
@@ -155,19 +155,19 @@ public class FeatureAccessController {
           userId, null, featureCode, false, "Invalid feature code: " + featureCode
       ));
     }
-    
+
     if (!featureDefinition.composable()) {
       return ResponseEntity.badRequest().body(new FeatureAccessResponse(
           userId, null, featureCode, false, "Feature is not composable: " + featureDefinition.displayName()
       ));
     }
-    
+
     // Validate user
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var disabled = configurableFeatureService.disableFeature(userId, featureCode);
     if (!disabled) {
       return ResponseEntity.status(409).body(new FeatureAccessResponse(
@@ -175,7 +175,7 @@ public class FeatureAccessController {
           "User doesn't have access to " + featureDefinition.displayName() + " to disable"
       ));
     }
-    
+
     return ResponseEntity.ok(new FeatureAccessResponse(
         userId, user.get().getUsername(), featureCode, false,
         featureDefinition.displayName() + " access disabled successfully"
@@ -199,7 +199,7 @@ public class FeatureAccessController {
       @PathVariable Long userId,
       @Parameter(description = "Feature code (crm, billing, api)", required = true)
       @PathVariable String featureCode) {
-    
+
     // Validate feature
     var featureDefinition = configurableFeatureService.getFeatureDefinition(featureCode);
     if (featureDefinition == null) {
@@ -207,18 +207,18 @@ public class FeatureAccessController {
           userId, null, featureCode, false, "Invalid feature code: " + featureCode
       ));
     }
-    
+
     // Validate user
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var hasAccess = configurableFeatureService.hasFeatureAccess(userId, featureCode);
-    var message = hasAccess 
+    var message = hasAccess
         ? "User has access to " + featureDefinition.displayName()
         : "User does not have access to " + featureDefinition.displayName();
-    
+
     return ResponseEntity.ok(new FeatureAccessResponse(
         userId, user.get().getUsername(), featureCode, hasAccess, message
     ));
@@ -238,12 +238,12 @@ public class FeatureAccessController {
   public ResponseEntity<UserFeaturesResponse> getUserFeatures(
       @Parameter(description = "User ID to get features for", required = true)
       @PathVariable Long userId) {
-    
+
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var userFeatureCodes = configurableFeatureService.getUserFeatures(userId);
     var featureSummaries = userFeatureCodes.stream()
         .map(featureCode -> {
@@ -256,7 +256,7 @@ public class FeatureAccessController {
           );
         })
         .toList();
-    
+
     return ResponseEntity.ok(new UserFeaturesResponse(
         userId,
         user.get().getUsername(),
@@ -281,15 +281,15 @@ public class FeatureAccessController {
       @Parameter(description = "User ID to update features for", required = true)
       @PathVariable Long userId,
       @Valid @RequestBody BulkFeatureUpdateRequest request) {
-    
-    logger.info("Bulk updating features for user ID: {} - enable: {}, disable: {}", 
+
+    logger.info("Bulk updating features for user ID: {} - enable: {}, disable: {}",
         userId, request.enableFeatures(), request.disableFeatures());
-    
+
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     // Validate feature codes
     var invalidFeatures = new java.util.ArrayList<String>();
     invalidFeatures.addAll(request.enableFeatures().stream()
@@ -298,14 +298,14 @@ public class FeatureAccessController {
     invalidFeatures.addAll(request.disableFeatures().stream()
         .filter(code -> configurableFeatureService.getFeatureDefinition(code) == null)
         .toList());
-    
+
     if (!invalidFeatures.isEmpty()) {
       return ResponseEntity.badRequest().body(new BulkFeatureUpdateResponse(
-          userId, user.get().getUsername(), 0, 0, 
+          userId, user.get().getUsername(), 0, 0,
           "Invalid feature codes: " + String.join(", ", invalidFeatures)
       ));
     }
-    
+
     // Check if features are composable
     var nonComposableFeatures = new java.util.ArrayList<String>();
     nonComposableFeatures.addAll(request.enableFeatures().stream()
@@ -320,33 +320,33 @@ public class FeatureAccessController {
           return def != null && !def.composable();
         })
         .toList());
-    
+
     if (!nonComposableFeatures.isEmpty()) {
       return ResponseEntity.badRequest().body(new BulkFeatureUpdateResponse(
-          userId, user.get().getUsername(), 0, 0, 
+          userId, user.get().getUsername(), 0, 0,
           "Non-composable features: " + String.join(", ", nonComposableFeatures)
       ));
     }
-    
+
     // Perform bulk operations
     var enabledCount = 0;
     var disabledCount = 0;
-    
+
     for (final var featureCode : request.enableFeatures()) {
       if (configurableFeatureService.enableFeature(userId, featureCode)) {
         enabledCount++;
       }
     }
-    
+
     for (final var featureCode : request.disableFeatures()) {
       if (configurableFeatureService.disableFeature(userId, featureCode)) {
         disabledCount++;
       }
     }
-    
-    var message = String.format("Enabled %d features, disabled %d features", 
+
+    var message = String.format("Enabled %d features, disabled %d features",
         enabledCount, disabledCount);
-    
+
     return ResponseEntity.ok(new BulkFeatureUpdateResponse(
         userId, user.get().getUsername(), enabledCount, disabledCount, message
     ));
@@ -363,7 +363,7 @@ public class FeatureAccessController {
   @GetMapping("/available")
   @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPER_ADMIN')")
   public ResponseEntity<AvailableFeaturesResponse> getAvailableFeatures() {
-    
+
     var composableFeatures = configurableFeatureService.getComposableFeatures();
     var featureDetails = composableFeatures.entrySet().stream()
         .map(entry -> new FeatureDetail(
@@ -375,7 +375,7 @@ public class FeatureAccessController {
             entry.getValue().dependencies()
         ))
         .toList();
-    
+
     return ResponseEntity.ok(new AvailableFeaturesResponse(
         featureDetails.size(),
         featureDetails
@@ -396,14 +396,14 @@ public class FeatureAccessController {
   public ResponseEntity<MicroserviceAccessResponse> getUserMicroserviceAccess(
       @Parameter(description = "User ID to get microservice access for", required = true)
       @PathVariable Long userId) {
-    
+
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var accessSummary = microserviceAccessService.getMicroserviceAccessSummary(userId);
-    
+
     return ResponseEntity.ok(new MicroserviceAccessResponse(
         accessSummary.userId(),
         accessSummary.username(),
@@ -434,16 +434,16 @@ public class FeatureAccessController {
       @PathVariable String microservice,
       @Parameter(description = "Endpoint path to validate", required = false)
       @RequestParam(required = false) String endpoint) {
-    
+
     var user = userRepository.findById(userId);
     if (user.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    
+
     var validation = microserviceAccessService.validateAccess(
         userId, microservice, endpoint != null ? endpoint : "/"
     );
-    
+
     return ResponseEntity.ok(new MicroserviceValidationResponse(
         userId,
         user.get().getUsername(),
@@ -468,7 +468,7 @@ public class FeatureAccessController {
   public ResponseEntity<MicroserviceUsersResponse> getMicroserviceUsers(
       @Parameter(description = "Microservice name", required = true)
       @PathVariable String microservice) {
-    
+
     var users = microserviceAccessService.getUsersWithMicroserviceAccess(microservice);
     var userSummaries = users.stream()
         .map(user -> new MicroserviceUserSummary(
@@ -479,7 +479,7 @@ public class FeatureAccessController {
             user.isActive()
         ))
         .toList();
-    
+
     return ResponseEntity.ok(new MicroserviceUsersResponse(
         microservice,
         userSummaries.size(),
@@ -498,7 +498,7 @@ public class FeatureAccessController {
   @GetMapping("/microservices/statistics")
   @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPER_ADMIN')")
   public ResponseEntity<MicroserviceStatisticsResponse> getMicroserviceStatistics() {
-    
+
     var statistics = microserviceAccessService.getMicroserviceUsageStatistics();
     var microserviceStats = statistics.entrySet().stream()
         .map(entry -> new MicroserviceStatistic(
@@ -507,7 +507,7 @@ public class FeatureAccessController {
             configurableFeatureService.getFeaturesForMicroservice(entry.getKey())
         ))
         .toList();
-    
+
     return ResponseEntity.ok(new MicroserviceStatisticsResponse(
         microserviceStats.size(),
         microserviceStats.stream().mapToLong(MicroserviceStatistic::userCount).sum(),
@@ -529,14 +529,14 @@ public class FeatureAccessController {
   public ResponseEntity<FeatureUsersResponse> getFeatureUsers(
       @Parameter(description = "Feature code (crm, billing, api)", required = true)
       @PathVariable String featureCode) {
-    
+
     var featureDefinition = configurableFeatureService.getFeatureDefinition(featureCode);
     if (featureDefinition == null) {
       return ResponseEntity.badRequest().build();
     }
-    
+
     var featureUsers = configurableFeatureService.getUsersWithFeature(featureCode);
-    
+
     var userSummaries = featureUsers.stream()
         .map(user -> new FeatureUserSummary(
             user.getId(),
@@ -546,7 +546,7 @@ public class FeatureAccessController {
             user.isActive()
         ))
         .toList();
-    
+
     return ResponseEntity.ok(new FeatureUsersResponse(
         featureCode,
         featureDefinition.displayName(),
@@ -563,26 +563,30 @@ public class FeatureAccessController {
       String featureCode,
       boolean hasAccess,
       String message
-  ) {}
+  ) {
+  }
 
   public record UserFeaturesResponse(
       Long userId,
       String username,
       int featureCount,
       List<FeatureSummary> features
-  ) {}
+  ) {
+  }
 
   public record FeatureSummary(
       String code,
       String displayName,
       String description,
       boolean enabled
-  ) {}
+  ) {
+  }
 
   public record BulkFeatureUpdateRequest(
       @NotNull @NotEmpty List<String> enableFeatures,
       @NotNull @NotEmpty List<String> disableFeatures
-  ) {}
+  ) {
+  }
 
   public record BulkFeatureUpdateResponse(
       Long userId,
@@ -590,12 +594,14 @@ public class FeatureAccessController {
       int featuresEnabled,
       int featuresDisabled,
       String message
-  ) {}
+  ) {
+  }
 
   public record AvailableFeaturesResponse(
       int totalCount,
       List<FeatureDetail> features
-  ) {}
+  ) {
+  }
 
   public record FeatureDetail(
       String code,
@@ -604,14 +610,16 @@ public class FeatureAccessController {
       boolean composable,
       List<String> requiredAuthorities,
       List<String> dependencies
-  ) {}
+  ) {
+  }
 
   public record FeatureUsersResponse(
       String featureCode,
       String featureName,
       int totalCount,
       List<FeatureUserSummary> users
-  ) {}
+  ) {
+  }
 
   public record FeatureUserSummary(
       Long id,
@@ -619,7 +627,8 @@ public class FeatureAccessController {
       String email,
       String fullName,
       boolean active
-  ) {}
+  ) {
+  }
 
   // Microservice Access DTOs
 
@@ -632,7 +641,8 @@ public class FeatureAccessController {
       List<MicroserviceAccessService.FeatureMicroserviceSummary> features,
       List<String> accessibleMicroservices,
       List<String> accessibleRoutes
-  ) {}
+  ) {
+  }
 
   public record MicroserviceValidationResponse(
       Long userId,
@@ -642,13 +652,15 @@ public class FeatureAccessController {
       boolean hasAccess,
       String message,
       String requiredFeature
-  ) {}
+  ) {
+  }
 
   public record MicroserviceUsersResponse(
       String microservice,
       int totalCount,
       List<MicroserviceUserSummary> users
-  ) {}
+  ) {
+  }
 
   public record MicroserviceUserSummary(
       Long id,
@@ -656,17 +668,20 @@ public class FeatureAccessController {
       String email,
       String fullName,
       boolean active
-  ) {}
+  ) {
+  }
 
   public record MicroserviceStatisticsResponse(
       int totalMicroservices,
       long totalUsers,
       List<MicroserviceStatistic> statistics
-  ) {}
+  ) {
+  }
 
   public record MicroserviceStatistic(
       String microservice,
       long userCount,
       List<String> features
-  ) {}
+  ) {
+  }
 }

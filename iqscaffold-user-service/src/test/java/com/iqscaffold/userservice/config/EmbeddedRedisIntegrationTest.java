@@ -43,3 +43,4 @@ class EmbeddedRedisIntegrationTest extends AbstractIntegrationTest {
     assertThat(redisTemplate.opsForHash().size(hashKey)).isEqualTo(2);
   }
 }
+

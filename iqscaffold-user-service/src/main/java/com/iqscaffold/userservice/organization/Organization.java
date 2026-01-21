@@ -10,6 +10,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -24,7 +27,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Organization entity representing billing entities in the multi-tenant SaaS architecture.
- * 
+ *
  * <p>Organizations are stored in the PUBLIC schema (system-wide) and have a 1:1 relationship
  * with tenants. Each organization represents a billing entity with its own tenant schema for
  * data isolation. This design enables:
@@ -62,6 +65,27 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "organizations", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.organization.Organization")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "organization-with-tenant",
+        attributeNodes = {
+            @NamedAttributeNode("tenant")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "organization-with-preferences",
+        attributeNodes = {
+            @NamedAttributeNode("preference")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "organization-complete",
+        attributeNodes = {
+            @NamedAttributeNode("tenant"),
+            @NamedAttributeNode("preference")
+        }
+    )
+})
 public class Organization {
 
   @Id
@@ -432,14 +456,14 @@ public class Organization {
   @Override
   public String toString() {
     return "Organization{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", tenantId='" + tenantId + '\'' +
-        ", industry='" + industry + '\'' +
-        ", enabled=" + enabled +
-        ", paymentGatewayProvider=" + paymentGatewayProvider +
-        ", subscriptionStatus='" + subscriptionStatus + '\'' +
-        ", createdAt=" + createdAt +
-        '}';
+           "id=" + id +
+           ", name='" + name + '\'' +
+           ", tenantId='" + tenantId + '\'' +
+           ", industry='" + industry + '\'' +
+           ", enabled=" + enabled +
+           ", paymentGatewayProvider=" + paymentGatewayProvider +
+           ", subscriptionStatus='" + subscriptionStatus + '\'' +
+           ", createdAt=" + createdAt +
+           '}';
   }
 }

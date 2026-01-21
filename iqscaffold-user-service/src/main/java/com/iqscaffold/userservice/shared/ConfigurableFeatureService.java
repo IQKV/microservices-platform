@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Configuration-driven feature service that uses YAML properties instead of hardcoded enums.
- * 
+ *
  * <p>This service provides feature management based entirely on configuration properties,
  * making the platform extensible without code changes. All feature definitions, authorities,
  * microservice mappings, and route patterns are defined in application.yml.
- * 
+ *
  * <h3>Configuration-Driven Architecture</h3>
  * <ul>
  *   <li><strong>No Hardcoded Features</strong> - All features defined in YAML</li>
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li><strong>Flexible Route Mapping</strong> - URL patterns mapped via properties</li>
  *   <li><strong>Microservice Integration</strong> - Service mappings in configuration</li>
  * </ul>
- * 
+ *
  * <h3>Extensibility Benefits</h3>
  * <ul>
  *   <li>Add new features without code changes</li>
@@ -56,8 +56,8 @@ public class ConfigurableFeatureService {
 
   /**
    * Check if a user has access to a specific feature based on configuration.
-   * 
-   * @param userId the user ID to check
+   *
+   * @param userId      the user ID to check
    * @param featureCode the feature code from configuration
    * @return true if user has access to the feature
    */
@@ -66,14 +66,14 @@ public class ConfigurableFeatureService {
     if (user.isEmpty()) {
       return false;
     }
-    
+
     return hasFeatureAccess(user.get(), featureCode);
   }
 
   /**
    * Check if a user has access to a specific feature based on configuration.
-   * 
-   * @param user the user to check
+   *
+   * @param user        the user to check
    * @param featureCode the feature code from configuration
    * @return true if user has access to the feature
    */
@@ -82,18 +82,18 @@ public class ConfigurableFeatureService {
     if (featureDefinition == null || !featureDefinition.enabled()) {
       return false;
     }
-    
+
     var userAuthorities = user.getAuthorities().stream()
         .map(Authority::getName)
         .collect(Collectors.toSet());
-    
+
     return hasRequiredAuthorities(userAuthorities, featureDefinition.requiredAuthorities());
   }
 
   /**
    * Enable a feature for a user by granting the required authorities.
-   * 
-   * @param userId the user ID to enable the feature for
+   *
+   * @param userId      the user ID to enable the feature for
    * @param featureCode the feature code from configuration
    * @return true if the feature was enabled, false if already enabled or user not found
    */
@@ -103,14 +103,14 @@ public class ConfigurableFeatureService {
       logger.warn("Cannot enable feature {}: user not found with ID {}", featureCode, userId);
       return false;
     }
-    
+
     return enableFeature(user.get(), featureCode);
   }
 
   /**
    * Enable a feature for a user by granting the required authorities.
-   * 
-   * @param user the user to enable the feature for
+   *
+   * @param user        the user to enable the feature for
    * @param featureCode the feature code from configuration
    * @return true if the feature was enabled, false if already enabled
    */
@@ -119,44 +119,44 @@ public class ConfigurableFeatureService {
     if (featureDefinition == null) {
       throw new IllegalArgumentException("Unknown feature code: " + featureCode);
     }
-    
+
     if (!featureDefinition.composable()) {
       throw new IllegalArgumentException("Feature is not composable: " + featureCode);
     }
-    
+
     if (hasFeatureAccess(user, featureCode)) {
       logger.debug("User {} already has access to feature {}", user.getUsername(), featureCode);
       return false;
     }
-    
+
     // Enable dependencies first
     for (final var dependency : featureDefinition.dependencies()) {
       if (!hasFeatureAccess(user, dependency)) {
-        logger.info("Enabling dependency {} for feature {} for user {}", 
+        logger.info("Enabling dependency {} for feature {} for user {}",
             dependency, featureCode, user.getUsername());
         enableFeature(user, dependency);
       }
     }
-    
+
     // Grant primary access authority
     var primaryAuthority = featureDefinition.getPrimaryAuthority();
     if (primaryAuthority != null) {
       var authority = findOrCreateAuthority(primaryAuthority);
       user.addAuthority(authority);
       userRepository.save(user);
-      
-      logger.info("Enabled feature {} for user: {} (granted authority: {})", 
+
+      logger.info("Enabled feature {} for user: {} (granted authority: {})",
           featureCode, user.getUsername(), primaryAuthority);
       return true;
     }
-    
+
     return false;
   }
 
   /**
    * Disable a feature for a user by removing associated authorities.
-   * 
-   * @param userId the user ID to disable the feature for
+   *
+   * @param userId      the user ID to disable the feature for
    * @param featureCode the feature code from configuration
    * @return true if the feature was disabled, false if not enabled or user not found
    */
@@ -166,14 +166,14 @@ public class ConfigurableFeatureService {
       logger.warn("Cannot disable feature {}: user not found with ID {}", featureCode, userId);
       return false;
     }
-    
+
     return disableFeature(user.get(), featureCode);
   }
 
   /**
    * Disable a feature for a user by removing associated authorities.
-   * 
-   * @param user the user to disable the feature for
+   *
+   * @param user        the user to disable the feature for
    * @param featureCode the feature code from configuration
    * @return true if the feature was disabled, false if not enabled
    */
@@ -182,38 +182,38 @@ public class ConfigurableFeatureService {
     if (featureDefinition == null) {
       throw new IllegalArgumentException("Unknown feature code: " + featureCode);
     }
-    
+
     if (!featureDefinition.composable()) {
       throw new IllegalArgumentException("Feature is not composable: " + featureCode);
     }
-    
+
     if (!hasFeatureAccess(user, featureCode)) {
-      logger.debug("User {} doesn't have access to feature {} to disable", 
+      logger.debug("User {} doesn't have access to feature {} to disable",
           user.getUsername(), featureCode);
       return false;
     }
-    
+
     // Remove all feature authorities
     var featureAuthorityNames = Set.copyOf(featureDefinition.allAuthorities());
-    
+
     var authoritiesToRemove = user.getAuthorities().stream()
         .filter(authority -> featureAuthorityNames.contains(authority.getName()))
         .toList();
-    
+
     for (final var authority : authoritiesToRemove) {
       user.removeAuthority(authority);
     }
-    
+
     userRepository.save(user);
-    
-    logger.info("Disabled feature {} for user: {} (removed {} authorities)", 
+
+    logger.info("Disabled feature {} for user: {} (removed {} authorities)",
         featureCode, user.getUsername(), authoritiesToRemove.size());
     return true;
   }
 
   /**
    * Get all features that a user has access to based on configuration.
-   * 
+   *
    * @param userId the user ID to check
    * @return list of feature codes the user has access to
    */
@@ -222,13 +222,13 @@ public class ConfigurableFeatureService {
     if (user.isEmpty()) {
       return List.of();
     }
-    
+
     return getUserFeatures(user.get());
   }
 
   /**
    * Get all features that a user has access to based on configuration.
-   * 
+   *
    * @param user the user to check
    * @return list of feature codes the user has access to
    */
@@ -241,7 +241,7 @@ public class ConfigurableFeatureService {
 
   /**
    * Get all users who have access to a specific feature.
-   * 
+   *
    * @param featureCode the feature code from configuration
    * @return list of users with access to the feature
    */
@@ -250,17 +250,17 @@ public class ConfigurableFeatureService {
     if (featureDefinition == null) {
       return List.of();
     }
-    
+
     var authorityNames = List.<String>of(featureDefinition.allAuthorities().toArray(new String[0]));
     var allAuthorityNames = new java.util.ArrayList<>(authorityNames);
     allAuthorityNames.addAll(platformConfig.authorities().adminAuthorities());
-    
+
     return userRepository.findUsersWithAnyAuthority(allAuthorityNames);
   }
 
   /**
    * Get feature definition from configuration.
-   * 
+   *
    * @param featureCode the feature code
    * @return feature definition or null if not found
    */
@@ -270,7 +270,7 @@ public class ConfigurableFeatureService {
 
   /**
    * Get all available features from configuration.
-   * 
+   *
    * @return map of feature codes to definitions
    */
   public java.util.Map<String, PlatformConfigurationProperties.FeatureDefinition> getAvailableFeatures() {
@@ -279,7 +279,7 @@ public class ConfigurableFeatureService {
 
   /**
    * Get composable features from configuration.
-   * 
+   *
    * @return map of composable feature codes to definitions
    */
   public java.util.Map<String, PlatformConfigurationProperties.FeatureDefinition> getComposableFeatures() {
@@ -288,7 +288,7 @@ public class ConfigurableFeatureService {
 
   /**
    * Find feature by route pattern.
-   * 
+   *
    * @param route the route to match
    * @return feature code that matches the route, or null if none found
    */
@@ -302,7 +302,7 @@ public class ConfigurableFeatureService {
 
   /**
    * Get features that use a specific microservice.
-   * 
+   *
    * @param microservice the microservice name
    * @return list of feature codes that use the microservice
    */
@@ -321,7 +321,7 @@ public class ConfigurableFeatureService {
     if (userAuthorities.stream().anyMatch(platformConfig.authorities()::isAdminAuthority)) {
       return true;
     }
-    
+
     // Check for required authorities
     return userAuthorities.stream()
         .anyMatch(requiredAuthorities::contains);
@@ -332,20 +332,20 @@ public class ConfigurableFeatureService {
    */
   private Authority findOrCreateAuthority(String authorityName) {
     var existingAuthority = authorityRepository.findByName(authorityName);
-    
+
     if (existingAuthority.isPresent()) {
       return existingAuthority.get();
     }
-    
+
     // Get description from configuration
     var authorityDefinition = platformConfig.authorities().getAuthority(authorityName);
-    var description = authorityDefinition != null 
-        ? authorityDefinition.description() 
+    var description = authorityDefinition != null
+        ? authorityDefinition.description()
         : "Configurable authority: " + authorityName;
-    
+
     var newAuthority = new Authority(authorityName, description);
     var savedAuthority = authorityRepository.save(newAuthority);
-    
+
     logger.info("Created authority: {} - {}", authorityName, description);
     return savedAuthority;
   }

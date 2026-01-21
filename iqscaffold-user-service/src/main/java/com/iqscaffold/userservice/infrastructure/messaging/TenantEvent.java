@@ -49,7 +49,7 @@ public class TenantEvent {
     if (additionalMetadata != null) {
       metadata.putAll(additionalMetadata);
     }
-    
+
     return new TenantEvent(
         UUID.randomUUID().toString(),
         "TENANT_CREATED",
@@ -95,7 +95,7 @@ public class TenantEvent {
     var metadata = new HashMap<String, Object>();
     metadata.put("reason", reason);
     metadata.put("suspendedBy", suspendedBy);
-    
+
     return new TenantEvent(
         UUID.randomUUID().toString(),
         "TENANT_SUSPENDED",
@@ -113,7 +113,7 @@ public class TenantEvent {
     var metadata = new HashMap<String, Object>();
     metadata.put("reason", reason);
     metadata.put("archivedBy", archivedBy);
-    
+
     return new TenantEvent(
         UUID.randomUUID().toString(),
         "TENANT_ARCHIVED",
@@ -130,7 +130,7 @@ public class TenantEvent {
   public static TenantEvent tenantRestored(String tenantId, String organizationName, String restoredBy) {
     var metadata = new HashMap<String, Object>();
     metadata.put("restoredBy", restoredBy);
-    
+
     return new TenantEvent(
         UUID.randomUUID().toString(),
         "TENANT_RESTORED",

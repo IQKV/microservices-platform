@@ -27,24 +27,24 @@ class LiquibaseMigrationExampleTest {
     void shouldHaveMigratedSchema() {
       // Verify that users table exists in tenant_test schema
       switchToTenantSchema("tenant_test");
-      
+
       Integer count = jdbcTemplate.queryForObject(
           "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'users'",
           Integer.class
       );
-      
+
       assertThat(count).isEqualTo(1);
     }
 
     @Test
     void shouldHaveAuthoritiesTable() {
       switchToTenantSchema("tenant_test");
-      
+
       Integer count = jdbcTemplate.queryForObject(
           "SELECT COUNT(*) FROM authorities",
           Integer.class
       );
-      
+
       // Should have 4 default authorities (SUPER_ADMIN, ADMIN, TENANT_OWNER, USER)
       assertThat(count).isGreaterThanOrEqualTo(4);
     }
@@ -105,7 +105,7 @@ class LiquibaseMigrationExampleTest {
     void shouldMigrateCustomSchema() throws Exception {
       // Create and migrate a custom schema for this specific test
       String customSchema = "tenant_custom_" + System.currentTimeMillis();
-      
+
       jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + customSchema);
       liquibaseRunner.runTenantChangelog(customSchema);
 
@@ -115,7 +115,7 @@ class LiquibaseMigrationExampleTest {
           "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'users'",
           Integer.class
       );
-      
+
       assertThat(count).isEqualTo(1);
 
       // Cleanup
@@ -123,3 +123,4 @@ class LiquibaseMigrationExampleTest {
     }
   }
 }
+

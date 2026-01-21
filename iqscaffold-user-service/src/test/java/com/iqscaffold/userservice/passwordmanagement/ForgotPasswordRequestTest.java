@@ -128,3 +128,4 @@ class ForgotPasswordRequestTest {
     assertTrue(validator.validate(request).isEmpty());
   }
 }
+

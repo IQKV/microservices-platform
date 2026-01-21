@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service responsible for initializing system authorities on application startup.
- * 
+ *
  * <p>This service ensures that all authorities defined in platform configuration
  * are created in the database during application startup. This is essential for:
  * <ul>
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Supporting authority-based access control from day one</li>
  *   <li>Preventing runtime errors when assigning authorities</li>
  * </ul>
- * 
+ *
  * <h3>Initialization Process</h3>
  * <ul>
  *   <li>Runs automatically on {@link ApplicationReadyEvent}</li>
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>Skips authorities that already exist</li>
  *   <li>Logs all initialization activities</li>
  * </ul>
- * 
+ *
  * <h3>Configuration-Driven</h3>
  * <ul>
  *   <li>Authorities are defined in application.yml under iqscaffold.platform.authorities</li>
@@ -57,56 +57,56 @@ public class AuthorityInitializationService {
   @EventListener(ApplicationReadyEvent.class)
   public void initializeAuthorities() {
     logger.info("Initializing system authorities from configuration...");
-    
+
     var initializedCount = 0;
     var skippedCount = 0;
-    
+
     // Initialize authorities from configuration
     for (final var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
       var authorityName = authorityEntry.getKey();
       var authorityDefinition = authorityEntry.getValue();
-      
+
       if (initializeAuthority(authorityName, authorityDefinition)) {
         initializedCount++;
       } else {
         skippedCount++;
       }
     }
-    
+
     var totalConfigured = platformConfig.authorities().definitions().size();
-    
-    logger.info("Authority initialization complete. Created: {}, Skipped: {}, Total configured: {}", 
+
+    logger.info("Authority initialization complete. Created: {}, Skipped: {}, Total configured: {}",
         initializedCount, skippedCount, totalConfigured);
-    
+
     // Log important authorities for visibility
     logImportantAuthorities();
   }
 
   /**
    * Initialize a specific authority from configuration if it doesn't exist.
-   * 
-   * @param authorityName the authority name to initialize
+   *
+   * @param authorityName       the authority name to initialize
    * @param authorityDefinition the authority definition from configuration
    * @return true if the authority was created, false if it already existed
    */
   private boolean initializeAuthority(final String authorityName, final PlatformConfigurationProperties.AuthorityDefinition authorityDefinition) {
     var existingAuthority = authorityRepository.findByName(authorityName);
-    
+
     if (existingAuthority.isPresent()) {
-      logger.debug("Authority already exists: {} - {}", 
+      logger.debug("Authority already exists: {} - {}",
           authorityName, authorityDefinition.displayName());
       return false;
     }
-    
+
     var newAuthority = new Authority(authorityName, authorityDefinition.description());
     authorityRepository.save(newAuthority);
-    
-    logger.info("Created authority: {} - {} (Category: {}, Priority: {})", 
-        authorityName, 
+
+    logger.info("Created authority: {} - {} (Category: {}, Priority: {})",
+        authorityName,
         authorityDefinition.displayName(),
         authorityDefinition.category(),
         authorityDefinition.priority());
-    
+
     return true;
   }
 
@@ -116,26 +116,26 @@ public class AuthorityInitializationService {
   private void logImportantAuthorities() {
     var adminAuthorities = platformConfig.authorities().adminAuthorities();
     var defaultAuthorities = platformConfig.authorities().defaultAuthorities();
-    
+
     logger.info("Admin authorities: {}", adminAuthorities);
     logger.info("Default authorities for new users: {}", defaultAuthorities);
-    
+
     // Log CRM authorities if they exist in configuration
     var crmAuthorities = platformConfig.authorities().definitions().entrySet().stream()
         .filter(entry -> "crm".equals(entry.getValue().category()))
         .map(java.util.Map.Entry::getKey)
         .toList();
-    
+
     if (!crmAuthorities.isEmpty()) {
       logger.info("CRM authorities available: {}", crmAuthorities);
     }
-    
+
     // Log billing authorities if they exist in configuration
     var billingAuthorities = platformConfig.authorities().definitions().entrySet().stream()
         .filter(entry -> "billing".equals(entry.getValue().category()))
         .map(java.util.Map.Entry::getKey)
         .toList();
-    
+
     if (!billingAuthorities.isEmpty()) {
       logger.info("Billing authorities available: {}", billingAuthorities);
     }
@@ -143,28 +143,28 @@ public class AuthorityInitializationService {
 
   /**
    * Manually initialize authorities (useful for testing or manual operations).
-   * 
+   *
    * @return the number of authorities created
    */
   public int manualInitialization() {
     logger.info("Manual authority initialization requested");
-    
+
     var createdCount = 0;
-    
+
     // Initialize from configuration
     for (final var authorityEntry : platformConfig.authorities().definitions().entrySet()) {
       if (initializeAuthority(authorityEntry.getKey(), authorityEntry.getValue())) {
         createdCount++;
       }
     }
-    
+
     logger.info("Manual initialization complete. Created {} authorities", createdCount);
     return createdCount;
   }
 
   /**
    * Check if all configured authorities exist in the database.
-   * 
+   *
    * @return true if all authorities exist, false otherwise
    */
   public boolean areAllAuthoritiesInitialized() {
@@ -174,25 +174,25 @@ public class AuthorityInitializationService {
         return false;
       }
     }
-    
+
     return true;
   }
 
   /**
    * Get the count of missing authorities.
-   * 
+   *
    * @return number of authorities that need to be created
    */
   public long getMissingAuthorityCount() {
     var missingCount = 0L;
-    
+
     // Count missing configured authorities
     for (final var authorityName : platformConfig.authorities().getAuthorityNames()) {
       if (authorityRepository.findByName(authorityName).isEmpty()) {
         missingCount++;
       }
     }
-    
+
     return missingCount;
   }
 }

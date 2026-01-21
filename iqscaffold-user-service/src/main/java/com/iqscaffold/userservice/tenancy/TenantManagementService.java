@@ -412,12 +412,12 @@ public class TenantManagementService {
   /**
    * Suspend a tenant. Prevents access but preserves all data. Can be restored.
    *
-   * @param tenantId the tenant ID
-   * @param reason   the suspension reason
+   * @param tenantId    the tenant ID
+   * @param reason      the suspension reason
    * @param suspendedBy the user suspending the tenant
    * @return the updated tenant response
    * @throws TenantManagementException.TenantNotFoundException if tenant not found
-   * @throws IllegalStateException if tenant is already suspended or archived
+   * @throws IllegalStateException                             if tenant is already suspended or archived
    */
   @Caching(evict = {
       @CacheEvict(value = "tenants", key = "#tenantId"),
@@ -454,12 +454,12 @@ public class TenantManagementService {
   /**
    * Archive a tenant. Data is preserved but inaccessible. Terminal state - cannot be restored.
    *
-   * @param tenantId the tenant ID
-   * @param reason   the archive reason
+   * @param tenantId   the tenant ID
+   * @param reason     the archive reason
    * @param archivedBy the user archiving the tenant
    * @return the updated tenant response
    * @throws TenantManagementException.TenantNotFoundException if tenant not found
-   * @throws IllegalStateException if tenant is already archived
+   * @throws IllegalStateException                             if tenant is already archived
    */
   @Caching(evict = {
       @CacheEvict(value = "tenants", key = "#tenantId"),
@@ -492,11 +492,11 @@ public class TenantManagementService {
   /**
    * Restore a suspended tenant back to active state. Only works for suspended tenants.
    *
-   * @param tenantId the tenant ID
+   * @param tenantId   the tenant ID
    * @param restoredBy the user restoring the tenant
    * @return the updated tenant response
    * @throws TenantManagementException.TenantNotFoundException if tenant not found
-   * @throws IllegalStateException if tenant is not suspended
+   * @throws IllegalStateException                             if tenant is not suspended
    */
   @Caching(evict = {
       @CacheEvict(value = "tenants", key = "#tenantId"),

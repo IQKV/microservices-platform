@@ -126,7 +126,7 @@ public record SelfServiceSignupRequest(
     adminEmail = adminEmail != null ? adminEmail.trim().toLowerCase(java.util.Locale.ROOT) : null;
     adminFirstName = adminFirstName != null ? adminFirstName.trim() : null;
     adminLastName = adminLastName != null ? adminLastName.trim() : null;
-    
+
     // Normalize optional fields
     tenantId = tenantId != null && !tenantId.trim().isEmpty() ? tenantId.trim().toLowerCase(java.util.Locale.ROOT) : null;
     domain = domain != null && !domain.trim().isEmpty() ? domain.trim().toLowerCase(java.util.Locale.ROOT) : null;

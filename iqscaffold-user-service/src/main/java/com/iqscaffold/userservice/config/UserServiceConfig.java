@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Main configuration class for User Service. 
+ * Main configuration class for User Service.
  * Enables configuration properties and sets up core application configuration.
  */
 @Configuration

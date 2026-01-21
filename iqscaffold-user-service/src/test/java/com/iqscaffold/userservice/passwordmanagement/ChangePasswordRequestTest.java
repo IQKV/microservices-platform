@@ -189,3 +189,4 @@ class ChangePasswordRequestTest {
     assertTrue(validator.validate(request).isEmpty());
   }
 }
+

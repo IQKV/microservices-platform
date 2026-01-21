@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for organization preference management operations.
- * 
+ *
  * <p>Organization preferences are stored in PUBLIC schema alongside organizations.
  * These preferences define organization-wide settings like password policies, security
  * settings, and localization defaults.
@@ -51,7 +51,7 @@ public class OrganizationPreferenceManagementService {
     validateAdminAccess(currentUser, "LIST_ORGANIZATION_PREFERENCES");
 
     Page<OrganizationPreference> preferences;
-    
+
     if (currentUser.hasAuthority("SUPER_ADMIN")) {
       // Super admin sees all preferences
       preferences = preferenceRepository.findAll(pageable);
@@ -59,7 +59,7 @@ public class OrganizationPreferenceManagementService {
       // Regular admin sees only their organization's preferences
       var org = organizationRepository.findByTenantId(currentUser.tenantId())
           .orElseThrow(() -> new OrganizationPreferenceManagementException("Organization not found for tenant: " + currentUser.tenantId()));
-      
+
       var pref = preferenceRepository.findByOrganizationId(org.getId()).orElse(null);
       if (pref != null) {
         var prefList = java.util.List.of(pref);

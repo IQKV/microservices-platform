@@ -1,9 +1,9 @@
 package com.iqscaffold.userservice.infrastructure.messaging;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import com.iqscaffold.userservice.usermanagement.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -199,3 +199,4 @@ class UserEventPublisherTest {
     verify(messagingService).publishPasswordReset("123", "tenant-1", "test@example.com");
   }
 }
+

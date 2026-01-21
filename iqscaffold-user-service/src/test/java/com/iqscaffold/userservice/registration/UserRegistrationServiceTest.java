@@ -91,7 +91,7 @@ class UserRegistrationServiceTest {
     lenient().when(inputSanitizer.sanitizeInput(anyString())).thenAnswer(i -> i.getArgument(0));
     lenient().when(inputSanitizer.isInputSafe(anyString())).thenReturn(true);
     lenient().when(inputSanitizer.containsSqlInjection(anyString())).thenReturn(false);
-    
+
     // Setup platform config mocks
     var mockAuthorities = mock(PlatformConfigurationProperties.Authorities.class);
     lenient().when(mockAuthorities.defaultAuthorities()).thenReturn(List.of("USER"));

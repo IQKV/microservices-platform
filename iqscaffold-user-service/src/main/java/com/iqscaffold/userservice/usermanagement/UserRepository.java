@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,49 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+  /**
+   * Find user by username with authorities loaded for authentication.
+   *
+   * @param username the username to search for
+   * @return Optional containing the user with authorities if found
+   */
+  @EntityGraph("user-with-authorities")
+  Optional<User> findByUsernameWithAuthorities(String username);
+
+  /**
+   * Find user by email address with authorities loaded for authentication.
+   *
+   * @param email the email to search for
+   * @return Optional containing the user with authorities if found
+   */
+  @EntityGraph("user-with-authorities")
+  Optional<User> findByEmailWithAuthorities(String email);
+
+  /**
+   * Find user by username or email with complete profile (authorities and preferences).
+   *
+   * @param username the username to search for
+   * @param email    the email to search for
+   * @return Optional containing the user with complete profile if found
+   */
+  @EntityGraph("user-complete")
+  @Query("""
+      SELECT u FROM User u 
+      WHERE u.username = :username 
+         OR u.email = :email
+      """)
+  Optional<User> findByUsernameOrEmailWithComplete(@Param("username") String username,
+                                                   @Param("email") String email);
+
+  /**
+   * Find user by ID with preferences loaded for profile operations.
+   *
+   * @param id the user ID to search for
+   * @return Optional containing the user with preferences if found
+   */
+  @EntityGraph("user-with-preferences")
+  Optional<User> findByIdWithPreferences(Long id);
 
   /**
    * Find user by username.
@@ -77,6 +121,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
       ORDER BY u.createdAt DESC
       """)
   List<User> findEnabledUsersOrderByCreatedAtDesc();
+
+  /**
+   * Find users by authority name with authorities loaded.
+   */
+  @EntityGraph("user-with-authorities")
+  @Query("""
+      SELECT DISTINCT u FROM User u 
+      JOIN u.authorities a 
+      WHERE a.name = :authorityName
+      ORDER BY u.createdAt DESC
+      """)
+  List<User> findByAuthorityNameWithAuthorities(@Param("authorityName") String authorityName);
 
   /**
    * Find users by authority name.

@@ -9,6 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.Objects;
@@ -27,6 +30,14 @@ import org.hibernate.annotations.CreationTimestamp;
 @Table(name = "user_audit_log")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.security.UserAuditLog")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "audit-log-with-user",
+        attributeNodes = {
+            @NamedAttributeNode("user")
+        }
+    )
+})
 public class UserAuditLog extends TenantAware {
 
   @Id

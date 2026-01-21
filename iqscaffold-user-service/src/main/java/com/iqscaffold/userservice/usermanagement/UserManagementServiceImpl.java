@@ -273,7 +273,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
   /**
    * Get authorities by names.
-   * 
+   *
    * <p>Authorities are stored in PUBLIC schema (system-wide), so all tenants
    * share the same set of roles. This ensures consistency and simplifies
    * role management across the platform.

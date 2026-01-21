@@ -13,10 +13,10 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Platform configuration properties for extensible feature and microservice management.
- * 
+ *
  * <p>This configuration allows the platform to be extended with new features, authorities,
  * and microservices without code changes. All platform behavior is driven by configuration.
- * 
+ *
  * <h3>Extensibility Features</h3>
  * <ul>
  *   <li><strong>Dynamic Features</strong> - Features defined in configuration</li>
@@ -24,7 +24,7 @@ import org.springframework.validation.annotation.Validated;
  *   <li><strong>Route Mappings</strong> - URL patterns mapped to features</li>
  *   <li><strong>Microservice Integration</strong> - Service-to-feature mappings</li>
  * </ul>
- * 
+ *
  * <h3>Configuration Structure</h3>
  * <pre>
  * iqscaffold:

@@ -27,13 +27,13 @@ public class UserEventPublisher {
   public void publishUserCreated(User user) {
     try {
       log.debug("Publishing user created event for user: {}", user.getId());
-      
+
       messagingService.publishUserCreated(
           user.getId().toString(),
           user.getTenantId(),
           user.getEmail()
       );
-      
+
       log.info("Published user created event for user: {} in tenant: {}",
           user.getId(), user.getTenantId());
     } catch (final Exception e) {
@@ -49,13 +49,13 @@ public class UserEventPublisher {
   public void publishUserCreated(Long userId, String tenantId, String email) {
     try {
       log.debug("Publishing user created event for user: {}", userId);
-      
+
       messagingService.publishUserCreated(
           userId.toString(),
           tenantId,
           email
       );
-      
+
       log.info("Published user created event for user: {} in tenant: {}", userId, tenantId);
     } catch (final Exception e) {
       log.error("Failed to publish user created event for user: {}", userId, e);
@@ -69,13 +69,13 @@ public class UserEventPublisher {
   public void publishUserUpdated(User user) {
     try {
       log.debug("Publishing user updated event for user: {}", user.getId());
-      
+
       messagingService.publishUserUpdated(
           user.getId().toString(),
           user.getTenantId(),
           user.getEmail()
       );
-      
+
       log.info("Published user updated event for user: {} in tenant: {}",
           user.getId(), user.getTenantId());
     } catch (final Exception e) {
@@ -91,13 +91,13 @@ public class UserEventPublisher {
   public void publishUserUpdated(Long userId, String tenantId, String email) {
     try {
       log.debug("Publishing user updated event for user: {}", userId);
-      
+
       messagingService.publishUserUpdated(
           userId.toString(),
           tenantId,
           email
       );
-      
+
       log.info("Published user updated event for user: {} in tenant: {}", userId, tenantId);
     } catch (final Exception e) {
       log.error("Failed to publish user updated event for user: {}", userId, e);
@@ -111,13 +111,13 @@ public class UserEventPublisher {
   public void publishUserDeleted(User user) {
     try {
       log.debug("Publishing user deleted event for user: {}", user.getId());
-      
+
       messagingService.publishUserDeleted(
           user.getId().toString(),
           user.getTenantId(),
           user.getEmail()
       );
-      
+
       log.info("Published user deleted event for user: {} in tenant: {}",
           user.getId(), user.getTenantId());
     } catch (final Exception e) {
@@ -133,13 +133,13 @@ public class UserEventPublisher {
   public void publishUserDeleted(Long userId, String tenantId, String email) {
     try {
       log.debug("Publishing user deleted event for user: {}", userId);
-      
+
       messagingService.publishUserDeleted(
           userId.toString(),
           tenantId,
           email
       );
-      
+
       log.info("Published user deleted event for user: {} in tenant: {}", userId, tenantId);
     } catch (final Exception e) {
       log.error("Failed to publish user deleted event for user: {}", userId, e);
@@ -153,13 +153,13 @@ public class UserEventPublisher {
   public void publishUserVerified(User user) {
     try {
       log.debug("Publishing user verified event for user: {}", user.getId());
-      
+
       messagingService.publishUserVerified(
           user.getId().toString(),
           user.getTenantId(),
           user.getEmail()
       );
-      
+
       log.info("Published user verified event for user: {} in tenant: {}",
           user.getId(), user.getTenantId());
     } catch (final Exception e) {
@@ -175,13 +175,13 @@ public class UserEventPublisher {
   public void publishUserVerified(Long userId, String tenantId, String email) {
     try {
       log.debug("Publishing user verified event for user: {}", userId);
-      
+
       messagingService.publishUserVerified(
           userId.toString(),
           tenantId,
           email
       );
-      
+
       log.info("Published user verified event for user: {} in tenant: {}", userId, tenantId);
     } catch (final Exception e) {
       log.error("Failed to publish user verified event for user: {}", userId, e);
@@ -195,13 +195,13 @@ public class UserEventPublisher {
   public void publishPasswordReset(User user) {
     try {
       log.debug("Publishing password reset event for user: {}", user.getId());
-      
+
       messagingService.publishPasswordReset(
           user.getId().toString(),
           user.getTenantId(),
           user.getEmail()
       );
-      
+
       log.info("Published password reset event for user: {} in tenant: {}",
           user.getId(), user.getTenantId());
     } catch (final Exception e) {
@@ -217,13 +217,13 @@ public class UserEventPublisher {
   public void publishPasswordReset(Long userId, String tenantId, String email) {
     try {
       log.debug("Publishing password reset event for user: {}", userId);
-      
+
       messagingService.publishPasswordReset(
           userId.toString(),
           tenantId,
           email
       );
-      
+
       log.info("Published password reset event for user: {} in tenant: {}", userId, tenantId);
     } catch (final Exception e) {
       log.error("Failed to publish password reset event for user: {}", userId, e);

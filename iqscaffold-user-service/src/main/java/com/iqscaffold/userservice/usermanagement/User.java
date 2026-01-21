@@ -11,6 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -132,6 +135,27 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "users")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.usermanagement.User")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "user-with-authorities",
+        attributeNodes = {
+            @NamedAttributeNode("authorities")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "user-with-preferences",
+        attributeNodes = {
+            @NamedAttributeNode("preference")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "user-complete",
+        attributeNodes = {
+            @NamedAttributeNode("authorities"),
+            @NamedAttributeNode("preference")
+        }
+    )
+})
 public class User extends TenantAware {
 
   @Id

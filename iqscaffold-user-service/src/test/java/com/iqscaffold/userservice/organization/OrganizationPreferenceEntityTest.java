@@ -84,7 +84,7 @@ class OrganizationPreferenceEntityTest {
 
     // Same reference
     assertThat(pref1).isEqualTo(pref1);
-    
+
     // Different instances with null ids are not equal (transient entities)
     assertThat(pref1).isNotEqualTo(pref2);
     assertThat(pref1).isNotEqualTo(pref3);

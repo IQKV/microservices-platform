@@ -9,6 +9,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -28,6 +31,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "tenants", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.userservice.tenancy.Tenant")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "tenant-with-organization",
+        attributeNodes = {
+            @NamedAttributeNode("organization")
+        }
+    )
+})
 public class Tenant {
 
   @Id

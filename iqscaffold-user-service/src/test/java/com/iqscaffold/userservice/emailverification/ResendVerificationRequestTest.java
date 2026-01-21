@@ -105,3 +105,4 @@ class ResendVerificationRequestTest {
     assertEquals("user@example.com", request.email());
   }
 }
+

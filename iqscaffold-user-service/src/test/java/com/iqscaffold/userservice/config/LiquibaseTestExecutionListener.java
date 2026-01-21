@@ -8,7 +8,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 /**
  * Test execution listener that runs Liquibase migrations before tests.
  * Use with @TestExecutionListeners annotation on test classes.
- * 
+ *
  * <p>Example:
  * <pre>
  * {@code
@@ -26,9 +26,9 @@ public class LiquibaseTestExecutionListener extends AbstractTestExecutionListene
 
   @Override
   public void beforeTestClass(TestContext testContext) throws Exception {
-    TenantLiquibaseRunner liquibaseRunner = 
+    TenantLiquibaseRunner liquibaseRunner =
         testContext.getApplicationContext().getBean(TenantLiquibaseRunner.class);
-    JdbcTemplate jdbcTemplate = 
+    JdbcTemplate jdbcTemplate =
         testContext.getApplicationContext().getBean(JdbcTemplate.class);
 
     // Run system migrations

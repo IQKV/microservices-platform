@@ -29,14 +29,14 @@ public class CacheConfig {
       try {
         SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         Cache cache = sessionFactory.getCache();
-        
+
         if (cache == null) {
           return Health.down().withDetail("reason", "Cache not available").build();
         }
 
         // Get cache statistics
         org.hibernate.stat.Statistics statistics = sessionFactory.getStatistics();
-        
+
         return Health.up()
             .withDetail("secondLevelCacheEnabled", true)
             .withDetail("queryCacheEnabled", statistics.isStatisticsEnabled())

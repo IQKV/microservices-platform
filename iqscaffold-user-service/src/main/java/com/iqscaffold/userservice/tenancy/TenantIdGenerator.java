@@ -37,22 +37,22 @@ public class TenantIdGenerator {
    */
   public String generateFromOrganizationName(String organizationName) {
     var baseSlug = createSlug(organizationName);
-    
+
     // Limit base slug length to allow for suffix
     if (baseSlug.length() > 46) {
       baseSlug = baseSlug.substring(0, 46);
     }
-    
+
     // Try to generate a unique ID (max 10 attempts)
     for (var i = 0; i < 10; i++) {
       var suffix = generateRandomSuffix();
       var tenantId = baseSlug + "-" + suffix;
-      
+
       if (!tenantRepository.existsByTenantId(tenantId)) {
         return tenantId;
       }
     }
-    
+
     // Fallback: use timestamp-based suffix if random attempts fail
     var timestamp = System.currentTimeMillis() % 100000;
     return baseSlug + "-" + timestamp;
@@ -68,27 +68,27 @@ public class TenantIdGenerator {
   private String createSlug(String text) {
     // Normalize to NFD form and remove diacritics
     var normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
-    
+
     // Convert to lowercase
     var lowercase = normalized.toLowerCase(Locale.ROOT);
-    
+
     // Replace whitespace with single dash
     var noWhitespace = WHITESPACE.matcher(lowercase).replaceAll("-");
-    
+
     // Remove all non-latin characters except dashes
     var latin = NON_LATIN.matcher(noWhitespace).replaceAll("");
-    
+
     // Replace multiple consecutive dashes with single dash
     var slug = MULTIPLE_DASHES.matcher(latin).replaceAll("-");
-    
+
     // Remove leading and trailing dashes
     slug = slug.replaceAll("^-+|-+$", "");
-    
+
     // Ensure minimum length
     if (slug.isEmpty() || slug.length() < 3) {
       slug = "tenant";
     }
-    
+
     return slug;
   }
 
@@ -118,27 +118,27 @@ public class TenantIdGenerator {
     if (tenantId == null || tenantId.isEmpty()) {
       return false;
     }
-    
+
     var length = tenantId.length();
     if (length < 3 || length > 50) {
       return false;
     }
-    
+
     // Must contain only lowercase letters, numbers, and dashes
     if (!tenantId.matches("^[a-z0-9-]+$")) {
       return false;
     }
-    
+
     // Cannot start or end with dash
     if (tenantId.startsWith("-") || tenantId.endsWith("-")) {
       return false;
     }
-    
+
     // Cannot contain consecutive dashes
     if (tenantId.contains("--")) {
       return false;
     }
-    
+
     return true;
   }
 

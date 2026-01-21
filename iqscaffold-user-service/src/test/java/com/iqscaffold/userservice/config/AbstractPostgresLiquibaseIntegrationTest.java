@@ -17,15 +17,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * Base class for integration tests that require Liquibase migrations with real PostgreSQL.
  * Uses Testcontainers to spin up a PostgreSQL instance for testing.
- * 
+ *
  * <p>This provides the most production-like testing environment but is slower than H2.
  * Use this when you need to test PostgreSQL-specific features or validate production behavior.
- * 
+ *
  * <p>Usage example:
  * <pre>
  * {@code
  * class MyServiceTest extends AbstractPostgresLiquibaseIntegrationTest {
- *   
+ *
  *   @Test
  *   void testWithRealPostgres() {
  *     // Your test code here - PostgreSQL is running with migrated schemas
@@ -42,7 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class AbstractPostgresLiquibaseIntegrationTest {
 
   @Container
-  protected static final PostgreSQLContainer<?> postgres = 
+  protected static final PostgreSQLContainer<?> postgres =
       new PostgreSQLContainer<>("postgres:16-alpine")
           .withDatabaseName("testdb")
           .withUsername("test")
@@ -67,7 +67,7 @@ public abstract class AbstractPostgresLiquibaseIntegrationTest {
    * Default is a single test tenant.
    */
   protected String[] getTestTenantSchemas() {
-    return new String[]{"tenant_test"};
+    return new String[] {"tenant_test"};
   }
 
   /**

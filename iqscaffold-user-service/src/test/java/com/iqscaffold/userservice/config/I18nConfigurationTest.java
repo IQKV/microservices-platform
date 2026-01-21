@@ -13,7 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(classes = I18nConfigurationTest.TestConfig.class)
 @TestPropertySource(properties = {
     "iqscaffold.i18n.supported-locales[0]=en",
-    "iqscaffold.i18n.supported-locales[1]=es", 
+    "iqscaffold.i18n.supported-locales[1]=es",
     "iqscaffold.i18n.supported-locales[2]=fr",
     "iqscaffold.i18n.default-locale=en",
     "iqscaffold.i18n.message-basename=i18n/messages",

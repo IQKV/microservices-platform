@@ -127,9 +127,9 @@ public class UserRegistrationService {
     var authorityNames = defaultAuthorities.stream()
         .map(Authority::getName)
         .toList();
-    logger.info("User registered successfully: {} with authorities: {}", 
+    logger.info("User registered successfully: {} with authorities: {}",
         savedUser.getUsername(), authorityNames);
-    
+
     securityAuditService.logUserRegistration(
         savedUser.getUsername(), savedUser.getEmail(), ipAddress, userAgent);
 
@@ -161,9 +161,9 @@ public class UserRegistrationService {
    */
   private List<Authority> findOrCreateDefaultAuthorities() {
     var configuredAuthorities = platformConfig.authorities().defaultAuthorities();
-    
+
     logger.debug("Finding or creating default authorities: {}", configuredAuthorities);
-    
+
     return configuredAuthorities.stream()
         .map(this::findOrCreateAuthority)
         .toList();
@@ -175,7 +175,7 @@ public class UserRegistrationService {
    */
   private Authority findOrCreateAuthority(String authorityName) {
     var existingAuthority = authorityRepository.findByName(authorityName);
-    
+
     if (existingAuthority.isPresent()) {
       return existingAuthority.get();
     }
@@ -184,7 +184,7 @@ public class UserRegistrationService {
     var description = getAuthorityDescription(authorityName);
     var newAuthority = new Authority(authorityName, description);
     var savedAuthority = authorityRepository.save(newAuthority);
-    
+
     logger.info("Created new authority: {} - {}", authorityName, description);
     return savedAuthority;
   }
@@ -197,11 +197,10 @@ public class UserRegistrationService {
     if (authorityDefinition != null) {
       return authorityDefinition.description();
     }
-    
+
     // Provide generic description for authorities not in configuration
     return "Configurable authority: " + authorityName;
   }
-
 
 
   /**

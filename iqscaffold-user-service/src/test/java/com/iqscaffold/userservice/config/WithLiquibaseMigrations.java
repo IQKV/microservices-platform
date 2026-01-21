@@ -11,7 +11,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 
 /**
  * Annotation to enable Liquibase migrations for integration tests.
- * 
+ *
  * <p>Usage:
  * <pre>
  * {@code
@@ -23,7 +23,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
  * }
  * }
  * </pre>
- * 
+ *
  * <p>You can also specify custom tenant schemas:
  * <pre>
  * {@code
@@ -39,7 +39,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
     mergeMode = MergeMode.MERGE_WITH_DEFAULTS
 )
 public @interface WithLiquibaseMigrations {
-  
+
   /**
    * Tenant schemas to create and migrate. Defaults to "tenant_test".
    */

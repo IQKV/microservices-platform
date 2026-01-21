@@ -160,3 +160,4 @@ class NotificationEventTest {
     assertNotNull(event.getRecipientEmail());
   }
 }
+
