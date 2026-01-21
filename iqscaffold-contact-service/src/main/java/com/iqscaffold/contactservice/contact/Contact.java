@@ -4,9 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +19,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import com.iqscaffold.contactservice.company.Company;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,6 +28,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "contacts")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = "contact-with-company",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("company")
+    }
+  )
+})
 public class Contact {
 
   @Id
@@ -53,6 +67,15 @@ public class Contact {
 
   @Column(name = "company_id")
   private Long companyId;
+
+  /**
+   * JPA relationship to Company entity.
+   * This provides an alternative to using companyId for queries that need company details.
+   * Both companyId and company relationship are maintained for backward compatibility.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "company_id", insertable = false, updatable = false)
+  private Company company;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
@@ -150,6 +173,14 @@ public class Contact {
 
   public void setCompanyId(Long companyId) {
     this.companyId = companyId;
+  }
+
+  public Company getCompany() {
+    return company;
+  }
+
+  public void setCompany(Company company) {
+    this.company = company;
   }
 
   public ContactStatus getStatus() {

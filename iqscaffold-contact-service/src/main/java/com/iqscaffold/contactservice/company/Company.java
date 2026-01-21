@@ -4,16 +4,25 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import com.iqscaffold.contactservice.contact.Contact;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,6 +31,41 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "companies")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = "company-with-contacts",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("contacts")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "company-with-parent",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("parentCompany")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "company-with-children",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("childCompanies")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "company-with-hierarchy",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("parentCompany"),
+      @jakarta.persistence.NamedAttributeNode("childCompanies")
+    }
+  ),
+  @NamedEntityGraph(
+    name = "company-complete",
+    attributeNodes = {
+      @jakarta.persistence.NamedAttributeNode("contacts"),
+      @jakarta.persistence.NamedAttributeNode("parentCompany"),
+      @jakarta.persistence.NamedAttributeNode("childCompanies")
+    }
+  )
+})
 public class Company {
 
   @Id
@@ -80,6 +124,31 @@ public class Company {
 
   @Column(name = "parent_company_id")
   private Long parentCompanyId;
+
+  /**
+   * JPA relationship to parent Company entity.
+   * This provides an alternative to using parentCompanyId for queries that need parent company details.
+   * Both parentCompanyId and parentCompany relationship are maintained for backward compatibility.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_company_id", insertable = false, updatable = false)
+  private Company parentCompany;
+
+  /**
+   * JPA relationship to child Company entities.
+   * This provides access to subsidiary companies.
+   */
+  @OneToMany(mappedBy = "parentCompany", fetch = FetchType.LAZY)
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+  private List<Company> childCompanies = new ArrayList<>();
+
+  /**
+   * JPA relationship to Contact entities.
+   * This provides access to all contacts associated with this company.
+   */
+  @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+  private List<Contact> contacts = new ArrayList<>();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 20)
@@ -221,6 +290,30 @@ public class Company {
 
   public void setParentCompanyId(Long parentCompanyId) {
     this.parentCompanyId = parentCompanyId;
+  }
+
+  public Company getParentCompany() {
+    return parentCompany;
+  }
+
+  public void setParentCompany(Company parentCompany) {
+    this.parentCompany = parentCompany;
+  }
+
+  public List<Company> getChildCompanies() {
+    return childCompanies;
+  }
+
+  public void setChildCompanies(List<Company> childCompanies) {
+    this.childCompanies = childCompanies;
+  }
+
+  public List<Contact> getContacts() {
+    return contacts;
+  }
+
+  public void setContacts(List<Contact> contacts) {
+    this.contacts = contacts;
   }
 
   public CompanyStatus getStatus() {
