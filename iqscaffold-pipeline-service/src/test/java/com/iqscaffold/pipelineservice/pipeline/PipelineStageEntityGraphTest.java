@@ -1,5 +1,11 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import com.iqscaffold.pipelineservice.shared.test.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,12 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for PipelineStage entity graphs.
@@ -81,20 +81,20 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     // Then
     assertThat(stageWithItems).isPresent();
     PipelineStage stage = stageWithItems.get();
-    
+
     // Verify stage data
     assertThat(stage.getName()).isEqualTo("Qualified");
     assertThat(stage.getDescription()).isEqualTo("Qualified leads ready for proposal");
     assertThat(stage.getColorCode()).isEqualTo("#28a745");
     assertThat(stage.getDisplayOrder()).isEqualTo(2);
     assertThat(stage.getIsActive()).isTrue();
-    
+
     // Verify pipeline items are loaded (should not trigger additional queries)
     assertThat(stage.getPipelineItems()).hasSize(2);
     assertThat(stage.getPipelineItems())
         .extracting(PipelineItem::getLeadId)
         .containsExactlyInAnyOrder(12345L, 23456L);
-    
+
     // Verify item details
     stage.getPipelineItems().forEach(item -> {
       assertThat(item.getStageId()).isEqualTo(testStage.getId());
@@ -112,12 +112,12 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     // Then
     assertThat(basicStage).isPresent();
     PipelineStage stage = basicStage.get();
-    
+
     // Verify stage data
     assertThat(stage.getName()).isEqualTo("Qualified");
     assertThat(stage.getDescription()).isEqualTo("Qualified leads ready for proposal");
     assertThat(stage.getColorCode()).isEqualTo("#28a745");
-    
+
     // Pipeline items should not be loaded (lazy loading)
     // Note: In a real test, you might verify this doesn't trigger additional queries
   }
@@ -132,11 +132,11 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     // Then
     assertThat(activeStagesWithItems).hasSize(1);
     PipelineStage stage = activeStagesWithItems.get(0);
-    
+
     // Verify it's the active stage
     assertThat(stage.getName()).isEqualTo("Qualified");
     assertThat(stage.getIsActive()).isTrue();
-    
+
     // Verify items are loaded
     assertThat(stage.getPipelineItems()).hasSize(2);
     assertThat(stage.getPipelineItems())
@@ -153,17 +153,17 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
 
     // Then
     assertThat(allStagesWithItems).hasSize(2);
-    
+
     // Verify stages are ordered by display order
     assertThat(allStagesWithItems.get(0).getName()).isEqualTo("Qualified");
     assertThat(allStagesWithItems.get(0).getDisplayOrder()).isEqualTo(2);
     assertThat(allStagesWithItems.get(1).getName()).isEqualTo("Inactive");
     assertThat(allStagesWithItems.get(1).getDisplayOrder()).isEqualTo(99);
-    
+
     // Verify items are loaded for each stage
     PipelineStage qualifiedStage = allStagesWithItems.get(0);
     assertThat(qualifiedStage.getPipelineItems()).hasSize(2);
-    
+
     PipelineStage inactiveStageLoaded = allStagesWithItems.get(1);
     assertThat(inactiveStageLoaded.getPipelineItems()).hasSize(1);
     assertThat(inactiveStageLoaded.getPipelineItems().get(0).getLeadId()).isEqualTo(34567L);
@@ -197,7 +197,7 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     // Then
     assertThat(stageWithItems).isPresent();
     PipelineStage stage = stageWithItems.get();
-    
+
     assertThat(stage.getName()).isEqualTo("Empty");
     assertThat(stage.getPipelineItems()).isEmpty();
   }
@@ -212,19 +212,19 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     // Then
     assertThat(stageWithItems).isPresent();
     PipelineStage stage = stageWithItems.get();
-    
+
     // Verify all items belong to this stage
     stage.getPipelineItems().forEach(item -> {
       assertThat(item.getStageId()).isEqualTo(testStage.getId());
       assertThat(item.getCreatedBy()).isEqualTo("test-user");
       assertThat(item.getUpdatedBy()).isEqualTo("test-user");
     });
-    
+
     // Verify expected values are loaded
     List<BigDecimal> expectedValues = stage.getPipelineItems().stream()
         .map(PipelineItem::getExpectedValue)
         .toList();
-    
+
     assertThat(expectedValues)
         .containsExactlyInAnyOrder(
             new BigDecimal("50000.00"),
