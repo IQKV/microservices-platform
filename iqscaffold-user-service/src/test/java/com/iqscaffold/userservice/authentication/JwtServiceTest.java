@@ -12,18 +12,15 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
-import com.iqscaffold.userservice.config.JwtConfiguration;
-import com.iqscaffold.userservice.shared.Authority;
-import com.iqscaffold.userservice.usermanagement.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,6 +28,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtException;
+
+import com.iqscaffold.userservice.config.JwtConfiguration;
+import com.iqscaffold.userservice.shared.Authority;
+import com.iqscaffold.userservice.usermanagement.User;
 
 /**
  * Unit tests for JwtService.

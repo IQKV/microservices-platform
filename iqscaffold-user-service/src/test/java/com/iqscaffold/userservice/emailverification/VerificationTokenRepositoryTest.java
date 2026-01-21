@@ -5,9 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.iqscaffold.userservice.tenancy.SchemaNameResolver;
-import com.iqscaffold.userservice.tenancy.SchemaTenantIdentifierResolver;
-import com.iqscaffold.userservice.tenancy.TenantContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.iqscaffold.userservice.tenancy.SchemaNameResolver;
+import com.iqscaffold.userservice.tenancy.SchemaTenantIdentifierResolver;
+import com.iqscaffold.userservice.tenancy.TenantContext;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)

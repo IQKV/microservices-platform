@@ -9,11 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.iqscaffold.userservice.usermanagement.UserContext;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.jupiter.api.Test;
+
+import com.iqscaffold.userservice.usermanagement.UserContext;
 
 
 class ValidateTokenResponseTest {

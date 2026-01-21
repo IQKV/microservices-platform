@@ -19,6 +19,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+import org.slf4j.MDC;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 import com.iqscaffold.userservice.config.IqScaffoldProperties;
 import com.iqscaffold.userservice.config.RedisConfig.TenantAwareSessionService;
 import com.iqscaffold.userservice.security.AccountLockoutService;
@@ -27,19 +41,6 @@ import com.iqscaffold.userservice.security.SecurityAuditService;
 import com.iqscaffold.userservice.shared.Authority;
 import com.iqscaffold.userservice.usermanagement.User;
 import com.iqscaffold.userservice.usermanagement.UserRepository;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.MDC;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  * Comprehensive unit tests for AuthenticationService.

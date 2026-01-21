@@ -10,8 +10,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import jakarta.persistence.EntityManagerFactory;
 import java.util.Map;
+
+import jakarta.persistence.EntityManagerFactory;
+
 import org.hibernate.Cache;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.CacheRegionStatistics;

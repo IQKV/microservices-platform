@@ -4,18 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.when;
 
-import com.iqscaffold.userservice.config.IqScaffoldProperties;
-import com.iqscaffold.userservice.emailverification.VerificationMetrics;
-import com.iqscaffold.userservice.usermanagement.User;
-import io.micrometer.core.instrument.Timer;
-import jakarta.mail.internet.MimeMessage;
 import java.util.Locale;
+
+import jakarta.mail.internet.MimeMessage;
+
+import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +25,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.MailException;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.TemplateEngine;
+
+import com.iqscaffold.userservice.config.IqScaffoldProperties;
+import com.iqscaffold.userservice.emailverification.VerificationMetrics;
+import com.iqscaffold.userservice.usermanagement.User;
 
 
 /**

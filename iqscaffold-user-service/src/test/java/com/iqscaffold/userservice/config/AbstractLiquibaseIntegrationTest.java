@@ -1,6 +1,5 @@
 package com.iqscaffold.userservice.config;
 
-import com.iqscaffold.userservice.tenancy.TenantLiquibaseRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+
+import com.iqscaffold.userservice.tenancy.TenantLiquibaseRunner;
 
 /**
  * Base class for integration tests that require Liquibase migrations.
