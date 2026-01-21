@@ -25,7 +25,7 @@ public interface PipelineActivityEntityGraphService {
    * Get basic pipeline activities for a lead using entity graph optimization.
    * Perfect for lead detail views showing activity history.
    *
-   * @param leadId the lead ID
+   * @param leadId   the lead ID
    * @param pageable pagination information
    * @return page of basic pipeline activities
    */
@@ -45,7 +45,7 @@ public interface PipelineActivityEntityGraphService {
    * Useful for activity type filtering and reporting.
    *
    * @param activityType the activity type
-   * @param pageable pagination information
+   * @param pageable     pagination information
    * @return page of basic pipeline activities of the specified type
    */
   Page<PipelineActivity> getBasicPipelineActivitiesByType(ActivityType activityType, Pageable pageable);

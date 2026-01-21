@@ -26,7 +26,7 @@ public interface FollowUpEntityGraphService {
    * Get basic follow-ups for a lead using entity graph optimization.
    * Perfect for lead detail views showing follow-up tasks.
    *
-   * @param leadId the lead ID
+   * @param leadId   the lead ID
    * @param pageable pagination information
    * @return page of basic follow-ups
    */
@@ -45,7 +45,7 @@ public interface FollowUpEntityGraphService {
    * Get basic follow-ups by status using entity graph optimization.
    * Ideal for status-based follow-up management views.
    *
-   * @param status the follow-up status
+   * @param status   the follow-up status
    * @param pageable pagination information
    * @return page of basic follow-ups with the specified status
    */
@@ -55,9 +55,9 @@ public interface FollowUpEntityGraphService {
    * Get basic follow-ups by status and date range using entity graph optimization.
    * Perfect for time-based follow-up reporting and scheduling.
    *
-   * @param status the follow-up status
+   * @param status    the follow-up status
    * @param startDate the start date
-   * @param endDate the end date
+   * @param endDate   the end date
    * @return list of basic follow-ups within the date range
    */
   List<FollowUp> getBasicFollowUpsByStatusAndDateRange(FollowUpStatus status, LocalDateTime startDate, LocalDateTime endDate);
@@ -66,7 +66,7 @@ public interface FollowUpEntityGraphService {
    * Get basic overdue follow-ups using entity graph optimization.
    * Essential for overdue task management and notifications.
    *
-   * @param status the follow-up status (typically PENDING)
+   * @param status      the follow-up status (typically PENDING)
    * @param currentDate the current date to compare against
    * @return list of basic overdue follow-ups
    */

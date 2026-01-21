@@ -21,10 +21,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(name = "pipeline_activities")
 @NamedEntityGraphs({
-  @NamedEntityGraph(
-    name = "PipelineActivity.basic"
-    // No attributeNodes - just the basic entity (no relationships to load)
-  )
+    @NamedEntityGraph(
+        name = "PipelineActivity.basic"
+        // No attributeNodes - just the basic entity (no relationships to load)
+        )
 })
 public class PipelineActivity {
 

@@ -25,16 +25,16 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "pipeline_stages")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @NamedEntityGraphs({
-  @NamedEntityGraph(
-    name = "PipelineStage.withItems",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("pipelineItems")
-    }
-  ),
-  @NamedEntityGraph(
-    name = "PipelineStage.basic"
-    // No attributeNodes - just the basic entity
-  )
+    @NamedEntityGraph(
+        name = "PipelineStage.withItems",
+        attributeNodes = {
+            @jakarta.persistence.NamedAttributeNode("pipelineItems")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "PipelineStage.basic"
+        // No attributeNodes - just the basic entity
+        )
 })
 public class PipelineStage {
 

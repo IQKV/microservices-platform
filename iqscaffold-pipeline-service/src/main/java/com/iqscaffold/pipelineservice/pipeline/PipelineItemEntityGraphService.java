@@ -52,7 +52,7 @@ public interface PipelineItemEntityGraphService {
    * Get pipeline items with stage information for a specific stage using entity graph optimization.
    * Ideal for stage-based pipeline views.
    *
-   * @param stageId the stage ID
+   * @param stageId  the stage ID
    * @param pageable pagination information
    * @return page of pipeline items with stages loaded
    */

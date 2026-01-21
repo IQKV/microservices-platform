@@ -25,10 +25,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "follow_ups")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @NamedEntityGraphs({
-  @NamedEntityGraph(
-    name = "FollowUp.basic"
-    // No attributeNodes - just the basic entity (no relationships to load)
-  )
+    @NamedEntityGraph(
+        name = "FollowUp.basic"
+        // No attributeNodes - just the basic entity (no relationships to load)
+        )
 })
 public class FollowUp {
 
