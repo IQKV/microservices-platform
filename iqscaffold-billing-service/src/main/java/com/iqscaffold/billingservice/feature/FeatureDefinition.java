@@ -16,8 +16,6 @@ import java.util.Objects;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Platform-wide feature definition entity.
@@ -73,12 +71,10 @@ public class FeatureDefinition {
   @Column(name = "category", length = 100)
   private String category;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", columnDefinition = "jsonb")
+  @Column(name = "metadata", columnDefinition = "text")
   private Map<String, Object> metadata;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "dependencies", columnDefinition = "jsonb")
+  @Column(name = "dependencies", columnDefinition = "text")
   private List<String> dependencies;
 
   @Column(name = "deprecated", nullable = false)

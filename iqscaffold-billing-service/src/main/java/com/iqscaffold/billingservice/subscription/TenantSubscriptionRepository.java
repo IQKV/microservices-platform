@@ -45,7 +45,8 @@ public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscr
    * @return Optional subscription with plan
    */
   @EntityGraph("subscription-with-plan")
-  Optional<TenantSubscription> findByIdWithPlan(UUID id);
+  @Query("SELECT s FROM TenantSubscription s WHERE s.id = :id")
+  Optional<TenantSubscription> findByIdWithPlan(@Param("id") UUID id);
 
   /**
    * Find subscription by Stripe subscription ID with plan loaded.
@@ -54,7 +55,8 @@ public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscr
    * @return Optional subscription with plan
    */
   @EntityGraph("subscription-with-plan")
-  Optional<TenantSubscription> findByStripeSubscriptionIdWithPlan(String stripeSubscriptionId);
+  @Query("SELECT s FROM TenantSubscription s WHERE s.stripeSubscriptionId = :stripeSubscriptionId")
+  Optional<TenantSubscription> findByStripeSubscriptionIdWithPlan(@Param("stripeSubscriptionId") String stripeSubscriptionId);
 
   /**
    * Find active subscription for current tenant.

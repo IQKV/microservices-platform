@@ -4,7 +4,7 @@ spring:
     allow-bean-definition-overriding: true
   
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -21,6 +21,7 @@ spring:
         cache:
           use_second_level_cache: false
           use_query_cache: false
+        globally_quoted_identifiers: false
   
   liquibase:
     enabled: false

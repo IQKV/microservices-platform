@@ -25,8 +25,6 @@ import java.util.UUID;
 import com.iqscaffold.billingservice.feature.PlanFeature;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Platform-wide subscription plan entity.
@@ -84,7 +82,7 @@ public class SubscriptionPlan {
   private String currency;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 20)
+  @Column(name = "subscription_interval", nullable = false, length = 20)
   private SubscriptionInterval interval;
 
   @Column(name = "interval_count", nullable = false)
@@ -124,8 +122,7 @@ public class SubscriptionPlan {
   /**
    * Additional metadata (JSON format).
    */
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
+  @Column(columnDefinition = "text")
   private String metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)

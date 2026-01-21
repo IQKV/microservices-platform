@@ -30,7 +30,7 @@
             <column name="currency" type="varchar(3)">
                 <constraints nullable="false"/>
             </column>
-            <column name="interval" type="varchar(20)">
+            <column name="subscription_interval" type="varchar(20)">
                 <constraints nullable="false"/>
             </column>
             <column name="interval_count" type="int" defaultValueNumeric="1">

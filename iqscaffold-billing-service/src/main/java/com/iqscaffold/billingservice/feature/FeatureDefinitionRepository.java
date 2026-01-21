@@ -47,8 +47,9 @@ public interface FeatureDefinitionRepository extends JpaRepository<FeatureDefini
 
   /**
    * Finds features that have dependencies on the given feature.
+   * Uses JSON containment operator to check if the feature key exists in the dependencies JSON array.
    */
-  @Query("SELECT f FROM FeatureDefinition f WHERE :featureKey MEMBER OF f.dependencies AND f.deprecated = false")
+  @Query(value = "SELECT * FROM public.feature_definition f WHERE f.dependencies::jsonb @> CONCAT('[\"', :featureKey, '\"]')::jsonb AND f.deprecated = false", nativeQuery = true)
   List<FeatureDefinition> findDependentFeatures(@Param("featureKey") String featureKey);
 
   /**

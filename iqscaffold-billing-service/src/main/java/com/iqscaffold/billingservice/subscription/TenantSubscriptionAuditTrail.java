@@ -13,9 +13,6 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 /**
  * Audit trail for tenant subscription state changes.
  * <p>
@@ -47,8 +44,7 @@ public class TenantSubscriptionAuditTrail {
   @Column(columnDefinition = "TEXT")
   private String reason;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
+  @Column(columnDefinition = "text")
   private String metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)

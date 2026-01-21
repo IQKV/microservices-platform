@@ -15,9 +15,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 /**
  * Subscription invoice entity.
  * <p>
@@ -66,8 +63,7 @@ public class SubscriptionInvoice {
   @Column(name = "invoice_pdf_url", length = 500)
   private String invoicePdfUrl;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
+  @Column(columnDefinition = "text")
   private String metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)

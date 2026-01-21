@@ -21,8 +21,6 @@ import java.util.UUID;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Represents a tenant's subscription to a platform plan.
@@ -106,8 +104,7 @@ public class TenantSubscription {
   /**
    * Additional metadata (JSON format).
    */
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(columnDefinition = "jsonb")
+  @Column(columnDefinition = "text")
   private String metadata;
 
   @Column(name = "created_at", nullable = false, updatable = false)

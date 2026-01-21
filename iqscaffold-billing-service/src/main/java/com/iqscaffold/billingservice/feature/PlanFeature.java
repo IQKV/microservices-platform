@@ -23,8 +23,6 @@ import java.util.UUID;
 import com.iqscaffold.billingservice.subscription.SubscriptionPlan;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Association entity between subscription plans and features.
@@ -88,8 +86,7 @@ public class PlanFeature {
   @Column(name = "enabled", nullable = false)
   private boolean enabled = true;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "configuration", columnDefinition = "jsonb")
+  @Column(name = "configuration", columnDefinition = "text")
   private Map<String, Object> configuration;
 
   @Column(name = "created_at", nullable = false, updatable = false)

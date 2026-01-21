@@ -27,14 +27,16 @@ public interface TenantSubscriptionAuditTrailRepository extends JpaRepository<Te
   Page<TenantSubscriptionAuditTrail> findByTenantSubscriptionId(@Param("tenantSubscriptionId") UUID tenantSubscriptionId, Pageable pageable);
 
   /**
-   * Find audit trail entries by tenant ID.
+   * Find audit trail entries by organization ID.
+   * Note: This accesses organization ID through the subscription relationship since
+   * audit trail doesn't have a direct organizationId field.
    *
-   * @param tenantId Tenant ID
+   * @param organizationId Organization ID
    * @param pageable Pagination parameters
    * @return Page of audit trail entries
    */
-  @Query("SELECT a FROM TenantSubscriptionAuditTrail a WHERE a.tenantId = :tenantId ORDER BY a.createdAt DESC")
-  Page<TenantSubscriptionAuditTrail> findByTenantId(@Param("tenantId") String tenantId, Pageable pageable);
+  @Query("SELECT a FROM TenantSubscriptionAuditTrail a WHERE a.tenantSubscription.organizationId = :organizationId ORDER BY a.createdAt DESC")
+  Page<TenantSubscriptionAuditTrail> findByTenantId(@Param("organizationId") Long organizationId, Pageable pageable);
 
   /**
    * Find recent audit trail entries for a subscription.

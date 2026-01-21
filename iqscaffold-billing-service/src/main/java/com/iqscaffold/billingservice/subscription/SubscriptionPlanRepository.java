@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -21,6 +22,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
    * @return List of active plans with features
    */
   @EntityGraph("plan-with-features")
+  @Query("SELECT p FROM SubscriptionPlan p WHERE p.isActive = true")
   List<SubscriptionPlan> findByIsActiveTrueWithFeatures();
 
   /**
@@ -30,7 +32,8 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
    * @return Optional plan with features
    */
   @EntityGraph("plan-with-features")
-  Optional<SubscriptionPlan> findByIdWithFeatures(UUID id);
+  @Query("SELECT p FROM SubscriptionPlan p WHERE p.id = :id")
+  Optional<SubscriptionPlan> findByIdWithFeatures(@Param("id") UUID id);
 
   /**
    * Find a plan by ID with features and definitions loaded for complete feature context.
@@ -39,7 +42,8 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
    * @return Optional plan with complete feature context
    */
   @EntityGraph("plan-with-features-and-definitions")
-  Optional<SubscriptionPlan> findByIdWithFeaturesAndDefinitions(UUID id);
+  @Query("SELECT p FROM SubscriptionPlan p WHERE p.id = :id")
+  Optional<SubscriptionPlan> findByIdWithFeaturesAndDefinitions(@Param("id") UUID id);
 
   /**
    * Find a plan by Stripe price ID with features loaded.
@@ -48,7 +52,8 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
    * @return Optional plan with features
    */
   @EntityGraph("plan-with-features")
-  Optional<SubscriptionPlan> findByStripePriceIdWithFeatures(String stripePriceId);
+  @Query("SELECT p FROM SubscriptionPlan p WHERE p.stripePriceId = :stripePriceId")
+  Optional<SubscriptionPlan> findByStripePriceIdWithFeatures(@Param("stripePriceId") String stripePriceId);
 
   /**
    * Find all active subscription plans.

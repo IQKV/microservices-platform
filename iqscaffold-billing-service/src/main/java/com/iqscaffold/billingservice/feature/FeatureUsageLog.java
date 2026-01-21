@@ -12,9 +12,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 /**
  * Entity for tracking feature usage across tenants.
  *
@@ -60,8 +57,7 @@ public class FeatureUsageLog {
   @Column(name = "correlation_id", length = 100)
   private String correlationId;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "metadata", columnDefinition = "jsonb")
+  @Column(name = "metadata", columnDefinition = "text")
   private Map<String, Object> metadata;
 
   // Constructors
