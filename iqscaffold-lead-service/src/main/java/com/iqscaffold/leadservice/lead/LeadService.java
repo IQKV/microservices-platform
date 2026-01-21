@@ -90,4 +90,62 @@ public interface LeadService {
    * @return Map of source to count
    */
   java.util.Map<String, Long> getLeadCountsBySource(LocalDateTime startDate, LocalDateTime endDate);
+
+  // Entity Graph Optimized Methods
+
+  /**
+   * Gets a lead with notes for detail view.
+   * Uses entity graph to optimize note loading.
+   *
+   * @param id The lead ID
+   * @return Lead with notes loaded
+   */
+  Optional<Lead> getLeadWithNotes(Long id);
+
+  /**
+   * Gets a lead with activities for timeline view.
+   * Uses entity graph to optimize activity loading.
+   *
+   * @param id The lead ID
+   * @return Lead with activities loaded
+   */
+  Optional<Lead> getLeadWithActivities(Long id);
+
+  /**
+   * Gets a lead with complete history (notes and activities).
+   * Uses entity graph to optimize loading of all related data.
+   *
+   * @param id The lead ID
+   * @return Lead with all related data loaded
+   */
+  Optional<Lead> getLeadWithCompleteHistory(Long id);
+
+  /**
+   * Gets leads by assigned user with basic data only.
+   * Optimized for listing views without heavy collections.
+   *
+   * @param assignedTo The assigned user
+   * @param pageable   Pagination parameters
+   * @return Page of leads with basic data
+   */
+  Page<Lead> getBasicLeadsByAssignedTo(String assignedTo, Pageable pageable);
+
+  /**
+   * Advanced search with notes loaded for detailed results.
+   * Use when search results need note context.
+   *
+   * @param searchTerm Search term
+   * @param source     Lead source filter
+   * @param status     Lead status filter
+   * @param assignedTo Assigned user filter
+   * @param pageable   Pagination parameters
+   * @return Page of leads with notes loaded
+   */
+  Page<Lead> searchLeadsWithNotes(
+      String searchTerm,
+      String source,
+      LeadStatus status,
+      String assignedTo,
+      Pageable pageable
+  );
 }

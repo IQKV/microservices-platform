@@ -1,17 +1,27 @@
 package com.iqscaffold.leadservice.lead;
 
+import com.iqscaffold.leadservice.activity.LeadActivity;
+import com.iqscaffold.leadservice.note.LeadNote;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.annotations.Cache;
@@ -22,6 +32,25 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "leads")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NamedEntityGraph(
+    name = "Lead.withNotes",
+    attributeNodes = @NamedAttributeNode("notes")
+)
+@NamedEntityGraph(
+    name = "Lead.withActivities", 
+    attributeNodes = @NamedAttributeNode("activities")
+)
+@NamedEntityGraph(
+    name = "Lead.withNotesAndActivities",
+    attributeNodes = {
+        @NamedAttributeNode("notes"),
+        @NamedAttributeNode("activities")
+    }
+)
+@NamedEntityGraph(
+    name = "Lead.basic"
+    // No attributeNodes - just the basic Lead entity without collections
+)
 public class Lead {
 
   @Id
@@ -97,6 +126,16 @@ public class Lead {
 
   @Column(name = "assigned_to")
   private String assignedTo;
+
+  // Relationships
+  @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OrderBy("createdAt DESC")
+  @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+  private List<LeadNote> notes = new ArrayList<>();
+
+  @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  @OrderBy("createdAt DESC")
+  private List<LeadActivity> activities = new ArrayList<>();
 
   // Constructors
   public Lead() {
@@ -260,6 +299,43 @@ public class Lead {
 
   public void setAssignedTo(final String assignedTo) {
     this.assignedTo = assignedTo;
+  }
+
+  public List<LeadNote> getNotes() {
+    return notes;
+  }
+
+  public void setNotes(final List<LeadNote> notes) {
+    this.notes = notes;
+  }
+
+  public List<LeadActivity> getActivities() {
+    return activities;
+  }
+
+  public void setActivities(final List<LeadActivity> activities) {
+    this.activities = activities;
+  }
+
+  // Helper methods for managing relationships
+  public void addNote(final LeadNote note) {
+    notes.add(note);
+    note.setLead(this);
+  }
+
+  public void removeNote(final LeadNote note) {
+    notes.remove(note);
+    note.setLead(null);
+  }
+
+  public void addActivity(final LeadActivity activity) {
+    activities.add(activity);
+    activity.setLead(this);
+  }
+
+  public void removeActivity(final LeadActivity activity) {
+    activities.remove(activity);
+    activity.setLead(null);
   }
 
   // Helper methods

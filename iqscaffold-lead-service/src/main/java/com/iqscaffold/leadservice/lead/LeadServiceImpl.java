@@ -405,4 +405,47 @@ public class LeadServiceImpl implements LeadService {
             LeadRepository.LeadSourceCount::getCount
         ));
   }
+
+  // Entity Graph Optimized Methods
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Lead> getLeadWithNotes(final Long id) {
+    log.debug("Fetching lead {} with notes using entity graph", id);
+    return leadRepository.findWithNotesById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Lead> getLeadWithActivities(final Long id) {
+    log.debug("Fetching lead {} with activities using entity graph", id);
+    return leadRepository.findWithActivitiesById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<Lead> getLeadWithCompleteHistory(final Long id) {
+    log.debug("Fetching lead {} with complete history using entity graph", id);
+    return leadRepository.findWithNotesAndActivitiesById(id);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<Lead> getBasicLeadsByAssignedTo(final String assignedTo, final Pageable pageable) {
+    log.debug("Fetching basic leads for assigned user: {}", assignedTo);
+    return leadRepository.findBasicByAssignedTo(assignedTo, pageable);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<Lead> searchLeadsWithNotes(
+      final String searchTerm,
+      final String source,
+      final LeadStatus status,
+      final String assignedTo,
+      final Pageable pageable) {
+    log.debug("Searching leads with notes - term: {}, source: {}, status: {}, assignedTo: {}", 
+        searchTerm, source, status, assignedTo);
+    return leadRepository.findLeadsWithFiltersAndNotes(searchTerm, source, status, assignedTo, pageable);
+  }
 }
