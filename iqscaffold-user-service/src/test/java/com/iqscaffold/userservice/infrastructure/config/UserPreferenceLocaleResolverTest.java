@@ -1,6 +1,5 @@
 package com.iqscaffold.userservice.infrastructure.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 

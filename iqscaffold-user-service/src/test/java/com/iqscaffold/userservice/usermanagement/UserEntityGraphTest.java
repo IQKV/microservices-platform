@@ -1,7 +1,5 @@
 package com.iqscaffold.userservice.usermanagement;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Set;
