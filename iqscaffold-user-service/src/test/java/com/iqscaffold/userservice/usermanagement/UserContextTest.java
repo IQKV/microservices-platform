@@ -1,20 +1,14 @@
 package com.iqscaffold.userservice.usermanagement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Map;
-import java.util.Set;
 
 import jakarta.annotation.Nullable;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 

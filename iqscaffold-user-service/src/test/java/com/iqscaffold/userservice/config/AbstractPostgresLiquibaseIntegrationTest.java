@@ -1,5 +1,6 @@
 package com.iqscaffold.userservice.config;
 
+import com.iqscaffold.userservice.tenancy.TenantLiquibaseRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import com.iqscaffold.userservice.tenancy.TenantLiquibaseRunner;
 
 /**
  * Base class for integration tests that require Liquibase migrations with real PostgreSQL.

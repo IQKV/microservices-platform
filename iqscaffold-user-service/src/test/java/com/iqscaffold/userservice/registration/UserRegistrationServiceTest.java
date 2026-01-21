@@ -14,14 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.Mock;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.iqscaffold.userservice.config.PlatformConfigurationProperties;
 import com.iqscaffold.userservice.emailverification.EmailVerificationService;
 import com.iqscaffold.userservice.security.InputSanitizer;
@@ -30,6 +22,13 @@ import com.iqscaffold.userservice.shared.Authority;
 import com.iqscaffold.userservice.shared.AuthorityRepository;
 import com.iqscaffold.userservice.usermanagement.User;
 import com.iqscaffold.userservice.usermanagement.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Unit tests for UserRegistrationService.

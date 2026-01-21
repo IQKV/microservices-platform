@@ -12,17 +12,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.Mock;
-import org.springframework.data.domain.PageRequest;
-
 import com.iqscaffold.userservice.security.UserAuditLogRepository;
 import com.iqscaffold.userservice.usermanagement.UserContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * Unit tests for OrganizationPreferenceManagementService.

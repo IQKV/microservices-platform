@@ -4,17 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Set;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.Set;
 
+import com.iqscaffold.userservice.authentication.AccountLockedException;
+import com.iqscaffold.userservice.authentication.AuthenticationException;
+import com.iqscaffold.userservice.authentication.EmailVerificationRequiredException;
+import com.iqscaffold.userservice.registration.UserRegistrationService;
+import com.iqscaffold.userservice.shared.exception.EmailVerificationException;
+import com.iqscaffold.userservice.usermanagement.UserManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
@@ -23,13 +28,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import com.iqscaffold.userservice.authentication.AccountLockedException;
-import com.iqscaffold.userservice.authentication.AuthenticationException;
-import com.iqscaffold.userservice.authentication.EmailVerificationRequiredException;
-import com.iqscaffold.userservice.registration.UserRegistrationService;
-import com.iqscaffold.userservice.shared.exception.EmailVerificationException;
-import com.iqscaffold.userservice.usermanagement.UserManagementService;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {

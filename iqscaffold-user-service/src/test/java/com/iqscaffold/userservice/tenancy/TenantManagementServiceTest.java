@@ -10,20 +10,19 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.Mock;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.CreateTenantRequest;
 import com.iqscaffold.userservice.infrastructure.repository.dto.TenantDto.UpdateTenantRequest;
 import com.iqscaffold.userservice.shared.exception.TenantManagementException;
 import com.iqscaffold.userservice.usermanagement.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Unit tests for TenantManagementService.

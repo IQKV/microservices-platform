@@ -2,10 +2,9 @@ package com.iqscaffold.userservice.usermanagement;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.iqscaffold.userservice.shared.Authority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.iqscaffold.userservice.shared.Authority;
 
 class UserEntityTest {
 

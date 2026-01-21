@@ -1,10 +1,9 @@
 package com.iqscaffold.userservice.config;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.test.context.TestContext;
-
 import com.iqscaffold.userservice.tenancy.TenantLiquibaseRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * Test execution listener that runs Liquibase migrations before tests.

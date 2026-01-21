@@ -1,21 +1,18 @@
 package com.iqscaffold.userservice.shared;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Locale;
 
-import jakarta.validation.constraints.NotNull;
-
+import com.iqscaffold.userservice.usermanagement.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
-
-import com.iqscaffold.userservice.usermanagement.User;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 
 class MessageServiceTest {
