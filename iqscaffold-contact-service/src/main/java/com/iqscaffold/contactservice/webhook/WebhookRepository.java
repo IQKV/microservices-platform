@@ -40,7 +40,12 @@ public interface WebhookRepository extends JpaRepository<Webhook, Long> {
    * @param events List of event types
    * @return List of webhooks subscribed to any of the events
    */
-  @Query("SELECT DISTINCT w FROM Webhook w WHERE w.active = true AND " +
-         "EXISTS (SELECT 1 FROM (VALUES :events) AS e(event) WHERE w.events LIKE CONCAT('%', e.event, '%'))")
-  List<Webhook> findActiveWebhooksByEvents(@Param("events") List<String> events);
+  default List<Webhook> findActiveWebhooksByEvents(List<String> events) {
+    if (events == null || events.isEmpty()) {
+      return List.of();
+    }
+    return findByActiveTrue().stream()
+        .filter(w -> events.stream().anyMatch(e -> w.getEvents().contains(e)))
+        .toList();
+  }
 }

@@ -18,9 +18,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.iqscaffold.contactservice.contact.Contact;
 import org.hibernate.annotations.Cache;
@@ -32,39 +32,24 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "companies")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @NamedEntityGraphs({
-  @NamedEntityGraph(
-    name = "company-with-contacts",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("contacts")
-    }
-  ),
-  @NamedEntityGraph(
-    name = "company-with-parent",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("parentCompany")
-    }
-  ),
-  @NamedEntityGraph(
-    name = "company-with-children",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("childCompanies")
-    }
-  ),
-  @NamedEntityGraph(
-    name = "company-with-hierarchy",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("parentCompany"),
-      @jakarta.persistence.NamedAttributeNode("childCompanies")
-    }
-  ),
-  @NamedEntityGraph(
-    name = "company-complete",
-    attributeNodes = {
-      @jakarta.persistence.NamedAttributeNode("contacts"),
-      @jakarta.persistence.NamedAttributeNode("parentCompany"),
-      @jakarta.persistence.NamedAttributeNode("childCompanies")
-    }
-  )
+    @NamedEntityGraph(name = "company-with-contacts", attributeNodes = {
+        @jakarta.persistence.NamedAttributeNode("contacts")
+    }),
+    @NamedEntityGraph(name = "company-with-parent", attributeNodes = {
+        @jakarta.persistence.NamedAttributeNode("parentCompany")
+    }),
+    @NamedEntityGraph(name = "company-with-children", attributeNodes = {
+        @jakarta.persistence.NamedAttributeNode("childCompanies")
+    }),
+    @NamedEntityGraph(name = "company-with-hierarchy", attributeNodes = {
+        @jakarta.persistence.NamedAttributeNode("parentCompany"),
+        @jakarta.persistence.NamedAttributeNode("childCompanies")
+    }),
+    @NamedEntityGraph(name = "company-complete", attributeNodes = {
+        @jakarta.persistence.NamedAttributeNode("contacts"),
+        @jakarta.persistence.NamedAttributeNode("parentCompany"),
+        @jakarta.persistence.NamedAttributeNode("childCompanies")
+    })
 })
 public class Company {
 
@@ -127,8 +112,10 @@ public class Company {
 
   /**
    * JPA relationship to parent Company entity.
-   * This provides an alternative to using parentCompanyId for queries that need parent company details.
-   * Both parentCompanyId and parentCompany relationship are maintained for backward compatibility.
+   * This provides an alternative to using parentCompanyId for queries that need
+   * parent company details.
+   * Both parentCompanyId and parentCompany relationship are maintained for
+   * backward compatibility.
    */
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_company_id", insertable = false, updatable = false)
@@ -140,7 +127,7 @@ public class Company {
    */
   @OneToMany(mappedBy = "parentCompany", fetch = FetchType.LAZY)
   @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-  private List<Company> childCompanies = new ArrayList<>();
+  private Set<Company> childCompanies = new LinkedHashSet<>();
 
   /**
    * JPA relationship to Contact entities.
@@ -148,7 +135,7 @@ public class Company {
    */
   @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
   @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-  private List<Contact> contacts = new ArrayList<>();
+  private Set<Contact> contacts = new LinkedHashSet<>();
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 20)
@@ -300,19 +287,19 @@ public class Company {
     this.parentCompany = parentCompany;
   }
 
-  public List<Company> getChildCompanies() {
+  public Set<Company> getChildCompanies() {
     return childCompanies;
   }
 
-  public void setChildCompanies(List<Company> childCompanies) {
+  public void setChildCompanies(Set<Company> childCompanies) {
     this.childCompanies = childCompanies;
   }
 
-  public List<Contact> getContacts() {
+  public Set<Contact> getContacts() {
     return contacts;
   }
 
-  public void setContacts(List<Contact> contacts) {
+  public void setContacts(Set<Contact> contacts) {
     this.contacts = contacts;
   }
 
@@ -384,10 +371,10 @@ public class Company {
   @Override
   public String toString() {
     return "Company{" +
-           "id=" + id +
-           ", name='" + name + '\'' +
-           ", industry='" + industry + '\'' +
-           ", status=" + status +
-           '}';
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", industry='" + industry + '\'' +
+        ", status=" + status +
+        '}';
   }
 }

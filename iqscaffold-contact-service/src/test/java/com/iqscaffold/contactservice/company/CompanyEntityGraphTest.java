@@ -15,7 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * Test class demonstrating entity graph functionality for company entities.
  * 
- * <p>These tests verify that entity graphs properly load associations
+ * <p>
+ * These tests verify that entity graphs properly load associations
  * without causing lazy loading exceptions or N+1 query problems.
  */
 @DataJpaTest
@@ -65,22 +66,21 @@ class CompanyEntityGraphTest {
 
     // Then: Company and contacts should be loaded
     assertThat(foundCompany).isPresent();
-    
+
     // Verify contacts are loaded without lazy loading exception
     assertDoesNotThrow(() -> {
       var loadedCompany = foundCompany.get();
       var contacts = loadedCompany.getContacts();
-      
+
       assertThat(contacts).hasSize(2);
-      
+
       var contactEmails = contacts.stream()
           .map(Contact::getEmail)
           .toList();
-      
+
       assertThat(contactEmails).containsExactlyInAnyOrder(
           "contact1@contactheavy.com",
-          "contact2@contactheavy.com"
-      );
+          "contact2@contactheavy.com");
     });
   }
 
@@ -115,22 +115,23 @@ class CompanyEntityGraphTest {
 
     // Then: Company with parent and children should be loaded
     assertThat(foundCompany).isPresent();
-    
+
     // Verify hierarchy is loaded without lazy loading exceptions
     assertDoesNotThrow(() -> {
       var loadedCompany = foundCompany.get();
-      
+
       // Check parent company
       var parent = loadedCompany.getParentCompany();
       assertThat(parent).isNotNull();
       assertThat(parent.getName()).isEqualTo("Parent Corp");
       assertThat(parent.getIndustry()).isEqualTo("Holding Company");
-      
+
       // Check child companies
       var children = loadedCompany.getChildCompanies();
       assertThat(children).hasSize(1);
-      assertThat(children.get(0).getName()).isEqualTo("Grandchild Corp");
-      assertThat(children.get(0).getIndustry()).isEqualTo("Software");
+      var firstChild = children.iterator().next();
+      assertThat(firstChild.getName()).isEqualTo("Grandchild Corp");
+      assertThat(firstChild.getIndustry()).isEqualTo("Software");
     });
   }
 
@@ -160,12 +161,12 @@ class CompanyEntityGraphTest {
 
     // Then: Company and parent should be loaded
     assertThat(foundCompany).isPresent();
-    
+
     // Verify parent is loaded without lazy loading exception
     assertDoesNotThrow(() -> {
       var loadedCompany = foundCompany.get();
       assertThat(loadedCompany.getName()).isEqualTo("Regional Operations");
-      
+
       var parent = loadedCompany.getParentCompany();
       assertThat(parent).isNotNull();
       assertThat(parent.getName()).isEqualTo("Global Holdings");
@@ -205,32 +206,30 @@ class CompanyEntityGraphTest {
 
     // Then: Company and children should be loaded
     assertThat(foundCompany).isPresent();
-    
+
     // Verify children are loaded without lazy loading exceptions
     assertDoesNotThrow(() -> {
       var loadedCompany = foundCompany.get();
       assertThat(loadedCompany.getName()).isEqualTo("Conglomerate Inc");
-      
+
       var children = loadedCompany.getChildCompanies();
       assertThat(children).hasSize(2);
-      
+
       var childNames = children.stream()
           .map(Company::getName)
           .toList();
-      
+
       assertThat(childNames).containsExactlyInAnyOrder(
           "Tech Division",
-          "Finance Division"
-      );
-      
+          "Finance Division");
+
       var childIndustries = children.stream()
           .map(Company::getIndustry)
           .toList();
-      
+
       assertThat(childIndustries).containsExactlyInAnyOrder(
           "Technology",
-          "Financial Services"
-      );
+          "Financial Services");
     });
   }
 
@@ -280,34 +279,33 @@ class CompanyEntityGraphTest {
 
     // Then: Company with all relationships should be loaded
     assertThat(foundCompany).isPresent();
-    
+
     // Verify all relationships are loaded without lazy loading exceptions
     assertDoesNotThrow(() -> {
       var loadedCompany = foundCompany.get();
       assertThat(loadedCompany.getName()).isEqualTo("Parent Corp");
-      
+
       // Check parent company
       var parent = loadedCompany.getParentCompany();
       assertThat(parent).isNotNull();
       assertThat(parent.getName()).isEqualTo("Grandparent Corp");
-      
+
       // Check child companies
       var children = loadedCompany.getChildCompanies();
       assertThat(children).hasSize(1);
-      assertThat(children.get(0).getName()).isEqualTo("Child Corp");
-      
+      assertThat(children.iterator().next().getName()).isEqualTo("Child Corp");
+
       // Check contacts
       var contacts = loadedCompany.getContacts();
       assertThat(contacts).hasSize(2);
-      
+
       var contactEmails = contacts.stream()
           .map(Contact::getEmail)
           .toList();
-      
+
       assertThat(contactEmails).containsExactlyInAnyOrder(
           "manager1@parent.com",
-          "manager2@parent.com"
-      );
+          "manager2@parent.com");
     });
   }
 
@@ -348,21 +346,21 @@ class CompanyEntityGraphTest {
 
     // Then: All parent companies with their children should be loaded
     assertThat(parentCompanies).hasSize(2);
-    
+
     // Verify children are loaded without lazy loading exceptions
     assertDoesNotThrow(() -> {
       var parentsByName = parentCompanies.stream()
           .collect(java.util.stream.Collectors.toMap(Company::getName, c -> c));
-      
+
       var parentOne = parentsByName.get("Parent One");
       assertThat(parentOne).isNotNull();
       assertThat(parentOne.getChildCompanies()).hasSize(1);
-      assertThat(parentOne.getChildCompanies().get(0).getName()).isEqualTo("Child One");
-      
+      assertThat(parentOne.getChildCompanies().iterator().next().getName()).isEqualTo("Child One");
+
       var parentTwo = parentsByName.get("Parent Two");
       assertThat(parentTwo).isNotNull();
       assertThat(parentTwo.getChildCompanies()).hasSize(1);
-      assertThat(parentTwo.getChildCompanies().get(0).getName()).isEqualTo("Child Two");
+      assertThat(parentTwo.getChildCompanies().iterator().next().getName()).isEqualTo("Child Two");
     });
   }
 }
