@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="20250121000000-demo-users-with-authorities" author="iqscaffold" context="demo">
+        <comment>Create demo users with different authority levels for testing and development</comment>
+
+        <!-- Demo Tenant for testing purposes -->
+        <insert tableName="tenants" schemaName="public">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="name" value="Demo Organization"/>
+            <column name="description" value="Demo tenant for testing user authorities and access levels"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="max_users" value="100"/>
+            <column name="storage_quota_gb" value="50"/>
+            <column name="api_rate_limit_per_minute" value="1000"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- Demo Organization linked to tenant -->
+        <insert tableName="organizations" schemaName="public">
+            <column name="name" value="Demo Tech Solutions"/>
+            <column name="description" value="Demo organization showcasing multi-tenant SaaS capabilities with comprehensive user management"/>
+            <column name="industry" value="Technology"/>
+            <column name="website" value="https://demo.iqscaffold.com"/>
+            <column name="phone" value="+1-555-0123"/>
+            <column name="address" value="123 Demo Street, Suite 100"/>
+            <column name="city" value="San Francisco"/>
+            <column name="country" value="United States"/>
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="billing_email" value="billing@demo.iqscaffold.com"/>
+            <column name="subscription_status" value="active"/>
+            <column name="subscription_plan" value="enterprise"/>
+            <column name="max_users" value="100"/>
+            <column name="created_by" value="system"/>
+        </insert>
+
+        <!-- 1. SUPER_ADMIN User - Platform Administrator with full system access across all tenants -->
+        <!-- Password: SuperAdmin123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="superadmin"/>
+            <column name="email" value="superadmin@iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="System"/>
+            <column name="last_name" value="Administrator"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 2. TENANT_OWNER User - Organization owner with full billing and administrative access -->
+        <!-- Password: TenantOwner123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="owner"/>
+            <column name="email" value="owner@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$8Xv2c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="Alice"/>
+            <column name="last_name" value="Johnson"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 3. TENANT_ADMIN User - Tenant administrator with full control within tenant scope -->
+        <!-- Password: TenantAdmin123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="admin"/>
+            <column name="email" value="admin@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$9Yv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="Bob"/>
+            <column name="last_name" value="Smith"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 4. BILLING_ADMIN User - Manages billing, subscriptions, invoices, and payment processing -->
+        <!-- Password: BillingAdmin123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="billing"/>
+            <column name="email" value="billing@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$AZv4c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="Carol"/>
+            <column name="last_name" value="Williams"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 5. FINANCE_VIEWER User - Read-only access to financial data, invoices, and reports -->
+        <!-- Password: FinanceViewer123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="finance"/>
+            <column name="email" value="finance@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$BXv5c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="David"/>
+            <column name="last_name" value="Brown"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+        <!-- 6. ADMIN User - Tenant administrator with user management and configuration access (no billing) -->
+        <!-- Password: RegularAdmin123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="manager"/>
+            <column name="email" value="manager@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$CYv6c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="Emma"/>
+            <column name="last_name" value="Davis"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 7. USER - Standard user with basic application access -->
+        <!-- Password: StandardUser123! (BCrypt hashed) -->
+        <insert tableName="users">
+            <column name="username" value="user"/>
+            <column name="email" value="user@demo.iqscaffold.com"/>
+            <column name="password_hash" value="$2a$12$DZv7c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfBzj6w00L0Rvxe"/>
+            <column name="first_name" value="Frank"/>
+            <column name="last_name" value="Miller"/>
+            <column name="enabled" valueBoolean="true"/>
+            <column name="email_verified" valueBoolean="true"/>
+            <column name="preferred_locale" value="en"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- Assign authorities to users via user_authorities junction table -->
+        
+        <!-- 1. SUPER_ADMIN authority for superadmin user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'superadmin')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'SUPER_ADMIN')"/>
+        </insert>
+
+        <!-- 2. TENANT_OWNER authority for owner user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'owner')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'TENANT_OWNER')"/>
+        </insert>
+
+        <!-- 3. TENANT_ADMIN authority for admin user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'admin')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'TENANT_ADMIN')"/>
+        </insert>
+
+        <!-- 4. BILLING_ADMIN authority for billing user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'billing')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'BILLING_ADMIN')"/>
+        </insert>
+
+        <!-- 5. FINANCE_VIEWER authority for finance user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'finance')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'FINANCE_VIEWER')"/>
+        </insert>
+
+        <!-- 6. ADMIN authority for manager user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'manager')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'ADMIN')"/>
+        </insert>
+
+        <!-- 7. USER authority for standard user -->
+        <insert tableName="user_authorities">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'user')"/>
+            <column name="authority_id" valueComputed="(SELECT id FROM public.authorities WHERE name = 'USER')"/>
+        </insert>
+        <!-- Create user preferences for demo users -->
+        
+        <!-- 1. Super Admin preferences - System administrator with comprehensive monitoring setup -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'superadmin')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="UTC"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="yyyy-MM-dd"/>
+            <column name="time_format" value="HH:mm:ss"/>
+            <column name="theme" value="dark"/>
+            <column name="phone_number" value="+1-555-0001"/>
+            <column name="bio" value="Platform administrator responsible for system-wide operations, security, and multi-tenant infrastructure management."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="true"/>
+            <column name="notification_push" valueBoolean="true"/>
+            <column name="two_factor_enabled" valueBoolean="true"/>
+            <column name="two_factor_method" value="TOTP"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 2. Tenant Owner preferences - Business owner focused on growth and billing -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'owner')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/New_York"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="MM/dd/yyyy"/>
+            <column name="time_format" value="hh:mm a"/>
+            <column name="theme" value="light"/>
+            <column name="phone_number" value="+1-555-0002"/>
+            <column name="bio" value="Organization owner and CEO, responsible for strategic decisions, billing oversight, and business growth initiatives."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="true"/>
+            <column name="notification_push" valueBoolean="true"/>
+            <column name="two_factor_enabled" valueBoolean="true"/>
+            <column name="two_factor_method" value="SMS"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 3. Tenant Admin preferences - Technical administrator with operational focus -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'admin')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/Los_Angeles"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="yyyy-MM-dd"/>
+            <column name="time_format" value="HH:mm"/>
+            <column name="theme" value="dark"/>
+            <column name="phone_number" value="+1-555-0003"/>
+            <column name="bio" value="Technical administrator managing user accounts, system configuration, and day-to-day operations within the tenant."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="false"/>
+            <column name="notification_push" valueBoolean="true"/>
+            <column name="two_factor_enabled" valueBoolean="true"/>
+            <column name="two_factor_method" value="TOTP"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 4. Billing Admin preferences - Finance-focused with detailed reporting needs -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'billing')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/Chicago"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="MM/dd/yyyy"/>
+            <column name="time_format" value="hh:mm a"/>
+            <column name="theme" value="light"/>
+            <column name="phone_number" value="+1-555-0004"/>
+            <column name="bio" value="Billing administrator responsible for subscription management, invoice processing, payment gateway integration, and financial reporting."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="true"/>
+            <column name="notification_push" valueBoolean="false"/>
+            <column name="two_factor_enabled" valueBoolean="true"/>
+            <column name="two_factor_method" value="EMAIL"/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+        <!-- 5. Finance Viewer preferences - Read-only financial analyst -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'finance')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/New_York"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="yyyy-MM-dd"/>
+            <column name="time_format" value="HH:mm:ss"/>
+            <column name="theme" value="light"/>
+            <column name="phone_number" value="+1-555-0005"/>
+            <column name="bio" value="Financial analyst with read-only access to billing data, reports, and analytics for business intelligence and compliance purposes."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="false"/>
+            <column name="notification_push" valueBoolean="false"/>
+            <column name="two_factor_enabled" valueBoolean="false"/>
+            <column name="two_factor_method" value=""/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 6. Manager preferences - Department manager with user oversight -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'manager')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/Denver"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="dd/MM/yyyy"/>
+            <column name="time_format" value="HH:mm"/>
+            <column name="theme" value="light"/>
+            <column name="phone_number" value="+1-555-0006"/>
+            <column name="bio" value="Department manager responsible for team coordination, user management, and operational oversight without billing access."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="false"/>
+            <column name="notification_push" valueBoolean="true"/>
+            <column name="two_factor_enabled" valueBoolean="false"/>
+            <column name="two_factor_method" value=""/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- 7. Standard User preferences - End user with basic application access -->
+        <insert tableName="user_preferences">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE username = 'user')"/>
+            <column name="locale" value="en"/>
+            <column name="timezone" value="America/Los_Angeles"/>
+            <column name="currency" value="USD"/>
+            <column name="date_format" value="MM/dd/yyyy"/>
+            <column name="time_format" value="hh:mm a"/>
+            <column name="theme" value="light"/>
+            <column name="phone_number" value="+1-555-0007"/>
+            <column name="bio" value="Standard application user with basic access to core features and functionality for daily business operations."/>
+            <column name="notification_email" valueBoolean="true"/>
+            <column name="notification_sms" valueBoolean="false"/>
+            <column name="notification_push" valueBoolean="true"/>
+            <column name="two_factor_enabled" valueBoolean="false"/>
+            <column name="two_factor_method" value=""/>
+            <column name="tenant_id" value="demo-tenant"/>
+        </insert>
+
+        <!-- Update organization with owner reference -->
+        <update tableName="organizations" schemaName="public">
+            <column name="owner_user_id" valueComputed="(SELECT id FROM users WHERE username = 'owner' AND tenant_id = 'demo-tenant')"/>
+            <where>tenant_id = 'demo-tenant'</where>
+        </update>
+
+        <rollback>
+            <!-- Remove user preferences -->
+            <delete tableName="user_preferences">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+            
+            <!-- Remove user authorities -->
+            <delete tableName="user_authorities">
+                <where>user_id IN (SELECT id FROM users WHERE tenant_id = 'demo-tenant')</where>
+            </delete>
+            
+            <!-- Remove users -->
+            <delete tableName="users">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+            
+            <!-- Remove organization -->
+            <delete tableName="organizations" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+            
+            <!-- Remove tenant -->
+            <delete tableName="tenants" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
