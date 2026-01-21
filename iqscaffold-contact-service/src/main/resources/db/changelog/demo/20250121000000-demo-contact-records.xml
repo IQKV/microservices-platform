@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="20250121000000-demo-contact-records" author="iqscaffold" context="demo">
+        <comment>Create demo contact records for demo-tenant with companies, contacts, and activities</comment>
+
+        <!-- Demo Tenant Info for Contact Service -->
+        <!-- Links demo-tenant to its schema for contact service operations -->
+        <insert tableName="tenant_info" schemaName="public">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="tenant_name" value="Demo Tech Solutions"/>
+            <column name="schema_name" value="demo_tenant"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+
+        <!-- 1. Demo Company - TechCorp Industries (Prospect Company) -->
+        <!-- Represents a potential client company that Demo Tech Solutions is pursuing -->
+        <insert tableName="companies">
+            <column name="name" value="TechCorp Industries"/>
+            <column name="website" value="https://techcorp-industries.com"/>
+            <column name="industry" value="Software Development"/>
+            <column name="size" value="201-500 employees"/>
+            <column name="phone" value="+1-555-0200"/>
+            <column name="email" value="info@techcorp-industries.com"/>
+            <column name="address_line1" value="456 Innovation Drive"/>
+            <column name="address_line2" value="Suite 300"/>
+            <column name="city" value="Austin"/>
+            <column name="state" value="Texas"/>
+            <column name="postal_code" value="78701"/>
+            <column name="country" value="United States"/>
+            <column name="parent_company_id" value=""/>
+            <column name="status" value="PROSPECT"/>
+            <column name="notes" value="Mid-size software company looking to modernize their CRM system. Initial contact made at Tech Conference 2024. Strong interest in our enterprise SaaS platform. Decision timeline: Q1 2025. Budget approved for $50K+ solution."/>
+            <column name="created_by" value="owner"/>
+            <column name="updated_by" value="admin"/>
+        </insert>
+
+        <!-- 2. Demo Company - Global Retail Solutions (Active Customer) -->
+        <!-- Represents an existing customer company that has converted from prospect to active client -->
+        <insert tableName="companies">
+            <column name="name" value="Global Retail Solutions"/>
+            <column name="website" value="https://globalretail.com"/>
+            <column name="industry" value="Retail Technology"/>
+            <column name="size" value="1001-5000 employees"/>
+            <column name="phone" value="+1-555-0300"/>
+            <column name="email" value="partnerships@globalretail.com"/>
+            <column name="address_line1" value="789 Commerce Boulevard"/>
+            <column name="address_line2" value=""/>
+            <column name="city" value="Chicago"/>
+            <column name="state" value="Illinois"/>
+            <column name="postal_code" value="60601"/>
+            <column name="country" value="United States"/>
+            <column name="parent_company_id" value=""/>
+            <column name="status" value="ACTIVE"/>
+            <column name="notes" value="Large retail technology company, converted from prospect in November 2024. Currently using our Enterprise plan. Excellent relationship with their IT team. Potential for expansion to additional business units. Annual contract value: $180K."/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="billing"/>
+        </insert>
+
+        <!-- 3. Demo Company - StartupHub Accelerator (Partner Company) -->
+        <!-- Represents a strategic partner company for referrals and joint ventures -->
+        <insert tableName="companies">
+            <column name="name" value="StartupHub Accelerator"/>
+            <column name="website" value="https://startuphub.io"/>
+            <column name="industry" value="Venture Capital"/>
+            <column name="size" value="11-50 employees"/>
+            <column name="phone" value="+1-555-0400"/>
+            <column name="email" value="partnerships@startuphub.io"/>
+            <column name="address_line1" value="321 Startup Lane"/>
+            <column name="address_line2" value="Floor 12"/>
+            <column name="city" value="San Francisco"/>
+            <column name="state" value="California"/>
+            <column name="postal_code" value="94105"/>
+            <column name="country" value="United States"/>
+            <column name="parent_company_id" value=""/>
+            <column name="status" value="PARTNER"/>
+            <column name="notes" value="Strategic partner accelerator that refers early-stage startups to our platform. Partnership agreement signed in October 2024. They provide 20% discount codes to their portfolio companies. Quarterly business reviews scheduled."/>
+            <column name="created_by" value="owner"/>
+            <column name="updated_by" value="manager"/>
+        </insert>
+
+        <rollback>
+            <!-- Remove companies -->
+            <delete tableName="companies">
+                <where>name IN ('TechCorp Industries', 'Global Retail Solutions', 'StartupHub Accelerator')</where>
+            </delete>
+            
+            <!-- Remove tenant info -->
+            <delete tableName="tenant_info" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

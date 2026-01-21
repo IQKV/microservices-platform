@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="20250121000000-demo-lead-records" author="iqscaffold" context="demo">
+        <comment>Create demo lead records for demo-tenant with various lead sources, statuses, and scores</comment>
+
+        <!-- Demo Tenant Info for Lead Service -->
+        <!-- Links demo-tenant to its schema for lead service operations -->
+        <insert tableName="tenant_info" schemaName="public">
+            <column name="tenant_id" value="demo-tenant"/>
+            <column name="tenant_name" value="Demo Tech Solutions"/>
+            <column name="schema_name" value="demo_tenant"/>
+            <column name="status" value="ACTIVE"/>
+        </insert>
+
+        <!-- 1. High-Value Qualified Lead - David Kim (Enterprise Prospect) -->
+        <!-- Represents a high-scoring lead ready for conversion to customer -->
+        <insert tableName="leads">
+            <column name="first_name" value="David"/>
+            <column name="last_name" value="Kim"/>
+            <column name="email" value="david.kim@innovatetech.com"/>
+            <column name="phone" value="+1-555-0500"/>
+            <column name="company" value="InnovateTech Solutions"/>
+            <column name="job_title" value="VP of Engineering"/>
+            <column name="source" value="Referral"/>
+            <column name="status" value="QUALIFIED"/>
+            <column name="score" value="92"/>
+            <column name="qualified" valueBoolean="true"/>
+            <column name="notes" value="High-value enterprise prospect referred by existing customer Global Retail Solutions. VP of Engineering at 500+ employee tech company. Strong technical background, understands our platform value. Attended 3 product demos, downloaded technical documentation, and completed security questionnaire. Budget approved for $75K+ solution. Decision timeline: February 2025. Key requirements: API integrations, SSO, and advanced analytics."/>
+            <column name="converted_at" value=""/>
+            <column name="converted_to_contact_id" value=""/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="admin"/>
+            <column name="assigned_to" value="admin"/>
+        </insert>
+
+        <!-- 2. Recently Converted Lead - Michael Rodriguez (Now Customer) -->
+        <!-- Represents a successfully converted lead that became the customer in contact service -->
+        <insert tableName="leads">
+            <column name="first_name" value="Michael"/>
+            <column name="last_name" value="Rodriguez"/>
+            <column name="email" value="m.rodriguez@globalretail.com"/>
+            <column name="phone" value="+1-555-0301"/>
+            <column name="company" value="Global Retail Solutions"/>
+            <column name="job_title" value="Vice President of Information Technology"/>
+            <column name="source" value="Website"/>
+            <column name="status" value="CONVERTED"/>
+            <column name="score" value="95"/>
+            <column name="qualified" valueBoolean="true"/>
+            <column name="notes" value="Successfully converted lead from website contact form. Led comprehensive evaluation process for CRM modernization. Excellent technical evaluation, strong business case, and executive buy-in. Converted to Enterprise customer in November 2024. This lead demonstrates our successful conversion process from initial inquiry to $180K annual contract."/>
+            <column name="converted_at" valueDate="2024-11-15T16:30:00Z"/>
+            <column name="converted_to_contact_id" value="12345"/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="billing"/>
+            <column name="assigned_to" value="billing"/>
+        </insert>
+
+        <!-- 3. New Inbound Lead - Lisa Thompson (Early Stage) -->
+        <!-- Represents a fresh inbound lead from partner referral program -->
+        <insert tableName="leads">
+            <column name="first_name" value="Lisa"/>
+            <column name="last_name" value="Thompson"/>
+            <column name="email" value="lisa.thompson@growthstartup.io"/>
+            <column name="phone" value="+1-555-0600"/>
+            <column name="company" value="GrowthStartup Inc"/>
+            <column name="job_title" value="Chief Operating Officer"/>
+            <column name="source" value="Partner"/>
+            <column name="status" value="NEW"/>
+            <column name="score" value="45"/>
+            <column name="qualified" valueBoolean="false"/>
+            <column name="notes" value="New inbound lead from StartupHub Accelerator partner referral program. COO at early-stage startup (25 employees) looking for scalable CRM solution. Received 20% partner discount code. Initial interest in our platform but needs to understand pricing and implementation timeline. Startup is in Series A funding round, decision pending funding completion."/>
+            <column name="converted_at" value=""/>
+            <column name="converted_to_contact_id" value=""/>
+            <column name="created_by" value="manager"/>
+            <column name="updated_by" value="manager"/>
+            <column name="assigned_to" value="manager"/>
+        </insert>
+
+        <rollback>
+            <!-- Remove leads -->
+            <delete tableName="leads">
+                <where>email IN (
+                    'david.kim@innovatetech.com',
+                    'm.rodriguez@globalretail.com',
+                    'lisa.thompson@growthstartup.io'
+                )</where>
+            </delete>
+            
+            <!-- Remove tenant info -->
+            <delete tableName="tenant_info" schemaName="public">
+                <where>tenant_id = 'demo-tenant'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

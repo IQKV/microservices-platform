@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="20250121000001-demo-lead-notes-and-activities" author="iqscaffold" context="demo">
+        <comment>Create demo lead notes and activities showing lead progression and sales interactions</comment>
+
+        <!-- Lead Notes for David Kim (High-Value Qualified Lead) -->
+        
+        <!-- Note 1: Initial Contact and Discovery -->
+        <insert tableName="lead_notes">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'david.kim@innovatetech.com')"/>
+            <column name="content" value="Initial discovery call completed. David is evaluating CRM solutions for their 500+ engineering team. Key pain points: current system lacks API integrations, no SSO support, and limited analytics. Budget range: $75K-$100K annually. Decision committee includes David (technical), CFO (budget), and CEO (final approval). Timeline: Decision by end of February 2025. Next steps: Technical demo scheduled for next week."/>
+            <column name="is_pinned" valueBoolean="true"/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="admin"/>
+        </insert>
+
+        <!-- Note 2: Technical Requirements -->
+        <insert tableName="lead_notes">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'david.kim@innovatetech.com')"/>
+            <column name="content" value="Technical requirements gathering session. Must-haves: REST API with rate limiting, SAML SSO integration, advanced reporting with custom dashboards, data export capabilities, and SOC2 compliance. Nice-to-haves: Mobile app, webhook integrations, and custom field support. David impressed with our API documentation and security posture. Requested POC environment for 2-week evaluation."/>
+            <column name="is_pinned" valueBoolean="false"/>
+            <column name="created_by" value="admin"/>
+            <column name="updated_by" value="admin"/>
+        </insert>
+
+        <!-- Lead Notes for Michael Rodriguez (Converted Lead) -->
+        
+        <!-- Note 3: Conversion Success Story -->
+        <insert tableName="lead_notes">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'm.rodriguez@globalretail.com')"/>
+            <column name="content" value="CONVERSION SUCCESS: Michael Rodriguez successfully converted to Enterprise customer! Lead-to-customer journey: Website inquiry (Sept 2024) → Discovery calls (Oct 2024) → Technical evaluation (Oct-Nov 2024) → Contract signed (Nov 15, 2024). Key success factors: Strong technical fit, clear ROI demonstration ($2.3M efficiency gains), and excellent relationship building. Annual contract value: $180K. This conversion validates our enterprise sales process and technical capabilities."/>
+            <column name="is_pinned" valueBoolean="true"/>
+            <column name="created_by" value="billing"/>
+            <column name="updated_by" value="billing"/>
+        </insert>
+
+        <!-- Lead Notes for Lisa Thompson (New Lead) -->
+        
+        <!-- Note 4: Partner Referral Follow-up -->
+        <insert tableName="lead_notes">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'lisa.thompson@growthstartup.io')"/>
+            <column name="content" value="Partner referral from StartupHub Accelerator. Lisa is COO at Series A startup (25 employees, $5M funding round in progress). Looking for scalable CRM to support growth from 25 to 100+ employees over next 18 months. Budget constraints due to startup stage, but has 20% partner discount. Interested in our Starter plan with upgrade path to Pro. Decision timeline tied to funding completion (expected Q1 2025)."/>
+            <column name="is_pinned" valueBoolean="false"/>
+            <column name="created_by" value="manager"/>
+            <column name="updated_by" value="manager"/>
+        </insert>
+
+        <!-- Lead Activities for David Kim -->
+        
+        <!-- Activity 1: Lead Creation -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'david.kim@innovatetech.com')"/>
+            <column name="type" value="LEAD_CREATED"/>
+            <column name="description" value="Lead created from referral by existing customer Global Retail Solutions. Michael Rodriguez recommended our platform during their quarterly business review."/>
+            <column name="metadata" value='{"referral_source": "customer", "referring_customer": "Global Retail Solutions", "referring_contact": "Michael Rodriguez", "referral_incentive": "account_credit"}'/>
+            <column name="created_by" value="admin"/>
+        </insert>
+
+        <!-- Activity 2: Lead Qualification -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'david.kim@innovatetech.com')"/>
+            <column name="type" value="STAGE_CHANGED"/>
+            <column name="description" value="Lead qualified after technical discovery call. Meets all qualification criteria: budget authority, technical need, decision timeline, and company size. Score increased from 65 to 92 based on engagement and fit."/>
+            <column name="metadata" value='{"previous_status": "CONTACTED", "new_status": "QUALIFIED", "previous_score": 65, "new_score": 92, "qualification_criteria": ["budget_authority", "technical_need", "timeline", "company_size"]}'/>
+            <column name="created_by" value="admin"/>
+        </insert>
+
+        <!-- Activity 3: Follow-up Scheduled -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'david.kim@innovatetech.com')"/>
+            <column name="type" value="FOLLOWUP_SCHEDULED"/>
+            <column name="description" value="Technical demo and POC discussion scheduled for January 28, 2025. Will cover API integrations, SSO setup, and advanced analytics capabilities. Decision committee members invited."/>
+            <column name="metadata" value='{"followup_date": "2025-01-28T15:00:00Z", "meeting_type": "technical_demo", "attendees": ["David Kim", "CTO", "Security Lead"], "agenda": ["API_demo", "SSO_integration", "analytics_walkthrough", "POC_planning"]}'/>
+            <column name="created_by" value="admin"/>
+        </insert>
+
+        <!-- Lead Activities for Michael Rodriguez -->
+        
+        <!-- Activity 4: Lead Conversion -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'm.rodriguez@globalretail.com')"/>
+            <column name="type" value="LEAD_CONVERTED"/>
+            <column name="description" value="Lead successfully converted to Enterprise customer. Contract signed for $180K annual value. Lead-to-customer cycle: 75 days from initial inquiry to signed contract. Conversion demonstrates effective enterprise sales process."/>
+            <column name="metadata" value='{"conversion_date": "2024-11-15T16:30:00Z", "contact_id": 12345, "contract_value": 180000, "plan_type": "Enterprise", "cycle_days": 75, "conversion_rate": "qualified_to_customer"}'/>
+            <column name="created_by" value="billing"/>
+        </insert>
+
+        <!-- Lead Activities for Lisa Thompson -->
+        
+        <!-- Activity 5: Partner Referral -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'lisa.thompson@growthstartup.io')"/>
+            <column name="type" value="LEAD_CREATED"/>
+            <column name="description" value="Lead created from StartupHub Accelerator partner referral program. COO at Series A startup interested in scalable CRM solution with growth potential."/>
+            <column name="metadata" value='{"referral_source": "partner", "partner_name": "StartupHub Accelerator", "partner_contact": "Jennifer Park", "discount_code": "STARTUP20", "company_stage": "Series_A"}'/>
+            <column name="created_by" value="manager"/>
+        </insert>
+
+        <!-- Activity 6: Initial Outreach -->
+        <insert tableName="lead_activities">
+            <column name="lead_id" valueComputed="(SELECT id FROM leads WHERE email = 'lisa.thompson@growthstartup.io')"/>
+            <column name="type" value="FOLLOWUP_SCHEDULED"/>
+            <column name="description" value="Initial qualification call scheduled to understand startup's CRM needs, growth timeline, and budget constraints. Will discuss Starter plan benefits and upgrade path to Pro/Enterprise."/>
+            <column name="metadata" value='{"followup_date": "2025-01-27T11:00:00Z", "meeting_type": "qualification_call", "focus_areas": ["needs_assessment", "budget_discussion", "timeline_planning", "plan_recommendation"]}'/>
+            <column name="created_by" value="manager"/>
+        </insert>
+
+        <rollback>
+            <!-- Remove lead activities -->
+            <delete tableName="lead_activities">
+                <where>lead_id IN (
+                    SELECT id FROM leads WHERE email IN (
+                        'david.kim@innovatetech.com',
+                        'm.rodriguez@globalretail.com',
+                        'lisa.thompson@growthstartup.io'
+                    )
+                )</where>
+            </delete>
+            
+            <!-- Remove lead notes -->
+            <delete tableName="lead_notes">
+                <where>lead_id IN (
+                    SELECT id FROM leads WHERE email IN (
+                        'david.kim@innovatetech.com',
+                        'm.rodriguez@globalretail.com',
+                        'lisa.thompson@growthstartup.io'
+                    )
+                )</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -7,5 +7,8 @@
 
     <!-- System-level changes (public schema) -->
     <include file="db/changelog/system/001-create-tenant-management.xml"/>
+    
+    <!-- Demo data for development and testing (context: demo) -->
+    <include file="db/changelog/demo/20250121000000-demo-contact-records.xml"/>
 
 </databaseChangeLog>

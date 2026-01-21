@@ -5,10 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <!-- System-level changes (public schema) -->
-    <include file="db/changelog/system/001-create-tenant-management.xml"/>
-    
-    <!-- Demo data for development and testing (context: demo) -->
-    <include file="db/changelog/demo/20250121000000-demo-lead-records.xml"/>
+    <!-- Demo data migrations for development and testing -->
+    <!-- Tenant-specific demo data (contacts, companies, activities, webhooks) -->
+    <include file="db/changelog/demo/20250121000001-demo-contacts-and-activities.xml"/>
 
 </databaseChangeLog>
