@@ -15,14 +15,18 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * RabbitMQ Configuration for IQScaffold User Service
  * Configures exchanges, queues, bindings, and message converters
  */
 @Configuration
+@ConditionalOnProperty(name = "iqscaffold.messaging.rabbitmq.enabled", havingValue = "true", matchIfMissing = true)
+@Profile("!test")
 public class RabbitMQConfig {
 
   private static final Logger log = LoggerFactory.getLogger(RabbitMQConfig.class);

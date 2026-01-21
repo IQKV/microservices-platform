@@ -24,7 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
    * @return Optional containing the user with authorities if found
    */
   @EntityGraph("user-with-authorities")
-  Optional<User> findByUsernameWithAuthorities(String username);
+  @Query("SELECT u FROM User u WHERE u.username = :username")
+  Optional<User> findByUsernameWithAuthorities(@Param("username") String username);
 
   /**
    * Find user by email address with authorities loaded for authentication.
@@ -33,7 +34,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
    * @return Optional containing the user with authorities if found
    */
   @EntityGraph("user-with-authorities")
-  Optional<User> findByEmailWithAuthorities(String email);
+  @Query("SELECT u FROM User u WHERE u.email = :email")
+  Optional<User> findByEmailWithAuthorities(@Param("email") String email);
 
   /**
    * Find user by username or email with complete profile (authorities and preferences).
@@ -58,7 +60,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
    * @return Optional containing the user with preferences if found
    */
   @EntityGraph("user-with-preferences")
-  Optional<User> findByIdWithPreferences(Long id);
+  @Query("SELECT u FROM User u WHERE u.id = :id")
+  Optional<User> findByIdWithPreferences(@Param("id") Long id);
 
   /**
    * Find user by username.

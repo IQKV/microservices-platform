@@ -20,6 +20,8 @@ spring:
         cache:
           use_second_level_cache: false
           use_query_cache: false
+        # Disable multi-tenancy for tests
+        multiTenancy: NONE
     open-in-view: false
 
   # Disable Redis for tests
@@ -28,6 +30,38 @@ spring:
       host: localhost
       port: 6379
       database: 1
+      
+  # Disable RabbitMQ for tests
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    
+  # Disable session management for tests
+  session:
+    store-type: none
+
+# Application properties for tests
+iqscaffold:
+  auth:
+    jwt:
+      issuer: test-issuer
+      audience: test-audience
+      expiration: 3600
+      refresh-expiration: 86400
+      algorithm: RS256
+      key-rotation-interval: 86400
+  database:
+    tenant:
+      default-schema: public
+      schema-prefix: tenant_
+  cache:
+    redis:
+      enabled: false
+  messaging:
+    rabbitmq:
+      enabled: false
 
 # Logging configuration for entity graph testing
 logging:

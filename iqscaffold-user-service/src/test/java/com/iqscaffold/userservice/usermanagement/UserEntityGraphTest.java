@@ -61,8 +61,7 @@ class UserEntityGraphTest {
         "Test", "User2", "test-tenant");
     entityManager.persist(user);
 
-    var preference = new UserPreference();
-    preference.setUser(user);
+    var preference = new UserPreference(user, "test-tenant");
     preference.setLocale("es");
     preference.setTimezone("Europe/Madrid");
     entityManager.persistAndFlush(preference);
@@ -94,8 +93,7 @@ class UserEntityGraphTest {
     user.setAuthorities(Set.of(authority));
     entityManager.persist(user);
 
-    var preference = new UserPreference();
-    preference.setUser(user);
+    var preference = new UserPreference(user, "test-tenant");
     preference.setLocale("fr");
     preference.setCurrency("EUR");
     entityManager.persistAndFlush(preference);

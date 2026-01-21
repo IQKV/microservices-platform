@@ -42,8 +42,8 @@ public class JwtConfiguration {
   }
 
   @Bean
-  public JwtDecoder jwtDecoder() {
-    // Use JWK Set for validation (supports multiple keys during rotation)
+  public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+    // Use JWK Source for validation (supports multiple keys during rotation)
     return NimbusJwtDecoder.withJwkSetUri("http://localhost:8080/.well-known/jwks.json").build();
   }
 

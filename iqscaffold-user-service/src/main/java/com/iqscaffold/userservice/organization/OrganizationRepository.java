@@ -21,19 +21,22 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
    * Find organization by tenant ID with complete profile (tenant and preferences).
    */
   @EntityGraph("organization-complete")
-  Optional<Organization> findByTenantIdWithComplete(String tenantId);
+  @Query("SELECT o FROM Organization o WHERE o.tenantId = :tenantId")
+  Optional<Organization> findByTenantIdWithComplete(@Param("tenantId") String tenantId);
 
   /**
    * Find organization by tenant ID with tenant loaded.
    */
   @EntityGraph("organization-with-tenant")
-  Optional<Organization> findByTenantIdWithTenant(String tenantId);
+  @Query("SELECT o FROM Organization o WHERE o.tenantId = :tenantId")
+  Optional<Organization> findByTenantIdWithTenant(@Param("tenantId") String tenantId);
 
   /**
    * Find organization by ID with preferences loaded.
    */
   @EntityGraph("organization-with-preferences")
-  Optional<Organization> findByIdWithPreferences(Long id);
+  @Query("SELECT o FROM Organization o WHERE o.id = :id")
+  Optional<Organization> findByIdWithPreferences(@Param("id") Long id);
 
   /**
    * Find organization by tenant ID.
