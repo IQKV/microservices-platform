@@ -1,7 +1,5 @@
 package com.iqscaffold.leadservice.lead;
 
-import com.iqscaffold.leadservice.activity.LeadActivity;
-import com.iqscaffold.leadservice.note.LeadNote;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,8 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -20,10 +18,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
+import com.iqscaffold.leadservice.activity.LeadActivity;
+import com.iqscaffold.leadservice.note.LeadNote;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,24 +32,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "leads")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@NamedEntityGraph(
-    name = "Lead.withNotes",
-    attributeNodes = @NamedAttributeNode("notes")
-)
-@NamedEntityGraph(
-    name = "Lead.withActivities", 
-    attributeNodes = @NamedAttributeNode("activities")
-)
-@NamedEntityGraph(
-    name = "Lead.withNotesAndActivities",
-    attributeNodes = {
-        @NamedAttributeNode("notes"),
-        @NamedAttributeNode("activities")
-    }
-)
-@NamedEntityGraph(
-    name = "Lead.basic"
-    // No attributeNodes - just the basic Lead entity without collections
+@NamedEntityGraph(name = "Lead.withNotes", attributeNodes = @NamedAttributeNode("leadNotes"))
+@NamedEntityGraph(name = "Lead.withActivities", attributeNodes = @NamedAttributeNode("activities"))
+@NamedEntityGraph(name = "Lead.withNotesAndActivities", attributeNodes = {
+    @NamedAttributeNode("leadNotes"),
+    @NamedAttributeNode("activities")
+})
+@NamedEntityGraph(name = "Lead.basic"
+// No attributeNodes - just the basic Lead entity without collections
 )
 public class Lead {
 
@@ -131,11 +121,11 @@ public class Lead {
   @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @OrderBy("createdAt DESC")
   @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-  private List<LeadNote> notes = new ArrayList<>();
+  private Set<LeadNote> leadNotes = new LinkedHashSet<>();
 
   @OneToMany(mappedBy = "lead", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   @OrderBy("createdAt DESC")
-  private List<LeadActivity> activities = new ArrayList<>();
+  private Set<LeadActivity> activities = new LinkedHashSet<>();
 
   // Constructors
   public Lead() {
@@ -245,6 +235,14 @@ public class Lead {
     this.notes = notes;
   }
 
+  public Set<LeadNote> getLeadNotes() {
+    return leadNotes;
+  }
+
+  public void setLeadNotes(final Set<LeadNote> leadNotes) {
+    this.leadNotes = leadNotes;
+  }
+
   public LocalDateTime getConvertedAt() {
     return convertedAt;
   }
@@ -301,30 +299,22 @@ public class Lead {
     this.assignedTo = assignedTo;
   }
 
-  public List<LeadNote> getNotes() {
-    return notes;
-  }
-
-  public void setNotes(final List<LeadNote> notes) {
-    this.notes = notes;
-  }
-
-  public List<LeadActivity> getActivities() {
+  public Set<LeadActivity> getActivities() {
     return activities;
   }
 
-  public void setActivities(final List<LeadActivity> activities) {
+  public void setActivities(final Set<LeadActivity> activities) {
     this.activities = activities;
   }
 
   // Helper methods for managing relationships
   public void addNote(final LeadNote note) {
-    notes.add(note);
+    leadNotes.add(note);
     note.setLead(this);
   }
 
   public void removeNote(final LeadNote note) {
-    notes.remove(note);
+    leadNotes.remove(note);
     note.setLead(null);
   }
 
@@ -371,14 +361,14 @@ public class Lead {
   @Override
   public String toString() {
     return "Lead{"
-           + "id=" + id
-           + ", firstName='" + firstName + '\''
-           + ", lastName='" + lastName + '\''
-           + ", email='" + email + '\''
-           + ", company='" + company + '\''
-           + ", source='" + source + '\''
-           + ", status=" + status
-           + ", score=" + score
-           + '}';
+        + "id=" + id
+        + ", firstName='" + firstName + '\''
+        + ", lastName='" + lastName + '\''
+        + ", email='" + email + '\''
+        + ", company='" + company + '\''
+        + ", source='" + source + '\''
+        + ", status=" + status
+        + ", score=" + score
+        + '}';
   }
 }

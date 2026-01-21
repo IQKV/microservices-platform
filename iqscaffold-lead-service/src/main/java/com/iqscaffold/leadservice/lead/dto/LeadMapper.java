@@ -41,8 +41,7 @@ public final class LeadMapper {
         lead.getUpdatedAt(),
         lead.getCreatedBy(),
         lead.getUpdatedBy(),
-        lead.getAssignedTo()
-    );
+        lead.getAssignedTo());
   }
 
   /**
