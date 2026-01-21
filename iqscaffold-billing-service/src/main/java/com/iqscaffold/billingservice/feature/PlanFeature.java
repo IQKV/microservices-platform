@@ -8,6 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -36,12 +39,40 @@ import org.hibernate.type.SqlTypes;
  *   <li>For TIER features: {"tier": "premium", "level": 2}</li>
  *   <li>For BOOLEAN features: {} (empty configuration)</li>
  * </ul>
+ *
+ * <h3>Entity Graphs</h3>
+ * <ul>
+ *   <li><strong>planfeature-with-plan</strong> - Eagerly loads subscription plan for billing operations</li>
+ *   <li><strong>planfeature-with-feature</strong> - Eagerly loads feature definition for feature checking</li>
+ *   <li><strong>planfeature-complete</strong> - Loads both plan and feature for complete context</li>
+ * </ul>
  */
 @Entity
 @Table(name = "plan_feature", schema = "public")
 @IdClass(PlanFeature.PlanFeatureId.class)
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.billingservice.feature.PlanFeature")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "planfeature-with-plan",
+        attributeNodes = {
+            @NamedAttributeNode("plan")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "planfeature-with-feature",
+        attributeNodes = {
+            @NamedAttributeNode("feature")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "planfeature-complete",
+        attributeNodes = {
+            @NamedAttributeNode("plan"),
+            @NamedAttributeNode("feature")
+        }
+    )
+})
 public class PlanFeature {
 
   @Id

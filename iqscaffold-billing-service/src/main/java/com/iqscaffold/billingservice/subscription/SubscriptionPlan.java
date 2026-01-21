@@ -8,6 +8,10 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -29,11 +33,39 @@ import org.hibernate.type.SqlTypes;
  * <p>
  * Represents the pricing plans available to all tenants (e.g., Starter, Pro, Enterprise).
  * Stored in public schema as plans are shared across all tenants.
+ *
+ * <h3>Entity Graphs</h3>
+ * <ul>
+ *   <li><strong>plan-with-features</strong> - Eagerly loads plan features for feature checking</li>
+ *   <li><strong>plan-with-features-and-definitions</strong> - Loads features with their definitions for complete feature context</li>
+ * </ul>
  */
 @Entity
 @Table(name = "subscription_plan", schema = "public")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.billingservice.subscription.SubscriptionPlan")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "plan-with-features",
+        attributeNodes = {
+            @NamedAttributeNode("planFeatures")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "plan-with-features-and-definitions",
+        attributeNodes = {
+            @NamedAttributeNode(value = "planFeatures", subgraph = "planFeature-with-definition")
+        },
+        subgraphs = {
+            @NamedSubgraph(
+                name = "planFeature-with-definition",
+                attributeNodes = {
+                    @NamedAttributeNode("feature")
+                }
+            )
+        }
+    )
+})
 public class SubscriptionPlan {
 
   @Id

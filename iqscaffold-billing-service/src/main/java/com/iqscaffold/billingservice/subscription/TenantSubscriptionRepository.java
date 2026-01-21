@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,43 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TenantSubscriptionRepository extends JpaRepository<TenantSubscription, UUID> {
+
+  /**
+   * Find active subscription for current tenant with plan loaded.
+   * Schema routing ensures this only searches current tenant's data.
+   *
+   * @return Optional active subscription with plan
+   */
+  @EntityGraph("subscription-with-plan")
+  @Query("SELECT s FROM TenantSubscription s WHERE s.status = 'ACTIVE'")
+  Optional<TenantSubscription> findActiveWithPlan();
+
+  /**
+   * Find active subscription with plan and features for feature access checks.
+   *
+   * @return Optional active subscription with complete feature context
+   */
+  @EntityGraph("subscription-with-plan-and-features")
+  @Query("SELECT s FROM TenantSubscription s WHERE s.status = 'ACTIVE'")
+  Optional<TenantSubscription> findActiveWithPlanAndFeatures();
+
+  /**
+   * Find subscription by ID with plan loaded for billing operations.
+   *
+   * @param id Subscription ID
+   * @return Optional subscription with plan
+   */
+  @EntityGraph("subscription-with-plan")
+  Optional<TenantSubscription> findByIdWithPlan(UUID id);
+
+  /**
+   * Find subscription by Stripe subscription ID with plan loaded.
+   *
+   * @param stripeSubscriptionId Stripe subscription ID
+   * @return Optional subscription with plan
+   */
+  @EntityGraph("subscription-with-plan")
+  Optional<TenantSubscription> findByStripeSubscriptionIdWithPlan(String stripeSubscriptionId);
 
   /**
    * Find active subscription for current tenant.

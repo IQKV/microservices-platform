@@ -9,6 +9,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -26,11 +30,39 @@ import org.hibernate.type.SqlTypes;
  * Stored in tenant-specific schema for maximum isolation.
  * Each tenant can have one active subscription at a time.
  * Tenant context is determined by the schema, not a column.
+ *
+ * <h3>Entity Graphs</h3>
+ * <ul>
+ *   <li><strong>subscription-with-plan</strong> - Eagerly loads subscription plan for billing operations</li>
+ *   <li><strong>subscription-with-plan-and-features</strong> - Loads plan with features for feature access checks</li>
+ * </ul>
  */
 @Entity
 @Table(name = "tenant_subscription")
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.billingservice.subscription.TenantSubscription")
+@NamedEntityGraphs({
+    @NamedEntityGraph(
+        name = "subscription-with-plan",
+        attributeNodes = {
+            @NamedAttributeNode("plan")
+        }
+    ),
+    @NamedEntityGraph(
+        name = "subscription-with-plan-and-features",
+        attributeNodes = {
+            @NamedAttributeNode(value = "plan", subgraph = "plan-with-features")
+        },
+        subgraphs = {
+            @NamedSubgraph(
+                name = "plan-with-features",
+                attributeNodes = {
+                    @NamedAttributeNode("planFeatures")
+                }
+            )
+        }
+    )
+})
 public class TenantSubscription {
 
   @Id
