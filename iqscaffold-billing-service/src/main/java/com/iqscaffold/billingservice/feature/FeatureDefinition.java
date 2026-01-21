@@ -2,6 +2,7 @@ package com.iqscaffold.billingservice.feature;
 
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,24 +15,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.iqscaffold.billingservice.shared.JsonListConverter;
+import com.iqscaffold.billingservice.shared.JsonMapConverter;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * Platform-wide feature definition entity.
  *
- * <p>Defines all available features that can be enabled in subscription plans.
+ * <p>
+ * Defines all available features that can be enabled in subscription plans.
  * Stored in public schema as features are shared across all tenants.
  *
- * <p>Features support different types:
+ * <p>
+ * Features support different types:
  * <ul>
- *   <li>BOOLEAN - Simple on/off features</li>
- *   <li>QUOTA - Usage-based features with limits</li>
- *   <li>LIMIT - Capacity-based features</li>
- *   <li>TIER - Multi-level features</li>
+ * <li>BOOLEAN - Simple on/off features</li>
+ * <li>QUOTA - Usage-based features with limits</li>
+ * <li>LIMIT - Capacity-based features</li>
+ * <li>TIER - Multi-level features</li>
  * </ul>
  *
- * <p>Example feature definitions:
+ * <p>
+ * Example feature definitions:
+ * 
  * <pre>
  * {
  *   "featureKey": "advanced_analytics",
@@ -72,9 +79,11 @@ public class FeatureDefinition {
   private String category;
 
   @Column(name = "metadata", columnDefinition = "text")
+  @Convert(converter = JsonMapConverter.class)
   private Map<String, Object> metadata;
 
   @Column(name = "dependencies", columnDefinition = "text")
+  @Convert(converter = JsonListConverter.class)
   private List<String> dependencies;
 
   @Column(name = "deprecated", nullable = false)
@@ -102,7 +111,8 @@ public class FeatureDefinition {
   public FeatureDefinition() {
   }
 
-  public FeatureDefinition(final String featureKey, final String displayName, final String description, final FeatureType type) {
+  public FeatureDefinition(final String featureKey, final String displayName, final String description,
+      final FeatureType type) {
     this.featureKey = featureKey;
     this.displayName = displayName;
     this.description = description;
@@ -300,10 +310,10 @@ public class FeatureDefinition {
   @Override
   public String toString() {
     return "FeatureDefinition{" +
-           "featureKey='" + featureKey + '\'' +
-           ", displayName='" + displayName + '\'' +
-           ", type=" + type +
-           ", deprecated=" + deprecated +
-           '}';
+        "featureKey='" + featureKey + '\'' +
+        ", displayName='" + displayName + '\'' +
+        ", type=" + type +
+        ", deprecated=" + deprecated +
+        '}';
   }
 }

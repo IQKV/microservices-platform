@@ -1,6 +1,7 @@
 package com.iqscaffold.billingservice.feature;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,24 +13,25 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 
+import com.iqscaffold.billingservice.shared.JsonMapConverter;
+
 /**
  * Entity for tracking feature usage across tenants.
  *
- * <p>Stores usage events for analytics, billing, and monitoring purposes.
+ * <p>
+ * Stores usage events for analytics, billing, and monitoring purposes.
  * This data helps understand feature adoption and usage patterns.
  *
- * <p>Stored in tenant-specific schema for data isolation.
+ * <p>
+ * Stored in tenant-specific schema for data isolation.
  */
 @Entity
-@Table(
-    name = "feature_usage_log",
-    indexes = {
-        @Index(name = "idx_feature_usage_tenant_feature", columnList = "tenant_id, feature_key"),
-        @Index(name = "idx_feature_usage_timestamp", columnList = "timestamp"),
-        @Index(name = "idx_feature_usage_tenant_timestamp", columnList = "tenant_id, timestamp"),
-        @Index(name = "idx_feature_usage_feature_timestamp", columnList = "feature_key, timestamp")
-    }
-)
+@Table(name = "feature_usage_log", indexes = {
+    @Index(name = "idx_feature_usage_tenant_feature", columnList = "tenant_id, feature_key"),
+    @Index(name = "idx_feature_usage_timestamp", columnList = "timestamp"),
+    @Index(name = "idx_feature_usage_tenant_timestamp", columnList = "tenant_id, timestamp"),
+    @Index(name = "idx_feature_usage_feature_timestamp", columnList = "feature_key, timestamp")
+})
 public class FeatureUsageLog {
 
   @Id
@@ -58,6 +60,7 @@ public class FeatureUsageLog {
   private String correlationId;
 
   @Column(name = "metadata", columnDefinition = "text")
+  @Convert(converter = JsonMapConverter.class)
   private Map<String, Object> metadata;
 
   // Constructors
@@ -178,11 +181,11 @@ public class FeatureUsageLog {
   @Override
   public String toString() {
     return "FeatureUsageLog{" +
-           "id=" + id +
-           ", tenantId='" + tenantId + '\'' +
-           ", featureKey='" + featureKey + '\'' +
-           ", endpoint='" + endpoint + '\'' +
-           ", timestamp=" + timestamp +
-           '}';
+        "id=" + id +
+        ", tenantId='" + tenantId + '\'' +
+        ", featureKey='" + featureKey + '\'' +
+        ", endpoint='" + endpoint + '\'' +
+        ", timestamp=" + timestamp +
+        '}';
   }
 }

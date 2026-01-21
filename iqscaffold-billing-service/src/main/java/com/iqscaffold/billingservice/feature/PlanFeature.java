@@ -2,6 +2,7 @@ package com.iqscaffold.billingservice.feature;
 
 import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.iqscaffold.billingservice.shared.JsonMapConverter;
 import com.iqscaffold.billingservice.subscription.SubscriptionPlan;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -27,22 +29,29 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 /**
  * Association entity between subscription plans and features.
  *
- * <p>Defines which features are enabled for each subscription plan and their specific configuration.
- * Stored in public schema as plan-feature associations are shared across all tenants.
+ * <p>
+ * Defines which features are enabled for each subscription plan and their
+ * specific configuration.
+ * Stored in public schema as plan-feature associations are shared across all
+ * tenants.
  *
- * <p>The configuration field allows plan-specific customization of features:
+ * <p>
+ * The configuration field allows plan-specific customization of features:
  * <ul>
- *   <li>For QUOTA features: {"quota": 50000, "resetPeriod": "monthly"}</li>
- *   <li>For LIMIT features: {"limit": 100, "unit": "users"}</li>
- *   <li>For TIER features: {"tier": "premium", "level": 2}</li>
- *   <li>For BOOLEAN features: {} (empty configuration)</li>
+ * <li>For QUOTA features: {"quota": 50000, "resetPeriod": "monthly"}</li>
+ * <li>For LIMIT features: {"limit": 100, "unit": "users"}</li>
+ * <li>For TIER features: {"tier": "premium", "level": 2}</li>
+ * <li>For BOOLEAN features: {} (empty configuration)</li>
  * </ul>
  *
  * <h3>Entity Graphs</h3>
  * <ul>
- *   <li><strong>planfeature-with-plan</strong> - Eagerly loads subscription plan for billing operations</li>
- *   <li><strong>planfeature-with-feature</strong> - Eagerly loads feature definition for feature checking</li>
- *   <li><strong>planfeature-complete</strong> - Loads both plan and feature for complete context</li>
+ * <li><strong>planfeature-with-plan</strong> - Eagerly loads subscription plan
+ * for billing operations</li>
+ * <li><strong>planfeature-with-feature</strong> - Eagerly loads feature
+ * definition for feature checking</li>
+ * <li><strong>planfeature-complete</strong> - Loads both plan and feature for
+ * complete context</li>
  * </ul>
  */
 @Entity
@@ -51,25 +60,16 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "com.iqscaffold.billingservice.feature.PlanFeature")
 @NamedEntityGraphs({
-    @NamedEntityGraph(
-        name = "planfeature-with-plan",
-        attributeNodes = {
-            @NamedAttributeNode("plan")
-        }
-    ),
-    @NamedEntityGraph(
-        name = "planfeature-with-feature",
-        attributeNodes = {
-            @NamedAttributeNode("feature")
-        }
-    ),
-    @NamedEntityGraph(
-        name = "planfeature-complete",
-        attributeNodes = {
-            @NamedAttributeNode("plan"),
-            @NamedAttributeNode("feature")
-        }
-    )
+    @NamedEntityGraph(name = "planfeature-with-plan", attributeNodes = {
+        @NamedAttributeNode("plan")
+    }),
+    @NamedEntityGraph(name = "planfeature-with-feature", attributeNodes = {
+        @NamedAttributeNode("feature")
+    }),
+    @NamedEntityGraph(name = "planfeature-complete", attributeNodes = {
+        @NamedAttributeNode("plan"),
+        @NamedAttributeNode("feature")
+    })
 })
 public class PlanFeature {
 
@@ -87,6 +87,7 @@ public class PlanFeature {
   private boolean enabled = true;
 
   @Column(name = "configuration", columnDefinition = "text")
+  @Convert(converter = JsonMapConverter.class)
   private Map<String, Object> configuration;
 
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -111,7 +112,8 @@ public class PlanFeature {
     this.enabled = enabled;
   }
 
-  public PlanFeature(final SubscriptionPlan plan, final FeatureDefinition feature, final boolean enabled, final Map<String, Object> configuration) {
+  public PlanFeature(final SubscriptionPlan plan, final FeatureDefinition feature, final boolean enabled,
+      final Map<String, Object> configuration) {
     this.plan = plan;
     this.feature = feature;
     this.enabled = enabled;
@@ -279,10 +281,10 @@ public class PlanFeature {
   @Override
   public String toString() {
     return "PlanFeature{" +
-           "plan=" + (plan != null ? plan.getId() : null) +
-           ", feature=" + (feature != null ? feature.getFeatureKey() : null) +
-           ", enabled=" + enabled +
-           '}';
+        "plan=" + (plan != null ? plan.getId() : null) +
+        ", feature=" + (feature != null ? feature.getFeatureKey() : null) +
+        ", enabled=" + enabled +
+        '}';
   }
 
   /**
