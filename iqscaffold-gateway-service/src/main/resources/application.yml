@@ -8,6 +8,9 @@ spring:
     allow-bean-definition-overriding: true
   profiles:
     active: local,crm
+  output:
+    ansi:
+      enabled: always
   data:
     redis:
       host: ${IQSCAFFOLD_CACHE_REDIS_HOST:localhost}

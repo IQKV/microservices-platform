@@ -4,7 +4,9 @@ spring:
   
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-  
+  output:
+    ansi:
+      enabled: always
   datasource:
     url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://localhost:5436/iqscaffold_pipeline_local}
     username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_pipeline}

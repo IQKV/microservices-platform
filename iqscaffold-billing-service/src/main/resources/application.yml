@@ -10,6 +10,9 @@ spring:
     name: iqscaffold-billing-service
   profiles:
     active: local
+  output:
+    ansi:
+      enabled: always
   
   lifecycle:
     timeout-per-shutdown-phase: 30s

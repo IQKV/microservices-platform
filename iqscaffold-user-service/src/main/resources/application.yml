@@ -6,7 +6,9 @@ spring:
     name: iqscaffold-user-service
   profiles:
     active: local
-  
+  output:
+    ansi:
+      enabled: always
   # Internationalization Configuration
   messages:
     basename: i18n/messages
