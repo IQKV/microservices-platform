@@ -28,10 +28,10 @@ public interface PipelineItemRepository extends JpaRepository<PipelineItem, Long
 
   Page<PipelineItem> findByStageId(Long stageId, Pageable pageable);
 
+  List<PipelineItem> findByStageId(Long stageId);
+
   @EntityGraph("PipelineItem.withStage")
   Page<PipelineItem> findWithStageByStageId(Long stageId, Pageable pageable);
-
-  List<PipelineItem> findByStageId(Long stageId);
 
   @EntityGraph("PipelineItem.withStage")
   List<PipelineItem> findWithStageByStageId(Long stageId);

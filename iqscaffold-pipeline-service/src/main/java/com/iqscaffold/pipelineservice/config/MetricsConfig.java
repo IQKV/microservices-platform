@@ -12,18 +12,25 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Metrics configuration for Pipeline Service observability.
  *
- * <p>This configuration provides custom Prometheus metrics for monitoring
+ * <p>
+ * This configuration provides custom Prometheus metrics for monitoring
  * pipeline operations, conversion tracking, and follow-up management.
  *
  * <h3>Custom Metrics:</h3>
  * <ul>
- *   <li><strong>pipeline.stage.changed</strong> - Counter for stage transition events</li>
- *   <li><strong>pipeline.lead.converted</strong> - Counter for lead conversion events (Won stage)</li>
- *   <li><strong>pipeline.lead.lost</strong> - Counter for lost lead events</li>
- *   <li><strong>pipeline.followup.scheduled</strong> - Counter for follow-up scheduling</li>
- *   <li><strong>pipeline.followup.completed</strong> - Counter for completed follow-ups</li>
- *   <li><strong>pipeline.conversion.rate</strong> - Gauge for conversion rate percentage</li>
- *   <li><strong>pipeline.stage.duration</strong> - Timer for time spent in stages</li>
+ * <li><strong>pipeline.stage.changed</strong> - Counter for stage transition
+ * events</li>
+ * <li><strong>pipeline.lead.converted</strong> - Counter for lead conversion
+ * events (Won stage)</li>
+ * <li><strong>pipeline.lead.lost</strong> - Counter for lost lead events</li>
+ * <li><strong>pipeline.followup.scheduled</strong> - Counter for follow-up
+ * scheduling</li>
+ * <li><strong>pipeline.followup.completed</strong> - Counter for completed
+ * follow-ups</li>
+ * <li><strong>pipeline.conversion.rate</strong> - Gauge for conversion rate
+ * percentage</li>
+ * <li><strong>pipeline.stage.duration</strong> - Timer for time spent in
+ * stages</li>
  * </ul>
  *
  * @see MeterRegistry
@@ -114,10 +121,10 @@ public class MetricsConfig {
   @Bean
   public Gauge conversionRateGauge(final MeterRegistry registry) {
     return Gauge.builder("pipeline.conversion.rate", this, config -> {
-          int total = config.totalLeads.get();
-          int converted = config.convertedLeads.get();
-          return total > 0 ? (converted * 100.0 / total) : 0.0;
-        })
+      int total = config.totalLeads.get();
+      int converted = config.convertedLeads.get();
+      return total > 0 ? (converted * 100.0 / total) : 0.0;
+    })
         .description("Lead conversion rate percentage")
         .tag("service", "pipeline-service")
         .register(registry);
