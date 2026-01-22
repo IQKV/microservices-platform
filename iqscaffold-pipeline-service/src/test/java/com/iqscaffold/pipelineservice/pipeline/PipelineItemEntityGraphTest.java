@@ -47,7 +47,11 @@ class PipelineItemEntityGraphTest extends BaseIntegrationTest {
     testPipelineItem.setDaysInStage(5);
     testPipelineItem.setCreatedBy("test-user");
     testPipelineItem.setUpdatedBy("test-user");
+    testPipelineItem.setStage(testStage); // Manually set the relationship
     testPipelineItem = pipelineItemRepository.save(testPipelineItem);
+
+    // Also add the item to the stage's collection
+    testStage.getPipelineItems().add(testPipelineItem);
   }
 
   @Test
@@ -168,6 +172,7 @@ class PipelineItemEntityGraphTest extends BaseIntegrationTest {
     PipelineItem itemWithInactiveStage = new PipelineItem(67890L, inactiveStage.getId());
     itemWithInactiveStage.setCreatedBy("test-user");
     itemWithInactiveStage.setUpdatedBy("test-user");
+    itemWithInactiveStage.setStage(inactiveStage); // Set the relationship
     itemWithInactiveStage = pipelineItemRepository.save(itemWithInactiveStage);
 
     // When
@@ -193,6 +198,7 @@ class PipelineItemEntityGraphTest extends BaseIntegrationTest {
     item2.setProbability(new BigDecimal("50.00"));
     item2.setCreatedBy("test-user");
     item2.setUpdatedBy("test-user");
+    item2.setStage(testStage); // Set the relationship
     pipelineItemRepository.save(item2);
 
     PipelineItem item3 = new PipelineItem(34567L, testStage.getId());
@@ -200,6 +206,7 @@ class PipelineItemEntityGraphTest extends BaseIntegrationTest {
     item3.setProbability(new BigDecimal("90.00"));
     item3.setCreatedBy("test-user");
     item3.setUpdatedBy("test-user");
+    item3.setStage(testStage); // Set the relationship
     pipelineItemRepository.save(item3);
 
     // When

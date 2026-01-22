@@ -54,21 +54,31 @@ class PipelineStageEntityGraphTest extends BaseIntegrationTest {
     item1.setProbability(new BigDecimal("75.00"));
     item1.setCreatedBy("test-user");
     item1.setUpdatedBy("test-user");
-    pipelineItemRepository.save(item1);
+    item1.setStage(testStage); // Set the relationship
+    item1 = pipelineItemRepository.save(item1);
 
     PipelineItem item2 = new PipelineItem(23456L, testStage.getId());
     item2.setExpectedValue(new BigDecimal("25000.00"));
     item2.setProbability(new BigDecimal("50.00"));
     item2.setCreatedBy("test-user");
     item2.setUpdatedBy("test-user");
-    pipelineItemRepository.save(item2);
+    item2.setStage(testStage); // Set the relationship
+    item2 = pipelineItemRepository.save(item2);
+
+    // Add items to the stage's collection
+    testStage.getPipelineItems().add(item1);
+    testStage.getPipelineItems().add(item2);
 
     // Create one item for inactive stage
     PipelineItem item3 = new PipelineItem(34567L, inactiveStage.getId());
     item3.setExpectedValue(new BigDecimal("10000.00"));
     item3.setCreatedBy("test-user");
     item3.setUpdatedBy("test-user");
-    pipelineItemRepository.save(item3);
+    item3.setStage(inactiveStage); // Set the relationship
+    item3 = pipelineItemRepository.save(item3);
+
+    // Add item to the inactive stage's collection
+    inactiveStage.getPipelineItems().add(item3);
   }
 
   @Test

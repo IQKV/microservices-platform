@@ -1,7 +1,9 @@
 package com.iqscaffold.pipelineservice.pipeline;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -78,7 +80,7 @@ public class PipelineStage {
   @Column(name = "updated_by", nullable = false)
   private String updatedBy;
 
-  @OneToMany(mappedBy = "stage")
+  @OneToMany(mappedBy = "stage", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   private List<PipelineItem> pipelineItems = new ArrayList<>();
 
   public PipelineStage() {
