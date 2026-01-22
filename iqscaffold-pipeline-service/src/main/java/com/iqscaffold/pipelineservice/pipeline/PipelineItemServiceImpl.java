@@ -11,6 +11,7 @@ import com.iqscaffold.pipelineservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class PipelineItemServiceImpl implements PipelineItemService {
   public PipelineItemServiceImpl(
       final PipelineItemRepository pipelineItemRepository,
       final PipelineStageRepository pipelineStageRepository,
-      final RabbitTemplate rabbitTemplate) {
+      @Autowired(required = false) final RabbitTemplate rabbitTemplate) {
     this.pipelineItemRepository = pipelineItemRepository;
     this.pipelineStageRepository = pipelineStageRepository;
     this.rabbitTemplate = rabbitTemplate;
@@ -120,20 +121,25 @@ public class PipelineItemServiceImpl implements PipelineItemService {
 
     final PipelineItem savedItem = pipelineItemRepository.save(item);
 
-    // Publish stage.changed event
+    // Publish stage.changed event if RabbitTemplate is available
     publishStageChangeEvent(item.getLeadId(), oldStageId, newStageId);
 
     return savedItem;
   }
 
   /**
-   * Publishes a stage.changed event to RabbitMQ.
+   * Publishes a stage.changed event to RabbitMQ if RabbitTemplate is available.
    *
    * @param leadId     the lead ID
    * @param oldStageId the old stage ID
    * @param newStageId the new stage ID
    */
   private void publishStageChangeEvent(final Long leadId, final Long oldStageId, final Long newStageId) {
+    if (rabbitTemplate == null) {
+      log.debug("RabbitTemplate not available, skipping stage.changed event for lead ID: {}", leadId);
+      return;
+    }
+
     try {
       final String tenantId = TenantContext.getTenantId();
       final StageChangeEvent event = new StageChangeEvent(leadId, oldStageId, newStageId, tenantId);

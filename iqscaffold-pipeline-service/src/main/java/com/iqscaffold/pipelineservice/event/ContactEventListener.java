@@ -11,6 +11,8 @@ import com.iqscaffold.pipelineservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * the pipeline item is moved to the "Won" stage.
  */
 @Component
+@ConditionalOnClass(ConnectionFactory.class)
 public class ContactEventListener {
 
   private static final Logger log = LoggerFactory.getLogger(ContactEventListener.class);

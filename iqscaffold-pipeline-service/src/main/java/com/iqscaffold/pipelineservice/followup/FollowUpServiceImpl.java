@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import com.iqscaffold.pipelineservice.event.FollowUpEventPublisher;
 import com.iqscaffold.pipelineservice.shared.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class FollowUpServiceImpl implements FollowUpService {
 
   public FollowUpServiceImpl(
       final FollowUpRepository followUpRepository,
-      final FollowUpEventPublisher followUpEventPublisher) {
+      @Autowired(required = false) final FollowUpEventPublisher followUpEventPublisher) {
     this.followUpRepository = followUpRepository;
     this.followUpEventPublisher = followUpEventPublisher;
   }
@@ -42,8 +43,10 @@ public class FollowUpServiceImpl implements FollowUpService {
   public FollowUp scheduleFollowUp(final FollowUp followUp) {
     final FollowUp savedFollowUp = followUpRepository.save(followUp);
 
-    // Publish followup.scheduled event
-    followUpEventPublisher.publishFollowUpScheduled(savedFollowUp);
+    // Publish followup.scheduled event if publisher is available
+    if (followUpEventPublisher != null) {
+      followUpEventPublisher.publishFollowUpScheduled(savedFollowUp);
+    }
 
     return savedFollowUp;
   }
@@ -127,8 +130,10 @@ public class FollowUpServiceImpl implements FollowUpService {
 
     final FollowUp savedFollowUp = followUpRepository.save(followUp);
 
-    // Publish followup.completed event
-    followUpEventPublisher.publishFollowUpCompleted(savedFollowUp);
+    // Publish followup.completed event if publisher is available
+    if (followUpEventPublisher != null) {
+      followUpEventPublisher.publishFollowUpCompleted(savedFollowUp);
+    }
 
     return savedFollowUp;
   }

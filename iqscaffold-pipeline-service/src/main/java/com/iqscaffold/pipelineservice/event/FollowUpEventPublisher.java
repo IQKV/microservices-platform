@@ -10,6 +10,7 @@ import com.iqscaffold.pipelineservice.tenancy.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
  * prevent disrupting the main business flow.
  */
 @Component
+@ConditionalOnBean(RabbitTemplate.class)
 public class FollowUpEventPublisher {
 
   private static final Logger log = LoggerFactory.getLogger(FollowUpEventPublisher.class);

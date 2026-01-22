@@ -9,6 +9,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * Configures exchanges, queues, and bindings for lead lifecycle events.
  */
 @Configuration
+@ConditionalOnClass(ConnectionFactory.class)
 public class RabbitMQConfig {
 
   public static final String EXCHANGE_NAME = "crm.events";
@@ -31,26 +34,31 @@ public class RabbitMQConfig {
   public static final String FOLLOWUP_COMPLETED_ROUTING_KEY = "followup.completed";
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public TopicExchange crmEventsExchange() {
     return new TopicExchange(EXCHANGE_NAME, true, false);
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Queue leadCreatedQueue() {
     return new Queue(LEAD_CREATED_QUEUE, true);
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Queue leadDeletedQueue() {
     return new Queue(LEAD_DELETED_QUEUE, true);
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Queue contactCreatedQueue() {
     return new Queue(CONTACT_CREATED_QUEUE, true);
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Binding leadCreatedBinding(final Queue leadCreatedQueue, final TopicExchange crmEventsExchange) {
     return BindingBuilder.bind(leadCreatedQueue)
         .to(crmEventsExchange)
@@ -58,6 +66,7 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Binding leadDeletedBinding(final Queue leadDeletedQueue, final TopicExchange crmEventsExchange) {
     return BindingBuilder.bind(leadDeletedQueue)
         .to(crmEventsExchange)
@@ -65,6 +74,7 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public Binding contactCreatedBinding(final Queue contactCreatedQueue, final TopicExchange crmEventsExchange) {
     return BindingBuilder.bind(contactCreatedQueue)
         .to(crmEventsExchange)
@@ -77,6 +87,7 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
@@ -84,6 +95,7 @@ public class RabbitMQConfig {
   }
 
   @Bean
+  @ConditionalOnBean(ConnectionFactory.class)
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
       final ConnectionFactory connectionFactory) {
     final SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
