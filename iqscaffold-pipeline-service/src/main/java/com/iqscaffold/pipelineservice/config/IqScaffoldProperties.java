@@ -99,7 +99,7 @@ public class IqScaffoldProperties {
   }
 
   public static class Services {
-    private String leadServiceUrl = "http://localhost:8084";
+    private String leadServiceUrl = "http://lead-service:8080";
 
     public String getLeadServiceUrl() {
       return leadServiceUrl;

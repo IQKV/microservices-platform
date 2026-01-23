@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
   // Entity Graph Methods - Optimized fetching strategies
-  
+
   /**
    * Find lead by ID with notes loaded eagerly.
    * Use this when you need to display lead details with note history.

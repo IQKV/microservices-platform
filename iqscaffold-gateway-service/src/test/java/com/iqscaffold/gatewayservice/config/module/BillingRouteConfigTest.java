@@ -73,7 +73,7 @@ class BillingRouteConfigTest {
         .toList();
 
     assertThat(billingRoutes).allMatch(route ->
-        route.getUri().toString().contains("localhost:8082")
+        route.getUri().toString().contains("billing-service:8080")
         || route.getUri().toString().contains("billing-service"));
   }
 

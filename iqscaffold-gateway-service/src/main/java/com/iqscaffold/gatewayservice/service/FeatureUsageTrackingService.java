@@ -25,7 +25,7 @@ public class FeatureUsageTrackingService {
 
   public FeatureUsageTrackingService(final WebClient.Builder webClientBuilder) {
     this.billingServiceClient = webClientBuilder
-        .baseUrl("http://iqscaffold-billing-service")
+        .baseUrl("http://billing-service")
         .build();
   }
 

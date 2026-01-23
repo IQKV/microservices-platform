@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(name = "spring.cloud.gateway.enabled", havingValue = "true", matchIfMissing = true)
 public class BillingRouteConfig {
 
-  @Value("${iqscaffold.gateway.routing.services.billing-service.uri:http://localhost:8082}")
+  @Value("${iqscaffold.gateway.routing.services.billing-service.uri:http://billing-service:8080}")
   private String billingServiceUri;
 
   @Value("${iqscaffold.gateway.routing.api-prefix.strip-count:0}")

@@ -66,7 +66,7 @@ public class ApiDocumentationResource {
                         "description": "Payments, subscriptions and invoicing",
                         "swaggerUi": "http://localhost:8080/billing-service/swagger-ui.html",
                         "apiDocs": "http://localhost:8080/billing-service/api-docs",
-                        "directUri": "http://localhost:8082",
+                        "directUri": "http://billing-service:8080",
                         "enabled": true,
                         "specializedGroups": [
                           {

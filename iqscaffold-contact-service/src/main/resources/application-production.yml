@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://prod-db:5432/iqscaffold_contact_production}
+    url: ${IQSCAFFOLD_DATABASE_URL:jdbc:postgresql://production-db:5432/iqscaffold_contact_production}
     username: ${IQSCAFFOLD_DATABASE_USERNAME:iqscaffold_contact}
     password: ${IQSCAFFOLD_DATABASE_PASSWORD}
     hikari:

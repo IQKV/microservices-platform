@@ -3,7 +3,7 @@ iqscaffold:
     routing:
       services:
         billing-service:
-          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI:http://localhost:8082}
+          uri: ${IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI:http://billing-service:8080}
           path: /v1/**
           enabled: true
           connect-timeout: 5000

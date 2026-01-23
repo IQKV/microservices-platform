@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8080
   shutdown: graceful
   compression:
     enabled: true
@@ -230,6 +230,14 @@ resilience4j:
         failureRateThreshold: 60
         slowCallRateThreshold: 80
         slowCallDurationThreshold: 3s
+      pipelineService:
+        baseConfig: default
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 60
+        slowCallRateThreshold: 80
+        slowCallDurationThreshold: 3s
 
   retry:
     configs:
@@ -255,6 +263,11 @@ resilience4j:
         maxAttempts: 3
         waitDuration: 500ms
         exponentialBackoffMultiplier: 2
+      pipelineService:
+        baseConfig: default
+        maxAttempts: 3
+        waitDuration: 500ms
+        exponentialBackoffMultiplier: 2
 
   timelimiter:
     configs:
@@ -263,6 +276,9 @@ resilience4j:
         cancelRunningFuture: true
     instances:
       contactService:
+        baseConfig: default
+        timeoutDuration: 10s
+      pipelineService:
         baseConfig: default
         timeoutDuration: 10s
 
@@ -286,7 +302,10 @@ iqscaffold:
   user-service-url: ${USER_SERVICE_URL:http://user-service:8080}
   
   # Contact Service URL for lead conversion
-  contact-service-url: ${CONTACT_SERVICE_URL:http://localhost:8083}
+  contact-service-url: ${CONTACT_SERVICE_URL:http://contact-service:8080}
+  
+  # Pipeline Service URL for pipeline item creation
+  pipeline-service-url: ${PIPELINE_SERVICE_URL:http://pipeline-service:8080}
   
   # Internationalization configuration
   i18n:

@@ -27,8 +27,11 @@ import reactor.netty.http.client.HttpClient;
 @Configuration
 public class WebClientConfig {
 
-  @Value("${iqscaffold.contact-service-url:http://localhost:8083}")
+  @Value("${iqscaffold.contact-service-url:http://contact-service:8080}")
   private String contactServiceUrl;
+
+  @Value("${iqscaffold.pipeline-service-url:http://lead-service:8080}")
+  private String pipelineServiceUrl;
 
   /**
    * Creates a WebClient bean for contact service communication.
@@ -46,6 +49,29 @@ public class WebClientConfig {
 
     return WebClient.builder()
         .baseUrl(contactServiceUrl)
+        .clientConnector(new ReactorClientHttpConnector(httpClient))
+        .codecs(configurer -> configurer
+            .defaultCodecs()
+            .maxInMemorySize(16 * 1024 * 1024)) // 16MB
+        .build();
+  }
+
+  /**
+   * Creates a WebClient bean for pipeline service communication.
+   *
+   * @return Configured WebClient instance
+   */
+  @Bean
+  public WebClient pipelineServiceWebClient() {
+    HttpClient httpClient = HttpClient.create()
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+        .responseTimeout(Duration.ofSeconds(5))
+        .doOnConnected(conn ->
+            conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.SECONDS))
+                .addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.SECONDS)));
+
+    return WebClient.builder()
+        .baseUrl(pipelineServiceUrl)
         .clientConnector(new ReactorClientHttpConnector(httpClient))
         .codecs(configurer -> configurer
             .defaultCodecs()

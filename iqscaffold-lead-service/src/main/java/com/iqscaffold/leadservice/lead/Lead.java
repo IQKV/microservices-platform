@@ -100,6 +100,9 @@ public class Lead {
   @Column(name = "converted_to_contact_id")
   private Long convertedToContactId;
 
+  @Column(name = "pipeline_item_id")
+  private Long pipelineItemId;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -259,6 +262,14 @@ public class Lead {
     this.convertedToContactId = convertedToContactId;
   }
 
+  public Long getPipelineItemId() {
+    return pipelineItemId;
+  }
+
+  public void setPipelineItemId(final Long pipelineItemId) {
+    this.pipelineItemId = pipelineItemId;
+  }
+
   public LocalDateTime getCreatedAt() {
     return createdAt;
   }
@@ -361,14 +372,14 @@ public class Lead {
   @Override
   public String toString() {
     return "Lead{"
-        + "id=" + id
-        + ", firstName='" + firstName + '\''
-        + ", lastName='" + lastName + '\''
-        + ", email='" + email + '\''
-        + ", company='" + company + '\''
-        + ", source='" + source + '\''
-        + ", status=" + status
-        + ", score=" + score
-        + '}';
+           + "id=" + id
+           + ", firstName='" + firstName + '\''
+           + ", lastName='" + lastName + '\''
+           + ", email='" + email + '\''
+           + ", company='" + company + '\''
+           + ", source='" + source + '\''
+           + ", status=" + status
+           + ", score=" + score
+           + '}';
   }
 }

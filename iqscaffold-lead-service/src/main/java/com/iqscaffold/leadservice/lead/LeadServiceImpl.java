@@ -9,7 +9,6 @@ import com.iqscaffold.leadservice.infrastructure.client.ContactServiceClient;
 import com.iqscaffold.leadservice.lead.dto.LeadDtos;
 import com.iqscaffold.leadservice.lead.dto.LeadMapper;
 import com.iqscaffold.leadservice.shared.exception.DuplicateResourceException;
-import com.iqscaffold.leadservice.shared.exception.LeadConversionException;
 import com.iqscaffold.leadservice.shared.exception.LeadNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +26,17 @@ public class LeadServiceImpl implements LeadService {
   private final LeadRepository leadRepository;
   private final ContactServiceClient contactServiceClient;
   private final LeadEventPublisher leadEventPublisher;
+  private final ConversionOrchestrator conversionOrchestrator;
 
   public LeadServiceImpl(
       final LeadRepository leadRepository,
       final ContactServiceClient contactServiceClient,
-      final LeadEventPublisher leadEventPublisher) {
+      final LeadEventPublisher leadEventPublisher,
+      final ConversionOrchestrator conversionOrchestrator) {
     this.leadRepository = leadRepository;
     this.contactServiceClient = contactServiceClient;
     this.leadEventPublisher = leadEventPublisher;
+    this.conversionOrchestrator = conversionOrchestrator;
   }
 
   @Override
@@ -243,107 +245,27 @@ public class LeadServiceImpl implements LeadService {
       final Long id,
       final LeadDtos.ConvertLeadRequest request,
       final String bearerToken) {
-    log.info("Converting lead {} to contact", id);
+    log.info("Converting lead {} to contact using ConversionOrchestrator", id);
 
-    // Get the lead
-    Lead lead = leadRepository.findById(id)
-        .orElseThrow(() -> new LeadNotFoundException("Lead not found with id: " + id));
+    // Extract user ID from bearer token for audit purposes
+    String convertedBy = extractUserIdFromToken(bearerToken);
 
-    // Validate lead can be converted
-    if (lead.getStatus() == LeadStatus.CONVERTED) {
-      throw new IllegalStateException(
-          "Lead " + id + " has already been converted to contact " + lead.getConvertedToContactId());
-    }
+    // Delegate to ConversionOrchestrator for the complete conversion workflow
+    return conversionOrchestrator.convertLead(id, request, bearerToken, convertedBy);
+  }
 
-    // Store original lead state for rollback
-    LeadStatus originalStatus = lead.getStatus();
-    LocalDateTime originalConvertedAt = lead.getConvertedAt();
-    Long originalContactId = lead.getConvertedToContactId();
-
-    // Prepare contact creation request
-    String contactNotes = request.notes() != null ? request.notes() : lead.getNotes();
-    ContactServiceClient.CreateContactRequest contactRequest =
-        new ContactServiceClient.CreateContactRequest(
-            lead.getFirstName(),
-            lead.getLastName(),
-            lead.getEmail(),
-            lead.getPhone(),
-            lead.getJobTitle(),
-            request.companyId(),
-            "CUSTOMER", // Set status to CUSTOMER for converted leads
-            lead.getScore(),
-            contactNotes
-        );
-
-    // Create contact in Contact Service
-    ContactServiceClient.ContactResponse contactResponse = null;
-    boolean contactCreated = false;
-
-    try {
-      contactResponse = contactServiceClient.createContact(contactRequest, bearerToken);
-      contactCreated = true;
-      log.info("Successfully created contact {} from lead {}", contactResponse.id(), id);
-
-      // Update lead status
-      lead.setStatus(LeadStatus.CONVERTED);
-      lead.setConvertedAt(LocalDateTime.now());
-      lead.setConvertedToContactId(contactResponse.id());
-      leadRepository.save(lead);
-
-      log.info("Lead {} successfully converted to contact {}", id, contactResponse.id());
-
-      // Publish lead.converted event
-      leadEventPublisher.publishLeadConverted(lead, contactResponse.id());
-
-      return new LeadDtos.ConvertLeadResponse(
-          id,
-          contactResponse.id(),
-          lead.getConvertedAt(),
-          "Lead successfully converted to contact"
-      );
-
-    } catch (final Exception e) {
-      log.error("Error during lead conversion for lead {}", id, e);
-
-      // Rollback: Delete the created contact if it was created
-      boolean rollbackSuccessful = false;
-      if (contactCreated && contactResponse != null) {
-        log.warn("Rolling back conversion: deleting contact {}", contactResponse.id());
-        try {
-          contactServiceClient.deleteContact(contactResponse.id(), bearerToken);
-          rollbackSuccessful = true;
-          log.info("Successfully rolled back contact creation for contact {}", contactResponse.id());
-        } catch (final Exception rollbackException) {
-          log.error("Failed to rollback contact creation for contact {}. Manual cleanup may be required.",
-              contactResponse.id(), rollbackException);
-          // Continue to restore lead state even if contact deletion fails
-        }
-      } else {
-        // No contact was created, so rollback is considered successful
-        rollbackSuccessful = true;
-      }
-
-      // Restore lead to original state
-      lead.setStatus(originalStatus);
-      lead.setConvertedAt(originalConvertedAt);
-      lead.setConvertedToContactId(originalContactId);
-      leadRepository.save(lead);
-      log.info("Lead {} restored to original state after failed conversion", id);
-
-      // Throw custom exception with rollback status
-      String errorMessage = rollbackSuccessful
-          ? "Failed to convert lead to contact. Rollback successful - lead restored to original state."
-          : "Failed to convert lead to contact. Rollback partially failed - manual cleanup may be required for contact "
-            + (contactResponse != null ? contactResponse.id() : "unknown");
-
-      throw new LeadConversionException(
-          errorMessage,
-          e,
-          id,
-          contactResponse != null ? contactResponse.id() : null,
-          rollbackSuccessful
-      );
-    }
+  /**
+   * Extracts user ID from bearer token for audit purposes.
+   * This is a simplified implementation - in production, you might want to
+   * use a proper JWT parser or get this from SecurityContext.
+   *
+   * @param bearerToken The bearer token
+   * @return The user ID, or "system" if not available
+   */
+  private String extractUserIdFromToken(final String bearerToken) {
+    // For now, return "system" - this could be enhanced to parse JWT
+    // or get from SecurityContext if available
+    return "system";
   }
 
   @Override
@@ -444,7 +366,7 @@ public class LeadServiceImpl implements LeadService {
       final LeadStatus status,
       final String assignedTo,
       final Pageable pageable) {
-    log.debug("Searching leads with notes - term: {}, source: {}, status: {}, assignedTo: {}", 
+    log.debug("Searching leads with notes - term: {}, source: {}, status: {}, assignedTo: {}",
         searchTerm, source, status, assignedTo);
     return leadRepository.findLeadsWithFiltersAndNotes(searchTerm, source, status, assignedTo, pageable);
   }

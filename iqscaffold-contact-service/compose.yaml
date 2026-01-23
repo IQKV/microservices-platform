@@ -147,7 +147,7 @@ services:
     networks:
       - contact-service-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health/readiness"]
+      test: ["CMD", "curl", "-f", "http://contact-service:8080/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3

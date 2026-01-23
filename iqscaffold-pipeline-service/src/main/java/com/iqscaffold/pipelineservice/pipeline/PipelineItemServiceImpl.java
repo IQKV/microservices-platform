@@ -45,6 +45,31 @@ public class PipelineItemServiceImpl implements PipelineItemService {
   }
 
   @Override
+  public PipelineItem createPipelineItem(final PipelineItem item) {
+    // Validate that the lead doesn't already have a pipeline item
+    if (pipelineItemRepository.existsByLeadId(item.getLeadId())) {
+      throw new IllegalStateException(
+          "Pipeline item already exists for lead ID: " + item.getLeadId());
+    }
+
+    // If no stage ID is provided, use the first stage (typically "New")
+    if (item.getStageId() == null) {
+      List<PipelineStage> stages = pipelineStageRepository.findAllByOrderByDisplayOrderAsc();
+      if (stages.isEmpty()) {
+        throw new IllegalStateException("No pipeline stages configured");
+      }
+      item.setStageId(stages.get(0).getId());
+    } else {
+      // Validate that the stage exists
+      if (!pipelineStageRepository.existsById(item.getStageId())) {
+        throw new IllegalArgumentException("Pipeline stage not found with ID: " + item.getStageId());
+      }
+    }
+
+    return pipelineItemRepository.save(item);
+  }
+
+  @Override
   @Transactional(readOnly = true)
   public Optional<PipelineItem> getPipelineItemById(final Long id) {
     return pipelineItemRepository.findById(id);

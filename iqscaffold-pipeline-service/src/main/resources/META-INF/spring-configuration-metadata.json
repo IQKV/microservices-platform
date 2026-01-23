@@ -86,7 +86,7 @@
       "type": "java.lang.String",
       "sourceType": "com.iqscaffold.pipelineservice.config.IqScaffoldProperties$Services",
       "description": "Base URL of the Lead Service for inter-service communication and lead data retrieval.",
-      "defaultValue": "http://localhost:8084"
+      "defaultValue": "http://lead-service:8080"
     }
   ],
   "hints": [
@@ -149,11 +149,11 @@
       "name": "iqscaffold.services.lead-service-url",
       "values": [
         {
-          "value": "http://localhost:8084",
+          "value": "http://lead-service:8080",
           "description": "Local development"
         },
         {
-          "value": "http://iqscaffold-lead-service:8084",
+          "value": "http://lead-service:8084",
           "description": "Docker Compose or Kubernetes service name"
         }
       ]

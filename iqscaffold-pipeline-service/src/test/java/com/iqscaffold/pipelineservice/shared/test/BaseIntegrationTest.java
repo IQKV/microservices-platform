@@ -18,5 +18,5 @@ import org.springframework.test.context.TestPropertySource;
     "logging.level.com.iqscaffold=DEBUG"
 })
 public abstract class BaseIntegrationTest {
-    // Common test configuration and utilities can be added here
+  // Common test configuration and utilities can be added here
 }

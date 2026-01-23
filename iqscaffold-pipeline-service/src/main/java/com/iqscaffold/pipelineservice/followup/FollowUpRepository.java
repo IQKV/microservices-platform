@@ -35,27 +35,27 @@ public interface FollowUpRepository extends JpaRepository<FollowUp, Long> {
 
   @Query("SELECT f FROM FollowUp f WHERE f.status = :status AND f.dueDate BETWEEN :startDate AND :endDate")
   List<FollowUp> findByStatusAndDueDateBetween(
-          @Param("status") FollowUpStatus status,
-          @Param("startDate") LocalDateTime startDate,
-          @Param("endDate") LocalDateTime endDate);
+      @Param("status") FollowUpStatus status,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 
   @EntityGraph("FollowUp.basic")
   @Query("SELECT f FROM FollowUp f WHERE f.status = :status AND f.dueDate BETWEEN :startDate AND :endDate")
   List<FollowUp> findBasicByStatusAndDueDateBetween(
-          @Param("status") FollowUpStatus status,
-          @Param("startDate") LocalDateTime startDate,
-          @Param("endDate") LocalDateTime endDate);
+      @Param("status") FollowUpStatus status,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 
   @Query("SELECT f FROM FollowUp f WHERE f.status = :status AND f.dueDate < :currentDate")
   List<FollowUp> findOverdueFollowUps(
-          @Param("status") FollowUpStatus status,
-          @Param("currentDate") LocalDateTime currentDate);
+      @Param("status") FollowUpStatus status,
+      @Param("currentDate") LocalDateTime currentDate);
 
   @EntityGraph("FollowUp.basic")
   @Query("SELECT f FROM FollowUp f WHERE f.status = :status AND f.dueDate < :currentDate")
   List<FollowUp> findBasicOverdueFollowUps(
-          @Param("status") FollowUpStatus status,
-          @Param("currentDate") LocalDateTime currentDate);
+      @Param("status") FollowUpStatus status,
+      @Param("currentDate") LocalDateTime currentDate);
 
   long countByStatusAndDueDateBetween(FollowUpStatus status, LocalDateTime startDate, LocalDateTime endDate);
 }

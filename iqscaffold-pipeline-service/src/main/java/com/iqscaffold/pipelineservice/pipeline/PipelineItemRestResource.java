@@ -15,14 +15,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,6 +94,40 @@ public class PipelineItemRestResource {
   }
 
   /**
+   * Creates a new pipeline item.
+   * <p>
+   * Creates a pipeline item for a lead. If no stage ID is provided, the lead will be
+   * placed in the first stage (typically "New").
+   *
+   * @param request The pipeline item creation request
+   * @return The created pipeline item
+   */
+  @Operation(
+      summary = "Create pipeline item",
+      description = "Creates a new pipeline item for a lead. If no stage ID is provided, uses the first stage.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "Pipeline item created successfully"),
+      @ApiResponse(responseCode = "400", description = "Invalid request data or lead already has pipeline item"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
+  @PostMapping
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ACCESS', 'CRM_ADMIN', 'USER', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<PipelineItemDtos.PipelineItemResponse> createPipelineItem(
+      @Valid @RequestBody PipelineItemDtos.CreatePipelineItemRequest request) {
+
+    String userId = getCurrentUserId();
+
+    // Convert request to entity
+    PipelineItem item = PipelineItemMapper.toEntity(request, request.stageId(), userId);
+
+    // Create the pipeline item
+    PipelineItem created = pipelineItemService.createPipelineItem(item);
+
+    PipelineItemDtos.PipelineItemResponse response = PipelineItemMapper.toResponse(created);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  /**
    * Gets a specific pipeline item by ID.
    *
    * @param id The pipeline item ID
@@ -151,6 +188,33 @@ public class PipelineItemRestResource {
 
     PipelineItemDtos.PipelineItemResponse response = PipelineItemMapper.toResponse(updated);
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Deletes a pipeline item.
+   * <p>
+   * This endpoint is primarily used for rollback operations during failed conversions.
+   * Use with caution as this permanently removes the pipeline item.
+   *
+   * @param id The pipeline item ID to delete
+   * @return No content response
+   */
+  @Operation(
+      summary = "Delete pipeline item",
+      description = "Deletes a pipeline item. Primarily used for rollback operations.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "Pipeline item deleted successfully"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized"),
+      @ApiResponse(responseCode = "404", description = "Pipeline item not found")
+  })
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasAnyAuthority('CRM_PIPELINE_MANAGER', 'CRM_ADMIN', 'ADMIN', 'SUPER_ADMIN')")
+  public ResponseEntity<Void> deletePipelineItem(
+      @Parameter(description = "Pipeline item ID")
+      @PathVariable Long id) {
+
+    pipelineItemService.removeFromPipeline(id);
+    return ResponseEntity.noContent().build();
   }
 
   /**

@@ -120,11 +120,12 @@ public class MetricsConfig {
    */
   @Bean
   public Gauge conversionRateGauge(final MeterRegistry registry) {
-    return Gauge.builder("pipeline.conversion.rate", this, config -> {
-      int total = config.totalLeads.get();
-      int converted = config.convertedLeads.get();
-      return total > 0 ? (converted * 100.0 / total) : 0.0;
-    })
+    return Gauge.builder("pipeline.conversion.rate", this,
+            config -> {
+              int total = config.totalLeads.get();
+              int converted = config.convertedLeads.get();
+              return total > 0 ? (converted * 100.0 / total) : 0.0;
+            })
         .description("Lead conversion rate percentage")
         .tag("service", "pipeline-service")
         .register(registry);

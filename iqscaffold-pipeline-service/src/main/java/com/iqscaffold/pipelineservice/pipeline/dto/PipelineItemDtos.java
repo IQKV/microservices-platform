@@ -29,6 +29,27 @@ public final class PipelineItemDtos {
   }
 
   /**
+   * Request DTO for creating a pipeline item.
+   */
+  @Schema(description = "Request to create a new pipeline item")
+  public record CreatePipelineItemRequest(
+      @NotNull(message = "Lead ID is required")
+      @Min(value = 1, message = "Lead ID must be positive")
+      @Schema(description = "ID of the lead to add to pipeline", example = "42")
+      Long leadId,
+
+      @Schema(description = "ID of the initial stage (optional, defaults to first stage)", example = "1")
+      Long stageId,
+
+      @Schema(description = "Expected value/revenue from this lead", example = "5000.00")
+      BigDecimal expectedValue,
+
+      @Schema(description = "Probability of conversion (0-100)", example = "75.50")
+      BigDecimal probability
+  ) {
+  }
+
+  /**
    * Response DTO for pipeline item.
    */
   @Schema(description = "Pipeline item response")

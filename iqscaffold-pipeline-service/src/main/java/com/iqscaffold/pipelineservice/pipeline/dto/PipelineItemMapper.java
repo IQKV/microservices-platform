@@ -1,5 +1,7 @@
 package com.iqscaffold.pipelineservice.pipeline.dto;
 
+import java.time.LocalDateTime;
+
 import com.iqscaffold.pipelineservice.pipeline.PipelineItem;
 
 /**
@@ -36,5 +38,35 @@ public final class PipelineItemMapper {
         item.getCreatedBy(),
         item.getUpdatedBy()
     );
+  }
+
+  /**
+   * Converts a create request DTO to a PipelineItem entity.
+   *
+   * @param request   The create request DTO
+   * @param stageId   The stage ID to use (from request or default)
+   * @param createdBy The user creating the item
+   * @return The pipeline item entity
+   */
+  public static PipelineItem toEntity(
+      final PipelineItemDtos.CreatePipelineItemRequest request,
+      final Long stageId,
+      final String createdBy) {
+
+    if (request == null) {
+      return null;
+    }
+
+    PipelineItem item = new PipelineItem();
+    item.setLeadId(request.leadId());
+    item.setStageId(stageId);
+    item.setExpectedValue(request.expectedValue());
+    item.setProbability(request.probability());
+    item.setEnteredStageAt(LocalDateTime.now());
+    item.setDaysInStage(0);
+    item.setCreatedBy(createdBy);
+    item.setUpdatedBy(createdBy);
+
+    return item;
   }
 }

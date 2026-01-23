@@ -55,7 +55,7 @@ cd ../iqscaffold-contact-service && docker-compose up -d
 cd ../iqscaffold-pipeline-service && docker-compose up -d
 ```
 
-Access APIs via Gateway: http://localhost:8081
+Access APIs via Gateway: http://localhost:8080
 
 ## Domain Adaptability
 

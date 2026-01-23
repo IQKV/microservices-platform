@@ -10,6 +10,8 @@ public interface PipelineItemService {
 
   PipelineItem addLeadToPipeline(PipelineItem item);
 
+  PipelineItem createPipelineItem(PipelineItem item);
+
   Optional<PipelineItem> getPipelineItemById(Long id);
 
   Optional<PipelineItem> getPipelineItemByLeadId(Long leadId);

@@ -42,7 +42,7 @@ iqscaffold:
         strip-count: 0
       services:
         billing-service:
-          uri: "http://localhost:8082"
+          uri: "http://billing-service:8080"
           path: "/api/v1/billing/**"
           enabled: true
           connect-timeout: 5000
