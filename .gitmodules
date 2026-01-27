@@ -1,0 +1,18 @@
+[submodule "iqscaffold-user-service"]
+	path = iqscaffold-user-service
+	url = git@github.com:IQKV/quickstart-user-service.git
+[submodule "iqscaffold-gateway-service"]
+	path = iqscaffold-gateway-service
+	url = git@github.com:IQKV/quickstart-gateway-service.git
+[submodule "iqscaffold-billing-service"]
+	path = iqscaffold-billing-service
+	url = git@github.com:IQKV/quickstart-billing-service.git
+[submodule "iqscaffold-lead-service"]
+	path = iqscaffold-lead-service
+	url = git@github.com:IQKV/quickstart-crm-lead-service.git
+[submodule "iqscaffold-contact-service"]
+	path = iqscaffold-contact-service
+	url = git@github.com:IQKV/quickstart-crm-contact-service.git
+[submodule "iqscaffold-pipeline-service"]
+	path = iqscaffold-pipeline-service
+	url = git@github.com:IQKV/quickstart-crm-pipeline-service.git
