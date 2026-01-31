@@ -178,7 +178,7 @@ CRM pipeline management service for sales process tracking and analytics.
        │
        ▼
 ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│            User Service (Port 8080)      │   │          Billing Service (Port 8082)     │
+│            User Service (Port 8080)      │   │          Billing Service (Port 8080)     │
 │  • Auth/JWT                              │   │  • Payment Intents                       │
 │  • Users                                 │   │  • Subscriptions                         │
 │  • Roles                                 │   │  • Stripe Connect                        │
@@ -191,7 +191,7 @@ CRM pipeline management service for sales process tracking and analytics.
 
 CRM Services
 ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│          Contact Service (Port 8083)     │   │           Lead Service (Port 8084)       │
+│          Contact Service (Port 8080)     │   │           Lead Service (Port 8080)       │
 │  • Contact Management                    │   │  • Lead Management                       │
 │  • Bulk Operations                       │   │  • Lead Scoring                          │
 │  • Lead Conversion                       │   │  • Lead Assignment                       │
@@ -203,7 +203,7 @@ CRM Services
 └──────────────────────────────────────────┘   └──────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────┐
-│        Pipeline Service (Port 8085)      │
+│        Pipeline Service (Port 8080)      │
 │  • Pipeline Management                   │
 │  • Follow-up Scheduling                  │
 │  • Analytics Dashboard                   │
