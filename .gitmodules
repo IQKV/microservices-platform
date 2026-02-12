@@ -16,3 +16,12 @@
 [submodule "iqscaffold-pipeline-service"]
 	path = iqscaffold-pipeline-service
 	url = git@github.com:IQKV/quickstart-crm-pipeline-service.git
+[submodule "iqscaffold-ui-auth-portal"]
+	path = iqscaffold-ui-auth-portal
+	url = git@github.com:IQKV/iqscaffold-ui-auth-portal.git
+[submodule "iqscaffold-ui-app-portal"]
+	path = iqscaffold-ui-app-portal
+	url = git@github.com:IQKV/iqscaffold-ui-app-portal.git
+[submodule "iqscaffold-ui-saas-landing-kit"]
+	path = iqscaffold-ui-saas-landing-kit
+	url = git@github.com:IQKV/iqscaffold-ui-saas-landing-kit.git
