@@ -37,6 +37,7 @@
 28. [Database Isolation & Autonomy](#28-database-isolation--autonomy)
 29. [Schema & API Evolution](#29-schema--api-evolution)
 30. [Kubernetes Lifecycle & Graceful Shutdown](#30-kubernetes-lifecycle--graceful-shutdown)
+31. [CI/CD Pipeline & Deployment Configuration](#31-cicd-pipeline--deployment-configuration)
 
 ---
 
@@ -2390,3 +2391,41 @@ Services must respect the orchestration lifecycle to achieve zero-downtime deplo
 - **Probes:**
   - `livenessProbe` must check if the application is fundamentally deadlocked (e.g., Spring Boot Actuator `/actuator/health/liveness`).
   - `readinessProbe` must check if the service can handle traffic, meaning its database connections and essential downstream dependencies are reachable (`/actuator/health/readiness`).
+
+---
+
+## 31. CI/CD Pipeline & Deployment Configuration
+
+All platform microservices use Drone CI pipelines for end-to-end CI/CD and Helm for Kubernetes deployments.
+
+### CI/CD Pipeline Flow
+
+- **VerifyCode:** Runs unit and integration tests (with TestContainers), Jacoco code coverage, and static analysis (SonarQube, PMD, SpotBugs) on all branches.
+- **PublishArtifacts:** Publishes Maven artifacts to the Nexus repository for specific branches and tags.
+- **PublishDockerImage:** Packages the JAR and builds a Docker container image securely published to the registry.
+- **Deploy / Promote:** Automated Helm deployments for WIP and feature branches; manual promotion steps for test, staging, and production environments.
+
+### Helm Chart Configuration & Infrastructure
+
+Microservices rely on common infrastructure deployed via the `iqscaffold-infra` Helm chart (PostgreSQL, Redis, RabbitMQ, MinIO). Connection details to these services must not be hardcoded in application code.
+
+### Strict Security Guidelines for `helm --set`
+
+- **Never hardcode secrets in `values.yaml`:** Passwords, JWT secret keys, OAuth client IDs/secrets, and SMTP credentials must be set to empty strings or safe placeholder values (like `"iqscaffold_dev_password"` ONLY for local dev overrides) in the `values.yaml` files.
+- **Dynamic Secret Injection via `--set`:** All sensitive configuration is managed in CI/CD secrets (e.g., Drone CI `from_secret`) and injected at deploy time using `--set`. 
+
+```bash
+# Example from Drone Pipeline
+helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
+  --values ./values.yaml \
+  --values ./values-dev.yaml \
+  --set image.tag=${DRONE_BRANCH} \
+  --set infraServices.postgresql.password=${INFRA_POSTGRESQL_PASSWORD} \
+  --set infraServices.redis.password=${INFRA_REDIS_PASSWORD} \
+  --set infraServices.rabbitmq.password=${INFRA_RABBITMQ_PASSWORD} \
+  --set infraServices.objectstorage.accessKey=${INFRA_S3_ACCESS_KEY} \
+  --set infraServices.objectstorage.secretKey=${INFRA_S3_SECRET_KEY} \
+  --set config.jwt.secretKey=${JWT_SECRET_KEY}
+```
+
+This guarantees that source code repositories never contain actionable credentials and that separate environments (dev, test, staging, production) can securely provision their own isolation.
