@@ -30,6 +30,13 @@
 21. [Constant Usage](#21-constant-usage)
 22. [Java 21+ Language Features](#22-java-21-language-features)
 23. [Internationalization (i18n)](#23-internationalization-i18n)
+24. [Inter-Service Communication & Resilience](#24-inter-service-communication--resilience)
+25. [Reactive Programming (Gateway Service)](#25-reactive-programming-gateway-service)
+26. [Consistency & Event Publishing (The Dual-Write Problem)](#26-consistency--event-publishing-the-dual-write-problem)
+27. [Idempotency](#27-idempotency)
+28. [Database Isolation & Autonomy](#28-database-isolation--autonomy)
+29. [Schema & API Evolution](#29-schema--api-evolution)
+30. [Kubernetes Lifecycle & Graceful Shutdown](#30-kubernetes-lifecycle--graceful-shutdown)
 
 ---
 
@@ -434,6 +441,8 @@ public class ContactRestResource {
 ### Rules
 
 - URL pattern: `/api/v1/{resource}` — always versioned.
+- `PUT` must fully replace the entity; `PATCH` must apply partial updates (ignoring nulls in the request).
+- Do not expose `Page<T>` directly. Wrap paginated responses in a standard `PagedResponse<T>` DTO to avoid leaking internal Spring Data fields.
 - Every endpoint must have `@Operation`, `@ApiResponses`, and `@Tag` annotations.
 - Every controller class must have `@SecurityRequirement(name = "bearerAuth")`.
 - Every endpoint must have `@PreAuthorize` with explicit authority list.
@@ -1211,6 +1220,7 @@ src/main/resources/db/changelog/
 - Changeset ID matches the filename without extension.
 - Author is always `iqscaffold`.
 - Every changeset **must** include a `<rollback>` section.
+- Treat destructive changes (e.g., `dropColumn`, `dropTable`) with extreme caution. In production, destructive changes should often have empty `<rollback>` blocks, or be performed in a multi-phase deployment (deprecate -> remove usage -> drop).
 - Every table must have: `id` (BIGSERIAL PK), `created_at`, `updated_at`, `created_by`, `updated_by`.
 - Create indexes for: all foreign key columns, `status` columns, frequently filtered columns, and composite search columns.
 - `ddl-auto` is always `none` — Hibernate never manages schema.
@@ -1455,8 +1465,14 @@ Enforce layer dependencies with ArchUnit — controllers must not access reposit
 
 ### Rules
 
+- All unit tests must follow the **Arrange-Act-Assert (AAA)** structure with clear blank lines separating the sections.
+- Prefer `BDDMockito` (`given()` and `then()`) over classic Mockito (`when()` and `verify()`) for natural alignment with the AAA pattern.
 - Unit tests: mock all dependencies with Mockito, test service logic in isolation.
 - Integration tests: use TestContainers — never mock the database in integration tests.
+- Be precise with Spring Boot test slicing:
+  - `@WebMvcTest` for controller-only tests (mocking the service layer).
+  - `@DataJpaTest` strictly for repository-only tests.
+  - `@SpringBootTest` exclusively for full integration tests using Testcontainers.
 - Use `@Transactional` on integration tests to roll back after each test.
 - Test class naming: `{ClassName}Test` for unit tests, `{ClassName}IT` for integration tests.
 - Do not write tests for: config classes, DTOs/records, exception classes, REST resources, filters, listeners (excluded from JaCoCo).
@@ -1519,6 +1535,7 @@ public final class ContactMapper {
 
 ### General Rules
 
+- Returning collections (`List`, `Set`, `Map`) from service boundaries or domain entities must be immutable. Use `List.copyOf()`, `Set.copyOf()`, or `Collections.unmodifiableList()` to prevent accidental state mutation by callers.
 - Constructor injection only — no field injection, no setter injection.
 - All injected fields are `final`.
 - Utility classes: `final` class, private constructor that throws `UnsupportedOperationException`.
@@ -2198,3 +2215,178 @@ context.setVariable("greeting", "Hello " + user.getFirstName());
 - `preferred_locale` in the JWT eliminates the need for a DB lookup in consumer services.
 - Supported locales are configured in `iqscaffold.i18n.supported-locales` — adding a new language requires a new `messages_{lang}.properties` file and a config update.
 - Missing translations are bugs — `use-code-as-default-message: true` prevents crashes but does not excuse missing keys.
+
+---
+
+## 24. Inter-Service Communication & Resilience
+
+### HTTP Clients
+
+Use modern HTTP clients for synchronous inter-service calls instead of legacy options:
+
+```java
+// Prefer Spring's RestClient (blocking, Spring Boot 3.2+) or WebClient (reactive)
+@Bean
+public RestClient {service}RestClient(RestClient.Builder builder) {
+    return builder.baseUrl("http://iqscaffold-{service}-service").build();
+}
+```
+
+Never use `RestTemplate` or `OpenFeign` for new integrations.
+
+### Context Propagation
+
+Outgoing HTTP requests must propagate contextual headers explicitly to maintain observability and multi-tenancy limits:
+
+- `X-Correlation-ID`: Ensure tracing matches across services.
+- `X-Tenant-ID`: Ensure downstream operations apply to the appropriate tenant data.
+
+Configure `RestClient` or `WebClient` with default interceptors/filters to extract these from `MDC` (or Reactor `Context`) and inject them into request headers.
+
+### Circuit Breaking and Retry
+
+Synchronous cascading failures must be prevented. Apply Resilience4j on all inter-service HTTP calls:
+
+```java
+@CircuitBreaker(name = "{service}Client", fallbackMethod = "fallbackFor{Operation}")
+@Retry(name = "{service}Client")
+public Response callDownstreamService(...) {
+    // ...
+}
+```
+
+Rules:
+- Non-critical read operations should define sensible fallbacks (e.g., empty lists or cached state).
+- Write operations typically cannot have fallbacks and should throw a custom exception representing a downstream failure.
+- Configure thresholds, timeouts, and half-open states in `application-production.yml` to prevent aggressive retries during system degradation.
+
+---
+
+## 25. Reactive Programming (Gateway Service)
+
+The API Gateway is built on Spring Cloud Gateway and WebFlux (Project Reactor). This implies strict reactive programming rules.
+
+### Rule of Avoidance: Blocking Calls
+
+**Blocking the event loop is strictly forbidden.** A single blocked thread in WebFlux can cause total service degradation.
+
+```java
+// WRONG: Blocking calls are forbidden in WebFlux
+// RestTemplate, standard JDBC, Thread.sleep(), InputStream holding thread...
+```
+
+Use `WebClient` for API calls from the gateway, and non-blocking alternatives (like `ReactiveRedisTemplate`) for caching or rate-limiting data access.
+
+### Context Propagation in Reactor
+
+In a reactive application, `ThreadLocal` (e.g., `MDC`, `SecurityContextHolder`, `TenantContext`) cannot be used reliably because multiple stages of a single processing pipeline may execute on different threads.
+
+```java
+// Use Reactor Context for context propagation
+return chain.filter(exchange)
+    .contextWrite(ctx -> ctx.put("tenantId", resolvedTenantId));
+
+// Extracting from Context later
+return Mono.deferContextual(ctx -> {
+    String tenantId = ctx.get("tenantId");
+    // ...
+});
+```
+
+Always rely on Reactor `Context` to thread contextual values down the reactive chain. Logging correlation IDs requires explicit Micrometer Tracing context configuration that bridges to SLF4J MDC using the `io.micrometer:context-propagation` library.
+
+---
+
+## 26. Consistency & Event Publishing (The Dual-Write Problem)
+
+Publishing an event to RabbitMQ directly from within a database transaction is a major architectural anti-pattern. If the message broker throws an exception, you might catch it, but if the database transaction subsequently rolls back (e.g., due to a constraint violation), the event has already been broadcasted. Downstream services will react to state that does not exist.
+
+### Strict Guidelines
+
+- **Never publish directly from a `@Transactional` business method.**
+- **Use `@TransactionalEventListener`:** For non-critical events, publish only after the transaction commits successfully.
+- **Use the Outbox Pattern:** For mission-critical state changes, save the event to an outbox table within the same database transaction. A separate process/job should read from the outbox table and publish to RabbitMQ.
+
+```java
+// Example: Safe Event Publishing
+@Service
+public class ContactServiceImpl implements ContactService {
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Transactional
+    public Contact createContact(Contact contact) {
+        Contact saved = repository.save(contact);
+        // Publish internal Spring application event
+        applicationEventPublisher.publishEvent(new ContactCreatedSpringEvent(saved));
+        return saved;
+    }
+}
+
+@Component
+public class ContactEventRabbitPublisher {
+    
+    // Listen for the internal event, trigger only AFTER DB COMMIT
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleContactCreated(ContactCreatedSpringEvent event) {
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, 
+                                          RabbitMQConfig.CONTACT_CREATED_ROUTING_KEY, 
+                                          event.getPayload());
+        } catch (Exception e) {
+            log.error("Failed to publish event after commit", e);
+        }
+    }
+}
+```
+
+---
+
+## 27. Idempotency
+
+In a distributed system, network failures and retries are guaranteed. Both HTTP requests (via Resilience4j retries) and RabbitMQ messages (via NACKs or broker redeliveries) will be processed at-least-once.
+
+### Strict Guidelines
+
+- **All State-Mutating APIs Must Be Idempotent:** `PUT`, `PATCH`, and `DELETE` endpoints must be naturally idempotent. For `POST` endpoints creating resources, require an `X-Idempotency-Key` header or use a natural unique composite key constraint in the database.
+- **All Event Listeners Must Be Idempotent:** Every `@RabbitListener` must check if it has already processed the specific `eventId` (by checking an `idempotency_keys` table or using database constraints) before mutating state.
+
+---
+
+## 28. Database Isolation & Autonomy
+
+Microservices must be completely decoupled at the data layer to ensure autonomous deployments and scaling.
+
+### Strict Guidelines
+
+- **Database-Per-Service:** No service may ever read or write to the database or schema of another service.
+- **No Shared Tables:** If two services need the same reference data, they must either query the owning service via REST or replicate the data locally by listening to RabbitMQ events.
+- **Foreign Keys:** You can never have a database foreign key pointing to a table owned by another microservice. Relational integrity across services must be handled at the application level via eventual consistency.
+
+---
+
+## 29. Schema & API Evolution
+
+Deployments in a microservice ecosystem happen independently. You cannot guarantee that the client (Consumer) and the server (Provider) will be deployed at the exact same moment.
+
+### Strict Guidelines
+
+- **Additive Changes Only:** Never remove, rename, or change the type of an API field or database column in a single deployment.
+- **Multi-Phase Rollouts for Breaking Changes:**
+  1. Add the new field/column. Write to both, read from old.
+  2. Implement the new behavior in clients.
+  3. Change the server to read from the new field.
+  4. (Months later) Remove the old field/column.
+- **Never Change Event Schemas:** Events in RabbitMQ might stay in queues or Dead Letter Exchanges (DLXs) for days. If you change the shape of an event that you publish, the consumer might crash when trying to deserialize older events. Add new fields instead of modifying existing ones, or publish to an entirely new routing key (e.g., `contact.created.v2`).
+
+---
+
+## 30. Kubernetes Lifecycle & Graceful Shutdown
+
+Services must respect the orchestration lifecycle to achieve zero-downtime deployments.
+
+### Strict Guidelines
+
+- **Graceful Shutdown:** Must be enabled in Spring Boot (`server.shutdown: graceful`). When Kubernetes sends a `SIGTERM`, the service must stop accepting new HTTP connections and stop pulling new RabbitMQ messages, but finish processing currently active requests (allow up to 30 seconds).
+- **Probes:**
+  - `livenessProbe` must check if the application is fundamentally deadlocked (e.g., Spring Boot Actuator `/actuator/health/liveness`).
+  - `readinessProbe` must check if the service can handle traffic, meaning its database connections and essential downstream dependencies are reachable (`/actuator/health/readiness`).
