@@ -1989,8 +1989,8 @@ mvn clean install -Dcheckstyle.skip=true
 
 ```bash
 # Prettier for non-Java files (YAML, JSON, Markdown)
-pnpm prettier:check
-pnpm prettier:write
+pnpm formatter:check
+pnpm formatter:write
 
 # Husky pre-commit hooks
 # - Runs Prettier on staged files

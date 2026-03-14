@@ -18,7 +18,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
-          version: "10.29.1"
+          version: "10.32.1"
           run_install: false
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -26,4 +26,4 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
       - run: pnpm install
-      - run: pnpm run prettier:check
+      - run: pnpm run formatter:check
