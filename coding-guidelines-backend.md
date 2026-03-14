@@ -73,18 +73,18 @@ Every service `pom.xml` must declare:
 
 ### Required Dependencies
 
-| Category | Artifact |
-|---|---|
-| Web | `spring-boot-starter-web` |
-| Persistence | `spring-boot-starter-data-jpa`, `postgresql`, `liquibase-core` |
-| Security | `spring-boot-starter-security`, `spring-boot-starter-oauth2-resource-server` |
-| Validation | `spring-boot-starter-validation` |
-| Messaging | `spring-boot-starter-amqp` |
-| Cache | `spring-boot-starter-data-redis`, `hibernate-jcache`, `ehcache (jakarta)` |
+| Category      | Artifact                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web           | `spring-boot-starter-web`                                                                                                                                     |
+| Persistence   | `spring-boot-starter-data-jpa`, `postgresql`, `liquibase-core`                                                                                                |
+| Security      | `spring-boot-starter-security`, `spring-boot-starter-oauth2-resource-server`                                                                                  |
+| Validation    | `spring-boot-starter-validation`                                                                                                                              |
+| Messaging     | `spring-boot-starter-amqp`                                                                                                                                    |
+| Cache         | `spring-boot-starter-data-redis`, `hibernate-jcache`, `ehcache (jakarta)`                                                                                     |
 | Observability | `spring-boot-starter-actuator`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`, `micrometer-registry-prometheus`, `logstash-logback-encoder` |
-| API Docs | `springdoc-openapi-starter-webmvc-ui` |
-| JWT | `jjwt-api`, `jjwt-impl`, `jjwt-jackson` |
-| Testing | `spring-boot-starter-test`, `spring-security-test`, `testcontainers:postgresql`, `archunit-junit5` |
+| API Docs      | `springdoc-openapi-starter-webmvc-ui`                                                                                                                         |
+| JWT           | `jjwt-api`, `jjwt-impl`, `jjwt-jackson`                                                                                                                       |
+| Testing       | `spring-boot-starter-test`, `spring-security-test`, `testcontainers:postgresql`, `archunit-junit5`                                                            |
 
 ### JaCoCo Coverage
 
@@ -158,35 +158,35 @@ com.iqscaffold.{service}/
 
 ### Classes
 
-| Type | Convention | Example |
-|---|---|---|
-| Entity | `{Entity}` | `Contact`, `User` |
-| Repository | `{Entity}Repository` | `ContactRepository` |
-| Service interface | `{Entity}Service` | `ContactService` |
-| Service implementation | `{Entity}ServiceImpl` | `ContactServiceImpl` |
-| REST controller | `{Entity}RestResource` | `ContactRestResource` |
-| DTO container | `{Entity}Dtos` | `ContactDtos` |
-| Mapper | `{Entity}Mapper` | `ContactMapper` |
-| Event publisher | `{Entity}EventPublisher` | `ContactEventPublisher` |
-| Config class | `{Concern}Config` | `SecurityConfig`, `RabbitMQConfig` |
-| Properties record | `{Service/Concern}Properties` | `IqScaffoldProperties` |
-| Constants class | `{Service}Constants` | `UserServiceConstants` |
-| Custom exception | `{Concept}Exception` | `ContactNotFoundException` |
-| Enum | `{Entity}Status` or descriptive | `ContactStatus` |
+| Type                   | Convention                      | Example                            |
+| ---------------------- | ------------------------------- | ---------------------------------- |
+| Entity                 | `{Entity}`                      | `Contact`, `User`                  |
+| Repository             | `{Entity}Repository`            | `ContactRepository`                |
+| Service interface      | `{Entity}Service`               | `ContactService`                   |
+| Service implementation | `{Entity}ServiceImpl`           | `ContactServiceImpl`               |
+| REST controller        | `{Entity}RestResource`          | `ContactRestResource`              |
+| DTO container          | `{Entity}Dtos`                  | `ContactDtos`                      |
+| Mapper                 | `{Entity}Mapper`                | `ContactMapper`                    |
+| Event publisher        | `{Entity}EventPublisher`        | `ContactEventPublisher`            |
+| Config class           | `{Concern}Config`               | `SecurityConfig`, `RabbitMQConfig` |
+| Properties record      | `{Service/Concern}Properties`   | `IqScaffoldProperties`             |
+| Constants class        | `{Service}Constants`            | `UserServiceConstants`             |
+| Custom exception       | `{Concept}Exception`            | `ContactNotFoundException`         |
+| Enum                   | `{Entity}Status` or descriptive | `ContactStatus`                    |
 
 ### Methods
 
-| Operation | Convention |
-|---|---|
-| Create | `create{Entity}(...)` |
-| Read single | `get{Entity}ById(...)` |
-| Read list/page | `getAll{Entities}(...)`, `get{Entities}By{Criteria}(...)` |
-| Update | `update{Entity}(...)` |
-| Delete | `delete{Entity}(...)` |
-| Check existence | `existsBy{Field}(...)` |
-| Count | `countBy{Field}(...)` |
-| Search | `search{Entities}(...)` |
-| Publish event | `publish{Entity}{Action}(...)` |
+| Operation       | Convention                                                |
+| --------------- | --------------------------------------------------------- |
+| Create          | `create{Entity}(...)`                                     |
+| Read single     | `get{Entity}ById(...)`                                    |
+| Read list/page  | `getAll{Entities}(...)`, `get{Entities}By{Criteria}(...)` |
+| Update          | `update{Entity}(...)`                                     |
+| Delete          | `delete{Entity}(...)`                                     |
+| Check existence | `existsBy{Field}(...)`                                    |
+| Count           | `countBy{Field}(...)`                                     |
+| Search          | `search{Entities}(...)`                                   |
+| Publish event   | `publish{Entity}{Action}(...)`                            |
 
 ### Database
 
@@ -278,7 +278,6 @@ public class Contact extends TenantAware {
 ```java
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
-
   Optional<Contact> findByEmail(String email);
 
   Page<Contact> findByStatus(ContactStatus status, Pageable pageable);
@@ -287,9 +286,7 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
   long countByStatus(ContactStatus status);
 
-  @Query("SELECT c FROM Contact c WHERE " +
-         "LOWER(c.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-         "LOWER(c.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+  @Query("SELECT c FROM Contact c WHERE " + "LOWER(c.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " + "LOWER(c.email) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
   Page<Contact> searchContacts(@Param("searchTerm") String searchTerm, Pageable pageable);
 
   @EntityGraph("contact-with-company")
@@ -340,9 +337,7 @@ public class ContactServiceImpl implements ContactService {
   private final ContactRepository contactRepository;
   private final ContactEventPublisher eventPublisher;
 
-  public ContactServiceImpl(
-      final ContactRepository contactRepository,
-      final ContactEventPublisher eventPublisher) {
+  public ContactServiceImpl(final ContactRepository contactRepository, final ContactEventPublisher eventPublisher) {
     this.contactRepository = contactRepository;
     this.eventPublisher = eventPublisher;
   }
@@ -405,16 +400,17 @@ public class ContactRestResource {
   }
 
   @Operation(summary = "Create contact", description = "Creates a new contact")
-  @ApiResponses(value = {
+  @ApiResponses(
+    value = {
       @ApiResponse(responseCode = "201", description = "Contact created successfully"),
       @ApiResponse(responseCode = "400", description = "Validation error"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "409", description = "Duplicate resource")
-  })
+      @ApiResponse(responseCode = "409", description = "Duplicate resource"),
+    }
+  )
   @PostMapping
   @PreAuthorize("hasAnyAuthority('USER', 'ADMIN', 'SUPER_ADMIN')")
-  public ResponseEntity<ContactDtos.ContactResponse> createContact(
-      @Valid @RequestBody ContactDtos.CreateContactRequest request) {
+  public ResponseEntity<ContactDtos.ContactResponse> createContact(@Valid @RequestBody ContactDtos.CreateContactRequest request) {
     String userId = getCurrentUserId();
     Contact contact = ContactMapper.toEntity(request, userId);
     Contact saved = contactService.createContact(contact);
@@ -432,13 +428,13 @@ public class ContactRestResource {
 
 ### HTTP Status Conventions
 
-| Operation | Success Status |
-|---|---|
-| POST (create) | `201 Created` |
-| GET (read) | `200 OK` |
-| PUT (full update) | `200 OK` |
-| PATCH (partial update) | `200 OK` |
-| DELETE | `204 No Content` |
+| Operation              | Success Status   |
+| ---------------------- | ---------------- |
+| POST (create)          | `201 Created`    |
+| GET (read)             | `200 OK`         |
+| PUT (full update)      | `200 OK`         |
+| PATCH (partial update) | `200 OK`         |
+| DELETE                 | `204 No Content` |
 
 ### Rules
 
@@ -480,42 +476,17 @@ public final class ContactDtos {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   public record CreateContactRequest(
-      @NotBlank(message = "First name is required")
-      @Size(max = 100, message = "First name must not exceed 100 characters")
-      String firstName,
-
-      @NotBlank(message = "Last name is required")
-      @Size(max = 100)
-      String lastName,
-
-      @Email(message = "Email must be a valid email address")
-      @Size(max = 255)
-      String email,
-
-      ContactStatus status,
-
-      @Min(0) @Max(100)
-      Integer leadScore
+    @NotBlank(message = "First name is required") @Size(max = 100, message = "First name must not exceed 100 characters") String firstName,
+    @NotBlank(message = "Last name is required") @Size(max = 100) String lastName,
+    @Email(message = "Email must be a valid email address") @Size(max = 255) String email,
+    ContactStatus status,
+    @Min(0) @Max(100) Integer leadScore
   ) {}
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  public record UpdateContactRequest(
-      @NotBlank String firstName,
-      @NotBlank String lastName,
-      @Email String email,
-      ContactStatus status
-  ) {}
+  public record UpdateContactRequest(@NotBlank String firstName, @NotBlank String lastName, @Email String email, ContactStatus status) {}
 
-  public record ContactResponse(
-      Long id,
-      String firstName,
-      String lastName,
-      String email,
-      ContactStatus status,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt,
-      String createdBy
-  ) {}
+  public record ContactResponse(Long id, String firstName, String lastName, String email, ContactStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy) {}
 }
 ```
 
@@ -576,6 +547,7 @@ public final class ContactMapper {
 ```java
 // Extend RuntimeException — no checked exceptions
 public class ContactNotFoundException extends RuntimeException {
+
   public ContactNotFoundException(String message) {
     super(message);
   }
@@ -583,6 +555,7 @@ public class ContactNotFoundException extends RuntimeException {
 
 // With context fields for security-critical exceptions
 public class TenantContextMismatchException extends RuntimeException {
+
   private final String currentTenantId;
   private final String entityTenantId;
 
@@ -603,24 +576,23 @@ public class GlobalExceptionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ProblemDetail> handleValidation(
-      MethodArgumentNotValidException ex, HttpServletRequest request) {
-    ProblemDetail pd = ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "Validation failed");
+  public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
     pd.setType(URI.create("https://api.iqscaffold.com/errors/validation-error"));
     pd.setTitle("Validation Error");
     pd.setInstance(URI.create(request.getRequestURI()));
     Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getFieldErrors()
-        .forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
+    ex
+      .getBindingResult()
+      .getFieldErrors()
+      .forEach((e) -> errors.put(e.getField(), e.getDefaultMessage()));
     pd.setProperty("errors", errors);
     logger.warn("Validation error on {}: {}", request.getRequestURI(), errors);
     return ResponseEntity.badRequest().body(pd);
   }
 
   @ExceptionHandler(ContactNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleNotFound(
-      ContactNotFoundException ex, HttpServletRequest request) {
+  public ResponseEntity<ProblemDetail> handleNotFound(ContactNotFoundException ex, HttpServletRequest request) {
     ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     pd.setType(URI.create("https://api.iqscaffold.com/errors/not-found"));
     pd.setTitle("Not Found");
@@ -657,24 +629,20 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/actuator/**").permitAll()
-            .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-            .anyRequest().authenticated())
-        .oauth2ResourceServer(oauth2 -> oauth2
-            .jwt(jwt -> jwt
-                .decoder(jwtDecoder())
-                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
-        .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+      .sessionManagement((s) -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .csrf((csrf) -> csrf.disable())
+      .authorizeHttpRequests((authz) ->
+        authz.requestMatchers("/actuator/**").permitAll().requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll().anyRequest().authenticated()
+      )
+      .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.decoder(jwtDecoder()).jwtAuthenticationConverter(jwtAuthenticationConverter())))
+      .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
     var authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-    authoritiesConverter.setAuthorityPrefix("");           // No ROLE_ prefix — ever (see 10.10)
+    authoritiesConverter.setAuthorityPrefix(""); // No ROLE_ prefix — ever (see 10.10)
     authoritiesConverter.setAuthoritiesClaimName("authorities");
     var converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
@@ -684,6 +652,7 @@ public class SecurityConfig {
 ```
 
 Rules:
+
 - All services are stateless — `SessionCreationPolicy.STATELESS` always.
 - CSRF disabled for all services (stateless JWT-based auth).
 - Actuator (`/actuator/**`) and API docs (`/swagger-ui/**`, `/api-docs/**`) are always public.
@@ -703,25 +672,25 @@ This is the canonical token structure. Every service that issues or consumes tok
 
 ```json
 {
-  "sub":              "42",
-  "iss":              "iqscaffold-user-service",
-  "iat":              1700000000,
-  "exp":              1700000900,
-  "jti":              "550e8400-e29b-41d4-a716-446655440000",
-  "type":             "access",
+  "sub": "42",
+  "iss": "iqscaffold-user-service",
+  "iat": 1700000000,
+  "exp": 1700000900,
+  "jti": "550e8400-e29b-41d4-a716-446655440000",
+  "type": "access",
 
-  "userId":           42,
-  "username":         "john.doe",
-  "email":            "john.doe@example.com",
-  "firstName":        "John",
-  "lastName":         "Doe",
+  "userId": 42,
+  "username": "john.doe",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
   "preferred_locale": "en",
 
-  "tenant_id":        "tenant-acme",
-  "organizationId":   7,
+  "tenant_id": "tenant-acme",
+  "organizationId": 7,
 
-  "authorities":      ["USER", "CRM_ACCESS"],
-  "permissions":      []
+  "authorities": ["USER", "CRM_ACCESS"],
+  "permissions": []
 }
 ```
 
@@ -729,14 +698,14 @@ This is the canonical token structure. Every service that issues or consumes tok
 
 ```json
 {
-  "sub":      "42",
-  "iss":      "iqscaffold-user-service",
-  "iat":      1700000000,
-  "exp":      1700604800,
-  "jti":      "660e9500-f30c-52e5-b827-557766551111",
-  "type":     "refresh",
+  "sub": "42",
+  "iss": "iqscaffold-user-service",
+  "iat": 1700000000,
+  "exp": 1700604800,
+  "jti": "660e9500-f30c-52e5-b827-557766551111",
+  "type": "refresh",
   "username": "john.doe",
-  "tenant_id":"tenant-acme"
+  "tenant_id": "tenant-acme"
 }
 ```
 
@@ -748,28 +717,29 @@ Refresh tokens carry only the minimum claims needed to issue a new access token.
 
 All claim names are defined in `JwtClaimNames` (one copy per service in `security/JwtClaimNames.java`). Never use raw string literals to read or write claims.
 
-| Constant | Wire Key | Type | Access | Refresh | Notes |
-|---|---|---|---|---|---|
-| `SUBJECT` | `sub` | `String` | ✅ | ✅ | User ID as string (RFC 7519) |
-| `ISSUER` | `iss` | `String` | ✅ | ✅ | Always `iqscaffold-user-service` |
-| `ISSUED_AT` | `iat` | `Instant` | ✅ | ✅ | RFC 7519 |
-| `EXPIRATION` | `exp` | `Instant` | ✅ | ✅ | RFC 7519 |
-| `JWT_ID` | `jti` | `String` | ✅ | ✅ | UUID, required for revocation |
-| `TYPE` | `type` | `String` | ✅ | ✅ | `"access"` or `"refresh"` |
-| `USER_ID` | `userId` | `Long` | ✅ | ❌ | Explicit numeric ID for frontend |
-| `USERNAME` | `username` | `String` | ✅ | ✅ | |
-| `EMAIL` | `email` | `String` | ✅ | ❌ | |
-| `FIRST_NAME` | `firstName` | `String` | ✅ | ❌ | camelCase |
-| `LAST_NAME` | `lastName` | `String` | ✅ | ❌ | camelCase |
-| `PREFERRED_LOCALE` | `preferred_locale` | `String` | ✅ | ❌ | snake_case (i18n convention) |
-| `TENANT_ID` | `tenant_id` | `String` | ✅ | ✅ | snake_case (multi-tenancy) |
-| `ORGANIZATION_ID` | `organizationId` | `Long` | ✅ | ❌ | camelCase |
-| `AUTHORITIES` | `authorities` | `List<String>` | ✅ | ❌ | No `ROLE_` prefix |
-| `PERMISSIONS` | `permissions` | `List<String>` | ✅ | ❌ | Fine-grained permissions |
+| Constant           | Wire Key           | Type           | Access | Refresh | Notes                            |
+| ------------------ | ------------------ | -------------- | ------ | ------- | -------------------------------- |
+| `SUBJECT`          | `sub`              | `String`       | ✅     | ✅      | User ID as string (RFC 7519)     |
+| `ISSUER`           | `iss`              | `String`       | ✅     | ✅      | Always `iqscaffold-user-service` |
+| `ISSUED_AT`        | `iat`              | `Instant`      | ✅     | ✅      | RFC 7519                         |
+| `EXPIRATION`       | `exp`              | `Instant`      | ✅     | ✅      | RFC 7519                         |
+| `JWT_ID`           | `jti`              | `String`       | ✅     | ✅      | UUID, required for revocation    |
+| `TYPE`             | `type`             | `String`       | ✅     | ✅      | `"access"` or `"refresh"`        |
+| `USER_ID`          | `userId`           | `Long`         | ✅     | ❌      | Explicit numeric ID for frontend |
+| `USERNAME`         | `username`         | `String`       | ✅     | ✅      |                                  |
+| `EMAIL`            | `email`            | `String`       | ✅     | ❌      |                                  |
+| `FIRST_NAME`       | `firstName`        | `String`       | ✅     | ❌      | camelCase                        |
+| `LAST_NAME`        | `lastName`         | `String`       | ✅     | ❌      | camelCase                        |
+| `PREFERRED_LOCALE` | `preferred_locale` | `String`       | ✅     | ❌      | snake_case (i18n convention)     |
+| `TENANT_ID`        | `tenant_id`        | `String`       | ✅     | ✅      | snake_case (multi-tenancy)       |
+| `ORGANIZATION_ID`  | `organizationId`   | `Long`         | ✅     | ❌      | camelCase                        |
+| `AUTHORITIES`      | `authorities`      | `List<String>` | ✅     | ❌      | No `ROLE_` prefix                |
+| `PERMISSIONS`      | `permissions`      | `List<String>` | ✅     | ❌      | Fine-grained permissions         |
 
 #### Naming convention rationale
 
 Mixed casing is intentional and must not be "fixed":
+
 - `sub`, `iss`, `iat`, `exp`, `jti` — RFC 7519 standard names, always lowercase.
 - `tenant_id`, `preferred_locale` — snake_case, matching database column names and i18n conventions.
 - `userId`, `firstName`, `lastName`, `organizationId` — camelCase, matching Java field names and frontend JSON conventions.
@@ -778,10 +748,10 @@ Mixed casing is intentional and must not be "fixed":
 
 ### 10.4 Token Lifetimes
 
-| Token | Default | Config key |
-|---|---|---|
-| Access token | 15 minutes | `iqscaffold.auth.jwt.access-token-expiry` |
-| Refresh token | 7 days | `iqscaffold.auth.jwt.refresh-token-expiry` |
+| Token         | Default    | Config key                                 |
+| ------------- | ---------- | ------------------------------------------ |
+| Access token  | 15 minutes | `iqscaffold.auth.jwt.access-token-expiry`  |
+| Refresh token | 7 days     | `iqscaffold.auth.jwt.refresh-token-expiry` |
 
 Access tokens are short-lived by design. Do not increase the default without a documented security justification.
 
@@ -855,6 +825,7 @@ redisTemplate.opsForValue().set("revoked:refresh:" + userId,
 ```
 
 Redis key conventions:
+
 - Single token blacklist: `blacklist:token:{jti}`
 - User-level refresh revocation: `revoked:refresh:{userId}`
 - Per-device refresh token: `refresh:token:{userId}:{deviceId}`
@@ -904,11 +875,13 @@ Never read claims with raw string literals. Always use the constant:
 ```java
 // Correct
 String tenantId = jwt.getClaim(JwtClaimNames.TENANT_ID);
-String userId   = jwt.getClaimAsString(JwtClaimNames.USER_ID);
+
+String userId = jwt.getClaimAsString(JwtClaimNames.USER_ID);
 
 // Wrong — raw strings bypass the single source of truth
 String tenantId = jwt.getClaimAsString("tenant_id");
-String userId   = jwt.getClaimAsString("userId");
+
+String userId = jwt.getClaimAsString("userId");
 ```
 
 ---
@@ -920,16 +893,7 @@ String userId   = jwt.getClaimAsString("userId");
 #### Standard structure (all services)
 
 ```java
-public record UserContext(
-    Long userId,
-    String username,
-    String email,
-    Set<String> authorities,
-    String tenantId,
-    Long organizationId,
-    String firstName,
-    String lastName
-) {
+public record UserContext(Long userId, String username, String email, Set<String> authorities, String tenantId, Long organizationId, String firstName, String lastName) {
   public boolean hasAuthority(String authority) {
     return authorities != null && authorities.contains(authority);
   }
@@ -945,6 +909,7 @@ public record UserContext(
 ```
 
 Rules:
+
 - Field order must match the constructor call in `JwtAuthenticationFilter.extractUserContext()` — keep them in sync.
 - Authority strings are always bare — `"ADMIN"`, `"USER"`, `"SUPER_ADMIN"`. Never `"ROLE_ADMIN"`, never `"ROLE_USER"`. See section 10.10.
 - Service-specific helper methods (e.g., `hasBillingAccess()` in billing service) are allowed as additions, not replacements.
@@ -962,13 +927,11 @@ Every service has a `JwtAuthenticationFilter extends OncePerRequestFilter` in it
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-  private static final String TENANT_ID_HEADER     = "X-Tenant-ID";
+  private static final String TENANT_ID_HEADER = "X-Tenant-ID";
   private static final String CORRELATION_ID_HEADER = "X-Correlation-ID";
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  FilterChain chain) throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
     var correlationId = request.getHeader(CORRELATION_ID_HEADER);
     if (correlationId != null) {
       MDC.put("correlationId", correlationId);
@@ -977,9 +940,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       var auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth instanceof JwtAuthenticationToken jwtAuth) {
-        var jwt         = jwtAuth.getToken();
+        var jwt = jwtAuth.getToken();
         var userContext = extractUserContext(jwt);
-        var tenantId    = resolveTenantId(request, userContext);
+        var tenantId = resolveTenantId(request, userContext);
 
         if (tenantId != null) {
           TenantContext.setCurrentTenantId(tenantId);
@@ -1009,22 +972,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (userId == null) userId = extractLong(jwt.getClaim(JwtClaimNames.USER_ID));
 
     return new UserContext(
-        userId,
-        jwt.getClaim(JwtClaimNames.USERNAME),
-        jwt.getClaim(JwtClaimNames.EMAIL),
-        extractAuthorities(jwt.getClaim(JwtClaimNames.AUTHORITIES)),
-        jwt.getClaim(JwtClaimNames.TENANT_ID),
-        extractLong(jwt.getClaim(JwtClaimNames.ORGANIZATION_ID)),
-        jwt.getClaim(JwtClaimNames.FIRST_NAME),
-        jwt.getClaim(JwtClaimNames.LAST_NAME)
+      userId,
+      jwt.getClaim(JwtClaimNames.USERNAME),
+      jwt.getClaim(JwtClaimNames.EMAIL),
+      extractAuthorities(jwt.getClaim(JwtClaimNames.AUTHORITIES)),
+      jwt.getClaim(JwtClaimNames.TENANT_ID),
+      extractLong(jwt.getClaim(JwtClaimNames.ORGANIZATION_ID)),
+      jwt.getClaim(JwtClaimNames.FIRST_NAME),
+      jwt.getClaim(JwtClaimNames.LAST_NAME)
     );
   }
 
   private Long extractLong(Object value) {
     return switch (value) {
-      case Long l    -> l;
+      case Long l -> l;
       case Integer i -> i.longValue();
-      case String s  -> { try { yield Long.parseLong(s); } catch (NumberFormatException e) { yield null; } }
+      case String s -> {
+        try {
+          yield Long.parseLong(s);
+        } catch (NumberFormatException e) {
+          yield null;
+        }
+      }
       case null, default -> null;
     };
   }
@@ -1032,7 +1001,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private Set<String> extractAuthorities(Object value) {
     return switch (value) {
       case List<?> list -> list.stream().map(Object::toString).collect(Collectors.toSet());
-      case Set<?>  set  -> set.stream().map(Object::toString).collect(Collectors.toSet());
+      case Set<?> set -> set.stream().map(Object::toString).collect(Collectors.toSet());
       case null, default -> Collections.emptySet();
     };
   }
@@ -1040,6 +1009,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 ```
 
 Rules:
+
 - Tenant resolution order: `X-Tenant-ID` header first, JWT `tenant_id` claim second.
 - Always clear `TenantContext` and `MDC` in the `finally` block — never skip this.
 - Do not log tenant IDs or user IDs at `INFO` level inside the filter — use `DEBUG` only. The lead service has `INFO`-level tenant logging that must be corrected.
@@ -1107,14 +1077,14 @@ hasAuthority("ROLE_USER")
 
 The following `ROLE_` references are legacy artifacts and must be removed:
 
-| Location | What to fix |
-|---|---|
+| Location                                                             | What to fix                                                       |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `UserContext.isAdmin()` in pipeline, lead, contact, billing services | Remove `authorities.contains("ROLE_ADMIN")` — keep only `"ADMIN"` |
-| `UserContext.isUser()` in pipeline, lead, contact services | Remove `authorities.contains("ROLE_USER")` — keep only `"USER"` |
-| `UserContext` tests in billing service | Replace `"ROLE_ADMIN"` with `"ADMIN"` in test data |
-| `JwtServiceTest` in user service | Replace `"ROLE_USER"` with `"USER"` in mock claims |
-| `AuthenticationServiceTest` in user service | Replace `"ROLE_USER"` with `"USER"` in test assertions |
-| `Authority` seed data in user service | Rename `"ROLE_USER"` → `"USER"` in DB migration and initializer |
+| `UserContext.isUser()` in pipeline, lead, contact services           | Remove `authorities.contains("ROLE_USER")` — keep only `"USER"`   |
+| `UserContext` tests in billing service                               | Replace `"ROLE_ADMIN"` with `"ADMIN"` in test data                |
+| `JwtServiceTest` in user service                                     | Replace `"ROLE_USER"` with `"USER"` in mock claims                |
+| `AuthenticationServiceTest` in user service                          | Replace `"ROLE_USER"` with `"USER"` in test assertions            |
+| `Authority` seed data in user service                                | Rename `"ROLE_USER"` → `"USER"` in DB migration and initializer   |
 
 ---
 
@@ -1237,20 +1207,13 @@ src/main/resources/db/changelog/
 
 ```java
 @ConfigurationProperties(prefix = "iqscaffold")
-public record IqScaffoldProperties(
-    String tenantIdHeader,
-    String userServiceUrl,
-    @NestedConfigurationProperty CrmProperties crm) {
-
-  public record CrmProperties(
-      @NestedConfigurationProperty SecurityProperties security) {
-
-    public record SecurityProperties(
-        @NestedConfigurationProperty JwtProperties jwt) {
-
+public record IqScaffoldProperties(String tenantIdHeader, String userServiceUrl, @NestedConfigurationProperty CrmProperties crm) {
+  public record CrmProperties(@NestedConfigurationProperty SecurityProperties security) {
+    public record SecurityProperties(@NestedConfigurationProperty JwtProperties jwt) {
       public record JwtProperties(
-          String jwkSetUri,    // RS256 only — no secretKey, no algorithm field
-          String issuer) {}
+        String jwkSetUri, // RS256 only — no secretKey, no algorithm field
+        String issuer
+      ) {}
     }
   }
 }
@@ -1264,7 +1227,7 @@ server:
 
 management:
   server:
-    port: 8081          # Actuator on separate port
+    port: 8081 # Actuator on separate port
   endpoints:
     web:
       exposure:
@@ -1316,9 +1279,10 @@ iqscaffold:
 
 ```java
 public class RabbitMQConfig {
-  public static final String EXCHANGE_NAME = "iqscaffold.events";   // shared topic exchange
-  public static final String DLX_EXCHANGE  = "iqscaffold.dlx";
-  public static final String DLQ           = "iqscaffold.dlq";
+
+  public static final String EXCHANGE_NAME = "iqscaffold.events"; // shared topic exchange
+  public static final String DLX_EXCHANGE = "iqscaffold.dlx";
+  public static final String DLQ = "iqscaffold.dlq";
 
   // Routing keys: {entity}.{action}
   public static final String CONTACT_CREATED_ROUTING_KEY = "contact.created";
@@ -1355,11 +1319,18 @@ public class ContactEventPublisher {
 ```java
 @Bean
 public Queue tenantEventsQueue() {
-  return new Queue("iqscaffold.{service}.tenant.events", true, false, false,
-      Map.of(
-          "x-dead-letter-exchange", DLX_EXCHANGE,
-          "x-message-ttl", 86400000  // 24 hours
-      ));
+  return new Queue(
+    "iqscaffold.{service}.tenant.events",
+    true,
+    false,
+    false,
+    Map.of(
+      "x-dead-letter-exchange",
+      DLX_EXCHANGE,
+      "x-message-ttl",
+      86400000 // 24 hours
+    )
+  );
 }
 ```
 
@@ -1492,12 +1463,11 @@ Always use constructor injection with `final` fields:
 ```java
 // Correct
 public class ContactServiceImpl implements ContactService {
+
   private final ContactRepository contactRepository;
   private final ContactEventPublisher eventPublisher;
 
-  public ContactServiceImpl(
-      final ContactRepository contactRepository,
-      final ContactEventPublisher eventPublisher) {
+  public ContactServiceImpl(final ContactRepository contactRepository, final ContactEventPublisher eventPublisher) {
     this.contactRepository = contactRepository;
     this.eventPublisher = eventPublisher;
   }
@@ -1512,12 +1482,17 @@ private ContactRepository contactRepository;
 
 ```java
 public final class UserServiceConstants {
+
   private UserServiceConstants() {
     throw new UnsupportedOperationException("Utility class");
   }
 
   public static final class Headers {
-    private Headers() { throw new UnsupportedOperationException("Utility class"); }
+
+    private Headers() {
+      throw new UnsupportedOperationException("Utility class");
+    }
+
     public static final String X_CORRELATION_ID = "X-Correlation-ID";
     public static final String X_TENANT_ID = "X-Tenant-ID";
   }
@@ -1528,6 +1503,7 @@ public final class UserServiceConstants {
 
 ```java
 public final class ContactMapper {
+
   private ContactMapper() {
     // Utility class — not instantiable
   }
@@ -1632,17 +1608,17 @@ Every string or number used more than once, or that carries domain meaning, must
 
 ### Where constants live
 
-| What | Where |
-|---|---|
-| JWT claim keys | `JwtClaimNames` (shared across services) |
-| HTTP headers | `{Service}Constants.Headers` |
-| MDC keys | `{Service}Constants.MDC` |
-| Security event types | `{Service}Constants.SecurityEvents` |
-| Cache region names | `{Service}Constants.CacheNames` |
+| What                                 | Where                                              |
+| ------------------------------------ | -------------------------------------------------- |
+| JWT claim keys                       | `JwtClaimNames` (shared across services)           |
+| HTTP headers                         | `{Service}Constants.Headers`                       |
+| MDC keys                             | `{Service}Constants.MDC`                           |
+| Security event types                 | `{Service}Constants.SecurityEvents`                |
+| Cache region names                   | `{Service}Constants.CacheNames`                    |
 | RabbitMQ exchange/queue/routing keys | `RabbitMQConfig` (as `public static final String`) |
-| Tenant/schema defaults | `{Service}Constants.Tenant` |
-| Filter ordering | `{Service}Constants.FilterOrder` |
-| Regex patterns | `{Service}Constants.Patterns` |
+| Tenant/schema defaults               | `{Service}Constants.Tenant`                        |
+| Filter ordering                      | `{Service}Constants.FilterOrder`                   |
+| Regex patterns                       | `{Service}Constants.Patterns`                      |
 
 ### Rules
 
@@ -1677,7 +1653,9 @@ Use `var` for local variables when the type is obvious from the right-hand side.
 ```java
 // Correct
 var users = userManagementService.getAllUsers(pageable, currentUser);
+
 var tenantClaim = jwt.getClaimAsString(UserServiceConstants.JwtClaims.TENANT_ID);
+
 var sb = new StringBuilder();
 
 // Wrong — type is already clear, explicit declaration adds nothing
@@ -1685,6 +1663,7 @@ List<UserDto> users = userManagementService.getAllUsers(pageable, currentUser);
 ```
 
 Do NOT use `var` when:
+
 - The right-hand side is a method call whose return type is not obvious from the name alone.
 - The variable is a field (not allowed by the language anyway).
 - It would hide a meaningful type distinction (e.g., `var x = someFactory.create()` where the factory returns different subtypes).
@@ -1752,6 +1731,7 @@ switch (status) {
 ```
 
 Rules:
+
 - Switch expressions must be exhaustive — always include a `default` branch unless the type is a sealed class or enum where all cases are covered.
 - Never use fall-through (`case X: case Y:` without a break) — use comma-separated cases instead: `case X, Y ->`.
 - Prefer switch expressions over long `if/else if` chains on the same variable.
@@ -1762,7 +1742,7 @@ Rules:
 
 Use text blocks for any multi-line string: SQL queries, JSON templates, OpenAPI descriptions, email bodies, log messages with structure.
 
-```java
+````java
 // Correct — OpenAPI description
 .description("""
     CRM contact management service for IQ Scaffold platform.
@@ -1793,9 +1773,10 @@ var nextSteps = """
 String desc = "CRM contact management service.\n" +
               "## Authentication\n" +
               "All endpoints require JWT.\n";
-```
+````
 
 Rules:
+
 - The closing `"""` goes on its own line to control trailing newline.
 - Combine with `.formatted(...)` for interpolation — never concatenate into a text block.
 - Use text blocks for any string that spans more than one logical line.
@@ -1823,14 +1804,11 @@ All DTOs are Java records — immutable, concise, with compiler-generated `equal
 
 ```java
 // Correct
-public record CreateContactRequest(
-    @NotBlank String firstName,
-    @Email    String email,
-    ContactStatus status
-) {}
+public record CreateContactRequest(@NotBlank String firstName, @Email String email, ContactStatus status) {}
 
 // Wrong — class-based DTO
 public class CreateContactRequest {
+
   private String firstName;
   // getters, setters, equals, hashCode, toString...
 }
@@ -1861,6 +1839,7 @@ return switch (result) {
 ```
 
 Use sealed types when:
+
 - A type hierarchy is intentionally closed (all subtypes are known at compile time).
 - You want the compiler to enforce exhaustive handling in switch expressions.
 - Modelling discriminated unions (success/failure, event types).
@@ -1877,9 +1856,9 @@ When extracting numeric values from untyped maps (e.g., RabbitMQ event metadata 
 // Correct — handles JSON deserializing numbers as Integer or Long
 Long leadId = switch (convertedFromLeadIdObj) {
   case Integer i -> i.longValue();
-  case Long    l -> l;
-  case null      -> null;
-  default        -> Long.parseLong(String.valueOf(convertedFromLeadIdObj));
+  case Long l -> l;
+  case null -> null;
+  default -> Long.parseLong(String.valueOf(convertedFromLeadIdObj));
 };
 
 // Also acceptable for simple two-case scenarios
@@ -1903,6 +1882,7 @@ spring:
 ```
 
 Rules:
+
 - Virtual threads must be enabled in every service — this is not optional.
 - Do not use `synchronized` blocks in code that runs on virtual threads — use `ReentrantLock` instead (synchronized pins the carrier thread).
 - Do not pool virtual threads — they are cheap to create; thread pools for virtual threads defeat the purpose.
@@ -1911,16 +1891,16 @@ Rules:
 
 ### What to Avoid (Pre-Java 21 Patterns)
 
-| Avoid | Use instead |
-|---|---|
-| `if (x instanceof Foo) { Foo f = (Foo) x; }` | `if (x instanceof Foo f)` |
-| `String.format(...)` | `"...".formatted(...)` |
-| `"line1\n" + "line2\n"` | Text block `"""..."""` |
-| Class-based DTOs with Lombok `@Data` | `record` |
-| `switch` statement with `break` | Switch expression with `->` |
-| Explicit type on obvious local variables | `var` |
-| Raw `(Long)` cast on untyped map values | Pattern matching switch or `instanceof Number n` |
-| `Thread.sleep` / blocking in platform threads for I/O | Virtual threads + non-blocking where possible |
+| Avoid                                                 | Use instead                                      |
+| ----------------------------------------------------- | ------------------------------------------------ |
+| `if (x instanceof Foo) { Foo f = (Foo) x; }`          | `if (x instanceof Foo f)`                        |
+| `String.format(...)`                                  | `"...".formatted(...)`                           |
+| `"line1\n" + "line2\n"`                               | Text block `"""..."""`                           |
+| Class-based DTOs with Lombok `@Data`                  | `record`                                         |
+| `switch` statement with `break`                       | Switch expression with `->`                      |
+| Explicit type on obvious local variables              | `var`                                            |
+| Raw `(Long)` cast on untyped map values               | Pattern matching switch or `instanceof Number n` |
+| `Thread.sleep` / blocking in platform threads for I/O | Virtual threads + non-blocking where possible    |
 
 ---
 
@@ -1970,6 +1950,7 @@ email.password.reset.subject=Reset your IQ Scaffold password
 ```
 
 Rules:
+
 - Keys are lowercase, dot-separated — no camelCase, no underscores.
 - Positional arguments use `{0}`, `{1}` (MessageFormat syntax).
 - Group related keys under the same prefix — all email keys under `email.`, all auth keys under `auth.`.
@@ -1983,7 +1964,7 @@ Rules:
 ```yaml
 spring:
   messages:
-    basename: i18n/messages    # loads i18n/messages*.properties from classpath
+    basename: i18n/messages # loads i18n/messages*.properties from classpath
     encoding: UTF-8
     cache-duration: PT1H
 
@@ -2007,25 +1988,21 @@ iqscaffold:
 
 ```java
 @ConfigurationProperties(prefix = "iqscaffold")
-public record IqScaffoldProperties(
-    @NestedConfigurationProperty I18n i18n) {
-
+public record IqScaffoldProperties(@NestedConfigurationProperty I18n i18n) {
   public record I18n(
-      List<String> supportedLocales,
-      String defaultLocale,
-      String messageBasename,
-      Duration messageCacheDuration,
-      boolean fallbackToSystemLocale,
-      boolean useCodeAsDefaultMessage
+    List<String> supportedLocales,
+    String defaultLocale,
+    String messageBasename,
+    Duration messageCacheDuration,
+    boolean fallbackToSystemLocale,
+    boolean useCodeAsDefaultMessage
   ) {
     public Locale getDefaultLocaleObject() {
       return Locale.forLanguageTag(defaultLocale);
     }
 
     public List<Locale> getSupportedLocaleObjects() {
-      return supportedLocales.stream()
-          .map(Locale::forLanguageTag)
-          .toList();
+      return supportedLocales.stream().map(Locale::forLanguageTag).toList();
     }
   }
 }
@@ -2094,19 +2071,19 @@ public class UserPreferenceLocaleResolver extends AcceptHeaderLocaleResolver {
       Locale locale = Locale.forLanguageTag(header);
       if (isSupportedLocale(locale)) return locale;
     }
-    return super.resolveLocale(request);  // falls back to Accept-Language
+    return super.resolveLocale(request); // falls back to Accept-Language
   }
 
   @Override
   public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
     // Read-only — locale changes go through user preferences, not this resolver
-    throw new UnsupportedOperationException(
-        "Cannot change locale via UserPreferenceLocaleResolver — update user preferences instead");
+    throw new UnsupportedOperationException("Cannot change locale via UserPreferenceLocaleResolver — update user preferences instead");
   }
 }
 ```
 
 Rules:
+
 - `setLocale` always throws — locale is not changed via the resolver. To change a user's locale, update `User.preferredLocale` in the database.
 - Unsupported locales fall through to `Accept-Language` — never reject a request because of an unknown locale header.
 
@@ -2166,6 +2143,7 @@ public class MessageService {
 ```
 
 Rules:
+
 - Always inject `MessageService` — never inject `MessageSource` directly in business code.
 - Use `getMessage(code, user)` when sending emails or notifications — the user's stored preference takes priority over the current request locale.
 - Use `getMessage(code)` for request-scoped messages (validation errors, API responses) — locale comes from the request automatically.
@@ -2180,9 +2158,8 @@ Rules:
 ```java
 // In a consumer service — get locale from JWT claim, not from DB
 String preferredLocale = jwt.getClaim(JwtClaimNames.PREFERRED_LOCALE);
-Locale locale = StringUtils.hasText(preferredLocale)
-    ? Locale.forLanguageTag(preferredLocale)
-    : Locale.ENGLISH;
+
+Locale locale = StringUtils.hasText(preferredLocale) ? Locale.forLanguageTag(preferredLocale) : Locale.ENGLISH;
 
 String subject = messageService.getMessage("email.invoice.subject", locale);
 ```
@@ -2258,6 +2235,7 @@ public Response callDownstreamService(...) {
 ```
 
 Rules:
+
 - Non-critical read operations should define sensible fallbacks (e.g., empty lists or cached state).
 - Write operations typically cannot have fallbacks and should throw a custom exception representing a downstream failure.
 - Configure thresholds, timeouts, and half-open states in `application-production.yml` to prevent aggressive retries during system degradation.
@@ -2313,31 +2291,30 @@ Publishing an event to RabbitMQ directly from within a database transaction is a
 // Example: Safe Event Publishing
 @Service
 public class ContactServiceImpl implements ContactService {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Transactional
-    public Contact createContact(Contact contact) {
-        Contact saved = repository.save(contact);
-        // Publish internal Spring application event
-        applicationEventPublisher.publishEvent(new ContactCreatedSpringEvent(saved));
-        return saved;
-    }
+  private final ApplicationEventPublisher applicationEventPublisher;
+
+  @Transactional
+  public Contact createContact(Contact contact) {
+    Contact saved = repository.save(contact);
+    // Publish internal Spring application event
+    applicationEventPublisher.publishEvent(new ContactCreatedSpringEvent(saved));
+    return saved;
+  }
 }
 
 @Component
 public class ContactEventRabbitPublisher {
-    
-    // Listen for the internal event, trigger only AFTER DB COMMIT
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleContactCreated(ContactCreatedSpringEvent event) {
-        try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, 
-                                          RabbitMQConfig.CONTACT_CREATED_ROUTING_KEY, 
-                                          event.getPayload());
-        } catch (Exception e) {
-            log.error("Failed to publish event after commit", e);
-        }
+
+  // Listen for the internal event, trigger only AFTER DB COMMIT
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void handleContactCreated(ContactCreatedSpringEvent event) {
+    try {
+      rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.CONTACT_CREATED_ROUTING_KEY, event.getPayload());
+    } catch (Exception e) {
+      log.error("Failed to publish event after commit", e);
     }
+  }
 }
 ```
 
@@ -2413,7 +2390,7 @@ Microservices rely on common infrastructure deployed via the `iqscaffold-infra` 
 ### Strict Security Guidelines for `helm --set`
 
 - **Never hardcode secrets in `values.yaml`:** Passwords, JWT secret keys, OAuth client IDs/secrets, and SMTP credentials must be set to empty strings or safe placeholder values (like `"iqscaffold_dev_password"` ONLY for local dev overrides) in the `values.yaml` files.
-- **Dynamic Secret Injection via `--set`:** All sensitive configuration is managed in CI/CD secrets (e.g., Drone CI `from_secret`) and injected at deploy time using `--set`. 
+- **Dynamic Secret Injection via `--set`:** All sensitive configuration is managed in CI/CD secrets (e.g., Drone CI `from_secret`) and injected at deploy time using `--set`.
 
 ```bash
 # Example from Drone Pipeline
@@ -2430,7 +2407,6 @@ helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
 ```
 
 This guarantees that source code repositories never contain actionable credentials and that separate environments (dev, test, staging, production) can securely provision their own isolation.
-
 
 ---
 
@@ -2454,6 +2430,7 @@ Imports must follow this exact order, with a blank line between each group:
 Checkstyle rule: `CustomImportOrder` with `STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE`.
 
 IntelliJ layout (`.editorconfig`):
+
 ```
 ij_java_imports_layout = $*, |, jakarta.**, java.**, javax.**, |, *
 ```
@@ -2473,29 +2450,27 @@ ij_java_imports_layout = $*, |, jakarta.**, java.**, javax.**, |, *
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import com.iqscaffold.contactservice.contact.Contact;
+import com.iqscaffold.contactservice.contact.ContactRepository;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.iqscaffold.contactservice.contact.Contact;
-import com.iqscaffold.contactservice.contact.ContactRepository;
 ```
 
 #### Wrong — never do this
 
 ```java
-import java.util.*;                          // wildcard — forbidden
-import org.springframework.stereotype.*;     // wildcard — forbidden
-import java.time.LocalDateTime;
-import static org.assertj.core.api.Assertions.assertThat;  // static not first
+import static org.assertj.core.api.Assertions.assertThat; // static not first
+
 import com.iqscaffold.contactservice.contact.Contact;
-import java.util.List;                       // java.** mixed with third-party
+import java.time.LocalDateTime;
+import java.util.*; // wildcard — forbidden
+import java.util.List;
+import org.springframework.stereotype.*; // wildcard — forbidden // java.** mixed with third-party
 ```
 
 ---
@@ -2509,12 +2484,11 @@ All constructor-injected fields must be `final`. This is already required by sec
 ```java
 // Correct
 public class ContactServiceImpl implements ContactService {
+
   private final ContactRepository contactRepository;
   private final ContactEventPublisher eventPublisher;
 
-  public ContactServiceImpl(
-      final ContactRepository contactRepository,
-      final ContactEventPublisher eventPublisher) {
+  public ContactServiceImpl(final ContactRepository contactRepository, final ContactEventPublisher eventPublisher) {
     this.contactRepository = contactRepository;
     this.eventPublisher = eventPublisher;
   }
@@ -2528,6 +2502,7 @@ private ContactRepository contactRepository;
 #### Constructor, catch, and for-each parameters — `final`
 
 The `FinalParameters` Checkstyle rule enforces `final` on:
+
 - Constructor parameters (`CTOR_DEF`)
 - For-each clause variables (`FOR_EACH_CLAUSE`)
 - Catch block parameters (`LITERAL_CATCH`)
@@ -2586,11 +2561,13 @@ public / protected / private → abstract → static → final → transient →
 ```java
 // Correct
 public static final String EXCHANGE_NAME = "iqscaffold.events";
+
 private static final Logger log = LoggerFactory.getLogger(ContactServiceImpl.class);
 
 // Wrong — wrong modifier order
-static public final String EXCHANGE_NAME = "iqscaffold.events";
-final static String EXCHANGE_NAME = "iqscaffold.events";
+public static final String EXCHANGE_NAME = "iqscaffold.events";
+
+static final String EXCHANGE_NAME = "iqscaffold.events";
 ```
 
 ---
@@ -2602,10 +2579,12 @@ final static String EXCHANGE_NAME = "iqscaffold.events";
 ```java
 // Correct
 String firstName = request.firstName();
-String lastName  = request.lastName();
+
+String lastName = request.lastName();
 
 // Wrong
-String firstName = request.firstName(), lastName = request.lastName();
+String firstName = request.firstName(),
+  lastName = request.lastName();
 ```
 
 `OneStatementPerLine` is also enforced — one statement per line, always.
@@ -2671,10 +2650,12 @@ return switch (status) {
 ```java
 // Correct
 String[] names;
+
 byte[] data;
 
 // Wrong — C-style
 String names[];
+
 byte data[];
 ```
 
@@ -2687,10 +2668,11 @@ byte data[];
 ```java
 // Correct
 long timeout = 86400L;
+
 long maxSize = 1_000_000L;
 
 // Wrong
-long timeout = 86400l;   // 'l' looks like '1'
+long timeout = 86400l; // 'l' looks like '1'
 ```
 
 ---
@@ -2705,14 +2687,19 @@ long timeout = 86400l;   // 'l' looks like '1'
 ```java
 // Correct — abbreviation ≤ 5 chars
 String userId;
+
 String jwtToken;
+
 String httpUrl;
-class RabbitMQConfig { }   // "AMQP" is 4 chars — OK
-class JwtClaimNames { }    // "JWT" is 3 chars — OK
+
+class RabbitMQConfig {} // "AMQP" is 4 chars — OK
+
+class JwtClaimNames {} // "JWT" is 3 chars — OK
 
 // Wrong — abbreviation > 5 chars
 String userIDENTIFIER;
-class HTTPSConnectionManager { }   // "HTTPS" is 5 — borderline; "HTTPS" itself is fine, but "HTTPSConnection" has 5 consecutive caps — check with Checkstyle
+
+class HTTPSConnectionManager {} // "HTTPS" is 5 — borderline; "HTTPS" itself is fine, but "HTTPSConnection" has 5 consecutive caps — check with Checkstyle
 ```
 
 ---
@@ -2784,25 +2771,25 @@ private static final int DEFAULT_PORT = 8080;
 
 ### 32.12 Summary Checklist
 
-| Rule | Enforced by | Severity |
-|---|---|---|
-| No wildcard imports | Checkstyle `AvoidStarImport` | Build failure |
-| No unused imports | Checkstyle `UnusedImports` | Build failure |
-| Import group order (static → java → special → third-party) | Checkstyle `CustomImportOrder` | Build failure |
-| Alphabetical order within import groups | Checkstyle `CustomImportOrder` | Build failure |
-| `final` on constructor / catch / for-each parameters | Checkstyle `FinalParameters` | Build failure |
-| `final` on all injected fields | Checkstyle + code review | Build failure |
-| One variable declaration per line | Checkstyle `MultipleVariableDeclarations` | Build failure |
-| One statement per line | Checkstyle `OneStatementPerLine` | Build failure |
-| No `finalize()` override | Checkstyle `NoFinalizer` | Build failure |
-| `default` in every `switch` | Checkstyle `MissingSwitchDefault` | Build failure |
-| No fall-through in `switch` | Checkstyle `FallThrough` | Build failure |
-| Java-style array declarations | Checkstyle `ArrayTypeStyle` | Build failure |
-| Uppercase `L` for long literals | Checkstyle `UpperEll` | Build failure |
-| Abbreviations ≤ 5 chars in names | Checkstyle `AbbreviationAsWordInName` | Build failure |
-| Overloads declared consecutively | Checkstyle `OverloadMethodsDeclarationOrder` | Build failure |
-| Braces on all control flow blocks | Checkstyle `NeedBraces` | Build failure |
-| No silent empty catch blocks | Checkstyle `EmptyCatchBlock` | Build failure |
-| Correct modifier order | Checkstyle `ModifierOrder` | Build failure |
-| Variable declared close to use (≤ 20 lines) | Checkstyle `VariableDeclarationUsageDistance` | Build failure |
-| No unexplained `@SuppressWarnings` | Code review policy | Review rejection |
+| Rule                                                       | Enforced by                                   | Severity         |
+| ---------------------------------------------------------- | --------------------------------------------- | ---------------- |
+| No wildcard imports                                        | Checkstyle `AvoidStarImport`                  | Build failure    |
+| No unused imports                                          | Checkstyle `UnusedImports`                    | Build failure    |
+| Import group order (static → java → special → third-party) | Checkstyle `CustomImportOrder`                | Build failure    |
+| Alphabetical order within import groups                    | Checkstyle `CustomImportOrder`                | Build failure    |
+| `final` on constructor / catch / for-each parameters       | Checkstyle `FinalParameters`                  | Build failure    |
+| `final` on all injected fields                             | Checkstyle + code review                      | Build failure    |
+| One variable declaration per line                          | Checkstyle `MultipleVariableDeclarations`     | Build failure    |
+| One statement per line                                     | Checkstyle `OneStatementPerLine`              | Build failure    |
+| No `finalize()` override                                   | Checkstyle `NoFinalizer`                      | Build failure    |
+| `default` in every `switch`                                | Checkstyle `MissingSwitchDefault`             | Build failure    |
+| No fall-through in `switch`                                | Checkstyle `FallThrough`                      | Build failure    |
+| Java-style array declarations                              | Checkstyle `ArrayTypeStyle`                   | Build failure    |
+| Uppercase `L` for long literals                            | Checkstyle `UpperEll`                         | Build failure    |
+| Abbreviations ≤ 5 chars in names                           | Checkstyle `AbbreviationAsWordInName`         | Build failure    |
+| Overloads declared consecutively                           | Checkstyle `OverloadMethodsDeclarationOrder`  | Build failure    |
+| Braces on all control flow blocks                          | Checkstyle `NeedBraces`                       | Build failure    |
+| No silent empty catch blocks                               | Checkstyle `EmptyCatchBlock`                  | Build failure    |
+| Correct modifier order                                     | Checkstyle `ModifierOrder`                    | Build failure    |
+| Variable declared close to use (≤ 20 lines)                | Checkstyle `VariableDeclarationUsageDistance` | Build failure    |
+| No unexplained `@SuppressWarnings`                         | Code review policy                            | Review rejection |
