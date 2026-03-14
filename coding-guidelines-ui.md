@@ -327,7 +327,7 @@ export const useUserStore = create<UserStore>()(
       set((state) => {
         state.user = user; // Immer allows direct mutation
       }),
-  }))
+  })),
 );
 ```
 

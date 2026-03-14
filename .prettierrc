@@ -4,5 +4,5 @@ tabWidth: 2
 semi: true
 singleQuote: false
 plugins:
-  - prettier-plugin-packagejson
-  - prettier-plugin-java
+    - prettier-plugin-packagejson
+    - prettier-plugin-java
