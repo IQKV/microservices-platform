@@ -38,6 +38,7 @@
 29. [Schema & API Evolution](#29-schema--api-evolution)
 30. [Kubernetes Lifecycle & Graceful Shutdown](#30-kubernetes-lifecycle--graceful-shutdown)
 31. [CI/CD Pipeline & Deployment Configuration](#31-cicd-pipeline--deployment-configuration)
+32. [Java Import Rules, Final Variables & Strict Code Hygiene](#32-java-import-rules-final-variables--strict-code-hygiene)
 
 ---
 
@@ -2429,3 +2430,379 @@ helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
 ```
 
 This guarantees that source code repositories never contain actionable credentials and that separate environments (dev, test, staging, production) can securely provision their own isolation.
+
+
+---
+
+## 32. Java Import Rules, Final Variables & Strict Code Hygiene
+
+These rules are enforced by Checkstyle (`maven-project-common-checkstyle.xml`) and the project `.editorconfig`. Violations fail the build — treat them as compilation errors.
+
+---
+
+### 32.1 Import Ordering
+
+Imports must follow this exact order, with a blank line between each group:
+
+```
+1. Static imports          (e.g., import static org.assertj.core.api.Assertions.assertThat;)
+2. Standard Java packages  (java.**, javax.**, jakarta.**)
+3. Special platform imports (tech.**, expert.**, android.**, dev.**, build.**)
+4. Third-party imports     (everything else — Spring, Hibernate, Jackson, etc.)
+```
+
+Checkstyle rule: `CustomImportOrder` with `STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE`.
+
+IntelliJ layout (`.editorconfig`):
+```
+ij_java_imports_layout = $*, |, jakarta.**, java.**, javax.**, |, *
+```
+
+#### Rules
+
+- No wildcard imports — ever. `AvoidStarImport` is enforced. Set `class_count_to_use_import_on_demand = 999` and `names_count_to_use_import_on_demand = 999` in IntelliJ to prevent auto-collapsing to `*`.
+- No unused imports — `UnusedImports` check is active.
+- Imports must not be line-wrapped — `NoLineWrap` is enforced on `IMPORT` and `STATIC_IMPORT` tokens.
+- Alphabetical ordering within each group is required.
+- One blank line between each import group — no blank lines within a group.
+- Static imports come first, before all other imports.
+
+#### Correct example
+
+```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.iqscaffold.contactservice.contact.Contact;
+import com.iqscaffold.contactservice.contact.ContactRepository;
+```
+
+#### Wrong — never do this
+
+```java
+import java.util.*;                          // wildcard — forbidden
+import org.springframework.stereotype.*;     // wildcard — forbidden
+import java.time.LocalDateTime;
+import static org.assertj.core.api.Assertions.assertThat;  // static not first
+import com.iqscaffold.contactservice.contact.Contact;
+import java.util.List;                       // java.** mixed with third-party
+```
+
+---
+
+### 32.2 Final Variables
+
+#### Injected fields — always `final`
+
+All constructor-injected fields must be `final`. This is already required by section 18, but it is also a Checkstyle-enforced rule.
+
+```java
+// Correct
+public class ContactServiceImpl implements ContactService {
+  private final ContactRepository contactRepository;
+  private final ContactEventPublisher eventPublisher;
+
+  public ContactServiceImpl(
+      final ContactRepository contactRepository,
+      final ContactEventPublisher eventPublisher) {
+    this.contactRepository = contactRepository;
+    this.eventPublisher = eventPublisher;
+  }
+}
+
+// Wrong — mutable field, field injection
+@Autowired
+private ContactRepository contactRepository;
+```
+
+#### Constructor, catch, and for-each parameters — `final`
+
+The `FinalParameters` Checkstyle rule enforces `final` on:
+- Constructor parameters (`CTOR_DEF`)
+- For-each clause variables (`FOR_EACH_CLAUSE`)
+- Catch block parameters (`LITERAL_CATCH`)
+
+Primitive types are exempt (`ignorePrimitiveTypes = true`). Unnamed parameters (Java 21 `_`) are exempt.
+
+```java
+// Correct
+public ContactServiceImpl(final ContactRepository repo, final ContactEventPublisher publisher) { ... }
+
+for (final Contact contact : contacts) { ... }
+
+try {
+  // ...
+} catch (final ContactNotFoundException ex) {
+  log.warn("Contact not found", ex);
+}
+
+// Wrong — missing final on constructor/catch/for-each parameters
+public ContactServiceImpl(ContactRepository repo) { ... }
+for (Contact contact : contacts) { ... }
+catch (ContactNotFoundException ex) { ... }
+```
+
+> Note: `final` on regular method parameters is not enforced by Checkstyle here (only `CTOR_DEF`, `FOR_EACH_CLAUSE`, `LITERAL_CATCH` are in scope), but it is encouraged for clarity on non-trivial methods.
+
+#### Local variables — declare close to use
+
+`VariableDeclarationUsageDistance` is set to `allowedDistance = 20`. Declare local variables as close as possible to their first use — do not hoist declarations to the top of a method.
+
+```java
+// Correct — declared at point of use
+public Contact createContact(final Contact contact) {
+  Contact saved = contactRepository.save(contact);
+  eventPublisher.publishContactCreated(saved);
+  return saved;
+}
+
+// Wrong — unnecessary hoisting
+public Contact createContact(final Contact contact) {
+  Contact saved;
+  // ... unrelated code ...
+  saved = contactRepository.save(contact);
+  return saved;
+}
+```
+
+#### Static constants — `public static final`
+
+All constants must be `public static final` (or package-private `static final` when intentionally scoped). The modifier order is enforced by `ModifierOrder`:
+
+```
+public / protected / private → abstract → static → final → transient → volatile → synchronized → native → strictfp
+```
+
+```java
+// Correct
+public static final String EXCHANGE_NAME = "iqscaffold.events";
+private static final Logger log = LoggerFactory.getLogger(ContactServiceImpl.class);
+
+// Wrong — wrong modifier order
+static public final String EXCHANGE_NAME = "iqscaffold.events";
+final static String EXCHANGE_NAME = "iqscaffold.events";
+```
+
+---
+
+### 32.3 One Declaration Per Line
+
+`MultipleVariableDeclarations` is enforced — never declare multiple variables on one line.
+
+```java
+// Correct
+String firstName = request.firstName();
+String lastName  = request.lastName();
+
+// Wrong
+String firstName = request.firstName(), lastName = request.lastName();
+```
+
+`OneStatementPerLine` is also enforced — one statement per line, always.
+
+```java
+// Correct
+contact.setFirstName(request.firstName());
+contact.setLastName(request.lastName());
+
+// Wrong
+contact.setFirstName(request.firstName()); contact.setLastName(request.lastName());
+```
+
+---
+
+### 32.4 No Finalizers
+
+`NoFinalizer` is enforced. Never override `Object.finalize()`. Use `try-with-resources` or explicit `close()` calls for resource cleanup.
+
+```java
+// Wrong — never do this
+@Override
+protected void finalize() throws Throwable {
+  cleanup();
+  super.finalize();
+}
+
+// Correct — use try-with-resources
+try (var stream = Files.newInputStream(path)) {
+  // use stream
+}
+```
+
+---
+
+### 32.5 Switch Statements
+
+- `MissingSwitchDefault` is enforced — every `switch` statement must have a `default` branch.
+- `FallThrough` is enforced — fall-through between `case` blocks is forbidden unless the case body is empty (grouping).
+
+```java
+// Correct — default present, no fall-through
+return switch (status) {
+  case ACTIVE   -> processActive(contact);
+  case INACTIVE -> processInactive(contact);
+  default       -> throw new IllegalArgumentException("Unknown status: " + status);
+};
+
+// Wrong — missing default
+return switch (status) {
+  case ACTIVE   -> processActive(contact);
+  case INACTIVE -> processInactive(contact);
+  // no default — Checkstyle violation
+};
+```
+
+---
+
+### 32.6 Array Style
+
+`ArrayTypeStyle` is enforced — use Java-style array declarations, not C-style.
+
+```java
+// Correct
+String[] names;
+byte[] data;
+
+// Wrong — C-style
+String names[];
+byte data[];
+```
+
+---
+
+### 32.7 Long Literal Suffix
+
+`UpperEll` is enforced — always use uppercase `L` for long literals, never lowercase `l` (visually ambiguous with `1`).
+
+```java
+// Correct
+long timeout = 86400L;
+long maxSize = 1_000_000L;
+
+// Wrong
+long timeout = 86400l;   // 'l' looks like '1'
+```
+
+---
+
+### 32.8 Abbreviations in Names
+
+`AbbreviationAsWordInName` is enforced with `allowedAbbreviationLength = 5` and `ignoreFinal = false`.
+
+- Abbreviations longer than 5 consecutive uppercase letters are forbidden in class, method, variable, and parameter names.
+- This applies to `final` fields too — `ignoreFinal = false`.
+
+```java
+// Correct — abbreviation ≤ 5 chars
+String userId;
+String jwtToken;
+String httpUrl;
+class RabbitMQConfig { }   // "AMQP" is 4 chars — OK
+class JwtClaimNames { }    // "JWT" is 3 chars — OK
+
+// Wrong — abbreviation > 5 chars
+String userIDENTIFIER;
+class HTTPSConnectionManager { }   // "HTTPS" is 5 — borderline; "HTTPS" itself is fine, but "HTTPSConnection" has 5 consecutive caps — check with Checkstyle
+```
+
+---
+
+### 32.9 Overloaded Methods — Declaration Order
+
+`OverloadMethodsDeclarationOrder` is enforced. All overloads of the same method must be declared consecutively — do not interleave overloads with unrelated methods.
+
+```java
+// Correct — overloads together
+public Optional<Contact> getContactById(Long id) { ... }
+public Optional<Contact> getContactById(Long id, String tenantId) { ... }
+
+public Page<Contact> getAllContacts(Pageable pageable) { ... }
+
+// Wrong — overloads separated by unrelated method
+public Optional<Contact> getContactById(Long id) { ... }
+public Page<Contact> getAllContacts(Pageable pageable) { ... }
+public Optional<Contact> getContactById(Long id, String tenantId) { ... }  // violation
+```
+
+---
+
+### 32.10 Empty Blocks & Braces
+
+- `NeedBraces` is enforced on `do`, `else`, `for`, `if`, `while` — always use braces, even for single-line bodies.
+- `EmptyBlock` is enforced — empty `try`, `finally`, `if`, `else`, `switch` blocks must contain at least a comment.
+- `EmptyCatchBlock` allows only catch blocks where the variable is named `expected` (test idiom).
+
+```java
+// Correct — braces always
+if (contact == null) {
+  return;
+}
+
+// Wrong — no braces
+if (contact == null) return;
+
+// Correct — empty catch with explanation
+try {
+  cache.evict(key);
+} catch (final CacheException expected) {
+  // eviction failure is non-critical; cache will expire naturally
+}
+
+// Wrong — silent swallow
+try {
+  cache.evict(key);
+} catch (CacheException e) {}
+```
+
+---
+
+### 32.11 Checkstyle Suppression Policy
+
+Suppressions are allowed only via `checkstyle-suppressions.xml` or `@SuppressWarnings` with a mandatory comment. Inline `// CHECKSTYLE:OFF` blocks are forbidden except in generated code.
+
+```java
+// Correct — suppression with explanation
+@SuppressWarnings("checkstyle:MagicNumber") // port 8080 is a well-known default, not a magic number
+private static final int DEFAULT_PORT = 8080;
+
+// Wrong — unexplained suppression
+@SuppressWarnings("checkstyle:MagicNumber")
+private static final int DEFAULT_PORT = 8080;
+```
+
+---
+
+### 32.12 Summary Checklist
+
+| Rule | Enforced by | Severity |
+|---|---|---|
+| No wildcard imports | Checkstyle `AvoidStarImport` | Build failure |
+| No unused imports | Checkstyle `UnusedImports` | Build failure |
+| Import group order (static → java → special → third-party) | Checkstyle `CustomImportOrder` | Build failure |
+| Alphabetical order within import groups | Checkstyle `CustomImportOrder` | Build failure |
+| `final` on constructor / catch / for-each parameters | Checkstyle `FinalParameters` | Build failure |
+| `final` on all injected fields | Checkstyle + code review | Build failure |
+| One variable declaration per line | Checkstyle `MultipleVariableDeclarations` | Build failure |
+| One statement per line | Checkstyle `OneStatementPerLine` | Build failure |
+| No `finalize()` override | Checkstyle `NoFinalizer` | Build failure |
+| `default` in every `switch` | Checkstyle `MissingSwitchDefault` | Build failure |
+| No fall-through in `switch` | Checkstyle `FallThrough` | Build failure |
+| Java-style array declarations | Checkstyle `ArrayTypeStyle` | Build failure |
+| Uppercase `L` for long literals | Checkstyle `UpperEll` | Build failure |
+| Abbreviations ≤ 5 chars in names | Checkstyle `AbbreviationAsWordInName` | Build failure |
+| Overloads declared consecutively | Checkstyle `OverloadMethodsDeclarationOrder` | Build failure |
+| Braces on all control flow blocks | Checkstyle `NeedBraces` | Build failure |
+| No silent empty catch blocks | Checkstyle `EmptyCatchBlock` | Build failure |
+| Correct modifier order | Checkstyle `ModifierOrder` | Build failure |
+| Variable declared close to use (≤ 20 lines) | Checkstyle `VariableDeclarationUsageDistance` | Build failure |
+| No unexplained `@SuppressWarnings` | Code review policy | Review rejection |
