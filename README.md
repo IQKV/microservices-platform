@@ -84,7 +84,7 @@ Multi-tenant payment orchestration and financial operations service.
 - Payout management and revenue sharing with platform fees
 - Refund processing with full and partial refund support
 - Invoice management with automated generation and tracking
-- Multi-gateway configuration (Stripe, PayPal, Square, Braintree) with encrypted credentials
+- Multi-gateway configuration (Stripe) with encrypted credentials
 
 **Key Patterns:**
 
