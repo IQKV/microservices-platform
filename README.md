@@ -20,8 +20,7 @@ A microservices ecosystem that provides:
 
 - **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
 - **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
-- **Billing & Payments** - Multi-tenant payment orchestration with Stripe Connect, subscription management, and automated financial operations
-- **CRM Operations** - Complete lead-to-customer pipeline with lead management, contact tracking, and sales pipeline automation
+- **Billing & Payments** - Multi-tenant payment orchestration with Stripe, subscription management, and automated financial operations
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
@@ -95,69 +94,6 @@ Multi-tenant payment orchestration and financial operations service.
 - Event-driven notifications with RabbitMQ integration
 - Comprehensive audit logging for compliance
 
-### 🎯 [Lead Service](foundation-lead-service/README.md)
-
-CRM lead management service for lead capture, qualification, and conversion.
-
-**Core Capabilities:**
-
-- Lead management with comprehensive tracking and scoring (0-100)
-- Lead qualification with automatic and manual processes
-- Lead assignment to sales representatives
-- Lead conversion to contacts with cross-service integration
-- Activity tracking and lead notes management
-- Multi-source lead tracking (Website, Referral, Cold Call, etc.)
-
-**Key Patterns:**
-
-- Lead-to-contact conversion with REST API integration
-- Event publishing for lead lifecycle events
-- Redis caching for performance optimization
-- Multi-tenant schema isolation
-- Role-based access control with JWT authentication
-
-### 👥 [Contact Service](foundation-contact-service/README.md)
-
-CRM contact management service with lead scoring and bulk operations.
-
-**Core Capabilities:**
-
-- Contact management with comprehensive CRUD operations
-- Bulk operations for efficient contact processing (max 100 per request)
-- Lead conversion tracking with timestamps
-- Company association and contact status management
-- Lead scoring maintenance and bulk score updates
-- Event publishing for contact lifecycle events
-
-**Key Patterns:**
-
-- Bulk operation support with detailed success/failure reporting
-- Event-driven integration with Lead and Pipeline services
-- Ehcache second-level caching for performance
-- Multi-tenant schema isolation
-- Conversion tracking from leads
-
-### 📊 [Pipeline Service](foundation-pipeline-service/README.md)
-
-CRM pipeline management service for sales process tracking and analytics.
-
-**Core Capabilities:**
-
-- Pipeline stage management with customizable stages (New → Contacted → Qualified → Proposal → Won/Lost)
-- Lead tracking through pipeline stages
-- Follow-up scheduling with due dates and priorities
-- Activity logging for all lead interactions and stage transitions
-- Dashboard analytics with conversion metrics and pipeline statistics
-- Velocity tracking and conversion rate analysis
-
-**Key Patterns:**
-
-- Event-driven architecture consuming contact/lead events
-- Activity logging for comprehensive audit trails
-- Dashboard service for real-time analytics
-- Multi-tenant schema isolation
-- Follow-up priority and status management
-
 ## Architecture Overview
 
 ### Microservices Architecture
@@ -188,31 +124,6 @@ CRM pipeline management service for sales process tracking and analytics.
 ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
 │            PostgreSQL (User DB)          │   │          PostgreSQL (Billing DB)         │
 └──────────────────────────────────────────┘   └──────────────────────────────────────────┘
-
-CRM Services
-┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│          Contact Service (Port 8080)     │   │           Lead Service (Port 8080)       │
-│  • Contact Management                    │   │  • Lead Management                       │
-│  • Bulk Operations                       │   │  • Lead Scoring                          │
-│  • Lead Conversion                       │   │  • Lead Assignment                       │
-└──────┬───────────────────────────────────┘   └──────┬───────────────────────────────────┘
-       │                                              │
-       ▼                                              ▼
-┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│          PostgreSQL (Contact DB)         │   │           PostgreSQL (Lead DB)           │
-└──────────────────────────────────────────┘   └──────────────────────────────────────────┘
-
-┌──────────────────────────────────────────┐
-│        Pipeline Service (Port 8080)      │
-│  • Pipeline Management                   │
-│  • Follow-up Scheduling                  │
-│  • Analytics Dashboard                   │
-└──────┬───────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────┐
-│         PostgreSQL (Pipeline DB)         │
-└──────────────────────────────────────────┘
 
 Shared Infrastructure
 ┌──────────────────────────────┐   ┌─────────────────────────────┐   ┌─────────────────────────────┐
@@ -323,16 +234,6 @@ docker-compose up
 
 # Start Gateway Service
 cd foundation-gateway-service
-docker-compose up
-
-# Start CRM Services
-cd foundation-lead-service
-docker-compose up
-
-cd foundation-contact-service
-docker-compose up
-
-cd foundation-pipeline-service
 docker-compose up
 
 ```
