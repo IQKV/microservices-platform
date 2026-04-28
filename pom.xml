@@ -9,8 +9,8 @@
         <artifactId>boot-parent-pom</artifactId>
         <version>0.25.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.iqscaffold</groupId>
-    <artifactId>iqscaffold</artifactId>
+    <groupId>com.foundation</groupId>
+    <artifactId>foundation</artifactId>
     <version>0.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -18,8 +18,7 @@
     <description>Extensible microservices platform with centralized authentication and gateway</description>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.run.jvmArguments>-Duser.timezone=UTC</spring-boot.run.jvmArguments>
@@ -29,7 +28,9 @@
     </properties>
 
     <modules>
-
+        <module>foundation-iam-service</module>
+        <module>foundation-billing-service</module>
+        <module>foundation-gateway-service</module>
     </modules>
 
     <build>
@@ -54,7 +55,7 @@
 
                                     <!-- Require Java 21 -->
                                     <requireJavaVersion>
-                                        <version>[21,)</version>
+                                        <version>[25,)</version>
                                     </requireJavaVersion>
 
                                     <!-- Ban duplicate dependencies -->
@@ -68,13 +69,12 @@
                     </executions>
                 </plugin>
 
-                <!-- Compiler plugin with Java 21 -->
+                <!-- Compiler plugin with Java 25 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
-                        <source>21</source>
-                        <target>21</target>
+                        <release>${java.version}</release>
                         <compilerArgs>
                             <arg>--enable-preview</arg>
                         </compilerArgs>

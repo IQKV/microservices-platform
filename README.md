@@ -28,7 +28,7 @@ This platform serves as a reference implementation for organizations building mi
 
 ## Platform Services
 
-### 🔐 [User Service](iqscaffold-user-service/README.md)
+### 🔐 [IAM Service](foundation-iam-service/README.md)
 
 Centralized authentication and identity management hub.
 
@@ -50,7 +50,7 @@ Centralized authentication and identity management hub.
 - User context propagation with full JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
 - Pattern matching for claim extraction (Java 21)
 
-### 🌐 [Gateway Service](iqscaffold-gateway-service/README.md)
+### 🌐 [Gateway Service](foundation-gateway-service/README.md)
 
 Reactive API gateway providing unified entry point for all services.
 
@@ -72,7 +72,7 @@ Reactive API gateway providing unified entry point for all services.
 - API versioning (path and header-based)
 - Type-safe configuration with Java records (IqScaffoldProperties)
 
-### 💰 [Billing Service](iqscaffold-billing-service/README.md)
+### 💰 [Billing Service](foundation-billing-service/README.md)
 
 Multi-tenant payment orchestration and financial operations service.
 
@@ -95,7 +95,7 @@ Multi-tenant payment orchestration and financial operations service.
 - Event-driven notifications with RabbitMQ integration
 - Comprehensive audit logging for compliance
 
-### 🎯 [Lead Service](iqscaffold-lead-service/README.md)
+### 🎯 [Lead Service](foundation-lead-service/README.md)
 
 CRM lead management service for lead capture, qualification, and conversion.
 
@@ -116,7 +116,7 @@ CRM lead management service for lead capture, qualification, and conversion.
 - Multi-tenant schema isolation
 - Role-based access control with JWT authentication
 
-### 👥 [Contact Service](iqscaffold-contact-service/README.md)
+### 👥 [Contact Service](foundation-contact-service/README.md)
 
 CRM contact management service with lead scoring and bulk operations.
 
@@ -137,7 +137,7 @@ CRM contact management service with lead scoring and bulk operations.
 - Multi-tenant schema isolation
 - Conversion tracking from leads
 
-### 📊 [Pipeline Service](iqscaffold-pipeline-service/README.md)
+### 📊 [Pipeline Service](foundation-pipeline-service/README.md)
 
 CRM pipeline management service for sales process tracking and analytics.
 
@@ -178,7 +178,7 @@ CRM pipeline management service for sales process tracking and analytics.
        │
        ▼
 ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│            User Service (Port 8080)      │   │          Billing Service (Port 8080)     │
+│            IAM Service (Port 8080)      │   │          Billing Service (Port 8080)     │
 │  • Auth/JWT                              │   │  • Payment Intents                       │
 │  • Users                                 │   │  • Subscriptions                         │
 │  • Roles                                 │   │  • Stripe Connect                        │
@@ -224,8 +224,8 @@ Shared Infrastructure
 
 ### Technology Stack
 
-- **Runtime:** Java 21 with modern features (records, var, text blocks, pattern matching, switch expressions)
-- **Framework:** Spring Boot 3.5.6, Spring Cloud 2025.0.0, Spring Cloud Gateway (reactive)
+- **Runtime:** Java 25 with modern features (records, var, text blocks, pattern matching, switch expressions)
+- **Framework:** Spring Boot 4.0, Spring Cloud 2025.0.0, Spring Cloud Gateway (reactive)
 - **Database:** PostgreSQL 15+ with Liquibase migrations, Hibernate multi-tenancy
 - **Caching:** Redis for distributed caching, rate limiting (ZSET), and token blacklisting
 - **Messaging:** RabbitMQ for event-driven communication and cross-service integration
@@ -240,7 +240,7 @@ Shared Infrastructure
 
 ### Security & Authentication
 
-- Centralized JWT-based authentication with RSA256 through User Service
+- Centralized JWT-based authentication with RSA256 through IAM Service
 - JTI-based token blacklisting with Redis TTL for logout
 - Token validation at Gateway with ReactiveSecurityContextHolder
 - User context propagation via headers (X-User-ID, X-Username, X-User-Roles)
@@ -313,26 +313,26 @@ Shared Infrastructure
 Each service can be run independently with Docker Compose:
 
 ```bash
-# Start User Service with dependencies
-cd iqscaffold-user-service
+# Start IAM Service with dependencies
+cd foundation-iam-service
 docker-compose up
 
 # Start Billing Service with dependencies
-cd iqscaffold-billing-service
+cd foundation-billing-service
 docker-compose up
 
 # Start Gateway Service
-cd iqscaffold-gateway-service
+cd foundation-gateway-service
 docker-compose up
 
 # Start CRM Services
-cd iqscaffold-lead-service
+cd foundation-lead-service
 docker-compose up
 
-cd iqscaffold-contact-service
+cd foundation-contact-service
 docker-compose up
 
-cd iqscaffold-pipeline-service
+cd foundation-pipeline-service
 docker-compose up
 
 ```
@@ -341,12 +341,9 @@ docker-compose up
 
 Once services are running, access Swagger UI:
 
-- User Service: http://user-service:8080/swagger-ui.html
+- IAM Service: http://iam-service:8080/swagger-ui.html
 - Gateway Service: http://gateway-service:8080/swagger-ui.html
 - Billing Service: http://billing-service:8080/swagger-ui.html
-- Contact Service: http://contact-service:8080/swagger-ui.html
-- Lead Service: http://lead-service:8080/swagger-ui.html
-- Pipeline Service: http://pipeline-service:8080/swagger-ui.html
 
 ### Monitoring
 

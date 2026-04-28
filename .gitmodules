@@ -25,3 +25,12 @@
 [submodule "iqscaffold-ui-saas-landing-kit"]
 	path = iqscaffold-ui-saas-landing-kit
 	url = git@github.com:IQKV/iqscaffold-ui-saas-landing-kit.git
+[submodule "foundation-iam-service"]
+	path = foundation-iam-service
+	url = git@github.com:IQKV/foundation-iam-service.git
+[submodule "foundation-billing-service"]
+	path = foundation-billing-service
+	url = git@github.com:IQKV/foundation-billing-service.git
+[submodule "foundation-gateway-service"]
+	path = foundation-gateway-service
+	url = git@github.com:IQKV/foundation-gateway-service.git

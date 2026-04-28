@@ -12,22 +12,18 @@
 
 ## Business Pillars
 
-Three critical domains to accelerate product development:
+Critical domains to accelerate product development:
 
 - **Identity & Access**: Multi-tenant authentication and role-based access control
 - **Financial Operations**: Payment processing, merchant onboarding, subscriptions, and revenue sharing
-- **CRM & Sales**: Complete lead-to-customer pipeline with scoring, conversion tracking, and analytics
 
 ## Service Ecosystem
 
 Domain-aligned services with event-driven communication:
 
-- **🔐 [User Service](iqscaffold-user-service/README.md)**: Authentication, user lifecycle, organization management
-- **🌐 [Gateway Service](iqscaffold-gateway-service/README.md)**: Routing, rate limiting, JWT validation, circuit breaker
-- **💰 [Billing Service](iqscaffold-billing-service/README.md)**: Payments, subscriptions, multi-gateway support, Stripe Connect
-- **👥 [Contact Service](iqscaffold-contact-service/README.md)**: Contact management, bulk operations, lead conversion tracking
-- **🎯 [Lead Service](iqscaffold-lead-service/README.md)**: Lead capture, scoring, qualification, assignment, conversion
-- **📊 [Pipeline Service](iqscaffold-pipeline-service/README.md)**: Sales stages, follow-ups, analytics, conversion metrics
+- **🔐 [IAM Service](foundation-iam-service/README.md)**: Authentication, user lifecycle, organization management
+- **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Routing, rate limiting, JWT validation, circuit breaker
+- **💰 [Billing Service](foundation-billing-service/README.md)**: Payments, subscriptions, multi-gateway support, Stripe Connect
 
 ## Infrastructure
 
@@ -45,14 +41,12 @@ Deploy with Docker Compose:
 
 ```bash
 # Core services
-cd iqscaffold-user-service && docker-compose up -d
-cd ../iqscaffold-gateway-service && docker-compose up -d
+cd foundation-iam-service && docker-compose up -d
+cd ../foundation-gateway-service && docker-compose up -d
 
 # Business services
-cd ../iqscaffold-billing-service && docker-compose up -d
-cd ../iqscaffold-lead-service && docker-compose up -d
-cd ../iqscaffold-contact-service && docker-compose up -d
-cd ../iqscaffold-pipeline-service && docker-compose up -d
+cd ../foundation-billing-service && docker-compose up -d
+
 ```
 
 Access APIs via Gateway: http://localhost:8080
@@ -63,7 +57,6 @@ Rapid deployment across industries:
 
 - **B2B SaaS**: Multi-tenancy and organization management
 - **Marketplaces**: Merchant onboarding and revenue orchestration
-- **CRM/ERP**: Relationship tracking and sales pipeline
 - **Regulated Sectors**: Data isolation and audit trails
 
 ---
