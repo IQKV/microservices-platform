@@ -95,12 +95,12 @@ This directory contains the complete observability stack for the IQ Key Value mi
 
 ### User Service Metrics
 
-- `foundation_user_authentication_duration`: Authentication request duration
-- `foundation_user_authentication_total`: Total authentication attempts (success/failure)
-- `foundation_user_registration_duration`: User registration duration
-- `foundation_user_registration_total`: Total registration attempts
-- `foundation_user_token_refresh_duration`: Token refresh duration
-- `foundation_user_token_refresh_total`: Total token refresh attempts
+- `foundation_iam_authentication_duration`: Authentication request duration
+- `foundation_iam_authentication_total`: Total authentication attempts (success/failure)
+- `foundation_iam_registration_duration`: User registration duration
+- `foundation_iam_registration_total`: Total registration attempts
+- `foundation_iam_token_refresh_duration`: Token refresh duration
+- `foundation_iam_token_refresh_total`: Total token refresh attempts
 
 ### Gateway Service Metrics
 

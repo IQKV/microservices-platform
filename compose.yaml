@@ -29,8 +29,8 @@ services:
     image: postgres:15-alpine
     container_name: foundation-postgres-iam
     environment:
-      POSTGRES_DB: foundation_user
-      POSTGRES_USER: foundation_user
+      POSTGRES_DB: foundation_iam
+      POSTGRES_USER: foundation_iam
       POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
@@ -40,7 +40,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_user -d foundation_user"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_iam -d foundation_iam"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -139,8 +139,8 @@ services:
     container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      IQKV_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_user
-      IQKV_DATABASE_USERNAME: foundation_user
+      IQKV_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_iam
+      IQKV_DATABASE_USERNAME: foundation_iam
       IQKV_DATABASE_PASSWORD: foundation_password
       IQKV_CACHE_REDIS_HOST: redis
       IQKV_CACHE_REDIS_PORT: 6379

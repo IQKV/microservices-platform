@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   # PostgreSQL Database for IAM Service Testing
@@ -7,7 +6,7 @@ services:
     container_name: foundation-postgres-iam-test
     environment:
       POSTGRES_DB: foundation_iam_test
-      POSTGRES_USER: foundation_test_user
+      POSTGRES_USER: foundation_test_iam
       POSTGRES_PASSWORD: foundation_test_password
     ports:
       - "5434:5432"
@@ -17,7 +16,7 @@ services:
     networks:
       - foundation-test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_test_user -d foundation_iam_test"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_test_iam -d foundation_iam_test"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -52,7 +51,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: test
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-iam-test:5432/foundation_iam_test
-      SPRING_DATASOURCE_USERNAME: foundation_test_user
+      SPRING_DATASOURCE_USERNAME: foundation_test_iam
       SPRING_DATASOURCE_PASSWORD: foundation_test_password
       SPRING_DATA_REDIS_HOST: redis-test
       SPRING_DATA_REDIS_PORT: 6379
