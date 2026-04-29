@@ -1,16 +1,16 @@
-version: "3.8"
-
 services:
-  # Traefik Reverse Proxy
+  # ---------------------------------------------------------------------------
+  # Reverse Proxy
+  # ---------------------------------------------------------------------------
   traefik:
     image: traefik:v3.0
     container_name: foundation-traefik
     command:
       - --configfile=/etc/traefik/traefik.yml
     ports:
-      - "80:80" # HTTP
-      - "443:443" # HTTPS
-      - "8080:8080" # Traefik Dashboard & Gateway
+      - "80:80"    # HTTP — routes to gateway-service
+      - "443:443"  # HTTPS
+      - "8888:8080" # Traefik Dashboard (http://localhost:8888/dashboard/)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -24,51 +24,92 @@ services:
       - "traefik.http.routers.traefik.entrypoints=web"
     restart: unless-stopped
 
-  # PostgreSQL Database for User Service
+  # ---------------------------------------------------------------------------
+  # Databases
+  # ---------------------------------------------------------------------------
   postgres-iam:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: foundation-postgres-iam
     environment:
-      POSTGRES_DB: foundation_iam
-      POSTGRES_USER: foundation_iam
-      POSTGRES_PASSWORD: foundation_password
+      POSTGRES_DB: ${IAM_DB_NAME:-iam}
+      POSTGRES_USER: ${IAM_DB_USERNAME:-iam}
+      POSTGRES_PASSWORD: ${IAM_DB_PASSWORD:-iam}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
     expose:
       - "5432"
     volumes:
-      - postgres_user_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
+      - postgres_iam_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-iam.sql:/docker-entrypoint-initdb.d/init-iam.sql:ro
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_iam -d foundation_iam"]
+      test: ["CMD-SHELL", "pg_isready -U iam -d iam"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
 
-  # PostgreSQL Database for Billing Service
   postgres-billing:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: foundation-postgres-billing
     environment:
-      POSTGRES_DB: foundation_billing
-      POSTGRES_USER: foundation_billing
-      POSTGRES_PASSWORD: foundation_password
+      POSTGRES_DB: ${BILLING_DB_NAME:-billing}
+      POSTGRES_USER: ${BILLING_DB_USERNAME:-billing}
+      POSTGRES_PASSWORD: ${BILLING_DB_PASSWORD:-billing}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
     expose:
       - "5432"
     volumes:
       - postgres_billing_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql
+      - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql:ro
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_billing -d foundation_billing"]
+      test: ["CMD-SHELL", "pg_isready -U billing -d billing"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
 
-  # Redis for Caching and Sessions
+  # ---------------------------------------------------------------------------
+  # Cache
+  # ---------------------------------------------------------------------------
   redis:
     image: redis:7-alpine
     container_name: foundation-redis
@@ -85,22 +126,25 @@ services:
       retries: 5
       start_period: 30s
     command: redis-server --appendonly yes
+    restart: unless-stopped
 
-  # RabbitMQ for Message Queue
+  # ---------------------------------------------------------------------------
+  # Messaging
+  # ---------------------------------------------------------------------------
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: foundation-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: foundation
-      RABBITMQ_DEFAULT_PASS: foundation_password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-foundation}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-foundation_password}
       RABBITMQ_DEFAULT_VHOST: /
     expose:
-      - "5672" # AMQP port
-      - "15672" # Management UI
+      - "5672"
+      - "15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
       - foundation-network
     labels:
@@ -114,14 +158,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    restart: unless-stopped
 
-  # MailHog for Email Testing in Local Development
+  # ---------------------------------------------------------------------------
+  # Mail (local development only)
+  # ---------------------------------------------------------------------------
   mailhog:
-    image: mailhog/mailhog:latest
+    image: mailhog/mailhog:v1.0.1
     container_name: foundation-mailhog
     expose:
-      - "1025" # SMTP port
-      - "8025" # Web UI
+      - "1025"
+      - "8025"
     networks:
       - foundation-network
     labels:
@@ -131,100 +178,137 @@ services:
       - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
     restart: unless-stopped
 
-  # User Service
+  # ---------------------------------------------------------------------------
+  # IAM Service
+  # (internal — not directly exposed via Traefik; traffic arrives via gateway-service)
+  # ---------------------------------------------------------------------------
   iam-service:
     build:
-      context: .
-      dockerfile: foundation-iam-service/Dockerfile
+      context: ./foundation-iam-service
+      dockerfile: Dockerfile
+    image: iqkv/foundation-iam-service:local
     container_name: foundation-iam-service
     environment:
-      SPRING_PROFILES_ACTIVE: local
-      IQKV_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_iam
-      IQKV_DATABASE_USERNAME: foundation_iam
-      IQKV_DATABASE_PASSWORD: foundation_password
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQKV_MESSAGING_RABBITMQ_PORT: 5672
-      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
-      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
-      IQKV_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
-      IQKV_AUTH_JWT_EXPIRATION: 900
-      IQKV_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+
+      # Database
+      DB_HOST: postgres-iam
+      DB_PORT: 5432
+      DB_NAME: ${IAM_DB_NAME:-iam}
+      DB_USERNAME: ${IAM_DB_USERNAME:-iam}
+      DB_PASSWORD: ${IAM_DB_PASSWORD:-iam}
+
+      # RabbitMQ
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-foundation}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-foundation_password}
+
+      # Mail (MailHog)
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
+
+      # JWT RS256
+      JWT_PRIVATE_KEY_PATH: classpath:keys/private.pem
+      JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
+      JWT_ISSUER: foundation-iam-service
+
+      # Application
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:80}
+
+      # Multi-tenancy
+      ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      DEFAULT_TENANT_KEY: ${DEFAULT_TENANT_KEY:-}
+      DEFAULT_TENANT_NAME: ${DEFAULT_TENANT_NAME:-Default Organization}
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-iam-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-iam-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
-      - "8080"
+      - "8080"  # Application API
+      - "8081"  # Management / Actuator
     depends_on:
       postgres-iam:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.iam-service.rule=Host(`iam-service.localhost`) || PathPrefix(`/api/users`)"
-      - "traefik.http.routers.iam-service.entrypoints=gateway"
-      - "traefik.http.services.iam-service.loadbalancer.server.port=8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
+    volumes:
+      - iam_logs:/app/logs
+      - iam_tmp:/app/tmp
     restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
   # Billing Service
+  # (internal — not directly exposed via Traefik; traffic arrives via gateway-service)
+  # ---------------------------------------------------------------------------
   billing-service:
     build:
-      context: .
-      dockerfile: foundation-billing-service/Dockerfile
+      context: ./foundation-billing-service
+      dockerfile: Dockerfile
+    image: iqkv/foundation-billing-service:local
     container_name: foundation-billing-service
     environment:
-      SPRING_PROFILES_ACTIVE: local
-      # Database Configuration
-      IQKV_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/foundation_billing
-      IQKV_DATABASE_USERNAME: foundation_billing
-      IQKV_DATABASE_PASSWORD: foundation_password
-      # Cache Configuration
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      # Messaging Configuration
-      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQKV_MESSAGING_RABBITMQ_PORT: 5672
-      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
-      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
-      # Service Integration
-      IQKV_USER_SERVICE_URL: http://iam-service:8080
-      EMAIL_SERVICE_URL: http://email-service:8080
-      # Email Configuration (MailHog for local development)
-      SMTP_HOST: mailhog
-      SMTP_PORT: 1025
-      EMAIL_FROM_EMAIL: billing@foundation.local
-      EMAIL_FROM_NAME: IQ Key Value Billing (Local)
-      APP_BASE_URL: http://localhost:80
-      # JWT Configuration
-      JWT_ISSUER: foundation-iam-service
-      # Payment Configuration
-      PAYMENT_PROVIDER: stripe
-      BILLING_SAAS_MODE: "true"
-      # Stripe Configuration
-      STRIPE_API_KEY: ${STRIPE_API_KEY:-sk_test_placeholder}
-      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-pk_test_placeholder}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+
+      # Database
+      DB_HOST: postgres-billing
+      DB_PORT: 5432
+      DB_NAME: ${BILLING_DB_NAME:-billing}
+      DB_USERNAME: ${BILLING_DB_USERNAME:-billing}
+      DB_PASSWORD: ${BILLING_DB_PASSWORD:-billing}
+
+      # RabbitMQ
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-foundation}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-foundation_password}
+      MESSAGING_ENABLED: ${MESSAGING_ENABLED:-true}
+
+      # Mail (MailHog)
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-IQ Key Value}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
+
+      # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
+      JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
+
+      # Application
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:80}
+
+      # Multi-tenancy
+      ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      DEFAULT_BILLING_EMAIL: ${DEFAULT_BILLING_EMAIL:-}
+
+      # Stripe (placeholders — override via .env)
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
-      STRIPE_CLIENT_ID: ${STRIPE_CLIENT_ID:-ca_test_placeholder}
-      STRIPE_CONNECT_CLIENT_ID: ${STRIPE_CONNECT_CLIENT_ID:-ca_test_placeholder}
-      # Notification Configuration
-      BILLING_EMAIL_NOTIFICATIONS: "true"
-      BILLING_WEBHOOK_NOTIFICATIONS: "true"
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-billing-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-billing-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080"
+      - "8081"
     depends_on:
       postgres-billing:
-        condition: service_healthy
-      redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -234,245 +318,92 @@ services:
         condition: service_started
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.billing-service.rule=Host(`billing-service.localhost`) || PathPrefix(`/api/billing`)"
-      - "traefik.http.routers.billing-service.entrypoints=gateway"
-      - "traefik.http.services.billing-service.loadbalancer.server.port=8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
+    volumes:
+      - billing_logs:/app/logs
+      - billing_tmp:/app/tmp
     restart: unless-stopped
 
-  # Contact Service
-  contact-service:
-    build:
-      context: .
-      dockerfile: foundation-contact-service/Dockerfile
-    container_name: foundation-contact-service
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: foundation-contact-service
-      # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contact:5432/foundation_contact
-      SPRING_DATASOURCE_USERNAME: foundation_contact
-      SPRING_DATASOURCE_PASSWORD: foundation_password
-      # Cache Configuration
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      # Messaging Configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: foundation
-      SPRING_RABBITMQ_PASSWORD: foundation_password
-      SPRING_RABBITMQ_VIRTUAL_HOST: /
-      # JWT Configuration
-      USER_SERVICE_URL: http://iam-service:8080
-      JWT_ISSUER: foundation-iam-service
-      # Multi-tenancy Configuration
-      IQKV_TENANT_ID_HEADER: X-Tenant-ID
-    expose:
-      - "8080"
-    depends_on:
-      postgres-contact:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      iam-service:
-        condition: service_healthy
-    networks:
-      - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.contact-service.rule=Host(`contact-service.localhost`) || PathPrefix(`/api/contacts`)"
-      - "traefik.http.routers.contact-service.entrypoints=gateway"
-      - "traefik.http.services.contact-service.loadbalancer.server.port=8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-
-  # Lead Service
-  lead-service:
-    build:
-      context: .
-      dockerfile: foundation-lead-service/Dockerfile
-    container_name: foundation-lead-service
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: foundation-lead-service
-      # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lead:5432/foundation_lead
-      SPRING_DATASOURCE_USERNAME: foundation_lead
-      SPRING_DATASOURCE_PASSWORD: foundation_password
-      # Cache Configuration
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      # Messaging Configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: foundation
-      SPRING_RABBITMQ_PASSWORD: foundation_password
-      SPRING_RABBITMQ_VIRTUAL_HOST: /
-      # JWT Configuration
-      USER_SERVICE_URL: http://iam-service:8080
-      JWT_ISSUER: foundation-iam-service
-      # Multi-tenancy Configuration
-      IQKV_TENANT_ID_HEADER: X-Tenant-ID
-      # Lead Configuration
-      LEAD_ENABLE_AUTO_SCORING: true
-      LEAD_ENABLE_AUTO_QUALIFICATION: false
-    expose:
-      - "8080"
-    depends_on:
-      postgres-lead:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      iam-service:
-        condition: service_healthy
-    networks:
-      - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.lead-service.rule=Host(`lead-service.localhost`) || PathPrefix(`/api/leads`)"
-      - "traefik.http.routers.lead-service.entrypoints=gateway"
-      - "traefik.http.services.lead-service.loadbalancer.server.port=8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-
-  # Pipeline Service
-  pipeline-service:
-    build:
-      context: .
-      dockerfile: foundation-pipeline-service/Dockerfile
-    container_name: foundation-pipeline-service
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: foundation-pipeline-service
-      # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pipeline:5432/foundation_pipeline
-      SPRING_DATASOURCE_USERNAME: foundation_pipeline
-      SPRING_DATASOURCE_PASSWORD: foundation_password
-      # Cache Configuration
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      # Messaging Configuration
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: foundation
-      SPRING_RABBITMQ_PASSWORD: foundation_password
-      SPRING_RABBITMQ_VIRTUAL_HOST: /
-      # JWT Configuration
-      USER_SERVICE_URL: http://iam-service:8080
-      JWT_ISSUER: foundation-iam-service
-      # Lead Service Integration
-      LEAD_SERVICE_URL: http://lead-service:8080
-      # Multi-tenancy Configuration
-      IQKV_TENANT_ID_HEADER: X-Tenant-ID
-    expose:
-      - "8080"
-    depends_on:
-      postgres-pipeline:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      iam-service:
-        condition: service_healthy
-      lead-service:
-        condition: service_healthy
-    networks:
-      - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pipeline-service.rule=Host(`pipeline-service.localhost`) || PathPrefix(`/api/pipeline`)"
-      - "traefik.http.routers.pipeline-service.entrypoints=gateway"
-      - "traefik.http.services.pipeline-service.loadbalancer.server.port=8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-
+  # ---------------------------------------------------------------------------
   # Gateway Service
+  # (single external entry point — routes to iam-service and billing-service)
+  # ---------------------------------------------------------------------------
   gateway-service:
     build:
-      context: .
-      dockerfile: foundation-gateway-service/Dockerfile
+      context: ./foundation-gateway-service
+      dockerfile: Dockerfile
+    image: iqkv/foundation-gateway-service:local
     container_name: foundation-gateway-service
     environment:
-      SPRING_PROFILES_ACTIVE: local
-      IQKV_CACHE_REDIS_HOST: redis
-      IQKV_CACHE_REDIS_PORT: 6379
-      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQKV_MESSAGING_RABBITMQ_PORT: 5672
-      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
-      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
-      IQKV_GATEWAY_ROUTING_USER_SERVICE_URI: http://iam-service:8080
-      IQKV_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
-      IQKV_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
-      IQKV_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
-      IQKV_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
-      IQKV_GATEWAY_RATE_LIMITING_ENABLED: true
-      IQKV_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+
+      # IAM service — routing target and JWKS endpoint for JWT validation
+      IAM_SERVICE_URI: http://iam-service:8080
+      IAM_JWKS_URI: http://iam-service:8080/.well-known/jwks.json
+
+      # IAM service URL — used by PlatformModeGuardFilter to verify rollout mode consistency
+      IAM_SERVICE_URL: http://iam-service:8080
+
+      # Billing service — routing target
+      BILLING_SERVICE_URI: http://billing-service:8080
+
+      # CORS
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
+
+      # Server ports (defaults match Dockerfile EXPOSE)
+      SERVER_PORT: 8080
+      MANAGEMENT_PORT: 8081
+
+      # Multi-tenancy
+      ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      DEFAULT_TENANT_KEY: ${DEFAULT_TENANT_KEY:-}
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-gateway-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
-      - "8080"
+      - "8080"  # Gateway API (internal)
+      - "8081"  # Management / Actuator
+    ports:
+      - "80:8080"  # Expose gateway as the platform entry point on host port 80
     depends_on:
       iam-service:
         condition: service_healthy
       billing-service:
         condition: service_healthy
-      contact-service:
-        condition: service_healthy
-      lead-service:
-        condition: service_healthy
-      pipeline-service:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - foundation-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gateway-service.rule=Host(`gateway.localhost`) || Host(`localhost`)"
-      - "traefik.http.routers.gateway-service.entrypoints=web"
-      - "traefik.http.services.gateway-service.loadbalancer.server.port=8080"
-      - "traefik.http.routers.gateway-service.priority=1"
+      - "traefik.http.routers.gateway.rule=Host(`localhost`) || Host(`gateway.localhost`)"
+      - "traefik.http.routers.gateway.entrypoints=web"
+      - "traefik.http.services.gateway.loadbalancer.server.port=8080"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+    volumes:
+      - gateway_logs:/app/logs
+      - gateway_tmp:/app/tmp
     restart: unless-stopped
 
-  # Observability Stack - Prometheus
+  # ---------------------------------------------------------------------------
+  # Observability Stack
+  # ---------------------------------------------------------------------------
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1
     container_name: foundation-prometheus
     expose:
       - "9090"
     volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - foundation-network
@@ -488,18 +419,21 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--storage.tsdb.retention.time=200h"
       - "--web.enable-lifecycle"
+    restart: unless-stopped
 
-  # Observability Stack - Grafana
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.3.0
     container_name: foundation-grafana
     expose:
       - "3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - foundation-network
     labels:
@@ -509,15 +443,16 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     depends_on:
       - prometheus
+      - loki
+    restart: unless-stopped
 
-  # Observability Stack - Loki
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.2.0
     container_name: foundation-loki
     expose:
       - "3100"
     volumes:
-      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     networks:
       - foundation-network
@@ -527,13 +462,13 @@ services:
       - "traefik.http.routers.loki.entrypoints=web"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
 
-  # Observability Stack - Promtail
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.2.0
     container_name: foundation-promtail
     volumes:
-      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
@@ -541,6 +476,7 @@ services:
     depends_on:
       - loki
     command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
 
 networks:
   foundation-network:
@@ -550,20 +486,26 @@ networks:
 volumes:
   traefik_letsencrypt:
     name: foundation_traefik_letsencrypt
-  postgres_user_data:
-    name: foundation_postgres_user_data
+  postgres_iam_data:
+    name: foundation_postgres_iam_data
   postgres_billing_data:
     name: foundation_postgres_billing_data
-  postgres_contact_data:
-    name: foundation_postgres_contact_data
-  postgres_lead_data:
-    name: foundation_postgres_lead_data
-  postgres_pipeline_data:
-    name: foundation_postgres_pipeline_data
   redis_data:
     name: foundation_redis_data
   rabbitmq_data:
     name: foundation_rabbitmq_data
+  iam_logs:
+    name: foundation_iam_logs
+  iam_tmp:
+    name: foundation_iam_tmp
+  billing_logs:
+    name: foundation_billing_logs
+  billing_tmp:
+    name: foundation_billing_tmp
+  gateway_logs:
+    name: foundation_gateway_logs
+  gateway_tmp:
+    name: foundation_gateway_tmp
   prometheus_data:
     name: foundation_prometheus_data
   grafana_data:

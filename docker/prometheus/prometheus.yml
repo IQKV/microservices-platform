@@ -2,40 +2,31 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
-rule_files:
-# - "first_rules.yml"
-# - "second_rules.yml"
-
 scrape_configs:
-  # Prometheus itself
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
 
-  # User Service
+  # IAM Service — management port 8081 exposes /actuator/prometheus
   - job_name: "iam-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["iam-service:8080"]
+      - targets: ["iam-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s
 
-  # Gateway Service
+  # Billing Service — management port 8081
+  - job_name: "billing-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["billing-service:8081"]
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Gateway Service — management port 8081
   - job_name: "gateway-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["gateway-service:8080"]
+      - targets: ["gateway-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s
-
-  # PostgreSQL Exporter (if added later)
-  - job_name: "postgres"
-    static_configs:
-      - targets: ["postgres-exporter:9187"]
-    scrape_interval: 30s
-
-  # Redis Exporter (if added later)
-  - job_name: "redis"
-    static_configs:
-      - targets: ["redis-exporter:9121"]
-    scrape_interval: 30s

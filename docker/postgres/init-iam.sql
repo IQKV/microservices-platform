@@ -1,22 +1,22 @@
--- Initialize User Service Database
+-- Initialize IAM Service Database
 -- This script runs when the PostgreSQL container starts for the first time
 
--- Create additional schemas if needed
+-- Create additional schemas
 CREATE SCHEMA IF NOT EXISTS auth;
 
 -- Set default search path
-ALTER DATABASE foundation_iam SET search_path TO public, auth;
+ALTER DATABASE iam SET search_path TO public, auth;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE foundation_iam TO foundation_iam;
-GRANT ALL PRIVILEGES ON SCHEMA public TO foundation_iam;
-GRANT ALL PRIVILEGES ON SCHEMA auth TO foundation_iam;
+GRANT ALL PRIVILEGES ON DATABASE iam TO iam;
+GRANT ALL PRIVILEGES ON SCHEMA public TO iam;
+GRANT ALL PRIVILEGES ON SCHEMA auth TO iam;
 
--- Create audit function for tracking changes
+-- Audit trigger function for tracking row updates
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -25,6 +25,4 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Log initialization
-INSERT INTO pg_stat_statements_reset();
-SELECT 'User Service Database initialized successfully' AS status;
+SELECT 'IAM Service Database initialized successfully' AS status;
