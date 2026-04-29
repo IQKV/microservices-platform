@@ -2,16 +2,16 @@
 
 ## Overview
 
-This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the IQ Scaffold microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
+This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the IQ Key Value microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
 
-The IQ Scaffold platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
+The IQ Key Value platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
 ## 🏛️ Repository Structure & Organization
 
 ### Microservices Architecture Layout
 
 ```
-iqscaffold/
+foundation/
 ├── .github/                          # GitHub workflows and automation
 │   └── workflows/                    # CI/CD pipeline definitions
 ├── docker/                           # Docker configurations for infrastructure
@@ -24,7 +24,7 @@ iqscaffold/
 ├── helm/                             # Kubernetes Helm charts
 ├── k8s/                              # Kubernetes manifests
 ├── scripts/                          # Build, deployment, and utility scripts
-├── iqscaffold-user-service/             # Authentication & identity management
+├── foundation-iam-service/             # Authentication & identity management
 │   ├── src/main/java/                # Java source code
 │   ├── src/main/resources/           # Configuration and migrations
 │   ├── src/test/                     # Unit and integration tests
@@ -32,7 +32,7 @@ iqscaffold/
 │   ├── Dockerfile                    # Container image definition
 │   ├── compose.yml                   # Local development setup
 │   └── pom.xml                       # Maven build configuration
-├── iqscaffold-gateway-service/          # API Gateway with routing & rate limiting
+├── foundation-gateway-service/          # API Gateway with routing & rate limiting
 │   ├── src/main/java/                # Reactive gateway implementation
 │   ├── src/main/resources/           # Gateway routing configuration
 │   ├── src/test/                     # Gateway tests
@@ -51,8 +51,8 @@ iqscaffold/
 Each microservice follows a consistent internal structure:
 
 ```
-iqscaffold-{service-name}/
-├── src/main/java/com/iqscaffold/{service}/
+foundation-{service-name}/
+├── src/main/java/com/foundation/{service}/
 │   ├── config/                       # Spring configuration classes
 │   ├── domain/                       # Domain entities and business logic
 │   ├── repository/                   # Data access layer (JPA repositories)
@@ -83,8 +83,8 @@ iqscaffold-{service-name}/
 
 <!-- Platform modules -->
 <modules>
-    <module>iqscaffold-user-service</module>
-    <module>iqscaffold-gateway-service</module>
+    <module>foundation-iam-service</module>
+    <module>foundation-gateway-service</module>
 </modules>
 ```
 
@@ -259,7 +259,7 @@ Before making recommendations, agents should understand the platform's technolog
 
 **Runtime & Framework**
 
-- Java 21 with modern features (records, pattern matching, text blocks, var)
+- Java 25 with modern features (records, pattern matching, text blocks, var)
 - Spring Boot 3.5.6 with Spring Cloud 2025.0.0
 - Parent POM: `com.iqkv:boot-parent-pom:0.25.0-SNAPSHOT`
 
@@ -348,7 +348,7 @@ Before making recommendations, agents should understand the platform's technolog
 
 #### 2. Spring Boot & Java Expert Agent
 
-**Purpose**: Expert Java 21+ development with Spring Boot 3.x best practices
+**Purpose**: Expert Java 25+ development with Spring Boot 3.x best practices
 
 **Responsibilities**:
 
@@ -763,7 +763,7 @@ type(scope): subject
 
 ```bash
 # Simple feature
-feat(user-service): add email verification endpoint
+feat(iam-service): add email verification endpoint
 
 # Bug fix with details
 fix(gateway): resolve rate limiting for tenant requests
@@ -784,7 +784,7 @@ search performance by 80%.
 docs(readme): update local development setup instructions
 
 # Refactoring
-refactor(user-service): extract JWT logic to separate service
+refactor(iam-service): extract JWT logic to separate service
 
 # Breaking change
 feat(auth)!: migrate to RSA256 JWT signing
@@ -845,7 +845,7 @@ BREAKING CHANGE: description (if applicable)
 **Example 1: Simple Feature Addition**
 
 ```
-feat(user-service): add password reset endpoint
+feat(iam-service): add password reset endpoint
 
 Implements password reset flow with email token verification.
 Includes rate limiting (3 requests/hour) and token expiration (1 hour).
@@ -869,7 +869,7 @@ Closes #156
 ```
 refactor(services): extract common JWT validation to shared utility
 
-- Move JWT validation logic from user-service and gateway-service to shared module
+- Move JWT validation logic from iam-service and gateway-service to shared module
 - Consolidate RSA key loading and token parsing
 - Update both services to use shared JwtValidator class
 - No behavior changes, all tests pass
@@ -919,7 +919,7 @@ docs(agents): add AI communication standards and commit message guidelines
 do:
   - Use imperative mood: "add feature" not "added feature"
   - Be specific: "fix JWT expiration check" not "fix bug"
-  - Include scope: "feat(user-service)" not just "feat"
+  - Include scope: "feat(iam-service)" not just "feat"
   - Add body for complex changes (3+ files, breaking changes)
   - Reference issue numbers: "Closes #123"
   - Explain WHY for non-obvious changes
@@ -944,7 +944,7 @@ When presenting a commit message to the user, use this format:
 I've completed the changes. Here's the suggested commit message:
 
 ---
-feat(user-service): add email verification endpoint
+feat(iam-service): add email verification endpoint
 
 Implements email verification flow with token-based validation.
 Includes rate limiting (3 emails/hour) and 24-hour token expiration.
@@ -958,7 +958,7 @@ Would you like me to use this commit message, or would you prefer to modify it?
 
 ```yaml
 service_scopes:
-  - user-service: "Authentication, user management, tenants"
+  - iam-service: "Authentication, user management, tenants"
   - gateway-service: "Routing, rate limiting, circuit breaker"
   - agents: "AGENTS.md, agent guidelines"
   - docker: "Docker, docker-compose, containerization"
@@ -976,7 +976,7 @@ cross_cutting_scopes:
 
 ### Code Quality Standards
 
-#### Java Code Standards (Java 21)
+#### Java Code Standards (Java 25)
 
 **Use Modern Java Features:**
 
@@ -985,7 +985,7 @@ cross_cutting_scopes:
 public record UserCreateCommand(@NotBlank @Size(max = 100) String username, @Email String email, @NotBlank String password) {}
 
 // Records for configuration properties
-@ConfigurationProperties(prefix = "iqscaffold.auth.jwt")
+@ConfigurationProperties(prefix = "foundation.auth.jwt")
 public record JwtProperties(String secret, long expiration, long refreshExpiration) {}
 
 // Pattern matching with switch expressions
@@ -1006,7 +1006,7 @@ var emailTemplate = """
   %s
 
   Best regards,
-  IQ Scaffold Team
+  IQ Key Value Team
   """.formatted(user.getUsername(), verificationLink);
 
 // var for local variables (when type is obvious)
@@ -1024,9 +1024,9 @@ All Java files must follow the import order:
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.iqscaffold.userservice.domain.User;
-import com.iqscaffold.userservice.repository.UserRepository;
-import com.iqscaffold.userservice.service.UserService;
+import com.foundation.userservice.domain.User;
+import com.foundation.userservice.repository.UserRepository;
+import com.foundation.userservice.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -1237,7 +1237,7 @@ class UserServiceIntegrationTest {
 **Architecture Tests with ArchUnit:**
 
 ```java
-@AnalyzeClasses(packages = "com.iqscaffold.userservice")
+@AnalyzeClasses(packages = "com.foundation.userservice")
 class ArchitectureTest {
 
   @ArchTest
@@ -1301,7 +1301,7 @@ PR titles must follow Conventional Commits format (enforced by GitHub Actions):
 type(scope): description
 
 Examples:
-feat(user-service): add email verification endpoint
+feat(iam-service): add email verification endpoint
 fix(gateway): resolve rate limiting for tenant requests
 docs(readme): update deployment instructions
 refactor(some-bussiness-service): extract inventory logic to separate service
@@ -1415,7 +1415,7 @@ review_checklist:
     - No tight coupling between services
 
   code_quality:
-    - Modern Java 21 features used appropriately
+    - Modern Java 25 features used appropriately
     - Records for DTOs
     - Proper exception handling
     - Logging with correlation IDs
@@ -1527,16 +1527,16 @@ git tag -a v1.0.0 -m "Release version 1.0.0"
 git push origin v1.0.0
 
 # Build and push Docker images
-docker build -t iqscaffold/user-service:1.0.0 -f iqscaffold-user-service/Dockerfile .
-docker build -t iqscaffold/gateway-service:1.0.0 -f iqscaffold-gateway-service/Dockerfile .
+docker build -t foundation/iam-service:1.0.0 -f foundation-iam-service/Dockerfile .
+docker build -t foundation/gateway-service:1.0.0 -f foundation-gateway-service/Dockerfile .
 
-docker push iqscaffold/user-service:1.0.0
-docker push iqscaffold/gateway-service:1.0.0
+docker push foundation/iam-service:1.0.0
+docker push foundation/gateway-service:1.0.0
 
 # Deploy to production
 kubectl apply -f k8s/production/
 # or
-helm upgrade iqscaffold ./helm/iqscaffold --namespace production
+helm upgrade foundation ./helm/foundation --namespace production
 ```
 
 **3. Post-Release Phase**
@@ -1711,10 +1711,10 @@ logging_security:
 
 ```bash
 # Use .env files (gitignored)
-# Example: iqscaffold-user-service/.env.local
+# Example: foundation-iam-service/.env.local
 
 SPRING_DATASOURCE_PASSWORD=local_password
-IQSCAFFOLD_AUTH_JWT_SECRET=your-256-bit-secret-key-here
+FOUNDATION_AUTH_JWT_SECRET=your-256-bit-secret-key-here
 SPRING_DATA_REDIS_PASSWORD=redis_password
 SPRING_MAIL_PASSWORD=mail_password
 ```
@@ -1723,7 +1723,7 @@ SPRING_MAIL_PASSWORD=mail_password
 
 ```bash
 # Use Kubernetes secrets
-kubectl create secret generic user-service-secrets \
+kubectl create secret generic iam-service-secrets \
   --from-literal=database-password='prod_password' \
   --from-literal=jwt-secret='prod_jwt_secret' \
   --from-literal=redis-password='prod_redis_password' \
@@ -1734,7 +1734,7 @@ env:
   - name: SPRING_DATASOURCE_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: user-service-secrets
+        name: iam-service-secrets
         key: database-password
 ```
 
@@ -1743,7 +1743,7 @@ env:
 ```bash
 # Spring Boot property mapping
 SPRING_DATASOURCE_PASSWORD → spring.datasource.password
-IQSCAFFOLD_AUTH_JWT_SECRET → iqscaffold.auth.jwt.secret
+FOUNDATION_AUTH_JWT_SECRET → foundation.auth.jwt.secret
 SPRING_DATA_REDIS_PASSWORD → spring.data.redis.password
 ```
 
@@ -2028,7 +2028,7 @@ pnpm formatter:write
 ### Recommended CI/CD Pipeline (To Implement)
 
 ```yaml
-name: IQ Scaffold Platform CI/CD
+name: IQ Key Value Platform CI/CD
 
 on:
   push:
@@ -2042,7 +2042,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [user-service, gateway-service]
+        service: [iam-service, gateway-service]
     steps:
       - uses: actions/checkout@v4
 
@@ -2055,13 +2055,13 @@ jobs:
 
       - name: Build and Test ${{ matrix.service }}
         run: |
-          cd iqscaffold-${{ matrix.service }}
+          cd foundation-${{ matrix.service }}
           mvn clean verify
 
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
         with:
-          files: iqscaffold-${{ matrix.service }}/target/site/jacoco/jacoco.xml
+          files: foundation-${{ matrix.service }}/target/site/jacoco/jacoco.xml
           flags: ${{ matrix.service }}
 
       - name: Archive Test Results
@@ -2069,7 +2069,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.service }}
-          path: iqscaffold-${{ matrix.service }}/target/surefire-reports/
+          path: foundation-${{ matrix.service }}/target/surefire-reports/
 
   # Job 2: Code Quality Checks
   code-quality:
@@ -2120,7 +2120,7 @@ jobs:
     if: github.ref == 'refs/heads/dev'
     strategy:
       matrix:
-        service: [user-service, gateway-service]
+        service: [iam-service, gateway-service]
     steps:
       - uses: actions/checkout@v4
 
@@ -2129,12 +2129,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t iqscaffold/${{ matrix.service }}:${{ github.sha }} \
-            -f iqscaffold-${{ matrix.service }}/Dockerfile .
+          docker build -t foundation/${{ matrix.service }}:${{ github.sha }} \
+            -f foundation-${{ matrix.service }}/Dockerfile .
 
       - name: Save Docker Image
         run: |
-          docker save iqscaffold/${{ matrix.service }}:${{ github.sha }} \
+          docker save foundation/${{ matrix.service }}:${{ github.sha }} \
             -o ${{ matrix.service }}.tar
 
       - name: Upload Image Artifact
@@ -2155,7 +2155,7 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          docker load -i user-service-image/user-service.tar
+          docker load -i iam-service-image/iam-service.tar
           docker load -i gateway-service-image/gateway-service.tar
 
       - name: Start Services
@@ -2241,7 +2241,7 @@ scaling: Horizontal pod autoscaling
 docker-compose up
 
 # Start specific service
-cd iqscaffold-user-service
+cd foundation-iam-service
 docker-compose up
 ```
 
@@ -2249,9 +2249,9 @@ docker-compose up
 
 ```bash
 # Deploy with Helm
-helm upgrade --install iqscaffold ./helm/iqscaffold \
+helm upgrade --install foundation ./helm/foundation \
   --namespace staging \
-  --values helm/iqscaffold/values-staging.yaml
+  --values helm/foundation/values-staging.yaml
 
 # Or with kubectl
 kubectl apply -f k8s/staging/
@@ -2261,14 +2261,14 @@ kubectl apply -f k8s/staging/
 
 ```bash
 # Deploy with Helm
-helm upgrade --install iqscaffold ./helm/iqscaffold \
+helm upgrade --install foundation ./helm/foundation \
   --namespace production \
-  --values helm/iqscaffold/values-production.yaml \
+  --values helm/foundation/values-production.yaml \
   --wait \
   --timeout 10m
 
 # Verify deployment
-kubectl rollout status deployment/user-service -n production
+kubectl rollout status deployment/iam-service -n production
 kubectl rollout status deployment/gateway-service -n production
 ```
 
@@ -2439,16 +2439,16 @@ public record UserDto(
 @Configuration
 @OpenAPIDefinition(
   info = @Info(
-    title = "IQ Scaffold User Service API",
+    title = "IQ Key Value User Service API",
     version = "1.0.0",
     description = "Authentication and user management microservice",
-    contact = @Contact(name = "IQ Scaffold Team", email = "support@iqscaffold.com"),
+    contact = @Contact(name = "IQ Key Value Team", email = "support@foundation.com"),
     license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")
   ),
   servers = {
     @Server(url = "http://localhost:8080", description = "Local development"),
-    @Server(url = "https://api-staging.iqscaffold.com", description = "Staging"),
-    @Server(url = "https://api.iqscaffold.com", description = "Production"),
+    @Server(url = "https://api-staging.foundation.com", description = "Staging"),
+    @Server(url = "https://api.foundation.com", description = "Production"),
   },
   security = @SecurityRequirement(name = "bearer-jwt")
 )
@@ -2809,4 +2809,4 @@ public class BookService {
 
 ---
 
-This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual IQ Scaffold platform implementation and represent production-ready approaches to building scalable distributed systems.
+This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual IQ Key Value platform implementation and represent production-ready approaches to building scalable distributed systems.

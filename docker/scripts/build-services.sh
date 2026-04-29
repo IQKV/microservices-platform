@@ -7,7 +7,7 @@ docker info > /dev/null 2>&1 || { echo "❌ Docker not running"; exit 1; }
 
 ./mvnw clean package -DskipTests
 
-docker build -f iqscaffold-user-service/Dockerfile -t iqscaffold/iqscaffold-user-service:latest .
-docker build -f iqscaffold-gateway-service/Dockerfile -t iqscaffold/iqscaffold-gateway-service:latest .
+docker build -f foundation-iam-service/Dockerfile -t foundation/foundation-iam-service:latest .
+docker build -f foundation-gateway-service/Dockerfile -t foundation/foundation-gateway-service:latest .
 
 echo "✅ Build complete"

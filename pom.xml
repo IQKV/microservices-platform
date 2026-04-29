@@ -14,7 +14,7 @@
     <version>0.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>IQ Scaffold Microservices Platform</name>
+    <name>IQ Key Value Microservices Platform</name>
     <description>Extensible microservices platform with centralized authentication and gateway</description>
 
     <properties>
@@ -53,7 +53,7 @@
                                         <version>>(,3.8.7],[3.9.0,)</version>
                                     </requireMavenVersion>
 
-                                    <!-- Require Java 21 -->
+                                    <!-- Require Java 25 -->
                                     <requireJavaVersion>
                                         <version>[25,)</version>
                                     </requireJavaVersion>

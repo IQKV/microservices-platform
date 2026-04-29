@@ -13,13 +13,13 @@ validate() {
 validate "main"
 validate "-f docker-compose.yml -f docker-compose.staging.yml" "staging"
 validate "-f docker-compose.yml -f docker-compose.production.yml" "production"
-validate "-f iqscaffold-user-service/docker-compose.yml" "user-service"
-validate "-f iqscaffold-gateway-service/docker-compose.yml" "gateway-service"
+validate "-f foundation-iam-service/docker-compose.yml" "iam-service"
+validate "-f foundation-gateway-service/docker-compose.yml" "gateway-service"
 
 for file in docker/postgres/init-user.sql docker/prometheus/prometheus.yml \
     docker/loki/loki-config.yml docker/promtail/promtail-config.yml \
     docker/grafana/provisioning/datasources/datasources.yml .env.example \
-    iqscaffold-user-service/Dockerfile iqscaffold-gateway-service/Dockerfile; do
+    foundation-iam-service/Dockerfile foundation-gateway-service/Dockerfile; do
     [ -f "$file" ] || { echo "❌ Missing: $file"; exit 1; }
 done
 

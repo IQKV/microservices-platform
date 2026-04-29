@@ -4,7 +4,7 @@ services:
   # Traefik Reverse Proxy
   traefik:
     image: traefik:v3.0
-    container_name: iqscaffold-traefik
+    container_name: foundation-traefik
     command:
       - --configfile=/etc/traefik/traefik.yml
     ports:
@@ -16,7 +16,7 @@ services:
       - ./docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - traefik_letsencrypt:/letsencrypt
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
@@ -25,22 +25,22 @@ services:
     restart: unless-stopped
 
   # PostgreSQL Database for User Service
-  postgres-user:
+  postgres-iam:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-user
+    container_name: foundation-postgres-iam
     environment:
-      POSTGRES_DB: iqscaffold_user
-      POSTGRES_USER: iqscaffold_user
-      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_DB: foundation_user
+      POSTGRES_USER: foundation_user
+      POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
     volumes:
       - postgres_user_data:/var/lib/postgresql/data
       - ./docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_user -d iqscaffold_user"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_user -d foundation_user"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,20 +49,20 @@ services:
   # PostgreSQL Database for Billing Service
   postgres-billing:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-billing
+    container_name: foundation-postgres-billing
     environment:
-      POSTGRES_DB: iqscaffold_billing
-      POSTGRES_USER: iqscaffold_billing
-      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_DB: foundation_billing
+      POSTGRES_USER: foundation_billing
+      POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
     volumes:
       - postgres_billing_data:/var/lib/postgresql/data
       - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_billing -d iqscaffold_billing"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_billing -d foundation_billing"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,20 +71,20 @@ services:
   # PostgreSQL Database for Contact Service
   postgres-contact:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-contact
+    container_name: foundation-postgres-contact
     environment:
-      POSTGRES_DB: iqscaffold_contact
-      POSTGRES_USER: iqscaffold_contact
-      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_DB: foundation_contact
+      POSTGRES_USER: foundation_contact
+      POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
     volumes:
       - postgres_contact_data:/var/lib/postgresql/data
       - ./docker/postgres/init-contact.sql:/docker-entrypoint-initdb.d/init-contact.sql
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_contact -d iqscaffold_contact"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_contact -d foundation_contact"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -93,20 +93,20 @@ services:
   # PostgreSQL Database for Lead Service
   postgres-lead:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-lead
+    container_name: foundation-postgres-lead
     environment:
-      POSTGRES_DB: iqscaffold_lead
-      POSTGRES_USER: iqscaffold_lead
-      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_DB: foundation_lead
+      POSTGRES_USER: foundation_lead
+      POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
     volumes:
       - postgres_lead_data:/var/lib/postgresql/data
       - ./docker/postgres/init-lead.sql:/docker-entrypoint-initdb.d/init-lead.sql
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_lead -d iqscaffold_lead"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_lead -d foundation_lead"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -115,20 +115,20 @@ services:
   # PostgreSQL Database for Pipeline Service
   postgres-pipeline:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-pipeline
+    container_name: foundation-postgres-pipeline
     environment:
-      POSTGRES_DB: iqscaffold_pipeline
-      POSTGRES_USER: iqscaffold_pipeline
-      POSTGRES_PASSWORD: iqscaffold_password
+      POSTGRES_DB: foundation_pipeline
+      POSTGRES_USER: foundation_pipeline
+      POSTGRES_PASSWORD: foundation_password
     expose:
       - "5432"
     volumes:
       - postgres_pipeline_data:/var/lib/postgresql/data
       - ./docker/postgres/init-pipeline.sql:/docker-entrypoint-initdb.d/init-pipeline.sql
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_pipeline -d iqscaffold_pipeline"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_pipeline -d foundation_pipeline"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -137,13 +137,13 @@ services:
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
-    container_name: iqscaffold-redis
+    container_name: foundation-redis
     expose:
       - "6379"
     volumes:
       - redis_data:/data
     networks:
-      - iqscaffold-network
+      - foundation-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -155,10 +155,10 @@ services:
   # RabbitMQ for Message Queue
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: iqscaffold-rabbitmq
+    container_name: foundation-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: iqscaffold
-      RABBITMQ_DEFAULT_PASS: iqscaffold_password
+      RABBITMQ_DEFAULT_USER: foundation
+      RABBITMQ_DEFAULT_PASS: foundation_password
       RABBITMQ_DEFAULT_VHOST: /
     expose:
       - "5672" # AMQP port
@@ -168,7 +168,7 @@ services:
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
@@ -184,12 +184,12 @@ services:
   # MailHog for Email Testing in Local Development
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: iqscaffold-mailhog
+    container_name: foundation-mailhog
     expose:
       - "1025" # SMTP port
       - "8025" # Web UI
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.mailhog.rule=Host(`mailhog.localhost`)"
@@ -198,41 +198,41 @@ services:
     restart: unless-stopped
 
   # User Service
-  user-service:
+  iam-service:
     build:
       context: .
-      dockerfile: iqscaffold-user-service/Dockerfile
-    container_name: iqscaffold-user-service
+      dockerfile: foundation-iam-service/Dockerfile
+    container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-user:5432/iqscaffold_user
-      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_user
-      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
-      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
-      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
-      IQSCAFFOLD_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
-      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
-      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      FOUNDATION_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_user
+      FOUNDATION_DATABASE_USERNAME: foundation_user
+      FOUNDATION_DATABASE_PASSWORD: foundation_password
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
+      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
+      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
+      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
+      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
+      FOUNDATION_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      FOUNDATION_AUTH_JWT_EXPIRATION: 900
+      FOUNDATION_AUTH_JWT_REFRESH_EXPIRATION: 604800
     expose:
       - "8080"
     depends_on:
-      postgres-user:
+      postgres-iam:
         condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.user-service.rule=Host(`user-service.localhost`) || PathPrefix(`/api/users`)"
-      - "traefik.http.routers.user-service.entrypoints=gateway"
-      - "traefik.http.services.user-service.loadbalancer.server.port=8080"
+      - "traefik.http.routers.iam-service.rule=Host(`iam-service.localhost`) || PathPrefix(`/api/users`)"
+      - "traefik.http.routers.iam-service.entrypoints=gateway"
+      - "traefik.http.services.iam-service.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -245,33 +245,33 @@ services:
   billing-service:
     build:
       context: .
-      dockerfile: iqscaffold-billing-service/Dockerfile
-    container_name: iqscaffold-billing-service
+      dockerfile: foundation-billing-service/Dockerfile
+    container_name: foundation-billing-service
     environment:
       SPRING_PROFILES_ACTIVE: local
       # Database Configuration
-      IQSCAFFOLD_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/iqscaffold_billing
-      IQSCAFFOLD_DATABASE_USERNAME: iqscaffold_billing
-      IQSCAFFOLD_DATABASE_PASSWORD: iqscaffold_password
+      FOUNDATION_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/foundation_billing
+      FOUNDATION_DATABASE_USERNAME: foundation_billing
+      FOUNDATION_DATABASE_PASSWORD: foundation_password
       # Cache Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
-      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
-      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
+      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
+      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
+      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
+      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
       # Service Integration
-      IQSCAFFOLD_USER_SERVICE_URL: http://user-service:8080
+      FOUNDATION_USER_SERVICE_URL: http://iam-service:8080
       EMAIL_SERVICE_URL: http://email-service:8080
       # Email Configuration (MailHog for local development)
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
-      EMAIL_FROM_EMAIL: billing@iqscaffold.local
-      EMAIL_FROM_NAME: IQ Scaffold Billing (Local)
+      EMAIL_FROM_EMAIL: billing@foundation.local
+      EMAIL_FROM_NAME: IQ Key Value Billing (Local)
       APP_BASE_URL: http://localhost:80
       # JWT Configuration
-      JWT_ISSUER: iqscaffold-user-service
+      JWT_ISSUER: foundation-iam-service
       # Payment Configuration
       PAYMENT_PROVIDER: stripe
       BILLING_SAAS_MODE: "true"
@@ -294,12 +294,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      user-service:
+      iam-service:
         condition: service_healthy
       mailhog:
         condition: service_started
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.billing-service.rule=Host(`billing-service.localhost`) || PathPrefix(`/api/billing`)"
@@ -317,29 +317,29 @@ services:
   contact-service:
     build:
       context: .
-      dockerfile: iqscaffold-contact-service/Dockerfile
-    container_name: iqscaffold-contact-service
+      dockerfile: foundation-contact-service/Dockerfile
+    container_name: foundation-contact-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: iqscaffold-contact-service
+      SPRING_APPLICATION_NAME: foundation-contact-service
       # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contact:5432/iqscaffold_contact
-      SPRING_DATASOURCE_USERNAME: iqscaffold_contact
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-contact:5432/foundation_contact
+      SPRING_DATASOURCE_USERNAME: foundation_contact
+      SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: iqscaffold
-      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_USERNAME: foundation
+      SPRING_RABBITMQ_PASSWORD: foundation_password
       SPRING_RABBITMQ_VIRTUAL_HOST: /
       # JWT Configuration
-      USER_SERVICE_URL: http://user-service:8080
-      JWT_ISSUER: iqscaffold-user-service
+      USER_SERVICE_URL: http://iam-service:8080
+      JWT_ISSUER: foundation-iam-service
       # Multi-tenancy Configuration
-      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
     expose:
       - "8080"
     depends_on:
@@ -349,10 +349,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      user-service:
+      iam-service:
         condition: service_healthy
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.contact-service.rule=Host(`contact-service.localhost`) || PathPrefix(`/api/contacts`)"
@@ -370,29 +370,29 @@ services:
   lead-service:
     build:
       context: .
-      dockerfile: iqscaffold-lead-service/Dockerfile
-    container_name: iqscaffold-lead-service
+      dockerfile: foundation-lead-service/Dockerfile
+    container_name: foundation-lead-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: iqscaffold-lead-service
+      SPRING_APPLICATION_NAME: foundation-lead-service
       # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lead:5432/iqscaffold_lead
-      SPRING_DATASOURCE_USERNAME: iqscaffold_lead
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-lead:5432/foundation_lead
+      SPRING_DATASOURCE_USERNAME: foundation_lead
+      SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: iqscaffold
-      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_USERNAME: foundation
+      SPRING_RABBITMQ_PASSWORD: foundation_password
       SPRING_RABBITMQ_VIRTUAL_HOST: /
       # JWT Configuration
-      USER_SERVICE_URL: http://user-service:8080
-      JWT_ISSUER: iqscaffold-user-service
+      USER_SERVICE_URL: http://iam-service:8080
+      JWT_ISSUER: foundation-iam-service
       # Multi-tenancy Configuration
-      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
       # Lead Configuration
       LEAD_ENABLE_AUTO_SCORING: true
       LEAD_ENABLE_AUTO_QUALIFICATION: false
@@ -405,10 +405,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      user-service:
+      iam-service:
         condition: service_healthy
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.lead-service.rule=Host(`lead-service.localhost`) || PathPrefix(`/api/leads`)"
@@ -426,31 +426,31 @@ services:
   pipeline-service:
     build:
       context: .
-      dockerfile: iqscaffold-pipeline-service/Dockerfile
-    container_name: iqscaffold-pipeline-service
+      dockerfile: foundation-pipeline-service/Dockerfile
+    container_name: foundation-pipeline-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      SPRING_APPLICATION_NAME: iqscaffold-pipeline-service
+      SPRING_APPLICATION_NAME: foundation-pipeline-service
       # Database Configuration
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pipeline:5432/iqscaffold_pipeline
-      SPRING_DATASOURCE_USERNAME: iqscaffold_pipeline
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pipeline:5432/foundation_pipeline
+      SPRING_DATASOURCE_USERNAME: foundation_pipeline
+      SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: iqscaffold
-      SPRING_RABBITMQ_PASSWORD: iqscaffold_password
+      SPRING_RABBITMQ_USERNAME: foundation
+      SPRING_RABBITMQ_PASSWORD: foundation_password
       SPRING_RABBITMQ_VIRTUAL_HOST: /
       # JWT Configuration
-      USER_SERVICE_URL: http://user-service:8080
-      JWT_ISSUER: iqscaffold-user-service
+      USER_SERVICE_URL: http://iam-service:8080
+      JWT_ISSUER: foundation-iam-service
       # Lead Service Integration
       LEAD_SERVICE_URL: http://lead-service:8080
       # Multi-tenancy Configuration
-      IQSCAFFOLD_TENANT_ID_HEADER: X-Tenant-ID
+      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
     expose:
       - "8080"
     depends_on:
@@ -460,12 +460,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      user-service:
+      iam-service:
         condition: service_healthy
       lead-service:
         condition: service_healthy
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.pipeline-service.rule=Host(`pipeline-service.localhost`) || PathPrefix(`/api/pipeline`)"
@@ -483,27 +483,27 @@ services:
   gateway-service:
     build:
       context: .
-      dockerfile: iqscaffold-gateway-service/Dockerfile
-    container_name: iqscaffold-gateway-service
+      dockerfile: foundation-gateway-service/Dockerfile
+    container_name: foundation-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      IQSCAFFOLD_CACHE_REDIS_HOST: redis
-      IQSCAFFOLD_CACHE_REDIS_PORT: 6379
-      IQSCAFFOLD_MESSAGING_RABBITMQ_HOST: rabbitmq
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PORT: 5672
-      IQSCAFFOLD_MESSAGING_RABBITMQ_USERNAME: iqscaffold
-      IQSCAFFOLD_MESSAGING_RABBITMQ_PASSWORD: iqscaffold_password
-      IQSCAFFOLD_GATEWAY_ROUTING_USER_SERVICE_URI: http://user-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
-      IQSCAFFOLD_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+      FOUNDATION_CACHE_REDIS_HOST: redis
+      FOUNDATION_CACHE_REDIS_PORT: 6379
+      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
+      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
+      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
+      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
+      FOUNDATION_GATEWAY_ROUTING_USER_SERVICE_URI: http://iam-service:8080
+      FOUNDATION_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
+      FOUNDATION_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
+      FOUNDATION_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
+      FOUNDATION_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
+      FOUNDATION_GATEWAY_RATE_LIMITING_ENABLED: true
+      FOUNDATION_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     expose:
       - "8080"
     depends_on:
-      user-service:
+      iam-service:
         condition: service_healthy
       billing-service:
         condition: service_healthy
@@ -516,7 +516,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.gateway-service.rule=Host(`gateway.localhost`) || Host(`localhost`)"
@@ -534,14 +534,14 @@ services:
   # Observability Stack - Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: iqscaffold-prometheus
+    container_name: foundation-prometheus
     expose:
       - "9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
@@ -558,7 +558,7 @@ services:
   # Observability Stack - Grafana
   grafana:
     image: grafana/grafana:latest
-    container_name: iqscaffold-grafana
+    container_name: foundation-grafana
     expose:
       - "3000"
     environment:
@@ -567,7 +567,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
@@ -579,14 +579,14 @@ services:
   # Observability Stack - Loki
   loki:
     image: grafana/loki:latest
-    container_name: iqscaffold-loki
+    container_name: foundation-loki
     expose:
       - "3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
     networks:
-      - iqscaffold-network
+      - foundation-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
@@ -597,42 +597,42 @@ services:
   # Observability Stack - Promtail
   promtail:
     image: grafana/promtail:latest
-    container_name: iqscaffold-promtail
+    container_name: foundation-promtail
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
-      - iqscaffold-network
+      - foundation-network
     depends_on:
       - loki
     command: -config.file=/etc/promtail/config.yml
 
 networks:
-  iqscaffold-network:
+  foundation-network:
     driver: bridge
-    name: iqscaffold-network
+    name: foundation-network
 
 volumes:
   traefik_letsencrypt:
-    name: iqscaffold_traefik_letsencrypt
+    name: foundation_traefik_letsencrypt
   postgres_user_data:
-    name: iqscaffold_postgres_user_data
+    name: foundation_postgres_user_data
   postgres_billing_data:
-    name: iqscaffold_postgres_billing_data
+    name: foundation_postgres_billing_data
   postgres_contact_data:
-    name: iqscaffold_postgres_contact_data
+    name: foundation_postgres_contact_data
   postgres_lead_data:
-    name: iqscaffold_postgres_lead_data
+    name: foundation_postgres_lead_data
   postgres_pipeline_data:
-    name: iqscaffold_postgres_pipeline_data
+    name: foundation_postgres_pipeline_data
   redis_data:
-    name: iqscaffold_redis_data
+    name: foundation_redis_data
   rabbitmq_data:
-    name: iqscaffold_rabbitmq_data
+    name: foundation_rabbitmq_data
   prometheus_data:
-    name: iqscaffold_prometheus_data
+    name: foundation_prometheus_data
   grafana_data:
-    name: iqscaffold_grafana_data
+    name: foundation_grafana_data
   loki_data:
-    name: iqscaffold_loki_data
+    name: foundation_loki_data

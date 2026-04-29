@@ -13,10 +13,10 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   # User Service
-  - job_name: "user-service"
+  - job_name: "iam-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["user-service:8080"]
+      - targets: ["iam-service:8080"]
     scrape_interval: 10s
     scrape_timeout: 5s
 

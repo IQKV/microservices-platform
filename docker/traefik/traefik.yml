@@ -19,13 +19,13 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-    network: iqscaffold-network
+    network: foundation-network
     watch: true
 
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: admin@iqscaffold.local
+      email: admin@foundation.local
       storage: /letsencrypt/acme.json
       httpChallenge:
         entryPoint: web

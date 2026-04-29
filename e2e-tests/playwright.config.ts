@@ -20,20 +20,20 @@ const environments = {
     workers: 4,
   },
   staging: {
-    baseURL: "https://api.iqscaffold.website",
+    baseURL: "https://api.foundation.website",
     services: {
-      gateway: "https://api.iqscaffold.website",
-      user: "https://user.iqscaffold.website",
+      gateway: "https://api.foundation.website",
+      user: "https://user.foundation.website",
     },
     timeout: 60000,
     retries: 2,
     workers: 2,
   },
   production: {
-    baseURL: "https://api.iqscaffold.com",
+    baseURL: "https://api.foundation.com",
     services: {
-      gateway: "https://api.iqscaffold.com",
-      user: "https://user.iqscaffold.com",
+      gateway: "https://api.foundation.com",
+      user: "https://user.foundation.com",
     },
     timeout: 90000,
     retries: 3,
@@ -44,7 +44,7 @@ const environments = {
 const config = environments[testEnv as keyof typeof environments] || environments.local;
 
 /**
- * Playwright configuration for iqscaffold API testing
+ * Playwright configuration for foundation API testing
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
@@ -105,7 +105,7 @@ export default defineConfig({
     extraHTTPHeaders: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      "User-Agent": "iqscaffold-E2E-Tests/1.0.0",
+      "User-Agent": "foundation-E2E-Tests/1.0.0",
     },
 
     /* API request timeout */
@@ -131,8 +131,8 @@ export default defineConfig({
     },
 
     {
-      name: "user-service",
-      testDir: "./src/tests/user-service",
+      name: "iam-service",
+      testDir: "./src/tests/iam-service",
       use: {
         ...devices["Desktop Chrome"],
         headless: true,

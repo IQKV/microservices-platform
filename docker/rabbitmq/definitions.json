@@ -3,7 +3,7 @@
   "rabbitmq_version": "3.13.0",
   "users": [
     {
-      "name": "iqscaffold",
+      "name": "foundation",
       "password_hash": "JDJiJDEyJGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhY",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": ["administrator"]
@@ -16,7 +16,7 @@
   ],
   "permissions": [
     {
-      "user": "iqscaffold",
+      "user": "foundation",
       "vhost": "/",
       "configure": ".*",
       "write": ".*",
@@ -25,7 +25,7 @@
   ],
   "exchanges": [
     {
-      "name": "iqscaffold.events",
+      "name": "foundation.events",
       "vhost": "/",
       "type": "topic",
       "durable": true,
@@ -34,7 +34,7 @@
       "arguments": {}
     },
     {
-      "name": "iqscaffold.dlx",
+      "name": "foundation.dlx",
       "vhost": "/",
       "type": "topic",
       "durable": true,
@@ -45,27 +45,27 @@
   ],
   "queues": [
     {
-      "name": "iqscaffold.user.events",
+      "name": "foundation.user.events",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-dead-letter-exchange": "iqscaffold.dlx",
+        "x-dead-letter-exchange": "foundation.dlx",
         "x-message-ttl": 86400000
       }
     },
     {
-      "name": "iqscaffold.notifications",
+      "name": "foundation.notifications",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
-        "x-dead-letter-exchange": "iqscaffold.dlx",
+        "x-dead-letter-exchange": "foundation.dlx",
         "x-message-ttl": 86400000
       }
     },
     {
-      "name": "iqscaffold.dlq",
+      "name": "foundation.dlq",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -74,25 +74,25 @@
   ],
   "bindings": [
     {
-      "source": "iqscaffold.events",
+      "source": "foundation.events",
       "vhost": "/",
-      "destination": "iqscaffold.user.events",
+      "destination": "foundation.user.events",
       "destination_type": "queue",
       "routing_key": "user.*",
       "arguments": {}
     },
     {
-      "source": "iqscaffold.events",
+      "source": "foundation.events",
       "vhost": "/",
-      "destination": "iqscaffold.notifications",
+      "destination": "foundation.notifications",
       "destination_type": "queue",
       "routing_key": "notification.*",
       "arguments": {}
     },
     {
-      "source": "iqscaffold.dlx",
+      "source": "foundation.dlx",
       "vhost": "/",
-      "destination": "iqscaffold.dlq",
+      "destination": "foundation.dlq",
       "destination_type": "queue",
       "routing_key": "#",
       "arguments": {}

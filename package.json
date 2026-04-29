@@ -1,5 +1,5 @@
 {
-  "name": "@iqscaffold/backend",
+  "name": "@foundation/backend",
   "version": "0.0.0",
   "private": true,
   "description": "Provide an optional Git commit hooks.",

@@ -1,4 +1,4 @@
-# 🏗️ IQ Scaffold Backend Microservices
+# 🏗️ IQ Key Value Backend Microservices
 
 > Enterprise microservices foundation for scalable SaaS products. Essential business infrastructure—Identity, Payments, and CRM—on secure, multi-tenant architecture.
 

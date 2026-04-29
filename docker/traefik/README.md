@@ -1,6 +1,6 @@
-# Traefik Configuration for IQ Scaffold Backend
+# Traefik Configuration for IQ Key Value Backend
 
-This directory contains the Traefik reverse proxy configuration for the IQ Scaffold backend services.
+This directory contains the Traefik reverse proxy configuration for the IQ Key Value backend services.
 
 ## Overview
 
@@ -25,7 +25,7 @@ When running locally, you can access services through:
 
 #### Direct Service Access (Development)
 
-- **User Service**: `http://user-service.localhost:8080` or `http://localhost:8080/api/users`
+- **User Service**: `http://iam-service.localhost:8080` or `http://localhost:8080/api/users`
 - **Billing Service**: `http://billing-service.localhost:8080` or `http://localhost:8080/api/billing`
 - **Contact Service**: `http://contact-service.localhost:8080` or `http://localhost:8080/api/contacts`
 - **Lead Service**: `http://lead-service.localhost:8080` or `http://localhost:8080/api/leads`
@@ -74,7 +74,7 @@ For better local development experience, add these entries to your `/etc/hosts` 
 ```
 127.0.0.1 localhost
 127.0.0.1 gateway.localhost
-127.0.0.1 user-service.localhost
+127.0.0.1 iam-service.localhost
 127.0.0.1 billing-service.localhost
 127.0.0.1 contact-service.localhost
 127.0.0.1 lead-service.localhost

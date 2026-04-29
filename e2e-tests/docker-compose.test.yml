@@ -1,23 +1,23 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database for User Service Testing
-  postgres-user-test:
+  # PostgreSQL Database for IAM Service Testing
+  postgres-iam-test:
     image: postgres:15-alpine
-    container_name: iqscaffold-postgres-user-test
+    container_name: foundation-postgres-iam-test
     environment:
-      POSTGRES_DB: iqscaffold_user_test
-      POSTGRES_USER: iqscaffold_test_user
-      POSTGRES_PASSWORD: iqscaffold_test_password
+      POSTGRES_DB: foundation_iam_test
+      POSTGRES_USER: foundation_test_user
+      POSTGRES_PASSWORD: foundation_test_password
     ports:
       - "5434:5432"
     volumes:
       - postgres_auth_test_data:/var/lib/postgresql/data
       - ../docker/postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
     networks:
-      - iqscaffold-test-network
+      - foundation-test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iqscaffold_test_user -d iqscaffold_user_test"]
+      test: ["CMD-SHELL", "pg_isready -U foundation_test_user -d foundation_iam_test"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -28,11 +28,11 @@ services:
   # Redis for Testing - Caching and Sessions
   redis-test:
     image: redis:7-alpine
-    container_name: iqscaffold-redis-test
+    container_name: foundation-redis-test
     ports:
       - "6380:6379"
     networks:
-      - iqscaffold-test-network
+      - foundation-test-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -44,32 +44,32 @@ services:
       - /data:noexec,nosuid,size=50m
 
   # User Service for Testing
-  user-service-test:
+  iam-service-test:
     build:
       context: ..
-      dockerfile: iqscaffold-user-service/Dockerfile
-    container_name: iqscaffold-user-service-test
+      dockerfile: foundation-iam-service/Dockerfile
+    container_name: foundation-iam-service-test
     environment:
       SPRING_PROFILES_ACTIVE: test
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-user-test:5432/iqscaffold_user_test
-      SPRING_DATASOURCE_USERNAME: iqscaffold_test_user
-      SPRING_DATASOURCE_PASSWORD: iqscaffold_test_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-iam-test:5432/foundation_iam_test
+      SPRING_DATASOURCE_USERNAME: foundation_test_user
+      SPRING_DATASOURCE_PASSWORD: foundation_test_password
       SPRING_DATA_REDIS_HOST: redis-test
       SPRING_DATA_REDIS_PORT: 6379
-      IQSCAFFOLD_AUTH_JWT_SECRET: test-256-bit-secret-key-for-testing-only-not-production
-      IQSCAFFOLD_AUTH_JWT_EXPIRATION: 900
-      IQSCAFFOLD_AUTH_JWT_REFRESH_EXPIRATION: 604800
-      LOGGING_LEVEL_ORG_IQSCAFFOLD: DEBUG
+      FOUNDATION_AUTH_JWT_SECRET: test-256-bit-secret-key-for-testing-only-not-production
+      FOUNDATION_AUTH_JWT_EXPIRATION: 900
+      FOUNDATION_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      LOGGING_LEVEL_ORG_FOUNDATION: DEBUG
       LOGGING_LEVEL_ROOT: INFO
     ports:
       - "8091:8080"
     depends_on:
-      postgres-user-test:
+      postgres-iam-test:
         condition: service_healthy
       redis-test:
         condition: service_healthy
     networks:
-      - iqscaffold-test-network
+      - foundation-test-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -82,26 +82,26 @@ services:
   gateway-service-test:
     build:
       context: ..
-      dockerfile: iqscaffold-gateway-service/Dockerfile
-    container_name: iqscaffold-gateway-service-test
+      dockerfile: foundation-gateway-service/Dockerfile
+    container_name: foundation-gateway-service-test
     environment:
       SPRING_PROFILES_ACTIVE: test
       SPRING_DATA_REDIS_HOST: redis-test
       SPRING_DATA_REDIS_PORT: 6379
-      IQSCAFFOLD_GATEWAY_USER_SERVICE_URL: http://user-service-test:8080
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_ENABLED: true
-      IQSCAFFOLD_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 1000
-      LOGGING_LEVEL_ORG_IQSCAFFOLD: DEBUG
+      FOUNDATION_GATEWAY_USER_SERVICE_URL: http://iam-service-test:8080
+      FOUNDATION_GATEWAY_RATE_LIMITING_ENABLED: true
+      FOUNDATION_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 1000
+      LOGGING_LEVEL_ORG_FOUNDATION: DEBUG
       LOGGING_LEVEL_ROOT: INFO
     ports:
       - "8090:8080"
     depends_on:
-      user-service-test:
+      iam-service-test:
         condition: service_healthy
       redis-test:
         condition: service_healthy
     networks:
-      - iqscaffold-test-network
+      - foundation-test-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -111,12 +111,12 @@ services:
     restart: "no"
 
 networks:
-  iqscaffold-test-network:
+  foundation-test-network:
     driver: bridge
-    name: iqscaffold-test-network
+    name: foundation-test-network
 
 volumes:
   postgres_auth_test_data:
-    name: iqscaffold_postgres_auth_test_data
+    name: foundation_postgres_auth_test_data
   redis_data:
-    name: iqscaffold_redis_data
+    name: foundation_redis_data

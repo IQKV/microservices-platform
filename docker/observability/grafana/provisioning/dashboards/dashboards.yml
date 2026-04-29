@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: "IQ Scaffold Platform Dashboards"
+  - name: "IQ Key Value Platform Dashboards"
     orgId: 1
-    folder: "IQ Scaffold Platform"
+    folder: "IQ Key Value Platform"
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10

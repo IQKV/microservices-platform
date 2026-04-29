@@ -8,8 +8,8 @@ docker info > /dev/null 2>&1 || { echo "❌ Docker not running"; exit 1; }
 [ -f .env ] || { cp .env.example .env; echo "📝 Update .env and run again"; exit 1; }
 
 docker-compose build --parallel
-docker-compose up -d postgres-user redis
-docker-compose up -d user-service gateway-service
+docker-compose up -d postgres-iam redis
+docker-compose up -d iam-service gateway-service
 docker-compose up -d prometheus grafana loki promtail
 
 echo "✅ Platform started"

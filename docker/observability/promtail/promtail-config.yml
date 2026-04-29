@@ -39,15 +39,15 @@ scrape_configs:
       - output:
           source: output
 
-  # IQ Scaffold User Service logs
-  - job_name: iqscaffold-user-service
+  # IQ Key Value User Service logs
+  - job_name: foundation-iam-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: iqscaffold-user-service
+          job: foundation-iam-service
           service: auth
-          __path__: /var/log/iqscaffold/iqscaffold-user-service/*.log
+          __path__: /var/log/foundation/foundation-iam-service/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -72,15 +72,15 @@ scrape_configs:
           userId:
           tenantId:
 
-  # IQ Scaffold Gateway Service logs
-  - job_name: iqscaffold-gateway-service
+  # IQ Key Value Gateway Service logs
+  - job_name: foundation-gateway-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: iqscaffold-gateway-service
+          job: foundation-gateway-service
           service: gateway
-          __path__: /var/log/iqscaffold/iqscaffold-gateway-service/*.log
+          __path__: /var/log/foundation/foundation-gateway-service/*.log
     pipeline_stages:
       - json:
           expressions:

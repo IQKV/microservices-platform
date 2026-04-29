@@ -41,14 +41,14 @@ scrape_configs:
           source: output
 
   # Application logs from services
-  - job_name: user-service
+  - job_name: iam-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: user-service
-          service: user-service
-          __path__: /var/log/user-service/*.log
+          job: iam-service
+          service: iam-service
+          __path__: /var/log/iam-service/*.log
 
   - job_name: gateway-service
     static_configs:

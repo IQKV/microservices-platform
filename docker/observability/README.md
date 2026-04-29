@@ -1,6 +1,6 @@
-# IQ Scaffold Platform Observability Stack
+# IQ Key Value Platform Observability Stack
 
-This directory contains the complete observability stack for the IQ Scaffold microservices platform, including distributed tracing, metrics collection, log aggregation, and visualization.
+This directory contains the complete observability stack for the IQ Key Value microservices platform, including distributed tracing, metrics collection, log aggregation, and visualization.
 
 ## Components
 
@@ -44,11 +44,11 @@ This directory contains the complete observability stack for the IQ Scaffold mic
 
    ```bash
    # Terminal 1 - User Service
-   cd iqscaffold-user-service
+   cd foundation-iam-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
 
    # Terminal 2 - Gateway Service
-   cd iqscaffold-gateway-service
+   cd foundation-gateway-service
    mvn spring-boot:run -Dspring-boot.run.profiles=local
    ```
 
@@ -95,20 +95,20 @@ This directory contains the complete observability stack for the IQ Scaffold mic
 
 ### User Service Metrics
 
-- `iqscaffold_user_authentication_duration`: Authentication request duration
-- `iqscaffold_user_authentication_total`: Total authentication attempts (success/failure)
-- `iqscaffold_user_registration_duration`: User registration duration
-- `iqscaffold_user_registration_total`: Total registration attempts
-- `iqscaffold_user_token_refresh_duration`: Token refresh duration
-- `iqscaffold_user_token_refresh_total`: Total token refresh attempts
+- `foundation_user_authentication_duration`: Authentication request duration
+- `foundation_user_authentication_total`: Total authentication attempts (success/failure)
+- `foundation_user_registration_duration`: User registration duration
+- `foundation_user_registration_total`: Total registration attempts
+- `foundation_user_token_refresh_duration`: Token refresh duration
+- `foundation_user_token_refresh_total`: Total token refresh attempts
 
 ### Gateway Service Metrics
 
-- `iqscaffold_gateway_request_duration`: Gateway request processing time
-- `iqscaffold_gateway_request_total`: Total gateway requests
-- `iqscaffold_gateway_authentication_duration`: Authentication validation time
-- `iqscaffold_gateway_ratelimit_hit`: Rate limit violations
-- `iqscaffold_gateway_circuitbreaker_open`: Circuit breaker state changes
+- `foundation_gateway_request_duration`: Gateway request processing time
+- `foundation_gateway_request_total`: Total gateway requests
+- `foundation_gateway_authentication_duration`: Authentication validation time
+- `foundation_gateway_ratelimit_hit`: Rate limit violations
+- `foundation_gateway_circuitbreaker_open`: Circuit breaker state changes
 
 ## Structured Logging
 
@@ -117,7 +117,7 @@ This directory contains the complete observability stack for the IQ Scaffold mic
 - `timestamp`: ISO 8601 timestamp in UTC
 - `level`: Log level (DEBUG, INFO, WARN, ERROR)
 - `message`: Log message
-- `service`: Service name (iqscaffold-user-service, iqscaffold-gateway-service)
+- `service`: Service name (foundation-iam-service, foundation-gateway-service)
 - `correlationId`: Request correlation ID
 - `traceId`: OpenTelemetry trace ID
 - `spanId`: OpenTelemetry span ID

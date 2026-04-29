@@ -1,4 +1,4 @@
-# 🚀 IQ Scaffold Microservices Platform
+# 🚀 IQ Key Value Microservices Platform
 
 > Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
@@ -47,7 +47,7 @@ Centralized authentication and identity management hub.
 - Email verification with rate limiting (3/hour)
 - Security audit logging with UserAuditLog entity
 - User context propagation with full JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
-- Pattern matching for claim extraction (Java 21)
+- Pattern matching for claim extraction (Java 25)
 
 ### 🌐 [Gateway Service](foundation-gateway-service/README.md)
 
@@ -69,7 +69,7 @@ Reactive API gateway providing unified entry point for all services.
 - Dual-layer rate limiting (global IP + tenant-specific)
 - Request/response transformation with GlobalFilter chain
 - API versioning (path and header-based)
-- Type-safe configuration with Java records (IqScaffoldProperties)
+- Type-safe configuration with Java records (IqkvProperties)
 
 ### 💰 [Billing Service](foundation-billing-service/README.md)
 
@@ -168,7 +168,7 @@ Shared Infrastructure
 - Prometheus metrics and Grafana dashboards
 - Health checks and actuator endpoints
 - Graceful shutdown and error handling
-- Environment-specific configuration (local, staging, production)
+- Environment-specific configuration (local, uat, prd)
 
 ### Performance & Scalability
 
@@ -214,7 +214,7 @@ Shared Infrastructure
 
 ### Prerequisites
 
-- Java 21+
+- Java 25+
 - Docker and Docker Compose
 - PostgreSQL 15+ (or use Docker Compose)
 - Redis (or use Docker Compose)
@@ -284,7 +284,7 @@ This platform demonstrates:
 
 ### Modern Java Development
 
-- Java 21 features (records, var, text blocks, pattern matching, switch expressions)
+- Java 25 features (records, var, text blocks, pattern matching, switch expressions)
 - Value objects and immutable DTOs with records
 - Pattern matching for claim extraction and type handling
 - Reactive programming with WebFlux and Project Reactor

@@ -1,30 +1,3 @@
-[submodule "iqscaffold-user-service"]
-	path = iqscaffold-user-service
-	url = git@github.com:IQKV/quickstart-user-service.git
-[submodule "iqscaffold-gateway-service"]
-	path = iqscaffold-gateway-service
-	url = git@github.com:IQKV/quickstart-gateway-service.git
-[submodule "iqscaffold-billing-service"]
-	path = iqscaffold-billing-service
-	url = git@github.com:IQKV/quickstart-billing-service.git
-[submodule "iqscaffold-lead-service"]
-	path = iqscaffold-lead-service
-	url = git@github.com:IQKV/quickstart-crm-lead-service.git
-[submodule "iqscaffold-contact-service"]
-	path = iqscaffold-contact-service
-	url = git@github.com:IQKV/quickstart-crm-contact-service.git
-[submodule "iqscaffold-pipeline-service"]
-	path = iqscaffold-pipeline-service
-	url = git@github.com:IQKV/quickstart-crm-pipeline-service.git
-[submodule "iqscaffold-ui-auth-portal"]
-	path = iqscaffold-ui-auth-portal
-	url = git@github.com:IQKV/iqscaffold-ui-auth-portal.git
-[submodule "iqscaffold-ui-app-portal"]
-	path = iqscaffold-ui-app-portal
-	url = git@github.com:IQKV/iqscaffold-ui-app-portal.git
-[submodule "iqscaffold-ui-saas-landing-kit"]
-	path = iqscaffold-ui-saas-landing-kit
-	url = git@github.com:IQKV/iqscaffold-ui-saas-landing-kit.git
 [submodule "foundation-iam-service"]
 	path = foundation-iam-service
 	url = git@github.com:IQKV/foundation-iam-service.git
