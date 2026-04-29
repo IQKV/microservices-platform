@@ -3,7 +3,7 @@
   "rabbitmq_version": "3.13.0",
   "users": [
     {
-      "name": "foundation",
+      "name": "svc_platform_rmq",
       "password_hash": "JDJiJDEyJGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhYdGhY",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": ["administrator"]
@@ -16,7 +16,7 @@
   ],
   "permissions": [
     {
-      "user": "foundation",
+      "user": "svc_platform_rmq",
       "vhost": "/",
       "configure": ".*",
       "write": ".*",

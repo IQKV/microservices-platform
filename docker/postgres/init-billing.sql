@@ -12,9 +12,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE billing TO billing;
-GRANT ALL PRIVILEGES ON SCHEMA public TO billing;
-GRANT ALL PRIVILEGES ON SCHEMA billing TO billing;
+GRANT ALL PRIVILEGES ON DATABASE billing TO svc_billing_dba;
+GRANT ALL PRIVILEGES ON SCHEMA public TO svc_billing_dba;
+GRANT ALL PRIVILEGES ON SCHEMA billing TO svc_billing_dba;
 
 -- Audit trigger function for tracking row updates
 CREATE OR REPLACE FUNCTION update_updated_at_column()

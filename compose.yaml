@@ -32,8 +32,8 @@ services:
     container_name: foundation-postgres-iam
     environment:
       POSTGRES_DB: ${IAM_DB_NAME:-iam}
-      POSTGRES_USER: ${IAM_DB_USERNAME:-iam}
-      POSTGRES_PASSWORD: ${IAM_DB_PASSWORD:-iam}
+      POSTGRES_USER: ${IAM_DB_USERNAME:-svc_iam_dba}
+      POSTGRES_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
       PGDATA: /var/lib/postgresql/data/pgdata
     expose:
@@ -44,7 +44,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iam -d iam"]
+      test: ["CMD-SHELL", "pg_isready -U ${IAM_DB_USERNAME:-svc_iam_dba} -d ${IAM_DB_NAME:-iam}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -72,8 +72,8 @@ services:
     container_name: foundation-postgres-billing
     environment:
       POSTGRES_DB: ${BILLING_DB_NAME:-billing}
-      POSTGRES_USER: ${BILLING_DB_USERNAME:-billing}
-      POSTGRES_PASSWORD: ${BILLING_DB_PASSWORD:-billing}
+      POSTGRES_USER: ${BILLING_DB_USERNAME:-svc_billing_dba}
+      POSTGRES_PASSWORD: ${BILLING_DB_PASSWORD:-svc_billing_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
       PGDATA: /var/lib/postgresql/data/pgdata
     expose:
@@ -84,7 +84,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U billing -d billing"]
+      test: ["CMD-SHELL", "pg_isready -U ${BILLING_DB_USERNAME:-svc_billing_dba} -d ${BILLING_DB_NAME:-billing}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -135,8 +135,8 @@ services:
     image: rabbitmq:3.13-management-alpine
     container_name: foundation-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-foundation}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-foundation_password}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
       RABBITMQ_DEFAULT_VHOST: /
     expose:
       - "5672"
@@ -195,14 +195,14 @@ services:
       DB_HOST: postgres-iam
       DB_PORT: 5432
       DB_NAME: ${IAM_DB_NAME:-iam}
-      DB_USERNAME: ${IAM_DB_USERNAME:-iam}
-      DB_PASSWORD: ${IAM_DB_PASSWORD:-iam}
+      DB_USERNAME: ${IAM_DB_USERNAME:-svc_iam_dba}
+      DB_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
 
       # RabbitMQ
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-foundation}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-foundation_password}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
 
       # Mail (MailHog)
       MAIL_HOST: mailhog
@@ -268,14 +268,14 @@ services:
       DB_HOST: postgres-billing
       DB_PORT: 5432
       DB_NAME: ${BILLING_DB_NAME:-billing}
-      DB_USERNAME: ${BILLING_DB_USERNAME:-billing}
-      DB_PASSWORD: ${BILLING_DB_PASSWORD:-billing}
+      DB_USERNAME: ${BILLING_DB_USERNAME:-svc_billing_dba}
+      DB_PASSWORD: ${BILLING_DB_PASSWORD:-svc_billing_dba}
 
       # RabbitMQ
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-foundation}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-foundation_password}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
       MESSAGING_ENABLED: ${MESSAGING_ENABLED:-true}
 
       # Mail (MailHog)
