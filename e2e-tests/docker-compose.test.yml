@@ -1,4 +1,3 @@
-
 services:
   # PostgreSQL Database for IAM Service Testing
   postgres-iam-test:

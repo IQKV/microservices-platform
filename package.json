@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "pnpm lint:stylelint && pnpm formatter:check",
     "lint:stylelint": "stylelint \"**/*.css\" --aei",
-    "node_modules:clear": "rm -rf node_modules",
+    "node_modules:cleanup": "rm -rf node_modules",
     "prepare": "husky",
     "formatter:check": "oxfmt --check",
     "formatter:write": "oxfmt --write",
@@ -28,8 +28,8 @@
     "release-it": "^19.2.4",
     "release-it-pnpm": "^4.6.6",
     "sort-package-json": "^3.6.1",
-    "stylelint": "^16.26.1",
-    "stylelint-config-standard-scss": "^16.0.0"
+    "stylelint": "^17.9.1",
+    "stylelint-config-standard-scss": "^17.0.0"
   },
   "lint-staged": {
     "*": [

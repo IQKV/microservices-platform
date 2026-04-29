@@ -8,8 +8,8 @@ services:
     command:
       - --configfile=/etc/traefik/traefik.yml
     ports:
-      - "80:80"    # HTTP — routes to gateway-service
-      - "443:443"  # HTTPS
+      - "80:80" # HTTP — routes to gateway-service
+      - "443:443" # HTTPS
       - "8888:8080" # Traefik Dashboard (http://localhost:8888/dashboard/)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -229,8 +229,8 @@ services:
       OTEL_SERVICE_NAME: foundation-iam-service
       OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-iam-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
-      - "8080"  # Application API
-      - "8081"  # Management / Actuator
+      - "8080" # Application API
+      - "8081" # Management / Actuator
     depends_on:
       postgres-iam:
         condition: service_healthy
@@ -367,10 +367,10 @@ services:
       OTEL_SERVICE_NAME: foundation-gateway-service
       OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
-      - "8080"  # Gateway API (internal)
-      - "8081"  # Management / Actuator
+      - "8080" # Gateway API (internal)
+      - "8081" # Management / Actuator
     ports:
-      - "80:8080"  # Expose gateway as the platform entry point on host port 80
+      - "80:8080" # Expose gateway as the platform entry point on host port 80
     depends_on:
       iam-service:
         condition: service_healthy

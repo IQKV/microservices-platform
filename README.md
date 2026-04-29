@@ -18,9 +18,9 @@
 
 A microservices ecosystem that provides:
 
-- **Identity & Access Management** - Centralized authentication with JWT tokens, user lifecycle management, email verification, and role-based access control
-- **API Gateway** - Intelligent request routing with rate limiting, circuit breakers, and multi-tenant support
-- **Billing & Payments** - Multi-tenant payment orchestration with Stripe, subscription management, and automated financial operations
+- **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, invitation flows, and role-based access control
+- **API Gateway** - Reactive entry point with JWT validation, header sanitization, tenant context injection, and platform mode consistency enforcement
+- **Billing & Payments** - Stripe-backed subscription management, plan catalog, webhook processing, and event-driven billing notifications
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
@@ -33,66 +33,76 @@ Centralized authentication and identity management hub.
 
 **Core Capabilities:**
 
-- JWT-based authentication with RSA256 (JwtEncoder/JwtDecoder)
-- User registration with email verification (UUID tokens, 24h expiry)
-- Password reset and account security
-- Role-based access control (RBAC) with @PreAuthorize
-- Schema-per-tenant isolation with Hibernate MultiTenantConnectionProvider
-- Admin user management with organization preferences
+- JWT-based authentication with RS256 (`JwtTokenGenerator` with RSA PEM keys)
+- User registration via `SignupStrategy` — `MULTI_TENANT` creates a new tenant + grants `TENANT_OWNER`; `SINGLE_TENANT` joins the default tenant with `MEMBER`
+- Email verification with 64-char hex one-time tokens, 24h expiry, rate-limited resend (3/hour)
+- Password reset with 32-byte hex tokens, configurable TTL, enumeration-safe responses
+- Tenant invitation flow — send, preview, accept (existing or new user), revoke
+- Two-layer token revocation: JTI denylist (per-signout) + `last_global_signout_at` (signout-all)
+- Account lockout after configurable failed attempts with sliding window
+- Schema-per-tenant PostgreSQL isolation (`t_{tenantKey}`) provisioned via Liquibase on `tenant.created` events
+- JWKS endpoint (`/.well-known/jwks.json`) for public key distribution
+- Tenant lifecycle management: `PROVISIONING → ACTIVE → SUSPENDED/DELETED` with event publishing
+- Admin user management with paginated listing and partial updates
 
 **Key Patterns:**
 
-- JTI-based token blacklisting with Redis TTL
-- Account lockout (5 attempts, 15min) with sliding window
-- Email verification with rate limiting (3/hour)
-- Security audit logging with UserAuditLog entity
-- User context propagation with full JWT claims (userId, username, email, roles, permissions, firstName, lastName, tenantId)
-- Pattern matching for claim extraction (Java 25)
+- `JwtAuthenticationFilter` runs before Spring Security — checks JTI denylist and `last_global_signout_at` on every request
+- `MyBatisSchemaInterceptor` sets PostgreSQL `search_path` to `t_{tenantKey}, public` per request
+- `TenantLiquibaseRunner` provisions tenant schemas asynchronously via RabbitMQ (`tenant.created` → `tenant.provisioned`)
+- `StuckTenantReaperJob` marks tenants stuck in `PROVISIONING` as `PROVISIONING_FAILED` every 5 minutes
+- `SubscriptionEventConsumer` suspends tenants on `subscription.cancelled` events from Billing
+- `PlatformModeInfoContributor` exposes `platform.rollout-mode` via `/actuator/info` for Gateway validation
+- Hourly ShedLock-protected cleanup jobs for expired tokens, verification tokens, and invitations
+- Micrometer counters for `auth.success`, `auth.failure` (with tenant and reason tags), and `tenant.created`
 
 ### 🌐 [Gateway Service](foundation-gateway-service/README.md)
 
-Reactive API gateway providing unified entry point for all services.
+Reactive API gateway providing the single external entry point for all services.
 
 **Core Capabilities:**
 
-- Intelligent routing to downstream services
-- JWT validation with ReactiveSecurityContextHolder
-- Redis-backed distributed rate limiting with ZSET
-- Circuit breaker with Resilience4j (per-service)
-- Multi-tenant request routing with priority-based extraction
-- Correlation ID generation and tracking
+- JWT validation via JWKS endpoint (Spring Security OAuth2 Resource Server, reactive)
+- Routes: `/.well-known/**` and `/api/v1/iam/**` → IAM; `/api/v1/billing/**` → Billing
+- Global CORS configuration with configurable allowed origins
+- Platform mode consistency enforcement — polls IAM `/actuator/info` every 60s; returns 503 on mismatch
+- Correlation ID generation and propagation (`X-Correlation-ID`)
+- Security response headers on all responses
 
 **Key Patterns:**
 
-- Reactive programming with WebFlux (Mono/Flux)
-- Sliding window log algorithm with Redis sorted sets
-- Dual-layer rate limiting (global IP + tenant-specific)
-- Request/response transformation with GlobalFilter chain
-- API versioning (path and header-based)
-- Type-safe configuration with Java records (IqkvProperties)
+- `HeaderSanitizationFilter` (order `-190`) strips all `X-User-*`, `X-Tenant-ID`, `X-Organization-ID` headers from incoming requests before JWT processing — prevents identity spoofing
+- `JwtContextPropagationFilter` (order `-100`) reads validated JWT from `ReactiveSecurityContextHolder` and injects `X-User-ID`, `X-Username`, `X-User-Email`, `X-Tenant-ID`, `X-User-Authorities` for downstream services
+- `TenantContextFilter` (order `-50`) — `MULTI_TENANT`: passes `X-Tenant-ID` from JWT; `SINGLE_TENANT`: injects `defaultTenantKey` when header is absent
+- `ResponseTransformationFilter` (order `MIN_VALUE+1`) adds `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy` to all responses
+- `PlatformModeGuardFilter` validates rollout mode consistency with IAM at startup and on a 60s schedule; sets readiness to `REFUSING_TRAFFIC` on mismatch
+- Type-safe configuration with `@ConfigurationProperties` records (`GatewayProperties`, `GatewayConfigurationProperties`, `PlatformConfigurationProperties`)
 
 ### 💰 [Billing Service](foundation-billing-service/README.md)
 
-Multi-tenant payment orchestration and financial operations service.
+Stripe-backed subscription and billing management service.
 
 **Core Capabilities:**
 
-- Payment orchestration with Stripe Payment Intents and multi-gateway support
-- Subscription management with automated billing, trial periods, and plan changes
-- Merchant onboarding using Stripe Connect (Standard/Express)
-- Payout management and revenue sharing with platform fees
-- Refund processing with full and partial refund support
-- Invoice management with automated generation and tracking
-- Multi-gateway configuration (Stripe) with encrypted credentials
+- Plan catalog with `MONTHLY`/`ANNUAL` billing periods, minor-unit pricing, feature sets (JSON), and `TENANT`/`USER` scope
+- Subscription management with Stripe-synced status (`active`, `trialing`, `past_due`, `canceled`, `unpaid`)
+- Stripe webhook processing with idempotency via `webhook_log` table — handles `customer.subscription.*` and `invoice.*` events
+- Billing settings per tenant: Stripe customer ID, billing email, company name, address, tax ID
+- User billing settings for `SINGLE_TENANT` mode: per-user Stripe customer creation
+- Entitlement evaluation: resolves active subscription + plan feature set for a subject (tenant or user)
+- Event-driven bootstrap: `TenantEventConsumer` creates Stripe customer on `tenant.created`; `UserEventConsumer` cleans up `profileOwnerId` on user removal
+- Email notifications: subscription activated, subscription cancelled, invoice paid, payment failed
+- Scheduled trial and overdue notifications (daily at 9AM and 10AM UTC via ShedLock)
 
 **Key Patterns:**
 
-- State machine-driven payment and subscription lifecycle
-- Cryptographic webhook signature verification
-- AES-256-GCM encryption for gateway credentials
-- Schema-per-tenant financial data isolation
-- Event-driven notifications with RabbitMQ integration
-- Comprehensive audit logging for compliance
+- `SubscriptionSubjectResolver` strategy — `MULTI_TENANT`: subject is `TENANT/tenantKey`; `SINGLE_TENANT`: subject is `USER/userId`
+- `PlanEligibilityPolicyImpl` validates plan scope matches subject type before subscription creation
+- `WebhookProcessingService` idempotency: checks `webhook_log` by `externalEventId` before processing; status lifecycle `RECEIVED → PROCESSED/FAILED`
+- `BillingContactResolver` fallback chain: `ownerEmail` from event → `DEFAULT_BILLING_EMAIL` env var → null (Stripe allows no email)
+- `TrialNotificationService` finds trials ending in 2–3 days and `past_due` subscriptions daily
+- `TenantExtractionFilter` resolves tenant from `X-Tenant-ID` header (injected by Gateway) with context validation
+- `PaymentGatewayClient` wraps Stripe SDK; initialized with `secretKey` at construction
 
 ## Architecture Overview
 
@@ -103,112 +113,125 @@ Multi-tenant payment orchestration and financial operations service.
 │   Clients   │
 │ (Web/Mobile)│
 └──────┬──────┘
-       │
+       │ :80
        ▼
 ┌──────────────────────────────────────────┐
-│        Gateway Service (Port 8081)       │
-│  • Routing & Rate Limiting               │
-│  • JWT Validation                        │
-│  • Circuit Breaker                       │
-└──────┬────────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│            IAM Service (Port 8080)      │   │          Billing Service (Port 8080)     │
-│  • Auth/JWT                              │   │  • Payment Intents                       │
-│  • Users                                 │   │  • Subscriptions                         │
-│  • Roles                                 │   │  • Stripe Connect                        │
-└──────┬───────────────────────────────────┘   └──────┬───────────────────────────────────┘
-       │                                              │
-       ▼                                              ▼
-┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐
-│            PostgreSQL (User DB)          │   │          PostgreSQL (Billing DB)         │
-└──────────────────────────────────────────┘   └──────────────────────────────────────────┘
+│         Gateway Service (:8080)          │
+│  • JWT Validation (JWKS from IAM)        │
+│  • Header Sanitization + Propagation     │
+│  • Tenant Context Injection              │
+│  • Platform Mode Guard                   │
+│  • Security Response Headers             │
+└──────┬──────────────────┬────────────────┘
+       │                  │
+       ▼                  ▼
+┌─────────────────┐  ┌──────────────────────┐
+│   IAM Service   │  │   Billing Service    │
+│  • Auth / JWT   │  │  • Subscriptions     │
+│  • Users        │  │  • Plan Catalog      │
+│  • Tenants      │  │  • Stripe Webhooks   │
+│  • Invitations  │  │  • Billing Settings  │
+│  • JWKS         │  │  • Entitlements      │
+└────────┬────────┘  └──────────┬───────────┘
+         │                      │
+         ▼                      ▼
+┌─────────────────┐  ┌──────────────────────┐
+│  PostgreSQL IAM │  │  PostgreSQL Billing  │
+│  (schema/tenant)│  │                      │
+└─────────────────┘  └──────────────────────┘
 
 Shared Infrastructure
-┌──────────────────────────────┐   ┌─────────────────────────────┐   ┌─────────────────────────────┐
-│            Redis             │   │          RabbitMQ           │   │        Observability        │
-│  • Caching                   │   │  • Event Publishing         │   │  • Prometheus / Grafana     │
-│  • Rate Limiting             │   │  • Cross-Service Messaging  │   │  • Loki / OpenTelemetry     │
-└──────────────────────────────┘   └─────────────────────────────┘   └─────────────────────────────┘
+┌──────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│     RabbitMQ     │  │       MailHog        │  │    Observability     │
+│  iqkv.events     │  │  (local SMTP)        │  │  Prometheus/Grafana  │
+│  topic exchange  │  │                      │  │  Loki / Promtail     │
+└──────────────────┘  └──────────────────────┘  └──────────────────────┘
 ```
 
 ### Technology Stack
 
 - **Runtime:** Java 25 with modern features (records, var, text blocks, pattern matching, switch expressions)
-- **Framework:** Spring Boot 4.0, Spring Cloud 2025.0.0, Spring Cloud Gateway (reactive)
-- **Database:** PostgreSQL 15+ with Liquibase migrations, Hibernate multi-tenancy
-- **Caching:** Redis for distributed caching, rate limiting (ZSET), and token blacklisting
-- **Messaging:** RabbitMQ for event-driven communication and cross-service integration
-- **Security:** JWT with RSA256 (JwtEncoder/JwtDecoder), Spring Security OAuth2 Resource Server
-- **Resilience:** Resilience4j for circuit breaker, rate limiting, and fault tolerance
-- **Observability:** OpenTelemetry, Prometheus, Grafana, Loki, structured JSON logging
-- **API Documentation:** SpringDoc OpenAPI with Swagger UI
-- **Testing:** JUnit 5, Testcontainers, ArchUnit, Spring Modulith, Reactor Test
+- **Framework:** Spring Boot 4.x, Spring Cloud Gateway (WebFlux/reactive)
+- **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis, schema-per-tenant isolation
+- **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
+- **Security:** JWT with RS256 (JJWT), Spring Security OAuth2 Resource Server, BCrypt strength 12
+- **Payments:** Stripe Java SDK for customer and subscription management
+- **Observability:** Prometheus (Micrometer), Grafana, Loki, Promtail, structured JSON logging (Logstash Logback Encoder)
+- **Distributed Locking:** ShedLock with JDBC provider for scheduled jobs
+- **API Documentation:** SpringDoc OpenAPI with Swagger UI (webmvc + webflux variants)
+- **Testing:** JUnit 5, Testcontainers, ArchUnit, H2
 - **Containerization:** Docker with multi-stage builds, Docker Compose for local development
 
 ## Key Features
 
 ### Security & Authentication
 
-- Centralized JWT-based authentication with RSA256 through IAM Service
-- JTI-based token blacklisting with Redis TTL for logout
-- Token validation at Gateway with ReactiveSecurityContextHolder
-- User context propagation via headers (X-User-ID, X-Username, X-User-Roles)
-- Role-based access control with @PreAuthorize across all services
-- Account security (5 failed attempts → 15min lockout with sliding window)
-- Email verification with UUID tokens and rate limiting (3/hour)
-- Password reset flows with secure time-limited tokens
-- Security audit logging with UserAuditLog entity and correlation IDs
+- RS256 JWT authentication issued by IAM, validated at Gateway via JWKS
+- Two-layer token revocation: JTI denylist (per-signout) + `last_global_signout_at` (signout-all)
+- `JwtAuthenticationFilter` checks both revocation layers before Spring Security processes the request
+- `HeaderSanitizationFilter` strips all user/tenant identity headers from client requests before JWT propagation — prevents spoofing
+- JWT claims propagated downstream as `X-User-ID`, `X-Username`, `X-User-Email`, `X-Tenant-ID`, `X-User-Authorities`
+- Role-based access control with `@PreAuthorize` and `@EnableMethodSecurity`
+- Account lockout after configurable failed login attempts with sliding window
+- Email verification with one-time tokens and rate-limited resend
+- Password reset with enumeration-safe responses and session invalidation on completion
+- Tenant invitation flow with authority assignment and support for both existing and new users
+
+### Multi-Tenancy
+
+- `MULTI_TENANT` mode: each signup creates a new tenant; subscriptions scoped per tenant
+- `SINGLE_TENANT` mode: all users join a default tenant; subscriptions scoped per user
+- Strategy pattern (`SignupStrategy`, `SubscriptionSubjectResolver`) selects behavior via `@ConditionalOnProperty`
+- All three services validate rollout mode at startup; Gateway additionally polls IAM every 60s and blocks traffic on mismatch
+- Schema-per-tenant PostgreSQL isolation in IAM — `MyBatisSchemaInterceptor` sets `search_path` per request
+- Tenant provisioning via async RabbitMQ flow: `tenant.created` → Liquibase migrations → `tenant.provisioned`
+
+### Event-Driven Integration
+
+- RabbitMQ topic exchange `iqkv.events` with dead-letter exchange and 24h TTL on all queues
+- IAM publishes: `tenant.created/provisioned/provisioning_failed/suspended/deleted`, `user.created/deleted/removed/invited`, `notification.iam.email`
+- Billing consumes `tenant.created` to bootstrap Stripe customer and billing settings
+- Billing publishes: `subscription.created/cancelled`, `invoice.paid`, `payment.failed`, `notification.billing.email`
+- IAM consumes `subscription.cancelled` to suspend the corresponding tenant
+- ShedLock prevents duplicate scheduled job execution across clustered deployments
 
 ### Operational Excellence
 
-- Structured JSON logging for production environments
-- Distributed tracing with correlation ID propagation
-- Prometheus metrics and Grafana dashboards
-- Health checks and actuator endpoints
-- Graceful shutdown and error handling
-- Environment-specific configuration (local, uat, prd)
-
-### Performance & Scalability
-
-- Reactive programming with WebFlux (Mono/Flux) for high-throughput scenarios
-- Multi-level caching with Redis (cache-aside pattern)
-- Sliding window log algorithm with Redis ZSET for rate limiting
-- Database query optimization with proper indexing and connection pooling
-- Circuit breaker with Resilience4j (per-service, configurable thresholds)
-- Distributed rate limiting with dual-layer (global IP + tenant-specific)
-- Schema-per-tenant isolation for multi-tenancy
-- Independent service scaling with stateless design
+- Structured JSON logging (Logstash Logback Encoder) for all services
+- Correlation ID generated at Gateway, propagated through all downstream services and logs
+- Prometheus metrics with Micrometer — auth counters with tenant/reason tags, auth duration timer
+- Grafana dashboards provisioned from `docker/grafana/provisioning`
+- Health checks on management port 8081 with readiness/liveness probes
+- Graceful shutdown configured on all services
+- Environment-specific profiles: `local`, `sit`, `uat`, `prd`
 
 ### Developer Experience
 
-- OpenAPI documentation with Swagger UI
-- Docker Compose for local development
-- Consistent error response format (RFC 7807)
+- OpenAPI documentation with Swagger UI — Gateway aggregates specs from IAM and Billing
+- Docker Compose for local development with MailHog for email testing
+- Consistent RFC 7807 error responses across all services
 - Architecture validation with ArchUnit
-- Integration tests with Testcontainers
-- Clear separation of concerns
+- Integration tests with Testcontainers (PostgreSQL, RabbitMQ)
+- Demo data Liquibase context for local development
 
 ## Architecture Patterns
 
 ### Cross-Cutting Patterns
 
-- **Database Per Service** - Each microservice owns its dedicated database
-- **API Gateway** - Single entry point with centralized concerns
-- **Service Discovery Ready** - Configurable for dynamic service registration
-- **Circuit Breaker** - Fault tolerance with Resilience4j
-- **Distributed Tracing** - Correlation IDs across all services
-- **Centralized Authentication** - JWT validation and context propagation
+- **Database Per Service** — IAM and Billing each own a dedicated PostgreSQL instance
+- **API Gateway** — single external entry point; downstream services not directly exposed
+- **Event-Driven Choreography** — services react to domain events via RabbitMQ without direct coupling
+- **Distributed Locking** — ShedLock with JDBC provider ensures scheduled jobs run once across replicas
+- **Correlation ID Tracking** — generated at Gateway, propagated through all services and logs
+- **Platform Mode Guard** — all three services enforce rollout mode consistency at startup
 
 ### Communication Patterns
 
-- Synchronous REST APIs with proper HTTP semantics
-- JWT-based user context propagation via headers
-- Event-driven messaging with RabbitMQ for cross-service communication
-- Lead-to-contact conversion with REST API integration
-- Correlation ID tracking for distributed requests
-- Standardized error responses across services
+- Synchronous REST APIs with proper HTTP semantics and RFC 7807 error responses
+- JWT-based user context propagation via headers (`X-User-ID`, `X-Tenant-ID`, `X-User-Authorities`)
+- Asynchronous event publishing via RabbitMQ topic exchange with dead-letter queues
+- Gateway aggregates downstream OpenAPI specs for unified Swagger UI
+- Webhook ingestion from Stripe with signature verification and idempotency
 
 ## Getting Started
 
@@ -216,43 +239,53 @@ Shared Infrastructure
 
 - Java 25+
 - Docker and Docker Compose
-- PostgreSQL 15+ (or use Docker Compose)
-- Redis (or use Docker Compose)
 
-### Local Development
-
-Each service can be run independently with Docker Compose:
+### Full Platform (all services)
 
 ```bash
-# Start IAM Service with dependencies
+# Start the entire platform from the repository root
+docker compose up
+
+# Platform entry point
+# http://localhost:80  →  Gateway Service
+# http://localhost:8888/dashboard/  →  Traefik Dashboard
+```
+
+### Individual Service Development
+
+Each service can be run independently with its own Docker Compose:
+
+```bash
+# IAM Service with PostgreSQL, RabbitMQ, MailHog
 cd foundation-iam-service
-docker-compose up
+docker compose up
 
-# Start Billing Service with dependencies
+# Billing Service with PostgreSQL, RabbitMQ, MailHog
 cd foundation-billing-service
-docker-compose up
+docker compose up
 
-# Start Gateway Service
+# Gateway Service (expects IAM running separately)
 cd foundation-gateway-service
-docker-compose up
-
+docker compose up
 ```
 
 ### API Documentation
 
 Once services are running, access Swagger UI:
 
-- IAM Service: http://iam-service:8080/swagger-ui.html
-- Gateway Service: http://gateway-service:8080/swagger-ui.html
-- Billing Service: http://billing-service:8080/swagger-ui.html
+- Gateway (aggregated): `http://localhost:80/swagger-ui.html`
+- IAM Service (direct): `http://localhost:8080/swagger-ui.html`
+- Billing Service (direct): `http://localhost:8080/swagger-ui.html`
 
 ### Monitoring
 
-Access observability tools:
+Access observability tools via Traefik virtual hosts (add to `/etc/hosts` or use a local DNS):
 
-- Prometheus: http://prometheus:9090
-- Grafana: http://grafana:3000
-- Health Checks: http://{service-name}:808x/actuator/health
+- Grafana: `http://grafana.localhost`
+- Prometheus: `http://prometheus.localhost`
+- RabbitMQ Management: `http://rabbitmq.localhost`
+- MailHog: `http://mailhog.localhost`
+- Health checks: `http://{service}:8081/actuator/health`
 
 ## Learning Objectives
 
@@ -262,36 +295,42 @@ This platform demonstrates:
 
 - Service decomposition and bounded contexts
 - Database per service pattern
-- API gateway pattern
-- Service-to-service communication
-- Distributed system challenges and solutions
+- API gateway as single entry point
+- Event-driven choreography with RabbitMQ
+- Async tenant provisioning with status lifecycle and failure recovery
 
 ### Security Implementation
 
-- JWT-based stateless authentication
-- Token validation and propagation
-- Role-based access control
-- Multi-tenant data isolation
-- Security audit logging
+- RS256 JWT issuance and validation across services
+- Two-layer token revocation (JTI denylist + global signout timestamp)
+- Header sanitization to prevent identity spoofing at the gateway
+- JWT claim propagation to downstream services
+- Schema-per-tenant data isolation with MyBatis interceptor
+- Enumeration-safe password reset and email verification flows
+
+### Multi-Tenancy
+
+- Strategy pattern for `MULTI_TENANT` vs `SINGLE_TENANT` behavior
+- Conditional Spring beans with `@ConditionalOnProperty`
+- Cross-service rollout mode consistency enforcement
+- Tenant lifecycle with async provisioning and failure recovery
 
 ### Operational Patterns
 
-- Structured logging and correlation IDs
-- Distributed tracing with OpenTelemetry
-- Metrics collection with Prometheus
-- Health checks and graceful shutdown
-- Circuit breaker and rate limiting
+- Structured JSON logging with correlation ID propagation
+- Prometheus metrics with business-relevant tags
+- ShedLock for distributed scheduled job coordination
+- Dead-letter queues for messaging fault tolerance
+- Readiness probe integration with platform mode guard
 
 ### Modern Java Development
 
 - Java 25 features (records, var, text blocks, pattern matching, switch expressions)
-- Value objects and immutable DTOs with records
-- Pattern matching for claim extraction and type handling
-- Reactive programming with WebFlux and Project Reactor
-- Spring Boot 3.x best practices with type-safe configuration
-- Domain-Driven Design with tactical patterns (aggregates, value objects, factories)
-- Clean architecture with clear layer separation
-- Test-driven development with unit, integration, and architecture tests
+- Immutable DTOs with records and `@ConfigurationProperties` records
+- Reactive programming with WebFlux and Project Reactor (Gateway)
+- Spring Boot 4.x best practices with type-safe configuration
+- MyBatis with XML mappers and custom type handlers
+- Clean package-by-feature structure with clear layer separation
 
 ## Adapting for Your Domain
 
@@ -299,26 +338,24 @@ This platform provides reusable patterns for:
 
 ### Authentication & Authorization
 
-- Employee portals and customer platforms
-- Multi-tenant SaaS applications
-- Partner access management systems
-- Identity and access management (IAM)
+- Multi-tenant SaaS applications with per-tenant schema isolation
+- Single-tenant applications with per-user billing
+- Partner and employee portals with invitation-based onboarding
+- Any system requiring centralized JWT issuance with downstream validation
 
 ### API Gateway Patterns
 
-- E-commerce platforms with multiple services
-- Mobile app backends with rate limiting
-- Public API protection and management
-- Multi-tenant request routing
+- Reactive entry point with JWT validation and context propagation
+- Header sanitization before forwarding to internal services
+- Platform-wide configuration consistency enforcement
+- Aggregated API documentation across multiple services
 
-### Domain Services
+### Billing & Subscriptions
 
-- CRM and lead management systems
-- Sales pipeline and conversion tracking
-- Customer relationship management platforms
-- Order processing systems
-- Asset management platforms
-- Any CRUD-based business domain
+- SaaS subscription management with Stripe
+- Plan catalogs with scope-based eligibility (tenant vs user)
+- Webhook-driven subscription lifecycle with idempotent processing
+- Event-driven billing notifications and trial management
 
 The patterns demonstrated here apply to any organization building microservices architectures requiring centralized authentication, API management, and scalable domain services.
 
