@@ -68,72 +68,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # PostgreSQL Database for Contact Service
-  postgres-contact:
-    image: postgres:15-alpine
-    container_name: foundation-postgres-contact
-    environment:
-      POSTGRES_DB: foundation_contact
-      POSTGRES_USER: foundation_contact
-      POSTGRES_PASSWORD: foundation_password
-    expose:
-      - "5432"
-    volumes:
-      - postgres_contact_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-contact.sql:/docker-entrypoint-initdb.d/init-contact.sql
-    networks:
-      - foundation-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_contact -d foundation_contact"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # PostgreSQL Database for Lead Service
-  postgres-lead:
-    image: postgres:15-alpine
-    container_name: foundation-postgres-lead
-    environment:
-      POSTGRES_DB: foundation_lead
-      POSTGRES_USER: foundation_lead
-      POSTGRES_PASSWORD: foundation_password
-    expose:
-      - "5432"
-    volumes:
-      - postgres_lead_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-lead.sql:/docker-entrypoint-initdb.d/init-lead.sql
-    networks:
-      - foundation-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_lead -d foundation_lead"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # PostgreSQL Database for Pipeline Service
-  postgres-pipeline:
-    image: postgres:15-alpine
-    container_name: foundation-postgres-pipeline
-    environment:
-      POSTGRES_DB: foundation_pipeline
-      POSTGRES_USER: foundation_pipeline
-      POSTGRES_PASSWORD: foundation_password
-    expose:
-      - "5432"
-    volumes:
-      - postgres_pipeline_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-pipeline.sql:/docker-entrypoint-initdb.d/init-pipeline.sql
-    networks:
-      - foundation-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U foundation_pipeline -d foundation_pipeline"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
   # Redis for Caching and Sessions
   redis:
     image: redis:7-alpine
@@ -205,18 +139,18 @@ services:
     container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      FOUNDATION_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_user
-      FOUNDATION_DATABASE_USERNAME: foundation_user
-      FOUNDATION_DATABASE_PASSWORD: foundation_password
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
-      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
-      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
-      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
-      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
-      FOUNDATION_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
-      FOUNDATION_AUTH_JWT_EXPIRATION: 900
-      FOUNDATION_AUTH_JWT_REFRESH_EXPIRATION: 604800
+      IQKV_DATABASE_URL: jdbc:postgresql://postgres-iam:5432/foundation_user
+      IQKV_DATABASE_USERNAME: foundation_user
+      IQKV_DATABASE_PASSWORD: foundation_password
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
+      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQKV_MESSAGING_RABBITMQ_PORT: 5672
+      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
+      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
+      IQKV_AUTH_JWT_SECRET: your-256-bit-secret-key-here-change-in-production
+      IQKV_AUTH_JWT_EXPIRATION: 900
+      IQKV_AUTH_JWT_REFRESH_EXPIRATION: 604800
     expose:
       - "8080"
     depends_on:
@@ -250,19 +184,19 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: local
       # Database Configuration
-      FOUNDATION_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/foundation_billing
-      FOUNDATION_DATABASE_USERNAME: foundation_billing
-      FOUNDATION_DATABASE_PASSWORD: foundation_password
+      IQKV_DATABASE_URL: jdbc:postgresql://postgres-billing:5432/foundation_billing
+      IQKV_DATABASE_USERNAME: foundation_billing
+      IQKV_DATABASE_PASSWORD: foundation_password
       # Cache Configuration
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
-      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
-      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
-      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
-      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
+      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQKV_MESSAGING_RABBITMQ_PORT: 5672
+      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
+      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
       # Service Integration
-      FOUNDATION_USER_SERVICE_URL: http://iam-service:8080
+      IQKV_USER_SERVICE_URL: http://iam-service:8080
       EMAIL_SERVICE_URL: http://email-service:8080
       # Email Configuration (MailHog for local development)
       SMTP_HOST: mailhog
@@ -327,8 +261,8 @@ services:
       SPRING_DATASOURCE_USERNAME: foundation_contact
       SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -339,7 +273,7 @@ services:
       USER_SERVICE_URL: http://iam-service:8080
       JWT_ISSUER: foundation-iam-service
       # Multi-tenancy Configuration
-      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
+      IQKV_TENANT_ID_HEADER: X-Tenant-ID
     expose:
       - "8080"
     depends_on:
@@ -380,8 +314,8 @@ services:
       SPRING_DATASOURCE_USERNAME: foundation_lead
       SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -392,7 +326,7 @@ services:
       USER_SERVICE_URL: http://iam-service:8080
       JWT_ISSUER: foundation-iam-service
       # Multi-tenancy Configuration
-      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
+      IQKV_TENANT_ID_HEADER: X-Tenant-ID
       # Lead Configuration
       LEAD_ENABLE_AUTO_SCORING: true
       LEAD_ENABLE_AUTO_QUALIFICATION: false
@@ -436,8 +370,8 @@ services:
       SPRING_DATASOURCE_USERNAME: foundation_pipeline
       SPRING_DATASOURCE_PASSWORD: foundation_password
       # Cache Configuration
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
       # Messaging Configuration
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
@@ -450,7 +384,7 @@ services:
       # Lead Service Integration
       LEAD_SERVICE_URL: http://lead-service:8080
       # Multi-tenancy Configuration
-      FOUNDATION_TENANT_ID_HEADER: X-Tenant-ID
+      IQKV_TENANT_ID_HEADER: X-Tenant-ID
     expose:
       - "8080"
     depends_on:
@@ -487,19 +421,19 @@ services:
     container_name: foundation-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: local
-      FOUNDATION_CACHE_REDIS_HOST: redis
-      FOUNDATION_CACHE_REDIS_PORT: 6379
-      FOUNDATION_MESSAGING_RABBITMQ_HOST: rabbitmq
-      FOUNDATION_MESSAGING_RABBITMQ_PORT: 5672
-      FOUNDATION_MESSAGING_RABBITMQ_USERNAME: foundation
-      FOUNDATION_MESSAGING_RABBITMQ_PASSWORD: foundation_password
-      FOUNDATION_GATEWAY_ROUTING_USER_SERVICE_URI: http://iam-service:8080
-      FOUNDATION_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
-      FOUNDATION_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
-      FOUNDATION_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
-      FOUNDATION_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
-      FOUNDATION_GATEWAY_RATE_LIMITING_ENABLED: true
-      FOUNDATION_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
+      IQKV_CACHE_REDIS_HOST: redis
+      IQKV_CACHE_REDIS_PORT: 6379
+      IQKV_MESSAGING_RABBITMQ_HOST: rabbitmq
+      IQKV_MESSAGING_RABBITMQ_PORT: 5672
+      IQKV_MESSAGING_RABBITMQ_USERNAME: foundation
+      IQKV_MESSAGING_RABBITMQ_PASSWORD: foundation_password
+      IQKV_GATEWAY_ROUTING_USER_SERVICE_URI: http://iam-service:8080
+      IQKV_GATEWAY_ROUTING_BILLING_SERVICE_URI: http://billing-service:8080
+      IQKV_GATEWAY_ROUTING_CONTACT_SERVICE_URI: http://contact-service:8080
+      IQKV_GATEWAY_ROUTING_LEAD_SERVICE_URI: http://lead-service:8080
+      IQKV_GATEWAY_ROUTING_PIPELINE_SERVICE_URI: http://pipeline-service:8080
+      IQKV_GATEWAY_RATE_LIMITING_ENABLED: true
+      IQKV_GATEWAY_RATE_LIMITING_REQUESTS_PER_MINUTE: 100
     expose:
       - "8080"
     depends_on:

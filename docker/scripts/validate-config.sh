@@ -11,8 +11,8 @@ validate() {
 }
 
 validate "main"
-validate "-f docker-compose.yml -f docker-compose.staging.yml" "staging"
-validate "-f docker-compose.yml -f docker-compose.production.yml" "production"
+validate "-f docker-compose.yml -f docker-compose.staging.yml" "uat"
+validate "-f docker-compose.yml -f docker-compose.production.yml" "prd"
 validate "-f foundation-iam-service/docker-compose.yml" "iam-service"
 validate "-f foundation-gateway-service/docker-compose.yml" "gateway-service"
 

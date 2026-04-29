@@ -1714,7 +1714,7 @@ logging_security:
 # Example: foundation-iam-service/.env.local
 
 SPRING_DATASOURCE_PASSWORD=local_password
-FOUNDATION_AUTH_JWT_SECRET=your-256-bit-secret-key-here
+IQKV_AUTH_JWT_SECRET=your-256-bit-secret-key-here
 SPRING_DATA_REDIS_PASSWORD=redis_password
 SPRING_MAIL_PASSWORD=mail_password
 ```
@@ -1743,7 +1743,7 @@ env:
 ```bash
 # Spring Boot property mapping
 SPRING_DATASOURCE_PASSWORD → spring.datasource.password
-FOUNDATION_AUTH_JWT_SECRET → foundation.auth.jwt.secret
+IQKV_AUTH_JWT_SECRET → foundation.auth.jwt.secret
 SPRING_DATA_REDIS_PASSWORD → spring.data.redis.password
 ```
 
