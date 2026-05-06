@@ -9,8 +9,8 @@
         <artifactId>boot-parent-pom</artifactId>
         <version>0.25.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.foundation</groupId>
-    <artifactId>foundation</artifactId>
+    <groupId>com.iqkv</groupId>
+    <artifactId>microservices-platform</artifactId>
     <version>0.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
