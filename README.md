@@ -110,9 +110,11 @@ Stripe-backed subscription and billing management service.
 Production-ready frontends for different user roles.
 
 #### [Tenant App](foundation-ui-app/README.md)
+
 React 19 SPA for workspace members — sign-in with tenant discovery, team management, invitations, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
 
 #### [Platform Admin](foundation-ui-platform-admin/README.md)
+
 React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
 
 ## Architecture Overview
