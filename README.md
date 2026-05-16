@@ -22,8 +22,9 @@ A microservices ecosystem that provides:
 - **API Gateway** - Reactive entry point with JWT validation, header sanitization, tenant context injection, and platform mode consistency enforcement
 - **Billing & Payments** - Stripe-backed subscription management, plan catalog, webhook processing, and event-driven billing notifications
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
+- **Included UI Applications** - Production-ready React frontends for both customers (Tenant App) and operators (Platform Admin)
 
-This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, and business domain services.
+This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, business domain services, and modern frontend development.
 
 ## Platform Services
 
@@ -104,15 +105,27 @@ Stripe-backed subscription and billing management service.
 - `TenantExtractionFilter` resolves tenant from `X-Tenant-ID` header (injected by Gateway) with context validation
 - `PaymentGatewayClient` wraps Stripe SDK; initialized with `secretKey` at construction
 
+### 💻 UI Applications
+
+Production-ready frontends for different user roles.
+
+#### [Tenant App](foundation-ui-app/README.md)
+React 19 SPA for workspace members — sign-in with tenant discovery, team management, invitations, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
+
+#### [Platform Admin](foundation-ui-platform-admin/README.md)
+React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
+
 ## Architecture Overview
 
 ### Microservices Architecture
 
 ```text
-┌─────────────┐
-│   Clients   │
-│ (Web/Mobile)│
-└──────┬──────┘
+┌─────────────┐      ┌─────────────────────────┐
+│   Clients   │◄────►│  Tenant App (React)     │
+│ (Web/Mobile)│      └─────────────────────────┘
+└──────┬──────┘      ┌─────────────────────────┐
+       │             │  Platform Admin (React) │
+       │             └─────────────────────────┘
        │ :80
        ▼
 ┌──────────────────────────────────────────┐
@@ -155,6 +168,7 @@ Shared Infrastructure
 - **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis, schema-per-tenant isolation
 - **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
 - **Security:** JWT with RS256 (JJWT), Spring Security OAuth2 Resource Server, BCrypt strength 12
+- **Frontend:** React 19, TypeScript, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
 - **Payments:** Stripe Java SDK for customer and subscription management
 - **Observability:** Prometheus (Micrometer), Grafana, Loki, Promtail, structured JSON logging (Logstash Logback Encoder)
 - **Distributed Locking:** ShedLock with JDBC provider for scheduled jobs
@@ -185,6 +199,13 @@ Shared Infrastructure
 - All three services validate rollout mode at startup; Gateway additionally polls IAM every 60s and blocks traffic on mismatch
 - Schema-per-tenant PostgreSQL isolation in IAM — `MyBatisSchemaInterceptor` sets `search_path` per request
 - Tenant provisioning via async RabbitMQ flow: `tenant.created` → Liquibase migrations → `tenant.provisioned`
+- **Frontend Support**: Both apps support runtime `public/config.js` overrides and silent token refresh for seamless multi-tenant switching.
+
+### Included UI Applications
+
+- **Tenant App**: React 19 SPA with Mantine UI, TanStack Router, and Lingui i18n. Supports tenant discovery, self-service signup, and team management.
+- **Platform Admin**: Operator console with `mantine-datatable`, real-time metrics dashboard, and global user/organization CRUD.
+- **Landing Kit**: Performance-optimized Astro landing kit with Tailwind CSS and DaisyUI.
 
 ### Event-Driven Integration
 
@@ -331,6 +352,15 @@ This platform demonstrates:
 - Spring Boot 4.x best practices with type-safe configuration
 - MyBatis with XML mappers and custom type handlers
 - Clean package-by-feature structure with clear layer separation
+
+### Modern Frontend Development
+
+- React 19 with TypeScript and Mantine UI 8
+- Feature-Sliced Design (FSD) architecture for scalable SPAs
+- File-based routing with TanStack Router
+- Server state management with TanStack Query
+- Internationalization with Lingui i18n
+- Vite-based builds with runtime environment configuration
 
 ## Adapting for Your Domain
 
