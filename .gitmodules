@@ -7,3 +7,9 @@
 [submodule "foundation-gateway-service"]
 	path = foundation-gateway-service
 	url = git@github.com:IQKV/foundation-gateway-service.git
+[submodule "foundation-ui-platform-admin"]
+	path = foundation-ui-platform-admin
+	url = git@github.com:IQKV/foundation-ui-platform-admin.git
+[submodule "foundation-ui-app"]
+	path = foundation-ui-app
+	url = git@github.com:IQKV/foundation-ui-app.git
