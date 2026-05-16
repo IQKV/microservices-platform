@@ -13,3 +13,6 @@
 [submodule "foundation-ui-app"]
 	path = foundation-ui-app
 	url = git@github.com:IQKV/foundation-ui-app.git
+[submodule "foundation-ui-saas-landing-kit"]
+	path = foundation-ui-saas-landing-kit
+	url = git@github.com:IQKV/foundation-ui-saas-landing-kit.git
