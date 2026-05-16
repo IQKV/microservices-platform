@@ -28,7 +28,7 @@ This platform serves as a reference implementation for organizations building mi
 
 ## Platform Services
 
-### 🔐 [IAM Service](foundation-iam-service/README.md)
+### 🔐 [IAM Service](https://github.com/IQKV/foundation-iam-service/blob/fef202da8e229e0e7d87f8fb6e1fd35036308383/README.md)
 
 Centralized authentication and identity management hub.
 
@@ -57,7 +57,7 @@ Centralized authentication and identity management hub.
 - Hourly ShedLock-protected cleanup jobs for expired tokens, verification tokens, and invitations
 - Micrometer counters for `auth.success`, `auth.failure` (with tenant and reason tags), and `tenant.created`
 
-### 🌐 [Gateway Service](foundation-gateway-service/README.md)
+### 🌐 [Gateway Service](https://github.com/IQKV/foundation-gateway-service/blob/96c2c83936e10ccb1d5bdcc46119e3405980b41a/README.md)
 
 Reactive API gateway providing the single external entry point for all services.
 
@@ -79,7 +79,7 @@ Reactive API gateway providing the single external entry point for all services.
 - `PlatformModeGuardFilter` validates rollout mode consistency with IAM at startup and on a 60s schedule; sets readiness to `REFUSING_TRAFFIC` on mismatch
 - Type-safe configuration with `@ConfigurationProperties` records (`GatewayProperties`, `GatewayConfigurationProperties`, `PlatformConfigurationProperties`)
 
-### 💰 [Billing Service](foundation-billing-service/README.md)
+### 💰 [Billing Service](https://github.com/IQKV/foundation-billing-service/blob/adcf00a706bced0aff2e02718b28718e07eadf8c/README.md)
 
 Stripe-backed subscription and billing management service.
 
@@ -109,11 +109,11 @@ Stripe-backed subscription and billing management service.
 
 Production-ready frontends for different user roles.
 
-#### [Tenant App](foundation-ui-app/README.md)
+#### [Tenant App](https://github.com/IQKV/foundation-ui-app/tree/23c86341d2da8318bc8c4af6b7279e179434bbbd/README.md)
 
 React 19 SPA for workspace members — sign-in with tenant discovery, team management, invitations, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
 
-#### [Platform Admin](foundation-ui-platform-admin/README.md)
+#### [Platform Admin](https://github.com/IQKV/foundation-ui-platform-admin/tree/083cb79347dc53c4348ddead22b92716383ea25b/README.md)
 
 React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
 
