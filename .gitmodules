@@ -16,3 +16,6 @@
 [submodule "foundation-ui-saas-landing-kit"]
 	path = foundation-ui-saas-landing-kit
 	url = git@github.com:IQKV/foundation-ui-saas-landing-kit.git
+[submodule "foundation-microservice-project-layout"]
+	path = foundation-microservice-project-layout
+	url = git@github.com:IQKV/foundation-microservice-project-layout.git
