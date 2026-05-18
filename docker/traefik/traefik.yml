@@ -15,9 +15,7 @@ entryPoints:
 
 providers:
   docker:
-    endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-    network: foundation-network
     watch: true
 
 certificatesResolvers:
@@ -29,7 +27,7 @@ certificatesResolvers:
         entryPoint: web
 
 log:
-  level: INFO
+  level: DEBUG
   format: json
 
 accessLog:
