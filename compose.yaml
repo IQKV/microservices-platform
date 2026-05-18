@@ -183,10 +183,7 @@ services:
   # (internal — not directly exposed via Traefik; traffic arrives via gateway-service)
   # ---------------------------------------------------------------------------
   iam-service:
-    build:
-      context: ./foundation-iam-service
-      dockerfile: Dockerfile
-    image: iqkv/foundation-iam-service:local
+    image: know-how.download/iqkv/foundation-iam-service:wip
     container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -256,10 +253,7 @@ services:
   # (internal — not directly exposed via Traefik; traffic arrives via gateway-service)
   # ---------------------------------------------------------------------------
   billing-service:
-    build:
-      context: ./foundation-billing-service
-      dockerfile: Dockerfile
-    image: iqkv/foundation-billing-service:local
+    image: know-how.download/iqkv/foundation-billing-service:wip
     container_name: foundation-billing-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -335,10 +329,7 @@ services:
   # (single external entry point — routes to iam-service and billing-service)
   # ---------------------------------------------------------------------------
   gateway-service:
-    build:
-      context: ./foundation-gateway-service
-      dockerfile: Dockerfile
-    image: iqkv/foundation-gateway-service:local
+    image: know-how.download/iqkv/foundation-gateway-service:wip
     container_name: foundation-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
