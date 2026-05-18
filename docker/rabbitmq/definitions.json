@@ -1,13 +1,11 @@
 {
   "rabbit_version": "3.13.0",
   "rabbitmq_version": "3.13.0",
-  "users": [],
   "vhosts": [
     {
       "name": "/"
     }
   ],
-  "permissions": [],
   "exchanges": [
     {
       "name": "foundation.events",
