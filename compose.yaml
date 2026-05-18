@@ -300,6 +300,7 @@ services:
       # Stripe (placeholders — override via .env)
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      STRIPE_PORTAL_RETURN_URL: ${STRIPE_PORTAL_RETURN_URL:-http://localhost:80/billing}
 
       # Observability
       OTEL_SERVICE_NAME: foundation-billing-service
@@ -347,7 +348,7 @@ services:
       IAM_JWKS_URI: http://iam-service:8080/.well-known/jwks.json
 
       # IAM service URL — used by PlatformModeGuardFilter to verify rollout mode consistency
-      IAM_SERVICE_URL: http://iam-service:8080
+      IQKV_IAM_SERVICE_URL: http://iam-service:8081
 
       # Billing service — routing target
       BILLING_SERVICE_URI: http://billing-service:8080
@@ -369,8 +370,6 @@ services:
     expose:
       - "8080" # Gateway API (internal)
       - "8081" # Management / Actuator
-    ports:
-      - "80:8080" # Expose gateway as the platform entry point on host port 80
     depends_on:
       iam-service:
         condition: service_healthy
