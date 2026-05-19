@@ -1,5 +1,21 @@
 services:
   # ---------------------------------------------------------------------------
+  # Reverse Proxy
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:latest
+    container_name: foundation-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - foundation-network
+    depends_on:
+      - gateway-service
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Databases
   # ---------------------------------------------------------------------------
   postgres-iam:
@@ -113,9 +129,9 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-svc_platform_rmq}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
       RABBITMQ_DEFAULT_VHOST: /
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
@@ -136,9 +152,9 @@ services:
   mailhog:
     image: mailhog/mailhog:v1.0.1
     container_name: foundation-mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+    expose:
+      - "1025"
+      - "8025"
     networks:
       - foundation-network
     restart: unless-stopped
@@ -323,9 +339,9 @@ services:
       # Observability
       OTEL_SERVICE_NAME: foundation-gateway-service
       OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
-    ports:
-      - "80:8080" # Gateway API
-      - "8081:8081" # Management / Actuator
+    expose:
+      - "8080" # Gateway API
+      - "8081" # Management / Actuator
     depends_on:
       foundation-iam-service:
         condition: service_healthy
@@ -350,8 +366,8 @@ services:
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: foundation-prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -364,6 +380,8 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--storage.tsdb.retention.time=200h"
       - "--web.enable-lifecycle"
+      - "--web.external-url=http://localhost/prometheus/"
+      - "--web.route-prefix=/"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
       interval: 10s
@@ -374,12 +392,14 @@ services:
   grafana:
     image: grafana/grafana:11.3.0
     container_name: foundation-grafana
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: http://localhost/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -396,8 +416,8 @@ services:
   loki:
     image: grafana/loki:3.2.0
     container_name: foundation-loki
-    ports:
-      - "3100:3100"
+    expose:
+      - "3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
