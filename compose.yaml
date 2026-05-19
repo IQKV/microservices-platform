@@ -1,33 +1,5 @@
 services:
   # ---------------------------------------------------------------------------
-  # Reverse Proxy
-  # ---------------------------------------------------------------------------
-  traefik:
-    image: traefik:v3.0
-    container_name: foundation-traefik
-    command:
-      - --configfile=/etc/traefik/traefik.yml
-      - --providers.docker=true
-      - --providers.docker.exposedByDefault=false
-      - --providers.docker.network=foundation-network
-    ports:
-      - "80:80" # HTTP — routes to gateway-service
-      - "443:443" # HTTPS
-      - "8888:8080" # Traefik Dashboard (http://localhost:8888/dashboard/)
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./docker/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - traefik_letsencrypt:/letsencrypt
-    networks:
-      - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.entrypoints=web"
-    restart: unless-stopped
-
-  # ---------------------------------------------------------------------------
   # Databases
   # ---------------------------------------------------------------------------
   postgres-iam:
@@ -141,20 +113,15 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-svc_platform_rmq}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
       RABBITMQ_DEFAULT_VHOST: /
-    expose:
-      - "5672"
-      - "15672"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.localhost`)"
-      - "traefik.http.routers.rabbitmq.entrypoints=web"
-      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -169,16 +136,11 @@ services:
   mailhog:
     image: mailhog/mailhog:v1.0.1
     container_name: foundation-mailhog
-    expose:
-      - "1025"
-      - "8025"
+    ports:
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mailhog.rule=Host(`mailhog.localhost`)"
-      - "traefik.http.routers.mailhog.entrypoints=web"
-      - "traefik.http.services.mailhog.loadbalancer.server.port=8025"
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -361,9 +323,9 @@ services:
       # Observability
       OTEL_SERVICE_NAME: foundation-gateway-service
       OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
-    expose:
-      - "8080" # Gateway API (internal)
-      - "8081" # Management / Actuator
+    ports:
+      - "80:8080" # Gateway API
+      - "8081:8081" # Management / Actuator
     depends_on:
       foundation-iam-service:
         condition: service_healthy
@@ -371,11 +333,6 @@ services:
         condition: service_healthy
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gateway.rule=Host(`localhost`) || Host(`gateway.localhost`)"
-      - "traefik.http.routers.gateway.entrypoints=web"
-      - "traefik.http.services.gateway.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 30s
@@ -393,18 +350,13 @@ services:
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: foundation-prometheus
-    expose:
-      - "9090"
+    ports:
+      - "9090:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
-      - "traefik.http.routers.prometheus.entrypoints=web"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -422,8 +374,8 @@ services:
   grafana:
     image: grafana/grafana:11.3.0
     container_name: foundation-grafana
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -434,11 +386,6 @@ services:
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - foundation-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
-      - "traefik.http.routers.grafana.entrypoints=web"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
     depends_on:
       prometheus:
         condition: service_healthy
@@ -449,8 +396,8 @@ services:
   loki:
     image: grafana/loki:3.2.0
     container_name: foundation-loki
-    expose:
-      - "3100"
+    ports:
+      - "3100:3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
@@ -458,11 +405,6 @@ services:
       foundation-network:
         aliases:
           - loki
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.loki.rule=Host(`loki.localhost`)"
-      - "traefik.http.routers.loki.entrypoints=web"
-      - "traefik.http.services.loki.loadbalancer.server.port=3100"
     command: -config.file=/etc/loki/local-config.yaml
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
@@ -488,12 +430,11 @@ services:
 
 networks:
   foundation-network:
-    driver: bridge
+    driver: overlay
+    external: true
     name: foundation-network
 
 volumes:
-  traefik_letsencrypt:
-    name: foundation_traefik_letsencrypt
   postgres_iam_data:
     name: foundation_postgres_iam_data
   postgres_billing_data:
