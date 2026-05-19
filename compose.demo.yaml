@@ -1,8 +1,27 @@
+# =============================================================================
+# Foundation Platform — All-in-One Demo Stack
+# =============================================================================
+# This configuration is designed for demonstration and quick-start purposes.
+# It runs the entire microservices platform, including:
+# - Reverse Proxy (Nginx) for single-port entry (80)
+# - User Interfaces (Admin and App)
+# - Backend Services (IAM, Billing, Gateway)
+# - Infrastructure (Postgres, Redis, RabbitMQ, MailHog)
+# - Observability (Prometheus, Grafana, Loki, Promtail)
+#
+# Key Architectural Principles:
+# 1. Standardized Naming: All services use 'foundation-' prefix.
+# 2. Network Isolation: All services run on the 'foundation-network'.
+# 3. Proxy-Only Exposure: Only Nginx exposes port 80 to the host.
+# 4. Host-Based Routing: Requires local domains (api.iqkv.local, etc.) in hosts file.
+# =============================================================================
+
 services:
   # ---------------------------------------------------------------------------
-  # Reverse Proxy
+  # Reverse Proxy (The Entry Point)
+  # Acts as the gateway for all HTTP traffic, routing by Hostname and Path.
   # ---------------------------------------------------------------------------
-  nginx:
+  foundation-nginx:
     image: nginx:latest
     container_name: foundation-nginx
     ports:
@@ -12,13 +31,13 @@ services:
     networks:
       - foundation-network
     depends_on:
-      - gateway-service
+      - foundation-gateway-service
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Databases
+  # Databases (Persistent Storage)
   # ---------------------------------------------------------------------------
-  postgres-iam:
+  foundation-postgres-iam:
     image: postgres:17-alpine
     container_name: foundation-postgres-iam
     environment:
@@ -30,7 +49,7 @@ services:
     expose:
       - "5432"
     volumes:
-      - postgres_iam_data:/var/lib/postgresql/data
+      - foundation_postgres_iam_data:/var/lib/postgresql/data
       - ./docker/postgres/init-iam.sql:/docker-entrypoint-initdb.d/init-iam.sql:ro
     networks:
       - foundation-network
@@ -58,7 +77,7 @@ services:
       -c min_wal_size=1GB
       -c max_wal_size=4GB
 
-  postgres-billing:
+  foundation-postgres-billing:
     image: postgres:17-alpine
     container_name: foundation-postgres-billing
     environment:
@@ -70,7 +89,7 @@ services:
     expose:
       - "5432"
     volumes:
-      - postgres_billing_data:/var/lib/postgresql/data
+      - foundation_postgres_billing_data:/var/lib/postgresql/data
       - ./docker/postgres/init-billing.sql:/docker-entrypoint-initdb.d/init-billing.sql:ro
     networks:
       - foundation-network
@@ -99,15 +118,15 @@ services:
       -c max_wal_size=4GB
 
   # ---------------------------------------------------------------------------
-  # Cache
+  # Cache (State Management)
   # ---------------------------------------------------------------------------
-  redis:
+  foundation-redis:
     image: redis:7-alpine
     container_name: foundation-redis
     expose:
       - "6379"
     volumes:
-      - redis_data:/data
+      - foundation_redis_data:/data
     networks:
       - foundation-network
     healthcheck:
@@ -120,9 +139,9 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Messaging
+  # Messaging (Event-Driven Communication)
   # ---------------------------------------------------------------------------
-  rabbitmq:
+  foundation-rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: foundation-rabbitmq
     environment:
@@ -133,7 +152,7 @@ services:
       - "5672"
       - "15672"
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+      - foundation_rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     networks:
@@ -147,9 +166,9 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Mail (local development only)
+  # Mail (Local Development Testing)
   # ---------------------------------------------------------------------------
-  mailhog:
+  foundation-mailhog:
     image: mailhog/mailhog:v1.0.1
     container_name: foundation-mailhog
     expose:
@@ -160,8 +179,8 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # IAM Service
-  # (internal — not directly exposed via reverse proxy; traffic arrives via gateway-service)
+  # IAM Service (Identity & Access Management)
+  # Internal service providing Authentication and Authorization.
   # ---------------------------------------------------------------------------
   foundation-iam-service:
     image: know-how.download/iqkv/foundation-iam-service:wip
@@ -170,20 +189,20 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
 
       # Database
-      DB_HOST: postgres-iam
+      DB_HOST: foundation-postgres-iam
       DB_PORT: 5432
       DB_NAME: ${IAM_DB_NAME:-iam}
       DB_USERNAME: ${IAM_DB_USERNAME:-svc_iam_dba}
       DB_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
 
       # RabbitMQ
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: foundation-rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
 
       # Mail (MailHog)
-      MAIL_HOST: mailhog
+      MAIL_HOST: foundation-mailhog
       MAIL_PORT: 1025
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
@@ -210,11 +229,11 @@ services:
       - "8080" # Application API
       - "8081" # Management / Actuator
     depends_on:
-      postgres-iam:
+      foundation-postgres-iam:
         condition: service_healthy
-      rabbitmq:
+      foundation-rabbitmq:
         condition: service_healthy
-      mailhog:
+      foundation-mailhog:
         condition: service_started
     networks:
       - foundation-network
@@ -225,13 +244,13 @@ services:
       retries: 3
       start_period: 90s
     volumes:
-      - iam_logs:/app/logs
-      - iam_tmp:/app/tmp
+      - foundation_iam_logs:/app/logs
+      - foundation_iam_tmp:/app/tmp
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Billing Service
-  # (internal — not directly exposed via reverse proxy; traffic arrives via gateway-service)
+  # Billing Service (Payments & Subscriptions)
+  # Internal service handling Stripe integration and financial workflows.
   # ---------------------------------------------------------------------------
   foundation-billing-service:
     image: know-how.download/iqkv/foundation-billing-service:wip
@@ -240,21 +259,21 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
 
       # Database
-      DB_HOST: postgres-billing
+      DB_HOST: foundation-postgres-billing
       DB_PORT: 5432
       DB_NAME: ${BILLING_DB_NAME:-billing}
       DB_USERNAME: ${BILLING_DB_USERNAME:-svc_billing_dba}
       DB_PASSWORD: ${BILLING_DB_PASSWORD:-svc_billing_dba}
 
       # RabbitMQ
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: foundation-rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
       MESSAGING_ENABLED: ${MESSAGING_ENABLED:-true}
 
       # Mail (MailHog)
-      MAIL_HOST: mailhog
+      MAIL_HOST: foundation-mailhog
       MAIL_PORT: 1025
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
@@ -284,13 +303,13 @@ services:
       - "8080"
       - "8081"
     depends_on:
-      postgres-billing:
+      foundation-postgres-billing:
         condition: service_healthy
-      rabbitmq:
+      foundation-rabbitmq:
         condition: service_healthy
       foundation-iam-service:
         condition: service_healthy
-      mailhog:
+      foundation-mailhog:
         condition: service_started
     networks:
       - foundation-network
@@ -301,15 +320,15 @@ services:
       retries: 3
       start_period: 90s
     volumes:
-      - billing_logs:/app/logs
-      - billing_tmp:/app/tmp
+      - foundation_billing_logs:/app/logs
+      - foundation_billing_tmp:/app/tmp
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Gateway Service
-  # (single external entry point — routes to foundation-iam-service and foundation-billing-service)
+  # Gateway Service (API Gateway)
+  # The unified entry point for all API requests, providing routing and security.
   # ---------------------------------------------------------------------------
-  gateway-service:
+  foundation-gateway-service:
     image: know-how.download/iqkv/foundation-gateway-service:wip
     container_name: foundation-gateway-service
     environment:
@@ -356,12 +375,12 @@ services:
       retries: 3
       start_period: 60s
     volumes:
-      - gateway_logs:/app/logs
-      - gateway_tmp:/app/tmp
+      - foundation_gateway_logs:/app/logs
+      - foundation_gateway_tmp:/app/tmp
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # User Interfaces
+  # User Interfaces (Frontends)
   # ---------------------------------------------------------------------------
   foundation-ui-platform-admin:
     image: know-how.download/iqkv/foundation-ui-platform-admin:wip
@@ -382,16 +401,16 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # Observability Stack
+  # Observability Stack (Monitoring & Logging)
   # ---------------------------------------------------------------------------
-  prometheus:
+  foundation-prometheus:
     image: prom/prometheus:v2.54.1
     container_name: foundation-prometheus
     expose:
       - "9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - foundation_prometheus_data:/prometheus
     networks:
       - foundation-network
     command:
@@ -410,7 +429,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  grafana:
+  foundation-grafana:
     image: grafana/grafana:11.3.0
     container_name: foundation-grafana
     expose:
@@ -422,26 +441,26 @@ services:
       GF_SERVER_ROOT_URL: http://localhost/services/grafana/
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
     volumes:
-      - grafana_data:/var/lib/grafana
+      - foundation_grafana_data:/var/lib/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - foundation-network
     depends_on:
-      prometheus:
+      foundation-prometheus:
         condition: service_healthy
-      loki:
+      foundation-loki:
         condition: service_healthy
     restart: unless-stopped
 
-  loki:
+  foundation-loki:
     image: grafana/loki:3.2.0
     container_name: foundation-loki
     expose:
       - "3100"
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
-      - loki_data:/loki
+      - foundation_loki_data:/loki
     networks:
       foundation-network:
         aliases:
@@ -454,7 +473,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  promtail:
+  foundation-promtail:
     image: grafana/promtail:3.2.0
     container_name: foundation-promtail
     volumes:
@@ -464,7 +483,7 @@ services:
     networks:
       - foundation-network
     depends_on:
-      loki:
+      foundation-loki:
         condition: service_healthy
     command: -config.file=/etc/promtail/config.yml
     restart: unless-stopped
@@ -476,29 +495,29 @@ networks:
     name: foundation-network
 
 volumes:
-  postgres_iam_data:
+  foundation_postgres_iam_data:
     name: foundation_postgres_iam_data
-  postgres_billing_data:
+  foundation_postgres_billing_data:
     name: foundation_postgres_billing_data
-  redis_data:
+  foundation_redis_data:
     name: foundation_redis_data
-  rabbitmq_data:
+  foundation_rabbitmq_data:
     name: foundation_rabbitmq_data
-  iam_logs:
+  foundation_iam_logs:
     name: foundation_iam_logs
-  iam_tmp:
+  foundation_iam_tmp:
     name: foundation_iam_tmp
-  billing_logs:
+  foundation_billing_logs:
     name: foundation_billing_logs
-  billing_tmp:
+  foundation_billing_tmp:
     name: foundation_billing_tmp
-  gateway_logs:
+  foundation_gateway_logs:
     name: foundation_gateway_logs
-  gateway_tmp:
+  foundation_gateway_tmp:
     name: foundation_gateway_tmp
-  prometheus_data:
+  foundation_prometheus_data:
     name: foundation_prometheus_data
-  grafana_data:
+  foundation_grafana_data:
     name: foundation_grafana_data
-  loki_data:
+  foundation_loki_data:
     name: foundation_loki_data

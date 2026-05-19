@@ -28,8 +28,8 @@ Domain-aligned services with event-driven communication:
 - **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog, webhook processing, entitlement evaluation
-- **💻 [Tenant App](../foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
-- **🛡️ [Platform Admin](../foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
+- **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
+- **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
 
 ## Infrastructure
 
@@ -44,18 +44,29 @@ Production-ready capabilities across all services:
 
 ## Quick Start
 
-Deploy the full platform with Docker Compose:
+The easiest way to see the platform in action is using the provided demo scripts:
 
 ```bash
-# Start all services from repository root
-docker compose up
+# On Linux or macOS
+./demo.sh
 
-# Platform entry point
-# http://localhost:80  →  Gateway Service
-# http://localhost:8888/dashboard/  →  Traefik Dashboard
+# On Windows (PowerShell)
+./demo.ps1
 ```
 
-Individual service development:
+These scripts launch the entire stack using `compose.demo.yaml`.
+
+### Platform Entry Points
+
+Once the stack is running, access the platform via these local domains:
+
+- **API Gateway**: [http://api.iqkv.local](http://api.iqkv.local)
+- **Tenant App**: [http://app.iqkv.local](http://app.iqkv.local)
+- **Platform Admin**: [http://admin.iqkv.local](http://admin.iqkv.local)
+
+_Note: Ensure you have mapped these domains to `127.0.0.1` in your hosts file._
+
+### Individual Service Development
 
 ```bash
 # IAM Service with PostgreSQL, RabbitMQ, MailHog
@@ -68,12 +79,14 @@ cd foundation-billing-service && docker compose up
 cd foundation-gateway-service && docker compose up
 ```
 
-Access APIs:
+### Monitoring & Infrastructure
 
-- Gateway (aggregated): `http://localhost:80/swagger-ui.html`
-- Grafana: `http://grafana.localhost`
-- RabbitMQ: `http://rabbitmq.localhost`
-- MailHog: `http://mailhog.localhost`
+Access observability tools via the unified API domain:
+
+- **Grafana**: [http://api.iqkv.local/services/grafana/](http://api.iqkv.local/services/grafana/)
+- **Prometheus**: [http://api.iqkv.local/services/prometheus/](http://api.iqkv.local/services/prometheus/)
+- **RabbitMQ**: [http://api.iqkv.local/services/rabbitmq/](http://api.iqkv.local/services/rabbitmq/)
+- **MailHog**: [http://api.iqkv.local/services/mailhog/](http://api.iqkv.local/services/mailhog/)
 
 ## Domain Adaptability
 

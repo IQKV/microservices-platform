@@ -127,12 +127,21 @@ React 19 SPA for operators — global user/organization management, subscription
 ```text
 ┌─────────────┐      ┌─────────────────────────┐
 │   Clients   │◄────►│  Tenant App (React)     │
-│ (Web/Mobile)│      └─────────────────────────┘
-└──────┬──────┘      ┌─────────────────────────┐
+│ (Web/Mobile)│      │  (app.iqkv.local)       │
+└──────┬──────┘      └─────────────────────────┘
+       │             ┌─────────────────────────┐
        │             │  Platform Admin (React) │
+       │             │  (admin.iqkv.local)     │
        │             └─────────────────────────┘
        │ :80
        ▼
+┌──────────────────────────────────────────┐
+│          Nginx Proxy (:80)               │
+│  • Host-based routing (UIs / API)        │
+│  • Path-based routing (Infrastructure)   │
+└──────┬──────────────────┬────────────────┘
+       │                  │
+       ▼                  ▼
 ┌──────────────────────────────────────────┐
 │         Gateway Service (:8080)          │
 │  • JWT Validation (JWKS from IAM)        │
@@ -266,52 +275,60 @@ Shared Infrastructure
 - Java 25+
 - Docker and Docker Compose
 
-### Full Platform (all services)
+### Full Platform (All-in-One Demo)
+
+The easiest way to see the platform in action is using the provided demo scripts:
 
 ```bash
-# Start the entire platform from the repository root
-docker compose up
+# On Linux or macOS
+./demo.sh
 
-# Platform entry point
-# http://localhost:80  →  Gateway Service
-# http://localhost:8888/dashboard/  →  Traefik Dashboard
+# On Windows (PowerShell)
+./demo.ps1
 ```
+
+These scripts launch the entire stack using `compose.demo.yaml`.
+
+### Platform Entry Points
+
+Once the stack is running, access the platform via these local domains:
+
+- **API Gateway**: [http://api.iqkv.local](http://api.iqkv.local)
+- **Tenant App**: [http://app.iqkv.local](http://app.iqkv.local)
+- **Platform Admin**: [http://admin.iqkv.local](http://admin.iqkv.local)
+
+_Note: Ensure you have mapped these domains to `127.0.0.1` in your hosts file._
 
 ### Individual Service Development
 
-Each service can be run independently with its own Docker Compose:
+Each service can be run independently for development:
 
 ```bash
 # IAM Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-iam-service
-docker compose up
+cd foundation-iam-service && docker compose up
 
 # Billing Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-billing-service
-docker compose up
+cd foundation-billing-service && docker compose up
 
 # Gateway Service (expects IAM running separately)
-cd foundation-gateway-service
-docker compose up
+cd foundation-gateway-service && docker compose up
 ```
 
 ### API Documentation
 
-Once services are running, access Swagger UI:
+Access Swagger UI (aggregated at the Gateway):
 
-- Gateway (aggregated): `http://localhost:80/swagger-ui.html`
-- IAM Service (direct): `http://localhost:8080/swagger-ui.html`
-- Billing Service (direct): `http://localhost:8080/swagger-ui.html`
+- [http://api.iqkv.local/swagger-ui.html](http://api.iqkv.local/swagger-ui.html)
 
-### Monitoring
+### Monitoring & Infrastructure
 
-Access observability tools via Traefik virtual hosts (add to `/etc/hosts` or use a local DNS):
+Access observability tools via the unified API domain:
 
-- Grafana: `http://grafana.localhost`
-- Prometheus: `http://prometheus.localhost`
-- RabbitMQ Management: `http://rabbitmq.localhost`
-- MailHog: `http://mailhog.localhost`
-- Health checks: `http://{service}:8081/actuator/health`
+- **Grafana**: [http://api.iqkv.local/services/grafana/](http://api.iqkv.local/services/grafana/)
+- **Prometheus**: [http://api.iqkv.local/services/prometheus/](http://api.iqkv.local/services/prometheus/)
+- **RabbitMQ**: [http://api.iqkv.local/services/rabbitmq/](http://api.iqkv.local/services/rabbitmq/)
+- **MailHog**: [http://api.iqkv.local/services/mailhog/](http://api.iqkv.local/services/mailhog/)
+- **Health checks**: `http://{service}:8081/actuator/health`
 
 ## Learning Objectives
 
