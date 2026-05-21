@@ -18,9 +18,8 @@ jobs:
 
       - name: "Modify/remove files before use"
         run: |
-          rm -f "./.github/workflows/use-template.yml"
-          mv README.md README.boilerplate.md
-          mv README.template.md README.md
+          chmod +x ./scripts/init-repository.sh
+          ./scripts/init-repository.sh
 
       - name: "Update commit"
         uses: "stefanzweifel/git-auto-commit-action@v4"
