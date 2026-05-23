@@ -30,6 +30,7 @@
     <modules>
         <module>foundation-iam-service</module>
         <module>foundation-billing-service</module>
+        <module>foundation-audit-service</module>
         <module>foundation-gateway-service</module>
     </modules>
 
