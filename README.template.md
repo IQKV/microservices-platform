@@ -28,6 +28,7 @@ Domain-aligned services with event-driven communication:
 - **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog, webhook processing, entitlement evaluation
+- **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
 - **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
 - **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
 
@@ -74,6 +75,9 @@ cd foundation-iam-service && docker compose up
 
 # Billing Service with PostgreSQL, RabbitMQ, MailHog
 cd foundation-billing-service && docker compose up
+
+# Audit Service with PostgreSQL, RabbitMQ
+cd foundation-audit-service && docker compose up
 
 # Gateway Service (expects IAM running separately)
 cd foundation-gateway-service && docker compose up

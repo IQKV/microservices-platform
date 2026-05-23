@@ -19,3 +19,6 @@
 [submodule "foundation-microservice-project-layout"]
 	path = foundation-microservice-project-layout
 	url = git@github.com:IQKV/foundation-microservice-project-layout.git
+[submodule "foundation-audit-service"]
+	path = foundation-audit-service
+	url = git@github.com:IQKV/foundation-audit-service.git

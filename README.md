@@ -24,6 +24,7 @@ A microservices ecosystem that provides:
 - **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, invitation flows, and role-based access control
 - **API Gateway** - Reactive entry point with JWT validation, header sanitization, tenant context injection, and platform mode consistency enforcement
 - **Billing & Payments** - Stripe-backed subscription management, plan catalog, webhook processing, and event-driven billing notifications
+- **Activity Auditing** - System-wide audit trails capturing security events, data changes, and administrative actions with structured storage and querying
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 - **Included UI Applications** - Production-ready React frontends for both customers (Tenant App) and operators (Platform Admin)
 
@@ -31,7 +32,7 @@ This platform serves as a reference implementation for organizations building mi
 
 ## Platform Services
 
-### 🔐 [IAM Service](https://github.com/IQKV/foundation-iam-service/tree/8e1385b9f880109ffa3ad25699b93d6b531bc88b/README.md)
+### 🔐 [IAM Service](https://github.com/IQKV/foundation-iam-service/tree/dev/README.md)
 
 Centralized authentication and identity management hub.
 
@@ -60,7 +61,7 @@ Centralized authentication and identity management hub.
 - Hourly ShedLock-protected cleanup jobs for expired tokens, verification tokens, and invitations
 - Micrometer counters for `auth.success`, `auth.failure` (with tenant and reason tags), and `tenant.created`
 
-### 🌐 [Gateway Service](https://github.com/IQKV/foundation-gateway-service/tree/96c2c83936e10ccb1d5bdcc46119e3405980b41a/README.md)
+### 🌐 [Gateway Service](https://github.com/IQKV/foundation-gateway-service/tree/dev/README.md)
 
 Reactive API gateway providing the single external entry point for all services.
 
@@ -82,7 +83,7 @@ Reactive API gateway providing the single external entry point for all services.
 - `PlatformModeGuardFilter` validates rollout mode consistency with IAM at startup and on a 60s schedule; sets readiness to `REFUSING_TRAFFIC` on mismatch
 - Type-safe configuration with `@ConfigurationProperties` records (`GatewayProperties`, `GatewayConfigurationProperties`, `PlatformConfigurationProperties`)
 
-### 💰 [Billing Service](https://github.com/IQKV/foundation-billing-service/tree/e47af99b357f551fa84c6e062df85c7c1d98cc19/README.md)
+### 💰 [Billing Service](https://github.com/IQKV/foundation-billing-service/tree/dev/README.md)
 
 Stripe-backed subscription and billing management service.
 
@@ -108,15 +109,35 @@ Stripe-backed subscription and billing management service.
 - `TenantExtractionFilter` resolves tenant from `X-Tenant-ID` header (injected by Gateway) with context validation
 - `PaymentGatewayClient` wraps Stripe SDK; initialized with `secretKey` at construction
 
+### � [Audit Service](https://github.com/IQKV/foundation-audit-service/tree/dev/README.md)
+
+Internal service for system-wide activity tracking and compliance.
+
+**Core Capabilities:**
+
+- Centralized storage for audit logs across all platform services
+- Captures authentication events, data modifications, and administrative actions
+- Structured storage using MyBatis with PostgreSQL
+- Event-driven log ingestion via RabbitMQ topic exchange
+- OAuth2 Resource Server for secure API access to audit trails
+- Retention policy enforcement and historical data querying
+
+**Key Patterns:**
+
+- `AuditEventConsumer` processes incoming audit events from the message broker
+- `AuditMapper` provides optimized queries for filtering and retrieving audit history
+- Standardized `AuditRecord` model shared via `foundation-audit-model`
+- Integration with Spring Actuator for health monitoring and Prometheus metrics
+
 ### 💻 UI Applications
 
 Production-ready frontends for different user roles.
 
-#### [Tenant App](https://github.com/IQKV/foundation-ui-app/tree/857e1a79c98b95e99e22df690fe597d2295f5cd1/README.md)
+#### [Tenant App](https://github.com/IQKV/foundation-ui-app/tree/dev/README.md)
 
 React 19 SPA for workspace members — sign-in with tenant discovery, team management, invitations, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
 
-#### [Platform Admin](https://github.com/IQKV/foundation-ui-platform-admin/tree/540c530ade34f51c54ed2aef3aa14bea81c029fe/README.md)
+#### [Platform Admin](https://github.com/IQKV/foundation-ui-platform-admin/tree/dev/README.md)
 
 React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
 
@@ -152,20 +173,20 @@ React 19 SPA for operators — global user/organization management, subscription
 └──────┬──────────────────┬────────────────┘
        │                  │
        ▼                  ▼
-┌─────────────────┐  ┌──────────────────────┐
-│   IAM Service   │  │   Billing Service    │
-│  • Auth / JWT   │  │  • Subscriptions     │
-│  • Users        │  │  • Plan Catalog      │
-│  • Tenants      │  │  • Stripe Webhooks   │
-│  • Invitations  │  │  • Billing Settings  │
-│  • JWKS         │  │  • Entitlements      │
-└────────┬────────┘  └──────────┬───────────┘
-         │                      │
-         ▼                      ▼
-┌─────────────────┐  ┌──────────────────────┐
-│  PostgreSQL IAM │  │  PostgreSQL Billing  │
-│  (schema/tenant)│  │                      │
-└─────────────────┘  └──────────────────────┘
+┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│   IAM Service   │  │   Billing Service    │  │    Audit Service     │
+│  • Auth / JWT   │  │  • Subscriptions     │  │  • Audit Trails      │
+│  • Users        │  │  • Plan Catalog      │  │  • Event Logging     │
+│  • Tenants      │  │  • Stripe Webhooks   │  │  • Compliance        │
+│  • Invitations  │  │  • Billing Settings  │  │  • Query API         │
+│  • JWKS         │  │  • Entitlements      │  │                      │
+└────────┬────────┘  └──────────┬───────────┘  └──────────┬───────────┘
+         │                      │                         │
+         ▼                      ▼                         ▼
+┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│  PostgreSQL IAM │  │  PostgreSQL Billing  │  │  PostgreSQL Audit    │
+│  (schema/tenant)│  │                      │  │                      │
+└─────────────────┘  └──────────────────────┘  └──────────────────────┘
 
 Shared Infrastructure
 ┌──────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
@@ -253,12 +274,12 @@ Shared Infrastructure
 
 ### Cross-Cutting Patterns
 
-- **Database Per Service** — IAM and Billing each own a dedicated PostgreSQL instance
+- **Database Per Service** — IAM, Billing, and Audit each own a dedicated PostgreSQL instance
 - **API Gateway** — single external entry point; downstream services not directly exposed
 - **Event-Driven Choreography** — services react to domain events via RabbitMQ without direct coupling
 - **Distributed Locking** — ShedLock with JDBC provider ensures scheduled jobs run once across replicas
 - **Correlation ID Tracking** — generated at Gateway, propagated through all services and logs
-- **Platform Mode Guard** — all three services enforce rollout mode consistency at startup
+- **Platform Mode Guard** — all core services enforce rollout mode consistency at startup
 
 ### Communication Patterns
 
@@ -309,6 +330,9 @@ cd foundation-iam-service && docker compose up
 
 # Billing Service with PostgreSQL, RabbitMQ, MailHog
 cd foundation-billing-service && docker compose up
+
+# Audit Service with PostgreSQL, RabbitMQ
+cd foundation-audit-service && docker compose up
 
 # Gateway Service (expects IAM running separately)
 cd foundation-gateway-service && docker compose up

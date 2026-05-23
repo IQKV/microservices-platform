@@ -117,6 +117,46 @@ services:
       -c min_wal_size=1GB
       -c max_wal_size=4GB
 
+  foundation-postgres-audit:
+    image: postgres:17-alpine
+    container_name: foundation-postgres-audit
+    environment:
+      POSTGRES_DB: ${AUDIT_DB_NAME:-audit}
+      POSTGRES_USER: ${AUDIT_DB_USERNAME:-svc_audit_dba}
+      POSTGRES_PASSWORD: ${AUDIT_DB_PASSWORD:-svc_audit_dba}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    expose:
+      - "5432"
+    volumes:
+      - foundation_postgres_audit_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-audit.sql:/docker-entrypoint-initdb.d/init-audit.sql:ro
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUDIT_DB_USERNAME:-svc_audit_dba} -d ${AUDIT_DB_NAME:-audit}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
   # ---------------------------------------------------------------------------
   # Cache (State Management)
   # ---------------------------------------------------------------------------
@@ -325,6 +365,60 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # Audit Service (Activity Tracking & Compliance)
+  # Internal service for logging and querying system-wide audit trails.
+  # ---------------------------------------------------------------------------
+  foundation-audit-service:
+    image: know-how.download/iqkv/foundation-audit-service:wip
+    container_name: foundation-audit-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+
+      # Database
+      DB_HOST: foundation-postgres-audit
+      DB_PORT: 5432
+      DB_NAME: ${AUDIT_DB_NAME:-audit}
+      DB_USERNAME: ${AUDIT_DB_USERNAME:-svc_audit_dba}
+      DB_PASSWORD: ${AUDIT_DB_PASSWORD:-svc_audit_dba}
+
+      # RabbitMQ
+      RABBITMQ_HOST: foundation-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
+
+      # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
+      JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-audit-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-audit-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+    expose:
+      - "8080"
+      - "8081"
+    depends_on:
+      foundation-postgres-audit:
+        condition: service_healthy
+      foundation-rabbitmq:
+        condition: service_healthy
+      foundation-iam-service:
+        condition: service_healthy
+    networks:
+      foundation-network:
+        aliases:
+          - audit-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    volumes:
+      - foundation_audit_logs:/app/logs
+      - foundation_audit_tmp:/app/tmp
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Gateway Service (API Gateway)
   # The unified entry point for all API requests, providing routing and security.
   # ---------------------------------------------------------------------------
@@ -343,6 +437,9 @@ services:
 
       # Billing service — routing target
       BILLING_SERVICE_URI: http://foundation-billing-service:8080
+
+      # Audit service — routing target
+      AUDIT_SERVICE_URI: http://foundation-audit-service:8080
 
       # CORS
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
@@ -365,6 +462,8 @@ services:
       foundation-iam-service:
         condition: service_healthy
       foundation-billing-service:
+        condition: service_healthy
+      foundation-audit-service:
         condition: service_healthy
     networks:
       - foundation-network
@@ -499,6 +598,8 @@ volumes:
     name: foundation_postgres_iam_data
   foundation_postgres_billing_data:
     name: foundation_postgres_billing_data
+  foundation_postgres_audit_data:
+    name: foundation_postgres_audit_data
   foundation_redis_data:
     name: foundation_redis_data
   foundation_rabbitmq_data:
@@ -511,6 +612,10 @@ volumes:
     name: foundation_billing_logs
   foundation_billing_tmp:
     name: foundation_billing_tmp
+  foundation_audit_logs:
+    name: foundation_audit_logs
+  foundation_audit_tmp:
+    name: foundation_audit_tmp
   foundation_gateway_logs:
     name: foundation_gateway_logs
   foundation_gateway_tmp:

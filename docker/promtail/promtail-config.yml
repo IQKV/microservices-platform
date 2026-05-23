@@ -59,6 +59,16 @@ scrape_configs:
           service: billing-service
           __path__: /var/log/billing-service/*.log
 
+  # Audit Service structured logs
+  - job_name: audit-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: audit-service
+          service: audit-service
+          __path__: /var/log/audit-service/*.log
+
   # Gateway Service structured logs
   - job_name: gateway-service
     static_configs:
