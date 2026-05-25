@@ -17,7 +17,7 @@
 
 Critical domains to accelerate product development:
 
-- **Identity & Access**: Multi-tenant authentication, invitation flows, and role-based access control
+- **Identity & Access**: Multi-tenant authentication, invitation flows, in-app notifications, site-wide announcements, and role-based access control
 - **Financial Operations**: Stripe-backed subscriptions, plan catalog, and webhook-driven billing
 - **Frontend Experience**: Production-ready React 19 SPAs for tenants and platform administrators
 
@@ -25,7 +25,7 @@ Critical domains to accelerate product development:
 
 Domain-aligned services with event-driven communication:
 
-- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows
+- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion

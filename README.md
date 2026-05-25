@@ -21,7 +21,7 @@
 
 A microservices ecosystem that provides:
 
-- **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, invitation flows, and role-based access control
+- **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, invitation flows, in-app notifications, site-wide announcements, and role-based access control
 - **API Gateway** - Reactive entry point with JWT validation, header sanitization, tenant context injection, and platform mode consistency enforcement
 - **Billing & Payments** - Stripe-backed subscription management, plan catalog, webhook processing, and event-driven billing notifications
 - **Activity Auditing** - System-wide audit trails capturing security events, data changes, and administrative actions with structured storage and querying
@@ -43,6 +43,8 @@ Centralized authentication and identity management hub.
 - Email verification with 64-char hex one-time tokens, 24h expiry, rate-limited resend (3/hour)
 - Password reset with 32-byte hex tokens, configurable TTL, enumeration-safe responses
 - Tenant invitation flow — send, preview, accept (existing or new user), revoke
+- In-app notifications — transactional events (signup, invitation, etc.) persisted as user notifications and pushed via WebSocket (STOMP/SockJS)
+- Site-wide announcements — multi-lingual announcements with async fan-out to all users and real-time broadcast
 - Two-layer token revocation: JTI denylist (per-signout) + `last_global_signout_at` (signout-all)
 - Account lockout after configurable failed attempts with sliding window
 - Schema-per-tenant PostgreSQL isolation (`t_{tenantKey}`) provisioned via Liquibase on `tenant.created` events
@@ -57,6 +59,8 @@ Centralized authentication and identity management hub.
 - `TenantLiquibaseRunner` provisions tenant schemas asynchronously via RabbitMQ (`tenant.created` → `tenant.provisioned`)
 - `StuckTenantReaperJob` marks tenants stuck in `PROVISIONING` as `PROVISIONING_FAILED` every 5 minutes
 - `SubscriptionEventConsumer` suspends tenants on `subscription.cancelled` events from Billing
+- `NotificationService` pushes real-time updates via WebSocket to `/user/{userId}/queue/notifications`
+- `AnnouncementService` triggers async fan-out for site-wide announcements in batches of 1000
 - `PlatformModeInfoContributor` exposes `platform.rollout-mode` via `/actuator/info` for Gateway validation
 - Hourly ShedLock-protected cleanup jobs for expired tokens, verification tokens, and invitations
 - Micrometer counters for `auth.success`, `auth.failure` (with tenant and reason tags), and `tenant.created`
@@ -225,6 +229,8 @@ Shared Infrastructure
 - Email verification with one-time tokens and rate-limited resend
 - Password reset with enumeration-safe responses and session invalidation on completion
 - Tenant invitation flow with authority assignment and support for both existing and new users
+- **In-App Notifications**: Transactional events (signup, invitation, password reset) persisted and pushed in real time via WebSocket (STOMP/SockJS)
+- **Site-Wide Announcements**: Multi-lingual announcements with async fan-out to all users in batches of 1000 and real-time broadcast via WebSocket
 
 ### Multi-Tenancy
 
