@@ -45,43 +45,76 @@ Production-ready capabilities across all services:
 
 ## Quick Start
 
-The easiest way to see the platform in action is using the provided demo scripts:
+### Full Demo Stack (all-in-one)
 
-```bash
-# On Linux or macOS
-./demo.sh
+One command starts the entire platform — all services, both SPAs, Nginx reverse proxy, and the full observability stack (Prometheus, Grafana, Loki).
 
-# On Windows (PowerShell)
-./demo.ps1
+**1. Add local domains to your `hosts` file (one-time setup)**
+
+```
+# Linux / macOS: /etc/hosts
+# Windows: C:\Windows\System32\drivers\etc\hosts
+
+127.0.0.1  api.iqkv.local
+127.0.0.1  admin.iqkv.local
+127.0.0.1  app.iqkv.local
 ```
 
-These scripts launch the entire stack using `compose.demo.yaml`.
+**2. Copy environment variables and start**
+
+```bash
+cp .env.example .env
+# Defaults work out of the box.
+# Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET for real billing.
+
+# Linux / macOS
+./demo.sh
+
+# Windows (PowerShell)
+.\demo.ps1
+```
 
 ### Platform Entry Points
 
-Once the stack is running, access the platform via these local domains:
-
-- **API Gateway**: [http://api.iqkv.local](http://api.iqkv.local)
-- **Tenant App**: [http://app.iqkv.local](http://app.iqkv.local)
-- **Platform Admin**: [http://admin.iqkv.local](http://admin.iqkv.local)
-
-_Note: Ensure you have mapped these domains to `127.0.0.1` in your hosts file._
+| URL                                          | Description                                    |
+| -------------------------------------------- | ---------------------------------------------- |
+| `http://app.iqkv.local`                      | Tenant app — sign up, sign in, team management |
+| `http://admin.iqkv.local`                    | Platform admin UI                              |
+| `http://api.iqkv.local/swagger-ui.html`      | Aggregated Swagger UI                          |
+| `http://api.iqkv.local/services/grafana/`    | Grafana dashboards                             |
+| `http://api.iqkv.local/services/prometheus/` | Prometheus                                     |
+| `http://api.iqkv.local/services/rabbitmq/`   | RabbitMQ management UI                         |
+| `http://api.iqkv.local/services/mailhog/`    | MailHog (captured emails)                      |
 
 ### Individual Service Development
 
+Each service ships three compose files covering every local workflow:
+
+| File                     | Purpose                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `compose.yaml`           | Infrastructure only (PostgreSQL, RabbitMQ, MailHog, MinIO). Run the service from your IDE. |
+| `compose.base.yaml`      | Shared service definitions — extended by the other two. Not used directly.                 |
+| `compose.container.yaml` | Full stack — infrastructure + service built from source. No IDE required.                  |
+
+**IDE workflow:**
+
 ```bash
-# IAM Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-iam-service && docker compose up
-
-# Billing Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-billing-service && docker compose up
-
-# Audit Service with PostgreSQL, RabbitMQ
-cd foundation-audit-service && docker compose up
-
-# Gateway Service (expects IAM running separately)
-cd foundation-gateway-service && docker compose up
+# Start infrastructure only, run service from your IDE
+cd foundation-iam-service
+cp .env.example .env.local
+docker compose up -d
+./mvnw spring-boot:run -Pdev
+# → API: http://localhost:8080  Swagger: http://localhost:8080/swagger-ui.html
 ```
+
+**Fully containerised:**
+
+```bash
+# Build and run service + infrastructure from source
+docker compose -f compose.container.yaml up -d --build
+```
+
+Each service uses isolated named volumes and a dedicated Docker network — running multiple services simultaneously requires no port remapping.
 
 ### Monitoring & Infrastructure
 

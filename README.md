@@ -80,7 +80,8 @@ Reactive API gateway providing the single external entry point for all services.
 
 **Key Patterns:**
 
-- `HeaderSanitizationFilter` (order `-190`) strips all `X-User-*`, `X-Tenant-ID`, `X-Organization-ID` headers from incoming requests before JWT processing — prevents identity spoofing
+- `HeaderSanitizationFilter` (order `-190`) strips all `X-User-*`, `X-Tenant-ID`, `X-Organization-ID`, and `X-Audit-*` headers from incoming requests before JWT processing — prevents identity spoofing
+- `AuditContextFilter` (order `-180`) extracts client IP and User-Agent from the original request and forwards them as `X-Audit-IP`, `X-Audit-UA`, and `X-Audit-Source` for downstream audit enrichment
 - `JwtContextPropagationFilter` (order `-100`) reads validated JWT from `ReactiveSecurityContextHolder` and injects `X-User-ID`, `X-Username`, `X-User-Email`, `X-Tenant-ID`, `X-User-Authorities` for downstream services
 - `TenantContextFilter` (order `-50`) — `MULTI_TENANT`: passes `X-Tenant-ID` from JWT; `SINGLE_TENANT`: injects `defaultTenantKey` when header is absent
 - `ResponseTransformationFilter` (order `MIN_VALUE+1`) adds `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy` to all responses
@@ -113,25 +114,28 @@ Stripe-backed subscription and billing management service.
 - `TenantExtractionFilter` resolves tenant from `X-Tenant-ID` header (injected by Gateway) with context validation
 - `PaymentGatewayClient` wraps Stripe SDK; initialized with `secretKey` at construction
 
-### � [Audit Service](https://github.com/IQKV/foundation-audit-service/tree/dev/README.md)
+### 📋 [Audit Service](https://github.com/IQKV/foundation-audit-service/tree/dev/README.md)
 
-Internal service for system-wide activity tracking and compliance.
+Centralized, event-driven activity logging service. Passive observer of the platform event bus.
 
 **Core Capabilities:**
 
-- Centralized storage for audit logs across all platform services
-- Captures authentication events, data modifications, and administrative actions
-- Structured storage using MyBatis with PostgreSQL
-- Event-driven log ingestion via RabbitMQ topic exchange
-- OAuth2 Resource Server for secure API access to audit trails
-- Retention policy enforcement and historical data querying
+- Passive consumption of all platform events via RabbitMQ topic wildcards (`user.#`, `tenant.#`, `subscription.#`, `invoice.#`, `audit.#`) — zero code changes in domain services for basic auditing
+- Normalizes disparate domain events into a unified `AuditRecord` format with enriched technical context
+- Captures client IP and User-Agent propagated from the Gateway as `X-Audit-IP` / `X-Audit-UA`
+- Dedicated PostgreSQL database — high-volume logging isolated from business-critical transactions
+- JSONB storage for dynamic event metadata — full domain event payload preserved for forensic queries
+- Secured, paginated, filterable admin search API restricted to `PLATFORM_ADMIN`
+- SPI pattern (`foundation-audit-spi`) — plug in Elasticsearch or custom SIEM backends without touching core
 
 **Key Patterns:**
 
-- `AuditEventConsumer` processes incoming audit events from the message broker
-- `AuditMapper` provides optimized queries for filtering and retrieving audit history
-- Standardized `AuditRecord` model shared via `foundation-audit-model`
-- Integration with Spring Actuator for health monitoring and Prometheus metrics
+- `AuditEventConsumer` binds to `iqkv.events` with wildcard routing keys; normalizes events into `AuditRecord` via `AuditRecordMapper`
+- `AuditContextEnricher` reads `X-Audit-IP` and `X-Audit-UA` headers propagated from the Gateway and attaches them to every record
+- `AuditProvider` SPI interface decouples storage from consumption — `PostgresAuditProvider` is the default implementation
+- `AuditSearchRestResource` exposes paginated search at `/api/v1/audits` — filterable by user, tenant, action, and time range
+- JSONB `TypeHandler` in MyBatis preserves the full dynamic event payload alongside normalized fields
+- Micrometer counters for `audit.event.consumption` (by type and source), `audit.persistence.duration`, and `audit.search.latency`
 
 ### 💻 UI Applications
 
@@ -302,63 +306,95 @@ Shared Infrastructure
 - Java 25+
 - Docker and Docker Compose
 
-### Full Platform (All-in-One Demo)
+### Full Demo Stack (all-in-one)
 
-The easiest way to see the platform in action is using the provided demo scripts:
+The fastest way to see the entire platform running is the demo stack — one command starts all services, both SPAs, Nginx, and the full observability stack.
 
-```bash
-# On Linux or macOS
-./demo.sh
+**1. Add local domains to your `hosts` file (one-time setup)**
 
-# On Windows (PowerShell)
-./demo.ps1
+```
+# Linux / macOS: /etc/hosts
+# Windows: C:\Windows\System32\drivers\etc\hosts
+
+127.0.0.1  api.iqkv.local
+127.0.0.1  admin.iqkv.local
+127.0.0.1  app.iqkv.local
 ```
 
-These scripts launch the entire stack using `compose.demo.yaml`.
+**2. Copy environment variables and start**
+
+```bash
+cp .env.example .env
+# Defaults work out of the box.
+# Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET for real billing.
+
+# Linux / macOS
+./demo.sh
+
+# Windows (PowerShell)
+.\demo.ps1
+```
+
+Both scripts run `docker compose -f compose.demo.yaml up -d --remove-orphans`.
+
+**Expected startup time:** 2–4 minutes with images already pulled. Services start in dependency order — databases and RabbitMQ first, then IAM, then Billing and Audit, then Gateway, then UIs.
 
 ### Platform Entry Points
 
-Once the stack is running, access the platform via these local domains:
-
-- **API Gateway**: [http://api.iqkv.local](http://api.iqkv.local)
-- **Tenant App**: [http://app.iqkv.local](http://app.iqkv.local)
-- **Platform Admin**: [http://admin.iqkv.local](http://admin.iqkv.local)
-
-_Note: Ensure you have mapped these domains to `127.0.0.1` in your hosts file._
+| URL                                          | Description                                    |
+| -------------------------------------------- | ---------------------------------------------- |
+| `http://app.iqkv.local`                      | Tenant app — sign up, sign in, team management |
+| `http://admin.iqkv.local`                    | Platform admin UI                              |
+| `http://api.iqkv.local/swagger-ui.html`      | Aggregated Swagger UI                          |
+| `http://api.iqkv.local/services/grafana/`    | Grafana dashboards                             |
+| `http://api.iqkv.local/services/prometheus/` | Prometheus                                     |
+| `http://api.iqkv.local/services/rabbitmq/`   | RabbitMQ management UI                         |
+| `http://api.iqkv.local/services/mailhog/`    | MailHog (captured emails)                      |
 
 ### Individual Service Development
 
-Each service can be run independently for development:
+Each service ships three compose files covering every local workflow:
+
+| File                     | Purpose                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `compose.yaml`           | Infrastructure only (PostgreSQL, RabbitMQ, MailHog, MinIO). Run the service from your IDE. |
+| `compose.base.yaml`      | Shared service definitions — extended by the other two. Not used directly.                 |
+| `compose.container.yaml` | Full stack — infrastructure + service built from source. No IDE required.                  |
+
+**IDE workflow (recommended for contributors):**
 
 ```bash
-# IAM Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-iam-service && docker compose up
+# IAM Service — PostgreSQL, RabbitMQ, MailHog, MinIO
+cd foundation-iam-service
+cp .env.example .env.local
+docker compose up -d
+./mvnw spring-boot:run -Pdev
+# → API: http://localhost:8080  Swagger: http://localhost:8080/swagger-ui.html
 
-# Billing Service with PostgreSQL, RabbitMQ, MailHog
-cd foundation-billing-service && docker compose up
+# Billing Service — PostgreSQL, RabbitMQ, MailHog
+cd foundation-billing-service
+docker compose up -d
+./mvnw spring-boot:run -Pdev
 
-# Audit Service with PostgreSQL, RabbitMQ
-cd foundation-audit-service && docker compose up
+# Audit Service — PostgreSQL, RabbitMQ
+cd foundation-audit-service
+docker compose up -d
+./mvnw spring-boot:run -Pdev
 
-# Gateway Service (expects IAM running separately)
-cd foundation-gateway-service && docker compose up
+# Gateway Service — depends on IAM + Billing + Audit
+cd foundation-gateway-service
+docker compose up -d
+./mvnw spring-boot:run -Pdev
 ```
 
-### API Documentation
+**Fully containerised (no IDE):**
 
-Access Swagger UI (aggregated at the Gateway):
+```bash
+# Build and run service + infrastructure from source
+docker compose -f compose.container.yaml up -d --build
+```
 
-- [http://api.iqkv.local/swagger-ui.html](http://api.iqkv.local/swagger-ui.html)
-
-### Monitoring & Infrastructure
-
-Access observability tools via the unified API domain:
-
-- **Grafana**: [http://api.iqkv.local/services/grafana/](http://api.iqkv.local/services/grafana/)
-- **Prometheus**: [http://api.iqkv.local/services/prometheus/](http://api.iqkv.local/services/prometheus/)
-- **RabbitMQ**: [http://api.iqkv.local/services/rabbitmq/](http://api.iqkv.local/services/rabbitmq/)
-- **MailHog**: [http://api.iqkv.local/services/mailhog/](http://api.iqkv.local/services/mailhog/)
-- **Health checks**: `http://{service}:8081/actuator/health`
+Each service uses isolated named volumes and a dedicated Docker network — running multiple services simultaneously requires no port remapping.
 
 ## Learning Objectives
 
