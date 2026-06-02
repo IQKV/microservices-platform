@@ -51,6 +51,8 @@ Centralized authentication and identity management hub.
 - JWKS endpoint (`/.well-known/jwks.json`) for public key distribution
 - Tenant lifecycle management: `PROVISIONING → ACTIVE → SUSPENDED/DELETED` with event publishing
 - Admin user management with paginated listing and partial updates
+- Tenant owner member management: ban/unban, edit authority (TENANT_OWNER ↔ MEMBER), transfer ownership
+- Platform admin actions: ban/unban users globally, unlock temporarily locked users
 
 **Key Patterns:**
 
@@ -229,10 +231,12 @@ Shared Infrastructure
 - `HeaderSanitizationFilter` strips all user/tenant identity headers from client requests before JWT propagation — prevents spoofing
 - JWT claims propagated downstream as `X-User-ID`, `X-Username`, `X-User-Email`, `X-Tenant-ID`, `X-User-Authorities`
 - Role-based access control with `@PreAuthorize` and `@EnableMethodSecurity`
-- Account lockout after configurable failed login attempts with sliding window
+- Account lockout after configurable failed login attempts with sliding window; platform admins can unlock users manually
 - Email verification with one-time tokens and rate-limited resend
 - Password reset with enumeration-safe responses and session invalidation on completion
 - Tenant invitation flow with authority assignment and support for both existing and new users
+- Tenant owner member management: ban/unban, edit authority (TENANT_OWNER ↔ MEMBER), transfer ownership with last-owner safeguards
+- Platform admin actions: ban/unban users globally
 - **In-App Notifications**: Transactional events (signup, invitation, password reset) persisted and pushed in real time via WebSocket (STOMP/SockJS)
 - **Site-Wide Announcements**: Multi-lingual announcements with async fan-out to all users in batches of 1000 and real-time broadcast via WebSocket
 

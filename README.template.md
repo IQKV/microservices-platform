@@ -25,7 +25,7 @@ Critical domains to accelerate product development:
 
 Domain-aligned services with event-driven communication:
 
-- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements
+- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements, tenant owner member management (ban/unban, edit authority, transfer ownership), platform admin user actions (ban/unban, unlock)
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
@@ -37,11 +37,12 @@ Domain-aligned services with event-driven communication:
 Production-ready capabilities across all services:
 
 - **Multi-Tenancy**: Schema-per-tenant PostgreSQL isolation with `MULTI_TENANT` and `SINGLE_TENANT` modes
-- **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing
+- **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing, account lockout with manual unlock
 - **Frontend**: React 19, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
 - **Event-Driven**: RabbitMQ topic exchange with dead-letter queues — tenant provisioning, subscription lifecycle, billing notifications
 - **Observability**: Correlation ID propagation, Prometheus metrics, Grafana dashboards, structured JSON logging
 - **Distributed Locking**: ShedLock for scheduled jobs (token cleanup, trial notifications, stuck tenant recovery)
+- **Member Management**: Tenant owner actions (ban/unban, edit authority, transfer ownership), platform admin actions (ban/unban users, unlock users)
 
 ## Quick Start
 
