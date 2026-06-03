@@ -1,0 +1,6 @@
+{"_id":"postgres-iam","engine":"postgres@dbgate-plugin-postgres","server":"foundation-postgres-iam","port":5432,"user":"svc_iam_dba","password":"svc_iam_dba","database":"iam","displayName":"PostgreSQL - IAM Service"}
+{"_id":"postgres-billing","engine":"postgres@dbgate-plugin-postgres","server":"foundation-postgres-billing","port":5432,"user":"svc_billing_dba","password":"svc_billing_dba","database":"billing","displayName":"PostgreSQL - Billing Service"}
+{"_id":"postgres-audit","engine":"postgres@dbgate-plugin-postgres","server":"foundation-postgres-audit","port":5432,"user":"svc_audit_dba","password":"svc_audit_dba","database":"audit","displayName":"PostgreSQL - Audit Service"}
+{"_id":"redis-master","engine":"redis@dbgate-plugin-redis","server":"foundation-redis","port":6379,"displayName":"Redis - Cache"}
+{"_id":"rabbitmq-management","engine":"rabbitmq@dbgate-plugin-rabbitmq","server":"foundation-rabbitmq","port":15672,"user":"svc_platform_rmq","password":"svc_platform_rmq","displayName":"RabbitMQ - Message Queue"}
+{"_id":"minio-s3","engine":"s3@dbgate-plugin-s3","server":"foundation-minio","port":9000,"user":"iqkv","password":"iqkv_password","displayName":"MinIO - S3 Object Storage"}

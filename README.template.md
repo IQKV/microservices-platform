@@ -38,6 +38,8 @@ Production-ready capabilities across all services:
 
 - **Multi-Tenancy**: Schema-per-tenant PostgreSQL isolation with `MULTI_TENANT` and `SINGLE_TENANT` modes
 - **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing, account lockout with manual unlock
+- **Object Storage**: MinIO S3-compatible storage for file uploads, avatars, and documents
+- **Database Administration**: DbGate web-based tool for PostgreSQL, Redis, RabbitMQ, and MinIO management
 - **Frontend**: React 19, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
 - **Event-Driven**: RabbitMQ topic exchange with dead-letter queues — tenant provisioning, subscription lifecycle, billing notifications
 - **Observability**: Correlation ID propagation, Prometheus metrics, Grafana dashboards, structured JSON logging
@@ -87,6 +89,11 @@ cp .env.example .env
 | `http://api.iqkv.local/services/rabbitmq/`   | RabbitMQ management UI                         |
 | `http://api.iqkv.local/services/mailhog/`    | MailHog (captured emails)                      |
 
+### Infrastructure Administration
+
+- **DbGate**: Web-based database administration for PostgreSQL, Redis, RabbitMQ, and MinIO. See [docker/dbgate.md](docker/dbgate.md).
+- **MinIO**: S3-compatible object storage (`:9000` API, `:9001` Console) for file uploads and assets.
+
 ### Individual Service Development
 
 Each service ships three compose files covering every local workflow:
@@ -125,6 +132,14 @@ Access observability tools via the unified API domain:
 - **Prometheus**: [http://api.iqkv.local/services/prometheus/](http://api.iqkv.local/services/prometheus/)
 - **RabbitMQ**: [http://api.iqkv.local/services/rabbitmq/](http://api.iqkv.local/services/rabbitmq/)
 - **MailHog**: [http://api.iqkv.local/services/mailhog/](http://api.iqkv.local/services/mailhog/)
+
+**Database Administration:**
+
+- **DbGate**: Web-based unified admin interface for all data stores (PostgreSQL, Redis, RabbitMQ, MinIO). See [docker/dbgate.md](docker/dbgate.md) for setup.
+
+**Object Storage:**
+
+- **MinIO**: S3-compatible storage for file uploads, avatars, and documents. Services use MinIO for asset storage with dedicated buckets per service.
 
 ## Domain Adaptability
 

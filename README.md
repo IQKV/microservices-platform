@@ -204,6 +204,11 @@ Shared Infrastructure
 │  iqkv.events     │  │  (local SMTP)        │  │  Prometheus/Grafana  │
 │  topic exchange  │  │                      │  │  Loki / Promtail     │
 └──────────────────┘  └──────────────────────┘  └──────────────────────┘
+┌──────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│      MinIO       │  │       DbGate         │  │       Redis          │
+│  (S3 Storage)    │  │  (DB Admin UI)       │  │    (Cache/State)     │
+│  :9000 / :9001   │  │      :3000           │  │       :6379          │
+└──────────────────┘  └──────────────────────┘  └──────────────────────┘
 ```
 
 ### Technology Stack
@@ -212,6 +217,8 @@ Shared Infrastructure
 - **Framework:** Spring Boot 4.x, Spring Cloud Gateway (WebFlux/reactive)
 - **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis, schema-per-tenant isolation
 - **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
+- **Object Storage:** MinIO S3-compatible storage for file uploads, avatars, and documents
+- **Database Admin:** DbGate web-based administration for PostgreSQL, Redis, RabbitMQ, and MinIO
 - **Security:** JWT with RS256 (JJWT), Spring Security OAuth2 Resource Server, BCrypt strength 12
 - **Frontend:** React 19, TypeScript, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
 - **Payments:** Stripe Java SDK for customer and subscription management
@@ -355,6 +362,29 @@ Both scripts run `docker compose -f compose.demo.yaml up -d --remove-orphans`.
 | `http://api.iqkv.local/services/rabbitmq/`   | RabbitMQ management UI                         |
 | `http://api.iqkv.local/services/mailhog/`    | MailHog (captured emails)                      |
 
+### Infrastructure Administration
+
+The demo stack includes administrative tools for all infrastructure services:
+
+- **DbGate** - Web-based database administration tool providing unified access to:
+  - PostgreSQL databases (IAM, Billing, Audit)
+  - Redis cache
+  - RabbitMQ message queue
+  - MinIO S3 object storage
+
+See [docker/dbgate.md](docker/dbgate.md) for detailed DbGate documentation.
+
+- **MinIO** - S3-compatible object storage for file uploads, avatars, and documents
+  - S3 API: `foundation-minio:9000` (internal)
+  - Console UI: `foundation-minio:9001` (internal)
+  - Used by IAM and Billing services for asset storage
+
+**Note:** DbGate and MinIO Console are available internally on the `foundation-network`. To access them, you can:
+
+1. Configure Nginx to expose them via subdomain or path routing
+2. Use `docker exec` to access their web interfaces
+3. Port forward using Docker commands
+
 ### Individual Service Development
 
 Each service ships three compose files covering every local workflow:
@@ -364,6 +394,14 @@ Each service ships three compose files covering every local workflow:
 | `compose.yaml`           | Infrastructure only (PostgreSQL, RabbitMQ, MailHog, MinIO). Run the service from your IDE. |
 | `compose.base.yaml`      | Shared service definitions — extended by the other two. Not used directly.                 |
 | `compose.container.yaml` | Full stack — infrastructure + service built from source. No IDE required.                  |
+
+**Infrastructure Components:**
+
+- **PostgreSQL** - Dedicated database instance per service
+- **RabbitMQ** - Message queue for event-driven communication
+- **MailHog** - Local SMTP server for email testing
+- **MinIO** - S3-compatible object storage for file uploads (IAM and Billing services)
+- **Redis** - Cache and session storage (available in full demo stack)
 
 **IDE workflow (recommended for contributors):**
 

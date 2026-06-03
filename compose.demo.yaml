@@ -6,7 +6,8 @@
 # - Reverse Proxy (Nginx) for single-port entry (80)
 # - User Interfaces (Admin and App)
 # - Backend Services (IAM, Billing, Gateway)
-# - Infrastructure (Postgres, Redis, RabbitMQ, MailHog)
+# - Infrastructure (Postgres, Redis, RabbitMQ, MailHog, MinIO)
+# - Database Administration (DbGate)
 # - Observability (Prometheus, Grafana, Loki, Promtail)
 #
 # Key Architectural Principles:
@@ -219,6 +220,75 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # Object Storage (S3-Compatible Storage)
+  # MinIO provides S3-compatible object storage for file uploads, avatars,
+  # document storage, and other binary assets across all services.
+  # ---------------------------------------------------------------------------
+  foundation-minio:
+    image: minio/minio:latest
+    container_name: foundation-minio
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-iqkv}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-iqkv_password}
+    expose:
+      - "9000" # S3 API
+      - "9001" # Console UI
+    volumes:
+      - foundation_minio_data:/data
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Database Administration (DbGate)
+  # Web-based database administration tool providing unified access to:
+  # - PostgreSQL databases (IAM, Billing, Audit)
+  # - Redis cache
+  # - RabbitMQ management
+  # - MinIO S3 storage
+  # ---------------------------------------------------------------------------
+  foundation-dbgate:
+    image: dbgate/dbgate:5.3.3
+    container_name: foundation-dbgate
+    environment:
+      WEB_ROOT: /
+      LOGINS: "1"
+    expose:
+      - "3000"
+    volumes:
+      - ./docker/dbgate/connections.jsonl:/root/.dbgate/connections.jsonl:ro
+      - foundation_dbgate_data:/root/.dbgate
+    networks:
+      - foundation-network
+    depends_on:
+      foundation-postgres-iam:
+        condition: service_healthy
+      foundation-postgres-billing:
+        condition: service_healthy
+      foundation-postgres-audit:
+        condition: service_healthy
+      foundation-redis:
+        condition: service_healthy
+      foundation-rabbitmq:
+        condition: service_healthy
+      foundation-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # IAM Service (Identity & Access Management)
   # Internal service providing Authentication and Authorization.
   # ---------------------------------------------------------------------------
@@ -249,6 +319,14 @@ services:
       MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
+      # Object Storage (MinIO)
+      OBJECTSTORAGE_ENDPOINT: http://foundation-minio:9000
+      OBJECTSTORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-iqkv}
+      OBJECTSTORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-iqkv_password}
+      OBJECTSTORAGE_BUCKET_NAME: ${IAM_BUCKET_NAME:-iam-assets}
+      OBJECTSTORAGE_REGION: ${MINIO_REGION:-us-east-1}
+      OBJECTSTORAGE_SSL: "false"
+
       # JWT RS256
       JWT_PRIVATE_KEY_PATH: classpath:keys/private.pem
       JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
@@ -272,6 +350,8 @@ services:
       foundation-postgres-iam:
         condition: service_healthy
       foundation-rabbitmq:
+        condition: service_healthy
+      foundation-minio:
         condition: service_healthy
       foundation-mailhog:
         condition: service_started
@@ -321,6 +401,14 @@ services:
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-IQ Key Value}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
+      # Object Storage (MinIO)
+      OBJECTSTORAGE_ENDPOINT: http://foundation-minio:9000
+      OBJECTSTORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-iqkv}
+      OBJECTSTORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-iqkv_password}
+      OBJECTSTORAGE_BUCKET_NAME: ${BILLING_BUCKET_NAME:-billing-assets}
+      OBJECTSTORAGE_REGION: ${MINIO_REGION:-us-east-1}
+      OBJECTSTORAGE_SSL: "false"
+
       # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
       JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
 
@@ -348,6 +436,8 @@ services:
       foundation-rabbitmq:
         condition: service_healthy
       foundation-iam-service:
+        condition: service_healthy
+      foundation-minio:
         condition: service_healthy
       foundation-mailhog:
         condition: service_started
@@ -604,6 +694,10 @@ volumes:
     name: foundation_redis_data
   foundation_rabbitmq_data:
     name: foundation_rabbitmq_data
+  foundation_minio_data:
+    name: foundation_minio_data
+  foundation_dbgate_data:
+    name: foundation_dbgate_data
   foundation_iam_logs:
     name: foundation_iam_logs
   foundation_iam_tmp:
