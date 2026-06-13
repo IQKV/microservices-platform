@@ -22,6 +22,12 @@ Critical domains to accelerate product development:
 - **Financial Operations**: Stripe-backed subscriptions, plan catalog, and webhook-driven billing
 - **Frontend Experience**: Production-ready React 19 SPAs for tenants and platform administrators
 
+<div align="center">
+  <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
+  <p><strong>Hybrid Tenancy SaaS Boilerplate. Microservice-first architecture, a collection of small, loosely coupled, and independently deployable services from day one.</strong></p>
+</div>
+
+
 ## Service Ecosystem
 
 Domain-aligned services with event-driven communication:
