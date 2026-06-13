@@ -28,4 +28,5 @@ tsconfig.json
 CLAUDE.md
 CLAUDE.local.md
 
+cicd/
 helm/
