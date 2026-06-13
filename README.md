@@ -7,7 +7,7 @@
 
 <div align="center">
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/novustools-mockup-1781349539211.png?raw=true" width="600" alt="IQKV Platform — Platform Admin">
-  <p><strong>Hybrid Tenancy SaaS Boilerplate</strong></p>
+  <p><strong>Hybrid Tenancy SaaS Boilerplate. Microservice-first architecture, a collection of small, loosely coupled, and independently deployable services from day one.</strong></p>
 </div>
 
 
@@ -40,7 +40,7 @@ This platform serves as a reference implementation for organizations building mi
 
 <div align="center">
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
-  <p><strong>Hybrid Tenancy SaaS Boilerplate</strong></p>
+  <p><strong>Separated Global Backoffice UI for entire Platform Management.</strong></p>
 </div>
 
 ## Platform Services
