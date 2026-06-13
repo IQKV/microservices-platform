@@ -1,0 +1,124 @@
+# K3s Full Configuration
+# Complete setup with all services for full development
+
+config:
+  postgresql:
+    password: "iqkv_k3s_password"
+  microservices:
+    - audit
+    - iam
+    - billing
+  rabbitmq:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_k3s_password"
+  redis:
+    password: "iqkv_k3s_password"
+  objectstorage:
+    accessKey: "iqkv_sit"
+    secretKey: "iqkv_k3s_password"
+  environment: "sit"
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "iqkv_k3s_password"
+    database: "iqkv"
+  primary:
+    persistence:
+      size: 3Gi
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 200m
+      requests:
+        memory: 128Mi
+        cpu: 100m
+
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "iqkv_k3s_password"
+  master:
+    persistence:
+      size: 1Gi
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m
+
+rabbitmq:
+  enabled: true
+  auth:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_k3s_password"
+  persistence:
+    size: 1Gi
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+# Enable MinIO for object storage
+minio:
+  enabled: true
+  auth:
+    rootUser: "iqkv_sit"
+    rootPassword: "iqkv_k3s_password"
+  persistence:
+    size: 2Gi
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  buckets:
+    - iqkv-iam-assets
+    - iqkv-billing-assets
+  corsAllowedOrigins: "*"
+
+mailhog:
+  enabled: true
+  resources:
+    limits:
+      memory: 64Mi
+      cpu: 50m
+    requests:
+      memory: 32Mi
+      cpu: 25m
+
+# Enable DbGate for database administration
+dbgate:
+  enabled: true
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+# Enable ingress for web access
+ingress:
+  enabled: true
+  hosts:
+    dbgate:
+      host: dbgate.k3s.local
+    rabbitmq:
+      host: rabbitmq.k3s.local
+    mailhog:
+      host: mailhog.k3s.local
+    minio:
+      host: minio.k3s.local
+
+dev:
+  exposeServices: false
+  debug: true

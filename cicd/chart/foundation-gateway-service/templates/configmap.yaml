@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-gateway-service.fullname" . }}-config
+  labels:
+    {{- include "foundation-gateway-service.labels" . | nindent 4 }}
+data:
+  SPRING_PROFILES_ACTIVE: {{ .Values.app.springBoot.profiles.active | quote }}
+  MANAGEMENT_PORT: {{ .Values.app.springBoot.management.port | toString | quote }}
+  IAM_SERVICE_URI: {{ .Values.config.iamServiceUri | quote }}
+  IAM_JWKS_URI: {{ printf "%s/.well-known/jwks.json" .Values.config.iamServiceUri | quote }}
+  BILLING_SERVICE_URI: {{ .Values.config.billingServiceUri | quote }}
+  AUDIT_SERVICE_URI: {{ .Values.config.auditServiceUri | quote }}
+  CORS_ALLOWED_ORIGINS: {{ join "," .Values.config.cors.allowedOrigins | quote }}
+
+  # Platform rollout mode — must be identical across IAM, Billing, and Gateway
+  # Maps to iqkv.platform.rollout-mode in application.yml
+  # Valid values: MULTI_TENANT | SINGLE_TENANT
+  ROLLOUT_MODE: {{ .Values.platform.rolloutMode | default "MULTI_TENANT" | quote }}
+
+  {{- if .Values.platform.defaultTenantKey }}
+  # Default tenant key — required when ROLLOUT_MODE=SINGLE_TENANT
+  # Injected as X-Tenant-ID for unauthenticated/pre-auth requests in single-tenant mode
+  # Maps to iqkv.tenancy.default-tenant-key in application.yml
+  DEFAULT_TENANT_KEY: {{ .Values.platform.defaultTenantKey | quote }}
+  {{- end }}
+
+  # IAM service URL for general API access
+  IAM_SERVICE_URL: {{ .Values.config.iamServiceUri | quote }}
+
+  # IAM management service URL for platform mode guard canonical check
+  # Overrides iqkv.iam.service-url via Spring Boot relaxed binding (IQKV_IAM_SERVICE_URL -> iqkv.iam.service-url)
+  # Uses the dedicated management-http Service (foundation-iam-service-management-http) which maps
+  # port 80 → 8081, so no port number is needed in the URL.
+  # e.g. http://foundation-iam-service-management-http/actuator/info
+  IQKV_IAM_SERVICE_URL: {{ .Values.config.iamManagementServiceUri | quote }}

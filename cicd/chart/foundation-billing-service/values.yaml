@@ -1,0 +1,288 @@
+# IQ Key Value Billing Service - Default Configuration
+# Base configuration with sensible defaults for all environments
+
+# Global settings
+global:
+  storageClass: "local-path"
+  imageRegistry: ""
+
+# Application Configuration
+app:
+  name: foundation-billing-service
+  version: "1.0.0"
+  environment: "sit"
+  namespace: "default"
+
+  # Spring Boot Application Settings
+  springBoot:
+    profiles:
+      active: sit
+    server:
+      port: 8080
+    management:
+      port: 8081
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-billing-service
+  tag: "latest"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: know-how-download-auth
+
+# Deployment Configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Configuration
+podAnnotations: {}
+podLabels: {}
+
+# Security Context (shared defaults)
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Management Service (Actuator endpoints)
+managementService:
+  enabled: true
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+  hosts:
+    - host: billing-service.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Resource Configuration
+resources:
+  limits:
+    memory: 768Mi
+    cpu: 500m
+  requests:
+    memory: 512Mi
+    cpu: 200m
+
+# JVM Configuration
+jvm:
+  maxRAMPercentage: "70.0"
+  initialRAMPercentage: "50.0"
+  minRAMPercentage: "50.0"
+  gcAlgorithm: "G1GC"
+  maxGCPauseMillis: "200"
+  additionalOpts: ""
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Node Selection
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Health Checks
+healthcheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8081
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8081
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+# External Infrastructure Configuration
+infraServices:
+  # PostgreSQL Configuration
+  postgresql:
+    host: "foundation-infra-postgresql.iqkv-sit-env.svc.cluster.local"
+    port: 5432
+    database: "iqkv_billing"
+    username: "svc_billing_sit_dba"
+    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: "foundation-infra-rabbitmq.iqkv-sit-env.svc.cluster.local"
+    port: 5672
+    username: "svc_infra_sit_rmq"
+    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+
+  # MinIO / S3-compatible Object Storage Configuration
+  # Points to the MinIO service deployed by foundation-infra Helm chart
+  objectstorage:
+    endpoint: "http://foundation-infra-minio.iqkv-sit-env.svc.cluster.local"
+    accessKey: "iqkv" # Override via --set-string infraServices.objectstorage.accessKey=xxx
+    secretKey: "iqkv_password" # Override via --set-string infraServices.objectstorage.secretKey=xxx
+    bucketName: "iqkv-billing-assets"
+    region: "us-east-1"
+    ssl: false
+    upload:
+      maxFileSizeBytes: 5242880 # 5 MB
+      presignedUrlExpirationMinutes: 60
+      allowedMimeTypes: "application/pdf,image/jpeg,image/png"
+
+# Application Configuration (only externalized values)
+config:
+  # JWT RSA Key Configuration
+  jwt:
+    publicKeyPath: "classpath:keys/public.pem" # Override for production
+
+  # Email / SMTP Configuration
+  mail:
+    host: "smtp.example.com"
+    port: 587
+    username: "" # Override via --set config.mail.username=xxx
+    password: "" # Override via --set config.mail.password=xxx
+    from: "noreply@iqkv.dev"
+    fromName: "IQ Key Value"
+    replyTo: ""
+
+  # Application base URL (used in email links)
+  appBaseUrl: "https://app.iqkv.site"
+
+  # Messaging Configuration
+  messaging:
+    enabled: true # Maps to iqkv.messaging.rabbitmq.enabled
+
+  # Stripe Configuration
+  stripe:
+    secretKey: "" # Must be overridden via --set-string config.stripe.secretKey in pipeline
+    webhookSecret: "" # Must be overridden via --set-string config.stripe.webhookSecret in pipeline
+    portalReturnUrl: "https://app.iqkv.site/billing"
+
+# Monitoring Configuration
+monitoring:
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    labels:
+      release: prometheus-stack
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /actuator/prometheus
+
+  prometheusRule:
+    enabled: false
+    namespace: monitoring
+    labels:
+      release: prometheus-stack
+    rules:
+      - alert: BillingServiceDown
+        expr: up{job=~"foundation-billing-service.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Billing Service is down"
+          description: "Billing Service has been down for more than 2 minutes"
+
+      - alert: BillingServiceHighMemory
+        expr: container_memory_usage_bytes{pod=~".*foundation-billing-service.*"} / container_spec_memory_limit_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Billing Service high memory usage"
+          description: "Billing Service memory usage is above 85% for more than 5 minutes"
+
+      - alert: BillingServiceHighCPU
+        expr: rate(container_cpu_usage_seconds_total{pod=~".*foundation-billing-service.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Billing Service high CPU usage"
+          description: "Billing Service CPU usage is above 80% for more than 5 minutes"
+
+      - alert: BillingServiceHighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5..", job=~"foundation-billing-service.*"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Billing Service high error rate"
+          description: "Billing Service is experiencing high 5xx error rate (>5%) for more than 5 minutes"
+
+      - alert: BillingServiceSlowResponses
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=~"foundation-billing-service.*"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Billing Service slow responses"
+          description: "Billing Service p95 response time is above 2 seconds for more than 5 minutes"
+
+# Network Policies
+networkPolicy:
+  enabled: false
+
+# Platform Rollout Mode Configuration
+# IMPORTANT: This value must be identical across foundation-iam-service,
+# foundation-billing-service, and foundation-gateway-service.
+# Mixed modes are a hard deployment error (spec section 13, 14.1 R1).
+#
+# Valid values: MULTI_TENANT | SINGLE_TENANT
+# Default: MULTI_TENANT
+platform:
+  rolloutMode: "MULTI_TENANT"
+  defaultBillingEmail: "" # Fallback email for SINGLE_TENANT mode (ownerEmail absent)
+
+# K3s specific configurations
+k3s:
+  useLocalPath: true
+  disableResourceQuotas: true
+  tolerateAllTaints: false

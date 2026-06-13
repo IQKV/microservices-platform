@@ -1,0 +1,62 @@
+1. Application URL:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls.enabled }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+
+   To get the resolved ingress URL:
+   kubectl --namespace {{ .Release.Namespace }} get ingress {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "standard-ui-blank-astro-daisyui-ssr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:4321 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 4321:$CONTAINER_PORT
+{{- end }}
+
+2. Health check:
+   kubectl --namespace {{ .Release.Namespace }} get pods -l "app.kubernetes.io/name={{ include "standard-ui-blank-astro-daisyui-ssr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+3. Logs:
+   kubectl --namespace {{ .Release.Namespace }} logs -l "app.kubernetes.io/name={{ include "standard-ui-blank-astro-daisyui-ssr.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -f
+
+4. Runtime environment variables are managed via ConfigMap (non-sensitive) and
+   Kubernetes Secrets (sensitive). The application uses:
+
+   ConfigMap name (envFrom source):
+     {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-config
+
+   Non-sensitive (set under app.env):
+     RESEND_FROM       – sender address for outgoing emails
+     RESEND_FROM_NAME  – optional display name for the From field
+     RESEND_TO         – recipient address for contact form submissions
+     RESEND_API_KEY    – Resend API key (non-secret fallback; prefer secretEnv)
+
+   Sensitive (set under app.secretEnv, provisioned as a Kubernetes Secret):
+     RESEND_API_KEY  – Resend API key for email delivery
+
+   Example values file configuration:
+     app:
+       env:
+         RESEND_FROM: "noreply@example.com"
+         RESEND_TO: "contact@example.com"
+       secretEnv:
+         RESEND_API_KEY:
+           secretName: standard-ui-blank-astro-daisyui-ssr-secrets
+           secretKey: RESEND_API_KEY
+
+   Create the Secret before deploying:
+     kubectl create secret generic standard-ui-blank-astro-daisyui-ssr-secrets \
+       --from-literal=RESEND_API_KEY=re_... \
+       --namespace <namespace>

@@ -13,6 +13,7 @@
 - [Key Features](#key-features)
 - [Architecture Patterns](#architecture-patterns)
 - [Getting Started](#getting-started)
+- [CI/CD & Deployment](#cicd--deployment)
 - [Monitoring](#monitoring)
 - [Learning Objectives](#learning-objectives)
 - [Adapting for Your Domain](#adapting-for-your-domain)
@@ -437,6 +438,21 @@ docker compose -f compose.container.yaml up -d --build
 ```
 
 Each service uses isolated named volumes and a dedicated Docker network — running multiple services simultaneously requires no port remapping.
+
+## CI/CD & Deployment
+
+The platform ships reference CI/CD pipelines and Helm charts in the [`cicd/`](cicd/README.md) folder.
+
+| Resource                                    | Description                                                                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipeline definitions for every service — Java microservices (10-pipeline flow), frontend apps (4-pipeline flow), and infrastructure |
+| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes deployment across SIT, UAT, and production environments                                                           |
+
+**Pipeline flow for Java services:** `VerifyCode` (tests + SonarQube + PMD + SpotBugs) → `PublishArtifacts` (Nexus) → `PublishDockerImage` → `DeployWorkInProgress` (SIT auto) → `PromoteFeatureDeployment` / `PromoteDeployment` (manual promote) → `ReleasePackage` (semver automation).
+
+**Helm charts** cover all platform components — `foundation-infra` (PostgreSQL, Redis, RabbitMQ, MinIO, MailHog), backend services, and frontend SPAs — with `values-sit.yaml`, `values-uat.yaml`, and `values-prd.yaml` variants.
+
+> These files are **template references**. They run against a self-hosted Drone CI instance and a separate Helm charts repository. See [`cicd/README.md`](cicd/README.md) for required secrets and adaptation instructions.
 
 ## Learning Objectives
 

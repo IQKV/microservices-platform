@@ -1,0 +1,58 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "foundation-ui-platform-admin.fullname" . }}
+  labels:
+    {{- include "foundation-ui-platform-admin.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheusRule.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+    - name: {{ include "foundation-ui-platform-admin.fullname" . }}.rules
+      rules:
+        - alert: AppPortalDown
+          expr: up{job="{{ include "foundation-ui-platform-admin.fullname" . }}"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            service: {{ include "foundation-ui-platform-admin.fullname" . }}
+          annotations:
+            summary: "Admin Dashboard is down"
+            description: "Admin Dashboard has been down for more than 5 minutes."
+
+        - alert: AppPortalHighMemoryUsage
+          expr: container_memory_usage_bytes{pod=~"{{ include "foundation-ui-platform-admin.fullname" . }}-.*"} / container_spec_memory_limit_bytes > 0.8
+          for: 10m
+          labels:
+            severity: warning
+            service: {{ include "foundation-ui-platform-admin.fullname" . }}
+          annotations:
+            summary: "Admin Dashboard high memory usage"
+            description: "Admin Dashboard memory usage is above 80% for more than 10 minutes."
+
+        - alert: AppPortalHighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{pod=~"{{ include "foundation-ui-platform-admin.fullname" . }}-.*"}[5m]) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+            service: {{ include "foundation-ui-platform-admin.fullname" . }}
+          annotations:
+            summary: "Admin Dashboard high CPU usage"
+            description: "Admin Dashboard CPU usage is above 80% for more than 10 minutes."
+
+        - alert: AppPortalPodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total{pod=~"{{ include "foundation-ui-platform-admin.fullname" . }}-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            service: {{ include "foundation-ui-platform-admin.fullname" . }}
+          annotations:
+            summary: "Admin Dashboard pod crash looping"
+            description: "Admin Dashboard pod is crash looping."
+{{- end }}

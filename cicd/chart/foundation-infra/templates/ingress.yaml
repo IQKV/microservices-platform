@@ -1,0 +1,201 @@
+{{- if .Values.ingress.enabled }}
+{{- if .Values.dbgate.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-dbgate
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dbgate-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.dbgate.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.hosts.dbgate.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "foundation-infra.fullname" . }}-dbgate
+                port:
+                  number: {{ .Values.dbgate.service.port }}
+---
+{{- end }}
+{{- if and .Values.rabbitmq.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-rabbitmq
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rabbitmq-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.rabbitmq.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.hosts.rabbitmq.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-rabbitmq
+                port:
+                  name: http-stats
+---
+{{- end }}
+{{- if and .Values.mailhog.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-mailhog
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mailhog-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.mailhog.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.hosts.mailhog.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "foundation-infra.fullname" . }}-mailhog
+                port:
+                  name: http
+---
+{{- end }}
+{{- if and .Values.minio.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-minio-api
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio-ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.minio.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.hosts.minio.path | default "/" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-minio
+                port:
+                  name: minio-api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-minio-console
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio-console-ingress
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    # MinIO console requires WebSocket support for live updates.
+    # nginx must forward the Upgrade/Connection headers and use HTTP/1.1
+    # (HTTP/2 does not support the protocol upgrade mechanism).
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: {{ .Release.Name }}-minio
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.minioConsole.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.hosts.minioConsole.path | default "/" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-minio
+                port:
+                  name: minio-console
+{{- end }}
+{{- end }}

@@ -1,0 +1,24 @@
+apiVersion: v2
+name: foundation-billing-service
+description: Billing and subscription management microservice. Acts as a Stripe Connect wrapper.
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqkv
+  - billing-service
+  - multi-tenant
+  - spring-boot
+  - microservices
+  - security
+  - rbac
+  - mybatis
+  - external-services
+
+home: https://github.com/IQKV/foundation-billing-service
+sources:
+  - https://github.com/IQKV/foundation-billing-service
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

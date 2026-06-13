@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-gateway-service.fullname" . }}
+  labels:
+    {{- include "foundation-gateway-service.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "foundation-gateway-service.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.managementService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-gateway-service.fullname" . }}-management
+  labels:
+    {{- include "foundation-gateway-service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: management
+  {{- with .Values.managementService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.managementService.type }}
+  ports:
+    - port: {{ .Values.managementService.port }}
+      targetPort: {{ .Values.managementService.targetPort }}
+      protocol: TCP
+      name: management
+  selector:
+    {{- include "foundation-gateway-service.selectorLabels" . | nindent 4 }}
+{{- end }}

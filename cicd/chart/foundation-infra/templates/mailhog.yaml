@@ -1,0 +1,60 @@
+{{- if .Values.mailhog.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-mailhog
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mailhog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "foundation-infra.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mailhog
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mailhog
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: mailhog
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.mailhog.image.repository }}:{{ .Values.mailhog.image.tag }}"
+          imagePullPolicy: {{ .Values.mailhog.image.pullPolicy }}
+          ports:
+            - name: smtp
+              containerPort: 1025
+              protocol: TCP
+            - name: http
+              containerPort: 8025
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.mailhog.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-mailhog
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mailhog
+spec:
+  type: {{ .Values.mailhog.service.type }}
+  ports:
+    - port: {{ .Values.mailhog.service.ports.smtp }}
+      targetPort: smtp
+      protocol: TCP
+      name: smtp
+    - port: {{ .Values.mailhog.service.ports.http }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "foundation-infra.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mailhog
+{{- end }}

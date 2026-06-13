@@ -1,0 +1,82 @@
+# IQ Key Value Gateway Service - Production Environment Configuration
+
+app:
+  environment: "prd"
+  springBoot:
+    profiles:
+      active: "prd"
+
+image:
+  pullPolicy: Always
+
+replicaCount: 3
+
+resources:
+  limits:
+    memory: 2Gi
+    cpu: 2000m
+  requests:
+    memory: 1Gi
+    cpu: 1000m
+
+jvm:
+  maxRAMPercentage: "75.0"
+  initialRAMPercentage: "60.0"
+  minRAMPercentage: "60.0"
+  gcAlgorithm: "G1GC"
+  maxGCPauseMillis: "100"
+  reactorNettyIoWorkerCount: "8"
+  reactorNettyMaxConnections: "1000"
+  additionalOpts: "-XX:+UseNUMA -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Xlog:gc*:file=/tmp/gc.log:time,uptime:filecount=10,filesize=20M"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+config:
+  iamServiceUri: "http://foundation-iam-service"
+  iamManagementServiceUri: "http://foundation-iam-service-management-http"
+  billingServiceUri: "http://foundation-billing-service"
+  auditServiceUri: "http://foundation-audit-service"
+  cors:
+    allowedOrigins:
+      - "https://admin.iqkv.site"
+      - "https://app.iqkv.site"
+      - "https://iqkv.site"
+
+ingress:
+  enabled: true
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: api.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+networkPolicy:
+  enabled: true
+
+# Platform rollout mode — must match foundation-iam-service and foundation-billing-service
+# IMPORTANT: Mode changes require a controlled migration runbook (spec section 10)
+platform:
+  rolloutMode: "MULTI_TENANT"
+  defaultTenantKey: "" # Set to a valid NanoID when switching to SINGLE_TENANT

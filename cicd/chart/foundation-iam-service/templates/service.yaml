@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-iam-service.fullname" . }}
+  labels:
+    {{- include "foundation-iam-service.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "foundation-iam-service.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.managementService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-iam-service.fullname" . }}-management
+  labels:
+    {{- include "foundation-iam-service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: management
+  {{- with .Values.managementService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.managementService.type }}
+  ports:
+    - port: {{ .Values.managementService.port }}
+      targetPort: {{ .Values.managementService.targetPort }}
+      protocol: TCP
+      name: management
+  selector:
+    {{- include "foundation-iam-service.selectorLabels" . | nindent 4 }}
+{{- end }}
+---
+{{- if .Values.managementHttpService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-iam-service.fullname" . }}-management-http
+  labels:
+    {{- include "foundation-iam-service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: management-http
+  {{- with .Values.managementHttpService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.managementHttpService.type }}
+  ports:
+    - port: {{ .Values.managementHttpService.port }}
+      targetPort: {{ .Values.managementHttpService.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "foundation-iam-service.selectorLabels" . | nindent 4 }}
+{{- end }}

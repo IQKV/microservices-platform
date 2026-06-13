@@ -1,0 +1,28 @@
+{{- if .Values.dbgate.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-dbgate-config
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dbgate
+data:
+  connections.jsonl: |
+{{- if and .Values.postgresql.enabled .Values.dbgate.autoConfigureConnections }}
+{{- range .Values.config.microservices }}
+    {"_id":"postgres-{{ . }}","engine":"postgres@dbgate-plugin-postgres","server":"{{ $.Release.Name }}-postgresql.{{ $.Release.Namespace }}.svc.cluster.local","port":5432,"user":"svc_{{ . }}_{{ $.Values.config.environment }}_dba","password":"{{ $.Values.config.postgresql.password }}","database":"iqkv_{{ . }}","displayName":"PostgreSQL - {{ . | title }} Service"}
+{{- end }}
+{{- end }}
+{{- if and .Values.redis.enabled .Values.dbgate.autoConfigureConnections }}
+    {"_id":"redis-master","engine":"redis@dbgate-plugin-redis","server":"{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local","port":6379,{{- if .Values.redis.auth.enabled }}"password":"{{ .Values.redis.auth.password }}",{{- end }}"displayName":"Redis - Master"}
+{{- end }}
+{{- if and .Values.rabbitmq.enabled .Values.dbgate.autoConfigureConnections }}
+    {"_id":"rabbitmq-management","engine":"rabbitmq@dbgate-plugin-rabbitmq","server":"{{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local","port":15672,"user":"{{ .Values.rabbitmq.auth.username }}","password":"{{ .Values.rabbitmq.auth.password }}","displayName":"RabbitMQ - Management"}
+{{- end }}
+{{- if and .Values.minio.enabled .Values.dbgate.autoConfigureConnections }}
+    {"_id":"minio-s3","engine":"s3@dbgate-plugin-s3","server":"{{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local","port":{{ .Values.minio.service.ports.api }},"user":"{{ .Values.minio.auth.rootUser }}","password":"{{ .Values.minio.auth.rootPassword }}","displayName":"MinIO - S3 Storage"}
+{{- end }}
+{{- range .Values.dbgate.connections }}
+    {"_id":"{{ .name | lower | replace " " "-" }}","engine":"{{ .engine }}","server":"{{ .server }}","port":{{ .port }},"user":"{{ .user }}","password":"{{ .password }}","database":"{{ .database }}","displayName":"{{ .name }}"}
+{{- end }}
+{{- end }}

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-ui-platform-admin.fullname" . }}-config
+  labels:
+    {{- include "foundation-ui-platform-admin.labels" . | nindent 4 }}
+data:
+  # Runtime configuration for the React application
+  config.js: |
+    {{- include "foundation-ui-platform-admin.runtimeConfig" . | nindent 4 }}
+
+  {{- if .Values.app.nginx.customConfig.siteConf }}
+  # Nginx site configuration (mounted to /usr/share/nginx/site.conf)
+  site.conf: |
+    {{- include "foundation-ui-platform-admin.siteConfig" . | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+  # Content Security Policy configuration (mounted to /usr/share/nginx/content-security-policy.conf)
+  content-security-policy.conf: |
+{{- .Values.app.nginx.customConfig.contentSecurityPolicyConf | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.app.nginx.customConfig.securityConf }}
+  # Security headers configuration (mounted to /usr/share/nginx/security.conf)
+  security.conf: |
+    {{- include "foundation-ui-platform-admin.securityConfig" . | nindent 4 }}
+  {{- end }}

@@ -1,0 +1,201 @@
+# IQ Key Value SaaS Landing Kit - Default Configuration
+# Base configuration with sensible defaults for all environments
+
+# Global settings
+global:
+  storageClass: "local-path"
+  imageRegistry: ""
+
+# Application Configuration
+app:
+  name: foundation-ui-saas-landing-kit
+  version: "1.0.0"
+  environment: "sit"
+  namespace: "default"
+
+  # Nginx Configuration (using pre-configured base image)
+  nginx:
+    port: 8080
+    # Custom configuration overrides (only mount when different from base image defaults)
+    customConfig:
+      # Override site.conf to add health check endpoint
+      # Note: Static site serving is already handled by the base nginx container
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Example: Proxy to backend API service
+        # Uncomment and configure for your use case
+        # location /api/ {
+        #     # Remove /api prefix when forwarding
+        #     rewrite ^/api/(.*) /$1 break;
+        #
+        #     # Forward to backend service (Kubernetes service DNS)
+        #     proxy_pass http://backend-service.default.svc.cluster.local:8080;
+        #
+        #     # Preserve headers
+        #     proxy_set_header Host $host;
+        #     proxy_set_header X-Real-IP $remote_addr;
+        #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #     proxy_set_header X-Forwarded-Proto $scheme;
+        #
+        #     # Timeouts
+        #     proxy_connect_timeout 60s;
+        #     proxy_send_timeout 60s;
+        #     proxy_read_timeout 60s;
+        #
+        #     # Don't add port to redirects
+        #     proxy_redirect off;
+        # }
+
+      # CSP for static landing page (no runtime config needed)
+      contentSecurityPolicyConf: |
+        # CSP for static SaaS landing page
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self'; object-src 'none'; base-uri 'self';" always;
+
+      # Override security headers only when needed (base image has good defaults)
+      securityConf: ""
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-ui-saas-landing-kit
+  tag: "latest"
+  pullPolicy: Always
+  # Base image: know-how.download/library/nginx-runner (pre-configured Nginx)
+
+imagePullSecrets:
+  - name: know-how-download-auth
+
+# Deployment Configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Configuration
+podAnnotations: {}
+podLabels: {}
+
+# Security Context (shared defaults)
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # Preserve headers from upstream proxy (Nginx Proxy Manager)
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    # SSL handled by upstream proxy
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+  hosts:
+    - host: iqscaffold.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Resource Configuration
+resources:
+  limits:
+    memory: 256Mi
+    cpu: 250m
+  requests:
+    memory: 128Mi
+    cpu: 100m
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Health Check Configuration
+healthcheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
+
+# Node Selection
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Monitoring Configuration
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    path: /metrics
+    port: 8080
+  prometheusRule:
+    enabled: false
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+  # maxUnavailable: 1
+
+# ConfigMap Configuration (not needed for static Astro site)
+configMap: {}
+
+# Volume Configuration
+volumes:
+  tmp:
+    enabled: true
+    size: 100Mi
+  logs:
+    enabled: true
+    size: 100Mi

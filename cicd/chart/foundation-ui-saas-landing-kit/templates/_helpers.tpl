@@ -1,0 +1,96 @@
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "foundation-ui-saas-landing-kit.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "foundation-ui-saas-landing-kit.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "foundation-ui-saas-landing-kit.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "foundation-ui-saas-landing-kit.labels" -}}
+helm.sh/chart: {{ include "foundation-ui-saas-landing-kit.chart" . }}
+{{ include "foundation-ui-saas-landing-kit.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/component: landing-page
+app.kubernetes.io/part-of: iqkv-platform
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "foundation-ui-saas-landing-kit.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "foundation-ui-saas-landing-kit.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "foundation-ui-saas-landing-kit.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "foundation-ui-saas-landing-kit.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Generate Nginx site configuration (only if not empty)
+*/}}
+{{- define "foundation-ui-saas-landing-kit.siteConfig" -}}
+{{- .Values.app.nginx.customConfig.siteConf }}
+{{- end }}
+
+{{/*
+Generate Content Security Policy configuration (only if not empty)
+*/}}
+{{- define "foundation-ui-saas-landing-kit.cspConfig" -}}
+{{- .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+{{- end }}
+
+{{/*
+Generate Security headers configuration (only if not empty)
+*/}}
+{{- define "foundation-ui-saas-landing-kit.securityConfig" -}}
+{{- .Values.app.nginx.customConfig.securityConf }}
+{{- end }}
+
+{{/*
+Check if any nginx config overrides are needed
+*/}}
+{{- define "foundation-ui-saas-landing-kit.hasNginxOverrides" -}}
+{{- if or .Values.app.nginx.customConfig.siteConf .Values.app.nginx.customConfig.contentSecurityPolicyConf .Values.app.nginx.customConfig.securityConf }}
+true
+{{- else }}
+false
+{{- end }}
+{{- end }}

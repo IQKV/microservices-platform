@@ -1,0 +1,176 @@
+{{- if .Values.minio.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-minio
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+spec:
+  type: ClusterIP
+  ports:
+    - name: minio-api
+      port: {{ .Values.minio.service.ports.api }}
+      targetPort: minio-api
+    - name: minio-console
+      port: {{ .Values.minio.service.ports.console }}
+      targetPort: minio-console
+  selector:
+    {{- include "foundation-infra.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "foundation-infra.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: minio
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        imagePullPolicy: IfNotPresent
+        # Container always binds on 9000/9001 internally.
+        # The Service maps minio.service.ports.api → 9000 at the cluster level,
+        # so the external port can be changed in values without touching this container.
+        command:
+        - /bin/sh
+        - -c
+        - minio server /data --address :9000 --console-address :9001
+        ports:
+        - name: minio-api
+          containerPort: 9000
+        - name: minio-console
+          containerPort: 9001
+        env:
+        - name: MINIO_ROOT_USER
+          value: {{ .Values.minio.auth.rootUser | quote }}
+        - name: MINIO_ROOT_PASSWORD
+          value: {{ .Values.minio.auth.rootPassword | quote }}
+        - name: MINIO_API_CORS_ALLOW_ORIGIN
+          value: {{ .Values.minio.corsAllowedOrigins | default "*" | quote }}
+        # Overrides the redirect URL MinIO sends to browsers when the API port is
+        # accessed directly. Without this, MinIO builds the redirect from its internal
+        # --console-address port (9001), which is unreachable from outside the cluster.
+        {{- if .Values.minio.consoleRedirectUrl }}
+        - name: MINIO_BROWSER_REDIRECT_URL
+          value: {{ .Values.minio.consoleRedirectUrl | quote }}
+        {{- end }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          {{- toYaml .Values.minio.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: minio-api
+          initialDelaySeconds: 30
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: minio-api
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-minio-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-minio-data
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.minio.persistence.storageClass | default .Values.global.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.minio.persistence.size }}
+{{- if .Values.minio.buckets }}
+---
+# Job that runs after MinIO is deployed and creates the required buckets.
+# It uses the official minio/mc (MinIO Client) image and retries until
+# MinIO is ready, then runs `mc mb --ignore-existing` for each bucket.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-minio-init
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio-init
+  annotations:
+    # Re-run this job whenever the chart is upgraded so new buckets get created.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: minio-init
+    spec:
+      restartPolicy: OnFailure
+      # NOTE: app.kubernetes.io/component=minio-init distinguishes this Job pod
+      # from long-running workloads, allowing `kubectl wait` to target only
+      # Deployments/StatefulSets by excluding component=minio-init.
+      initContainers:
+        # Wait until the MinIO API port is reachable before running mc.
+        # Uses the Service port (minio.service.ports.api) since this runs inside the cluster.
+        - name: wait-for-minio
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for MinIO to be ready..."
+              until wget -q --spider http://{{ .Release.Name }}-minio:{{ .Values.minio.service.ports.api }}/minio/health/ready; do
+                echo "MinIO not ready yet, sleeping 5s..."
+                sleep 5
+              done
+              echo "MinIO is ready."
+      containers:
+        - name: mc
+          image: minio/mc:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{ .Values.minio.auth.rootUser | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{ .Values.minio.auth.rootPassword | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mc alias set local http://{{ .Release.Name }}-minio:{{ .Values.minio.service.ports.api }} "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
+              {{- range .Values.minio.buckets }}
+              mc mb --ignore-existing local/{{ . }}
+              echo "Bucket '{{ . }}' is ready."
+              {{- end }}
+              {{- range .Values.minio.publicBuckets }}
+              mc anonymous set download local/{{ . }}
+              echo "Bucket '{{ . }}' set to public download."
+              {{- end }}
+{{- end }}
+{{- end }}

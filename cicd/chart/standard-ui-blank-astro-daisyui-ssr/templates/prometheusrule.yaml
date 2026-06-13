@@ -1,0 +1,110 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}
+  labels:
+    {{- include "standard-ui-blank-astro-daisyui-ssr.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: standard-ui-blank-astro-daisyui-ssr.rules
+      rules:
+        - alert: AstroAppDown
+          expr: up{job="{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro SSR application is down"
+            description: "standard-ui-blank-astro-daisyui-ssr has been unreachable for more than 5 minutes."
+
+        - alert: AstroAppHighErrorRate
+          expr: |
+            (
+              rate(http_requests_total{job="{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}", status=~"5.."}[5m]) /
+              rate(http_requests_total{job="{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}"}[5m])
+            ) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro app high error rate"
+            description: "Error rate above 10% for more than 5 minutes."
+
+        - alert: AstroAppHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              rate(http_request_duration_seconds_bucket{job="{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}"}[5m])
+            ) > 2
+          for: 5m
+          labels:
+            severity: warning
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro app high latency"
+            description: "95th percentile latency above 2 seconds for more than 5 minutes."
+
+        - alert: AstroAppPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{
+              namespace="{{ .Release.Namespace }}",
+              pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*"
+            }[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro app pod crash looping"
+            description: "Pod {{ "{{ $labels.pod }}" }} is crash looping."
+
+        - alert: AstroAppHighMemoryUsage
+          expr: |
+            (
+              container_memory_working_set_bytes{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              } /
+              container_spec_memory_limit_bytes{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }
+            ) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro app high memory usage"
+            description: "Pod {{ "{{ $labels.pod }}" }} memory usage above 90% for more than 5 minutes."
+
+        - alert: AstroAppHighCPUUsage
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }[5m]) /
+              container_spec_cpu_quota{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              } * container_spec_cpu_period{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "standard-ui-blank-astro-daisyui-ssr.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }
+            ) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            service: standard-ui-blank-astro-daisyui-ssr
+          annotations:
+            summary: "Astro app high CPU usage"
+            description: "Pod {{ "{{ $labels.pod }}" }} CPU usage above 90% for more than 5 minutes."
+{{- end }}

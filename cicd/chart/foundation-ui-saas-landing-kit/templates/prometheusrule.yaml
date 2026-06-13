@@ -1,0 +1,110 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "foundation-ui-saas-landing-kit.fullname" . }}
+  labels:
+    {{- include "foundation-ui-saas-landing-kit.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: foundation-ui-saas-landing-kit.rules
+      rules:
+        - alert: AuthPortalDown
+          expr: up{job="{{ include "foundation-ui-saas-landing-kit.fullname" . }}"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            service: auth-portal
+          annotations:
+            summary: "Landing page is down"
+            description: "Auth Portal has been down for more than 5 minutes."
+
+        - alert: AuthPortalHighErrorRate
+          expr: |
+            (
+              rate(nginx_http_requests_total{job="{{ include "foundation-ui-saas-landing-kit.fullname" . }}", status=~"5.."}[5m]) /
+              rate(nginx_http_requests_total{job="{{ include "foundation-ui-saas-landing-kit.fullname" . }}"}[5m])
+            ) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            service: auth-portal
+          annotations:
+            summary: "Auth Portal high error rate"
+            description: "Auth Portal error rate is above 10% for more than 5 minutes."
+
+        - alert: AuthPortalHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              rate(nginx_http_request_duration_seconds_bucket{job="{{ include "foundation-ui-saas-landing-kit.fullname" . }}"}[5m])
+            ) > 1
+          for: 5m
+          labels:
+            severity: warning
+            service: auth-portal
+          annotations:
+            summary: "Auth Portal high latency"
+            description: "Auth Portal 95th percentile latency is above 1 second for more than 5 minutes."
+
+        - alert: AuthPortalPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{
+              namespace="{{ .Release.Namespace }}",
+              pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*"
+            }[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            service: auth-portal
+          annotations:
+            summary: "Auth Portal pod crash looping"
+            description: "Auth Portal pod {{ "{{ $labels.pod }}" }} is crash looping."
+
+        - alert: AuthPortalHighMemoryUsage
+          expr: |
+            (
+              container_memory_working_set_bytes{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              } /
+              container_spec_memory_limit_bytes{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }
+            ) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            service: auth-portal
+          annotations:
+            summary: "Auth Portal high memory usage"
+            description: "Auth Portal pod {{ "{{ $labels.pod }}" }} memory usage is above 90% for more than 5 minutes."
+
+        - alert: AuthPortalHighCPUUsage
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }[5m]) /
+              container_spec_cpu_quota{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              } * container_spec_cpu_period{
+                namespace="{{ .Release.Namespace }}",
+                pod=~"{{ include "foundation-ui-saas-landing-kit.fullname" . }}-.*",
+                container="{{ .Chart.Name }}"
+              }
+            ) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            service: auth-portal
+          annotations:
+            summary: "Auth Portal high CPU usage"
+            description: "Auth Portal pod {{ "{{ $labels.pod }}" }} CPU usage is above 90% for more than 5 minutes."
+{{- end }}

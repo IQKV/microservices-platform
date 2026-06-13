@@ -1,0 +1,97 @@
+{{- if .Values.redis.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-redis-master
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  selector:
+    {{- include "foundation-infra.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-redis-master
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  serviceName: {{ .Release.Name }}-redis-master
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "foundation-infra.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: redis
+          containerPort: 6379
+        {{- if .Values.redis.auth.enabled }}
+        command:
+        - redis-server
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        env:
+        - name: REDIS_PASSWORD
+          value: {{ .Values.redis.auth.password | quote }}
+        {{- end }}
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          {{- toYaml .Values.redis.master.resources | nindent 10 }}
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            {{- if .Values.redis.auth.enabled }}
+            - -a
+            - $(REDIS_PASSWORD)
+            {{- end }}
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            {{- if .Values.redis.auth.enabled }}
+            - -a
+            - $(REDIS_PASSWORD)
+            {{- end }}
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "foundation-infra.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.redis.master.persistence.storageClass | default .Values.global.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.redis.master.persistence.size }}
+{{- end }}

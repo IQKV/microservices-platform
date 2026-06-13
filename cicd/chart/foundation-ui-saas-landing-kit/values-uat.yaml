@@ -1,0 +1,122 @@
+# IQ Key Value SaaS Landing Kit - UAT Environment Configuration
+# Staging configuration for pre-production testing
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-ui-saas-landing-kit
+  tag: "staging"
+  pullPolicy: Always
+
+# Deployment Configuration
+replicaCount: 2
+
+# Resource Configuration (Staging)
+resources:
+  limits:
+    memory: 384Mi
+    cpu: 400m
+  requests:
+    memory: 192Mi
+    cpu: 200m
+
+# Runtime Environment Variables (Staging)
+app:
+  environment: "uat"
+
+  # Nginx Configuration (Staging)
+  nginx:
+    port: 8080
+    customConfig:
+      # Staging site configuration
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Metrics endpoint for monitoring
+        location /metrics {
+            access_log off;
+            return 200 "# Nginx metrics placeholder\n";
+            add_header Content-Type text/plain;
+        }
+
+      # CSP for staging static landing page
+      contentSecurityPolicyConf: |
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self'; object-src 'none'; base-uri 'self';" always;
+
+      # Staging security headers
+      securityConf: |
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+# Ingress Configuration (Staging)
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: true
+    certManager:
+      enabled: true
+      issuer: "letsencrypt-staging"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # Force HTTPS redirect
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: staging.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  prometheusRule:
+    enabled: false
+
+# Health Checks (Staging)
+healthcheck:
+  livenessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Security Context (Staging)
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false

@@ -1,0 +1,60 @@
+# IQ Key Value Gateway Service - Test Environment Configuration
+
+app:
+  environment: "sit"
+  springBoot:
+    profiles:
+      active: "sit"
+
+image:
+  pullPolicy: Always
+
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 500m
+
+config:
+  iamServiceUri: "http://foundation-iam-service"
+  iamManagementServiceUri: "http://foundation-iam-service-management-http"
+  billingServiceUri: "http://foundation-billing-service"
+  auditServiceUri: "http://foundation-audit-service"
+  cors:
+    allowedOrigins:
+      - "https://admin.iqkv.site"
+      - "https://app.iqkv.site"
+      - "http://localhost:3000"
+      - "http://localhost:5173"
+
+ingress:
+  enabled: true
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-staging"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: api.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+# Platform rollout mode — must match foundation-iam-service and foundation-billing-service
+platform:
+  rolloutMode: "MULTI_TENANT"
+  defaultTenantKey: "" # Set to a valid NanoID when switching to SINGLE_TENANT

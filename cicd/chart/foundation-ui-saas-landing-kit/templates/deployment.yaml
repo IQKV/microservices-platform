@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "foundation-ui-saas-landing-kit.fullname" . }}
+  labels:
+    {{- include "foundation-ui-saas-landing-kit.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "foundation-ui-saas-landing-kit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "foundation-ui-saas-landing-kit.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "foundation-ui-saas-landing-kit.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      # Anti-affinity to spread pods across nodes for HA
+      {{- if not .Values.affinity }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "foundation-ui-saas-landing-kit.selectorLabels" . | nindent 20 }}
+                topologyKey: kubernetes.io/hostname
+      {{- else }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.nginx.port }}
+              protocol: TCP
+
+          {{- if .Values.healthcheck.enabled }}
+          livenessProbe:
+            {{- toYaml .Values.healthcheck.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.healthcheck.readinessProbe | nindent 12 }}
+          {{- end }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+            {{- if .Values.app.nginx.customConfig.siteConf }}
+            # Mount custom site configuration (override base image)
+            - name: nginx-site-config
+              mountPath: /usr/share/nginx/site.conf
+              subPath: site.conf
+            {{- end }}
+            {{- if .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+            # Mount custom CSP configuration (override base image)
+            - name: nginx-csp-config
+              mountPath: /usr/share/nginx/content-security-policy.conf
+              subPath: content-security-policy.conf
+            {{- end }}
+            {{- if .Values.app.nginx.customConfig.securityConf }}
+            # Mount custom security headers (override base image)
+            - name: nginx-security-config
+              mountPath: /usr/share/nginx/security.conf
+              subPath: security.conf
+            {{- end }}
+            {{- if .Values.volumes.tmp.enabled }}
+            # Temporary files volume
+            - name: tmp-volume
+              mountPath: /tmp
+            {{- end }}
+            {{- if .Values.volumes.logs.enabled }}
+            # Logs volume
+            - name: logs-volume
+              mountPath: /var/log/nginx
+            {{- end }}
+
+      volumes:
+        {{- if .Values.app.nginx.customConfig.siteConf }}
+        # ConfigMap for Nginx site configuration (only if overriding)
+        - name: nginx-site-config
+          configMap:
+            name: {{ include "foundation-ui-saas-landing-kit.fullname" . }}-config
+            items:
+              - key: site.conf
+                path: site.conf
+        {{- end }}
+        {{- if .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+        # ConfigMap for CSP configuration (only if overriding)
+        - name: nginx-csp-config
+          configMap:
+            name: {{ include "foundation-ui-saas-landing-kit.fullname" . }}-config
+            items:
+              - key: content-security-policy.conf
+                path: content-security-policy.conf
+        {{- end }}
+        {{- if .Values.app.nginx.customConfig.securityConf }}
+        # ConfigMap for security headers (only if overriding)
+        - name: nginx-security-config
+          configMap:
+            name: {{ include "foundation-ui-saas-landing-kit.fullname" . }}-config
+            items:
+              - key: security.conf
+                path: security.conf
+        {{- end }}
+        {{- if .Values.volumes.tmp.enabled }}
+        # Temporary files volume
+        - name: tmp-volume
+          emptyDir:
+            sizeLimit: {{ .Values.volumes.tmp.size }}
+        {{- end }}
+        {{- if .Values.volumes.logs.enabled }}
+        # Logs volume
+        - name: logs-volume
+          emptyDir:
+            sizeLimit: {{ .Values.volumes.logs.size }}
+        {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,377 @@
+# =====================================================================================
+# UI Admin Dashboard - Drone CI/CD Pipeline
+# =====================================================================================
+# Pipeline Flow:
+#   1. VerifyCode                  - Code quality, tests, and static analysis
+#   2. PublishArtifacts            - NPM packages to Nexus repository
+#   3. DeployWorkInProgress        - Wip branch deployments to dev environment
+#   4. RollbackWorkInProgress      - Rollback wip deployments
+# ======================================================================================
+
+# ============================================================================
+# Pipeline 1: VerifyCode
+# ============================================================================
+# Validates code quality, runs tests, and performs static analysis
+# Triggers: Push to all branches and tags for comprehensive quality checks
+# Quality Gates:
+#   - Code formatting
+#   - Linting
+#   - Unit tests with coverage
+#   - SonarQube static analysis
+#   - Build verification
+# ============================================================================
+kind: pipeline
+name: VerifyCode
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+
+# Persistent volumes for dependency caching
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Code Quality Gate
+  # --------------------------------------------------------------------------
+  # Comprehensive quality checks including formatting, linting, testing,
+  # static analysis, and build verification
+  # Uses pnpm for faster dependency resolution and caching
+  # --------------------------------------------------------------------------
+  - name: verify
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: pnpm-store
+        path: /root/.pnpm-store
+    environment:
+      # SonarQube configuration for code quality analysis
+      SONAR_HOST_URL:
+        from_secret: SONAR_HOST_URL
+      SONAR_TOKEN:
+        from_secret: SONAR_TOKEN
+      # NPM registry credentials for private packages
+      NPM_USERNAME:
+        from_secret: NEXUS_NPM_USERNAME
+      NPM_PASSWORD:
+        from_secret: NEXUS_NPM_PASSWORD
+      NPM_EMAIL:
+        from_secret: NEXUS_NPM_EMAIL
+    commands:
+      # - yamllint .
+      - pnpm install --frozen-lockfile --ignore-scripts && pnpm formatter:check # Install dependencies and verify code formatting
+      - pnpm ci:lint # Run ESLint for code quality checks
+      - pnpm test:coverage # Execute unit tests with coverage reporting
+      - npx @sonar/scan # Perform SonarQube static code analysis
+      - pnpm build # Build application to verify compilation
+
+  # --------------------------------------------------------------------------
+  # Step 2: Slack Notification (Failure Only)
+  # --------------------------------------------------------------------------
+  # Notifies team in Slack when verification fails
+  # Uses red circle and thunder cloud emoji for failure indication
+  # --------------------------------------------------------------------------
+  - name: notify-slack-on-failure
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        :red_circle: :thunder_cloud_and_rain: {{build.link}} ({{build.branch}}) by {{build.author}}
+    when:
+      status:
+        - failure
+    depends_on:
+      - verify
+
+---
+# ============================================================================
+# Pipeline 2: PublishArtifacts
+# ============================================================================
+# Publishes NPM packages to Nexus repository
+# Triggers: Push to dev, wip, prerelease/*, *.*.x branches and tags
+# Artifacts:
+#   - NPM packages with version management
+#   - Automated cleanup of 0.0.0 versions
+# ============================================================================
+kind: pipeline
+name: PublishArtifacts
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/dev # Development branch
+    - refs/heads/wip # Work in progress branch
+    - refs/heads/prerelease/* # Prerelease branches
+    - refs/heads/*.*.x # Maintenance branches (e.g., 1.0.x)
+    - refs/tags/* # All tags
+
+depends_on:
+  - VerifyCode # Only runs if code verification passes
+
+# Persistent volumes for dependency caching
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Publish NPM Package
+  # --------------------------------------------------------------------------
+  # Publishes package to NPM registry with automated version management
+  # Includes cleanup of development versions and Git configuration
+  # Skips redundant linting as it already passed in VerifyCode pipeline
+  # --------------------------------------------------------------------------
+  - name: pnpm-publish
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: pnpm-store
+        path: /root/.pnpm-store
+    environment:
+      # SonarQube configuration (inherited from verification)
+      SONAR_HOST_URL:
+        from_secret: SONAR_HOST_URL
+      SONAR_TOKEN:
+        from_secret: SONAR_TOKEN
+      # NPM registry credentials for package publishing
+      NPM_USERNAME:
+        from_secret: NEXUS_NPM_USERNAME
+      NPM_PASSWORD:
+        from_secret: NEXUS_NPM_PASSWORD
+      NPM_EMAIL:
+        from_secret: NEXUS_NPM_EMAIL
+      # Git service account credentials for automated commits
+      SVC_BUILD_GIT_USERNAME:
+        from_secret: SVC_BUILD_GIT_USERNAME
+      SVC_BUILD_GIT_EMAIL:
+        from_secret: SVC_BUILD_GIT_EMAIL
+    commands:
+      # Configure Git identity for automated commits during publishing
+      - export GIT_AUTHOR_NAME="${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_AUTHOR_EMAIL=${SVC_BUILD_GIT_EMAIL}
+      - export GIT_COMMITTER_NAME="${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_COMMITTER_EMAIL=${SVC_BUILD_GIT_EMAIL}
+      - git config user.name "${SVC_BUILD_GIT_USERNAME}"
+      - git config user.email ${SVC_BUILD_GIT_EMAIL}
+      - npm unpublish -f @iqkv/foundation-ui-platform-admin@0.0.0 || true # Remove development version
+      - pnpm publish --publish-branch ${DRONE_BRANCH} --force --no-git-checks || true # Publish with force flag
+    when:
+      branch:
+        include:
+          - "dev"
+          - "wip"
+          - "prerelease/*"
+          - "*.*.x"
+
+  # --------------------------------------------------------------------------
+  # Step 2: Slack Notification
+  # --------------------------------------------------------------------------
+  # Notifies team of artifact publication success/failure
+  # Shows different messages and emojis based on build status
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :package: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :package: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - pnpm-publish
+
+---
+# ============================================================================
+# Pipeline 3: DeployWorkInProgress
+# ============================================================================
+# Builds and deploys wip branch to dev environment using containerized approach
+# Triggers: Push to wip branch only
+# Process:
+#   1. Downloads Nginx Dockerfile template
+#   2. Builds application artifacts
+#   3. Creates container image
+#   4. Deploys to Kubernetes using Helm
+# ============================================================================
+kind: pipeline
+name: DeployWorkInProgress
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/wip
+
+depends_on:
+  - PublishArtifacts # Ensures artifacts are published first
+
+# Persistent volumes for dependency caching
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Download Dockerfile Template
+  # --------------------------------------------------------------------------
+  # Downloads standardized Nginx Dockerfile for static web applications
+  # --------------------------------------------------------------------------
+  - name: download-dockerfile
+    image: cicdtools/pipeline-runner
+    pull: never
+    commands:
+      - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/Nginx.dockerfile # Download Nginx Dockerfile template
+
+  # --------------------------------------------------------------------------
+  # Step 2: Build Application
+  # --------------------------------------------------------------------------
+  # Builds the frontend application for production deployment
+  # Uses pnpm for consistent dependency management
+  # --------------------------------------------------------------------------
+  - name: build-application
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: pnpm-store
+        path: /root/.pnpm-store
+    commands:
+      - pnpm install --frozen-lockfile --ignore-scripts # Install dependencies
+      - pnpm build # Build production artifacts
+      - ls -la ./dist/
+
+  # --------------------------------------------------------------------------
+  # Step 3: Build Container Image
+  # --------------------------------------------------------------------------
+  # Creates Docker image with built application using Nginx base
+  # Image naming: know-how.download/{owner}/{repo}:{branch}
+  # --------------------------------------------------------------------------
+  - name: build-container
+    image: plugins/docker
+    settings:
+      dockerfile: ./Dockerfile
+      context: ./
+      storage_driver: vfs
+      username:
+        from_secret: SVC_CONTAINER_REGISTRY_USERNAME
+      password:
+        from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
+      repo: know-how.download/${DRONE_REPO_OWNER,,}/${DRONE_REPO_NAME}
+      registry: know-how.download
+      force_tag: true
+      build_args:
+        - BASE_IMAGE=know-how.download/library/nginx-runner
+        - VCS_REFERENCE=${DRONE_COMMIT}
+        - SOURCE_DIR=./dist/
+      tags:
+        - ${DRONE_BRANCH} # Use branch name as tag
+    depends_on:
+      - build-application
+
+  # --------------------------------------------------------------------------
+  # Step 4: Deploy to SIT Environment
+  # --------------------------------------------------------------------------
+  # Uses Helm for atomic deployment with automatic rollback on failure
+  # Deploys to iqkv-sit-env namespace with dev-specific configuration
+  # --------------------------------------------------------------------------
+  - name: deploy
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - kubectl version --output=yaml
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-sit-env || true # Uninstall deployment
+      - |
+        helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
+          --values ./values.yaml \
+          --values ./values-sit.yaml \
+          --set image.tag=${DRONE_BRANCH} \
+          --namespace iqkv-sit-env \
+          --create-namespace
+    depends_on:
+      - build-container
+
+  # --------------------------------------------------------------------------
+  # Step 5: Slack Notification
+  # --------------------------------------------------------------------------
+  # Notifies team of deployment success/failure with appropriate emojis
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :ship: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :anchor: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - deploy
+
+---
+# ============================================================================
+# Pipeline 4: RollbackWorkInProgress
+# ============================================================================
+# Rolls back wip branch deployment from SIT environment
+# Trigger: Manual rollback event with target=sit
+# Uses Helm uninstall to completely remove the deployment
+# ============================================================================
+kind: pipeline
+name: RollbackWorkInProgress
+type: docker
+
+trigger:
+  event:
+    - rollback # Manual trigger only
+  target:
+    - sit
+  ref:
+    - "refs/heads/wip"
+
+steps:
+  # --------------------------------------------------------------------------
+  # Rollback from SIT Environment
+  # --------------------------------------------------------------------------
+  # Uses Helm uninstall to completely remove the wip deployment
+  # --------------------------------------------------------------------------
+  - name: rollback
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME} # Clone Helm charts repository
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-sit-env # Uninstall deployment

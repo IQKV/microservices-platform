@@ -1,0 +1,76 @@
+# K3s Minimal Configuration
+# Ultra-lightweight setup for resource-constrained environments
+
+config:
+  postgresql:
+    password: "dev123"
+  microservices:
+    - audit
+    - iam
+    - billing
+  rabbitmq:
+    username: "dev"
+    password: "dev123"
+  redis:
+    password: "redis123"
+  objectstorage:
+    accessKey: "dev"
+    secretKey: "dev123"
+  environment: "sit"
+
+# DbGate disabled for minimal setup
+dbgate:
+  enabled: false
+
+# Ingress disabled for minimal setup
+ingress:
+  enabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "dev123"
+    database: "iqkv"
+  primary:
+    persistence:
+      size: 1Gi
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m
+
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "redis123"
+  master:
+    persistence:
+      size: 512Mi
+    resources:
+      limits:
+        memory: 64Mi
+        cpu: 50m
+      requests:
+        memory: 32Mi
+        cpu: 25m
+
+rabbitmq:
+  enabled: false
+
+# MinIO disabled for minimal setup
+minio:
+  enabled: false
+
+mailhog:
+  enabled: true
+  resources:
+    limits:
+      memory: 32Mi
+      cpu: 25m
+    requests:
+      memory: 16Mi
+      cpu: 10m

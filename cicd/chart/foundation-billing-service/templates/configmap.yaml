@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-billing-service.fullname" . }}-config
+  labels:
+    {{- include "foundation-billing-service.labels" . | nindent 4 }}
+data:
+  # Spring Profile Configuration
+  SPRING_PROFILES_ACTIVE: {{ .Values.app.springBoot.profiles.active | quote }}
+
+  # Database Configuration (maps to iqkv.db.* in application.yml)
+  DB_HOST: {{ .Values.infraServices.postgresql.host | quote }}
+  DB_PORT: {{ .Values.infraServices.postgresql.port | toString | quote }}
+  DB_NAME: {{ .Values.infraServices.postgresql.database | quote }}
+  DB_USERNAME: {{ .Values.infraServices.postgresql.username | quote }}
+
+  # RabbitMQ Configuration (maps to iqkv.rabbitmq.* in application.yml)
+  RABBITMQ_HOST: {{ .Values.infraServices.rabbitmq.host | quote }}
+  RABBITMQ_PORT: {{ .Values.infraServices.rabbitmq.port | toString | quote }}
+  RABBITMQ_USERNAME: {{ .Values.infraServices.rabbitmq.username | quote }}
+
+  # Mail Configuration (maps to iqkv.mail.* in application.yml)
+  MAIL_HOST: {{ .Values.config.mail.host | quote }}
+  MAIL_PORT: {{ .Values.config.mail.port | toString | quote }}
+  MAIL_FROM: {{ .Values.config.mail.from | quote }}
+  MAIL_FROM_NAME: {{ .Values.config.mail.fromName | default "IQ Key Value" | quote }}
+  MAIL_REPLY_TO: {{ .Values.config.mail.replyTo | default "" | quote }}
+
+  # JWT RSA Key Paths (maps to iqkv.auth.jwt.* in application.yml)
+  JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | quote }}
+
+  # Application Base URL (used in email notification links)
+  APP_BASE_URL: {{ .Values.config.appBaseUrl | quote }}
+
+  # Messaging Configuration (maps to iqkv.messaging.rabbitmq.enabled in application.yml)
+  MESSAGING_ENABLED: {{ .Values.config.messaging.enabled | default true | toString | quote }}
+
+  # Stripe portal return URL (maps to iqkv.stripe.portal-return-url in application.yml)
+  STRIPE_PORTAL_RETURN_URL: {{ .Values.config.stripe.portalReturnUrl | quote }}
+
+  # Platform rollout mode — must be identical across IAM, Billing, and Gateway
+  # Maps to iqkv.platform.rollout-mode in application.yml
+  # Valid values: MULTI_TENANT | SINGLE_TENANT
+  ROLLOUT_MODE: {{ .Values.platform.rolloutMode | default "MULTI_TENANT" | quote }}
+
+  {{- if .Values.platform.defaultBillingEmail }}
+  # Fallback billing contact email for single-tenant mode (ownerEmail absent in tenant.created)
+  # Maps to iqkv.billing.default-contact-email in application.yml
+  DEFAULT_BILLING_EMAIL: {{ .Values.platform.defaultBillingEmail | quote }}
+  {{- end }}
+
+  # Helm release info
+  HELM_RELEASE_NAME: {{ .Release.Name | quote }}

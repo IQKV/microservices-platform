@@ -1,0 +1,70 @@
+# IQ Key Value Gateway Service - UAT Environment Configuration
+
+app:
+  environment: "uat"
+  springBoot:
+    profiles:
+      active: "uat"
+
+image:
+  pullPolicy: Always
+
+replicaCount: 2
+
+resources:
+  limits:
+    memory: 1.5Gi
+    cpu: 1500m
+  requests:
+    memory: 768Mi
+    cpu: 750m
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+config:
+  iamServiceUri: "http://foundation-iam-service"
+  iamManagementServiceUri: "http://foundation-iam-service-management-http"
+  billingServiceUri: "http://foundation-billing-service"
+  auditServiceUri: "http://foundation-audit-service"
+  cors:
+    allowedOrigins:
+      - "https://admin.iqkv.site"
+      - "https://app.iqkv.site"
+
+ingress:
+  enabled: true
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: api.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+networkPolicy:
+  enabled: true
+
+# Platform rollout mode — must match foundation-iam-service and foundation-billing-service
+platform:
+  rolloutMode: "MULTI_TENANT"
+  defaultTenantKey: "" # Set to a valid NanoID when switching to SINGLE_TENANT

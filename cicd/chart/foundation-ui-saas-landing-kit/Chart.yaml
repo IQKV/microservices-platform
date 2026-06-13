@@ -1,0 +1,27 @@
+apiVersion: v2
+name: foundation-ui-saas-landing-kit
+description: Astro-based SaaS landing page kit with Nginx serving and static site deployment
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqscaffold
+  - saas
+  - landing-page
+  - astro
+  - react
+  - nginx
+  - static-site
+  - frontend
+  - ui
+  - tailwind
+  - daisyui
+
+home: https://github.com/IQKV/foundation-ui-saas-landing-kit
+sources:
+  - https://github.com/IQKV/foundation-ui-saas-landing-kit
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

@@ -1,0 +1,31 @@
+apiVersion: v2
+name: foundation-iam-service
+description: Identity and Access Management microservice with JWT RS256, multi-tenancy, MyBatis, and email verification (requires external PostgreSQL, RabbitMQ)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqkv
+  - iam-service
+  - authentication
+  - authorization
+  - jwt
+  - multi-tenant
+  - email-verification
+  - identity
+  - access-management
+  - spring-boot
+  - microservices
+  - security
+  - rbac
+  - mybatis
+  - external-services
+
+home: https://github.com/IQKV/foundation-iam-service
+sources:
+  - https://github.com/IQKV/foundation-iam-service
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

@@ -1,0 +1,262 @@
+{{- if .Values.postgresql.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-postgresql-init
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+data:
+  init-databases.sh: |
+    #!/bin/bash
+    set -e
+    set -x # Enable debug logging
+
+    export PGPASSWORD="$POSTGRES_PASSWORD"
+
+    echo "=== Waiting for PostgreSQL server to be ready ==="
+    until pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"; do
+      echo "Waiting for database $POSTGRES_DB to accept connections..."
+      sleep 2
+    done
+
+    echo "=== Starting microservice database initialization ==="
+
+    {{- range .Values.config.microservices }}
+    echo "--- [Service: {{ . }}] ---"
+
+    # 1. Create Role (Maintenance DB)
+    echo "Processing role: svc_{{ . }}_{{ $.Values.config.environment }}_dba"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "
+      DO \$\$
+      BEGIN
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'svc_{{ . }}_{{ $.Values.config.environment }}_dba') THEN
+          CREATE USER svc_{{ . }}_{{ $.Values.config.environment }}_dba WITH PASSWORD '{{ $.Values.config.postgresql.password }}';
+        ELSE
+          ALTER USER svc_{{ . }}_{{ $.Values.config.environment }}_dba WITH PASSWORD '{{ $.Values.config.postgresql.password }}';
+        END IF;
+      END
+      \$\$;"
+
+    # 2. Create Database (Shell-based check)
+    if ! psql -tAc "SELECT 1 FROM pg_database WHERE datname = 'iqkv_{{ . }}'" --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" | grep -q 1; then
+      echo "Creating database: iqkv_{{ . }}"
+      psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "CREATE DATABASE iqkv_{{ . }}"
+    else
+      echo "Database iqkv_{{ . }} already exists."
+    fi
+
+    # 3. Grant Base Privileges (Maintenance DB)
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "
+      REVOKE ALL ON DATABASE iqkv_{{ . }} FROM PUBLIC;
+      GRANT ALL PRIVILEGES ON DATABASE iqkv_{{ . }} TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT CREATE ON DATABASE iqkv_{{ . }} TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;"
+
+    # 4. Schema and Object Privileges (Service DB)
+    echo "Granting privileges in: iqkv_{{ . }}"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "
+      GRANT ALL ON SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT USAGE ON SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT CREATE ON SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT ALL PRIVILEGES ON ALL ROUTINES IN SCHEMA public TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TYPES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      SELECT 'Database iqkv_{{ . }} fully initialized' as status;"
+
+    echo "Finished: {{ . }}"
+    {{- end }}
+
+    echo "=== Creating Tenant Schemas (default, demo, and acme) ==="
+    {{- range .Values.config.microservices }}
+    echo "--- [Service: {{ . }}] Creating tenant schemas ---"
+
+    # Create t_platform schema
+    echo "Creating t_platform schema for {{ . }}"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "
+      CREATE SCHEMA IF NOT EXISTS t_platform;
+      GRANT ALL ON SCHEMA t_platform TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT USAGE ON SCHEMA t_platform TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT CREATE ON SCHEMA t_platform TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_platform GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_platform GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_platform GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_platform GRANT ALL ON TYPES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_platform GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_platform GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_platform GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      SELECT 'Schema t_platform created for iqkv_{{ . }}' as status;"
+
+    # Create t_demo0001 schema
+    echo "Creating t_demo0001 schema for {{ . }}"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "
+      CREATE SCHEMA IF NOT EXISTS t_demo0001;
+      GRANT ALL ON SCHEMA t_demo0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT USAGE ON SCHEMA t_demo0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT CREATE ON SCHEMA t_demo0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_demo0001 GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_demo0001 GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_demo0001 GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_demo0001 GRANT ALL ON TYPES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_demo0001 GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_demo0001 GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_demo0001 GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      SELECT 'Schema t_demo0001 created for iqkv_{{ . }}' as status;"
+
+    # Create t_acme0001 schema
+    echo "Creating t_acme0001 schema for {{ . }}"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "
+      CREATE SCHEMA IF NOT EXISTS t_acme0001;
+      GRANT ALL ON SCHEMA t_acme0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT USAGE ON SCHEMA t_acme0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      GRANT CREATE ON SCHEMA t_acme0001 TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_acme0001 GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_acme0001 GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_acme0001 GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA t_acme0001 GRANT ALL ON TYPES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_acme0001 GRANT ALL ON TABLES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_acme0001 GRANT ALL ON SEQUENCES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+      ALTER DEFAULT PRIVILEGES FOR USER svc_{{ . }}_{{ $.Values.config.environment }}_dba IN SCHEMA t_acme0001 GRANT ALL ON ROUTINES TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
+
+      SELECT 'Schema t_acme0001 created for iqkv_{{ . }}' as status;"
+
+    echo "Finished creating tenant schemas for: {{ . }}"
+    {{- end }}
+
+    echo "=== Finalizing Initialization ==="
+    psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "SELECT datname FROM pg_database WHERE datname LIKE 'iqkv_%' ORDER BY datname;"
+
+    echo "=== Verifying Tenant Schemas ==="
+    {{- range .Values.config.microservices }}
+    echo "Schemas in iqkv_{{ . }}:"
+    psql --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name IN ('public', 't_platform', 't_demo0001', 't_acme0001') ORDER BY schema_name;"
+    {{- end }}
+
+    echo "Initialization script finished successfully."
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: postgresql
+  selector:
+    {{- include "foundation-infra.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgresql
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
+  serviceName: {{ .Release.Name }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "foundation-infra.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:17-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: postgresql
+          containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: {{ .Values.postgresql.auth.postgresPassword | quote }}
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_DB
+          value: {{ .Values.postgresql.auth.database | quote }}
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          {{- toYaml .Values.postgresql.primary.resources | nindent 10 }}
+        startupProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U postgres
+          initialDelaySeconds: 30
+          periodSeconds: {{ .Values.postgresql.primary.startupProbe.periodSeconds }}
+          timeoutSeconds: 5
+          failureThreshold: {{ .Values.postgresql.primary.startupProbe.failureThreshold }}
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U postgres
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U postgres
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: {{ include "foundation-infra.fullname" . }}-postgresql-init
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "foundation-infra.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.postgresql.primary.persistence.storageClass | default .Values.global.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.postgresql.primary.persistence.size }}
+{{- end }}

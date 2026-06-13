@@ -1,0 +1,168 @@
+# IQ Key Value Admin Dashboard UI - Production Environment Configuration
+# Production-ready configuration with high availability and security
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-ui-platform-admin
+  tag: "latest"
+  pullPolicy: Always
+
+# Deployment Configuration
+replicaCount: 3
+
+# Resource Configuration (Production)
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 500m
+
+# Runtime Environment Variables (Production endpoints)
+app:
+  environment: "prd"
+
+  # Nginx Configuration (Production)
+  nginx:
+    port: 8080
+    customConfig:
+      # Override site.conf for production-specific endpoints and SPA routing
+      # Override site.conf to add production-specific endpoints
+      # Note: SPA routing is already handled by the base nginx container's default.conf
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Metrics endpoint for monitoring
+        location /metrics {
+            access_log off;
+            return 200 "# Nginx metrics placeholder\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Security.txt for responsible disclosure
+        location /.well-known/security.txt {
+            return 200 "Contact: noreply@iqkv.dev\nExpires: 2025-12-31T23:59:59.000Z\n";
+            add_header Content-Type text/plain;
+        }
+
+      # Override CSP for production with strict policies
+      contentSecurityPolicyConf: |
+        # Strict CSP for production React SPA - allows iqkv.site subdomains and Stripe integration
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://*.iqkv.site wss://*.iqkv.site https://api.stripe.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+
+      # Override security headers for production hardening
+      securityConf: |
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "microphone=(), geolocation=(), camera=(), payment=(), usb=()" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+  env:
+    # API Configuration - Points to gateway service in production namespace
+    apiServerUrl: "https://api.iqkv.site/api"
+
+    # Production Configuration
+    enableMsw: "false"
+    logLevel: "warn"
+    demoMode: "false"
+
+# Ingress Configuration (Production)
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: true
+    certManager:
+      enabled: true
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    # SPA routing support - use upstream-hash-by for consistent routing
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$request_uri"
+    # WebSocket support for real-time features (e.g. notifications, live updates)
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/websocket-services: foundation-ui-platform-admin
+    # CORS is handled by the API backend, not the frontend ingress
+    # Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: admin.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+  prometheusRule:
+    enabled: true
+
+# Health Checks (Production)
+healthcheck:
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Node Selection and Affinity (Production)
+nodeSelector:
+  kubernetes.io/arch: amd64
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - foundation-ui-platform-admin
+          topologyKey: kubernetes.io/hostname
+
+# Security Context (Production hardening)
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  seccompProfile:
+    type: RuntimeDefault

@@ -1,0 +1,153 @@
+# Production Environment Configuration
+# Hardened security and optimized performance
+#
+# IMPORTANT: Connection passwords are overridden by Drone pipeline secrets:
+# - infraServices.postgresql.password from INFRA_POSTGRESQL_PASSWORD
+# - infraServices.rabbitmq.password from INFRA_RABBITMQ_PASSWORD
+
+# Application Configuration
+app:
+  environment: "prd"
+  springBoot:
+    profiles:
+      active: prd
+
+# Production image configuration
+image:
+  tag: "1.0.0" # Use specific version in production
+
+# Production deployment configuration
+replicaCount: 2
+
+# Production resource configuration
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 500m
+
+# JVM Configuration for production
+jvm:
+  maxRAMPercentage: "75.0"
+  initialRAMPercentage: "60.0"
+  minRAMPercentage: "60.0"
+  gcAlgorithm: "G1GC"
+  maxGCPauseMillis: "100"
+  additionalOpts: "-XX:+UseNUMA -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Xlog:gc*:file=/tmp/gc.log:time,uptime:filecount=10,filesize=20M"
+
+# Enable autoscaling in production
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# Production external services (in production namespace)
+infraServices:
+  postgresql:
+    host: "foundation-infra-postgresql.iqkv-prd-env.svc.cluster.local"
+    database: "iqkv_audit"
+    username: "svc_audit_prd_dba"
+    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+
+  rabbitmq:
+    host: "foundation-infra-rabbitmq.iqkv-prd-env.svc.cluster.local"
+    username: "svc_infra_prd_rmq"
+    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+
+# Production ingress configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  tls:
+    enabled: false
+    secretName: "audit-service-tls"
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+  hosts:
+    - host: audit-service.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Production configuration overrides
+config:
+  jwt:
+    publicKeyPath: "file:/run/secrets/public.pem"
+
+  messaging:
+    enabled: true
+
+# Enable production monitoring
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+# Production affinity for high availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - foundation-audit-service
+          topologyKey: kubernetes.io/hostname
+
+# Enable network policies in production
+networkPolicy:
+  enabled: true
+
+# Production-hardened security context
+podSecurityContext:
+  fsGroup: 1001
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+# Production health checks with tighter timeouts
+healthcheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8081
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8081
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# Platform rollout mode
+platform:
+  rolloutMode: "MULTI_TENANT"

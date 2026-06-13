@@ -1,0 +1,190 @@
+1. Get the application URLs by running these commands:
+
+{{- if .Values.postgresql.enabled }}
+
+PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
+
+    {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local - Read/Write connection
+
+Database connection details:
+{{- range .Values.config.microservices }}
+  - Service: {{ . }}
+    Database: iqkv_{{ . }}
+    Username: svc_{{ . }}_{{ $.Values.config.environment }}_dba
+    Password: {{ $.Values.config.postgresql.password }}
+{{- end }}
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-postgresql 5432:5432 &
+    PGPASSWORD="{{ .Values.config.postgresql.password }}" psql --host 127.0.0.1 -U svc_user_{{ .Values.config.environment }}_dba -d iqkv_user -p 5432
+
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+
+Redis can be accessed via port 6379 on the following DNS name from within your cluster:
+
+    {{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local for read/write operations
+
+To connect to your Redis server from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-redis-master 6379:6379 &
+    redis-cli -h 127.0.0.1 -p 6379
+
+{{- end }}
+
+{{- if .Values.rabbitmq.enabled }}
+
+RabbitMQ can be accessed within the cluster on port 5672 at:
+
+    {{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local
+
+Credentials:
+    Username: {{ .Values.config.rabbitmq.username }}
+    Password: {{ .Values.config.rabbitmq.password }}
+
+To access the RabbitMQ Management interface from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-rabbitmq 15672:15672 &
+    echo "RabbitMQ Management URL: http://127.0.0.1:15672/"
+
+{{- end }}
+
+{{- if .Values.mailhog.enabled }}
+
+MailHog can be accessed within the cluster on the following DNS names:
+
+    SMTP: {{ include "foundation-infra.fullname" . }}-mailhog.{{ .Release.Namespace }}.svc.cluster.local:1025
+    Web UI: {{ include "foundation-infra.fullname" . }}-mailhog.{{ .Release.Namespace }}.svc.cluster.local:8025
+
+To access the MailHog Web UI from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "foundation-infra.fullname" . }}-mailhog 8025:8025 &
+    echo "MailHog Web UI: http://127.0.0.1:8025/"
+
+{{- end }}
+
+{{- if .Values.dbgate.enabled }}
+
+DbGate can be accessed within the cluster on the following DNS name:
+
+    Web UI: {{ include "foundation-infra.fullname" . }}-dbgate.{{ .Release.Namespace }}.svc.cluster.local:3000
+
+To access the DbGate Web UI from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "foundation-infra.fullname" . }}-dbgate 3000:3000 &
+    echo "DbGate Web UI: http://127.0.0.1:3000/"
+
+DbGate is pre-configured with connections to:
+{{- if .Values.postgresql.enabled }}
+{{- range .Values.config.microservices }}
+  - PostgreSQL: {{ . | title }} Service (iqkv_{{ . }})
+{{- end }}
+{{- end }}
+{{- if .Values.redis.enabled }}
+  - Redis: Master instance
+{{- end }}
+
+{{- end }}
+
+{{- if .Values.minio.enabled }}
+
+MinIO can be accessed within the cluster on the following DNS names:
+
+    API: {{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9000
+    Console: {{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9001
+
+Credentials:
+    Access Key: {{ .Values.config.objectstorage.accessKey }}
+    Secret Key: {{ .Values.config.objectstorage.secretKey }}
+
+To access MinIO from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-minio 9000:9000 &
+    kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ .Release.Name }}-minio 9001:9001 &
+    echo "MinIO API: http://127.0.0.1:9000/"
+    echo "MinIO Console: http://127.0.0.1:9001/"
+
+{{- end }}
+
+{{- if .Values.ingress.enabled }}
+
+Ingress URLs (make sure to configure DNS or /etc/hosts):
+{{- if .Values.dbgate.enabled }}
+  - DbGate: http://{{ .Values.ingress.hosts.dbgate.host }}
+{{- end }}
+{{- if .Values.rabbitmq.enabled }}
+  - RabbitMQ Management: http://{{ .Values.ingress.hosts.rabbitmq.host }}
+{{- end }}
+{{- if .Values.mailhog.enabled }}
+  - MailHog: http://{{ .Values.ingress.hosts.mailhog.host }}
+{{- end }}
+{{- if .Values.minio.enabled }}
+  - MinIO Console: http://{{ .Values.ingress.hosts.minio.host }}
+{{- end }}
+
+{{- end }}
+
+2. Environment variables for your microservices:
+
+{{- if .Values.postgresql.enabled }}
+# PostgreSQL Database URLs
+{{- range .Values.config.microservices }}
+IQKV_DATABASE_{{ upper . }}_URL=jdbc:postgresql://{{ $.Release.Name }}-postgresql.{{ $.Release.Namespace }}.svc.cluster.local:5432/iqkv_{{ . }}
+IQKV_DATABASE_{{ upper . }}_USERNAME=svc_{{ . }}_{{ $.Values.config.environment }}_dba
+IQKV_DATABASE_{{ upper . }}_PASSWORD={{ $.Values.config.postgresql.password }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+# Redis Configuration
+IQKV_CACHE_REDIS_HOST={{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local
+IQKV_CACHE_REDIS_PORT=6379
+{{- if .Values.redis.auth.enabled }}
+IQKV_CACHE_REDIS_PASSWORD={{ .Values.redis.auth.password }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.rabbitmq.enabled }}
+# RabbitMQ Configuration
+IQKV_MESSAGING_RABBITMQ_HOST={{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local
+IQKV_MESSAGING_RABBITMQ_PORT=5672
+IQKV_MESSAGING_RABBITMQ_USERNAME={{ .Values.config.rabbitmq.username }}
+IQKV_MESSAGING_RABBITMQ_PASSWORD={{ .Values.config.rabbitmq.password }}
+{{- end }}
+
+{{- if .Values.mailhog.enabled }}
+# MailHog SMTP Configuration (Development)
+IQKV_MAIL_HOST={{ include "foundation-infra.fullname" . }}-mailhog.{{ .Release.Namespace }}.svc.cluster.local
+IQKV_MAIL_PORT=1025
+{{- end }}
+
+{{- if .Values.minio.enabled }}
+# MinIO Object Storage Configuration
+IQKV_STORAGE_MINIO_ENDPOINT={{ .Release.Name }}-minio.{{ .Release.Namespace }}.svc.cluster.local:9000
+IQKV_STORAGE_ACCESS_KEY={{ .Values.config.objectstorage.accessKey }}
+IQKV_STORAGE_SECRET_KEY={{ .Values.config.objectstorage.secretKey }}
+IQKV_STORAGE_BUCKET_UPLOADS=uploads
+IQKV_STORAGE_BUCKET_BACKUPS=backups
+{{- end }}
+
+3. Quick customization examples:
+
+# Change passwords
+helm upgrade {{ .Release.Name }} ./foundation-infra --set config.postgresql.password=newpass --set config.rabbitmq.password=newpass --set config.objectstorage.secretKey=newpass
+
+# Add more microservice databases
+helm upgrade {{ .Release.Name }} ./foundation-infra --set config.microservices="{iam,billing,contact,lead,pipeline,analytics}"
+
+# Reduce resources for K3s
+helm upgrade {{ .Release.Name }} ./foundation-infra --set postgresql.primary.resources.limits.memory=128Mi --set redis.master.resources.limits.memory=64Mi
+
+# Disable components
+helm upgrade {{ .Release.Name }} ./foundation-infra --set mailhog.enabled=false --set rabbitmq.enabled=false --set minio.enabled=false
+
+# Enable DbGate database administration
+helm upgrade {{ .Release.Name }} ./foundation-infra --set dbgate.enabled=true
+
+# Enable ingress for web access
+helm upgrade {{ .Release.Name }} ./foundation-infra --set ingress.enabled=true --set dbgate.enabled=true --set minio.enabled=true

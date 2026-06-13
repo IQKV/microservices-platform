@@ -1,0 +1,102 @@
+{{- if .Values.dbgate.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-dbgate
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dbgate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "foundation-infra.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: dbgate
+  template:
+    metadata:
+      labels:
+        {{- include "foundation-infra.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: dbgate
+    spec:
+      securityContext:
+        fsGroup: 0
+      initContainers:
+      - name: copy-connections
+        image: busybox:latest
+        command:
+        - sh
+        - -c
+        - |
+          cp /tmp/connections.jsonl /data/connections.jsonl
+          chmod 644 /data/connections.jsonl
+        volumeMounts:
+        - name: connections-config
+          mountPath: /tmp/connections.jsonl
+          subPath: connections.jsonl
+        - name: dbgate-data
+          mountPath: /data
+      containers:
+        - name: dbgate
+          securityContext:
+            runAsUser: 0
+          image: "{{ .Values.dbgate.image.repository }}:{{ .Values.dbgate.image.tag }}"
+          imagePullPolicy: {{ .Values.dbgate.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: WEB_ROOT
+              value: "/"
+            - name: LOGINS
+              value: "1"
+          volumeMounts:
+            - name: dbgate-data
+              mountPath: /root/.dbgate
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.dbgate.resources | nindent 12 }}
+      volumes:
+        - name: connections-config
+          configMap:
+            name: {{ include "foundation-infra.fullname" . }}-dbgate-config
+        - name: dbgate-data
+          emptyDir: {}
+      {{- with .Values.dbgate.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dbgate.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "foundation-infra.fullname" . }}-dbgate
+  labels:
+    {{- include "foundation-infra.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dbgate
+spec:
+  type: {{ .Values.dbgate.service.type }}
+  ports:
+    - port: {{ .Values.dbgate.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "foundation-infra.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: dbgate
+{{- end }}

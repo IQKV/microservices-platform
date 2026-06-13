@@ -1,0 +1,205 @@
+# IQ Key Value Infrastructure Services Configuration
+
+# Global settings
+global:
+  storageClass: "local-path"
+
+# Common configuration
+config:
+  postgresql:
+    password: "iqkv_password"
+  microservices:
+    - iam
+    - billing
+  rabbitmq:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_password"
+  redis:
+    password: "iqkv_password"
+  objectstorage:
+    accessKey: "iqkv"
+    secretKey: "iqkv_password"
+  environment: "sit"
+
+# PostgreSQL Configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "iqkv_password"
+    database: "iqkv"
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi
+      storageClass: "local-path"
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        memory: 256Mi
+        cpu: 200m
+    startupProbe:
+      failureThreshold: 60
+      periodSeconds: 10
+
+# Redis Configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "iqkv_password"
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClass: "local-path"
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m
+
+# RabbitMQ Configuration
+rabbitmq:
+  enabled: true
+  auth:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_password"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: "local-path"
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+# MinIO Configuration
+minio:
+  enabled: true
+  auth:
+    rootUser: "iqkv"
+    rootPassword: "iqkv_password"
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: "local-path"
+  service:
+    ports:
+      api: 80
+      console: 9001
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  # Buckets to create on first startup via the minio-init Job.
+  # Add one entry per service that needs object storage.
+  buckets:
+    - iqkv-iam-assets
+    - iqkv-billing-assets
+  # Buckets that should allow anonymous public GET (download).
+  # Use for user-facing assets like avatars that are served directly to browsers
+  # via a permanent URL (not presigned). Leave empty to keep all buckets private.
+  publicBuckets: []
+  # CORS allowed origins for presigned URL uploads from browser clients.
+  # At minimum include the UI app origin. Use "*" only for local dev.
+  # Overrides the URL MinIO redirects browsers to when the S3 API port is accessed.
+  # Set this to the external console ingress URL so the redirect goes to the right host/port.
+  # Leave empty to disable the override (MinIO will use its internal console port).
+  consoleRedirectUrl: ""
+  corsAllowedOrigins: "*"
+
+# MailHog Configuration
+mailhog:
+  enabled: true
+  image:
+    repository: mailhog/mailhog
+    tag: "v1.0.1"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    ports:
+      smtp: 1025
+      http: 8025
+  resources:
+    limits:
+      memory: 64Mi
+      cpu: 50m
+    requests:
+      memory: 32Mi
+      cpu: 25m
+
+# DbGate Configuration
+dbgate:
+  enabled: false
+  image:
+    repository: dbgate/dbgate
+    tag: "5.3.3"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  autoConfigureConnections: true
+  connections: []
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    dbgate:
+      host: dbgate.local
+      path: /
+    rabbitmq:
+      host: rabbitmq.local
+      path: /
+    mailhog:
+      host: mailhog.local
+      path: /
+    minio:
+      host: minio.local
+      path: /
+    minioConsole:
+      host: minio-console.local
+      path: /
+  tls: []
+
+# Development helpers
+dev:
+  exposeServices: false
+  debug: false
+
+# Network Policies
+networkPolicy:
+  enabled: false
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+
+# Security Context
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000

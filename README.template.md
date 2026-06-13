@@ -11,6 +11,7 @@
 - [Service Ecosystem](#service-ecosystem)
 - [Infrastructure](#infrastructure)
 - [Quick Start](#quick-start)
+- [CI/CD & Deployment](#cicd--deployment)
 - [Domain Adaptability](#domain-adaptability)
 
 ## Business Pillars
@@ -140,6 +141,17 @@ Access observability tools via the unified API domain:
 **Object Storage:**
 
 - **MinIO**: S3-compatible storage for file uploads, avatars, and documents. Services use MinIO for asset storage with dedicated buckets per service.
+
+## CI/CD & Deployment
+
+Reference Drone CI pipelines and Helm charts are in the [`cicd/`](cicd/README.md) folder.
+
+| Resource                                    | Description                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipelines — Java microservices (10-stage flow), frontend apps, and infrastructure |
+| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes — SIT, UAT, and production value files per chart                |
+
+> Template reference only. Adapt to your own Drone CI instance and Helm charts repository.
 
 ## Domain Adaptability
 

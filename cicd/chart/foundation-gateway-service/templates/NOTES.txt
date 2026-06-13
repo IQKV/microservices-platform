@@ -1,0 +1,62 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls.enabled }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "foundation-gateway-service.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "foundation-gateway-service.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "foundation-gateway-service.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "foundation-gateway-service.selectorLabels" . }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+
+2. Check the gateway service health:
+{{- if .Values.managementService.enabled }}
+  export MGMT_POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "{{ include "foundation-gateway-service.selectorLabels" . }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $MGMT_POD_NAME 8081:8081
+
+  Then visit:
+  - Health: http://127.0.0.1:8081/actuator/health
+  - Readiness: http://127.0.0.1:8081/actuator/health/readiness
+  - Liveness: http://127.0.0.1:8081/actuator/health/liveness
+  - Metrics: http://127.0.0.1:8081/actuator/prometheus
+  - Gateway Routes: http://127.0.0.1:8081/actuator/gateway/routes
+{{- end }}
+
+3. Access the API documentation:
+  - Swagger UI: http://127.0.0.1:8080/swagger-ui.html
+  - OpenAPI Spec: http://127.0.0.1:8080/api-docs
+
+4. Important API endpoints:
+  - Authentication: /api/v1/auth/*
+  - User Profile: /api/v1/users/me
+  - Admin APIs: /api/v1/admin/*
+{{- if .Values.infraServices.billingService.enabled }}
+  - Billing APIs: /api/v1/billing/*
+{{- end }}
+
+5. Active Spring profiles: {{ include "foundation-gateway-service.springProfiles" . }}
+
+6. Configuration notes:
+{{- if not .Values.config.cors.allowedOrigins }}
+  ⚠️  WARNING: CORS allowed origins not configured. Set config.cors.allowedOrigins in values.yaml
+{{- end }}
+
+7. External dependencies required:
+  - User Service: {{ .Values.infraServices.userService.url }}
+{{- if .Values.infraServices.billingService.enabled }}
+  - Billing Service: {{ .Values.infraServices.billingService.url }}
+{{- end }}
+
+8. Platform rollout mode: {{ .Values.platform.rolloutMode }}

@@ -1,0 +1,135 @@
+# K3s Full Configuration
+# Complete setup with all services for full development
+
+config:
+  postgresql:
+    password: "iqkv_sit_password"
+  microservices:
+    - audit
+    - iam
+    - billing
+  rabbitmq:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_sit_password"
+  redis:
+    password: "iqkv_sit_password"
+  objectstorage:
+    accessKey: "iqkv_sit"
+    secretKey: "iqkv_sit_password"
+  environment: "sit"
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "iqkv_sit_password"
+    database: "iqkv"
+  primary:
+    persistence:
+      size: 3Gi
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 200m
+      requests:
+        memory: 128Mi
+        cpu: 100m
+
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "iqkv_sit_password"
+  master:
+    persistence:
+      size: 1Gi
+    resources:
+      limits:
+        memory: 128Mi
+        cpu: 100m
+      requests:
+        memory: 64Mi
+        cpu: 50m
+
+rabbitmq:
+  enabled: true
+  auth:
+    username: "svc_infra_sit_rmq"
+    password: "iqkv_sit_password"
+  persistence:
+    size: 1Gi
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+# Enable MinIO for object storage
+minio:
+  enabled: true
+  auth:
+    rootUser: "iqkv_sit"
+    rootPassword: "iqkv_sit_password"
+  persistence:
+    size: 2Gi
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  buckets:
+    - iqkv-iam-assets
+    - iqkv-billing-assets
+  publicBuckets:
+    - iqkv-iam-assets
+  consoleRedirectUrl: "https://minio-console-sit.iqkv.site"
+  corsAllowedOrigins: "https://app.iqkv.site,https://admin.iqkv.site"
+
+mailhog:
+  enabled: true
+  resources:
+    limits:
+      memory: 64Mi
+      cpu: 50m
+    requests:
+      memory: 32Mi
+      cpu: 25m
+
+# Enable DbGate for database administration
+dbgate:
+  enabled: true
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 200m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+
+# Enable ingress for web access
+ingress:
+  enabled: true
+  annotations:
+    # NPM handles TLS termination externally — disable nginx ingress ssl-redirect
+    # to prevent it from redirecting WebSocket upgrade requests when it sees
+    # X-Forwarded-Proto: https sent by NPM.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+  hosts:
+    dbgate:
+      host: dbgate-sit.iqkv.site
+    rabbitmq:
+      host: rabbitmq-sit.iqkv.site
+    mailhog:
+      host: mailhog-sit.iqkv.site
+    minio:
+      host: minio-sit.iqkv.site
+    minioConsole:
+      host: minio-console-sit.iqkv.site
+
+dev:
+  exposeServices: false
+  debug: true

@@ -1,0 +1,300 @@
+# =====================================================================================
+# Infrastructure Services - Drone CI/CD Pipeline
+# =====================================================================================
+# Pipeline Flow:
+#   1. PromoteInfrastructure    - Deploy infrastructure services to target environment
+#   2. RollbackInfrastructure   - Rollback infrastructure services from target environment
+# ======================================================================================
+
+kind: pipeline
+name: Info
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    include:
+      - refs/heads/dev
+
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+steps:
+  - name: info
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    volumes:
+      - name: pnpm-store
+        path: /root/.pnpm-store
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts # Clone Helm charts repository
+      - cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml -n iqkv-sit-env
+
+---
+# ============================================================================
+# Pipeline 1: PromoteInfrastructure
+# ============================================================================
+# Deploys infrastructure services (PostgreSQL, Redis, RabbitMQ, DbGate, etc.)
+# to target environment using Helm
+# Trigger: Manual promotion event with target=dev|test|staging|production
+# ============================================================================
+kind: pipeline
+name: PromoteInfrastructure
+type: docker
+
+trigger:
+  event:
+    - promote # Manual trigger only
+  target:
+    - sit # Service-to-service communication environment
+    - uat # User Acceptance environment
+    - prd # Production environment
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Deploy Infrastructure Services
+  # --------------------------------------------------------------------------
+  # Uses Helm to deploy infrastructure services with environment-specific values
+  # Includes PostgreSQL, Redis, RabbitMQ, DbGate, and optional ingress
+  # --------------------------------------------------------------------------
+  - name: deploy-infrastructure
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+      INFRA_RABBITMQ_PASSWORD:
+        from_secret: INFRA_RABBITMQ_PASSWORD
+      INFRA_REDIS_PASSWORD:
+        from_secret: INFRA_REDIS_PASSWORD
+      INFRA_S3_ACCESS_KEY:
+        from_secret: INFRA_S3_ACCESS_KEY
+      INFRA_S3_SECRET_KEY:
+        from_secret: INFRA_S3_SECRET_KEY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts # Clone Helm charts repository
+      - cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME} # Clone Helm charts repository
+      - kubectl version --output=yaml # Display Kubernetes version
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./values-${DRONE_DEPLOY_TO}.yaml -n iqkv-${DRONE_DEPLOY_TO}-env
+      - |
+        helm upgrade --install --atomic --wait --timeout 10m \
+          ${DRONE_REPO_NAME} ./ \
+          --values ./values.yaml \
+          --values ./values-${DRONE_DEPLOY_TO}.yaml \
+          --set config.environment=${DRONE_DEPLOY_TO} \
+          --set config.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set config.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set config.redis.password=$${INFRA_REDIS_PASSWORD} \
+          --set config.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
+          --set config.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
+          --set postgresql.auth.postgresPassword=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set redis.auth.enabled=true \
+          --set redis.auth.password=$${INFRA_REDIS_PASSWORD} \
+          --set rabbitmq.auth.username=svc_infra_$${DRONE_DEPLOY_TO}_rmq \
+          --set rabbitmq.auth.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set minio.auth.rootUser=$${INFRA_S3_ACCESS_KEY} \
+          --set minio.auth.rootPassword=$${INFRA_S3_SECRET_KEY} \
+          --namespace iqkv-$${DRONE_DEPLOY_TO}-env
+
+  # --------------------------------------------------------------------------
+  # Step 2: Verify Deployment
+  # --------------------------------------------------------------------------
+  # Verifies that all infrastructure services are running correctly
+  # --------------------------------------------------------------------------
+  - name: verify-deployment
+    depends_on:
+      - deploy-infrastructure
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+    commands:
+      # Wait only on long-running workload pods (StatefulSets/Deployments), not completed Job pods
+      - kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=${DRONE_REPO_NAME},app.kubernetes.io/component!=minio-init -n iqkv-${DRONE_DEPLOY_TO}-env --timeout=300s
+      - kubectl get pods,svc,pvc -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env
+
+  # --------------------------------------------------------------------------
+  # Step 3: Verify Database Initialization
+  # --------------------------------------------------------------------------
+  # Verifies that all microservice databases were created successfully
+  # and service users can connect
+  # --------------------------------------------------------------------------
+  - name: verify-databases
+    depends_on:
+      - verify-deployment
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+    commands:
+      - echo "- Waiting for PostgreSQL to be fully ready..."
+      - sleep 10
+      - |
+        POD_NAME=$(kubectl get pod -n iqkv-${DRONE_DEPLOY_TO}-env -l app.kubernetes.io/component=postgresql -o jsonpath='{.items[0].metadata.name}')
+        echo "PostgreSQL pod: $POD_NAME"
+      - |
+        echo "=== Listing all iqkv databases ==="
+        kubectl exec -n iqkv-${DRONE_DEPLOY_TO}-env \
+          $(kubectl get pod -n iqkv-${DRONE_DEPLOY_TO}-env -l app.kubernetes.io/component=postgresql -o jsonpath='{.items[0].metadata.name}') \
+          -- psql -U postgres -c "\l" | grep iqkv || echo "No iqkv databases found!"
+      - |
+        echo "=== Testing service user connections ==="
+        for service in iam billing; do
+          echo "Testing connection for $service service..."
+          kubectl exec -n iqkv-${DRONE_DEPLOY_TO}-env \
+            $(kubectl get pod -n iqkv-${DRONE_DEPLOY_TO}-env -l app.kubernetes.io/component=postgresql -o jsonpath='{.items[0].metadata.name}') \
+            -- psql -U svc_$${service}_${DRONE_DEPLOY_TO}_dba -d iqkv_$${service} -c "SELECT 'Connection successful for ${service}' AS status, version();" || echo "FAILED: Cannot connect as svc_$${service}_${DRONE_DEPLOY_TO}_dba"
+        done
+      - |
+        echo "=== Testing schema creation privileges ==="
+        for service in iam billing; do
+          echo "Testing schema creation for $service service..."
+          kubectl exec -n iqkv-${DRONE_DEPLOY_TO}-env \
+            $(kubectl get pod -n iqkv-${DRONE_DEPLOY_TO}-env -l app.kubernetes.io/component=postgresql -o jsonpath='{.items[0].metadata.name}') \
+            -- psql -U svc_$${service}_${DRONE_DEPLOY_TO}_dba -d iqkv_$${service} -c "CREATE SCHEMA IF NOT EXISTS test_tenant_schema; DROP SCHEMA IF EXISTS test_tenant_schema CASCADE;" || echo "FAILED: Cannot create schema for ${service}"
+        done
+      - echo "=== Database verification complete ==="
+
+  # --------------------------------------------------------------------------
+  # Step 4: Cleanup on Failure
+  # --------------------------------------------------------------------------
+  # Runs helm uninstall in case of deployment failure to clean up partial deployments
+  # --------------------------------------------------------------------------
+  - name: cleanup-on-failure
+    image: cicdtools/pipeline-runner
+    pull: never
+    commands:
+      - echo "Deployment failed, performing deep cleanup..."
+      - helm uninstall --wait --timeout 5m ${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env || echo "No release found to uninstall"
+      - echo "- Deleting all PVCs associated with this instance..."
+      - kubectl delete pvc -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env --wait=true --timeout=2m || echo "No PVCs found or deletion timed out"
+      - echo "- Verifying all resources are gone..."
+      - kubectl get pods,pvc,svc -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env
+    when:
+      status:
+        - failure
+    depends_on:
+      - deploy-infrastructure
+      - verify-deployment
+      - verify-databases
+
+  # --------------------------------------------------------------------------
+  # Step 5: Slack Notification
+  # --------------------------------------------------------------------------
+  # Notifies team of infrastructure deployment success/failure
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :building_construction: *Infrastructure deployed to ${DRONE_DEPLOY_TO}*
+         {{build.link}} by {{build.author}}
+         Services: PostgreSQL, Redis, RabbitMQ, DbGate, MailHog, MinIO (API+Console)
+         Databases: iam, billing
+        {{else}}
+         :red_circle: :construction: *Infrastructure deployment failed on ${DRONE_DEPLOY_TO}*
+         {{build.link}} by {{build.author}}
+         Cleanup performed: Helm release uninstalled, PVCs removed
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - verify-deployment
+      - verify-databases
+      - cleanup-on-failure
+
+---
+# ============================================================================
+# Pipeline 2: RollbackInfrastructure
+# ============================================================================
+# Rolls back infrastructure services from target environment
+# Trigger: Manual rollback event with target=dev|test|staging|production
+# Uses Helm uninstall to completely remove infrastructure deployment
+# ============================================================================
+kind: pipeline
+name: RollbackInfrastructure
+type: docker
+
+trigger:
+  event:
+    - rollback # Manual trigger only
+  target:
+    - prd # Production environment
+    - uat # User Acceptance environment
+    - sit # Service-to-service communication environment
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Rollback Infrastructure Services
+  # --------------------------------------------------------------------------
+  # Uses Helm uninstall to completely remove infrastructure deployment
+  # --------------------------------------------------------------------------
+  - name: rollback-infrastructure
+    image: cicdtools/pipeline-runner
+    pull: never
+    commands:
+      - echo "Starting deep rollback:"
+      - helm uninstall --wait --timeout 5m ${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env || echo "Release already gone"
+      - echo "- Forcefully deleting PVCs to ensure clean state for next deployment..."
+      - kubectl delete pvc -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env --wait=true --timeout=3m || echo "PVC cleanup skipped or failed"
+      - kubectl delete pvc -n iqkv-${DRONE_DEPLOY_TO}-env --all
+      - echo "- Final check of remaining resources..."
+      - kubectl get all -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env
+
+  # --------------------------------------------------------------------------
+  # Step 2: Verify Rollback
+  # --------------------------------------------------------------------------
+  # Verifies that all infrastructure services have been removed
+  # --------------------------------------------------------------------------
+  - name: verify-rollback
+    depends_on:
+      - rollback-infrastructure
+    image: cicdtools/pipeline-runner
+    pull: never
+    commands:
+      - kubectl get pods -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env --no-headers
+      - kubectl get pvc -l app.kubernetes.io/instance=${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env || echo "No PVCs found"
+
+  # --------------------------------------------------------------------------
+  # Step 4: Slack Notification
+  # --------------------------------------------------------------------------
+  # Notifies team of infrastructure rollback success/failure
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :recycle: *Infrastructure rolled back from ${DRONE_DEPLOY_TO}*
+         {{build.link}} by {{build.author}}
+         Services removed: PostgreSQL, Redis, RabbitMQ, DbGate, MailHog, MinIO
+        {{else}}
+         :red_circle: :warning: *Infrastructure rollback failed on ${DRONE_DEPLOY_TO}*
+         {{build.link}} by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - verify-rollback

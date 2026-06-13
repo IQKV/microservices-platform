@@ -1,0 +1,29 @@
+apiVersion: v2
+name: foundation-gateway-service
+description: API Gateway with routing, authentication, rate limiting, and multi-service orchestration
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqkv
+  - gateway-service
+  - api-gateway
+  - spring-cloud-gateway
+  - authentication
+  - rate-limiting
+  - routing
+  - reactive
+  - microservices
+  - security
+  - cors
+  - jwt
+  - external-services
+
+home: https://github.com/IQKV/foundation-gateway-service
+sources:
+  - https://github.com/IQKV/foundation-gateway-service
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

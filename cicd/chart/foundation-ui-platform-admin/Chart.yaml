@@ -1,0 +1,28 @@
+apiVersion: v2
+name: foundation-ui-platform-admin
+description: React-based application portal UI with Nginx serving, runtime configuration via ConfigMap, and SPA routing support
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqscaffold
+  - admin-dashboard
+  - react
+  - nginx
+  - spa
+  - application
+  - frontend
+  - ui
+  - vite
+  - tanstack-router
+  - mantine
+  - runtime-config
+
+home: https://github.com/IQKV/foundation-ui-platform-admin
+sources:
+  - https://github.com/IQKV/foundation-ui-platform-admin
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

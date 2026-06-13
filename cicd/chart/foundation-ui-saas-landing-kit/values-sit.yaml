@@ -1,0 +1,88 @@
+# IQ Key Value SaaS Landing Kit - Development Environment Configuration
+# Overrides for local development and testing
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-ui-saas-landing-kit
+  tag: "wip"
+  pullPolicy: Always
+
+# Resource Configuration (Lower for development)
+resources:
+  limits:
+    memory: 128Mi
+    cpu: 100m
+  requests:
+    memory: 64Mi
+    cpu: 50m
+
+# Health Checks (Faster for development)
+healthcheck:
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Runtime Environment Variables (Development endpoints)
+app:
+  environment: "sit"
+
+  # Nginx Configuration (Development)
+  nginx:
+    port: 8080
+    customConfig:
+      # Override site.conf to add health check endpoint
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+      # CSP for static landing page (development)
+      contentSecurityPolicyConf: |
+        # CSP for development static landing page
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self'; object-src 'none'; base-uri 'self';" always;
+
+      # Use base image security headers (sufficient for development)
+      securityConf: ""
+
+# Ingress Configuration (Development)
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: false
+    certManager:
+      enabled: false
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # Preserve headers from upstream proxy (Nginx Proxy Manager)
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    # SSL handled by upstream proxy
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+  hosts:
+    - host: iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: www.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Monitoring (Disabled for development)
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false
+
+# Autoscaling (Disabled for development)
+autoscaling:
+  enabled: false

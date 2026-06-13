@@ -1,0 +1,727 @@
+# =====================================================================================
+# Audit Service - Drone CI/CD Pipeline
+# =====================================================================================
+# Pipeline Flow:
+#   1. VerifyCode                       - Code quality, tests, and static analysis
+#   2. PublishArtifacts                 - Maven artifacts to Nexus repository
+#   3. PublishDockerImage               - Container images to registry
+#   4. DeployWorkInProgress             - Wip branch deployments to dev environment
+#   5. RollbackWorkInProgress           - Rollback wip deployments
+#   6. PromoteFeatureDeployment         - Feature branch deployments to SIT environment
+#   7. RollbackFeatureDeployment        - Rollback feature deployments
+#   8. PromoteDeployment                - Release deployments to staging/production
+#   9. RollbackDeployment               - Rollback release deployments
+#   10. ReleasePackage                  - Automated version management
+# =====================================================================================
+
+# ============================================================================
+# Pipeline 1: VerifyCode
+# ============================================================================
+kind: pipeline
+name: VerifyCode
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    include:
+      - refs/heads/dev
+      - refs/heads/feature/*
+      - refs/heads/rfc/*
+      - refs/heads/poc/*
+      - refs/heads/bugfix/*
+      - refs/heads/improvement/*
+      - refs/heads/prerelease/*
+      - refs/heads/library/*
+      - refs/heads/hotfix/*
+      - refs/heads/*.*.x
+      - refs/tags/*
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: npm-cache
+    host:
+      path: /app/.npm-cache
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Code Coverage Gate
+  # --------------------------------------------------------------------------
+  - name: code-coverage-gate
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - javac -version
+      - mvn -version
+      # - yamllint .
+      - pnpm install --frozen-lockfile --ignore-scripts && pnpm lint
+      - mvn dependency:resolve -U -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - mvn clean verify -Dstyle.color=always -Dmaven.javadoc.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+
+  # --------------------------------------------------------------------------
+  # Step 2: Static Analysis Gate
+  # --------------------------------------------------------------------------
+  - name: static-analysis-gate
+    depends_on:
+      - code-coverage-gate
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+      - name: npm-cache
+        path: /root/.npm
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+      SONAR_HOST:
+        from_secret: SONAR_HOST
+      SONAR_TOKEN:
+        from_secret: SONAR_TOKEN
+    commands:
+      - mvn org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies -Dmdep.prependGroupId=true -Dstyle.color=always -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.6.0.6792:sonar '-Dsonar.java.libraries=target/dependency/*.jar' '-Dsonar.java.test.libraries=target/classes,target/dependency/*.jar' -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300 -Dsonar.host.url=$SONAR_HOST -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dsonar.projectName=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dstyle.color=always -Dmaven.javadoc.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - pmd check --minimum-priority High -d src -f text -R https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/pmd/ruleset.xml
+      - mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.3:check -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD -Dspotbugs.xmlOutput=true -Dspotbugs.failOnError=true -Dspotbugs.excludeFilterFile=../spotbugs-exclude.xml -Dspotbugs.includeTests=true -Dstyle.color=always
+
+  # --------------------------------------------------------------------------
+  # Step 3: Slack Notification (Failure Only)
+  # --------------------------------------------------------------------------
+  - name: notify-slack-on-failure
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        :red_circle: :thunder_cloud_and_rain: {{build.link}} ({{build.branch}}) by {{build.author}}
+    when:
+      status:
+        - failure
+    depends_on:
+      - code-coverage-gate
+      - static-analysis-gate
+
+---
+# ============================================================================
+# Pipeline 2: PublishArtifacts
+# ============================================================================
+kind: pipeline
+name: PublishArtifacts
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/dev
+    - refs/heads/prerelease/*
+    - refs/heads/*.*.x
+    - refs/tags/*
+
+depends_on:
+  - VerifyCode
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Publish SNAPSHOT JAR
+  # --------------------------------------------------------------------------
+  - name: publish-snapshot-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - mvn deploy -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD -DaltDeploymentRepository=kh-contrib-snapshots-repo::https://know-how.nexus/repository/maven-snapshots
+    when:
+      branch:
+        include:
+          - "dev"
+          - "prerelease/*"
+          - "*.*.x"
+
+  # --------------------------------------------------------------------------
+  # Step 2: Publish Release JAR
+  # --------------------------------------------------------------------------
+  - name: publish-release-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - mvn deploy -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD -DaltDeploymentRepository=kh-contrib-releases-repo::https://know-how.nexus/repository/maven-releases
+    when:
+      ref:
+        - "refs/tags/*"
+
+  # --------------------------------------------------------------------------
+  # Step 3: Create GitHub Release
+  # --------------------------------------------------------------------------
+  - name: create-github-release
+    depends_on:
+      - publish-release-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+      - name: npm-cache
+        path: /root/.npm
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_API_ACCESS_TOKEN
+    commands:
+      - git checkout -b release
+      - pnpm install --frozen-lockfile --ignore-scripts && git config --unset core.hooksPath
+      - wget -O ./.release-it.json https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/release-it/release.json
+      - git fetch --tags
+      - release-it --ci --no-increment -VV
+      - git status
+    when:
+      ref:
+        - "refs/tags/*"
+
+  # --------------------------------------------------------------------------
+  # Step 4: Slack Notification
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :package: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :package: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - publish-snapshot-jar
+      - publish-release-jar
+
+---
+# ============================================================================
+# Pipeline 3: PublishDockerImage
+# ============================================================================
+kind: pipeline
+name: PublishDockerImage
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    include:
+      - refs/heads/wip
+      - refs/heads/feature/*
+      - refs/tags/*
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  # --------------------------------------------------------------------------
+  # Step 1: Package JAR File
+  # --------------------------------------------------------------------------
+  - name: package-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/JDK.alpine-simple.dockerfile
+      - mvn package -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+
+  # --------------------------------------------------------------------------
+  # Step 2: Build WIP Branch Docker Image
+  # --------------------------------------------------------------------------
+  - name: build-wip-container
+    depends_on:
+      - package-jar
+    image: plugins/docker
+    settings:
+      dockerfile: ./Dockerfile
+      context: ./
+      storage_driver: vfs
+      username:
+        from_secret: SVC_CONTAINER_REGISTRY_USERNAME
+      password:
+        from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
+      repo: know-how.download/${DRONE_REPO_OWNER,,}/${DRONE_REPO_NAME}
+      registry: know-how.download
+      force_tag: true
+      build_args:
+        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - VCS_REFERENCE=${DRONE_COMMIT}
+      tags:
+        - ${DRONE_BRANCH}
+      purge: true
+      compress: true
+    when:
+      branch:
+        include:
+          - "wip"
+
+  # --------------------------------------------------------------------------
+  # Step 3: Build Feature Branch Docker Image
+  # --------------------------------------------------------------------------
+  - name: build-container-with-feature
+    depends_on:
+      - package-jar
+    image: plugins/docker
+    settings:
+      dockerfile: ./Dockerfile
+      context: ./
+      storage_driver: vfs
+      username:
+        from_secret: SVC_CONTAINER_REGISTRY_USERNAME
+      password:
+        from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
+      repo: know-how.download/${DRONE_REPO_OWNER,,}/${DRONE_REPO_NAME}
+      registry: know-how.download
+      force_tag: true
+      build_args:
+        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - VCS_REFERENCE=${DRONE_COMMIT}
+      tags:
+        - ${DRONE_BRANCH:8} # Strips 'feature/' prefix
+    when:
+      branch:
+        include:
+          - "feature/*"
+
+  # --------------------------------------------------------------------------
+  # Step 4: Build Release Docker Image
+  # --------------------------------------------------------------------------
+  - name: build-container-release
+    depends_on:
+      - package-jar
+    image: plugins/docker
+    settings:
+      dockerfile: ./Dockerfile
+      context: ./
+      storage_driver: vfs
+      username:
+        from_secret: SVC_CONTAINER_REGISTRY_USERNAME
+      password:
+        from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
+      repo: know-how.download/${DRONE_REPO_OWNER,,}/${DRONE_REPO_NAME}
+      registry: know-how.download
+      force_tag: true
+      build_args:
+        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - VCS_REFERENCE=${DRONE_COMMIT}
+      tags:
+        - ${DRONE_TAG}
+    when:
+      ref:
+        - "refs/tags/*"
+
+---
+# ============================================================================
+# Pipeline 4: DeployWorkInProgress
+# ============================================================================
+kind: pipeline
+name: DeployWorkInProgress
+type: docker
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/wip
+
+depends_on:
+  - PublishDockerImage
+
+steps:
+  # --------------------------------------------------------------------------
+  # Deploy to SIT Environment
+  # --------------------------------------------------------------------------
+  - name: deploy
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+      INFRA_RABBITMQ_PASSWORD:
+        from_secret: INFRA_RABBITMQ_PASSWORD
+      SMTP_USERNAME:
+        from_secret: SMTP_USERNAME
+      SMTP_PASSWORD:
+        from_secret: SMTP_PASSWORD
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - kubectl version --output=yaml
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-sit-env || true
+      - |
+        helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
+          --values ./values.yaml \
+          --values ./values-sit.yaml \
+          --set image.tag=${DRONE_BRANCH} \
+          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set config.mail.username=$${SMTP_USERNAME} \
+          --set config.mail.password=$${SMTP_PASSWORD} \
+          --namespace iqkv-sit-env \
+          --create-namespace
+
+  # --------------------------------------------------------------------------
+  # Slack Notification
+  # --------------------------------------------------------------------------
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :ship: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :anchor: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - deploy
+
+---
+# ============================================================================
+# Pipeline 5: RollbackWorkInProgress
+# ============================================================================
+kind: pipeline
+name: RollbackWorkInProgress
+type: docker
+trigger:
+  event:
+    - rollback
+  target:
+    - sit
+  ref:
+    - "refs/heads/wip"
+
+steps:
+  - name: rollback
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-sit-env
+
+---
+# ============================================================================
+# Pipeline 6: PromoteFeatureDeployment
+# ============================================================================
+kind: pipeline
+name: PromoteFeatureDeployment
+type: docker
+trigger:
+  event:
+    - promote
+  target:
+    - sit
+  ref:
+    - "refs/heads/feature/*"
+
+steps:
+  - name: deploy
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+      INFRA_RABBITMQ_PASSWORD:
+        from_secret: INFRA_RABBITMQ_PASSWORD
+      SMTP_USERNAME:
+        from_secret: SMTP_USERNAME
+      SMTP_PASSWORD:
+        from_secret: SMTP_PASSWORD
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - kubectl version --output=yaml
+      - |
+        helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
+          --values ./values.yaml \
+          --values ./values-${DRONE_DEPLOY_TO}.yaml \
+          --set image.tag=${DRONE_BRANCH:8} \
+          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set infraServices.rabbitmq.password=${INFRA_RABBITMQ_PASSWORD} \
+          --set config.mail.username=$${SMTP_USERNAME} \
+          --set config.mail.password=$${SMTP_PASSWORD} \
+          --namespace iqkv-${DRONE_DEPLOY_TO}-env \
+          --create-namespace
+
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :ship: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :anchor: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - deploy
+
+---
+# ============================================================================
+# Pipeline 7: RollbackFeatureDeployment
+# ============================================================================
+kind: pipeline
+name: RollbackFeatureDeployment
+type: docker
+trigger:
+  event:
+    - rollback
+  target:
+    - sit
+  ref:
+    - "refs/heads/feature/*"
+
+steps:
+  - name: rollback
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env
+
+---
+# ============================================================================
+# Pipeline 8: PromoteDeployment
+# ============================================================================
+kind: pipeline
+name: PromoteDeployment
+type: docker
+trigger:
+  event:
+    - promote
+  target:
+    - uat
+    - prd
+  ref:
+    - "refs/tags/*"
+
+steps:
+  - name: deploy
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+      INFRA_POSTGRESQL_PASSWORD:
+        from_secret: INFRA_POSTGRESQL_PASSWORD
+      INFRA_RABBITMQ_PASSWORD:
+        from_secret: INFRA_RABBITMQ_PASSWORD
+      SMTP_USERNAME:
+        from_secret: SMTP_USERNAME
+      SMTP_PASSWORD:
+        from_secret: SMTP_PASSWORD
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - kubectl version --output=yaml
+      - |
+        helm upgrade --install --atomic --wait --timeout 5m ${DRONE_REPO_NAME} ./ \
+          --values ./values.yaml \
+          --values ./values-${DRONE_DEPLOY_TO}.yaml \
+          --set image.tag=${DRONE_TAG} \
+          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set config.mail.username=$${SMTP_USERNAME} \
+          --set config.mail.password=$${SMTP_PASSWORD} \
+          --namespace iqkv-${DRONE_DEPLOY_TO}-env \
+          --create-namespace
+
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :ship: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :anchor: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - deploy
+
+---
+# ============================================================================
+# Pipeline 9: RollbackDeployment
+# ============================================================================
+kind: pipeline
+name: RollbackDeployment
+type: docker
+trigger:
+  event:
+    - rollback
+  target:
+    - uat
+    - prd
+  ref:
+    - "refs/tags/*"
+
+steps:
+  - name: rollback
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
+      - helm uninstall --wait --timeout 2m ${DRONE_REPO_NAME} -n iqkv-${DRONE_DEPLOY_TO}-env
+
+---
+# ============================================================================
+# Pipeline 10: ReleasePackage
+# ============================================================================
+kind: pipeline
+name: ReleasePackage
+type: docker
+trigger:
+  event:
+    - promote
+  target:
+    - release
+  branch:
+    - "dev"
+    - "*.*.x"
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  - name: create-release-tag
+    failure: ignore
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_API_ACCESS_TOKEN
+    commands:
+      - export RELEASE_VERSION=$(jq -r .version package.json | cut -d '-' -f 1)
+      - export INCREMENT_COMMAND="increment_version -m $${RELEASE_VERSION}"
+      - export SNAPSHOT_VERSION=$($${INCREMENT_COMMAND})
+      - echo Prepare new version $${RELEASE_VERSION}
+      - export NEXT_SNAPSHOT=$${SNAPSHOT_VERSION}-SNAPSHOT
+      - export GIT_AUTHOR_NAME="$${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_AUTHOR_EMAIL="$${SVC_BUILD_GIT_EMAIL}"
+      - export GIT_COMMITTER_NAME="$${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_COMMITTER_EMAIL=$${SVC_BUILD_GIT_EMAIL}
+      - git remote set-url --push origin ${DRONE_GIT_SSH_URL}
+      - git checkout -b v$${RELEASE_VERSION}
+      - mvn versions:set -DremoveSnapshot
+      - mvn versions:set -DnewVersion=$${RELEASE_VERSION}
+      - mvn versions:update-parent
+      - >-
+        git commit -a -m "chore: bump v$${RELEASE_VERSION}"
+      - git tag $${RELEASE_VERSION} && git push origin $${RELEASE_VERSION}
+      - echo "✅ Release tag $${RELEASE_VERSION} was created."
+      - sleep 10
+      - git tag -d $${RELEASE_VERSION} && git checkout ${DRONE_COMMIT_BRANCH} && git branch -D v$${RELEASE_VERSION}
+      - mvn versions:set -DnewVersion=$${NEXT_SNAPSHOT}
+      - mvn versions:update-parent -DallowSnapshots=true
+      - pnpm install --frozen-lockfile --ignore-scripts && git config --unset core.hooksPath
+      - wget -O ./.release-it.json https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/release-it/changelog.json
+      - git fetch --tags
+      - release-it --ci --no-increment -VV
+      - npm version $${SNAPSHOT_VERSION} --no-git-tag-version
+      - >-
+        git commit -a -m "chore: create new $${NEXT_SNAPSHOT}"
+      - git push origin ${DRONE_COMMIT_BRANCH}
+      - echo "✅ Started $${NEXT_SNAPSHOT}."
+      - echo "🚀 Good job, new version $${RELEASE_VERSION} was released successfully."

@@ -1,0 +1,23 @@
+apiVersion: v2
+name: foundation-audit-service
+description: Centralized audit logging service for IQKV platform.
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqkv
+  - audit-service
+  - multi-tenant
+  - spring-boot
+  - microservices
+  - security
+  - mybatis
+  - audit-logging
+
+home: https://github.com/IQKV/foundation-audit-service
+sources:
+  - https://github.com/IQKV/foundation-audit-service
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev
