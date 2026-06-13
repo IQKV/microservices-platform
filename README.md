@@ -3,7 +3,10 @@
 > Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
 [![Project Site](https://img.shields.io/badge/Project-iqkv.dev-blue?style=for-the-badge&logo=appveyor)](https://iqkv.dev)
-[![Live Demo](https://img.shields.io/badge/Demo-iqkv.site-success?style=for-the-badge&logo=playstation)](https://iqkv.site)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-iqkv.site-success?style=for-the-badge&logo=rocket)](https://iqkv.site)
+[![Tenant App](https://img.shields.io/badge/Tenant%20App-app.iqkv.site-informational?style=for-the-badge)](https://app.iqkv.site)
+[![Platform Admin](https://img.shields.io/badge/Platform%20Admin-admin.iqkv.site-blueviolet?style=for-the-badge)](https://admin.iqkv.site)
+[![Swagger UI](https://img.shields.io/badge/API%20Docs-swagger-orange?style=for-the-badge&logo=swagger)](https://api.iqkv.site/swagger-ui.html)
 
 <div align="center">
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/novustools-mockup-1781349539211.png?raw=true" width="600" alt="IQKV Platform — Platform Admin">
@@ -13,6 +16,7 @@
 
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Business Purpose](#business-purpose)
 - [Platform Services](#platform-services)
 - [Architecture Overview](#architecture-overview)
@@ -20,9 +24,38 @@
 - [Architecture Patterns](#architecture-patterns)
 - [Getting Started](#getting-started)
 - [CI/CD & Deployment](#cicd--deployment)
-- [Monitoring](#monitoring)
+- [Adding a New Microservice](#adding-a-new-microservice)
 - [Learning Objectives](#learning-objectives)
 - [Adapting for Your Domain](#adapting-for-your-domain)
+
+## Live Demo
+
+The platform runs live at **[iqkv.site](https://iqkv.site)** — a fully deployed instance of this repository with all services, both SPAs, and the complete observability stack.
+
+### Public entry points
+
+| URL | What you see |
+|---|---|
+| [app.iqkv.site](https://app.iqkv.site) | Tenant App — sign up, sign in, team management, invitations, account profile |
+| [admin.iqkv.site](https://admin.iqkv.site) | Platform Admin — global user/org management, subscription monitoring, plan catalog |
+| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI — all backend APIs in one place |
+
+> Observability tools (Grafana, Prometheus, RabbitMQ management, MailHog) are available in the local Docker demo only — see [Getting Started](#getting-started).
+
+### Demo credentials
+
+The demo instance runs in `MULTI_TENANT` mode. You can sign up freely — each registration creates an isolated tenant workspace. Platform Admin access and billing test credentials are available on request.
+
+### What the demo illustrates
+
+- End-to-end **multi-tenant signup flow**: registration → email verification → tenant provisioning (async via RabbitMQ) → login
+- **Invitation flow**: tenant owner invites a team member, invitee receives email via MailHog, accepts, joins workspace
+- **In-app notifications and announcements**: real-time WebSocket push visible in the Tenant App notification bell
+- **JWT lifecycle**: obtain token at IAM, validated at Gateway via JWKS, user context propagated downstream as headers
+- **Subscription management**: create plan, subscribe via Stripe test mode, observe `subscription.created` event flow to IAM (tenant status) and Audit
+- **Audit trail**: every event (signup, login, invitation, subscription) visible in the Platform Admin audit log
+- **Observability**: Grafana, Prometheus, RabbitMQ management, and MailHog are available locally via the Docker demo stack — run `./demo.sh` to access them at `http://api.iqkv.local/services/*`
+- **Platform mode guard**: Gateway polls IAM `/actuator/info` every 60 s — mismatched `rolloutMode` across services triggers 503
 
 ## Business Purpose
 
@@ -455,16 +488,109 @@ Each service uses isolated named volumes and a dedicated Docker network — runn
 
 The platform ships reference CI/CD pipelines and Helm charts in the [`cicd/`](cicd/README.md) folder.
 
-| Resource                                    | Description                                                                                                                                  |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resource | Description |
+|---|---|
 | [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipeline definitions for every service — Java microservices (10-pipeline flow), frontend apps (4-pipeline flow), and infrastructure |
-| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes deployment across SIT, UAT, and production environments                                                           |
+| [`cicd/chart/`](cicd/chart/README.md) | Helm charts for Kubernetes deployment across SIT, UAT, and production environments |
 
 **Pipeline flow for Java services:** `VerifyCode` (tests + SonarQube + PMD + SpotBugs) → `PublishArtifacts` (Nexus) → `PublishDockerImage` → `DeployWorkInProgress` (SIT auto) → `PromoteFeatureDeployment` / `PromoteDeployment` (manual promote) → `ReleasePackage` (semver automation).
 
 **Helm charts** cover all platform components — `foundation-infra` (PostgreSQL, Redis, RabbitMQ, MinIO, MailHog), backend services, and frontend SPAs — with `values-sit.yaml`, `values-uat.yaml`, and `values-prd.yaml` variants.
 
 > These files are **template references**. They run against a self-hosted Drone CI instance and a separate Helm charts repository. See [`cicd/README.md`](cicd/README.md) for required secrets and adaptation instructions.
+
+## Adding a New Microservice
+
+The [`cicd/pipeline/foundation-microservice-project-layout.yml`](cicd/pipeline/foundation-microservice-project-layout.yml) is the **canonical template** for adding a service to the platform. It encodes every convention the ecosystem enforces — quality gates, release automation, deployment pipeline, Helm integration — so new services slot in without improvising.
+
+### What the template gives you
+
+- **10-pipeline Drone CI flow** — the full lifecycle from push to production: verify → publish artifacts → publish Docker image → deploy to SIT → promote to UAT/PRD → automated release
+- **Quality gates wired in** — `mvn clean verify` (JaCoCo + Checkstyle), SonarQube with quality gate wait, PMD High-priority rules, SpotBugs
+- **Conventional release automation** — `ReleasePackage` strips `-SNAPSHOT`, creates git tag, bumps pom + `package.json` to next SNAPSHOT, regenerates `CHANGELOG.md` via `release-it`, all in one promote trigger
+- **Consistent image tagging** — `wip` → `:wip`, `feature/my-thing` → `:my-thing`, release tag → `:1.2.3`
+- **Helm-based atomic deployment** — deploy steps run `helm upgrade --install --atomic --wait` with automatic rollback on failure
+- **Rollback pipelines** — matching `Rollback*` pipelines for every target via `helm uninstall`
+- **Slack notifications** — success/failure webhooks on every significant step with consistent emoji convention
+
+### Steps to add a service
+
+**1. Bootstrap the Maven module**
+
+Add your service to the root `pom.xml`:
+
+```xml
+<modules>
+    ...
+    <module>foundation-your-service</module>
+</modules>
+```
+
+Inherit from `com.iqkv:boot-parent-pom`. This pulls in Checkstyle config, JaCoCo thresholds, Surefire/Failsafe split, dependency management, and plugin versions.
+
+**2. Follow the package structure**
+
+```
+foundation-your-service/src/main/java/com/iqkv/your/
+├── config/          — @Configuration classes, @ConfigurationProperties records
+├── domain/          — entities, business objects
+├── repository/      — JPA repositories or MyBatis mappers
+├── service/         — business logic, @Transactional
+├── presentation/
+│   ├── web/         — public REST controllers
+│   └── admin/       — PLATFORM_ADMIN-only endpoints
+├── security/        — service-specific security config and filters
+├── exception/       — domain exceptions + @ControllerAdvice (RFC 7807)
+└── YourServiceApplication.java
+```
+
+**3. Wire platform cross-cutting concerns**
+
+These are non-negotiable for every platform service:
+
+| Concern | How |
+|---|---|
+| Correlation ID | Read `X-Correlation-ID` from request, attach to MDC, include in all log lines |
+| Structured logging | Use Logstash Logback Encoder — JSON output, no plaintext in production |
+| Health checks | Expose `/actuator/health/liveness` and `/actuator/health/readiness` on port 8081 |
+| Tenant context | Read `X-Tenant-ID` header (injected by Gateway), validate, store in `TenantContext` |
+| User context | Read `X-User-ID`, `X-Username`, `X-User-Authorities` headers (injected by Gateway) |
+| JWT | Configure as OAuth2 Resource Server — validate against IAM JWKS endpoint |
+| Metrics | Expose `/actuator/prometheus`; add Micrometer counters for critical business operations |
+| OpenAPI | Annotate controllers and DTOs with SpringDoc; Gateway aggregates specs automatically |
+| Error responses | Return RFC 7807 `ProblemDetail` — no custom error envelope schemas |
+| Rollout mode | Read `platform.rolloutMode` from config; fail fast at startup if inconsistent with other services |
+
+**4. Publish domain events**
+
+Route keys follow the convention `your-domain.{verb}` and `notification.your-service.email`. The Audit Service binds to `#` wildcards — your events are automatically captured without any Audit Service changes.
+
+**5. Add Helm chart**
+
+Copy an existing backend chart (e.g. `cicd/chart/foundation-billing-service`). Required sections:
+
+- `infraServices.postgresql.*` and optionally `infraServices.rabbitmq.*`
+- `platform.rolloutMode` — must match all other services in the release
+- Dual management services on port 8081 (`managementService` and `managementHttpService`)
+- Liveness/readiness probes on `/actuator/health/*` port 8081
+- Non-root security context (`runAsUser: 1001`, `capabilities.drop: [ALL]`)
+- `monitoring.serviceMonitor` + `monitoring.prometheusRule` blocks (disabled by default)
+
+Store the chart in the Helm charts repository under `{org}/{repo-name}/`.
+
+**6. Copy and configure the pipeline**
+
+Copy `cicd/pipeline/foundation-microservice-project-layout.yml` to your service repo. Adjust `--set` flags to match your `values.yaml` keys and add service-specific secrets. The `sonar.projectKey` derives automatically from `${DRONE_REPO_OWNER}:${DRONE_REPO_NAME}`.
+
+**7. Add architecture tests**
+
+Every service enforces layer rules with ArchUnit. Copy the test class from an existing service, update the package prefix, and verify on first build.
+
+**8. Register in the monorepo**
+
+- Add to `compose.demo.yaml` in the correct startup order (after `foundation-infra`, before `foundation-gateway-service`)
+- Add a route in Gateway routing config pointing to the new service
+- Update the Platform Services section in this README
 
 ## Learning Objectives
 

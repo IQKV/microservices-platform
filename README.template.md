@@ -3,16 +3,35 @@
 > Enterprise microservices foundation for scalable SaaS products. Essential business infrastructure—Identity, Payments, and API Gateway—on secure, multi-tenant architecture.
 
 [![Project Site](https://img.shields.io/badge/Project-iqkv.dev-blue?style=for-the-badge&logo=appveyor)](https://iqkv.dev)
-[![Live Demo](https://img.shields.io/badge/Demo-iqkv.site-success?style=for-the-badge&logo=playstation)](https://iqkv.site)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-iqkv.site-success?style=for-the-badge&logo=rocket)](https://iqkv.site)
+[![Tenant App](https://img.shields.io/badge/Tenant%20App-app.iqkv.site-informational?style=for-the-badge)](https://app.iqkv.site)
+[![Platform Admin](https://img.shields.io/badge/Platform%20Admin-admin.iqkv.site-blueviolet?style=for-the-badge)](https://admin.iqkv.site)
+[![Swagger UI](https://img.shields.io/badge/API%20Docs-swagger-orange?style=for-the-badge&logo=swagger)](https://api.iqkv.site/swagger-ui.html)
 
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Business Pillars](#business-pillars)
 - [Service Ecosystem](#service-ecosystem)
 - [Infrastructure](#infrastructure)
 - [Quick Start](#quick-start)
 - [CI/CD & Deployment](#cicd--deployment)
+- [Adding a New Microservice](#adding-a-new-microservice)
 - [Domain Adaptability](#domain-adaptability)
+
+## Live Demo
+
+The platform runs live at **[iqkv.site](https://iqkv.site)** with all services and both SPAs deployed.
+
+| URL | Description |
+|---|---|
+| [app.iqkv.site](https://app.iqkv.site) | Tenant App — sign up, sign in, team management, invitations |
+| [admin.iqkv.site](https://admin.iqkv.site) | Platform Admin — users, organizations, subscriptions, audit log |
+| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI |
+
+> Observability tools (Grafana, Prometheus, RabbitMQ management, MailHog) are available in the local Docker demo only — see [Quick Start](#quick-start).
+
+**Demo credentials** — the instance runs in `MULTI_TENANT` mode. Sign up freely at [app.iqkv.site](https://app.iqkv.site) to create an isolated tenant workspace. Platform Admin access and billing test credentials are available on request.
 
 ## Business Pillars
 
@@ -152,12 +171,38 @@ Access observability tools via the unified API domain:
 
 Reference Drone CI pipelines and Helm charts are in the [`cicd/`](cicd/README.md) folder.
 
-| Resource                                    | Description                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Resource | Description |
+|---|---|
 | [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipelines — Java microservices (10-stage flow), frontend apps, and infrastructure |
-| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes — SIT, UAT, and production value files per chart                |
+| [`cicd/chart/`](cicd/chart/README.md) | Helm charts for Kubernetes — SIT, UAT, and production value files per chart |
 
 > Template reference only. Adapt to your own Drone CI instance and Helm charts repository.
+
+## Adding a New Microservice
+
+[`cicd/pipeline/foundation-microservice-project-layout.yml`](cicd/pipeline/foundation-microservice-project-layout.yml) is the starting point. Copy it to your new service repository — it encodes the full 10-pipeline lifecycle, quality gates (JaCoCo, Checkstyle, SonarQube, PMD, SpotBugs), Helm deployment, and automated release flow.
+
+### Checklist
+
+1. **Maven module** — add to root `pom.xml`, inherit `com.iqkv:boot-parent-pom`
+2. **Package structure** — `config/`, `domain/`, `repository/`, `service/`, `presentation/web/`, `presentation/admin/`, `security/`, `exception/`
+3. **Cross-cutting concerns** (mandatory for every service):
+   - Correlation ID propagation via MDC
+   - Structured JSON logging (Logstash Logback Encoder)
+   - Spring Actuator health probes on port 8081
+   - Tenant + user context from Gateway-injected headers (`X-Tenant-ID`, `X-User-ID`, `X-User-Authorities`)
+   - OAuth2 Resource Server config pointing to IAM JWKS endpoint
+   - Micrometer metrics + `/actuator/prometheus`
+   - SpringDoc OpenAPI annotations (Gateway aggregates specs)
+   - RFC 7807 `ProblemDetail` error responses
+   - `platform.rolloutMode` consistency check at startup
+4. **Domain events** — publish to `iqkv.events` topic exchange using `your-domain.{verb}` routing keys; Audit Service captures them automatically
+5. **Helm chart** — copy from `cicd/chart/foundation-billing-service`, update infra connection values, keep `platform.rolloutMode` and management service / probe config
+6. **Pipeline** — copy `foundation-microservice-project-layout.yml`, adjust `helm --set` flags, configure Drone secrets
+7. **ArchUnit tests** — copy architecture test class, update package prefix
+8. **Monorepo registration** — add to `compose.demo.yaml`, add Gateway route, update this README
+
+See the full [platform README](README.md#adding-a-new-microservice) for detailed guidance on each step.
 
 ## Domain Adaptability
 
