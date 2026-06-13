@@ -5,6 +5,12 @@
 [![Project Site](https://img.shields.io/badge/Project-iqkv.dev-blue?style=for-the-badge&logo=appveyor)](https://iqkv.dev)
 [![Live Demo](https://img.shields.io/badge/Demo-iqkv.site-success?style=for-the-badge&logo=playstation)](https://iqkv.site)
 
+<div align="center">
+  <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/novustools-mockup-1781349539211.png?raw=true" width="600" alt="IQKV Platform — Platform Admin">
+  <p><strong>Hybrid Tenancy SaaS Boilerplate</strong></p>
+</div>
+
+
 ## Table of Contents
 
 - [Business Purpose](#business-purpose)
@@ -30,6 +36,12 @@ A microservices ecosystem that provides:
 - **Included UI Applications** - Production-ready React frontends for both customers (Tenant App) and operators (Platform Admin)
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, business domain services, and modern frontend development.
+
+
+<div align="center">
+  <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
+  <p><strong>Hybrid Tenancy SaaS Boilerplate</strong></p>
+</div>
 
 ## Platform Services
 
