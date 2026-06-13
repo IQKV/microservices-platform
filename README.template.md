@@ -23,11 +23,11 @@
 
 The platform runs live at **[iqkv.site](https://iqkv.site)** with all services and both SPAs deployed.
 
-| URL | Description |
-|---|---|
-| [app.iqkv.site](https://app.iqkv.site) | Tenant App — sign up, sign in, team management, invitations |
-| [admin.iqkv.site](https://admin.iqkv.site) | Platform Admin — users, organizations, subscriptions, audit log |
-| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI |
+| URL                                                                    | Description                                                     |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [app.iqkv.site](https://app.iqkv.site)                                 | Tenant App — sign up, sign in, team management, invitations     |
+| [admin.iqkv.site](https://admin.iqkv.site)                             | Platform Admin — users, organizations, subscriptions, audit log |
+| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI                                           |
 
 > Observability tools (Grafana, Prometheus, RabbitMQ management, MailHog) are available in the local Docker demo only — see [Quick Start](#quick-start).
 
@@ -45,7 +45,6 @@ Critical domains to accelerate product development:
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
   <p><strong>Hybrid Tenancy SaaS Boilerplate. Microservice-first architecture, a collection of small, loosely coupled, and independently deployable services from day one.</strong></p>
 </div>
-
 
 ## Service Ecosystem
 
@@ -171,10 +170,10 @@ Access observability tools via the unified API domain:
 
 Reference Drone CI pipelines and Helm charts are in the [`cicd/`](cicd/README.md) folder.
 
-| Resource | Description |
-|---|---|
+| Resource                                    | Description                                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipelines — Java microservices (10-stage flow), frontend apps, and infrastructure |
-| [`cicd/chart/`](cicd/chart/README.md) | Helm charts for Kubernetes — SIT, UAT, and production value files per chart |
+| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes — SIT, UAT, and production value files per chart                |
 
 > Template reference only. Adapt to your own Drone CI instance and Helm charts repository.
 

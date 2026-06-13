@@ -13,7 +13,6 @@
   <p><strong>Hybrid Tenancy SaaS Boilerplate. Microservice-first architecture, a collection of small, loosely coupled, and independently deployable services from day one.</strong></p>
 </div>
 
-
 ## Table of Contents
 
 - [Live Demo](#live-demo)
@@ -34,11 +33,11 @@ The platform runs live at **[iqkv.site](https://iqkv.site)** — a fully deploye
 
 ### Public entry points
 
-| URL | What you see |
-|---|---|
-| [app.iqkv.site](https://app.iqkv.site) | Tenant App — sign up, sign in, team management, invitations, account profile |
-| [admin.iqkv.site](https://admin.iqkv.site) | Platform Admin — global user/org management, subscription monitoring, plan catalog |
-| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI — all backend APIs in one place |
+| URL                                                                    | What you see                                                                       |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [app.iqkv.site](https://app.iqkv.site)                                 | Tenant App — sign up, sign in, team management, invitations, account profile       |
+| [admin.iqkv.site](https://admin.iqkv.site)                             | Platform Admin — global user/org management, subscription monitoring, plan catalog |
+| [api.iqkv.site/swagger-ui.html](https://api.iqkv.site/swagger-ui.html) | Aggregated Swagger UI — all backend APIs in one place                              |
 
 > Observability tools (Grafana, Prometheus, RabbitMQ management, MailHog) are available in the local Docker demo only — see [Getting Started](#getting-started).
 
@@ -69,7 +68,6 @@ A microservices ecosystem that provides:
 - **Included UI Applications** - Production-ready React frontends for both customers (Tenant App) and operators (Platform Admin)
 
 This platform serves as a reference implementation for organizations building microservices architectures, showcasing production-ready patterns for authentication, API management, business domain services, and modern frontend development.
-
 
 <div align="center">
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
@@ -488,10 +486,10 @@ Each service uses isolated named volumes and a dedicated Docker network — runn
 
 The platform ships reference CI/CD pipelines and Helm charts in the [`cicd/`](cicd/README.md) folder.
 
-| Resource | Description |
-|---|---|
+| Resource                                    | Description                                                                                                                                  |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`cicd/pipeline/`](cicd/pipeline/README.md) | Drone CI pipeline definitions for every service — Java microservices (10-pipeline flow), frontend apps (4-pipeline flow), and infrastructure |
-| [`cicd/chart/`](cicd/chart/README.md) | Helm charts for Kubernetes deployment across SIT, UAT, and production environments |
+| [`cicd/chart/`](cicd/chart/README.md)       | Helm charts for Kubernetes deployment across SIT, UAT, and production environments                                                           |
 
 **Pipeline flow for Java services:** `VerifyCode` (tests + SonarQube + PMD + SpotBugs) → `PublishArtifacts` (Nexus) → `PublishDockerImage` → `DeployWorkInProgress` (SIT auto) → `PromoteFeatureDeployment` / `PromoteDeployment` (manual promote) → `ReleasePackage` (semver automation).
 
@@ -548,18 +546,18 @@ foundation-your-service/src/main/java/com/iqkv/your/
 
 These are non-negotiable for every platform service:
 
-| Concern | How |
-|---|---|
-| Correlation ID | Read `X-Correlation-ID` from request, attach to MDC, include in all log lines |
-| Structured logging | Use Logstash Logback Encoder — JSON output, no plaintext in production |
-| Health checks | Expose `/actuator/health/liveness` and `/actuator/health/readiness` on port 8081 |
-| Tenant context | Read `X-Tenant-ID` header (injected by Gateway), validate, store in `TenantContext` |
-| User context | Read `X-User-ID`, `X-Username`, `X-User-Authorities` headers (injected by Gateway) |
-| JWT | Configure as OAuth2 Resource Server — validate against IAM JWKS endpoint |
-| Metrics | Expose `/actuator/prometheus`; add Micrometer counters for critical business operations |
-| OpenAPI | Annotate controllers and DTOs with SpringDoc; Gateway aggregates specs automatically |
-| Error responses | Return RFC 7807 `ProblemDetail` — no custom error envelope schemas |
-| Rollout mode | Read `platform.rolloutMode` from config; fail fast at startup if inconsistent with other services |
+| Concern            | How                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| Correlation ID     | Read `X-Correlation-ID` from request, attach to MDC, include in all log lines                     |
+| Structured logging | Use Logstash Logback Encoder — JSON output, no plaintext in production                            |
+| Health checks      | Expose `/actuator/health/liveness` and `/actuator/health/readiness` on port 8081                  |
+| Tenant context     | Read `X-Tenant-ID` header (injected by Gateway), validate, store in `TenantContext`               |
+| User context       | Read `X-User-ID`, `X-Username`, `X-User-Authorities` headers (injected by Gateway)                |
+| JWT                | Configure as OAuth2 Resource Server — validate against IAM JWKS endpoint                          |
+| Metrics            | Expose `/actuator/prometheus`; add Micrometer counters for critical business operations           |
+| OpenAPI            | Annotate controllers and DTOs with SpringDoc; Gateway aggregates specs automatically              |
+| Error responses    | Return RFC 7807 `ProblemDetail` — no custom error envelope schemas                                |
+| Rollout mode       | Read `platform.rolloutMode` from config; fail fast at startup if inconsistent with other services |
 
 **4. Publish domain events**
 
