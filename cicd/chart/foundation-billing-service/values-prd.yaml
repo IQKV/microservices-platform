@@ -19,7 +19,7 @@ app:
 
 # Production image configuration
 image:
-  tag: "1.0.0" # Use specific version in production
+  tag: "1.0.0"  # Use specific version in production
 
 # Production deployment configuration
 replicaCount: 2
@@ -55,17 +55,17 @@ infraServices:
     host: "foundation-infra-postgresql.iqkv-prd-env.svc.cluster.local"
     database: "iqkv_billing"
     username: "svc_billing_prd_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-prd-env.svc.cluster.local"
     username: "svc_infra_prd_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
   objectstorage:
-    endpoint: "https://s3.amazonaws.com" # Use AWS S3 in production; override for self-hosted
-    accessKey: "" # Must be overridden via --set-string infraServices.objectstorage.accessKey in pipeline
-    secretKey: "" # Must be overridden via --set-string infraServices.objectstorage.secretKey in pipeline
+    endpoint: "https://s3.amazonaws.com"  # Use AWS S3 in production; override for self-hosted
+    accessKey: ""  # Must be overridden via --set-string infraServices.objectstorage.accessKey in pipeline
+    secretKey: ""  # Must be overridden via --set-string infraServices.objectstorage.secretKey in pipeline
     bucketName: "iqkv-billing-assets-production"
     region: "us-east-1"
     ssl: true
@@ -103,8 +103,8 @@ config:
   mail:
     host: "smtp.iqkv.site"
     port: 587
-    username: "" # Must be overridden via --set-string config.mail.username in pipeline
-    password: "" # Must be overridden via --set-string config.mail.password in pipeline
+    username: ""  # Must be overridden via --set-string config.mail.username in pipeline
+    password: ""  # Must be overridden via --set-string config.mail.password in pipeline
     from: "noreply@iqkv.dev"
     fromName: "IQ Key Value"
 
@@ -179,4 +179,4 @@ healthcheck:
 # IMPORTANT: Mode changes require a controlled migration runbook (spec section 10)
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultBillingEmail: "" # Set when switching to SINGLE_TENANT
+  defaultBillingEmail: ""  # Set when switching to SINGLE_TENANT

@@ -239,6 +239,19 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
       name: {{ include "foundation-iam-service.fullname" . }}-config
       key: APP_BASE_URL
 
+# Billing Service Configuration
+- name: BILLING_SERVICE_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: BILLING_SERVICE_URI
+- name: PLAN_CATALOG_REFRESH_INTERVAL
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: PLAN_CATALOG_REFRESH_INTERVAL
+      optional: true
+
 # Pod Information
 - name: POD_NAME
   valueFrom:

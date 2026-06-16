@@ -14,7 +14,7 @@ app:
 
 # Production image configuration
 image:
-  tag: "1.0.0" # Use specific version in production
+  tag: "1.0.0"  # Use specific version in production
 
 # Production deployment configuration
 replicaCount: 2
@@ -50,12 +50,12 @@ infraServices:
     host: "foundation-infra-postgresql.iqkv-prd-env.svc.cluster.local"
     database: "iqkv_audit"
     username: "svc_audit_prd_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-prd-env.svc.cluster.local"
     username: "svc_infra_prd_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
 # Production ingress configuration
 ingress:

@@ -13,12 +13,12 @@ infraServices:
     host: "foundation-infra-postgresql.iqkv-uat-env.svc.cluster.local"
     database: "iqkv_audit"
     username: "svc_audit_uat_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-uat-env.svc.cluster.local"
     username: "svc_infra_uat_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
 # Staging environment resources (production-like)
 resources:

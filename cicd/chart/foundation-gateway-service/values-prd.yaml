@@ -79,4 +79,4 @@ networkPolicy:
 # IMPORTANT: Mode changes require a controlled migration runbook (spec section 10)
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey: "" # Set to a valid NanoID when switching to SINGLE_TENANT
+  defaultTenantKey: ""  # Set to a valid NanoID when switching to SINGLE_TENANT

@@ -13,16 +13,16 @@ infraServices:
     host: "foundation-infra-postgresql.iqkv-uat-env.svc.cluster.local"
     database: "iqkv_billing"
     username: "svc_billing_uat_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-uat-env.svc.cluster.local"
     username: "svc_infra_uat_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
   objectstorage:
     endpoint: "http://foundation-infra-minio.iqkv-uat-env.svc.cluster.local"
-    accessKey: "iqkv" # Override via --set-string infraServices.objectstorage.accessKey=xxx
+    accessKey: "iqkv"          # Override via --set-string infraServices.objectstorage.accessKey=xxx
     secretKey: "iqkv_password" # Override via --set-string infraServices.objectstorage.secretKey=xxx
     bucketName: "iqkv-billing-assets"
     region: "us-east-1"
@@ -64,4 +64,4 @@ monitoring:
 # Platform rollout mode — must match foundation-iam-service and foundation-gateway-service
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultBillingEmail: "" # Set when switching to SINGLE_TENANT
+  defaultBillingEmail: ""  # Set when switching to SINGLE_TENANT

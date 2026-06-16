@@ -65,7 +65,7 @@ app:
     # Test Configuration
     enableMsw: "false"
     logLevel: "debug"
-    demoMode: "false"
+    demoMode: "true"
 
 # Ingress Configuration (Test)
 ingress:

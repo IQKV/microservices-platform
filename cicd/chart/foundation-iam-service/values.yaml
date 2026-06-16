@@ -161,20 +161,20 @@ infraServices:
     port: 5432
     database: "iqkv_iam"
     username: "svc_iam_sit_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   # RabbitMQ Configuration
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-sit-env.svc.cluster.local"
     port: 5672
     username: "svc_infra_sit_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
   # MinIO / S3-compatible Object Storage Configuration
   # Points to the MinIO service deployed by foundation-infra Helm chart
   objectstorage:
     endpoint: "http://foundation-infra-minio.iqkv-sit-env.svc.cluster.local"
-    accessKey: "iqkv" # Override via --set-string infraServices.objectstorage.accessKey=xxx
+    accessKey: "iqkv"          # Override via --set-string infraServices.objectstorage.accessKey=xxx
     secretKey: "iqkv_password" # Override via --set-string infraServices.objectstorage.secretKey=xxx
     bucketName: "iqkv-iam-assets"
     region: "us-east-1"
@@ -183,7 +183,7 @@ infraServices:
     # When set, rewrites the internal cluster hostname in presigned URLs.
     publicEndpoint: ""
     upload:
-      maxFileSizeBytes: 5242880 # 5 MB
+      maxFileSizeBytes: 5242880      # 5 MB
       presignedUrlExpirationMinutes: 60
       allowedMimeTypes: "image/jpeg,image/png,image/webp,image/gif"
 
@@ -191,16 +191,21 @@ infraServices:
 config:
   # JWT RSA Key Configuration
   jwt:
-    privateKeyPath: "classpath:keys/private.pem" # Override for production
-    publicKeyPath: "classpath:keys/public.pem" # Override for production
+    privateKeyPath: "classpath:keys/private.pem"  # Override for production
+    publicKeyPath: "classpath:keys/public.pem"    # Override for production
     issuer: "foundation-iam-service"
+
+  # Billing Service Configuration
+  billing:
+    serviceUri: "http://foundation-billing-service"  # Maps to iqkv.billing.service-url
+    planCatalogRefreshInterval: "PT10M"                    # Maps to iqkv.billing.plan-catalog-refresh-interval
 
   # Email / SMTP Configuration
   mail:
     host: "smtp.example.com"
     port: 587
-    username: "" # Override via --set config.mail.username=xxx
-    password: "" # Override via --set config.mail.password=xxx
+    username: ""   # Override via --set config.mail.username=xxx
+    password: ""   # Override via --set config.mail.password=xxx
     from: "noreply@iqkv.dev"
     fromName: "IQ Key Value"
     replyTo: ""
@@ -283,8 +288,8 @@ networkPolicy:
 # Default: MULTI_TENANT
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey: "" # Required for SINGLE_TENANT mode — NanoID format [a-z0-9]{8}
-  defaultTenantName: "Acme Corp." # Display name for the default tenant
+  defaultTenantKey: ""   # Required for SINGLE_TENANT mode — NanoID format [a-z0-9]{8}
+  defaultTenantName: "Acme Corp."  # Display name for the default tenant
 
 # K3s specific configurations
 k3s:

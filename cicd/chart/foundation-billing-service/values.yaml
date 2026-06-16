@@ -152,26 +152,26 @@ infraServices:
     port: 5432
     database: "iqkv_billing"
     username: "svc_billing_sit_dba"
-    password: "" # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
 
   # RabbitMQ Configuration
   rabbitmq:
     host: "foundation-infra-rabbitmq.iqkv-sit-env.svc.cluster.local"
     port: 5672
     username: "svc_infra_sit_rmq"
-    password: "" # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
   # MinIO / S3-compatible Object Storage Configuration
   # Points to the MinIO service deployed by foundation-infra Helm chart
   objectstorage:
     endpoint: "http://foundation-infra-minio.iqkv-sit-env.svc.cluster.local"
-    accessKey: "iqkv" # Override via --set-string infraServices.objectstorage.accessKey=xxx
+    accessKey: "iqkv"          # Override via --set-string infraServices.objectstorage.accessKey=xxx
     secretKey: "iqkv_password" # Override via --set-string infraServices.objectstorage.secretKey=xxx
     bucketName: "iqkv-billing-assets"
     region: "us-east-1"
     ssl: false
     upload:
-      maxFileSizeBytes: 5242880 # 5 MB
+      maxFileSizeBytes: 5242880      # 5 MB
       presignedUrlExpirationMinutes: 60
       allowedMimeTypes: "application/pdf,image/jpeg,image/png"
 
@@ -179,14 +179,14 @@ infraServices:
 config:
   # JWT RSA Key Configuration
   jwt:
-    publicKeyPath: "classpath:keys/public.pem" # Override for production
+    publicKeyPath: "classpath:keys/public.pem"    # Override for production
 
   # Email / SMTP Configuration
   mail:
     host: "smtp.example.com"
     port: 587
-    username: "" # Override via --set config.mail.username=xxx
-    password: "" # Override via --set config.mail.password=xxx
+    username: ""   # Override via --set config.mail.username=xxx
+    password: ""   # Override via --set config.mail.password=xxx
     from: "noreply@iqkv.dev"
     fromName: "IQ Key Value"
     replyTo: ""
@@ -196,12 +196,12 @@ config:
 
   # Messaging Configuration
   messaging:
-    enabled: true # Maps to iqkv.messaging.rabbitmq.enabled
+    enabled: true   # Maps to iqkv.messaging.rabbitmq.enabled
 
   # Stripe Configuration
   stripe:
-    secretKey: "" # Must be overridden via --set-string config.stripe.secretKey in pipeline
-    webhookSecret: "" # Must be overridden via --set-string config.stripe.webhookSecret in pipeline
+    secretKey: ""        # Must be overridden via --set-string config.stripe.secretKey in pipeline
+    webhookSecret: ""    # Must be overridden via --set-string config.stripe.webhookSecret in pipeline
     portalReturnUrl: "https://app.iqkv.site/billing"
 
 # Monitoring Configuration
@@ -279,7 +279,7 @@ networkPolicy:
 # Default: MULTI_TENANT
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultBillingEmail: "" # Fallback email for SINGLE_TENANT mode (ownerEmail absent)
+  defaultBillingEmail: ""  # Fallback email for SINGLE_TENANT mode (ownerEmail absent)
 
 # K3s specific configurations
 k3s:

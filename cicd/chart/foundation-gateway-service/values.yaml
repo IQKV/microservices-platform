@@ -231,9 +231,8 @@ networkPolicy:
 # Default: MULTI_TENANT
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey:
-    "" # Required for SINGLE_TENANT mode — NanoID format [a-z0-9]{8}
-    # Must match iqkv.tenancy.default-tenant-key in IAM service
+  defaultTenantKey: ""  # Required for SINGLE_TENANT mode — NanoID format [a-z0-9]{8}
+                        # Must match iqkv.tenancy.default-tenant-key in IAM service
 
 # Infrastructure Services Configuration
 # Controls which downstream services are enabled and their connection details

@@ -43,6 +43,10 @@ data:
   JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | quote }}
   JWT_ISSUER: {{ .Values.config.jwt.issuer | default "foundation-iam-service" | quote }}
 
+  # Billing Service Configuration (maps to iqkv.billing.* in application.yml)
+  BILLING_SERVICE_URI: {{ .Values.config.billing.serviceUri | quote }}
+  PLAN_CATALOG_REFRESH_INTERVAL: {{ .Values.config.billing.planCatalogRefreshInterval | quote }}
+
   # Application Base URL (used in email notification links)
   APP_BASE_URL: {{ .Values.config.appBaseUrl | quote }}
 
