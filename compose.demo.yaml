@@ -319,6 +319,9 @@ services:
       MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
+      # Billing service — routing target
+      BILLING_SERVICE_URI: http://foundation-billing-service:8080
+
       # Object Storage (MinIO)
       OBJECTSTORAGE_ENDPOINT: http://foundation-minio:9000
       OBJECTSTORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-iqkv}
