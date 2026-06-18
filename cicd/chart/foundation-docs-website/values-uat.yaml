@@ -1,0 +1,84 @@
+# IQ Key Value Platform Documentation Website - UAT Environment Configuration
+# Overrides for user acceptance testing
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-docs-website
+  tag: "uat"
+  pullPolicy: Always
+
+# Resource Configuration (UAT)
+resources:
+  limits:
+    memory: 512Mi
+    cpu: 500m
+  requests:
+    memory: 256Mi
+    cpu: 250m
+
+# Health Checks (UAT)
+healthcheck:
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+
+app:
+  environment: "uat"
+
+  # Nginx Configuration (UAT)
+  nginx:
+    port: 8080
+    customConfig:
+      # Override site.conf to add health check endpoint
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+      # CSP configured for iqkv.site domains (UAT)
+      contentSecurityPolicyConf: |
+        # CSP for UAT VitePress docs with iqkv.site domains
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.iqkv.site https://iqkv.site; object-src 'none'; base-uri 'self';" always;
+
+      # Use base image security headers
+      securityConf: ""
+
+# Ingress Configuration (UAT)
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: true
+    certManager:
+      enabled: true
+      issuer: "letsencrypt-prod"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: docs-uat.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Monitoring (Enabled for UAT)
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false
+
+# Autoscaling (Disabled for UAT)
+autoscaling:
+  enabled: false

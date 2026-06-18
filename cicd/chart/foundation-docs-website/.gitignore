@@ -1,0 +1,207 @@
+# Helm chart packaging
+*.tgz
+charts/*.tgz
+
+# Helm dependencies
+charts/
+!charts/.gitkeep
+
+# Helm lock files
+Chart.lock
+
+# Temporary files
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+*.bak
+*.orig
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.tmproj
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.prd.local
+
+# Kubernetes secrets and sensitive files
+secrets/
+*.key
+*.crt
+*.pem
+*.p12
+*.pfx
+
+# Helm test outputs
+test-output/
+test-results/
+
+# Local development files
+local/
+dev/
+debug/
+*.local
+
+# Backup files
+*.backup
+*.bkp
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go specific (if using Go for custom tools)
+*.exe~
+*.test
+*.out
+vendor/
+
+# Python specific (if using Python for custom tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Java specific (if using Java for custom tools)
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# Terraform (if using for infrastructure)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Docker
+.dockerignore
+
+# Local Helm values files (keep examples)
+values-local.yaml
+values-personal.yaml
+values-override.yaml
+*-local.yaml
+*-personal.yaml
+*-override.yaml
+
+# Keep the standard values files
+!values.yaml
+!values-sit.yaml
+!values-uat.yaml
+!values-prd.yaml
+
+# Temporary Helm template outputs
+output.yaml
+rendered.yaml
+debug.yaml

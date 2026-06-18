@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-docs-website.fullname" . }}-config
+  labels:
+    {{- include "foundation-docs-website.labels" . | nindent 4 }}
+data:
+  {{- if .Values.app.nginx.customConfig.siteConf }}
+  # Nginx site configuration (mounted to /usr/share/nginx/site.conf)
+  site.conf: |
+    {{- include "foundation-docs-website.siteConfig" . | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+  # Content Security Policy configuration (mounted to /usr/share/nginx/content-security-policy.conf)
+  content-security-policy.conf: |
+{{- .Values.app.nginx.customConfig.contentSecurityPolicyConf | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.app.nginx.customConfig.securityConf }}
+  # Security headers configuration (mounted to /usr/share/nginx/security.conf)
+  security.conf: |
+    {{- include "foundation-docs-website.securityConfig" . | nindent 4 }}
+  {{- end }}

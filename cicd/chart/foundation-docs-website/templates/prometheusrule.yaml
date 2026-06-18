@@ -1,0 +1,58 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "foundation-docs-website.fullname" . }}
+  labels:
+    {{- include "foundation-docs-website.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheusRule.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+    - name: {{ include "foundation-docs-website.fullname" . }}.rules
+      rules:
+        - alert: DocsDown
+          expr: up{job="{{ include "foundation-docs-website.fullname" . }}"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            service: {{ include "foundation-docs-website.fullname" . }}
+          annotations:
+            summary: "Documentation Website is down"
+            description: "Documentation Website has been down for more than 5 minutes."
+
+        - alert: DocsHighMemoryUsage
+          expr: container_memory_usage_bytes{pod=~"{{ include "foundation-docs-website.fullname" . }}-.*"} / container_spec_memory_limit_bytes > 0.8
+          for: 10m
+          labels:
+            severity: warning
+            service: {{ include "foundation-docs-website.fullname" . }}
+          annotations:
+            summary: "Documentation Website high memory usage"
+            description: "Documentation Website memory usage is above 80% for more than 10 minutes."
+
+        - alert: DocsHighCPUUsage
+          expr: rate(container_cpu_usage_seconds_total{pod=~"{{ include "foundation-docs-website.fullname" . }}-.*"}[5m]) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+            service: {{ include "foundation-docs-website.fullname" . }}
+          annotations:
+            summary: "Documentation Website high CPU usage"
+            description: "Documentation Website CPU usage is above 80% for more than 10 minutes."
+
+        - alert: DocsPodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total{pod=~"{{ include "foundation-docs-website.fullname" . }}-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            service: {{ include "foundation-docs-website.fullname" . }}
+          annotations:
+            summary: "Documentation Website pod crash looping"
+            description: "Documentation Website pod is crash looping."
+{{- end }}

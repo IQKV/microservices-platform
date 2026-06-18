@@ -1,0 +1,107 @@
+# Patterns to ignore when building packages.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Common VCS dirs
+.git/
+.gitignore
+.gitattributes
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+
+# Common backup files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.temp
+*.orig
+*~
+.netrwhist
+
+# Various IDEs and editors
+.project
+.classpath
+.settings/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.tmproj
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# Logs and temporary files
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Local development and testing files
+local/
+dev/
+debug/
+test-output/
+test-results/
+output.yaml
+rendered.yaml
+debug.yaml
+*.local
+*.personal
+*-local.yaml
+*-personal.yaml
+*-override.yaml
+
+# Sensitive files
+secrets/
+*.key
+*.crt
+*.pem
+*.p12
+*.pfx
+.env
+.env.*
+
+# Documentation build artifacts
+docs/_build/
+site/
+
+# CI/CD artifacts
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+Jenkinsfile
+
+# Package managers
+node_modules/
+.npm
+.yarn-integrity
+vendor/
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# README and documentation that shouldn't be in the package
+README-dev.md
+CONTRIBUTING.md
+CHANGELOG-dev.md

@@ -408,6 +408,10 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      STRIPE_SECRET_KEY:
+        from_secret: STRIPE_SECRET_KEY
+      STRIPE_WEBHOOK_SECRET:
+        from_secret: STRIPE_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -421,6 +425,8 @@ steps:
           --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
           --set config.mail.username=$${SMTP_USERNAME} \
           --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
+          --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
           --namespace iqkv-sit-env \
           --create-namespace
 
@@ -503,6 +509,10 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      STRIPE_SECRET_KEY:
+        from_secret: STRIPE_SECRET_KEY
+      STRIPE_WEBHOOK_SECRET:
+        from_secret: STRIPE_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -512,9 +522,11 @@ steps:
           --values ./values-${DRONE_DEPLOY_TO}.yaml \
           --set image.tag=${DRONE_BRANCH:8} \
           --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
-          --set infraServices.rabbitmq.password=${INFRA_RABBITMQ_PASSWORD} \
+          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
           --set config.mail.username=$${SMTP_USERNAME} \
           --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
+          --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 
@@ -595,6 +607,10 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      STRIPE_SECRET_KEY:
+        from_secret: STRIPE_SECRET_KEY
+      STRIPE_WEBHOOK_SECRET:
+        from_secret: STRIPE_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -607,6 +623,8 @@ steps:
           --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
           --set config.mail.username=$${SMTP_USERNAME} \
           --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
+          --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 

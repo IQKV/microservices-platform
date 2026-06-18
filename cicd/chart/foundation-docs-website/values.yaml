@@ -1,0 +1,177 @@
+# IQ Key Value Platform Documentation Website - Default Configuration
+# Base configuration with sensible defaults for all environments
+
+# Global settings
+global:
+  storageClass: "local-path"
+  imageRegistry: ""
+
+# Application Configuration
+app:
+  name: foundation-docs-website
+  version: "1.0.0"
+  environment: "sit"
+  namespace: "default"
+
+  # Nginx Configuration (using pre-configured base image)
+  nginx:
+    port: 8080
+    # Custom configuration overrides (only mount when different from base image defaults)
+    customConfig:
+      # Override site.conf to add health check endpoint
+      # Note: SPA routing is already handled by the base nginx container's default.conf
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+      # Default CSP from base nginx container image
+      contentSecurityPolicyConf: |
+        # Default CSP for IQKV platform documentation
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';" always;
+
+      # Override security headers only when needed (base image has good defaults)
+      securityConf: ""
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-docs-website
+  tag: "latest"
+  pullPolicy: Always
+  # Base image: know-how.download/library/nginx-runner (pre-configured Nginx)
+
+imagePullSecrets:
+  - name: know-how-download-auth
+
+# Deployment Configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Configuration
+podAnnotations: {}
+podLabels: {}
+
+# Security Context (shared defaults)
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: ""
+  tls:
+    enabled: false
+    certManager:
+      enabled: false
+      issuer: ""
+    secretName: ""
+  annotations: {}
+  hosts: []
+
+# Health Check Configuration
+healthcheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
+
+# Resource Configuration
+resources:
+  limits:
+    memory: 256Mi
+    cpu: 250m
+  requests:
+    memory: 128Mi
+    cpu: 100m
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# Monitoring Configuration
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    labels: {}
+    annotations: {}
+  prometheusRule:
+    enabled: false
+    labels: {}
+    annotations: {}
+
+# Node Selection
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Additional volumes
+volumes: []
+
+# Additional volume mounts
+volumeMounts: []
+
+# Additional environment variables
+extraEnv: []
+
+# Additional containers
+extraContainers: []
+
+# Additional init containers
+extraInitContainers: []

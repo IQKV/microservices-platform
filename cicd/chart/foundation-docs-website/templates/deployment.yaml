@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "foundation-docs-website.fullname" . }}
+  labels:
+    {{- include "foundation-docs-website.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "foundation-docs-website.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- if include "foundation-docs-website.hasNginxOverrides" . }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "foundation-docs-website.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "foundation-docs-website.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.nginx.port }}
+              protocol: TCP
+
+          {{- if .Values.healthcheck.enabled }}
+          livenessProbe:
+            {{- toYaml .Values.healthcheck.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.healthcheck.readinessProbe | nindent 12 }}
+          {{- end }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          env:
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+
+          volumeMounts:
+            {{- if .Values.app.nginx.customConfig.siteConf }}
+            # Mount custom site configuration (override base image)
+            - name: config-template
+              mountPath: /usr/share/nginx/site.conf
+              subPath: site.conf
+              readOnly: true
+            {{- end }}
+            {{- if .Values.app.nginx.customConfig.contentSecurityPolicyConf }}
+            # Mount custom CSP configuration (override base image)
+            - name: config-template
+              mountPath: /usr/share/nginx/content-security-policy.conf
+              subPath: content-security-policy.conf
+              readOnly: true
+            {{- end }}
+            {{- if .Values.app.nginx.customConfig.securityConf }}
+            # Mount custom security headers configuration (override base image)
+            - name: config-template
+              mountPath: /usr/share/nginx/security.conf
+              subPath: security.conf
+              readOnly: true
+            {{- end }}
+            # Mount temporary directory for Nginx
+            - name: tmp-volume
+              mountPath: /tmp
+            # Mount logs directory for Nginx
+            - name: logs-volume
+              mountPath: /var/log/nginx
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+      volumes:
+        {{- if include "foundation-docs-website.hasNginxOverrides" . }}
+        # ConfigMap containing optional Nginx overrides
+        - name: config-template
+          configMap:
+            name: {{ include "foundation-docs-website.fullname" . }}-config
+        {{- end }}
+        # Temporary directory for Nginx
+        - name: tmp-volume
+          emptyDir:
+            sizeLimit: 100Mi
+        # Logs directory for Nginx
+        - name: logs-volume
+          emptyDir:
+            sizeLimit: 100Mi
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,88 @@
+# IQ Key Value Platform Documentation Website - Test Environment Configuration
+# Overrides for local development and testing
+
+# Image Configuration
+image:
+  repository: know-how.download/iqkv/foundation-docs-website
+  tag: "sit"
+  pullPolicy: Always
+
+# Resource Configuration (Lower for development)
+resources:
+  limits:
+    memory: 256Mi
+    cpu: 250m
+  requests:
+    memory: 128Mi
+    cpu: 100m
+
+# Health Checks (Faster for development)
+healthcheck:
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+app:
+  environment: "sit"
+
+  # Nginx Configuration (Test)
+  nginx:
+    port: 8080
+    customConfig:
+      # Override site.conf to add health check, dev endpoints
+      siteConf: |
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Test-specific endpoints
+        location /api/dev {
+            return 200 "Test API endpoint\n";
+            add_header Content-Type text/plain;
+        }
+
+      # CSP configured for iqkv.site domains (development)
+      contentSecurityPolicyConf: |
+        # CSP for development VitePress docs with iqkv.site domains
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.iqkv.site https://iqkv.site; object-src 'none'; base-uri 'self';" always;
+
+      # Use base image security headers (sufficient for development)
+      securityConf: ""
+
+# Ingress Configuration (Test)
+ingress:
+  enabled: true
+  className: "nginx"
+  tls:
+    enabled: false
+    certManager:
+      enabled: false
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+  hosts:
+    - host: docs.iqkv.site
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Monitoring (Disabled for development)
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+  prometheusRule:
+    enabled: false
+
+# Autoscaling (Disabled for development)
+autoscaling:
+  enabled: false
