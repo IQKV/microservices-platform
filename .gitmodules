@@ -22,3 +22,6 @@
 [submodule "foundation-audit-service"]
 	path = foundation-audit-service
 	url = git@github.com:IQKV/foundation-audit-service.git
+[submodule "foundation-docs-website"]
+	path = foundation-docs-website
+	url = git@github.com:IQKV/foundation-docs-website.git

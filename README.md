@@ -195,6 +195,14 @@ React 19 SPA for workspace members — sign-in with tenant discovery, team manag
 
 React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
 
+#### [SaaS Landing Kit](https://github.com/IQKV/foundation-ui-saas-landing-kit/tree/dev/README.md)
+
+Modern, performant landing page built with Astro, React, Tailwind CSS, and shadcn/ui — includes integrated authentication with login/logout functionality.
+
+#### [Documentation Website](https://github.com/IQKV/foundation-docs-website/tree/dev/README.md)
+
+VitePress-based documentation site with user guides, platform overview, and quick start instructions — ready to deploy alongside your application.
+
 ## Architecture Overview
 
 ### Microservices Architecture
@@ -264,7 +272,7 @@ Shared Infrastructure
 - **Object Storage:** MinIO S3-compatible storage for file uploads, avatars, and documents
 - **Database Admin:** DbGate web-based administration for PostgreSQL, Redis, RabbitMQ, and MinIO
 - **Security:** JWT with RS256 (JJWT), Spring Security OAuth2 Resource Server, BCrypt strength 12
-- **Frontend:** React 19, TypeScript, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
+- **Frontend**: React 19, TypeScript, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
 - **Payments:** Stripe Java SDK for customer and subscription management
 - **Observability:** Prometheus (Micrometer), Grafana, Loki, Promtail, structured JSON logging (Logstash Logback Encoder)
 - **Distributed Locking:** ShedLock with JDBC provider for scheduled jobs
@@ -305,7 +313,8 @@ Shared Infrastructure
 
 - **Tenant App**: React 19 SPA with Mantine UI, TanStack Router, and Lingui i18n. Supports tenant discovery, self-service signup, and team management.
 - **Platform Admin**: Operator console with `mantine-datatable`, real-time metrics dashboard, and global user/organization CRUD.
-- **Landing Kit**: Performance-optimized Astro landing kit with Tailwind CSS and DaisyUI.
+- **SaaS Landing Kit**: Modern, performant Astro landing page with Tailwind CSS, shadcn/ui components, and integrated authentication.
+- **Documentation Website**: VitePress-based documentation with user guides, platform overview, and quick start instructions.
 
 ### Event-Driven Integration
 

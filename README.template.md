@@ -39,7 +39,7 @@ Critical domains to accelerate product development:
 
 - **Identity & Access**: Multi-tenant authentication, invitation flows, in-app notifications, site-wide announcements, and role-based access control
 - **Financial Operations**: Stripe-backed subscriptions, plan catalog, and webhook-driven billing
-- **Frontend Experience**: Production-ready React 19 SPAs for tenants and platform administrators
+- **Frontend Experience**: Production-ready React 19 SPAs for tenants and platform administrators, plus a SaaS landing kit and documentation website to complete your product's public presence
 
 <div align="center">
   <img src="https://github.com/dimdnk/dimdnk/blob/dev/screenshots/chrome_IS8q0S3OwG.gif?raw=true" width="800" alt="IQKV Platform — Platform Admin">
@@ -56,6 +56,8 @@ Domain-aligned services with event-driven communication:
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
 - **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
 - **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
+- **🚀 [SaaS Landing Kit](foundation-ui-saas-landing-kit/README.md)**: Modern, performant landing page built with Astro, React, Tailwind CSS, and shadcn/ui — includes authentication integration
+- **📚 [Documentation Website](foundation-docs-website/README.md)**: VitePress-based documentation site with user guides, platform overview, and quick start instructions
 
 ## Infrastructure
 
@@ -65,7 +67,7 @@ Production-ready capabilities across all services:
 - **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing, account lockout with manual unlock
 - **Object Storage**: MinIO S3-compatible storage for file uploads, avatars, and documents
 - **Database Administration**: DbGate web-based tool for PostgreSQL, Redis, RabbitMQ, and MinIO management
-- **Frontend**: React 19, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD)
+- **Frontend**: React 19, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
 - **Event-Driven**: RabbitMQ topic exchange with dead-letter queues — tenant provisioning, subscription lifecycle, billing notifications
 - **Observability**: Correlation ID propagation, Prometheus metrics, Grafana dashboards, structured JSON logging
 - **Distributed Locking**: ShedLock for scheduled jobs (token cleanup, trial notifications, stuck tenant recovery)
