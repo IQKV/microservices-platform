@@ -52,7 +52,7 @@ Domain-aligned services with event-driven communication:
 
 - **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements, tenant owner member management (ban/unban, edit authority, transfer ownership), platform admin user actions (ban/unban, unlock)
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
-- **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog, webhook processing, entitlement evaluation
+- **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog with trial period support, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
 - **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
 - **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD

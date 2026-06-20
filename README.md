@@ -140,7 +140,7 @@ Stripe-backed subscription and billing management service.
 
 **Core Capabilities:**
 
-- Plan catalog with `MONTHLY`/`ANNUAL` billing periods, minor-unit pricing, feature sets (JSON), and `TENANT`/`USER` scope
+- Plan catalog with `MONTHLY`/`ANNUAL` billing periods, minor-unit pricing, feature sets (JSON), `TENANT`/`USER` scope, and `trialPeriodDays` to define free trial length in days (0 = no trial)
 - Subscription management with Stripe-synced status (`active`, `trialing`, `past_due`, `canceled`, `unpaid`)
 - Stripe webhook processing with idempotency via `webhook_log` table — handles `customer.subscription.*` and `invoice.*` events
 - Billing settings per tenant: Stripe customer ID, billing email, company name, address, tax ID
