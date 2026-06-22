@@ -158,6 +158,46 @@ services:
       -c min_wal_size=1GB
       -c max_wal_size=4GB
 
+  foundation-postgres-cms:
+    image: postgres:17-alpine
+    container_name: foundation-postgres-cms
+    environment:
+      POSTGRES_DB: ${CMS_DB_NAME:-cms}
+      POSTGRES_USER: ${CMS_DB_USERNAME:-svc_cms_dba}
+      POSTGRES_PASSWORD: ${CMS_DB_PASSWORD:-svc_cms_dba}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    expose:
+      - "5432"
+    volumes:
+      - foundation_postgres_cms_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-cms.sql:/docker-entrypoint-initdb.d/init-cms.sql:ro
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CMS_DB_USERNAME:-svc_cms_dba} -d ${CMS_DB_NAME:-cms}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
   # ---------------------------------------------------------------------------
   # Cache (State Management)
   # ---------------------------------------------------------------------------
@@ -512,6 +552,60 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # CMS Service (Content Management)
+  # Internal service for managing static pages and content
+  # ---------------------------------------------------------------------------
+  foundation-cms-service:
+    image: know-how.download/iqkv/foundation-cms-service:wip
+    container_name: foundation-cms-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+
+      # Database
+      DB_HOST: foundation-postgres-cms
+      DB_PORT: 5432
+      DB_NAME: ${CMS_DB_NAME:-cms}
+      DB_USERNAME: ${CMS_DB_USERNAME:-svc_cms_dba}
+      DB_PASSWORD: ${CMS_DB_PASSWORD:-svc_cms_dba}
+
+      # RabbitMQ
+      RABBITMQ_HOST: foundation-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
+
+      # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
+      JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-cms-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-cms-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+    expose:
+      - "8080"
+      - "8081"
+    depends_on:
+      foundation-postgres-cms:
+        condition: service_healthy
+      foundation-rabbitmq:
+        condition: service_healthy
+      foundation-iam-service:
+        condition: service_healthy
+    networks:
+      foundation-network:
+        aliases:
+          - cms-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    volumes:
+      - foundation_cms_logs:/app/logs
+      - foundation_cms_tmp:/app/tmp
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Gateway Service (API Gateway)
   # The unified entry point for all API requests, providing routing and security.
   # ---------------------------------------------------------------------------
@@ -533,6 +627,9 @@ services:
 
       # Audit service — routing target
       AUDIT_SERVICE_URI: http://foundation-audit-service:8080
+
+      # CMS service — routing target
+      CMS_SERVICE_URI: http://foundation-cms-service:8080
 
       # CORS
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
@@ -557,6 +654,8 @@ services:
       foundation-billing-service:
         condition: service_healthy
       foundation-audit-service:
+        condition: service_healthy
+      foundation-cms-service:
         condition: service_healthy
     networks:
       - foundation-network
@@ -693,6 +792,8 @@ volumes:
     name: foundation_postgres_billing_data
   foundation_postgres_audit_data:
     name: foundation_postgres_audit_data
+  foundation_postgres_cms_data:
+    name: foundation_postgres_cms_data
   foundation_redis_data:
     name: foundation_redis_data
   foundation_rabbitmq_data:
@@ -713,6 +814,10 @@ volumes:
     name: foundation_audit_logs
   foundation_audit_tmp:
     name: foundation_audit_tmp
+  foundation_cms_logs:
+    name: foundation_cms_logs
+  foundation_cms_tmp:
+    name: foundation_cms_tmp
   foundation_gateway_logs:
     name: foundation_gateway_logs
   foundation_gateway_tmp:

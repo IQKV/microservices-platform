@@ -25,3 +25,6 @@
 [submodule "foundation-docs-website"]
 	path = foundation-docs-website
 	url = git@github.com:IQKV/foundation-docs-website.git
+[submodule "foundation-cms-service"]
+	path = foundation-cms-service
+	url = git@github.com:IQKV/foundation-cms-service.git

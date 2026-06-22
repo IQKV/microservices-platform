@@ -54,6 +54,7 @@ Domain-aligned services with event-driven communication:
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog with trial period support, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
+- **📝 [CMS Service](foundation-cms-service/README.md)**: Content management for static pages, multi-language support, hierarchical content, and SEO-friendly metadata
 - **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
 - **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
 - **🚀 [SaaS Landing Kit](foundation-ui-saas-landing-kit/README.md)**: Modern, performant landing page built with Astro, React, Tailwind CSS, and shadcn/ui — includes authentication integration

@@ -183,6 +183,26 @@ Centralized, event-driven activity logging service. Passive observer of the plat
 - JSONB `TypeHandler` in MyBatis preserves the full dynamic event payload alongside normalized fields
 - Micrometer counters for `audit.event.consumption` (by type and source), `audit.persistence.duration`, and `audit.search.latency`
 
+### 📝 [CMS Service](https://github.com/IQKV/foundation-cms-service/tree/dev/README.md)
+
+Content management service for static pages, multi-language support, and hierarchical content.
+
+**Core Capabilities:**
+
+- Static page management with publishing status (draft/published)
+- Multi-language support with en-US fallback
+- Hierarchical content structure with parent/child pages
+- SEO-friendly metadata (title, description, Open Graph, canonical URLs)
+- Tenant isolation with schema-per-tenant architecture
+- Event-driven content lifecycle publishing (cms.page.created/updated/deleted)
+
+**Key Patterns:**
+
+- `PageService` handles CRUD operations with publishing status management
+- `PageTranslation` entity for multi-language content with fallback logic
+- Tenant schema routing via `MyBatisSchemaInterceptor`
+- Event publishing to RabbitMQ for content changes
+
 ### 💻 UI Applications
 
 Production-ready frontends for different user roles.
@@ -235,19 +255,19 @@ VitePress-based documentation site with user guides, platform overview, and quic
 └──────┬──────────────────┬────────────────┘
        │                  │
        ▼                  ▼
-┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
-│   IAM Service   │  │   Billing Service    │  │    Audit Service     │
-│  • Auth / JWT   │  │  • Subscriptions     │  │  • Audit Trails      │
-│  • Users        │  │  • Plan Catalog      │  │  • Event Logging     │
-│  • Tenants      │  │  • Stripe Webhooks   │  │  • Compliance        │
-│  • Invitations  │  │  • Billing Settings  │  │  • Query API         │
-│  • JWKS         │  │  • Entitlements      │  │                      │
-└────────┬────────┘  └──────────┬───────────┘  └──────────┬───────────┘
-         │                      │                         │
-         ▼                      ▼                         ▼
-┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
-│  PostgreSQL IAM │  │  PostgreSQL Billing  │  │  PostgreSQL Audit    │
-│  (schema/tenant)│  │                      │  │                      │
+┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│   IAM Service   │  │   Billing Service    │  │    Audit Service     │  │    CMS Service       │
+│  • Auth / JWT   │  │  • Subscriptions     │  │  • Audit Trails      │  • Content Management │
+│  • Users        │  │  • Plan Catalog      │  │  • Event Logging     │  • Multi-Language     │
+│  • Tenants      │  │  • Stripe Webhooks   │  │  • Compliance        │  • Hierarchical Pages │
+│  • Invitations  │  │  • Billing Settings  │  │  • Query API         │                        │
+│  • JWKS         │  │  • Entitlements      │  │                      │                        │
+└────────┬────────┘  └──────────┬───────────┘  └──────────┬───────────┘  └──────────┬───────────┘
+         │                      │                         │                         │
+         ▼                      ▼                         ▼                         ▼
+┌─────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+│  PostgreSQL IAM │  │  PostgreSQL Billing  │  │  PostgreSQL Audit    │  │  PostgreSQL CMS      │
+│  (schema/tenant)│  │                      │  │                      │  │  (schema/tenant)     │
 └─────────────────┘  └──────────────────────┘  └──────────────────────┘
 
 Shared Infrastructure
