@@ -11,6 +11,7 @@ data:
   IAM_JWKS_URI: {{ printf "%s/.well-known/jwks.json" .Values.config.iamServiceUri | quote }}
   BILLING_SERVICE_URI: {{ .Values.config.billingServiceUri | quote }}
   AUDIT_SERVICE_URI: {{ .Values.config.auditServiceUri | quote }}
+  CMS_SERVICE_URI: {{ .Values.config.cmsServiceUri | quote }}
   CORS_ALLOWED_ORIGINS: {{ join "," .Values.config.cors.allowedOrigins | quote }}
 
   # Platform rollout mode — must be identical across IAM, Billing, and Gateway

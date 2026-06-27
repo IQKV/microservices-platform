@@ -166,6 +166,10 @@ config:
   # Maps to env var AUDIT_SERVICE_URI consumed by application.yml
   auditServiceUri: "http://foundation-audit-service"
 
+  # CMS Service URI — used for routing CMS API requests
+  # Maps to env var CMS_SERVICE_URI consumed by application.yml
+  cmsServiceUri: "http://foundation-cms-service"
+
   # CORS allowed origins
   # Maps to env var CORS_ALLOWED_ORIGINS consumed by application.yml
   cors:

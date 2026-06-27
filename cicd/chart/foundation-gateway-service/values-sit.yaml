@@ -22,6 +22,7 @@ config:
   iamManagementServiceUri: "http://foundation-iam-service-management-http"
   billingServiceUri: "http://foundation-billing-service"
   auditServiceUri: "http://foundation-audit-service"
+  cmsServiceUri: "http://foundation-cms-service"
   cors:
     allowedOrigins:
       - "https://admin.iqkv.site"

@@ -1,0 +1,23 @@
+apiVersion: v2
+name: foundation-cms-service
+description: Centralized cms service for IQKV platform.
+version: 0.1.0
+appVersion: "1.0.0"
+
+keywords:
+  - iqkv
+  - cms-service
+  - multi-tenant
+  - spring-boot
+  - microservices
+  - security
+  - mybatis
+  - cms-logging
+
+home: https://github.com/IQKV/foundation-cms-service
+sources:
+  - https://github.com/IQKV/foundation-cms-service
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

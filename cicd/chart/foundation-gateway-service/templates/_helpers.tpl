@@ -96,6 +96,11 @@ Only variables actually consumed by application.yml are included.
     configMapKeyRef:
       name: {{ include "foundation-gateway-service.fullname" . }}-config
       key: AUDIT_SERVICE_URI
+- name: CMS_SERVICE_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-gateway-service.fullname" . }}-config
+      key: CMS_SERVICE_URI
 - name: CORS_ALLOWED_ORIGINS
   valueFrom:
     configMapKeyRef:
