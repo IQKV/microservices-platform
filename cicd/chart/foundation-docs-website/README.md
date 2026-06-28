@@ -52,21 +52,21 @@ The following table lists the configurable parameters of the chart and their def
 
 ### Application Configuration
 
-| Parameter         | Description         | Default                            |
-| ----------------- | ------------------- | ---------------------------------- |
-| `app.name`        | Application name    | `foundation-docs-website`          |
-| `app.version`     | Application version | `1.0.0`                            |
-| `app.environment` | Environment name    | `sit`                              |
-| `app.nginx.port`  | Nginx port          | `8080`                             |
+| Parameter         | Description         | Default                   |
+| ----------------- | ------------------- | ------------------------- |
+| `app.name`        | Application name    | `foundation-docs-website` |
+| `app.version`     | Application version | `1.0.0`                   |
+| `app.environment` | Environment name    | `sit`                     |
+| `app.nginx.port`  | Nginx port          | `8080`                    |
 
 ### Image Configuration
 
-| Parameter          | Description        | Default                                                         |
-| ------------------ | ------------------ | --------------------------------------------------------------- |
-| `image.repository` | Image repository   | `know-how.download/iqkv/foundation-docs-website`                |
-| `image.tag`        | Image tag          | `latest`                                                        |
-| `image.pullPolicy` | Image pull policy  | `Always`                                                        |
-| `imagePullSecrets` | Image pull secrets | `[{name: know-how-download-auth}]`                              |
+| Parameter          | Description        | Default                            |
+| ------------------ | ------------------ | ---------------------------------- |
+| `image.repository` | Image repository   | `iqkv/foundation-docs-website`     |
+| `image.tag`        | Image tag          | `latest`                           |
+| `image.pullPolicy` | Image pull policy  | `Always`                           |
+| `imagePullSecrets` | Image pull secrets | `[{name: know-how-download-auth}]` |
 
 ### Deployment Configuration
 

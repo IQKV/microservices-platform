@@ -24,7 +24,7 @@ app:
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-gateway-service
+  repository: iqkv/foundation-gateway-service
   tag: "latest"
   pullPolicy: Always
 

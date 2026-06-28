@@ -38,7 +38,7 @@ app:
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-docs-website
+  repository: iqkv/foundation-docs-website
   tag: "latest"
   pullPolicy: Always
   # Base image: cicdtools/nginx-runner (pre-configured Nginx)

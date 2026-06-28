@@ -24,7 +24,7 @@ app:
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-audit-service
+  repository: iqkv/foundation-audit-service
   tag: "latest"
   pullPolicy: Always
 

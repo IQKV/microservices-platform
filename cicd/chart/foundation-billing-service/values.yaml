@@ -24,7 +24,7 @@ app:
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-billing-service
+  repository: iqkv/foundation-billing-service
   tag: "latest"
   pullPolicy: Always
 

@@ -70,7 +70,7 @@ app:
 
 ```yaml
 image:
-  repository: know-how.download/iqkv/foundation-ui-saas-landing-kit
+  repository: iqkv/foundation-ui-saas-landing-kit
   tag: "latest"
   pullPolicy: Always
 

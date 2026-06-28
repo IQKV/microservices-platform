@@ -56,29 +56,29 @@ The following table lists the configurable parameters of the chart and their def
 
 ### Application Configuration
 
-| Parameter         | Description         | Default                            |
-| ----------------- | ------------------- | ---------------------------------- |
+| Parameter         | Description         | Default             |
+| ----------------- | ------------------- | ------------------- |
 | `app.name`        | Application name    | `foundation-ui-app` |
-| `app.version`     | Application version | `1.0.0`                            |
-| `app.environment` | Environment name    | `dev`                              |
-| `app.nginx.port`  | Nginx port          | `8080`                             |
+| `app.version`     | Application version | `1.0.0`             |
+| `app.environment` | Environment name    | `dev`               |
+| `app.nginx.port`  | Nginx port          | `8080`              |
 
 ### Runtime Environment Variables
 
-| Parameter                         | Description                | Default                 |
-| --------------------------------- | -------------------------- | ----------------------- |
-| `app.env.apiServerUrl`            | Backend API URL            | `http://localhost:8080` |
-| `app.env.enableMsw`               | Enable Mock Service Worker | `false`                 |
-| `app.env.logLevel`                | Logging level              | `info`                  |
+| Parameter              | Description                | Default                 |
+| ---------------------- | -------------------------- | ----------------------- |
+| `app.env.apiServerUrl` | Backend API URL            | `http://localhost:8080` |
+| `app.env.enableMsw`    | Enable Mock Service Worker | `false`                 |
+| `app.env.logLevel`     | Logging level              | `info`                  |
 
 ### Image Configuration
 
-| Parameter          | Description        | Default                                                   |
-| ------------------ | ------------------ | --------------------------------------------------------- |
-| `image.repository` | Image repository   | `know-how.download/iqkv/foundation-ui-app` |
-| `image.tag`        | Image tag          | `latest`                                                  |
-| `image.pullPolicy` | Image pull policy  | `Always`                                                  |
-| `imagePullSecrets` | Image pull secrets | `[{name: know-how-download-auth}]`                        |
+| Parameter          | Description        | Default                            |
+| ------------------ | ------------------ | ---------------------------------- |
+| `image.repository` | Image repository   | `iqkv/foundation-ui-app`           |
+| `image.tag`        | Image tag          | `latest`                           |
+| `image.pullPolicy` | Image pull policy  | `Always`                           |
+| `imagePullSecrets` | Image pull secrets | `[{name: know-how-download-auth}]` |
 
 ### Deployment Configuration
 

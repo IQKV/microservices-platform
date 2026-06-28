@@ -3,7 +3,7 @@
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-docs-website
+  repository: iqkv/foundation-docs-website
   tag: "latest"
   pullPolicy: IfNotPresent
 

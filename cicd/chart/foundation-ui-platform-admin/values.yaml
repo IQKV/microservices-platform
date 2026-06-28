@@ -49,7 +49,7 @@ app:
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-ui-platform-admin
+  repository: iqkv/foundation-ui-platform-admin
   tag: "latest"
   pullPolicy: Always
   # Base image: cicdtools/nginx-runner (pre-configured Nginx)

@@ -3,7 +3,7 @@
 
 # Image Configuration
 image:
-  repository: know-how.download/iqkv/foundation-ui-app
+  repository: iqkv/foundation-ui-app
   tag: "latest"
   pullPolicy: Always
 
