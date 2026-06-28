@@ -1,5 +1,5 @@
 # =====================================================================================
-# UI SaaS Landling - Drone CI/CD Pipeline
+# UI SaaS Landing - Drone CI/CD Pipeline
 # =====================================================================================
 # Pipeline Flow:
 #   1. VerifyCode                       - Code quality, tests, and static analysis
