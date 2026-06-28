@@ -35,7 +35,7 @@ image:
   repository: know-how.download/iqkv/standard-ui-blank-astro-daisyui-ssr
   tag: "latest"
   pullPolicy: Always
-  # Base image: know-how.download/library/nodejs-runner
+  # Base image: cicdtools/nodejs-runner
 
 imagePullSecrets:
   - name: know-how-download-auth

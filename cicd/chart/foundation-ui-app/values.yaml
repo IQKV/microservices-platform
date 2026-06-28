@@ -53,7 +53,7 @@ image:
   repository: know-how.download/iqkv/foundation-ui-app
   tag: "latest"
   pullPolicy: Always
-  # Base image: know-how.download/library/nginx-runner (pre-configured Nginx)
+  # Base image: cicdtools/nginx-runner (pre-configured Nginx)
 
 imagePullSecrets:
   - name: know-how-download-auth

@@ -37,7 +37,7 @@ helm install landing-kit ./foundation-ui-saas-landing-kit \
 
 ## Nginx Configuration
 
-The chart uses a pre-configured Nginx base image (`know-how.download/library/nginx-runner`) with optimized defaults for static sites.
+The chart uses a pre-configured Nginx base image (`cicdtools/nginx-runner`) with optimized defaults for static sites.
 
 ### Base Image Defaults
 

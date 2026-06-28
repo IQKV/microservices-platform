@@ -284,7 +284,7 @@ steps:
       registry: know-how.download
       force_tag: true
       build_args:
-        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - BASE_IMAGE=cicdtools/jre-runner-alpine
         - VCS_REFERENCE=${DRONE_COMMIT}
       tags:
         - ${DRONE_BRANCH}
@@ -313,7 +313,7 @@ steps:
       registry: know-how.download
       force_tag: true
       build_args:
-        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - BASE_IMAGE=cicdtools/jre-runner-alpine
         - VCS_REFERENCE=${DRONE_COMMIT}
       tags:
         - ${DRONE_BRANCH:8} # Strips 'feature/' prefix
@@ -338,7 +338,7 @@ steps:
       registry: know-how.download
       force_tag: true
       build_args:
-        - BASE_IMAGE=know-how.download/library/jre-runner-alpine
+        - BASE_IMAGE=cicdtools/jre-runner-alpine
         - VCS_REFERENCE=${DRONE_COMMIT}
       tags:
         - ${DRONE_TAG}

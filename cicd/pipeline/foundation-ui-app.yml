@@ -281,7 +281,7 @@ steps:
       registry: know-how.download
       force_tag: true
       build_args:
-        - BASE_IMAGE=know-how.download/library/nginx-runner
+        - BASE_IMAGE=cicdtools/nginx-runner
         - VCS_REFERENCE=${DRONE_COMMIT}
         - SOURCE_DIR=./dist/
       tags:
