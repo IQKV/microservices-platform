@@ -333,7 +333,7 @@ services:
   # Internal service providing Authentication and Authorization.
   # ---------------------------------------------------------------------------
   foundation-iam-service:
-    image: know-how.download/iqkv/foundation-iam-service:wip
+    image: iqkv/foundation-iam-service:wip
     container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -416,7 +416,7 @@ services:
   # Internal service handling Stripe integration and financial workflows.
   # ---------------------------------------------------------------------------
   foundation-billing-service:
-    image: know-how.download/iqkv/foundation-billing-service:wip
+    image: iqkv/foundation-billing-service:wip
     container_name: foundation-billing-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -502,7 +502,7 @@ services:
   # Internal service for logging and querying system-wide audit trails.
   # ---------------------------------------------------------------------------
   foundation-audit-service:
-    image: know-how.download/iqkv/foundation-audit-service:wip
+    image: iqkv/foundation-audit-service:wip
     container_name: foundation-audit-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -556,7 +556,7 @@ services:
   # Internal service for managing static pages and content
   # ---------------------------------------------------------------------------
   foundation-cms-service:
-    image: know-how.download/iqkv/foundation-cms-service:wip
+    image: iqkv/foundation-cms-service:wip
     container_name: foundation-cms-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -610,7 +610,7 @@ services:
   # The unified entry point for all API requests, providing routing and security.
   # ---------------------------------------------------------------------------
   foundation-gateway-service:
-    image: know-how.download/iqkv/foundation-gateway-service:wip
+    image: iqkv/foundation-gateway-service:wip
     container_name: foundation-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -674,7 +674,7 @@ services:
   # User Interfaces (Frontends)
   # ---------------------------------------------------------------------------
   foundation-ui-platform-admin:
-    image: know-how.download/iqkv/foundation-ui-platform-admin:wip
+    image: iqkv/foundation-ui-platform-admin:wip
     container_name: foundation-ui-platform-admin
     expose:
       - "8080"
@@ -683,7 +683,7 @@ services:
     restart: unless-stopped
 
   foundation-ui-app:
-    image: know-how.download/iqkv/foundation-ui-app:wip
+    image: iqkv/foundation-ui-app:wip
     container_name: foundation-ui-app
     expose:
       - "8080"
