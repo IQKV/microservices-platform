@@ -14,7 +14,7 @@ app:
 
 # Production image configuration
 image:
-  tag: "1.0.0"  # Use specific version in production
+  tag: "0.3.0"  # Use specific version in production
 
 # Production deployment configuration
 replicaCount: 2

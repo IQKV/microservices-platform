@@ -2,8 +2,8 @@ apiVersion: v2
 name: foundation-ui-platform-admin
 description: React-based application portal UI with Nginx serving, runtime configuration via ConfigMap, and SPA routing support
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
 
 keywords:
   - iqscaffold

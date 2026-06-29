@@ -2,8 +2,8 @@ apiVersion: v2
 name: foundation-gateway-service
 description: API Gateway with routing, authentication, rate limiting, and multi-service orchestration
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
 
 keywords:
   - iqkv

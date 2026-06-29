@@ -2,8 +2,8 @@ apiVersion: v2
 name: foundation-iam-service
 description: Identity and Access Management microservice with JWT RS256, multi-tenancy, MyBatis, and email verification (requires external PostgreSQL, RabbitMQ)
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
 
 keywords:
   - iqkv

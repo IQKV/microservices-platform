@@ -9,7 +9,7 @@ global:
 # Application Configuration
 app:
   name: foundation-iam-service
-  version: "1.0.0"
+  version: "0.3.0"
   environment: "sit"
   namespace: "default"
 

@@ -2,8 +2,8 @@ apiVersion: v2
 name: foundation-infra
 description: IQ Key Value Platform Core Infrastructure Services Helm Chart
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
 keywords:
   - iqkv
   - infrastructure

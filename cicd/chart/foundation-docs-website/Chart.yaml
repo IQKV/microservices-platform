@@ -2,8 +2,8 @@ apiVersion: v2
 name: foundation-docs-website
 description: IQ Key Value Platform Documentation Website - VitePress-based documentation with Nginx serving
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.3.0
+appVersion: "0.3.0"
 
 keywords:
   - iqscaffold
