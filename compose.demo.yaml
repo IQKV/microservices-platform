@@ -345,6 +345,10 @@ services:
       DB_USERNAME: ${IAM_DB_USERNAME:-svc_iam_dba}
       DB_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
 
+      # Redis (OIDC state/PKCE, lockouts, ephemeral security state)
+      REDIS_HOST: foundation-redis
+      REDIS_PORT: 6379
+
       # RabbitMQ
       RABBITMQ_HOST: foundation-rabbitmq
       RABBITMQ_PORT: 5672
@@ -392,6 +396,8 @@ services:
     depends_on:
       foundation-postgres-iam:
         condition: service_healthy
+      foundation-redis:
+        condition: service_healthy
       foundation-rabbitmq:
         condition: service_healthy
       foundation-minio:
@@ -413,7 +419,8 @@ services:
 
   # ---------------------------------------------------------------------------
   # Billing Service (Payments & Subscriptions)
-  # Internal service handling Stripe integration and financial workflows.
+  # Internal service handling payment gateway integration and financial workflows.
+  # Supports Stripe and Lemon Squeezy via multi-gateway strategy pattern.
   # ---------------------------------------------------------------------------
   foundation-billing-service:
     image: iqkv/foundation-billing-service:wip
@@ -462,10 +469,18 @@ services:
       ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
       DEFAULT_BILLING_EMAIL: ${DEFAULT_BILLING_EMAIL:-}
 
-      # Stripe (placeholders — override via .env)
+      # Payment Gateway — set to STRIPE or LEMON_SQUEEZY
+      PAYMENT_GATEWAY_TYPE: ${PAYMENT_GATEWAY_TYPE:-STRIPE}
+
+      # Stripe (used when PAYMENT_GATEWAY_TYPE=STRIPE)
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       STRIPE_PORTAL_RETURN_URL: ${STRIPE_PORTAL_RETURN_URL:-http://localhost:80/billing}
+
+      # Lemon Squeezy (used when PAYMENT_GATEWAY_TYPE=LEMON_SQUEEZY)
+      LEMON_SQUEEZY_API_KEY: ${LEMON_SQUEEZY_API_KEY:-ls_test_placeholder}
+      LEMON_SQUEEZY_WEBHOOK_SECRET: ${LEMON_SQUEEZY_WEBHOOK_SECRET:-whsec_placeholder}
+      LEMON_SQUEEZY_STORE_ID: ${LEMON_SQUEEZY_STORE_ID:-12345}
 
       # Observability
       OTEL_SERVICE_NAME: foundation-billing-service
@@ -676,6 +691,10 @@ services:
   foundation-ui-platform-admin:
     image: iqkv/foundation-ui-platform-admin:wip
     container_name: foundation-ui-platform-admin
+    environment:
+      VITE_API_SERVER_URL: ${VITE_API_SERVER_URL:-http://api.iqkv.local/api}
+      VITE_LOG_LEVEL: ${VITE_LOG_LEVEL:-info}
+      VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
     expose:
       - "8080"
     networks:
@@ -685,6 +704,13 @@ services:
   foundation-ui-app:
     image: iqkv/foundation-ui-app:wip
     container_name: foundation-ui-app
+    environment:
+      VITE_API_SERVER_URL: ${VITE_API_SERVER_URL:-http://api.iqkv.local/api}
+      VITE_LOG_LEVEL: ${VITE_LOG_LEVEL:-info}
+      VITE_ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
+      VITE_ENABLE_MAGIC_LINK: ${VITE_ENABLE_MAGIC_LINK:-true}
+      VITE_PAYMENT_GATEWAY_TYPE: ${PAYMENT_GATEWAY_TYPE:-STRIPE}
     expose:
       - "8080"
     networks:

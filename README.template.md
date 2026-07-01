@@ -37,8 +37,8 @@ The platform runs live at **[iqkv.site](https://iqkv.site)** with all services a
 
 Critical domains to accelerate product development:
 
-- **Identity & Access**: Multi-tenant authentication, invitation flows, in-app notifications, site-wide announcements, and role-based access control
-- **Financial Operations**: Stripe-backed subscriptions, plan catalog, and webhook-driven billing
+- **Identity & Access**: Multi-tenant authentication, magic link and OAuth2/OIDC social sign-in, invitation flows, in-app notifications, site-wide announcements, and role-based access control
+- **Financial Operations**: Multi-gateway subscriptions (Stripe + Lemon Squeezy), FLAT and PER_SEAT pricing, plan catalog with trial support, entitlement evaluation, and webhook-driven billing
 - **Frontend Experience**: Production-ready React 19 SPAs for tenants and platform administrators, plus a SaaS landing kit and documentation website to complete your product's public presence
 
 <div align="center">
@@ -50,13 +50,13 @@ Critical domains to accelerate product development:
 
 Domain-aligned services with event-driven communication:
 
-- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements, tenant owner member management (ban/unban, edit authority, transfer ownership), platform admin user actions (ban/unban, unlock)
+- **🔐 [IAM Service](foundation-iam-service/README.md)**: RS256 JWT authentication, magic link auth, OAuth2/OIDC social sign-in, account linking, tenant SSO, avatar uploads, tenant lifecycle, email verification, password reset, invitation flows, in-app notifications, site-wide announcements, tenant owner member management (ban/unban, edit authority, transfer ownership), platform admin user actions (ban/unban, unlock)
 - **🌐 [Gateway Service](foundation-gateway-service/README.md)**: Reactive entry point with JWT validation, header sanitization, tenant context injection, platform mode guard
-- **💰 [Billing Service](foundation-billing-service/README.md)**: Stripe subscriptions, plan catalog with trial period support, webhook processing, entitlement evaluation
+- **💰 [Billing Service](foundation-billing-service/README.md)**: Multi-gateway subscriptions (Stripe + Lemon Squeezy), FLAT/PER_SEAT pricing models, plan catalog with trial support, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
 - **📝 [CMS Service](foundation-cms-service/README.md)**: Content management for static pages, multi-language support, hierarchical content, and SEO-friendly metadata
-- **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — sign-in, team management, invitations, account profile
-- **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription monitoring, plan catalog CRUD
+- **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — OAuth2/OIDC sign-in, magic link auth, team management, invitations, billing self-service with entitlement-based feature gating, account profile
+- **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription lifecycle, plan catalog CRUD, announcement management with translations, OIDC identity remediation
 - **🚀 [SaaS Landing Kit](foundation-ui-saas-landing-kit/README.md)**: Modern, performant landing page built with Astro, React, Tailwind CSS, and shadcn/ui — includes authentication integration
 - **📚 [Documentation Website](foundation-docs-website/README.md)**: VitePress-based documentation site with user guides, platform overview, and quick start instructions
 
@@ -65,14 +65,15 @@ Domain-aligned services with event-driven communication:
 Production-ready capabilities across all services:
 
 - **Multi-Tenancy**: Schema-per-tenant PostgreSQL isolation with `MULTI_TENANT` and `SINGLE_TENANT` modes
-- **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing, account lockout with manual unlock
+- **Security**: RS256 JWT with two-layer revocation (JTI denylist + global signout timestamp), header sanitization to prevent spoofing, account lockout with manual unlock, OAuth2/OIDC social sign-in with server-side PKCE
 - **Object Storage**: MinIO S3-compatible storage for file uploads, avatars, and documents
 - **Database Administration**: DbGate web-based tool for PostgreSQL, Redis, RabbitMQ, and MinIO management
-- **Frontend**: React 19, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
+- **Frontend**: React 19, Mantine UI 9, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
 - **Event-Driven**: RabbitMQ topic exchange with dead-letter queues — tenant provisioning, subscription lifecycle, billing notifications
 - **Observability**: Correlation ID propagation, Prometheus metrics, Grafana dashboards, structured JSON logging
 - **Distributed Locking**: ShedLock for scheduled jobs (token cleanup, trial notifications, stuck tenant recovery)
 - **Member Management**: Tenant owner actions (ban/unban, edit authority, transfer ownership), platform admin actions (ban/unban users, unlock users)
+- **Payments**: Multi-gateway strategy — Stripe and Lemon Squeezy with FLAT and PER_SEAT pricing models, entitlement evaluation, and plan-based feature gating
 
 ## Quick Start
 

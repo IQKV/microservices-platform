@@ -60,9 +60,9 @@ The demo instance runs in `MULTI_TENANT` mode. You can sign up freely — each r
 
 A microservices ecosystem that provides:
 
-- **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, invitation flows, in-app notifications, site-wide announcements, and role-based access control
+- **Identity & Access Management** - Centralized authentication with RS256 JWT tokens, multi-tenant user lifecycle, email verification, magic link authentication, OAuth2/OIDC social sign-in, invitation flows, in-app notifications, site-wide announcements, and role-based access control
 - **API Gateway** - Reactive entry point with JWT validation, header sanitization, tenant context injection, and platform mode consistency enforcement
-- **Billing & Payments** - Stripe-backed subscription management, plan catalog, webhook processing, and event-driven billing notifications
+- **Billing & Payments** - Multi-gateway subscription management (Stripe + Lemon Squeezy), FLAT and PER_SEAT pricing models, plan catalog with trial support, webhook processing, entitlement evaluation, and event-driven billing notifications
 - **Activity Auditing** - System-wide audit trails capturing security events, data changes, and administrative actions with structured storage and querying
 - **Extensible Platform** - Foundation for adding new microservices with standardized security, observability, and integration patterns
 - **Included UI Applications** - Production-ready React frontends for both customers (Tenant App) and operators (Platform Admin)
@@ -86,17 +86,23 @@ Centralized authentication and identity management hub.
 - User registration via `SignupStrategy` — `MULTI_TENANT` creates a new tenant + grants `TENANT_OWNER`; `SINGLE_TENANT` joins the default tenant with `MEMBER`
 - Email verification with 64-char hex one-time tokens, 24h expiry, rate-limited resend (3/hour)
 - Password reset with 32-byte hex tokens, configurable TTL, enumeration-safe responses
+- **Magic link authentication** — passwordless sign-in with time-limited tokens, resend functionality, and rate limiting
+- **OAuth2/OIDC authentication** — social sign-in via Google, GitHub, and Microsoft plus tenant-specific OIDC providers; browser flows use server-side PKCE and Redis-backed signed state
+- **Account linking** — authenticated users can link/unlink external identities; platform admins can inspect and force-unmerge linked identities for remediation
+- **Tenant SSO configuration** — tenant owners and platform admins manage custom OIDC client settings per tenant
 - Tenant invitation flow — send, preview, accept (existing or new user), revoke
 - In-app notifications — transactional events (signup, invitation, etc.) persisted as user notifications and pushed via WebSocket (STOMP/SockJS)
-- Site-wide announcements — multi-lingual announcements with async fan-out to all users and real-time broadcast
+- Site-wide announcements — multi-lingual announcements with async fan-out to all users in batches of 1000 and real-time broadcast
 - Two-layer token revocation: JTI denylist (per-signout) + `last_global_signout_at` (signout-all)
 - Account lockout after configurable failed attempts with sliding window
+- **Avatar uploads** — two-phase S3 upload flow: initiate generates presigned PUT URL, client uploads directly to S3, confirm persists avatar URL
 - Schema-per-tenant PostgreSQL isolation (`t_{tenantKey}`) provisioned via Liquibase on `tenant.created` events
 - JWKS endpoint (`/.well-known/jwks.json`) for public key distribution
 - Tenant lifecycle management: `PROVISIONING → ACTIVE → SUSPENDED/DELETED` with event publishing
 - Admin user management with paginated listing and partial updates
 - Tenant owner member management: ban/unban, edit authority (TENANT_OWNER ↔ MEMBER), transfer ownership
 - Platform admin actions: ban/unban users globally, unlock temporarily locked users
+- **Plan feature enforcement** — `PlanFeatureGuard` resolves the caller's active plan features from a local cache and throws `PlanFeatureNotAvailableException` for gated endpoints
 
 **Key Patterns:**
 
@@ -136,17 +142,22 @@ Reactive API gateway providing the single external entry point for all services.
 
 ### 💰 [Billing Service](https://github.com/IQKV/foundation-billing-service/tree/dev/README.md)
 
-Stripe-backed subscription and billing management service.
+Payment gateway-agnostic subscription and billing management service.
 
 **Core Capabilities:**
 
-- Plan catalog with `MONTHLY`/`ANNUAL` billing periods, minor-unit pricing, feature sets (JSON), `TENANT`/`USER` scope, and `trialPeriodDays` to define free trial length in days (0 = no trial)
-- Subscription management with Stripe-synced status (`active`, `trialing`, `past_due`, `canceled`, `unpaid`)
-- Stripe webhook processing with idempotency via `webhook_log` table — handles `customer.subscription.*` and `invoice.*` events
-- Billing settings per tenant: Stripe customer ID, billing email, company name, address, tax ID
-- User billing settings for `SINGLE_TENANT` mode: per-user Stripe customer creation
-- Entitlement evaluation: resolves active subscription + plan feature set for a subject (tenant or user)
-- Event-driven bootstrap: `TenantEventConsumer` creates Stripe customer on `tenant.created`; `UserEventConsumer` cleans up `profileOwnerId` on user removal
+- **Multi-gateway strategy** — `PaymentGatewayPort` interface decouples business logic from gateway SDKs; Stripe and Lemon Squeezy are implemented
+- Plan catalog with `MONTHLY`/`ANNUAL` billing periods, minor-unit pricing, `TENANT`/`USER` scope, and `trialPeriodDays` (0 = no trial)
+- **Pricing models** — `FLAT` (fixed price per period) and `PER_SEAT` (price × seat count; `maxUsers` acts as the seat ceiling)
+- Typed `PlanFeatures`: `maxUsers` and `maxProjects` as typed quota fields; extensible `features` map keyed by feature code (e.g. `priority_support`)
+- Subscription management with gateway-synced status (`active`, `trialing`, `past_due`, `canceled`, `unpaid`)
+- Webhook processing with idempotency via `webhook_log` table — handles gateway subscription and invoice events
+- Billing settings per tenant: external customer ID, billing email, company name, address, tax ID
+- User billing settings for `SINGLE_TENANT` mode: per-user customer creation
+- Entitlement evaluation: resolves active subscription + plan feature set for a subject (tenant or user); returns `isInTrial` and `trialDaysLeft` fields
+- `BillingSeedRunner` synchronizes plan catalog with the payment gateway at startup — no REST API for plan CRUD, config-driven only
+- `PlanFeatureRegistry` serves an in-memory feature map for zero-latency entitlement evaluation; internal plans endpoint (`/internal/plans`) for service-to-service consumption
+- Event-driven bootstrap: `TenantEventConsumer` creates gateway customer on `tenant.provisioned`
 - Email notifications: subscription activated, subscription cancelled, invoice paid, payment failed
 - Scheduled trial and overdue notifications (daily at 9AM and 10AM UTC via ShedLock)
 
@@ -155,10 +166,9 @@ Stripe-backed subscription and billing management service.
 - `SubscriptionSubjectResolver` strategy — `MULTI_TENANT`: subject is `TENANT/tenantKey`; `SINGLE_TENANT`: subject is `USER/userId`
 - `PlanEligibilityPolicyImpl` validates plan scope matches subject type before subscription creation
 - `WebhookProcessingService` idempotency: checks `webhook_log` by `externalEventId` before processing; status lifecycle `RECEIVED → PROCESSED/FAILED`
-- `BillingContactResolver` fallback chain: `ownerEmail` from event → `DEFAULT_BILLING_EMAIL` env var → null (Stripe allows no email)
+- `BillingContactResolver` fallback chain: `ownerEmail` from event → `DEFAULT_BILLING_EMAIL` env var → null
 - `TrialNotificationService` finds trials ending in 2–3 days and `past_due` subscriptions daily
 - `TenantExtractionFilter` resolves tenant from `X-Tenant-ID` header (injected by Gateway) with context validation
-- `PaymentGatewayClient` wraps Stripe SDK; initialized with `secretKey` at construction
 
 ### 📋 [Audit Service](https://github.com/IQKV/foundation-audit-service/tree/dev/README.md)
 
@@ -209,11 +219,37 @@ Production-ready frontends for different user roles.
 
 #### [Tenant App](https://github.com/IQKV/foundation-ui-app/tree/dev/README.md)
 
-React 19 SPA for workspace members — sign-in with tenant discovery, team management, invitations, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
+React 19 SPA for workspace members — sign-in with tenant discovery, OAuth2/OIDC social sign-in, magic link authentication, team management, invitations, billing self-service, and account profile. Scoped to a single tenant via `X-Tenant-ID` and tenant-scoped JWTs.
+
+**Key capabilities:**
+
+- Two-step sign-in flow: credentials → tenant discovery → workspace selection
+- OAuth2/OIDC social sign-in (Google, GitHub, Microsoft) and Enterprise SSO (tenant OIDC)
+- OAuth2 provider link/unlink from account settings
+- Self-service signup with tenant provisioning polling (`PROVISIONING → ACTIVE`)
+- Magic link passwordless authentication (feature-flagged)
+- Billing portal access (Stripe or Lemon Squeezy), plan catalog, entitlements-based feature gating via `FeatureGate`, quota checks via `useQuota()`
+- `EntitlementsProvider` with `hasFeature(code)`, `getQuota(field)`, `isActive`, `planCode`
+- In-app notifications with WebSocket support and notification bell UI
+- Inactivity sign-out after 30 minutes; silent token refresh on page reload
+- Runtime config via `public/config.js` overrides without rebuild; supports `MULTI_TENANT` and `SINGLE_TENANT` rollout modes
 
 #### [Platform Admin](https://github.com/IQKV/foundation-ui-platform-admin/tree/dev/README.md)
 
-React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, and platform-wide metrics dashboard.
+React 19 SPA for operators — global user/organization management, subscription monitoring, plan catalog CRUD, announcement management, and OIDC identity remediation.
+
+**Key capabilities:**
+
+- Dashboard with parallel count cards for users, organizations, and active subscriptions
+- Users: paginated list, detail view (Overview, Organizations, Platform Authority, OIDC Identities tabs), edit profile, set password, ban/unban/unlock, grant/revoke `PLATFORM_ADMIN`, force-unmerge OIDC identities
+- Organizations: list with status filter, detail layout (Overview, Members, Billing, Subscriptions, Refunds tabs), member authority management (TENANT_OWNER, ADMIN, MEMBER)
+- Invitations: propose, edit, revoke across all tenants
+- Subscriptions: global list with lifecycle actions (cancel, pause, reactivate) and quantity update
+- Plans: plan catalog list, create, detail with edit and delete
+- Announcements: create, edit, publish, delete with translation support
+- Audit Logs: global audit log view
+- Refunds: list and detail views
+- In-app notifications with WebSocket support
 
 #### [SaaS Landing Kit](https://github.com/IQKV/foundation-ui-saas-landing-kit/tree/dev/README.md)
 
@@ -286,14 +322,14 @@ Shared Infrastructure
 ### Technology Stack
 
 - **Runtime:** Java 25 with modern features (records, var, text blocks, pattern matching, switch expressions)
-- **Framework:** Spring Boot 4.x, Spring Cloud Gateway (WebFlux/reactive)
-- **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis, schema-per-tenant isolation
+- **Framework:** Spring Boot 4.1, Spring Cloud Gateway (WebFlux/reactive)
+- **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis 3.x, schema-per-tenant isolation
 - **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
 - **Object Storage:** MinIO S3-compatible storage for file uploads, avatars, and documents
 - **Database Admin:** DbGate web-based administration for PostgreSQL, Redis, RabbitMQ, and MinIO
 - **Security:** JWT with RS256 (JJWT), Spring Security OAuth2 Resource Server, BCrypt strength 12
-- **Frontend**: React 19, TypeScript, Mantine UI 8, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
-- **Payments:** Stripe Java SDK for customer and subscription management
+- **Frontend:** React 19, TypeScript, Mantine UI 9, TanStack Router & Query, Feature-Sliced Design (FSD), Astro (landing kit), VitePress (documentation)
+- **Payments:** Stripe Java SDK and Lemon Squeezy adapter for customer and subscription management
 - **Observability:** Prometheus (Micrometer), Grafana, Loki, Promtail, structured JSON logging (Logstash Logback Encoder)
 - **Distributed Locking:** ShedLock with JDBC provider for scheduled jobs
 - **API Documentation:** SpringDoc OpenAPI with Swagger UI (webmvc + webflux variants)
@@ -313,11 +349,16 @@ Shared Infrastructure
 - Account lockout after configurable failed login attempts with sliding window; platform admins can unlock users manually
 - Email verification with one-time tokens and rate-limited resend
 - Password reset with enumeration-safe responses and session invalidation on completion
+- **Magic link authentication** — passwordless sign-in with time-limited tokens and rate limiting (feature-flagged)
+- **OAuth2/OIDC social sign-in** — Google, GitHub, Microsoft with server-side PKCE; Redis-backed signed state
+- **Account linking** — users link/unlink external OAuth2 providers; platform admins can force-unmerge linked identities
+- **Tenant SSO** — per-tenant custom OIDC provider configuration managed by tenant owners and platform admins
 - Tenant invitation flow with authority assignment and support for both existing and new users
 - Tenant owner member management: ban/unban, edit authority (TENANT_OWNER ↔ MEMBER), transfer ownership with last-owner safeguards
 - Platform admin actions: ban/unban users globally
 - **In-App Notifications**: Transactional events (signup, invitation, password reset) persisted and pushed in real time via WebSocket (STOMP/SockJS)
 - **Site-Wide Announcements**: Multi-lingual announcements with async fan-out to all users in batches of 1000 and real-time broadcast via WebSocket
+- **Avatar uploads**: Two-phase S3 presigned URL flow — initiate → direct S3 upload → confirm
 
 ### Multi-Tenancy
 
@@ -327,21 +368,21 @@ Shared Infrastructure
 - All three services validate rollout mode at startup; Gateway additionally polls IAM every 60s and blocks traffic on mismatch
 - Schema-per-tenant PostgreSQL isolation in IAM — `MyBatisSchemaInterceptor` sets `search_path` per request
 - Tenant provisioning via async RabbitMQ flow: `tenant.created` → Liquibase migrations → `tenant.provisioned`
-- **Frontend Support**: Both apps support runtime `public/config.js` overrides and silent token refresh for seamless multi-tenant switching.
+- **Frontend Support**: Both apps support runtime `public/config.js` overrides, silent token refresh, and `MULTI_TENANT`/`SINGLE_TENANT` rollout mode switching.
 
 ### Included UI Applications
 
-- **Tenant App**: React 19 SPA with Mantine UI, TanStack Router, and Lingui i18n. Supports tenant discovery, self-service signup, and team management.
-- **Platform Admin**: Operator console with `mantine-datatable`, real-time metrics dashboard, and global user/organization CRUD.
+- **Tenant App**: React 19 SPA with Mantine UI 9, TanStack Router, and Lingui i18n. Supports OAuth2/OIDC social sign-in, magic link auth, tenant discovery, self-service signup, team management, billing self-service with plan-based feature gating, and account linking.
+- **Platform Admin**: Operator console with `mantine-datatable`, real-time metrics dashboard, global user/organization CRUD, subscription lifecycle management, plan catalog, announcement management with translations, and OIDC identity remediation.
 - **SaaS Landing Kit**: Modern, performant Astro landing page with Tailwind CSS, shadcn/ui components, and integrated authentication.
 - **Documentation Website**: VitePress-based documentation with user guides, platform overview, and quick start instructions.
 
 ### Event-Driven Integration
 
 - RabbitMQ topic exchange `iqkv.events` with dead-letter exchange and 24h TTL on all queues
-- IAM publishes: `tenant.created/provisioned/provisioning_failed/suspended/deleted`, `user.created/deleted/removed/invited`, `notification.iam.email`
-- Billing consumes `tenant.created` to bootstrap Stripe customer and billing settings
-- Billing publishes: `subscription.created/cancelled`, `invoice.paid`, `payment.failed`, `notification.billing.email`
+- IAM publishes: `tenant.created/provisioned/provisioning_failed/suspended/deleted`, `user.created/updated/deleted/removed/invited`, `notification.iam.email`, `announcement.publish`
+- Billing consumes `tenant.provisioned` to bootstrap gateway customer and billing settings
+- Billing publishes: `subscription.created/cancelled`, `invoice.created/finalized/paid/updated`, `payment.failed`, `refund.created`, `notification.billing.email`
 - IAM consumes `subscription.cancelled` to suspend the corresponding tenant
 - ShedLock prevents duplicate scheduled job execution across clustered deployments
 
@@ -666,12 +707,15 @@ This platform demonstrates:
 
 ### Modern Frontend Development
 
-- React 19 with TypeScript and Mantine UI 8
+- React 19 with TypeScript and Mantine UI 9
 - Feature-Sliced Design (FSD) architecture for scalable SPAs
 - File-based routing with TanStack Router
 - Server state management with TanStack Query
 - Internationalization with Lingui i18n
 - Vite-based builds with runtime environment configuration
+- OAuth2/OIDC social sign-in with PKCE and account linking
+- Plan-based feature gating with `EntitlementsProvider`, `FeatureGate`, and quota hooks
+- Billing self-service with Stripe and Lemon Squeezy portal integration
 
 ## Adapting for Your Domain
 
@@ -693,8 +737,9 @@ This platform provides reusable patterns for:
 
 ### Billing & Subscriptions
 
-- SaaS subscription management with Stripe
-- Plan catalogs with scope-based eligibility (tenant vs user)
+- SaaS subscription management with Stripe or Lemon Squeezy (multi-gateway strategy pattern)
+- FLAT and PER_SEAT pricing models with typed quota and feature entitlements
+- Plan catalogs with scope-based eligibility (tenant vs user) and configurable trial periods
 - Webhook-driven subscription lifecycle with idempotent processing
 - Event-driven billing notifications and trial management
 
