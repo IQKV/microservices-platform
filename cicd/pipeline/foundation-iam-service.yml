@@ -404,6 +404,8 @@ steps:
         from_secret: INFRA_POSTGRESQL_PASSWORD
       INFRA_RABBITMQ_PASSWORD:
         from_secret: INFRA_RABBITMQ_PASSWORD
+      INFRA_REDIS_PASSWORD:
+        from_secret: INFRA_REDIS_PASSWORD
       INFRA_S3_ACCESS_KEY:
         from_secret: INFRA_S3_ACCESS_KEY
       INFRA_S3_SECRET_KEY:
@@ -412,6 +414,14 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      OIDC_ENCRYPTION_KEY:
+        from_secret: OIDC_ENCRYPTION_KEY
+      OAUTH2_GOOGLE_CLIENT_SECRET:
+        from_secret: OAUTH2_GOOGLE_CLIENT_SECRET
+      OAUTH2_GITHUB_CLIENT_SECRET:
+        from_secret: OAUTH2_GITHUB_CLIENT_SECRET
+      OAUTH2_MICROSOFT_CLIENT_SECRET:
+        from_secret: OAUTH2_MICROSOFT_CLIENT_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -421,12 +431,17 @@ steps:
           --values ./values.yaml \
           --values ./values-sit.yaml \
           --set image.tag=${DRONE_BRANCH} \
-          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
-          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
-          --set infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
-          --set infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
-          --set config.mail.username=$${SMTP_USERNAME} \
-          --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set-string infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set-string infraServices.redis.password=$${INFRA_REDIS_PASSWORD} \
+          --set-string infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
+          --set-string infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
+          --set-string config.mail.username=$${SMTP_USERNAME} \
+          --set-string config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.oauth2.encryptionKey=$${OIDC_ENCRYPTION_KEY} \
+          --set-string config.oauth2.providers.google.clientSecret=$${OAUTH2_GOOGLE_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.github.clientSecret=$${OAUTH2_GITHUB_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.microsoft.clientSecret=$${OAUTH2_MICROSOFT_CLIENT_SECRET} \
           --namespace iqkv-sit-env \
           --create-namespace
 
@@ -505,6 +520,8 @@ steps:
         from_secret: INFRA_POSTGRESQL_PASSWORD
       INFRA_RABBITMQ_PASSWORD:
         from_secret: INFRA_RABBITMQ_PASSWORD
+      INFRA_REDIS_PASSWORD:
+        from_secret: INFRA_REDIS_PASSWORD
       INFRA_S3_ACCESS_KEY:
         from_secret: INFRA_S3_ACCESS_KEY
       INFRA_S3_SECRET_KEY:
@@ -513,6 +530,14 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      OIDC_ENCRYPTION_KEY:
+        from_secret: OIDC_ENCRYPTION_KEY
+      OAUTH2_GOOGLE_CLIENT_SECRET:
+        from_secret: OAUTH2_GOOGLE_CLIENT_SECRET
+      OAUTH2_GITHUB_CLIENT_SECRET:
+        from_secret: OAUTH2_GITHUB_CLIENT_SECRET
+      OAUTH2_MICROSOFT_CLIENT_SECRET:
+        from_secret: OAUTH2_MICROSOFT_CLIENT_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -521,12 +546,17 @@ steps:
           --values ./values.yaml \
           --values ./values-${DRONE_DEPLOY_TO}.yaml \
           --set image.tag=${DRONE_BRANCH:8} \
-          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
-          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
-          --set infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
-          --set infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
-          --set config.mail.username=$${SMTP_USERNAME} \
-          --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set-string infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set-string infraServices.redis.password=$${INFRA_REDIS_PASSWORD} \
+          --set-string infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
+          --set-string infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
+          --set-string config.mail.username=$${SMTP_USERNAME} \
+          --set-string config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.oauth2.encryptionKey=$${OIDC_ENCRYPTION_KEY} \
+          --set-string config.oauth2.providers.google.clientSecret=$${OAUTH2_GOOGLE_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.github.clientSecret=$${OAUTH2_GITHUB_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.microsoft.clientSecret=$${OAUTH2_MICROSOFT_CLIENT_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 
@@ -603,6 +633,8 @@ steps:
         from_secret: INFRA_POSTGRESQL_PASSWORD
       INFRA_RABBITMQ_PASSWORD:
         from_secret: INFRA_RABBITMQ_PASSWORD
+      INFRA_REDIS_PASSWORD:
+        from_secret: INFRA_REDIS_PASSWORD
       INFRA_S3_ACCESS_KEY:
         from_secret: INFRA_S3_ACCESS_KEY
       INFRA_S3_SECRET_KEY:
@@ -611,6 +643,14 @@ steps:
         from_secret: SMTP_USERNAME
       SMTP_PASSWORD:
         from_secret: SMTP_PASSWORD
+      OIDC_ENCRYPTION_KEY:
+        from_secret: OIDC_ENCRYPTION_KEY
+      OAUTH2_GOOGLE_CLIENT_SECRET:
+        from_secret: OAUTH2_GOOGLE_CLIENT_SECRET
+      OAUTH2_GITHUB_CLIENT_SECRET:
+        from_secret: OAUTH2_GITHUB_CLIENT_SECRET
+      OAUTH2_MICROSOFT_CLIENT_SECRET:
+        from_secret: OAUTH2_MICROSOFT_CLIENT_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -619,12 +659,17 @@ steps:
           --values ./values.yaml \
           --values ./values-${DRONE_DEPLOY_TO}.yaml \
           --set image.tag=${DRONE_TAG} \
-          --set infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
-          --set infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
-          --set infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
-          --set infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
-          --set config.mail.username=$${SMTP_USERNAME} \
-          --set config.mail.password=$${SMTP_PASSWORD} \
+          --set-string infraServices.postgresql.password=$${INFRA_POSTGRESQL_PASSWORD} \
+          --set-string infraServices.rabbitmq.password=$${INFRA_RABBITMQ_PASSWORD} \
+          --set-string infraServices.redis.password=$${INFRA_REDIS_PASSWORD} \
+          --set-string infraServices.objectstorage.accessKey=$${INFRA_S3_ACCESS_KEY} \
+          --set-string infraServices.objectstorage.secretKey=$${INFRA_S3_SECRET_KEY} \
+          --set-string config.mail.username=$${SMTP_USERNAME} \
+          --set-string config.mail.password=$${SMTP_PASSWORD} \
+          --set-string config.oauth2.encryptionKey=$${OIDC_ENCRYPTION_KEY} \
+          --set-string config.oauth2.providers.google.clientSecret=$${OAUTH2_GOOGLE_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.github.clientSecret=$${OAUTH2_GITHUB_CLIENT_SECRET} \
+          --set-string config.oauth2.providers.microsoft.clientSecret=$${OAUTH2_MICROSOFT_CLIENT_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 

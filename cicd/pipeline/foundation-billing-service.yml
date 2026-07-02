@@ -412,6 +412,12 @@ steps:
         from_secret: STRIPE_SECRET_KEY
       STRIPE_WEBHOOK_SECRET:
         from_secret: STRIPE_WEBHOOK_SECRET
+      LEMON_SQUEEZY_API_KEY:
+        from_secret: LEMON_SQUEEZY_API_KEY
+      LEMON_SQUEEZY_STORE_ID:
+        from_secret: LEMON_SQUEEZY_STORE_ID
+      LEMON_SQUEEZY_WEBHOOK_SECRET:
+        from_secret: LEMON_SQUEEZY_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -427,6 +433,9 @@ steps:
           --set config.mail.password=$${SMTP_PASSWORD} \
           --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
           --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
+          --set-string config.lemonSqueezy.apiKey=$${LEMON_SQUEEZY_API_KEY} \
+          --set-string config.lemonSqueezy.storeId=$${LEMON_SQUEEZY_STORE_ID} \
+          --set-string config.lemonSqueezy.webhookSecret=$${LEMON_SQUEEZY_WEBHOOK_SECRET} \
           --namespace iqkv-sit-env \
           --create-namespace
 
@@ -513,6 +522,12 @@ steps:
         from_secret: STRIPE_SECRET_KEY
       STRIPE_WEBHOOK_SECRET:
         from_secret: STRIPE_WEBHOOK_SECRET
+      LEMON_SQUEEZY_API_KEY:
+        from_secret: LEMON_SQUEEZY_API_KEY
+      LEMON_SQUEEZY_STORE_ID:
+        from_secret: LEMON_SQUEEZY_STORE_ID
+      LEMON_SQUEEZY_WEBHOOK_SECRET:
+        from_secret: LEMON_SQUEEZY_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -527,6 +542,9 @@ steps:
           --set config.mail.password=$${SMTP_PASSWORD} \
           --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
           --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
+          --set-string config.lemonSqueezy.apiKey=$${LEMON_SQUEEZY_API_KEY} \
+          --set-string config.lemonSqueezy.storeId=$${LEMON_SQUEEZY_STORE_ID} \
+          --set-string config.lemonSqueezy.webhookSecret=$${LEMON_SQUEEZY_WEBHOOK_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 
@@ -611,6 +629,12 @@ steps:
         from_secret: STRIPE_SECRET_KEY
       STRIPE_WEBHOOK_SECRET:
         from_secret: STRIPE_WEBHOOK_SECRET
+      LEMON_SQUEEZY_API_KEY:
+        from_secret: LEMON_SQUEEZY_API_KEY
+      LEMON_SQUEEZY_STORE_ID:
+        from_secret: LEMON_SQUEEZY_STORE_ID
+      LEMON_SQUEEZY_WEBHOOK_SECRET:
+        from_secret: LEMON_SQUEEZY_WEBHOOK_SECRET
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/${DRONE_REPO_OWNER}/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
@@ -625,6 +649,9 @@ steps:
           --set config.mail.password=$${SMTP_PASSWORD} \
           --set-string config.stripe.secretKey=$${STRIPE_SECRET_KEY} \
           --set-string config.stripe.webhookSecret=$${STRIPE_WEBHOOK_SECRET} \
+          --set-string config.lemonSqueezy.apiKey=$${LEMON_SQUEEZY_API_KEY} \
+          --set-string config.lemonSqueezy.storeId=$${LEMON_SQUEEZY_STORE_ID} \
+          --set-string config.lemonSqueezy.webhookSecret=$${LEMON_SQUEEZY_WEBHOOK_SECRET} \
           --namespace iqkv-${DRONE_DEPLOY_TO}-env \
           --create-namespace
 
