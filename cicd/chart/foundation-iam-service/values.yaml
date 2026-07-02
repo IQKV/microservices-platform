@@ -170,6 +170,14 @@ infraServices:
     username: "svc_infra_sit_rmq"
     password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
+  # Redis Configuration
+  redis:
+    host: "foundation-infra-redis.iqkv-sit-env.svc.cluster.local"
+    port: 6379
+    password: ""  # Override when Redis auth is enabled
+    database: 0
+    timeout: "PT2S"
+
   # MinIO / S3-compatible Object Storage Configuration
   # Points to the MinIO service deployed by foundation-infra Helm chart
   objectstorage:
@@ -212,6 +220,29 @@ config:
 
   # Application base URL (used in email links)
   appBaseUrl: "https://app.iqkv.site"
+
+  # OAuth2 / OIDC Configuration
+  oauth2:
+    enabledProviders: "google,github"
+    baseUrl: "http://localhost:8080"
+    postLoginRedirectUri: "https://app.iqkv.site/auth/callback"
+    autoProvisionUsers: true
+    stateTtl: "PT10M"
+    stateTtlMax: "PT15M"
+    autoLink:
+      enabled: true
+    providers:
+      google:
+        clientId: ""
+        clientSecret: ""  # Override via --set-string config.oauth2.providers.google.clientSecret=xxx
+      github:
+        clientId: ""
+        clientSecret: ""  # Override via --set-string config.oauth2.providers.github.clientSecret=xxx
+      microsoft:
+        clientId: ""
+        clientSecret: ""  # Override via --set-string config.oauth2.providers.microsoft.clientSecret=xxx
+        tenantId: "common"
+    encryptionKey: ""  # Override via --set-string config.oauth2.encryptionKey=xxx
 
 # Monitoring Configuration
 monitoring:

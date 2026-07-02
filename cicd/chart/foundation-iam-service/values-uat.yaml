@@ -20,6 +20,10 @@ infraServices:
     username: "svc_infra_uat_rmq"
     password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
+  redis:
+    host: "foundation-infra-redis.iqkv-uat-env.svc.cluster.local"
+    password: ""
+
   objectstorage:
     endpoint: "http://foundation-infra-minio.iqkv-uat-env.svc.cluster.local"
     accessKey: "iqkv"          # Override via --set-string infraServices.objectstorage.accessKey=xxx
@@ -55,6 +59,8 @@ config:
     fromName: "IQ Key Value"
 
   appBaseUrl: "https://app.iqkv.site"
+  oauth2:
+    postLoginRedirectUri: "https://app.iqkv.site/auth/callback"
 
 # Enable monitoring in staging
 monitoring:

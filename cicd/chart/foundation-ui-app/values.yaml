@@ -48,6 +48,11 @@ app:
     rolloutMode: "MULTI_TENANT"
     demoMode: "false"
 
+    # Active payment gateway: STRIPE (default) | LEMON_SQUEEZY
+    # Deploy-time constant — only one gateway is active per deployment.
+    # Must match config.paymentGatewayType in foundation-billing-service.
+    paymentGatewayType: "STRIPE"
+
 # Image Configuration
 image:
   repository: iqkv/foundation-ui-app

@@ -4,8 +4,11 @@
 # IMPORTANT: Connection passwords are overridden by Drone pipeline secrets:
 # - infraServices.postgresql.password from INFRA_POSTGRESQL_PASSWORD
 # - infraServices.rabbitmq.password from INFRA_RABBITMQ_PASSWORD
+# - infraServices.redis.password from INFRA_REDIS_PASSWORD
 # - config.mail.username from SMTP_USERNAME
 # - config.mail.password from SMTP_PASSWORD
+# - config.oauth2.encryptionKey from OIDC_ENCRYPTION_KEY
+# - config.oauth2.providers.*.clientSecret from provider-specific OAuth client secrets
 
 # Application Configuration
 app:
@@ -59,6 +62,10 @@ infraServices:
     username: "svc_infra_prd_rmq"
     password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
+  redis:
+    host: "foundation-infra-redis.iqkv-prd-env.svc.cluster.local"
+    password: ""  # Must be overridden via --set-string infraServices.redis.password in pipeline
+
   objectstorage:
     endpoint: "https://s3.amazonaws.com"  # Use AWS S3 in production; override for self-hosted
     accessKey: ""  # Must be overridden via --set-string infraServices.objectstorage.accessKey in pipeline
@@ -111,6 +118,10 @@ config:
     fromName: "IQ Key Value"
 
   appBaseUrl: "https://app.iqkv.site"
+  oauth2:
+    baseUrl: "https://iam-service.iqkv.site"
+    postLoginRedirectUri: "https://app.iqkv.site/auth/callback"
+    encryptionKey: ""  # Must be overridden via --set-string config.oauth2.encryptionKey in pipeline
 
 # Enable production monitoring
 monitoring:

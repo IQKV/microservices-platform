@@ -198,6 +198,35 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
       name: {{ include "foundation-billing-service.fullname" . }}-config
       key: STRIPE_PORTAL_RETURN_URL
 
+# Payment Gateway Selector
+- name: PAYMENT_GATEWAY_TYPE
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-config
+      key: PAYMENT_GATEWAY_TYPE
+
+# Lemon Squeezy Configuration
+- name: LEMON_SQUEEZY_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-secrets
+      key: lemon-squeezy-api-key
+- name: LEMON_SQUEEZY_STORE_ID
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-config
+      key: LEMON_SQUEEZY_STORE_ID
+- name: LEMON_SQUEEZY_WEBHOOK_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-secrets
+      key: lemon-squeezy-webhook-secret
+- name: LEMON_SQUEEZY_PORTAL_RETURN_URL
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-config
+      key: LEMON_SQUEEZY_PORTAL_RETURN_URL
+
 # Platform Configuration
 - name: ROLLOUT_MODE
   valueFrom:

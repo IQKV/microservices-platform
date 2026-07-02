@@ -20,6 +20,10 @@ infraServices:
     username: "svc_infra_sit_rmq"
     password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
 
+  redis:
+    host: "foundation-infra-redis.iqkv-sit-env.svc.cluster.local"
+    password: ""
+
   objectstorage:
     endpoint: "http://foundation-infra-minio.iqkv-sit-env.svc.cluster.local"
     accessKey: "iqkv"          # Override via --set-string infraServices.objectstorage.accessKey=xxx
@@ -54,6 +58,8 @@ config:
     from: "noreply@iqkv.dev"
 
   appBaseUrl: "https://app.iqkv.site"
+  oauth2:
+    postLoginRedirectUri: "https://app.iqkv.site/auth/callback"
 
 # Platform rollout mode — must match foundation-billing-service and foundation-gateway-service
 platform:

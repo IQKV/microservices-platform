@@ -54,6 +54,13 @@ config:
   stripe:
     portalReturnUrl: "https://app.iqkv.site/billing"
 
+  # Lemon Squeezy credentials for UAT — override with real test-mode values in pipeline
+  lemonSqueezy:
+    apiKey: ""           # Override via --set-string config.lemonSqueezy.apiKey in pipeline
+    storeId: ""          # Override via --set-string config.lemonSqueezy.storeId in pipeline
+    webhookSecret: ""    # Override via --set-string config.lemonSqueezy.webhookSecret in pipeline
+    portalReturnUrl: "https://app.iqkv.site/billing"
+
 # Enable monitoring in staging
 monitoring:
   serviceMonitor:

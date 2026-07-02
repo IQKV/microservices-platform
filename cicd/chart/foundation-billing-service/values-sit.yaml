@@ -50,11 +50,22 @@ config:
 
   appBaseUrl: "https://app.iqkv.site"
 
+  # Active payment gateway — default STRIPE for SIT; switch to LEMON_SQUEEZY to test LS flow
+  paymentGatewayType: "STRIPE"
+
   # Stripe dummy test credentials for SIT environment
   # These are placeholder values — Stripe webhooks and charges will not be processed
   stripe:
     secretKey: "sk_test_sit_dummy_000000000000000000000000"
     webhookSecret: "whsec_sit_dummy_0000000000000000000000000000000000000000000000000000000000000000"
+    portalReturnUrl: "https://app.iqkv.site/billing"
+
+  # Lemon Squeezy dummy test credentials for SIT environment
+  # Replace with real test-mode values when testing the LEMON_SQUEEZY gateway path
+  lemonSqueezy:
+    apiKey: ""           # Override via --set-string config.lemonSqueezy.apiKey in pipeline
+    storeId: ""          # Override via --set-string config.lemonSqueezy.storeId in pipeline
+    webhookSecret: ""    # Override via --set-string config.lemonSqueezy.webhookSecret in pipeline
     portalReturnUrl: "https://app.iqkv.site/billing"
 
 # Platform rollout mode — must match foundation-iam-service and foundation-gateway-service

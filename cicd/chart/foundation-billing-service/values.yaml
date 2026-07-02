@@ -198,10 +198,23 @@ config:
   messaging:
     enabled: true   # Maps to iqkv.messaging.rabbitmq.enabled
 
-  # Stripe Configuration
+  # Active payment gateway: STRIPE (default) | LEMON_SQUEEZY
+  # Maps to iqkv.payment.gateway.type in application.yml
+  paymentGatewayType: "STRIPE"
+
+  # Stripe Configuration — active when paymentGatewayType=STRIPE
   stripe:
     secretKey: ""        # Must be overridden via --set-string config.stripe.secretKey in pipeline
     webhookSecret: ""    # Must be overridden via --set-string config.stripe.webhookSecret in pipeline
+    portalReturnUrl: "https://app.iqkv.site/billing"
+
+  # Lemon Squeezy Configuration — active when paymentGatewayType=LEMON_SQUEEZY
+  # Operators must pre-create products/variants in the LS dashboard and set externalVariantId
+  # per plan in the billing.plan-catalog before deployment.
+  lemonSqueezy:
+    apiKey: ""           # Must be overridden via --set-string config.lemonSqueezy.apiKey in pipeline
+    storeId: ""          # Must be overridden via --set-string config.lemonSqueezy.storeId in pipeline
+    webhookSecret: ""    # Must be overridden via --set-string config.lemonSqueezy.webhookSecret in pipeline
     portalReturnUrl: "https://app.iqkv.site/billing"
 
 # Monitoring Configuration

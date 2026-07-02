@@ -77,6 +77,10 @@ window.VITE_ENABLE_MSW = {{ .Values.app.env.enableMsw | quote }};
 window.VITE_LOG_LEVEL = {{ .Values.app.env.logLevel | quote }};
 window.VITE_ROLLOUT_MODE = {{ .Values.app.env.rolloutMode | quote }};
 window.VITE_DEMO_MODE = {{ .Values.app.env.demoMode | quote }};
+
+// Payment gateway — deploy-time constant, not toggled at runtime.
+// Valid values: "STRIPE" | "LEMON_SQUEEZY"
+window.VITE_PAYMENT_GATEWAY_TYPE = {{ .Values.app.env.paymentGatewayType | default "STRIPE" | quote }};
 {{- end }}
 
 {{/*

@@ -35,8 +35,16 @@ data:
   # Messaging Configuration (maps to iqkv.messaging.rabbitmq.enabled in application.yml)
   MESSAGING_ENABLED: {{ .Values.config.messaging.enabled | default true | toString | quote }}
 
+  # Payment gateway selector (maps to iqkv.payment.gateway.type in application.yml)
+  # Valid values: STRIPE | LEMON_SQUEEZY
+  PAYMENT_GATEWAY_TYPE: {{ .Values.config.paymentGatewayType | default "STRIPE" | quote }}
+
   # Stripe portal return URL (maps to iqkv.stripe.portal-return-url in application.yml)
   STRIPE_PORTAL_RETURN_URL: {{ .Values.config.stripe.portalReturnUrl | quote }}
+
+  # Lemon Squeezy non-secret config (maps to iqkv.lemon-squeezy.* in application.yml)
+  LEMON_SQUEEZY_STORE_ID: {{ .Values.config.lemonSqueezy.storeId | default "" | quote }}
+  LEMON_SQUEEZY_PORTAL_RETURN_URL: {{ .Values.config.lemonSqueezy.portalReturnUrl | default "https://app.iqkv.site/billing" | quote }}
 
   # Platform rollout mode — must be identical across IAM, Billing, and Gateway
   # Maps to iqkv.platform.rollout-mode in application.yml

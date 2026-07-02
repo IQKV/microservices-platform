@@ -19,6 +19,12 @@ data:
   RABBITMQ_PORT: {{ .Values.infraServices.rabbitmq.port | toString | quote }}
   RABBITMQ_USERNAME: {{ .Values.infraServices.rabbitmq.username | quote }}
 
+  # Redis Configuration (maps to iqkv.redis.* in application.yml)
+  REDIS_HOST: {{ .Values.infraServices.redis.host | quote }}
+  REDIS_PORT: {{ .Values.infraServices.redis.port | toString | quote }}
+  REDIS_DATABASE: {{ .Values.infraServices.redis.database | toString | quote }}
+  REDIS_TIMEOUT: {{ .Values.infraServices.redis.timeout | quote }}
+
   # Object Storage / MinIO Configuration (maps to iqkv.objectstorage.* in application.yml)
   OBJECTSTORAGE_ENDPOINT: {{ .Values.infraServices.objectstorage.endpoint | quote }}
   OBJECTSTORAGE_PUBLIC_ENDPOINT: {{ .Values.infraServices.objectstorage.publicEndpoint | default "" | quote }}
@@ -49,6 +55,19 @@ data:
 
   # Application Base URL (used in email notification links)
   APP_BASE_URL: {{ .Values.config.appBaseUrl | quote }}
+
+  # OAuth2 / OIDC Configuration (maps to iqkv.auth.oauth2.* in application.yml)
+  OAUTH2_ENABLED_PROVIDERS: {{ .Values.config.oauth2.enabledProviders | quote }}
+  OAUTH2_BASE_URL: {{ .Values.config.oauth2.baseUrl | quote }}
+  OAUTH2_POST_LOGIN_REDIRECT_URI: {{ .Values.config.oauth2.postLoginRedirectUri | quote }}
+  OAUTH2_AUTO_PROVISION_USERS: {{ .Values.config.oauth2.autoProvisionUsers | toString | quote }}
+  OAUTH2_STATE_TTL: {{ .Values.config.oauth2.stateTtl | quote }}
+  OAUTH2_STATE_TTL_MAX: {{ .Values.config.oauth2.stateTtlMax | quote }}
+  OAUTH2_AUTO_LINK_ENABLED: {{ .Values.config.oauth2.autoLink.enabled | toString | quote }}
+  OAUTH2_GOOGLE_CLIENT_ID: {{ .Values.config.oauth2.providers.google.clientId | quote }}
+  OAUTH2_GITHUB_CLIENT_ID: {{ .Values.config.oauth2.providers.github.clientId | quote }}
+  OAUTH2_MICROSOFT_CLIENT_ID: {{ .Values.config.oauth2.providers.microsoft.clientId | quote }}
+  OAUTH2_MICROSOFT_TENANT_ID: {{ .Values.config.oauth2.providers.microsoft.tenantId | quote }}
 
   # Platform rollout mode — must be identical across IAM, Billing, and Gateway
   # Maps to iqkv.platform.rollout-mode in application.yml

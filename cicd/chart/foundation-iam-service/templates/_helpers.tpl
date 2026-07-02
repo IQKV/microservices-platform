@@ -63,8 +63,8 @@ Create the name of the service account to use
 
 {{/*
 Common environment variables for the application.
-IAM service uses the classic iqkv.db.* / iqkv.rabbitmq.* property style
-mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL_*, JWT_* env vars.
+IAM service uses nested iqkv.* properties mapped via DB_*, RABBITMQ_*, REDIS_*,
+MAIL_*, JWT_*, APP_BASE_URL, BILLING_*, and OAUTH2_* / OIDC_* env vars.
 */}}
 {{- define "foundation-iam-service.env" -}}
 # Spring Profile Configuration
@@ -122,6 +122,33 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
     secretKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-secrets
       key: rabbitmq-password
+
+# Redis Configuration
+- name: REDIS_HOST
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: REDIS_HOST
+- name: REDIS_PORT
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: REDIS_PORT
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: redis-password
+- name: REDIS_DATABASE
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: REDIS_DATABASE
+- name: REDIS_TIMEOUT
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: REDIS_TIMEOUT
 
 # Object Storage / MinIO Configuration
 - name: OBJECTSTORAGE_ENDPOINT
@@ -238,6 +265,83 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
     configMapKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-config
       key: APP_BASE_URL
+
+# OAuth2 / OIDC Configuration
+- name: OAUTH2_ENABLED_PROVIDERS
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_ENABLED_PROVIDERS
+- name: OAUTH2_BASE_URL
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_BASE_URL
+- name: OAUTH2_POST_LOGIN_REDIRECT_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_POST_LOGIN_REDIRECT_URI
+- name: OAUTH2_AUTO_PROVISION_USERS
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_AUTO_PROVISION_USERS
+- name: OAUTH2_STATE_TTL
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_STATE_TTL
+- name: OAUTH2_STATE_TTL_MAX
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_STATE_TTL_MAX
+- name: OAUTH2_AUTO_LINK_ENABLED
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_AUTO_LINK_ENABLED
+- name: OAUTH2_GOOGLE_CLIENT_ID
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_GOOGLE_CLIENT_ID
+- name: OAUTH2_GOOGLE_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: oauth2-google-client-secret
+- name: OAUTH2_GITHUB_CLIENT_ID
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_GITHUB_CLIENT_ID
+- name: OAUTH2_GITHUB_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: oauth2-github-client-secret
+- name: OAUTH2_MICROSOFT_CLIENT_ID
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_MICROSOFT_CLIENT_ID
+- name: OAUTH2_MICROSOFT_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: oauth2-microsoft-client-secret
+- name: OAUTH2_MICROSOFT_TENANT_ID
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: OAUTH2_MICROSOFT_TENANT_ID
+- name: OIDC_ENCRYPTION_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: oidc-encryption-key
 
 # Billing Service Configuration
 - name: BILLING_SERVICE_URI

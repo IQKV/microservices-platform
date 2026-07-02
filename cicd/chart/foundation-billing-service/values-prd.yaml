@@ -9,6 +9,10 @@
 # - config.stripe.secretKey from STRIPE_SECRET_KEY
 # - config.stripe.webhookSecret from STRIPE_WEBHOOK_SECRET
 # - config.stripe.portalReturnUrl from STRIPE_PORTAL_RETURN_URL
+# - config.lemonSqueezy.apiKey from LEMON_SQUEEZY_API_KEY
+# - config.lemonSqueezy.storeId from LEMON_SQUEEZY_STORE_ID
+# - config.lemonSqueezy.webhookSecret from LEMON_SQUEEZY_WEBHOOK_SECRET
+# - config.lemonSqueezy.portalReturnUrl from LEMON_SQUEEZY_PORTAL_RETURN_URL
 
 # Application Configuration
 app:
@@ -111,6 +115,15 @@ config:
   appBaseUrl: "https://app.iqkv.site"
 
   stripe:
+    portalReturnUrl: "https://app.iqkv.site/billing"
+
+  # Lemon Squeezy credentials for production — all secrets injected by pipeline
+  # Operators must pre-create products/variants in the LS dashboard and configure
+  # externalVariantId per plan in the billing.plan-catalog before switching gateway
+  lemonSqueezy:
+    apiKey: ""           # Must be overridden via --set-string config.lemonSqueezy.apiKey in pipeline
+    storeId: ""          # Must be overridden via --set-string config.lemonSqueezy.storeId in pipeline
+    webhookSecret: ""    # Must be overridden via --set-string config.lemonSqueezy.webhookSecret in pipeline
     portalReturnUrl: "https://app.iqkv.site/billing"
 
 # Enable production monitoring
