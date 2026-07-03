@@ -349,11 +349,11 @@ MAIL_*, JWT_*, APP_BASE_URL, BILLING_*, and OAUTH2_* / OIDC_* env vars.
     configMapKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-config
       key: BILLING_SERVICE_URI
-- name: PLAN_CATALOG_REFRESH_INTERVAL
+- name: BILLING_PLAN_REFRESH_INTERVAL
   valueFrom:
     configMapKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-config
-      key: PLAN_CATALOG_REFRESH_INTERVAL
+      key: BILLING_PLAN_REFRESH_INTERVAL
       optional: true
 
 # Pod Information

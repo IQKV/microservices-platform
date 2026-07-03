@@ -206,7 +206,7 @@ config:
   # Billing Service Configuration
   billing:
     serviceUri: "http://foundation-billing-service"  # Maps to iqkv.billing.service-url
-    planCatalogRefreshInterval: "PT10M"                    # Maps to iqkv.billing.plan-catalog-refresh-interval
+    planRefreshInterval: "PT10M"                    # Maps to iqkv.billing.plan-catalog-refresh-interval
 
   # Email / SMTP Configuration
   mail:
