@@ -1,18 +1,18 @@
--- Initialize Cms Database
+-- Initialize CMS Service Database
 -- This script runs when the PostgreSQL container starts for the first time
 
 -- Create additional schemas
 CREATE SCHEMA IF NOT EXISTS cms;
 
 -- Set default search path
-ALTER DATABASE cms SET search_path TO public, cms;
+ALTER DATABASE cmsservice SET search_path TO public, cms;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE cms TO svc_cms_dba;
+GRANT ALL PRIVILEGES ON DATABASE cmsservice TO svc_cms_dba;
 GRANT ALL PRIVILEGES ON SCHEMA public TO svc_cms_dba;
 GRANT ALL PRIVILEGES ON SCHEMA cms TO svc_cms_dba;
 
@@ -25,4 +25,4 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-SELECT 'Cms Database initialized successfully' AS status;
+SELECT 'CMS Service Database initialized successfully' AS status;

@@ -5,14 +5,14 @@
 CREATE SCHEMA IF NOT EXISTS audit;
 
 -- Set default search path
-ALTER DATABASE audit SET search_path TO public, audit;
+ALTER DATABASE auditservice SET search_path TO public, audit;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE audit TO svc_audit_dba;
+GRANT ALL PRIVILEGES ON DATABASE auditservice TO svc_audit_dba;
 GRANT ALL PRIVILEGES ON SCHEMA public TO svc_audit_dba;
 GRANT ALL PRIVILEGES ON SCHEMA audit TO svc_audit_dba;
 

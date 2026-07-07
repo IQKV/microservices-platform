@@ -42,11 +42,12 @@ DbGate automatically includes connections for:
 
 ### PostgreSQL Databases
 
-| Connection                   | Server                      | Port | Database | Username        |
-| ---------------------------- | --------------------------- | ---- | -------- | --------------- |
-| PostgreSQL - IAM Service     | foundation-postgres-iam     | 5432 | iam      | svc_iam_dba     |
-| PostgreSQL - Billing Service | foundation-postgres-billing | 5432 | billing  | svc_billing_dba |
-| PostgreSQL - Audit Service   | foundation-postgres-audit   | 5432 | audit    | svc_audit_dba   |
+| Connection                   | Server                      | Port | Database       | Username        |
+| ---------------------------- | --------------------------- | ---- | -------------- | --------------- |
+| PostgreSQL - IAM Service     | foundation-postgres-iam     | 5432 | iamservice     | svc_iam_dba     |
+| PostgreSQL - Billing Service | foundation-postgres-billing | 5432 | billingservice | svc_billing_dba |
+| PostgreSQL - Audit Service   | foundation-postgres-audit   | 5432 | auditservice   | svc_audit_dba   |
+| PostgreSQL - CMS Service     | foundation-postgres-cms     | 5432 | cmsservice     | svc_cms_dba     |
 
 ### Redis Cache
 

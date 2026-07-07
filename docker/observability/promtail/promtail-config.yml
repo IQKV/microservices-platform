@@ -9,13 +9,13 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  # Docker container logs
-  - job_name: docker
+  # Docker container logs (JSON log driver)
+  - job_name: containers
     static_configs:
       - targets:
           - localhost
         labels:
-          job: docker
+          job: containerlogs
           __path__: /var/lib/docker/containers/*/*log
     pipeline_stages:
       - json:
@@ -39,15 +39,15 @@ scrape_configs:
       - output:
           source: output
 
-  # IQ Key Value User Service logs
-  - job_name: foundation-iam-service
+  # IAM Service structured logs
+  - job_name: iam-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: foundation-iam-service
-          service: auth
-          __path__: /var/log/foundation/foundation-iam-service/*.log
+          job: iam-service
+          service: iam-service
+          __path__: /var/log/iam-service/*.log
     pipeline_stages:
       - json:
           expressions:
@@ -72,15 +72,114 @@ scrape_configs:
           userId:
           tenantId:
 
-  # IQ Key Value Gateway Service logs
-  - job_name: foundation-gateway-service
+  # Billing Service structured logs
+  - job_name: billing-service
     static_configs:
       - targets:
           - localhost
         labels:
-          job: foundation-gateway-service
-          service: gateway
-          __path__: /var/log/foundation/foundation-gateway-service/*.log
+          job: billing-service
+          service: billing-service
+          __path__: /var/log/billing-service/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            logger: logger
+            correlationId: correlationId
+            traceId: traceId
+            spanId: spanId
+            userId: userId
+            tenantId: tenantId
+      - timestamp:
+          format: RFC3339
+          source: timestamp
+      - labels:
+          level:
+          logger:
+          correlationId:
+          traceId:
+          spanId:
+          userId:
+          tenantId:
+
+  # Audit Service structured logs
+  - job_name: audit-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: audit-service
+          service: audit-service
+          __path__: /var/log/audit-service/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            logger: logger
+            correlationId: correlationId
+            traceId: traceId
+            spanId: spanId
+            userId: userId
+            tenantId: tenantId
+      - timestamp:
+          format: RFC3339
+          source: timestamp
+      - labels:
+          level:
+          logger:
+          correlationId:
+          traceId:
+          spanId:
+          userId:
+          tenantId:
+
+  # CMS Service structured logs
+  - job_name: cms-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: cms-service
+          service: cms-service
+          __path__: /var/log/cms-service/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            logger: logger
+            correlationId: correlationId
+            traceId: traceId
+            spanId: spanId
+            userId: userId
+            tenantId: tenantId
+      - timestamp:
+          format: RFC3339
+          source: timestamp
+      - labels:
+          level:
+          logger:
+          correlationId:
+          traceId:
+          spanId:
+          userId:
+          tenantId:
+
+  # Gateway Service structured logs
+  - job_name: gateway-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: gateway-service
+          service: gateway-service
+          __path__: /var/log/gateway-service/*.log
     pipeline_stages:
       - json:
           expressions:

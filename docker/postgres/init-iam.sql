@@ -5,14 +5,14 @@
 CREATE SCHEMA IF NOT EXISTS auth;
 
 -- Set default search path
-ALTER DATABASE iam SET search_path TO public, auth;
+ALTER DATABASE iamservice SET search_path TO public, auth;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE iam TO svc_iam_dba;
+GRANT ALL PRIVILEGES ON DATABASE iamservice TO svc_iam_dba;
 GRANT ALL PRIVILEGES ON SCHEMA public TO svc_iam_dba;
 GRANT ALL PRIVILEGES ON SCHEMA auth TO svc_iam_dba;
 

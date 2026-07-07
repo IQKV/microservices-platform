@@ -1,165 +1,165 @@
-# IQ Key Value Platform Observability Stack
+# IQ Key Value Platform — Observability Stack
 
-This directory contains the complete observability stack for the IQ Key Value microservices platform, including distributed tracing, metrics collection, log aggregation, and visualization.
+Standalone observability stack for local development. Run this when developing
+services with `mvn spring-boot:run` (services on the host, observability tools
+in Docker). For the all-in-one demo use `compose.demo.yaml` at the repo root instead.
 
 ## Components
 
-### OpenTelemetry & Jaeger
-
-- **Jaeger**: Distributed tracing system for monitoring and troubleshooting microservices
-- **Port**: 16686 (UI), 4317 (OTLP gRPC), 4318 (OTLP HTTP)
-- **URL**: http://localhost:16686
-
-### Prometheus
-
-- **Purpose**: Metrics collection and monitoring
-- **Port**: 9090
-- **URL**: http://localhost:9090
-- **Scrapes**: User service (8080), Gateway service (8080)
-
-### Grafana
-
-- **Purpose**: Dashboards and visualization
-- **Port**: 3000
-- **URL**: http://localhost:3000
-- **Credentials**: admin/admin (default)
-
-### Loki & Promtail
-
-- **Loki**: Log aggregation system
-- **Promtail**: Log shipping agent
-- **Port**: 3100 (Loki)
-- **URL**: http://localhost:3100
+| Tool           | Purpose                      | Port                                           |
+| -------------- | ---------------------------- | ---------------------------------------------- |
+| **Jaeger**     | Distributed tracing          | 16686 (UI), 4317 (OTLP gRPC), 4318 (OTLP HTTP) |
+| **Prometheus** | Metrics collection           | 9090                                           |
+| **Grafana**    | Dashboards and visualization | 3000                                           |
+| **Loki**       | Log aggregation              | 3100                                           |
+| **Promtail**   | Log shipping agent           | —                                              |
 
 ## Quick Start
 
-1. **Start the observability stack**:
+### 1. Start the observability stack
 
-   ```bash
-   cd docker/observability
-   docker compose -f docker-compose.observability.yml up -d
-   ```
+```bash
+cd docker/observability
+docker compose -f docker-compose.observability.yml up -d
+```
 
-2. **Start the microservices**:
+### 2. Start the microservices on the host
 
-   ```bash
-   # Terminal 1 - User Service
-   cd foundation-iam-service
-   mvn spring-boot:run -Dspring-boot.run.profiles=local
+Each service exposes its API on an even port and its actuator on the next odd port.
 
-   # Terminal 2 - Gateway Service
-   cd foundation-gateway-service
-   mvn spring-boot:run -Dspring-boot.run.profiles=local
-   ```
+| Service | API port | Actuator port |
+| ------- | -------- | ------------- |
+| IAM     | 8080     | 8081          |
+| Billing | 8082     | 8083          |
+| Audit   | 8084     | 8085          |
+| CMS     | 8086     | 8087          |
+| Gateway | 8088     | 8089          |
 
-3. **Access the dashboards**:
-   - Jaeger UI: http://localhost:16686
-   - Prometheus: http://localhost:9090
-   - Grafana: http://localhost:3000
+```bash
+# Terminal per service — adjust profile and port as needed
+cd foundation-iam-service
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+
+cd foundation-billing-service
+mvn spring-boot:run -Dspring-boot.run.profiles=local -Dserver.port=8082 -Dmanagement.server.port=8083
+
+cd foundation-audit-service
+mvn spring-boot:run -Dspring-boot.run.profiles=local -Dserver.port=8084 -Dmanagement.server.port=8085
+
+cd foundation-cms-service
+mvn spring-boot:run -Dspring-boot.run.profiles=local -Dserver.port=8086 -Dmanagement.server.port=8087
+
+cd foundation-gateway-service
+mvn spring-boot:run -Dspring-boot.run.profiles=local -Dserver.port=8088 -Dmanagement.server.port=8089
+```
+
+### 3. Access the dashboards
+
+| Tool       | URL                    | Credentials   |
+| ---------- | ---------------------- | ------------- |
+| Jaeger UI  | http://localhost:16686 | —             |
+| Prometheus | http://localhost:9090  | —             |
+| Grafana    | http://localhost:3000  | admin / admin |
+| Loki       | http://localhost:3100  | —             |
 
 ## Monitoring Endpoints
 
-### User Service (Port 8080)
+All services expose actuator endpoints on their management port:
 
-- Health: http://localhost:8080/actuator/health
-- Metrics: http://localhost:8080/actuator/prometheus
-- Info: http://localhost:8080/actuator/info
-
-### Gateway Service (Port 8080)
-
-- Health: http://localhost:8080/actuator/health
-- Metrics: http://localhost:8080/actuator/prometheus
-- Info: http://localhost:8080/actuator/info
+| Service | Health                                | Metrics                                   | Info                                |
+| ------- | ------------------------------------- | ----------------------------------------- | ----------------------------------- |
+| IAM     | http://localhost:8081/actuator/health | http://localhost:8081/actuator/prometheus | http://localhost:8081/actuator/info |
+| Billing | http://localhost:8083/actuator/health | http://localhost:8083/actuator/prometheus | http://localhost:8083/actuator/info |
+| Audit   | http://localhost:8085/actuator/health | http://localhost:8085/actuator/prometheus | http://localhost:8085/actuator/info |
+| CMS     | http://localhost:8087/actuator/health | http://localhost:8087/actuator/prometheus | http://localhost:8087/actuator/info |
+| Gateway | http://localhost:8089/actuator/health | http://localhost:8089/actuator/prometheus | http://localhost:8089/actuator/info |
 
 ## Configuration
 
 ### Environment Variables
 
-- `OTEL_EXPORTER_OTLP_ENDPOINT`: OpenTelemetry collector endpoint
-- `GRAFANA_USER`: Grafana admin username
-- `GRAFANA_PASSWORD`: Grafana admin password
+| Variable                      | Default | Description                                    |
+| ----------------------------- | ------- | ---------------------------------------------- |
+| `GRAFANA_USER`                | `admin` | Grafana admin username                         |
+| `GRAFANA_ADMIN_PASSWORD`      | `admin` | Grafana admin password                         |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | —       | Set in each service to `http://localhost:4317` |
 
-### Logging Levels by Environment
+### OpenTelemetry — wiring services to Jaeger
 
-- **Local**: DEBUG level with human-readable format
-- **Staging**: INFO level with JSON format
-- **Production**: WARN level with JSON format
+Add to each service's run command or `application-local.yml`:
+
+```yaml
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # 100% in local dev
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4317
+```
 
 ### Tracing Sampling Rates
 
-- **Local**: 100% sampling (1.0)
-- **Staging**: 10% sampling (0.1)
-- **Production**: 1% sampling (0.01)
+| Environment | Rate       |
+| ----------- | ---------- |
+| Local       | 1.0 (100%) |
+| SIT / UAT   | 0.1 (10%)  |
+| Production  | 0.01 (1%)  |
 
-## Custom Metrics
+### Logging Levels by Environment
 
-### User Service Metrics
+| Environment | Level | Format         |
+| ----------- | ----- | -------------- |
+| Local       | DEBUG | Human-readable |
+| SIT / UAT   | INFO  | JSON           |
+| Production  | WARN  | JSON           |
 
-- `foundation_iam_authentication_duration`: Authentication request duration
-- `foundation_iam_authentication_total`: Total authentication attempts (success/failure)
-- `foundation_iam_registration_duration`: User registration duration
-- `foundation_iam_registration_total`: Total registration attempts
-- `foundation_iam_token_refresh_duration`: Token refresh duration
-- `foundation_iam_token_refresh_total`: Total token refresh attempts
+## Structured Log Fields
 
-### Gateway Service Metrics
+All services emit JSON logs with these fields:
 
-- `foundation_gateway_request_duration`: Gateway request processing time
-- `foundation_gateway_request_total`: Total gateway requests
-- `foundation_gateway_authentication_duration`: Authentication validation time
-- `foundation_gateway_ratelimit_hit`: Rate limit violations
-- `foundation_gateway_circuitbreaker_open`: Circuit breaker state changes
-
-## Structured Logging
-
-### Log Fields
-
-- `timestamp`: ISO 8601 timestamp in UTC
-- `level`: Log level (DEBUG, INFO, WARN, ERROR)
-- `message`: Log message
-- `service`: Service name (foundation-iam-service, foundation-gateway-service)
-- `correlationId`: Request correlation ID
-- `traceId`: OpenTelemetry trace ID
-- `spanId`: OpenTelemetry span ID
-- `userId`: Authenticated user ID (when available)
-- `tenantId`: Tenant ID (when available)
-- `logger`: Logger name
-
-### Correlation ID Flow
-
-1. Gateway generates correlation ID for incoming requests
-2. Correlation ID propagated to downstream services via headers
-3. All log entries include correlation ID for request tracing
-4. Correlation ID returned in response headers
+| Field           | Description                                             |
+| --------------- | ------------------------------------------------------- |
+| `timestamp`     | ISO 8601 UTC                                            |
+| `level`         | DEBUG / INFO / WARN / ERROR                             |
+| `message`       | Log message                                             |
+| `service`       | Service name (e.g. `foundation-iam-service`)            |
+| `correlationId` | Request correlation ID (from `X-Correlation-ID` header) |
+| `traceId`       | OpenTelemetry trace ID                                  |
+| `spanId`        | OpenTelemetry span ID                                   |
+| `userId`        | Authenticated user ID (when available)                  |
+| `tenantId`      | Tenant key (when available)                             |
+| `logger`        | Logger class name                                       |
 
 ## Troubleshooting
 
-### Common Issues
+**Services not appearing in Prometheus**
 
-1. **Services not appearing in Prometheus**: Check if actuator endpoints are accessible
-2. **No traces in Jaeger**: Verify OTEL_EXPORTER_OTLP_ENDPOINT configuration
-3. **Missing logs in Loki**: Check Promtail configuration and log file paths
-4. **Grafana datasource errors**: Ensure all services are running and accessible
+- Confirm the service is running and actuator is reachable: `curl http://localhost:8081/actuator/prometheus`
+- Check `prometheus.yml` scrape targets match actual actuator ports
 
-### Health Checks
+**No traces in Jaeger**
 
-```bash
-# Check observability stack health
-docker compose -f docker-compose.observability.yml ps
+- Verify `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317` is set for the service
+- Confirm Jaeger is healthy: `docker logs foundation-jaeger`
 
-# Check service health
-curl http://localhost:8080/actuator/health  # User service
-curl http://localhost:8080/actuator/health  # Gateway service
+**Missing logs in Loki**
 
-# Check metrics endpoints
-curl http://localhost:8080/actuator/prometheus  # Auth metrics
-curl http://localhost:8080/actuator/prometheus  # Gateway metrics
-```
+- Check Promtail is running: `docker logs foundation-promtail`
+- Verify log files exist at `/var/log/{slug}-service/*.log`
+- Confirm `logback-spring.xml` writes to the expected path in local profile
+
+**Grafana datasource errors**
+
+- Ensure Prometheus and Loki containers are healthy before Grafana starts
+- Re-run `docker compose -f docker-compose.observability.yml restart grafana`
 
 ## Production Considerations
 
-1. **Security**: Configure authentication for Grafana and Prometheus
-2. **Storage**: Use persistent volumes for production data
-3. **Retention**: Configure appropriate data retention policies
-4. **Alerting**: Set up Prometheus alerting rules
-5. **Backup**: Implement backup strategies for dashboards and configurations
+1. **Security** — enable auth on Prometheus (`--web.enable-admin-api` + basic auth reverse proxy)
+2. **Retention** — set `--storage.tsdb.retention.time` to match your SLA
+3. **Alerting** — add Prometheus alerting rules and wire Alertmanager
+4. **Backup** — snapshot Grafana dashboards and Loki chunks to object storage
+5. **Sampling** — reduce OTEL sampling to 1–10% in production to control trace volume

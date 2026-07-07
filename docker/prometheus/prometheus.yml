@@ -11,7 +11,7 @@ scrape_configs:
   - job_name: "iam-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["iam-service:8081"]
+      - targets: ["foundation-iam-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s
 
@@ -19,7 +19,7 @@ scrape_configs:
   - job_name: "billing-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["billing-service:8081"]
+      - targets: ["foundation-billing-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s
 
@@ -27,7 +27,15 @@ scrape_configs:
   - job_name: "audit-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["audit-service:8081"]
+      - targets: ["foundation-audit-service:8081"]
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # CMS Service — management port 8081
+  - job_name: "cms-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["foundation-cms-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s
 
@@ -35,6 +43,6 @@ scrape_configs:
   - job_name: "gateway-service"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["gateway-service:8081"]
+      - targets: ["foundation-gateway-service:8081"]
     scrape_interval: 10s
     scrape_timeout: 5s

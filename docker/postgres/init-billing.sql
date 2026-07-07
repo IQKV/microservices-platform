@@ -5,14 +5,14 @@
 CREATE SCHEMA IF NOT EXISTS billing;
 
 -- Set default search path
-ALTER DATABASE billing SET search_path TO public, billing;
+ALTER DATABASE billingservice SET search_path TO public, billing;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 
 -- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE billing TO svc_billing_dba;
+GRANT ALL PRIVILEGES ON DATABASE billingservice TO svc_billing_dba;
 GRANT ALL PRIVILEGES ON SCHEMA public TO svc_billing_dba;
 GRANT ALL PRIVILEGES ON SCHEMA billing TO svc_billing_dba;
 

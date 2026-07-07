@@ -6,7 +6,7 @@ positions:
   filename: /tmp/positions.yaml
 
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://foundation-loki:3100/loki/api/v1/push
 
 scrape_configs:
   # Docker container logs (JSON log driver)
@@ -68,6 +68,16 @@ scrape_configs:
           job: audit-service
           service: audit-service
           __path__: /var/log/audit-service/*.log
+
+  # CMS Service structured logs
+  - job_name: cms-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: cms-service
+          service: cms-service
+          __path__: /var/log/cms-service/*.log
 
   # Gateway Service structured logs
   - job_name: gateway-service

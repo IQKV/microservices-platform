@@ -33,6 +33,8 @@ services:
       - foundation-network
     depends_on:
       - foundation-gateway-service
+      - foundation-ui-platform-admin
+      - foundation-ui-app
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -42,7 +44,7 @@ services:
     image: postgres:17-alpine
     container_name: foundation-postgres-iam
     environment:
-      POSTGRES_DB: ${IAM_DB_NAME:-iam}
+      POSTGRES_DB: ${IAM_DB_NAME:-iamservice}
       POSTGRES_USER: ${IAM_DB_USERNAME:-svc_iam_dba}
       POSTGRES_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -55,7 +57,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${IAM_DB_USERNAME:-svc_iam_dba} -d ${IAM_DB_NAME:-iam}"]
+      test: ["CMD-SHELL", "pg_isready -U ${IAM_DB_USERNAME:-svc_iam_dba} -d ${IAM_DB_NAME:-iamservice}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -82,7 +84,7 @@ services:
     image: postgres:17-alpine
     container_name: foundation-postgres-billing
     environment:
-      POSTGRES_DB: ${BILLING_DB_NAME:-billing}
+      POSTGRES_DB: ${BILLING_DB_NAME:-billingservice}
       POSTGRES_USER: ${BILLING_DB_USERNAME:-svc_billing_dba}
       POSTGRES_PASSWORD: ${BILLING_DB_PASSWORD:-svc_billing_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -95,7 +97,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${BILLING_DB_USERNAME:-svc_billing_dba} -d ${BILLING_DB_NAME:-billing}"]
+      test: ["CMD-SHELL", "pg_isready -U ${BILLING_DB_USERNAME:-svc_billing_dba} -d ${BILLING_DB_NAME:-billingservice}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -122,7 +124,7 @@ services:
     image: postgres:17-alpine
     container_name: foundation-postgres-audit
     environment:
-      POSTGRES_DB: ${AUDIT_DB_NAME:-audit}
+      POSTGRES_DB: ${AUDIT_DB_NAME:-auditservice}
       POSTGRES_USER: ${AUDIT_DB_USERNAME:-svc_audit_dba}
       POSTGRES_PASSWORD: ${AUDIT_DB_PASSWORD:-svc_audit_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -135,7 +137,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${AUDIT_DB_USERNAME:-svc_audit_dba} -d ${AUDIT_DB_NAME:-audit}"]
+      test: ["CMD-SHELL", "pg_isready -U ${AUDIT_DB_USERNAME:-svc_audit_dba} -d ${AUDIT_DB_NAME:-auditservice}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -162,7 +164,7 @@ services:
     image: postgres:17-alpine
     container_name: foundation-postgres-cms
     environment:
-      POSTGRES_DB: ${CMS_DB_NAME:-cms}
+      POSTGRES_DB: ${CMS_DB_NAME:-cmsservice}
       POSTGRES_USER: ${CMS_DB_USERNAME:-svc_cms_dba}
       POSTGRES_PASSWORD: ${CMS_DB_PASSWORD:-svc_cms_dba}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
@@ -175,7 +177,7 @@ services:
     networks:
       - foundation-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${CMS_DB_USERNAME:-svc_cms_dba} -d ${CMS_DB_NAME:-cms}"]
+      test: ["CMD-SHELL", "pg_isready -U ${CMS_DB_USERNAME:-svc_cms_dba} -d ${CMS_DB_NAME:-cmsservice}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -314,6 +316,8 @@ services:
         condition: service_healthy
       foundation-postgres-audit:
         condition: service_healthy
+      foundation-postgres-cms:
+        condition: service_healthy
       foundation-redis:
         condition: service_healthy
       foundation-rabbitmq:
@@ -337,6 +341,7 @@ services:
     container_name: foundation-iam-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-iam-service
 
       # Database
       DB_HOST: foundation-postgres-iam
@@ -361,6 +366,7 @@ services:
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
       MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-IQ Key Value}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
       # Billing service — routing target
@@ -389,7 +395,7 @@ services:
 
       # Observability
       OTEL_SERVICE_NAME: foundation-iam-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-iam-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-iam-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080" # Application API
       - "8081" # Management / Actuator
@@ -427,6 +433,7 @@ services:
     container_name: foundation-billing-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-billing-service
 
       # Database
       DB_HOST: foundation-postgres-billing
@@ -484,7 +491,7 @@ services:
 
       # Observability
       OTEL_SERVICE_NAME: foundation-billing-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-billing-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-billing-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080"
       - "8081"
@@ -521,6 +528,7 @@ services:
     container_name: foundation-audit-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-audit-service
 
       # Database
       DB_HOST: foundation-postgres-audit
@@ -535,12 +543,19 @@ services:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
 
+      # Mail (MailHog)
+      MAIL_HOST: foundation-mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
+
       # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
       JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
 
       # Observability
       OTEL_SERVICE_NAME: foundation-audit-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-audit-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-audit-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080"
       - "8081"
@@ -575,6 +590,7 @@ services:
     container_name: foundation-cms-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-cms-service
 
       # Database
       DB_HOST: foundation-postgres-cms
@@ -592,9 +608,27 @@ services:
       # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
       JWT_PUBLIC_KEY_PATH: classpath:keys/public.pem
 
+      # Application
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:80}
+
+      # Multi-tenancy
+      ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      DEFAULT_TENANT_KEY: ${DEFAULT_TENANT_KEY:-}
+      DEFAULT_TENANT_NAME: ${DEFAULT_TENANT_NAME:-Default Organization}
+
+      # Billing service — quota / plan enforcement
+      BILLING_SERVICE_URI: http://foundation-billing-service:8080
+
+      # Mail (MailHog)
+      MAIL_HOST: foundation-mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
+
       # Observability
       OTEL_SERVICE_NAME: foundation-cms-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-cms-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-cms-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080"
       - "8081"
@@ -629,6 +663,7 @@ services:
     container_name: foundation-gateway-service
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-gateway-service
 
       # IAM service — routing target and JWKS endpoint for JWT validation
       IAM_SERVICE_URI: http://foundation-iam-service:8080
@@ -659,7 +694,7 @@ services:
 
       # Observability
       OTEL_SERVICE_NAME: foundation-gateway-service
-      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-gateway-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
     expose:
       - "8080" # Gateway API
       - "8081" # Management / Actuator
