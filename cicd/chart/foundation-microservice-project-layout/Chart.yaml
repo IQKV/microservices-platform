@@ -1,0 +1,23 @@
+apiVersion: v2
+name: foundation-microservice-project-layout
+description: Centralized cms service for IQKV platform.
+version: 0.3.0
+appVersion: "0.3.0"
+
+keywords:
+  - iqkv
+  - cms-service
+  - multi-tenant
+  - spring-boot
+  - microservices
+  - security
+  - mybatis
+  - cms-logging
+
+home: https://github.com/IQKV/foundation-microservice-project-layout
+sources:
+  - https://github.com/IQKV/foundation-microservice-project-layout
+
+maintainers:
+  - name: IQ Key Value Team
+    email: team@iqkv.dev

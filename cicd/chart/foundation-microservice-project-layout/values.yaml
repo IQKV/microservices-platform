@@ -1,0 +1,248 @@
+# IQ Key Value Servicename Service - Default Configuration
+# Base configuration with sensible defaults for all environments
+
+# Global settings
+global:
+  storageClass: "local-path"
+  imageRegistry: ""
+
+# Application Configuration
+app:
+  name: foundation-microservice-project-layout
+  version: "0.3.0"
+  environment: "sit"
+  namespace: "default"
+
+  # Spring Boot Application Settings
+  springBoot:
+    profiles:
+      active: sit
+    server:
+      port: 8080
+    management:
+      port: 8081
+
+# Image Configuration
+image:
+  repository: iqkv/foundation-microservice-project-layout
+  tag: "latest"
+  pullPolicy: Always
+
+imagePullSecrets:
+  - name: know-how-download-auth
+
+# Deployment Configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod Configuration
+podAnnotations: {}
+podLabels: {}
+
+# Security Context (shared defaults)
+podSecurityContext:
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Service Configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Management Service (Actuator endpoints)
+managementService:
+  enabled: true
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+  annotations: {}
+
+# Ingress Configuration
+ingress:
+  enabled: false
+  className: "nginx"
+  tls:
+    enabled: false
+    secretName: ""
+    certManager:
+      enabled: false
+      issuer: "letsencrypt-production"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+  hosts:
+    - host: cms-service.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Resource Configuration
+resources:
+  limits:
+    memory: 768Mi
+    cpu: 500m
+  requests:
+    memory: 512Mi
+    cpu: 200m
+
+# JVM Configuration
+jvm:
+  maxRAMPercentage: "70.0"
+  initialRAMPercentage: "50.0"
+  minRAMPercentage: "50.0"
+  gcAlgorithm: "G1GC"
+  maxGCPauseMillis: "200"
+  additionalOpts: ""
+
+# Autoscaling Configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Node Selection
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Health Checks
+healthcheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8081
+    initialDelaySeconds: 120
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 5
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8081
+    initialDelaySeconds: 60
+    periodSeconds: 15
+    timeoutSeconds: 10
+    failureThreshold: 5
+
+# External Infrastructure Configuration
+infraServices:
+  # PostgreSQL Configuration
+  postgresql:
+    host: "foundation-infra-postgresql.iqkv-sit-env.svc.cluster.local"
+    port: 5432
+    database: "iqkv_cms"
+    username: "svc_cms_sit_dba"
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: "foundation-infra-rabbitmq.iqkv-sit-env.svc.cluster.local"
+    port: 5672
+    username: "svc_infra_sit_rmq"
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+
+# Application Configuration (only externalized values)
+config:
+  # JWT RSA Key Configuration
+  jwt:
+    publicKeyPath: "classpath:keys/public.pem"    # Override for production
+
+  # Messaging Configuration
+  messaging:
+    enabled: true   # Maps to iqkv.messaging.rabbitmq.enabled
+
+# Platform rollout mode
+platform:
+  rolloutMode: "MULTI_TENANT"
+
+# Monitoring Configuration
+monitoring:
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    labels:
+      release: prometheus-stack
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /actuator/prometheus
+
+  prometheusRule:
+    enabled: false
+    namespace: monitoring
+    labels:
+      release: prometheus-stack
+    rules:
+      - alert: MicroserviceLayoutDown
+        expr: up{job=~"foundation-microservice-project-layout.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Foundation Microservice is down"
+          description: "Foundation Microservice has been down for more than 2 minutes"
+
+      - alert: MicroserviceLayoutHighMemory
+        expr: container_memory_usage_bytes{pod=~".*foundation-microservice-project-layout.*"} / container_spec_memory_limit_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Foundation Microservice high memory usage"
+          description: "Foundation Microservice memory usage is above 85% for more than 5 minutes"
+
+      - alert: MicroserviceLayoutHighCPU
+        expr: rate(container_cpu_usage_seconds_total{pod=~".*foundation-microservice-project-layout.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Foundation Microservice high CPU usage"
+          description: "Foundation Microservice CPU usage is above 80% for more than 5 minutes"
+
+      - alert: MicroserviceLayoutHighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5..", job=~"foundation-microservice-project-layout.*"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Foundation Microservice high error rate"
+          description: "Foundation Microservice is experiencing high 5xx error rate (>5%) for more than 5 minutes"
+
+      - alert: MicroserviceLayoutSlowResponses
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=~"foundation-microservice-project-layout.*"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Foundation Microservice slow responses"
+          description: "Foundation Microservice p95 response time is above 2 seconds for more than 5 minutes"
+
+# Network Policies
+networkPolicy:
+  enabled: false
+
+# K3s specific configurations
+k3s:
+  useLocalPath: true
+  disableResourceQuotas: true
+  tolerateAllTaints: false

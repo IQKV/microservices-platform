@@ -1,0 +1,41 @@
+# Test Environment Configuration
+
+# Application Configuration
+app:
+  environment: "sit"
+  springBoot:
+    profiles:
+      active: sit
+
+# Test external services (in sit namespace)
+infraServices:
+  postgresql:
+    host: "foundation-infra-postgresql.iqkv-sit-env.svc.cluster.local"
+    database: "iqkv_cms"
+    username: "svc_cms_sit_dba"
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+
+  rabbitmq:
+    host: "foundation-infra-rabbitmq.iqkv-sit-env.svc.cluster.local"
+    username: "svc_infra_sit_rmq"
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+
+# Test environment resources
+resources:
+  limits:
+    memory: 768Mi
+    cpu: 750m
+  requests:
+    memory: 384Mi
+    cpu: 300m
+
+config:
+  jwt:
+    publicKeyPath: "classpath:keys/public.pem"
+
+  messaging:
+    enabled: true
+
+# Platform rollout mode
+platform:
+  rolloutMode: "MULTI_TENANT"

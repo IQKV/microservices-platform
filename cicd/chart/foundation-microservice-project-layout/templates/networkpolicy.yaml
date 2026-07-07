@@ -1,0 +1,62 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "foundation-microservice-project-layout.fullname" . }}
+  labels:
+    {{- include "foundation-microservice-project-layout.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "foundation-microservice-project-layout.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from within the same namespace
+    - from:
+        - podSelector: {}
+    # Allow traffic from Prometheus (monitoring namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: {{ .Values.app.springBoot.management.port }}
+    # Allow traffic from Ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/instance: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: {{ .Values.app.springBoot.server.port }}
+  egress:
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow traffic to PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow traffic to RabbitMQ
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672
+{{- end }}
