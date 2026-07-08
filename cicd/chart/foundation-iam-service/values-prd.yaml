@@ -107,7 +107,7 @@ config:
     publicKeyPath: "file:/run/secrets/public.pem"
 
   billing:
-    serviceUri: "http://foundation-billing-service.iqkv-prd-env.svc.cluster.local:8080"
+    serviceUri: "http://foundation-billing-service"
 
   mail:
     host: "smtp.iqkv.site"

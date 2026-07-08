@@ -48,7 +48,7 @@ config:
     publicKeyPath: "classpath:keys/public.pem"
 
   billing:
-    serviceUri: "http://foundation-billing-service.iqkv-sit-env.svc.cluster.local:8080"
+    serviceUri: "http://foundation-billing-service"
 
   mail:
     host: "foundation-infra-mailhog.iqkv-sit-env.svc.cluster.local"
