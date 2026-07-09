@@ -1,0 +1,265 @@
+kind: pipeline
+name: VerifyCode
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    include:
+      - refs/heads/dev
+      - refs/heads/feature/*
+      - refs/heads/rfc/*
+      - refs/heads/poc/*
+      - refs/heads/bugfix/*
+      - refs/heads/improvement/*
+      - refs/heads/prerelease/*
+      - refs/heads/library/*
+      - refs/heads/hotfix/*
+      - refs/heads/*.*.x
+      - refs/tags/*
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: npm-cache
+    host:
+      path: /app/.npm-cache
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  - name: code-coverage-gate
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - javac -version
+      - mvn -version
+      # - yamllint .
+      - pnpm install --frozen-lockfile --ignore-scripts && pnpm lint
+      - mvn dependency:resolve -U  -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - mvn clean verify -Dstyle.color=always -Dmaven.javadoc.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+
+  - name: static-analysis-gate
+    depends_on:
+      - code-coverage-gate
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+      - name: npm-cache
+        path: /root/.npm
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+      SONAR_HOST:
+        from_secret: SONAR_HOST
+      SONAR_TOKEN:
+        from_secret: SONAR_TOKEN
+    commands:
+      - mvn org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies -Dmdep.prependGroupId=true -Dstyle.color=always -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar '-Dsonar.java.libraries=target/dependency/*.jar' '-Dsonar.java.test.libraries=target/classes,target/dependency/*.jar' -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300 -Dsonar.host.url=$SONAR_HOST -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dsonar.projectName=${DRONE_REPO_OWNER}:${DRONE_REPO_NAME} -Dstyle.color=always -Dmaven.javadoc.skip=true --batch-mode -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD
+      - mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.3:check -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD  -Dspotbugs.xmlOutput=true -Dspotbugs.failOnError=true -Dspotbugs.excludeFilterFile=../spotbugs-exclude.xml -Dspotbugs.includeTests=true -Dstyle.color=always
+
+  - name: notify-slack-on-failure
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        :red_circle: :thunder_cloud_and_rain: {{build.link}} ({{build.branch}}) by {{build.author}}
+    when:
+      status:
+        - failure
+    depends_on:
+      - code-coverage-gate
+      - static-analysis-gate
+
+---
+kind: pipeline
+name: PublishArtifacts
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/dev
+    - refs/heads/prerelease/*
+    - refs/heads/*.*.x
+    - refs/tags/*
+
+depends_on:
+  - VerifyCode
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  - name: publish-snapshot-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - mvn deploy -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD -DaltDeploymentRepository=kh-contrib-snapshots-repo::https://know-how.nexus/repository/maven-snapshots
+    when:
+      branch:
+        include:
+          - "dev"
+          - "prerelease/*"
+          - "*.*.x"
+
+  - name: publish-release-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      NEXUS_DEPLOYER_USERNAME:
+        from_secret: NEXUS_DEPLOYER_USERNAME
+      NEXUS_DEPLOYER_PASSWORD:
+        from_secret: NEXUS_DEPLOYER_PASSWORD
+    commands:
+      - mvn deploy -Dstyle.color=always -DskipTests -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dcheckstyle.skip=true -s ../maven-settings.xml -Ddeployer.username=$NEXUS_DEPLOYER_USERNAME -Ddeployer.password=$NEXUS_DEPLOYER_PASSWORD -DaltDeploymentRepository=kh-contrib-releases-repo::https://know-how.nexus/repository/maven-releases
+    when:
+      ref:
+        - "refs/tags/*"
+
+  - name: create-github-release
+    depends_on:
+      - publish-release-jar
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+      - name: npm-cache
+        path: /root/.npm
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_API_ACCESS_TOKEN
+    commands:
+      - git checkout -b release
+      - pnpm install --frozen-lockfile --ignore-scripts && git config --unset core.hooksPath
+      - wget -O ./.release-it.json https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/release-it/release.json
+      - git fetch --tags
+      - release-it --ci --no-increment -VV
+      - git status
+    when:
+      ref:
+        - "refs/tags/*"
+
+  - name: notify-slack
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: SLACK_WEBHOOK
+      channel: dev
+      template: >
+        {{#success build.status}}
+         :large_green_circle: :package: *${DRONE_COMMIT_MESSAGE}*
+         {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{else}}
+         :red_circle: :package: {{build.link}} ({{build.branch}}) by {{build.author}}
+        {{/success}}
+    when:
+      status:
+        - failure
+        - success
+    depends_on:
+      - publish-snapshot-jar
+      - publish-release-jar
+
+---
+kind: pipeline
+name: ReleasePackage
+type: docker
+trigger:
+  event:
+    - promote
+  target:
+    - release
+  branch:
+    - "dev"
+    - "*.*.x"
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /app/.m2
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+
+steps:
+  - name: create-release-tag
+    failure: ignore
+    image: cicdtools/pipeline-runner
+    pull: never
+    volumes:
+      - name: maven-cache
+        path: /root/.m2
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_API_ACCESS_TOKEN
+    commands:
+      - export RELEASE_VERSION=$(jq -r .version package.json | cut -d '-' -f 1)
+      - export INCREMENT_COMMAND="increment_version -m $${RELEASE_VERSION}"
+      - export SNAPSHOT_VERSION=$($${INCREMENT_COMMAND})
+      - echo Prepare new version $${RELEASE_VERSION}
+      - export NEXT_SNAPSHOT=$${SNAPSHOT_VERSION}-SNAPSHOT
+      - export GIT_AUTHOR_NAME="$${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_AUTHOR_EMAIL="$${SVC_BUILD_GIT_EMAIL}"
+      - export GIT_COMMITTER_NAME="$${SVC_BUILD_GIT_USERNAME}"
+      - export GIT_COMMITTER_EMAIL=$${SVC_BUILD_GIT_EMAIL}
+      - git remote set-url --push origin ${DRONE_GIT_SSH_URL}
+      - git checkout -b v$${RELEASE_VERSION}
+      - mvn versions:set -DremoveSnapshot
+      - mvn versions:set -DnewVersion=$${RELEASE_VERSION}
+      - mvn versions:update-parent
+      - >-
+        git commit -a -m "chore: bump v$${RELEASE_VERSION}"
+      - git tag $${RELEASE_VERSION} && git push origin $${RELEASE_VERSION}
+      - echo "✅ Release tag $${RELEASE_VERSION} was created."
+      - sleep 10
+      - git tag -d $${RELEASE_VERSION} && git checkout ${DRONE_COMMIT_BRANCH} && git branch -D v$${RELEASE_VERSION}
+      - mvn versions:set -DnewVersion=$${NEXT_SNAPSHOT}
+      - mvn versions:update-parent -DallowSnapshots=true
+      - pnpm install --frozen-lockfile --ignore-scripts && git config --unset core.hooksPath
+      - wget -O ./.release-it.json https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/release-it/changelog.json
+      - git fetch --tags
+      - release-it --ci --no-increment -VV
+      - npm version $${SNAPSHOT_VERSION} --no-git-tag-version
+      - >-
+        git commit -a -m "chore: create new $${NEXT_SNAPSHOT}"
+      - git push origin ${DRONE_COMMIT_BRANCH}
+      - echo "✅ Started $${NEXT_SNAPSHOT}."
+      - echo "🚀 Good job, new version $${RELEASE_VERSION} was released successfully."
