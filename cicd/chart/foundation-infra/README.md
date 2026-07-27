@@ -1,6 +1,6 @@
-# IQ Key Value Infrastructure Services Helm Chart
+# iQ Key Value Infrastructure Services Helm Chart
 
-This Helm chart deploys core infrastructure services for the IQ Key Value microservices platform, optimized for K3s development environments.
+This Helm chart deploys core infrastructure services for the iQ Key Value microservices platform, optimized for K3s development environments.
 
 ## 🎯 Key Features
 

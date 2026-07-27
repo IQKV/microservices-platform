@@ -1,6 +1,6 @@
-# IQ Key Value Admin Dashboard UI Helm Chart
+# iQ Key Value Admin Dashboard UI Helm Chart
 
-A Helm chart for deploying the IQ Key Value Application Portal UI - a modern React application with Nginx serving, runtime configuration via ConfigMap, and SPA routing support.
+A Helm chart for deploying the iQ Key Value Application Portal UI - a modern React application with Nginx serving, runtime configuration via ConfigMap, and SPA routing support.
 
 ## Description
 

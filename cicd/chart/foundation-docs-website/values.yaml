@@ -1,4 +1,4 @@
-# IQ Key Value Platform Documentation Website - Default Configuration
+# iQ Key Value Platform Documentation Website - Default Configuration
 # Base configuration with sensible defaults for all environments
 
 # Global settings
@@ -30,7 +30,7 @@ app:
 
       # Default CSP from base nginx container image
       contentSecurityPolicyConf: |
-        # Default CSP for IQKV platform documentation
+        # Default CSP for iQ Key Value Platform documentation
         add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';" always;
 
       # Override security headers only when needed (base image has good defaults)

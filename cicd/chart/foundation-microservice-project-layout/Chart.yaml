@@ -1,6 +1,6 @@
 apiVersion: v2
 name: foundation-microservice-project-layout
-description: Centralized cms service for IQKV platform.
+description: Centralized cms service for iQ Key Value Platform.
 version: 0.3.0
 appVersion: "0.3.0"
 
@@ -19,5 +19,5 @@ sources:
   - https://github.com/IQKV/foundation-microservice-project-layout
 
 maintainers:
-  - name: IQ Key Value Team
+  - name: iQ Key Value Team
     email: team@iqkv.dev

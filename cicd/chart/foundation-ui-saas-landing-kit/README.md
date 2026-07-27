@@ -1,4 +1,4 @@
-# IQ Key Value SaaS Landing Kit - Helm Chart
+# iQ Key Value SaaS Landing Kit - Helm Chart
 
 A Helm chart for deploying a static SaaS landing page built with Astro, React, Tailwind CSS, and DaisyUI, served by Nginx.
 

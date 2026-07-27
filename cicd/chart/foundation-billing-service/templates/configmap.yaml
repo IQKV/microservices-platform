@@ -23,7 +23,7 @@ data:
   MAIL_HOST: {{ .Values.config.mail.host | quote }}
   MAIL_PORT: {{ .Values.config.mail.port | toString | quote }}
   MAIL_FROM: {{ .Values.config.mail.from | quote }}
-  MAIL_FROM_NAME: {{ .Values.config.mail.fromName | default "IQ Key Value" | quote }}
+  MAIL_FROM_NAME: {{ .Values.config.mail.fromName | default "iQ Key Value" | quote }}
   MAIL_REPLY_TO: {{ .Values.config.mail.replyTo | default "" | quote }}
 
   # JWT RSA Key Paths (maps to iqkv.auth.jwt.* in application.yml)

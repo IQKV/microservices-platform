@@ -115,7 +115,7 @@ config:
     username: ""  # Must be overridden via --set-string config.mail.username in pipeline
     password: ""  # Must be overridden via --set-string config.mail.password in pipeline
     from: "noreply@iqkv.dev"
-    fromName: "IQ Key Value"
+    fromName: "iQ Key Value"
 
   appBaseUrl: "https://app.iqkv.site"
   oauth2:

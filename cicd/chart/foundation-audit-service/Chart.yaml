@@ -1,6 +1,6 @@
 apiVersion: v2
 name: foundation-audit-service
-description: Centralized audit logging service for IQKV platform.
+description: Centralized audit logging service for iQ Key Value Platform.
 version: 0.3.0
 appVersion: "0.3.0"
 
@@ -19,5 +19,5 @@ sources:
   - https://github.com/IQKV/foundation-audit-service
 
 maintainers:
-  - name: IQ Key Value Team
+  - name: iQ Key Value Team
     email: team@iqkv.dev

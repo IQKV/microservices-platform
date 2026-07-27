@@ -1,4 +1,4 @@
-# IQ Key Value Gateway Service - Production Environment Configuration
+# iQ Key Value Gateway Service - Production Environment Configuration
 
 app:
   environment: "prd"

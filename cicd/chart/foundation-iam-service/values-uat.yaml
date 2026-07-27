@@ -56,7 +56,7 @@ config:
     username: ""
     password: ""
     from: "noreply@iqkv.dev"
-    fromName: "IQ Key Value"
+    fromName: "iQ Key Value"
 
   appBaseUrl: "https://app.iqkv.site"
   oauth2:

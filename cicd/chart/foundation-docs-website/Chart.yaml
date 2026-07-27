@@ -1,6 +1,6 @@
 apiVersion: v2
 name: foundation-docs-website
-description: IQ Key Value Platform Documentation Website - VitePress-based documentation with Nginx serving
+description: iQ Key Value Platform Documentation Website - VitePress-based documentation with Nginx serving
 type: application
 version: 0.3.0
 appVersion: "0.3.0"
@@ -20,5 +20,5 @@ sources:
   - https://github.com/IQKV/foundation-docs-website
 
 maintainers:
-  - name: IQ Key Value Team
+  - name: iQ Key Value Team
     email: team@iqkv.dev

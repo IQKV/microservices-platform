@@ -366,7 +366,7 @@ services:
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
       MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-IQ Key Value}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-iQ Key Value}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
       # Billing service — routing target
@@ -455,7 +455,7 @@ services:
       MAIL_USERNAME: ""
       MAIL_PASSWORD: ""
       MAIL_FROM: ${MAIL_FROM:-noreply@iqkv.dev}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-IQ Key Value}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-iQ Key Value}
       MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
 
       # Object Storage (MinIO)

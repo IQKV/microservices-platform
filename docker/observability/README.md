@@ -1,4 +1,4 @@
-# IQ Key Value Platform — Observability Stack
+# iQ Key Value Platform — Observability Stack
 
 Standalone observability stack for local development. Run this when developing
 services with `mvn spring-boot:run` (services on the host, observability tools

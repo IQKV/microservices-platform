@@ -2,9 +2,9 @@
 
 ## Overview
 
-This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the IQ Key Value microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
+This document provides comprehensive guidelines for repository management, development workflows, and collaboration standards for the iQ Key Value microservices platform. It serves as a reference for both human developers and AI agents working with this codebase.
 
-The IQ Key Value platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
+The iQ Key Value platform is a production-ready Spring Boot microservices ecosystem demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 
 ## 🏛️ Repository Structure & Organization
 
@@ -1006,7 +1006,7 @@ var emailTemplate = """
   %s
 
   Best regards,
-  IQ Key Value Team
+  iQ Key Value Team
   """.formatted(user.getUsername(), verificationLink);
 
 // var for local variables (when type is obvious)
@@ -2028,7 +2028,7 @@ pnpm formatter:write
 ### Recommended CI/CD Pipeline (To Implement)
 
 ```yaml
-name: IQ Key Value Platform CI/CD
+name: iQ Key Value Platform CI/CD
 
 on:
   push:
@@ -2439,10 +2439,10 @@ public record UserDto(
 @Configuration
 @OpenAPIDefinition(
   info = @Info(
-    title = "IQ Key Value User Service API",
+    title = "iQ Key Value User Service API",
     version = "1.0.0",
     description = "Authentication and user management microservice",
-    contact = @Contact(name = "IQ Key Value Team", email = "support@foundation.com"),
+    contact = @Contact(name = "iQ Key Value Team", email = "support@foundation.com"),
     license = @License(name = "Apache 2.0", url = "https://www.apache.org/licenses/LICENSE-2.0")
   ),
   servers = {
@@ -2809,4 +2809,4 @@ public class BookService {
 
 ---
 
-This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual IQ Key Value platform implementation and represent production-ready approaches to building scalable distributed systems.
+This repository guidelines document serves as a comprehensive reference for maintaining high-quality, secure, and well-organized microservices while facilitating effective collaboration between human developers and AI agents. The patterns and practices documented here are derived from the actual iQ Key Value platform implementation and represent production-ready approaches to building scalable distributed systems.

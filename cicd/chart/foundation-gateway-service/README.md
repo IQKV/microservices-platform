@@ -1,10 +1,10 @@
-# IQ Key Value Gateway Service Helm Chart
+# iQ Key Value Gateway Service Helm Chart
 
-API Gateway with intelligent routing, authentication, rate limiting, and comprehensive service orchestration for the IQ Key Value microservices platform.
+API Gateway with intelligent routing, authentication, rate limiting, and comprehensive service orchestration for the iQ Key Value microservices platform.
 
 ## Overview
 
-This Helm chart deploys the IQ Key Value Gateway Service, which provides:
+This Helm chart deploys the iQ Key Value Gateway Service, which provides:
 
 - Centralized API gateway with intelligent routing
 - JWT-based authentication and authorization
@@ -20,7 +20,7 @@ This Helm chart deploys the IQ Key Value Gateway Service, which provides:
 - Kubernetes 1.19+
 - Helm 3.2.0+
 - External Redis cache (for rate limiting and session storage)
-- IQ Key Value User Service (for JWT validation)
+- iQ Key Value User Service (for JWT validation)
 - Downstream microservices (Billing, CRM services, etc.)
 
 ## Installation
@@ -206,6 +206,6 @@ The gateway routes requests to downstream services:
 
 For issues and questions:
 
-- **Documentation**: [IQ Key Value Documentation](https://docs.iqkv.site)
+- **Documentation**: [iQ Key Value Documentation](https://docs.iqkv.site)
 - **Issues**: [GitHub Issues](https://github.com/IQKV/foundation-gateway-service/issues)
 - **Email**: team@iqkv.dev

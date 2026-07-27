@@ -1,4 +1,4 @@
-# IQ Key Value IAM Service - Default Configuration
+# iQ Key Value IAM Service - Default Configuration
 # Base configuration with sensible defaults for all environments
 
 # Global settings
@@ -215,7 +215,7 @@ config:
     username: ""   # Override via --set config.mail.username=xxx
     password: ""   # Override via --set config.mail.password=xxx
     from: "noreply@iqkv.dev"
-    fromName: "IQ Key Value"
+    fromName: "iQ Key Value"
     replyTo: ""
 
   # Application base URL (used in email links)

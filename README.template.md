@@ -1,4 +1,4 @@
-# 🏗️ IQ Key Value Backend Microservices
+# 🏗️ iQ Key Value Backend Microservices
 
 > Enterprise microservices foundation for scalable SaaS products. Essential business infrastructure—Identity, Payments, and API Gateway—on secure, multi-tenant architecture.
 

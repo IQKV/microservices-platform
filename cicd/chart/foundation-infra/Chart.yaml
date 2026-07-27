@@ -1,6 +1,6 @@
 apiVersion: v2
 name: foundation-infra
-description: IQ Key Value Platform Core Infrastructure Services Helm Chart
+description: iQ Key Value Platform Core Infrastructure Services Helm Chart
 type: application
 version: 0.3.0
 appVersion: "0.3.0"
@@ -15,5 +15,5 @@ home: https://github.com/IQKV/microservices-platform
 sources:
   - https://github.com/IQKV/microservices-platform
 maintainers:
-  - name: IQ Key Value Team
+  - name: iQ Key Value Team
     email: team@iqkv.com

@@ -1,4 +1,4 @@
-# 🚀 IQ Key Value Microservices Platform
+# 🚀 iQ Key Value Microservices Platform
 
 > Spring Boot microservices platform demonstrating modern architecture patterns, security best practices, and operational excellence for building scalable distributed systems.
 

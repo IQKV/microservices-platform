@@ -1,6 +1,6 @@
-# IQ Key Value Documentation Website Helm Chart
+# iQ Key Value Documentation Website Helm Chart
 
-A Helm chart for deploying the IQ Key Value Documentation Website - a VitePress-based documentation site with Nginx serving.
+A Helm chart for deploying the iQ Key Value Documentation Website - a VitePress-based documentation site with Nginx serving.
 
 ## Description
 

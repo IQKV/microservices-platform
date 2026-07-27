@@ -1,4 +1,4 @@
-# IQ Key Value Gateway Service - UAT Environment Configuration
+# iQ Key Value Gateway Service - UAT Environment Configuration
 
 app:
   environment: "uat"
