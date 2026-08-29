@@ -346,7 +346,7 @@ services:
       # Database
       DB_HOST: foundation-postgres-iam
       DB_PORT: 5432
-      DB_NAME: ${IAM_DB_NAME:-iam}
+      DB_NAME: ${IAM_DB_NAME:-iamservice}
       DB_USERNAME: ${IAM_DB_USERNAME:-svc_iam_dba}
       DB_PASSWORD: ${IAM_DB_PASSWORD:-svc_iam_dba}
 
@@ -438,7 +438,7 @@ services:
       # Database
       DB_HOST: foundation-postgres-billing
       DB_PORT: 5432
-      DB_NAME: ${BILLING_DB_NAME:-billing}
+      DB_NAME: ${BILLING_DB_NAME:-billingservice}
       DB_USERNAME: ${BILLING_DB_USERNAME:-svc_billing_dba}
       DB_PASSWORD: ${BILLING_DB_PASSWORD:-svc_billing_dba}
 
@@ -533,7 +533,7 @@ services:
       # Database
       DB_HOST: foundation-postgres-audit
       DB_PORT: 5432
-      DB_NAME: ${AUDIT_DB_NAME:-audit}
+      DB_NAME: ${AUDIT_DB_NAME:-auditservice}
       DB_USERNAME: ${AUDIT_DB_USERNAME:-svc_audit_dba}
       DB_PASSWORD: ${AUDIT_DB_PASSWORD:-svc_audit_dba}
 
@@ -595,7 +595,7 @@ services:
       # Database
       DB_HOST: foundation-postgres-cms
       DB_PORT: 5432
-      DB_NAME: ${CMS_DB_NAME:-cms}
+      DB_NAME: ${CMS_DB_NAME:-cmsservice}
       DB_USERNAME: ${CMS_DB_USERNAME:-svc_cms_dba}
       DB_PASSWORD: ${CMS_DB_PASSWORD:-svc_cms_dba}
 
@@ -830,8 +830,12 @@ services:
     container_name: foundation-promtail
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
-      - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - foundation_iam_logs:/var/log/iam-service:ro
+      - foundation_billing_logs:/var/log/billing-service:ro
+      - foundation_audit_logs:/var/log/audit-service:ro
+      - foundation_cms_logs:/var/log/cms-service:ro
+      - foundation_gateway_logs:/var/log/gateway-service:ro
     networks:
       - foundation-network
     depends_on:
@@ -842,8 +846,7 @@ services:
 
 networks:
   foundation-network:
-    driver: overlay
-    external: true
+    driver: bridge
     name: foundation-network
 
 volumes:
