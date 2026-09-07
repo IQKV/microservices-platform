@@ -273,6 +273,11 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-iqkv}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-iqkv_password}
+      # Server-level CORS — applies to all buckets, no per-bucket CORS config needed
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+      # Public URL for presigned URL generation — override in .env for external access
+      MINIO_SERVER_URL: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_CONSOLE_URL:-http://localhost:9001}
     expose:
       - "9000" # S3 API
       - "9001" # Console UI
@@ -287,6 +292,33 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # MinIO Bucket Init (one-shot)
+  # Creates required buckets and sets public read on iam-assets/avatars.
+  # ---------------------------------------------------------------------------
+  foundation-minio-init:
+    image: minio/mc:latest
+    container_name: foundation-minio-init
+    depends_on:
+      foundation-minio:
+        condition: service_healthy
+    networks:
+      - foundation-network
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-iqkv}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-iqkv_password}
+      IAM_BUCKET_NAME: ${IAM_BUCKET_NAME:-iam-assets}
+      BILLING_BUCKET_NAME: ${BILLING_BUCKET_NAME:-billing-assets}
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://foundation-minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+        mc mb --ignore-existing local/$$IAM_BUCKET_NAME &&
+        mc mb --ignore-existing local/$$BILLING_BUCKET_NAME &&
+        mc anonymous set download local/$$IAM_BUCKET_NAME &&
+        echo 'Buckets ready.'
+      "
+    restart: on-failure
 
   # ---------------------------------------------------------------------------
   # Database Administration (DbGate)
@@ -374,6 +406,7 @@ services:
 
       # Object Storage (MinIO)
       OBJECTSTORAGE_ENDPOINT: http://foundation-minio:9000
+      OBJECTSTORAGE_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       OBJECTSTORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-iqkv}
       OBJECTSTORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-iqkv_password}
       OBJECTSTORAGE_BUCKET_NAME: ${IAM_BUCKET_NAME:-iam-assets}
@@ -408,6 +441,8 @@ services:
         condition: service_healthy
       foundation-minio:
         condition: service_healthy
+      foundation-minio-init:
+        condition: service_completed_successfully
       foundation-mailhog:
         condition: service_started
     networks:
@@ -504,6 +539,8 @@ services:
         condition: service_healthy
       foundation-minio:
         condition: service_healthy
+      foundation-minio-init:
+        condition: service_completed_successfully
       foundation-mailhog:
         condition: service_started
     networks:

@@ -6,6 +6,23 @@
       "name": "/"
     }
   ],
+  "users": [
+    {
+      "name": "svc_platform_rmq",
+      "password": "svc_platform_rmq",
+      "tags": "management",
+      "limits": {}
+    }
+  ],
+  "permissions": [
+    {
+      "user": "svc_platform_rmq",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
   "exchanges": [
     {
       "name": "foundation.events",
