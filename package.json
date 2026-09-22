@@ -24,7 +24,7 @@
     "lint-staged": "^17.5.1",
     "oxfmt": "^0.67.0",
     "oxlint": "^1.83.0",
-    "oxlint-tsgolint": "^7.0.2001",
+    "oxlint-tsgolint": "^7.0.2002",
     "release-it": "^19.2.4",
     "release-it-pnpm": "^4.6.6",
     "sort-package-json": "^4.0.0",
