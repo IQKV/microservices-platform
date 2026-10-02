@@ -33,7 +33,7 @@
   },
   "lint-staged": {
     "*": [
-      "pnpm formatter:check"
+      "oxfmt --write"
     ],
     "package.json": [
       "sort-package-json"

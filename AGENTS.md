@@ -88,6 +88,39 @@ foundation-{service-name}/
 </modules>
 ```
 
+## Execution Discipline
+
+- Root cause first. Fix at the real entry point, not around it.
+- Changes to the root POM or root `package.json` affect all submodules — verify build from root after any such change.
+- After two identical failures without new evidence, change approach — do not retry blindly.
+- Always build from the repository root, not from a submodule directory.
+- No speculative additions.
+
+## Security
+
+- Keep credentials, tokens, and private config out of commits, logs, and shared text.
+- Flag files likely to contain secrets (`.env`, `application-local.yml`) before staging.
+- No hardcoded secrets — use environment variables or Spring config properties.
+- Submodule changes must be committed in the submodule first, then the parent repo updated.
+- Never bypass `--no-verify` unless explicitly requested.
+
+## Commit Standards
+
+Format: `type(scope): subject`
+
+- Subject: imperative, lowercase, no trailing period, ≤ 72 chars
+- Types: `feat`, `fix`, `improvement`, `refactor`, `docs`, `chore`, `ci`, `revert`
+- Scope: affected service or area (e.g., `iam`, `billing`, `gateway`, `cms`, `audit`, `docker`, `deps`, `submodules`)
+- For `fix`: symptom + trigger, not the code change
+  - ✅ `fix(gateway): upstream timeout not propagated to client when IAM unreachable`
+  - ❌ `fix(gateway): update timeout config`
+
+Examples:
+- `chore(submodules): update all submodules to latest dev`
+- `feat(docker): add Prometheus scrape config for billing service`
+- `fix(compose): gateway healthcheck fails when IAM starts slowly`
+- `chore(deps): update boot-parent-pom to 0.25.0`
+
 ## 🤖 AI Agent Guidelines
 
 ### AI Communication Standards
