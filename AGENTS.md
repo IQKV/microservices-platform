@@ -116,6 +116,7 @@ Format: `type(scope): subject`
   - ❌ `fix(gateway): update timeout config`
 
 Examples:
+
 - `chore(submodules): update all submodules to latest dev`
 - `feat(docker): add Prometheus scrape config for billing service`
 - `fix(compose): gateway healthcheck fails when IAM starts slowly`
