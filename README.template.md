@@ -55,6 +55,7 @@ Domain-aligned services with event-driven communication:
 - **💰 [Billing Service](foundation-billing-service/README.md)**: Multi-gateway subscriptions (Stripe + Lemon Squeezy), FLAT/PER_SEAT pricing models, plan catalog with trial support, webhook processing, entitlement evaluation
 - **📋 [Audit Service](foundation-audit-service/README.md)**: System-wide audit trails, activity tracking, compliance logging, event-driven log ingestion
 - **📝 [CMS Service](foundation-cms-service/README.md)**: Content management for static pages, multi-language support, hierarchical content, and SEO-friendly metadata
+- **💬 [AI Chat Service](foundation-ai-chat-service/README.md)**: Spring AI 2.0 integration with Ollama — LLM-backed conversational API, configurable prompt engineering controls, chat session persistence, and admin session oversight
 - **💻 [Tenant App](foundation-ui-app/README.md)**: React 19 SPA for workspace members — OAuth2/OIDC sign-in, magic link auth, team management, invitations, billing self-service with entitlement-based feature gating, account profile
 - **🛡️ [Platform Admin](foundation-ui-platform-admin/README.md)**: React 19 SPA for operators — global user/org management, subscription lifecycle, plan catalog CRUD, announcement management with translations, OIDC identity remediation
 - **🚀 [SaaS Landing Kit](foundation-ui-saas-landing-kit/README.md)**: Modern, performant landing page built with Astro, React, Tailwind CSS, and shadcn/ui — includes authentication integration
@@ -74,6 +75,7 @@ Production-ready capabilities across all services:
 - **Distributed Locking**: ShedLock for scheduled jobs (token cleanup, trial notifications, stuck tenant recovery)
 - **Member Management**: Tenant owner actions (ban/unban, edit authority, transfer ownership), platform admin actions (ban/unban users, unlock users)
 - **Payments**: Multi-gateway strategy — Stripe and Lemon Squeezy with FLAT and PER_SEAT pricing models, entitlement evaluation, and plan-based feature gating
+- **AI Integration**: Spring AI 2.0 with Ollama for local LLM inference — configurable prompt engineering, system prompts, and token budgets
 
 ## Quick Start
 

@@ -213,6 +213,29 @@ Content management service for static pages, multi-language support, and hierarc
 - Tenant schema routing via `MyBatisSchemaInterceptor`
 - Event publishing to RabbitMQ for content changes
 
+### 💬 [AI Chat Service](https://github.com/IQKV/foundation-ai-chat-service/tree/dev/README.md)
+
+LLM-backed conversational service demonstrating Spring AI integration with Ollama.
+
+**Core Capabilities:**
+
+- Spring AI 2.0 integration with Ollama for local LLM inference (`llama3.1:8b` default)
+- Chat session persistence — sessions and messages stored in PostgreSQL (system schema, not tenant-scoped)
+- Multi-tenant JWT resource server — validates tokens from IAM via JWKS, tenant context resolved per request
+- Prompt engineering controls — configurable system prompt, input character limit, output token budget, and temperature via `iqkv.ai.*` properties
+- Conversation history with message roles (USER, ASSISTANT, SYSTEM)
+- Admin endpoints for cross-tenant session visibility (`PLATFORM_ADMIN` only)
+- Error handling for LLM backend failures (`NonTransientAiException` → 502 Bad Gateway with surfaced error message)
+
+**Key Patterns:**
+
+- `ChatClient` with per-request `OllamaChatOptions` (model, temperature, `numPredict`) and `.system()` prompt injection
+- `AiChatProperties` binds `iqkv.ai.*` — system prompt, max input chars, max output tokens, temperature — all overridable via env vars
+- `GlobalExceptionHandler` catches `NonTransientAiException` and returns a 502 `ProblemDetail` with the Ollama error message
+- Flat bounded-context layout (`chat/`) following the CMS service pattern — domain model, service, MyBatis mapper, REST resources, DTOs
+- FK cascade delete on `chat_messages.session_id` so session removal cleans up message history
+- Gateway route `aichat-api` with 180s response timeout to accommodate LLM inference latency
+
 ### 💻 UI Applications
 
 Production-ready frontends for different user roles.
@@ -306,6 +329,25 @@ VitePress-based documentation site with user guides, platform overview, and quic
 │  (schema/tenant)│  │                      │  │                      │  │  (schema/tenant)     │
 └─────────────────┘  └──────────────────────┘  └──────────────────────┘
 
+                      ┌──────────────────────────────────────────────────────────┐
+                      │                  Gateway Service (:8080)                 │
+                      │  also routes /api/v1/aichat/** → AI Chat Service (:8080) │
+                      └───────────────────────────────┬──────────────────────────┘
+                                                           │
+                                                           ▼
+                      ┌──────────────────────┐  ┌──────────────────────┐
+                      │   AI Chat Service    │  │       Ollama         │
+                      │  • Spring AI 2.0    │──│  • LLM Inference     │
+                      │  • Chat Sessions    │  │  • llama3.1:8b       │
+                      │  • Prompt Controls  │  │  • :11434            │
+                      └──────────┬───────────┘  └──────────────────────┘
+                                 │
+                                 ▼
+                      ┌──────────────────────┐
+                      │  PostgreSQL AI Chat  │
+                      │  (system schema)     │
+                      └──────────────────────┘
+
 Shared Infrastructure
 ┌──────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
 │     RabbitMQ     │  │       MailHog        │  │    Observability     │
@@ -322,7 +364,7 @@ Shared Infrastructure
 ### Technology Stack
 
 - **Runtime:** Java 25 with modern features (records, var, text blocks, pattern matching, switch expressions)
-- **Framework:** Spring Boot 4.1, Spring Cloud Gateway (WebFlux/reactive)
+- **Framework:** Spring Boot 4.1, Spring Cloud Gateway (WebFlux/reactive), Spring AI 2.0 (Ollama)
 - **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis 3.x, schema-per-tenant isolation
 - **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
 - **Object Storage:** MinIO S3-compatible storage for file uploads, avatars, and documents
