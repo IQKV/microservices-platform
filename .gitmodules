@@ -28,3 +28,6 @@
 [submodule "foundation-cms-service"]
 	path = foundation-cms-service
 	url = git@github.com:IQKV/foundation-cms-service.git
+[submodule "foundation-ai-chat-service"]
+	path = foundation-ai-chat-service
+	url = git@github.com:IQKV/foundation-ai-chat-service.git
