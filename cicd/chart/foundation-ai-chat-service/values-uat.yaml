@@ -1,0 +1,58 @@
+# UAT Environment Configuration
+
+# Application Configuration
+app:
+  environment: "uat"
+  springBoot:
+    profiles:
+      active: uat
+
+# Staging external services (in staging namespace)
+infraServices:
+  postgresql:
+    host: "foundation-infra-postgresql.iqkv-uat-env.svc.cluster.local"
+    database: "iqkv_aichat"
+    username: "svc_aichat_uat_dba"
+    password: ""  # Must be overridden via --set-string infraServices.postgresql.password in pipeline
+
+  rabbitmq:
+    host: "foundation-infra-rabbitmq.iqkv-uat-env.svc.cluster.local"
+    username: "svc_infra_uat_rmq"
+    password: ""  # Must be overridden via --set-string infraServices.rabbitmq.password in pipeline
+
+# Staging environment resources (production-like)
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 500m
+
+# JWT — use JWKS endpoint in deployed environments
+config:
+  jwt:
+    jwksUri: "http://foundation-iam-service:8080/.well-known/jwks.json"
+
+  messaging:
+    enabled: true
+
+# AI / LLM Configuration
+ai:
+  ollama:
+    baseUrl: "http://foundation-ollama:11434"
+    model: "llama3.1:8b"
+
+billing:
+  serviceUrl: "http://foundation-billing-service:8080"
+
+# Enable monitoring in staging
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+
+# Platform rollout mode
+platform:
+  rolloutMode: "MULTI_TENANT"

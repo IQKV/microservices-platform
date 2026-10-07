@@ -1,0 +1,24 @@
+apiVersion: v2
+name: foundation-ai-chat-service
+description: AI chat service with Spring AI and Ollama integration for iQ Key Value Platform.
+version: 0.1.0
+appVersion: "0.1.0"
+
+keywords:
+  - iqkv
+  - ai-chat-service
+  - spring-ai
+  - ollama
+  - multi-tenant
+  - spring-boot
+  - microservices
+  - security
+  - mybatis
+
+home: https://github.com/IQKV/foundation-ai-chat-service
+sources:
+  - https://github.com/IQKV/foundation-ai-chat-service
+
+maintainers:
+  - name: iQ Key Value Team
+    email: team@iqkv.dev

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "foundation-ai-chat-service.fullname" . }}-config
+  labels:
+    {{- include "foundation-ai-chat-service.labels" . | nindent 4 }}
+data:
+  # Spring Profile Configuration
+  SPRING_PROFILES_ACTIVE: {{ .Values.app.springBoot.profiles.active | quote }}
+
+  # Database Configuration (maps to iqkv.db.* in application.yml)
+  DB_HOST: {{ .Values.infraServices.postgresql.host | quote }}
+  DB_PORT: {{ .Values.infraServices.postgresql.port | toString | quote }}
+  DB_NAME: {{ .Values.infraServices.postgresql.database | quote }}
+  DB_USERNAME: {{ .Values.infraServices.postgresql.username | quote }}
+
+  # RabbitMQ Configuration (maps to iqkv.rabbitmq.* in application.yml)
+  RABBITMQ_HOST: {{ .Values.infraServices.rabbitmq.host | quote }}
+  RABBITMQ_PORT: {{ .Values.infraServices.rabbitmq.port | toString | quote }}
+  RABBITMQ_USERNAME: {{ .Values.infraServices.rabbitmq.username | quote }}
+
+  # JWT RS256 — JWKS URI from IAM (empty = fall back to classpath public.pem)
+  JWT_JWKS_URI: {{ .Values.config.jwt.jwksUri | default "" | quote }}
+
+  # Messaging Configuration (maps to iqkv.messaging.rabbitmq.enabled in application.yml)
+  MESSAGING_ENABLED: {{ .Values.config.messaging.enabled | default true | toString | quote }}
+
+  # AI / LLM Configuration (maps to spring.ai.ollama.* and iqkv.ai.* in application.yml)
+  SPRING_AI_OLLAMA_BASE_URL: {{ .Values.ai.ollama.baseUrl | quote }}
+  SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL: {{ .Values.ai.ollama.model | quote }}
+  AI_SYSTEM_PROMPT: {{ .Values.ai.prompt.systemPrompt | default "" | quote }}
+  AI_TEMPERATURE: {{ .Values.ai.prompt.temperature | toString | quote }}
+  AI_MAX_INPUT_CHARS: {{ .Values.ai.prompt.maxInputChars | toString | quote }}
+  AI_MAX_OUTPUT_TOKENS: {{ .Values.ai.prompt.maxOutputTokens | toString | quote }}
+
+  # Billing service URL (quota / plan enforcement)
+  BILLING_SERVICE_URI: {{ .Values.billing.serviceUrl | quote }}
+
+  # Platform rollout mode
+  # Maps to iqkv.platform.rollout-mode in application.yml
+  # Valid values: MULTI_TENANT | SINGLE_TENANT
+  ROLLOUT_MODE: {{ .Values.platform.rolloutMode | default "MULTI_TENANT" | quote }}
+
+  # Helm release info
+  HELM_RELEASE_NAME: {{ .Release.Name | quote }}
