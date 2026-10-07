@@ -76,6 +76,7 @@ window.VITE_API_SERVER_URL = {{ .Values.app.env.apiServerUrl | quote }};
 window.VITE_ENABLE_MSW = {{ .Values.app.env.enableMsw | quote }};
 window.VITE_LOG_LEVEL = {{ .Values.app.env.logLevel | quote }};
 window.VITE_DEMO_MODE = {{ .Values.app.env.demoMode | quote }};
+window.VITE_ENABLED_UI_ADDONS = "platform-ai-chat";
 {{- end }}
 
 {{/*
