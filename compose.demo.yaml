@@ -201,6 +201,51 @@ services:
       -c max_wal_size=4GB
 
   # ---------------------------------------------------------------------------
+  # Database — AI Chat Service
+  # Stores chat sessions and messages in the public (system) schema.
+  # Users are global (managed by IAM) so no per-tenant schema needed.
+  # ---------------------------------------------------------------------------
+  foundation-postgres-aichat:
+    image: pgvector/pgvector:pg17-bookworm
+    container_name: foundation-postgres-aichat
+    environment:
+      POSTGRES_DB: ${AICHAT_DB_NAME:-aichatservice}
+      POSTGRES_USER: ${AICHAT_DB_USERNAME:-svc_aichat_dba}
+      POSTGRES_PASSWORD: ${AICHAT_DB_PASSWORD:-svc_aichat_dba}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    expose:
+      - "5432"
+    volumes:
+      - foundation_postgres_aichat_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-aichat.sql:/docker-entrypoint-initdb.d/init-aichat.sql:ro
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AICHAT_DB_USERNAME:-svc_aichat_dba} -d ${AICHAT_DB_NAME:-aichatservice}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=100
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+
+  # ---------------------------------------------------------------------------
   # Cache (State Management)
   # ---------------------------------------------------------------------------
   foundation-redis:
@@ -349,6 +394,8 @@ services:
       foundation-postgres-audit:
         condition: service_healthy
       foundation-postgres-cms:
+        condition: service_healthy
+      foundation-postgres-aichat:
         condition: service_healthy
       foundation-redis:
         condition: service_healthy
@@ -692,6 +739,100 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
+  # AI Chat Service (LLM-backed conversational API)
+  # Connects to the local Ollama instance for model inference.
+  # JWT resource server — validates tokens from IAM via JWKS.
+  # ---------------------------------------------------------------------------
+  foundation-ai-chat-service:
+    image: iqkv/foundation-ai-chat-service:wip
+    container_name: foundation-ai-chat-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      SPRING_APPLICATION_NAME: foundation-ai-chat-service
+
+      # Database
+      DB_HOST: foundation-postgres-aichat
+      DB_PORT: 5432
+      DB_NAME: ${AICHAT_DB_NAME:-aichatservice}
+      DB_USERNAME: ${AICHAT_DB_USERNAME:-svc_aichat_dba}
+      DB_PASSWORD: ${AICHAT_DB_PASSWORD:-svc_aichat_dba}
+
+      # RabbitMQ
+      RABBITMQ_HOST: foundation-rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-svc_platform_rmq}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-svc_platform_rmq}
+
+      # JWT RS256 (OAuth2 Resource Server — validates tokens from IAM)
+      JWT_JWKS_URI: http://foundation-iam-service:8080/.well-known/jwks.json
+      JWT_PUBLIC_KEY_PATH: ""
+
+      # Ollama — local LLM inference
+      SPRING_AI_OLLAMA_BASE_URL: ${SPRING_AI_OLLAMA_BASE_URL:-http://foundation-ollama:11434}
+      SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL: ${AICHAT_OLLAMA_MODEL:-llama3.1:8b}
+
+      # Prompt engineering controls (optional overrides)
+      AI_SYSTEM_PROMPT: ${AI_SYSTEM_PROMPT:-}
+      AI_TEMPERATURE: ${AI_TEMPERATURE:-0.7}
+      AI_MAX_INPUT_CHARS: ${AI_MAX_INPUT_CHARS:-4000}
+      AI_MAX_OUTPUT_TOKENS: ${AI_MAX_OUTPUT_TOKENS:-1024}
+
+      # Billing service — quota / plan enforcement
+      BILLING_SERVICE_URI: http://foundation-billing-service:8080
+
+      # Multi-tenancy
+      ROLLOUT_MODE: ${ROLLOUT_MODE:-MULTI_TENANT}
+      DEFAULT_TENANT_KEY: ${DEFAULT_TENANT_KEY:-}
+
+      # Observability
+      OTEL_SERVICE_NAME: foundation-ai-chat-service
+      OTEL_RESOURCE_ATTRIBUTES: service.name=foundation-ai-chat-service,service.version=1.0.0,deployment.environment=${SPRING_PROFILES_ACTIVE:-local}
+    expose:
+      - "8080"
+      - "8081"
+    depends_on:
+      foundation-postgres-aichat:
+        condition: service_healthy
+      foundation-rabbitmq:
+        condition: service_healthy
+      foundation-iam-service:
+        condition: service_healthy
+      foundation-ollama:
+        condition: service_started
+    networks:
+      - foundation-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    volumes:
+      - foundation_aichat_logs:/app/logs
+      - foundation_aichat_tmp:/app/tmp
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # AI / LLM (Ollama — local model inference)
+  # Runs large language models locally. Models are stored in a named volume so
+  # they survive container recreation. The REST API (port 11434) is accessible
+  # within the network at http://foundation-ollama:11434.
+  # Pull a model after first start: docker exec foundation-ollama ollama pull llama3.1:8b
+  # ---------------------------------------------------------------------------
+  foundation-ollama:
+    image: ollama/ollama:latest
+    container_name: foundation-ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: -1
+    expose:
+      - "11434"
+    volumes:
+      - foundation_ollama_data:/root/.ollama
+    networks:
+      - foundation-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
   # Gateway Service (API Gateway)
   # The unified entry point for all API requests, providing routing and security.
   # ---------------------------------------------------------------------------
@@ -718,6 +859,9 @@ services:
       # CMS service — routing target
       CMS_SERVICE_URI: http://foundation-cms-service:8080
 
+      # AI Chat service — routing target
+      AI_CHAT_SERVICE_URI: http://foundation-ai-chat-service:8080
+
       # CORS
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-*}
 
@@ -743,6 +887,8 @@ services:
       foundation-audit-service:
         condition: service_healthy
       foundation-cms-service:
+        condition: service_healthy
+      foundation-ai-chat-service:
         condition: service_healthy
     networks:
       - foundation-network
@@ -873,6 +1019,7 @@ services:
       - foundation_audit_logs:/var/log/audit-service:ro
       - foundation_cms_logs:/var/log/cms-service:ro
       - foundation_gateway_logs:/var/log/gateway-service:ro
+      - foundation_aichat_logs:/var/log/ai-chat-service:ro
     networks:
       - foundation-network
     depends_on:
@@ -923,6 +1070,14 @@ volumes:
     name: foundation_gateway_logs
   foundation_gateway_tmp:
     name: foundation_gateway_tmp
+  foundation_postgres_aichat_data:
+    name: foundation_postgres_aichat_data
+  foundation_aichat_logs:
+    name: foundation_aichat_logs
+  foundation_aichat_tmp:
+    name: foundation_aichat_tmp
+  foundation_ollama_data:
+    name: foundation_ollama_data
   foundation_prometheus_data:
     name: foundation_prometheus_data
   foundation_grafana_data:
