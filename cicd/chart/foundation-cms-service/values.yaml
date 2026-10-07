@@ -163,9 +163,13 @@ infraServices:
 
 # Application Configuration (only externalized values)
 config:
-  # JWT RSA Key Configuration
+  # JWT Configuration
+  # Use jwksUri for deployed environments (K8s) — keys are fetched from the IAM service
+  # and cached locally. Set publicKeyPath only for local dev / tests (classpath: fallback).
+  # Exactly one must be non-blank; the application fails fast at startup if both or neither are set.
   jwt:
-    publicKeyPath: "classpath:keys/public.pem"    # Override for production
+    jwksUri: "http://foundation-iam-service/.well-known/jwks.json"
+    publicKeyPath: ""   # Leave blank when jwksUri is set
 
   # Messaging Configuration
   messaging:

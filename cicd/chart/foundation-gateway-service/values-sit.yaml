@@ -58,4 +58,3 @@ monitoring:
 # Platform rollout mode — must match foundation-iam-service and foundation-billing-service
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey: ""  # Set to a valid NanoID when switching to SINGLE_TENANT

@@ -19,13 +19,6 @@ data:
   # Valid values: MULTI_TENANT | SINGLE_TENANT
   ROLLOUT_MODE: {{ .Values.platform.rolloutMode | default "MULTI_TENANT" | quote }}
 
-  {{- if .Values.platform.defaultTenantKey }}
-  # Default tenant key — required when ROLLOUT_MODE=SINGLE_TENANT
-  # Injected as X-Tenant-ID for unauthenticated/pre-auth requests in single-tenant mode
-  # Maps to iqkv.tenancy.default-tenant-key in application.yml
-  DEFAULT_TENANT_KEY: {{ .Values.platform.defaultTenantKey | quote }}
-  {{- end }}
-
   # IAM service URL for general API access
   IAM_SERVICE_URL: {{ .Values.config.iamServiceUri | quote }}
 

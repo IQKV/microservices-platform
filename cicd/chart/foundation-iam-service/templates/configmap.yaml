@@ -43,6 +43,8 @@ data:
   MAIL_FROM: {{ .Values.config.mail.from | quote }}
   MAIL_FROM_NAME: {{ .Values.config.mail.fromName | default "iQ Key Value" | quote }}
   MAIL_REPLY_TO: {{ .Values.config.mail.replyTo | default "" | quote }}
+  # Email transport provider — "smtp" (default) or "resend" (maps to iqkv.notification.mail.provider)
+  MAIL_PROVIDER: {{ .Values.config.mail.provider | default "smtp" | quote }}
 
   # JWT RSA Key Paths (maps to iqkv.auth.jwt.* in application.yml)
   JWT_PRIVATE_KEY_PATH: {{ .Values.config.jwt.privateKeyPath | quote }}
@@ -73,13 +75,6 @@ data:
   # Maps to iqkv.platform.rollout-mode in application.yml
   # Valid values: MULTI_TENANT | SINGLE_TENANT
   ROLLOUT_MODE: {{ .Values.platform.rolloutMode | default "MULTI_TENANT" | quote }}
-
-  {{- if .Values.platform.defaultTenantKey }}
-  # Default tenant key — required when ROLLOUT_MODE=SINGLE_TENANT
-  # Must be a valid NanoID (8 chars, [a-z0-9])
-  # Maps to iqkv.tenancy.default-tenant-key in application.yml
-  DEFAULT_TENANT_KEY: {{ .Values.platform.defaultTenantKey | quote }}
-  {{- end }}
 
   # Default tenant name — display name for the default tenant in SINGLE_TENANT mode
   # Maps to iqkv.tenancy.default-tenant-name in application.yml

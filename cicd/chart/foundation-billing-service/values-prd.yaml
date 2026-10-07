@@ -102,9 +102,11 @@ ingress:
 # Production configuration overrides
 config:
   jwt:
-    publicKeyPath: "file:/run/secrets/public.pem"
+    jwksUri: "http://foundation-iam-service/.well-known/jwks.json"
+    publicKeyPath: ""
 
   mail:
+    provider: "smtp"  # smtp (default) | resend
     host: "smtp.iqkv.site"
     port: 587
     username: ""  # Must be overridden via --set-string config.mail.username in pipeline

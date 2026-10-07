@@ -217,6 +217,11 @@ config:
     from: "noreply@iqkv.dev"
     fromName: "iQ Key Value"
     replyTo: ""
+    # Email transport provider: "smtp" (default) or "resend"
+    # When set to "resend", config.mail.resend.apiKey must be supplied
+    provider: "smtp"
+    resend:
+      apiKey: ""   # Must be overridden via --set-string config.mail.resend.apiKey in pipeline
 
   # Application base URL (used in email links)
   appBaseUrl: "https://app.iqkv.site"
@@ -319,7 +324,6 @@ networkPolicy:
 # Default: MULTI_TENANT
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey: ""   # Required for SINGLE_TENANT mode — NanoID format [a-z0-9]{8}
   defaultTenantName: "Acme Corp."  # Display name for the default tenant
 
 # K3s specific configurations

@@ -149,6 +149,11 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
     configMapKeyRef:
       name: {{ include "foundation-billing-service.fullname" . }}-config
       key: MAIL_REPLY_TO
+- name: MAIL_PROVIDER
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-config
+      key: MAIL_PROVIDER
 - name: MAIL_USERNAME
   valueFrom:
     secretKeyRef:
@@ -159,8 +164,18 @@ mapped via DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, RABBITMQ_*, MAIL
     secretKeyRef:
       name: {{ include "foundation-billing-service.fullname" . }}-secrets
       key: mail-password
+- name: RESEND_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-secrets
+      key: resend-api-key
 
-# JWT RSA Key Configuration
+# JWT Configuration
+- name: JWT_JWKS_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-billing-service.fullname" . }}-config
+      key: JWT_JWKS_URI
 - name: JWT_PUBLIC_KEY_PATH
   valueFrom:
     configMapKeyRef:

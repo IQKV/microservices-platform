@@ -19,8 +19,11 @@ data:
   RABBITMQ_PORT: {{ .Values.infraServices.rabbitmq.port | toString | quote }}
   RABBITMQ_USERNAME: {{ .Values.infraServices.rabbitmq.username | quote }}
 
-  # JWT RSA Key Paths (maps to iqkv.auth.jwt.* in application.yml)
-  JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | quote }}
+  # JWT Configuration (maps to iqkv.auth.jwt.* in application.yml)
+  # jwks-uri is used in deployed environments; public-key-path is the local dev / test fallback.
+  # Exactly one must be non-blank — the application fails fast at startup otherwise.
+  JWT_JWKS_URI: {{ .Values.config.jwt.jwksUri | default "" | quote }}
+  JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | default "" | quote }}
 
   # Messaging Configuration (maps to iqkv.messaging.rabbitmq.enabled in application.yml)
   MESSAGING_ENABLED: {{ .Values.config.messaging.enabled | default true | toString | quote }}

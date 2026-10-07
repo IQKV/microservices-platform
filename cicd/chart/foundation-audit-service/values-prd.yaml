@@ -81,7 +81,8 @@ ingress:
 # Production configuration overrides
 config:
   jwt:
-    publicKeyPath: "file:/run/secrets/public.pem"
+    jwksUri: "http://foundation-iam-service/.well-known/jwks.json"
+    publicKeyPath: ""
 
   messaging:
     enabled: true

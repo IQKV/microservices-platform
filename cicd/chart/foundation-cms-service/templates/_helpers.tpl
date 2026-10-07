@@ -121,7 +121,12 @@ Common environment variables for the application.
       name: {{ include "foundation-cms-service.fullname" . }}-secrets
       key: rabbitmq-password
 
-# JWT RSA Key Configuration
+# JWT Configuration
+- name: JWT_JWKS_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-cms-service.fullname" . }}-config
+      key: JWT_JWKS_URI
 - name: JWT_PUBLIC_KEY_PATH
   valueFrom:
     configMapKeyRef:

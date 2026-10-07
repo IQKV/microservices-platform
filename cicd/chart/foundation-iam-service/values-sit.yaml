@@ -64,5 +64,4 @@ config:
 # Platform rollout mode — must match foundation-billing-service and foundation-gateway-service
 platform:
   rolloutMode: "MULTI_TENANT"
-  defaultTenantKey: ""  # Set to a valid NanoID when switching to SINGLE_TENANT
   defaultTenantName: "Acme Corp."

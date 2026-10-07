@@ -31,7 +31,8 @@ resources:
 
 config:
   jwt:
-    publicKeyPath: "classpath:keys/public.pem"
+    jwksUri: "http://foundation-iam-service/.well-known/jwks.json"
+    publicKeyPath: ""
 
   messaging:
     enabled: true

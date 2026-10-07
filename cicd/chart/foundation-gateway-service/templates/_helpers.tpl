@@ -112,13 +112,6 @@ Only variables actually consumed by application.yml are included.
     configMapKeyRef:
       name: {{ include "foundation-gateway-service.fullname" . }}-config
       key: ROLLOUT_MODE
-{{- if .Values.platform.defaultTenantKey }}
-- name: DEFAULT_TENANT_KEY
-  valueFrom:
-    configMapKeyRef:
-      name: {{ include "foundation-gateway-service.fullname" . }}-config
-      key: DEFAULT_TENANT_KEY
-{{- end }}
 - name: IAM_SERVICE_URL
   valueFrom:
     configMapKeyRef:

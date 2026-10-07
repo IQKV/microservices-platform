@@ -25,9 +25,14 @@ data:
   MAIL_FROM: {{ .Values.config.mail.from | quote }}
   MAIL_FROM_NAME: {{ .Values.config.mail.fromName | default "iQ Key Value" | quote }}
   MAIL_REPLY_TO: {{ .Values.config.mail.replyTo | default "" | quote }}
+  # Email transport provider — "smtp" (default) or "resend" (maps to iqkv.notification.mail.provider)
+  MAIL_PROVIDER: {{ .Values.config.mail.provider | default "smtp" | quote }}
 
-  # JWT RSA Key Paths (maps to iqkv.auth.jwt.* in application.yml)
-  JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | quote }}
+  # JWT Configuration (maps to iqkv.auth.jwt.* in application.yml)
+  # jwks-uri is used in deployed environments; public-key-path is the local dev / test fallback.
+  # Exactly one must be non-blank — the application fails fast at startup otherwise.
+  JWT_JWKS_URI: {{ .Values.config.jwt.jwksUri | default "" | quote }}
+  JWT_PUBLIC_KEY_PATH: {{ .Values.config.jwt.publicKeyPath | default "" | quote }}
 
   # Application Base URL (used in email notification links)
   APP_BASE_URL: {{ .Values.config.appBaseUrl | quote }}

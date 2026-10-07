@@ -231,6 +231,11 @@ MAIL_*, JWT_*, APP_BASE_URL, BILLING_*, and OAUTH2_* / OIDC_* env vars.
     configMapKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-config
       key: MAIL_REPLY_TO
+- name: MAIL_PROVIDER
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-config
+      key: MAIL_PROVIDER
 - name: MAIL_USERNAME
   valueFrom:
     secretKeyRef:
@@ -241,6 +246,11 @@ MAIL_*, JWT_*, APP_BASE_URL, BILLING_*, and OAUTH2_* / OIDC_* env vars.
     secretKeyRef:
       name: {{ include "foundation-iam-service.fullname" . }}-secrets
       key: mail-password
+- name: RESEND_API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "foundation-iam-service.fullname" . }}-secrets
+      key: resend-api-key
 
 # JWT RSA Key Configuration
 - name: JWT_PRIVATE_KEY_PATH
