@@ -47,6 +47,17 @@ app:
     logLevel: "info"
     demoMode: "false"
 
+    # Addon Configuration
+    # Comma-separated list of addon IDs to enable at runtime
+    # Available addons: platform-health-notes
+    # Example: enabledAddons: "platform-health-notes"
+    enabledAddons: "platform-health-notes,platform-ai-chat-sessions"
+
+    # Navigation Layout Variant
+    # "sidebar" — original left sidebar with section groups (default)
+    # "topbar"  — two-level horizontal top navigation (L1 section tabs + L2 item strip)
+    navVariant: "sidebar"
+
 # Image Configuration
 image:
   repository: iqkv/foundation-ui-platform-admin

@@ -64,6 +64,14 @@ app:
     logLevel: "info"
     demoMode: "false"
 
+    # Addon Configuration
+    # Comma-separated list of addon IDs to enable at runtime
+    # Available addons: platform-health-notes
+    enabledAddons: ""
+
+    # Navigation Layout Variant
+    navVariant: "sidebar"
+
 # Ingress Configuration (Staging)
 ingress:
   enabled: true

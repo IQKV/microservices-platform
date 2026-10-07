@@ -53,6 +53,17 @@ app:
     # Must match config.paymentGatewayType in foundation-billing-service.
     paymentGatewayType: "STRIPE"
 
+    # Addon Configuration
+    # Comma-separated list of addon IDs to enable at runtime
+    # Available addons: none registered yet (see src/app/addons/addon-loader.ts)
+    # Example: enabledAddons: "project-management"
+    enabledAddons: "platform-ai-chat"
+
+    # Navigation Layout Variant
+    # "sidebar" — original left sidebar with section groups (default)
+    # "topbar"  — two-level horizontal top navigation (L1 section tabs + L2 item strip)
+    navVariant: "sidebar"
+
 # Image Configuration
 image:
   repository: iqkv/foundation-ui-app

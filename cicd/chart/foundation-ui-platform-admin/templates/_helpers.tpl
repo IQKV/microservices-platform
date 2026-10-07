@@ -76,7 +76,15 @@ window.VITE_API_SERVER_URL = {{ .Values.app.env.apiServerUrl | quote }};
 window.VITE_ENABLE_MSW = {{ .Values.app.env.enableMsw | quote }};
 window.VITE_LOG_LEVEL = {{ .Values.app.env.logLevel | quote }};
 window.VITE_DEMO_MODE = {{ .Values.app.env.demoMode | quote }};
-window.VITE_ENABLED_UI_ADDONS = "platform-ai-chat";
+
+// Addon configuration
+// Comma-separated list of addon IDs to enable (e.g. "platform-health-notes,other-addon")
+window.VITE_ENABLED_UI_ADDONS = {{ .Values.app.env.enabledAddons | default "" | quote }};
+
+// Navigation layout variant
+// "sidebar" — original left sidebar with section groups (default)
+// "topbar"  — two-level horizontal top navigation (L1 section tabs + L2 item strip)
+window.VITE_APP_NAV_VARIANT = {{ .Values.app.env.navVariant | default "sidebar" | quote }};
 {{- end }}
 
 {{/*

@@ -67,6 +67,13 @@ app:
     logLevel: "debug"
     demoMode: "true"
 
+    # Addon Configuration
+    # Enable sample addon for SIT to validate addon loading end-to-end
+    enabledAddons: "platform-health-notes"
+
+    # Navigation Layout Variant
+    navVariant: "sidebar"
+
 # Ingress Configuration (Test)
 ingress:
   enabled: true

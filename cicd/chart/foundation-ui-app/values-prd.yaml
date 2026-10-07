@@ -76,6 +76,13 @@ app:
     demoMode: "false"
     paymentGatewayType: "STRIPE"
 
+    # Addon Configuration
+    # Comma-separated list of addon IDs to enable at runtime
+    enabledAddons: ""
+
+    # Navigation Layout Variant
+    navVariant: "sidebar"
+
 # Ingress Configuration (Production)
 ingress:
   enabled: true
