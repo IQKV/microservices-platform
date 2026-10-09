@@ -23,7 +23,7 @@
     "husky": "9.1.7",
     "lint-staged": "^17.6.0",
     "oxfmt": "^0.72.0",
-    "oxlint": "^1.86.0",
+    "oxlint": "^1.87.0",
     "oxlint-tsgolint": "^7.0.2003",
     "release-it": "^19.2.4",
     "release-it-pnpm": "^4.6.6",
