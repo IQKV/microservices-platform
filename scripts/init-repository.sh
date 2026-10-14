@@ -26,8 +26,11 @@ if [ -f .gitmodules ]; then
         rm -rf ".git/modules/$name" 2>/dev/null || true
         rm -rf "$path"
         
-        echo "Cloning fresh repository from '$url' into '$path'..."
-        git clone "$url" "$path"
+        # Convert SSH URL (git@github.com:ORG/REPO.git) to HTTPS for environments
+        # where SSH keys are not available (CI runners, fresh template checkouts).
+        https_url=$(echo "$url" | sed -E 's|^git@([^:]+):(.+)$|https://\1/\2|')
+        echo "Cloning fresh repository from '$https_url' into '$path'..."
+        git clone "$https_url" "$path"
         
         echo "Removing .git directory from '$path' to flatten it..."
         rm -rf "$path/.git"
