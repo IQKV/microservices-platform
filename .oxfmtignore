@@ -1,0 +1,3 @@
+# Helm chart YAML files are templated with Go template syntax which oxfmt cannot parse
+cicd/chart/**/*.yaml
+cicd/chart/**/*.yml
