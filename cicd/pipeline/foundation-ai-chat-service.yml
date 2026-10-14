@@ -725,4 +725,3 @@ steps:
       - git push origin ${DRONE_COMMIT_BRANCH}
       - echo "✅ Started $${NEXT_SNAPSHOT}."
       - echo "🚀 Good job, new version $${RELEASE_VERSION} was released successfully."
-

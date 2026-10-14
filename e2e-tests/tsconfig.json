@@ -33,17 +33,6 @@
       "@/tests/*": ["tests/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "playwright.config.ts",
-    "global-setup.ts",
-    "global-teardown.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "reports",
-    "screenshots",
-    "test-data"
-  ]
+  "include": ["src/**/*", "playwright.config.ts", "global-setup.ts", "global-teardown.ts"],
+  "exclude": ["node_modules", "dist", "reports", "screenshots", "test-data"]
 }
