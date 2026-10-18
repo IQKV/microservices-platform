@@ -2088,16 +2088,16 @@ A task is evaluated as done only when all of the following hold:
 
 ### Required gates by change type
 
-| Change type | Required gates |
-| --- | --- |
-| Any change | `mvn -q compile`, then the narrowest targeted `mvn test -Dtest=ClassName` |
-| Domain / application / service logic | Unit tests (JUnit 5 + Mockito, AAA); a new non-trivial branch, loop or parser needs a test |
-| MyBatis mapper (interface or XML) | Service-level test covering the mapper path, then full `mvn clean verify` |
-| REST controller, Spring Security, `@PreAuthorize`, tenant guard | Security test, then full `mvn clean verify` |
-| Liquibase changelog (system/ or tenant/) | Full `mvn clean verify` — the Spring context and schema must load cleanly |
-| Package/layer move, new bounded context | ArchUnit `ArchitectureTest`, then full `mvn clean verify` |
-| Dependency or build config | `mvn clean verify`, then `mvn org.owasp:dependency-check-maven:check` |
-| Docs or `AGENTS.md` only | No code gate — state that none applies |
+| Change type                                                     | Required gates                                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Any change                                                      | `mvn -q compile`, then the narrowest targeted `mvn test -Dtest=ClassName`                  |
+| Domain / application / service logic                            | Unit tests (JUnit 5 + Mockito, AAA); a new non-trivial branch, loop or parser needs a test |
+| MyBatis mapper (interface or XML)                               | Service-level test covering the mapper path, then full `mvn clean verify`                  |
+| REST controller, Spring Security, `@PreAuthorize`, tenant guard | Security test, then full `mvn clean verify`                                                |
+| Liquibase changelog (system/ or tenant/)                        | Full `mvn clean verify` — the Spring context and schema must load cleanly                  |
+| Package/layer move, new bounded context                         | ArchUnit `ArchitectureTest`, then full `mvn clean verify`                                  |
+| Dependency or build config                                      | `mvn clean verify`, then `mvn org.owasp:dependency-check-maven:check`                      |
+| Docs or `AGENTS.md` only                                        | No code gate — state that none applies                                                     |
 
 ### Ordering
 
