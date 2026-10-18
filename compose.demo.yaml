@@ -312,7 +312,7 @@ services:
   # document storage, and other binary assets across all services.
   # ---------------------------------------------------------------------------
   foundation-minio:
-    image: minio/minio:latest
+    image: pgsty/minio:latest
     container_name: foundation-minio
     command: server /data --console-address :9001
     environment:
@@ -343,7 +343,7 @@ services:
   # Creates required buckets and sets public read on iam-assets/avatars.
   # ---------------------------------------------------------------------------
   foundation-minio-init:
-    image: minio/mc:latest
+    image: pgsty/mc:latest
     container_name: foundation-minio-init
     depends_on:
       foundation-minio:
