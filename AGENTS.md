@@ -335,7 +335,7 @@ Before making recommendations, agents should understand the platform's technolog
 **Runtime & Framework**
 
 - Java 25 with modern features (records, pattern matching, text blocks, var)
-- Spring Boot 3.5.6 with Spring Cloud 2025.0.0
+- Spring Boot 4.1.1 with Spring Cloud 2025.1.3
 - Parent POM: `com.iqkv:boot-parent-pom:0.25.0-SNAPSHOT`
 
 **Data & Caching**
@@ -423,12 +423,12 @@ Before making recommendations, agents should understand the platform's technolog
 
 #### 2. Spring Boot & Java Expert Agent
 
-**Purpose**: Expert Java 25+ development with Spring Boot 3.x best practices
+**Purpose**: Expert Java 25+ development with Spring Boot 4.x best practices
 
 **Responsibilities**:
 
 - Modern Java feature implementation (records, pattern matching, sealed classes)
-- Spring Boot 3.x configuration and best practices
+- Spring Boot 4.x configuration and best practices
 - Dependency injection and component design
 - Configuration management with profiles
 - Actuator and health check implementation
