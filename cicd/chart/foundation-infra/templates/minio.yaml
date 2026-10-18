@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
       - name: minio
-        image: minio/minio:latest
+        image: pgsty/minio:latest
         imagePullPolicy: IfNotPresent
         # Container always binds on 9000/9001 internally.
         # The Service maps minio.service.ports.api → 9000 at the cluster level,
@@ -152,7 +152,7 @@ spec:
               echo "MinIO is ready."
       containers:
         - name: mc
-          image: minio/mc:latest
+          image: pgsty/mc:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: MINIO_ROOT_USER

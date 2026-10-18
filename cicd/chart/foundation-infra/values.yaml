@@ -11,6 +11,9 @@ config:
   microservices:
     - iam
     - billing
+    - audit
+    - cms
+    - aichat
   rabbitmq:
     username: "svc_infra_sit_rmq"
     password: "iqkv_password"
@@ -24,6 +27,10 @@ config:
 # PostgreSQL Configuration
 postgresql:
   enabled: true
+  image:
+    repository: pgvector/pgvector
+    tag: pg17
+    pullPolicy: IfNotPresent
   auth:
     postgresPassword: "iqkv_password"
     database: "iqkv"

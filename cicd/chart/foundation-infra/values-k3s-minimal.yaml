@@ -8,6 +8,8 @@ config:
     - audit
     - iam
     - billing
+    - cms
+    - aichat
   rabbitmq:
     username: "dev"
     password: "dev123"
@@ -28,6 +30,10 @@ ingress:
 
 postgresql:
   enabled: true
+  image:
+    repository: pgvector/pgvector
+    tag: pg17
+    pullPolicy: IfNotPresent
   auth:
     postgresPassword: "dev123"
     database: "iqkv"

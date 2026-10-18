@@ -8,6 +8,8 @@ config:
     - audit
     - iam
     - billing
+    - cms
+    - aichat
   rabbitmq:
     username: "svc_infra_sit_rmq"
     password: "iqkv_k3s_password"
@@ -20,6 +22,10 @@ config:
 
 postgresql:
   enabled: true
+  image:
+    repository: pgvector/pgvector
+    tag: pg17
+    pullPolicy: IfNotPresent
   auth:
     postgresPassword: "iqkv_k3s_password"
     database: "iqkv"

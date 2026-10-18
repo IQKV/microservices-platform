@@ -21,6 +21,11 @@ data:
       sleep 2
     done
 
+    echo "=== Enabling pgvector extension on maintenance database $POSTGRES_DB ==="
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "
+      CREATE EXTENSION IF NOT EXISTS vector;
+      SELECT 'vector extension version: ' || extversion FROM pg_extension WHERE extname = 'vector';"
+
     echo "=== Starting microservice database initialization ==="
 
     {{- range .Values.config.microservices }}
@@ -52,6 +57,12 @@ data:
       REVOKE ALL ON DATABASE iqkv_{{ . }} FROM PUBLIC;
       GRANT ALL PRIVILEGES ON DATABASE iqkv_{{ . }} TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;
       GRANT CREATE ON DATABASE iqkv_{{ . }} TO svc_{{ . }}_{{ $.Values.config.environment }}_dba;"
+
+    # 3.5 Enable pgvector extension (Service DB)
+    echo "Enabling pgvector extension in: iqkv_{{ . }}"
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "iqkv_{{ . }}" -c "
+      CREATE EXTENSION IF NOT EXISTS vector;
+      SELECT 'vector extension version: ' || extversion FROM pg_extension WHERE extname = 'vector';"
 
     # 4. Schema and Object Privileges (Service DB)
     echo "Granting privileges in: iqkv_{{ . }}"
@@ -195,8 +206,8 @@ spec:
     spec:
       containers:
       - name: postgresql
-        image: postgres:17-alpine
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+        imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
         ports:
         - name: postgresql
           containerPort: 5432
