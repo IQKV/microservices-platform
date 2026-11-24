@@ -364,7 +364,7 @@ Shared Infrastructure
 ### Technology Stack
 
 - **Runtime:** Java 25 with modern features (records, var, text blocks, pattern matching, switch expressions)
-- **Framework:** Spring Boot 4.1, Spring Cloud Gateway (WebFlux/reactive), Spring AI 2.0 (Ollama)
+- **Framework:** Spring Boot 4.2, Spring Cloud Gateway (WebFlux/reactive), Spring AI 2.0 (Ollama)
 - **Database:** PostgreSQL 17 with Liquibase migrations, MyBatis 3.x, schema-per-tenant isolation
 - **Messaging:** RabbitMQ topic exchange with dead-letter queues and 24h message TTL
 - **Object Storage:** MinIO S3-compatible storage for file uploads, avatars, and documents
